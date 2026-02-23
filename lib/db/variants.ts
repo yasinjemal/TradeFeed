@@ -126,3 +126,30 @@ export async function deleteVariant(variantId: string, shopId: string) {
     where: { id: variantId },
   });
 }
+
+/**
+ * Batch create multiple variants for a product.
+ *
+ * WHAT: Creates all size × color combinations in one DB call.
+ * WHY: Smart variant creator generates many variants at once.
+ * Uses createMany with skipDuplicates to avoid conflicts.
+ */
+export async function batchCreateVariants(
+  productId: string,
+  shopId: string,
+  variants: { size: string; color: string | null; priceInCents: number; stock: number }[]
+) {
+  const isOwner = await verifyProductOwnership(productId, shopId);
+  if (!isOwner) return null;
+
+  return db.productVariant.createMany({
+    data: variants.map((v) => ({
+      productId,
+      size: v.size,
+      color: v.color,
+      priceInCents: v.priceInCents,
+      stock: v.stock,
+    })),
+    skipDuplicates: true,
+  });
+}

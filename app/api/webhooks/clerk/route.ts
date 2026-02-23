@@ -40,50 +40,50 @@ type ClerkUserEvent = {
 };
 
 export async function POST(request: Request) {
-  // 1. Get Svix headers for signature verification
-  const headerPayload = await headers();
-  const svixId = headerPayload.get("svix-id");
-  const svixTimestamp = headerPayload.get("svix-timestamp");
-  const svixSignature = headerPayload.get("svix-signature");
-
-  if (!svixId || !svixTimestamp || !svixSignature) {
-    return NextResponse.json(
-      { error: "Missing Svix headers" },
-      { status: 400 }
-    );
-  }
-
-  // 2. Get raw body for verification
+  // 1. Get raw body (needed for both verified and unverified paths)
   const payload = await request.text();
 
-  // 3. Verify webhook signature
+  // 2. Verify webhook signature (or skip in dev if no secret)
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
-  if (!webhookSecret) {
-    console.error("[clerk-webhook] CLERK_WEBHOOK_SECRET not set");
-    return NextResponse.json(
-      { error: "Server configuration error" },
-      { status: 500 }
-    );
-  }
-
-  const wh = new Webhook(webhookSecret);
   let event: ClerkUserEvent;
 
-  try {
-    event = wh.verify(payload, {
-      "svix-id": svixId,
-      "svix-timestamp": svixTimestamp,
-      "svix-signature": svixSignature,
-    }) as ClerkUserEvent;
-  } catch (err) {
-    console.error("[clerk-webhook] Signature verification failed:", err);
-    return NextResponse.json(
-      { error: "Invalid signature" },
-      { status: 401 }
-    );
+  if (webhookSecret) {
+    // PRODUCTION: Full Svix signature verification
+    const headerPayload = await headers();
+    const svixId = headerPayload.get("svix-id");
+    const svixTimestamp = headerPayload.get("svix-timestamp");
+    const svixSignature = headerPayload.get("svix-signature");
+
+    if (!svixId || !svixTimestamp || !svixSignature) {
+      return NextResponse.json(
+        { error: "Missing Svix headers" },
+        { status: 400 }
+      );
+    }
+
+    const wh = new Webhook(webhookSecret);
+
+    try {
+      event = wh.verify(payload, {
+        "svix-id": svixId,
+        "svix-timestamp": svixTimestamp,
+        "svix-signature": svixSignature,
+      }) as ClerkUserEvent;
+    } catch (err) {
+      console.error("[clerk-webhook] Signature verification failed:", err);
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 }
+      );
+    }
+  } else {
+    // DEV ONLY: Skip verification when CLERK_WEBHOOK_SECRET is not set
+    // WARNING: Never deploy without CLERK_WEBHOOK_SECRET set!
+    console.warn("[clerk-webhook] ⚠ No CLERK_WEBHOOK_SECRET — skipping signature verification (dev only)");
+    event = JSON.parse(payload) as ClerkUserEvent;
   }
 
-  // 4. Handle event
+  // 3. Handle event
   const { type, data } = event;
 
   switch (type) {

@@ -22,7 +22,7 @@ import {
   variantCreateSchema,
 } from "@/lib/validation/product";
 import { createProduct, updateProduct, deleteProduct } from "@/lib/db/products";
-import { createVariant, deleteVariant } from "@/lib/db/variants";
+import { createVariant, deleteVariant, batchCreateVariants } from "@/lib/db/variants";
 import { requireShopAccess } from "@/lib/auth";
 
 // ============================================================
@@ -100,7 +100,7 @@ export async function createProductAction(
     const rawInput = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
-      categoryId: formData.get("categoryId") as string,
+      categoryId: (formData.get("categoryId") as string) || "",
       isActive: formData.get("isActive") === "on",
     };
 
@@ -146,7 +146,7 @@ export async function updateProductAction(
     const rawInput = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
-      categoryId: formData.get("categoryId") as string,
+      categoryId: (formData.get("categoryId") as string) || "",
       isActive: formData.get("isActive") === "on",
     };
 
@@ -292,5 +292,48 @@ export async function deleteVariantAction(
   } catch (error: unknown) {
     console.error("[deleteVariantAction] Error:", error);
     return { success: false, error: "Something went wrong. Please try again." };
+  }
+}
+
+// ── batchCreateVariantsAction ───────────────────────────────
+
+/**
+ * Batch create variants from size × color combinations.
+ *
+ * WHAT: Smart variant creator calls this with arrays of sizes/colors.
+ * WHY: Wholesalers need to create many size/color combos at once.
+ * Skips duplicates automatically.
+ */
+export async function batchCreateVariantsAction(
+  shopSlug: string,
+  productId: string,
+  sizes: string[],
+  colors: string[],
+  priceInCents: number,
+  stock: number
+): Promise<ActionResult> {
+  try {
+    const access = await resolveShopAccess(shopSlug);
+    if (!access) return { success: false, error: "Access denied." };
+
+    // Generate all size × color combinations
+    const colorsToUse: (string | null)[] =
+      colors.length > 0 ? colors : [null];
+    const variants = sizes.flatMap((size) =>
+      colorsToUse.map((color) => ({ size, color, priceInCents, stock }))
+    );
+
+    const result = await batchCreateVariants(
+      productId,
+      access.shopId,
+      variants
+    );
+    if (!result) return { success: false, error: "Product not found." };
+
+    revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("[batchCreateVariantsAction] Error:", error);
+    return { success: false, error: "Failed to create variants." };
   }
 }
