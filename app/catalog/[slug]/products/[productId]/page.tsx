@@ -18,6 +18,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { AddToCart } from "@/components/catalog/add-to-cart";
+import { ProductImageGallery } from "@/components/catalog/product-image-gallery";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -108,83 +109,16 @@ export default async function ProductDetailPage({
 
       {/* ── Product Card ──────────────────────────────────── */}
       <div className="bg-white rounded-3xl border border-stone-200/50 overflow-hidden shadow-sm shadow-stone-200/50">
-        {/* ── Image Gallery ─────────────────────────────── */}
-        <div className="relative">
-          {/* Hero image */}
-          <div className="relative aspect-square bg-stone-100 overflow-hidden">
-            <div className="absolute inset-0 shimmer" />
-            {product.images.length > 0 ? (
-              <img
-                src={product.images[0]!.url}
-                alt={product.images[0]!.altText || product.name}
-                className="relative w-full h-full object-cover"
-              />
-            ) : (
-              <div className="relative w-full h-full flex flex-col items-center justify-center gap-3 text-stone-300 bg-gradient-to-br from-stone-50 to-stone-100">
-                <svg
-                  className="w-16 h-16"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={0.75}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
-                  />
-                </svg>
-                <span className="text-sm font-medium">No image available</span>
-              </div>
-            )}
-
-            {/* Image gallery dots */}
-            {product.images.length > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 backdrop-blur-sm rounded-full px-2.5 py-1.5">
-                {product.images.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      i === 0 ? "bg-white" : "bg-white/40"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Sold out overlay */}
-            {totalStock === 0 && (
-              <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
-                <span className="bg-stone-900 text-white text-sm font-semibold px-5 py-2 rounded-full">
-                  Sold Out
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* ── Thumbnail strip ───────────────────────── */}
-          {product.images.length > 1 && (
-            <div className="flex gap-2 p-3 bg-stone-50/50 overflow-x-auto scrollbar-hide">
-              {product.images.map((img, i) => (
-                <div
-                  key={img.id}
-                  className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                    i === 0
-                      ? "border-emerald-500 shadow-md shadow-emerald-100"
-                      : "border-transparent opacity-60 hover:opacity-100"
-                  }`}
-                >
-                  <img
-                    src={img.url}
-                    alt={img.altText || `${product.name} photo ${i + 1}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* ── Image Gallery (interactive) ─────────────── */}
+        <ProductImageGallery
+          images={product.images.map((img) => ({
+            id: img.id,
+            url: img.url,
+            altText: img.altText,
+          }))}
+          productName={product.name}
+          soldOut={totalStock === 0}
+        />
 
         {/* ── Product Info ───────────────────────────────── */}
         <div className="p-5 sm:p-6 space-y-6">
