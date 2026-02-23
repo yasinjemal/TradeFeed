@@ -2,7 +2,7 @@
 
 > Single source of truth for project progress.
 > Updated after every completed feature.
-> Last updated: **2026-02-23**
+> Last updated: **2026-02-24**
 
 ---
 
@@ -11,7 +11,7 @@
 | Phase | Name | Status | Description |
 |-------|------|--------|-------------|
 | 1 | Foundation | ✅ Complete | Schema, project structure, database, config |
-| 2 | Core Commerce | 🔄 In Progress | Shop, products, catalog, WhatsApp checkout |
+| 2 | Core Commerce | ✅ Complete | Shop, products, catalog, WhatsApp checkout |
 | 3 | Auth & Security | ⬜ Not Started | Clerk auth, role-based access, rate limiting |
 | 4 | Monetisation | ⬜ Not Started | PayFast billing, subscription tiers |
 | 5 | Scale & Intelligence | ⬜ Not Started | Analytics, WhatsApp Business API, admin |
@@ -36,7 +36,7 @@
 
 ---
 
-## Phase 2 — Core Commerce 🔄
+## Phase 2 — Core Commerce ✅
 
 > Multi-tenant shop creation, product catalog, public storefront, WhatsApp checkout.
 
@@ -86,18 +86,23 @@
 
 **Public Catalog complete — 2026-02-23**
 
-### 2D — WhatsApp Structured Checkout ⬜
+### 2D — WhatsApp Structured Checkout ✅
 
 > Buyer selects items → generates pre-filled WhatsApp message → opens `wa.me` link.
 
 | # | Task | Status | Commit | Notes |
 |---|------|--------|--------|-------|
-| 2D.1 | Cart state management (client-side) | ⬜ | — | `useContext` or Zustand, persisted to localStorage |
-| 2D.2 | Add-to-cart UI on catalog | ⬜ | — | Size/color picker → add button |
-| 2D.3 | Cart summary component | ⬜ | — | Item list, quantities, total in ZAR |
-| 2D.4 | WhatsApp message builder | ⬜ | — | Structured text: items, sizes, total |
-| 2D.5 | `wa.me` checkout button | ⬜ | — | `https://wa.me/{number}?text={encoded}` |
-| 2D.6 | Cart empty state + clear | ⬜ | — | Guide buyer to browse catalog |
+| 2D.1 | Cart state management (React Context + localStorage) | ✅ Done | `2f0bf30` | Per-shop scoped, hydration-safe, quantities capped at stock |
+| 2D.2 | Add-to-cart picker (size → color → qty → add) | ✅ Done | `2f0bf30` | Interactive variant picker with green feedback animation |
+| 2D.3 | Floating cart button | ✅ Done | `2f0bf30` | Count badge, total price, bounce animation on add |
+| 2D.4 | Slide-out cart panel | ✅ Done | `2f0bf30` | Item list, qty steppers, remove, clear, backdrop blur |
+| 2D.5 | WhatsApp message builder | ✅ Done | `2f0bf30` | Structured order text with line items, sizes, colors, total in ZAR |
+| 2D.6 | `wa.me` checkout button | ✅ Done | `2f0bf30` | Opens WhatsApp with pre-filled order → clears cart |
+| 2D.7 | Product detail page integration | ✅ Done | `2f0bf30` | AddToCart replaces old WA-only button, enquiry link secondary |
+
+**WhatsApp Structured Checkout complete — 2026-02-24**
+
+**Phase 2 Core Commerce complete — 2026-02-24** 🎉
 
 ---
 
@@ -145,6 +150,8 @@
 
 | Commit | Message | Date |
 |--------|---------|------|
+| `2f0bf30` | feat: WhatsApp structured checkout — cart, add-to-cart, panel, message builder | 2026-02-24 |
+| `9512485` | chore: update phase tracker — 2C public catalog complete | 2026-02-23 |
 | `292862e` | feat: public catalog — storefront layout, product grid, detail page, WhatsApp order | 2026-02-23 |
 | `f30ab1d` | feat: product CRUD — validation, data access, server actions, dashboard UI | 2026-02-23 |
 | `21bccd2` | feat: shop creation — Zod validation, data access, server action, UI form | 2026-02-23 |
@@ -162,3 +169,5 @@
 - **Zod v4**: Issues use `PropertyKey[]` for path (not `(string | number)[]`)
 - **PostCSS**: Must use ESM `export default` in `.mjs` config
 - **shadcn components**: button, input, label, card, form, textarea, badge
+- **Cart**: React Context + localStorage, scoped per shop slug (`tradefeed_cart_{slug}`)
+- **Checkout**: Client-side cart → structured WhatsApp message → `wa.me` URL → clears cart
