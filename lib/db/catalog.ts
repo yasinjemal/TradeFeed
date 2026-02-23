@@ -1,0 +1,171 @@
+// ============================================================
+// Data Access — Public Catalog (Read-Only)
+// ============================================================
+// Queries for the public-facing catalog pages.
+//
+// RULES:
+// - NO AUTH REQUIRED — these are public pages
+// - Only return ACTIVE shops and ACTIVE products
+// - Only include ACTIVE variants with stock > 0 for display
+// - Never expose internal IDs unnecessarily
+// - Optimised for SSR — fast queries for mobile users on SA data
+// ============================================================
+
+import { db } from "@/lib/db";
+
+/**
+ * Get a shop's public profile by slug.
+ *
+ * WHAT: Returns basic shop info for the catalog header/layout.
+ * WHY: Buyers see the shop name, description, WhatsApp number.
+ *
+ * PUBLIC: No auth. Only returns active shops.
+ * POPIA: WhatsApp number is shown intentionally — it's the order channel.
+ */
+export async function getCatalogShop(slug: string) {
+  return db.shop.findFirst({
+    where: {
+      slug,
+      isActive: true,
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      whatsappNumber: true,
+      logoUrl: true,
+    },
+  });
+}
+
+/**
+ * Get all active products for a shop's public catalog.
+ *
+ * WHAT: Returns products with their variants, images, and category.
+ * WHY: The product grid needs name, price range, image, variant count.
+ *
+ * FILTERING:
+ * - Only active products (isActive: true)
+ * - Only active variants (isActive: true)
+ * - Products sorted newest first (sellers see latest additions)
+ *
+ * PERFORMANCE: Includes only first image (list view thumbnail).
+ */
+export async function getCatalogProducts(shopId: string) {
+  return db.product.findMany({
+    where: {
+      shopId,
+      isActive: true,
+      // Only include products that have at least one active variant
+      variants: {
+        some: {
+          isActive: true,
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+      images: {
+        where: { position: 0 },
+        select: {
+          url: true,
+          altText: true,
+        },
+        take: 1,
+      },
+      variants: {
+        where: { isActive: true },
+        select: {
+          id: true,
+          size: true,
+          color: true,
+          priceInCents: true,
+          stock: true,
+        },
+        orderBy: [{ size: "asc" }, { color: "asc" }],
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/**
+ * Get a single product for the public catalog detail page.
+ *
+ * WHAT: Full product with all active variants.
+ * WHY: Buyer needs to see every size/color option and pick what to order.
+ *
+ * MULTI-TENANT: Scoped by shopId — prevents accessing products via ID guessing.
+ * PUBLIC: No auth, but product must be active.
+ */
+export async function getCatalogProduct(productId: string, shopId: string) {
+  return db.product.findFirst({
+    where: {
+      id: productId,
+      shopId,
+      isActive: true,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+      images: {
+        select: {
+          id: true,
+          url: true,
+          altText: true,
+          position: true,
+        },
+        orderBy: { position: "asc" },
+      },
+      variants: {
+        where: { isActive: true },
+        select: {
+          id: true,
+          size: true,
+          color: true,
+          priceInCents: true,
+          stock: true,
+        },
+        orderBy: [{ priceInCents: "asc" }, { size: "asc" }, { color: "asc" }],
+      },
+    },
+  });
+}
+
+/**
+ * Get the count of active products in a shop.
+ *
+ * WHAT: Simple count for display ("42 products available").
+ * WHY: Gives buyers confidence that the catalog is active.
+ */
+export async function getCatalogProductCount(shopId: string) {
+  return db.product.count({
+    where: {
+      shopId,
+      isActive: true,
+      variants: {
+        some: {
+          isActive: true,
+        },
+      },
+    },
+  });
+}
