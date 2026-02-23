@@ -1,0 +1,9 @@
+// ============================================================
+// UI Components
+// ============================================================
+// Reusable UI components live here.
+// shadcn/ui components will be installed into /components/ui/
+// Custom components go directly in /components/
+// ============================================================
+
+export {};
