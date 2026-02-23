@@ -1,0 +1,305 @@
+// ============================================================
+// Component — Add to Cart
+// ============================================================
+// Interactive variant picker for the product detail page.
+// Buyer selects size → color (if applicable) → quantity → add.
+//
+// DESIGN:
+// - Size pills: tap to select, shows which are in stock
+// - Color chips: appear after size selection, filtered to available
+// - Quantity stepper: +/- buttons, capped at stock
+// - Add button: green with satisfying feedback animation
+// - Shows selected variant price
+//
+// STATE FLOW: size → color → quantity → add to cart
+// ============================================================
+
+"use client";
+
+import { useState, useCallback } from "react";
+import { useCart } from "@/lib/cart/cart-context";
+import { formatZAR } from "@/types";
+
+interface Variant {
+  id: string;
+  size: string;
+  color: string | null;
+  priceInCents: number;
+  stock: number;
+}
+
+interface AddToCartProps {
+  productId: string;
+  productName: string;
+  variants: Variant[];
+}
+
+export function AddToCart({ productId, productName, variants }: AddToCartProps) {
+  const { addItem } = useCart();
+
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [justAdded, setJustAdded] = useState(false);
+
+  // ── Derived data ─────────────────────────────────────────
+  const uniqueSizes = Array.from(new Set(variants.map((v) => v.size)));
+
+  // Colors available for the selected size
+  const availableColors = selectedSize
+    ? Array.from(
+        new Set(
+          variants
+            .filter((v) => v.size === selectedSize && v.stock > 0)
+            .map((v) => v.color)
+            .filter(Boolean)
+        )
+      )
+    : [];
+
+  // The currently selected variant (if size + color match)
+  const selectedVariant = variants.find((v) => {
+    if (!selectedSize) return false;
+    if (v.size !== selectedSize) return false;
+    // If product has colors, must match color too
+    if (availableColors.length > 0) {
+      return v.color === selectedColor;
+    }
+    // No colors — just match size
+    return true;
+  });
+
+  const maxStock = selectedVariant?.stock ?? 0;
+  const canAdd = selectedVariant !== undefined && selectedVariant.stock > 0 && quantity > 0;
+
+  // ── Handlers ─────────────────────────────────────────────
+  const handleSizeSelect = useCallback(
+    (size: string) => {
+      setSelectedSize(size);
+      setSelectedColor(null);
+      setQuantity(1);
+
+      // Auto-select color if only one option
+      const colorsForSize = Array.from(
+        new Set(
+          variants
+            .filter((v) => v.size === size && v.stock > 0)
+            .map((v) => v.color)
+            .filter(Boolean)
+        )
+      );
+      if (colorsForSize.length === 1 && colorsForSize[0]) {
+        setSelectedColor(colorsForSize[0]);
+      }
+    },
+    [variants]
+  );
+
+  const handleColorSelect = useCallback((color: string) => {
+    setSelectedColor(color);
+    setQuantity(1);
+  }, []);
+
+  const handleAdd = useCallback(() => {
+    if (!selectedVariant || !canAdd) return;
+
+    addItem({
+      variantId: selectedVariant.id,
+      productId,
+      productName,
+      size: selectedVariant.size,
+      color: selectedVariant.color,
+      priceInCents: selectedVariant.priceInCents,
+      maxStock: selectedVariant.stock,
+    }, quantity);
+
+    // Show feedback
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1500);
+
+    // Reset for next add
+    setQuantity(1);
+  }, [selectedVariant, canAdd, addItem, productId, productName, quantity]);
+
+  // ── Check if a size has any stock ────────────────────────
+  const sizeHasStock = (size: string): boolean =>
+    variants.some((v) => v.size === size && v.stock > 0);
+
+  return (
+    <div className="space-y-5">
+      {/* ── Size Selector ───────────────────────────────── */}
+      <div>
+        <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5">
+          Select Size
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {uniqueSizes.map((size) => {
+            const inStock = sizeHasStock(size);
+            const isSelected = selectedSize === size;
+
+            return (
+              <button
+                key={size}
+                onClick={() => inStock && handleSizeSelect(size)}
+                disabled={!inStock}
+                className={`min-w-[2.75rem] px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                  isSelected
+                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-200 scale-105"
+                    : inStock
+                    ? "bg-stone-100 text-stone-700 hover:bg-stone-200 active:scale-95"
+                    : "bg-stone-50 text-stone-300 line-through cursor-not-allowed"
+                }`}
+              >
+                {size}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Color Selector (only if product has colors) ── */}
+      {selectedSize && availableColors.length > 0 && (
+        <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+          <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5">
+            Select Color
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {availableColors.map((color) => {
+              const isSelected = selectedColor === color;
+              return (
+                <button
+                  key={color}
+                  onClick={() => handleColorSelect(color!)}
+                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    isSelected
+                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-200"
+                      : "bg-stone-50 border border-stone-200 text-stone-700 hover:border-stone-300 active:scale-95"
+                  }`}
+                >
+                  <span
+                    className={`w-3 h-3 rounded-full ${
+                      isSelected ? "border-2 border-white" : "border border-stone-300"
+                    }`}
+                    style={{ backgroundColor: colorToHex(color!) }}
+                  />
+                  {color}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Selected variant info + quantity ─────────────── */}
+      {selectedVariant && selectedVariant.stock > 0 && (
+        <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+          {/* Price + Stock */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <span className="text-2xl font-bold text-stone-900">
+                {formatZAR(selectedVariant.priceInCents)}
+              </span>
+              <span className="text-xs text-stone-500 ml-2">each</span>
+            </div>
+            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {selectedVariant.stock} in stock
+            </span>
+          </div>
+
+          {/* Quantity Stepper */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs uppercase tracking-wider font-semibold text-stone-500">
+              Qty
+            </span>
+            <div className="flex items-center bg-white rounded-xl border border-stone-200 overflow-hidden">
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                disabled={quantity <= 1}
+                className="w-10 h-10 flex items-center justify-center text-stone-600 hover:bg-stone-50 transition-colors disabled:text-stone-300 disabled:cursor-not-allowed"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
+                </svg>
+              </button>
+              <span className="w-12 text-center font-semibold text-stone-900 text-sm tabular-nums">
+                {quantity}
+              </span>
+              <button
+                onClick={() => setQuantity((q) => Math.min(maxStock, q + 1))}
+                disabled={quantity >= maxStock}
+                className="w-10 h-10 flex items-center justify-center text-stone-600 hover:bg-stone-50 transition-colors disabled:text-stone-300 disabled:cursor-not-allowed"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </button>
+            </div>
+            {quantity > 1 && (
+              <span className="text-sm text-stone-500 font-medium">
+                = {formatZAR(selectedVariant.priceInCents * quantity)}
+              </span>
+            )}
+          </div>
+
+          {/* Add to Cart Button */}
+          <button
+            onClick={handleAdd}
+            disabled={!canAdd || justAdded}
+            className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] ${
+              justAdded
+                ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
+                : "bg-stone-900 text-white hover:bg-stone-800 shadow-md hover:shadow-lg"
+            }`}
+          >
+            {justAdded ? (
+              <span className="inline-flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                Added to Cart!
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+                Add to Cart — {formatZAR(selectedVariant.priceInCents * quantity)}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* ── Prompt to select ────────────────────────────── */}
+      {!selectedSize && (
+        <p className="text-sm text-stone-400 text-center py-2">
+          ↑ Select a size to add to your order
+        </p>
+      )}
+      {selectedSize && availableColors.length > 0 && !selectedColor && (
+        <p className="text-sm text-stone-400 text-center py-2">
+          ↑ Select a color to continue
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ================================================================
+// Helper: Color name → CSS hex
+// ================================================================
+
+function colorToHex(color: string): string {
+  const colorMap: Record<string, string> = {
+    black: "#1a1a1a", white: "#f5f5f5", red: "#dc2626", blue: "#2563eb",
+    navy: "#1e3a5f", green: "#16a34a", yellow: "#eab308", pink: "#ec4899",
+    purple: "#9333ea", orange: "#ea580c", grey: "#6b7280", gray: "#6b7280",
+    brown: "#92400e", beige: "#d4b896", cream: "#fffdd0", maroon: "#800000",
+    olive: "#556b2f", teal: "#0d9488", coral: "#f97316", khaki: "#bdb76b",
+    gold: "#ca8a04", silver: "#a8a29e", charcoal: "#374151", burgundy: "#800020",
+    tan: "#d2b48c", mint: "#a7f3d0", lavender: "#c4b5fd", peach: "#fdba74",
+    rose: "#fb7185", sky: "#38bdf8", denim: "#1e40af",
+  };
+  return colorMap[color.toLowerCase()] || "#9ca3af";
+}

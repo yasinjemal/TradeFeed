@@ -15,6 +15,8 @@ import { getCatalogShop } from "@/lib/db/catalog";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CartProvider } from "@/lib/cart/cart-context";
+import { CartButton } from "@/components/catalog/cart-button";
 
 interface CatalogLayoutProps {
   children: React.ReactNode;
@@ -66,7 +68,8 @@ export default async function CatalogLayout({
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
+    <CartProvider shopSlug={slug} whatsappNumber={shop.whatsappNumber}>
+      <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
       {/* ── Shop Header ─────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-stone-200/60">
         <div className="max-w-5xl mx-auto px-4 py-3">
@@ -125,7 +128,10 @@ export default async function CatalogLayout({
       </header>
 
       {/* ── Main Content ─────────────────────────────────── */}
-      <main className="max-w-5xl mx-auto px-4 py-6">{children}</main>
+      <main className="max-w-5xl mx-auto px-4 py-6 pb-24">{children}</main>
+
+      {/* ── Floating Cart Button ─────────────────────────── */}
+      <CartButton />
 
       {/* ── Footer ───────────────────────────────────────── */}
       <footer className="border-t border-stone-200/60 bg-white/50 mt-12">
@@ -152,5 +158,6 @@ export default async function CatalogLayout({
         </div>
       </footer>
     </div>
+    </CartProvider>
   );
 }
