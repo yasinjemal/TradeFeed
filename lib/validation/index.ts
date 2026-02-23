@@ -6,9 +6,8 @@
 // Never validate inline. Always use .parse() or .safeParse().
 // ============================================================
 
-export {};
+// Phase 2 — Shop schemas
+export { shopCreateSchema, type ShopCreateInput } from "./shop";
 
-// Schemas will be added here as features are built.
-// Example (Phase 2):
-// export { shopCreateSchema, shopUpdateSchema } from "./shop";
+// Future:
 // export { productCreateSchema } from "./product";
