@@ -71,17 +71,20 @@
 
 **Product CRUD complete — 2026-02-23**
 
-### 2C — Public Catalog Page ⬜
+### 2C — Public Catalog Page ✅
 
 > Shareable storefront for buyers — the link sellers drop in WhatsApp groups.
 
 | # | Task | Status | Commit | Notes |
 |---|------|--------|--------|-------|
-| 2C.1 | Public catalog route (`/catalog/[slug]`) | ⬜ | — | SSR for SEO + fast load on mobile data |
-| 2C.2 | Catalog data access (public, read-only) | ⬜ | — | Only active products, no auth required |
-| 2C.3 | Product grid UI (mobile-first) | ⬜ | — | Image, name, price range, variant count |
-| 2C.4 | Product detail modal or page | ⬜ | — | Variant selector (size, color), stock check |
-| 2C.5 | Shop header / branding | ⬜ | — | Shop name, description, WhatsApp badge |
+| 2C.1 | Public catalog route (`/catalog/[slug]`) | ✅ Done | `292862e` | SSR for SEO + fast load on mobile data |
+| 2C.2 | Catalog data access (public, read-only) | ✅ Done | `292862e` | Only active products/variants, no auth |
+| 2C.3 | Product grid UI (mobile-first) | ✅ Done | `292862e` | Color dots, size pills, price range, sold-out overlay |
+| 2C.4 | Product detail page | ✅ Done | `292862e` | Variant table, sizes, colors, stock, WhatsApp order button |
+| 2C.5 | Shop header / branding | ✅ Done | `292862e` | Sticky header, logo fallback, WhatsApp CTA, SEO metadata |
+| 2C.6 | Not-found + empty states | ✅ Done | `292862e` | Graceful UX for stale links + empty catalogs |
+
+**Public Catalog complete — 2026-02-23**
 
 ### 2D — WhatsApp Structured Checkout ⬜
 
@@ -142,6 +145,7 @@
 
 | Commit | Message | Date |
 |--------|---------|------|
+| `292862e` | feat: public catalog — storefront layout, product grid, detail page, WhatsApp order | 2026-02-23 |
 | `f30ab1d` | feat: product CRUD — validation, data access, server actions, dashboard UI | 2026-02-23 |
 | `21bccd2` | feat: shop creation — Zod validation, data access, server action, UI form | 2026-02-23 |
 | `8259e30` | fix: postcss ESM export, add Neon DB, run init migration | 2026-02-23 |
