@@ -1,15 +1,19 @@
 // ============================================================
-// Layout — Seller Dashboard
+// Layout — Seller Dashboard (Auth-Protected)
 // ============================================================
 // Shared layout for all /dashboard/[slug]/* pages.
-// Provides navigation, shop context, and branding.
+// Provides navigation, shop context, auth guard, and branding.
 //
-// MULTI-TENANT: Resolves shop from slug. Phase 3 adds auth check.
+// MULTI-TENANT: Resolves shop from slug + verifies user membership.
+// AUTH: Clerk middleware protects the route, this layout verifies
+//       shop-level access and provides the UserButton.
 // ============================================================
 
 import Link from "next/link";
 import { getShopBySlug } from "@/lib/db/shops";
-import { notFound } from "next/navigation";
+import { requireShopAccess } from "@/lib/auth";
+import { notFound, redirect } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -21,8 +25,23 @@ export default async function DashboardLayout({
   params,
 }: DashboardLayoutProps) {
   const { slug } = await params;
-  const shop = await getShopBySlug(slug);
 
+  // Auth + shop access check
+  let access: Awaited<ReturnType<typeof requireShopAccess>>;
+  try {
+    access = await requireShopAccess(slug);
+  } catch {
+    // Not signed in — Clerk middleware should catch this,
+    // but handle edge case
+    redirect("/sign-in");
+  }
+
+  if (!access) {
+    // Signed in but no access to this shop
+    notFound();
+  }
+
+  const shop = await getShopBySlug(slug);
   if (!shop) {
     notFound();
   }
@@ -67,6 +86,16 @@ export default async function DashboardLayout({
             >
               View Catalog ↗
             </Link>
+            <div className="ml-2 pl-2 border-l">
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "h-8 w-8",
+                  },
+                }}
+              />
+            </div>
           </nav>
         </div>
       </header>

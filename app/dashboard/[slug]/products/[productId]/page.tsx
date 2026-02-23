@@ -7,8 +7,7 @@
 
 import { getProduct } from "@/lib/db/products";
 import { getShopBySlug } from "@/lib/db/shops";
-import { getDevUserId } from "@/lib/auth/dev";
-import { db } from "@/lib/db";
+import { requireShopAccess } from "@/lib/auth";
 import { formatZAR } from "@/types";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -27,19 +26,17 @@ export default async function ProductDetailPage({
 }: ProductDetailPageProps) {
   const { slug, productId } = await params;
 
-  // ── Resolve shop ────────────────────────────────────────
-  const userId = await getDevUserId();
-  if (!userId) return notFound();
+  // ── Resolve shop + verify access (Clerk auth) ──────────
+  let access: Awaited<ReturnType<typeof requireShopAccess>>;
+  try {
+    access = await requireShopAccess(slug);
+  } catch {
+    return notFound();
+  }
+  if (!access) return notFound();
 
   const shop = await getShopBySlug(slug);
   if (!shop) return notFound();
-
-  // Verify membership via ShopUser table
-  const membership = await db.shopUser.findUnique({
-    where: { userId_shopId: { userId, shopId: shop.id } },
-    select: { id: true },
-  });
-  if (!membership) return notFound();
 
   // ── Fetch product with variants ─────────────────────────
   const product = await getProduct(productId, shop.id);

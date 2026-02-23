@@ -22,7 +22,7 @@
 import { shopCreateSchema } from "@/lib/validation/shop";
 import { createShop } from "@/lib/db/shops";
 import { redirect } from "next/navigation";
-import { getDevUserId } from "@/lib/auth/dev";
+import { requireAuth } from "@/lib/auth";
 
 /**
  * Server action result type.
@@ -80,17 +80,9 @@ export async function createShopAction(
       };
     }
 
-    // 3. Get user ID
-    // PHASE 2: Dev user from seed script
-    // PHASE 3: Replace with Clerk getCurrentUser()
-    const userId = await getDevUserId();
-
-    if (!userId) {
-      return {
-        success: false,
-        error: "No user found. Run `npm run db:seed` first.",
-      };
-    }
+    // 3. Get authenticated user (Clerk → DB)
+    const user = await requireAuth();
+    const userId = user.id;
 
     // 4. Create shop via data access layer (NOT direct Prisma call)
     const shop = await createShop(parsed.data, userId);

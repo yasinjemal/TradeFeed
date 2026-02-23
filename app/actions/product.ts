@@ -23,9 +23,7 @@ import {
 } from "@/lib/validation/product";
 import { createProduct, updateProduct, deleteProduct } from "@/lib/db/products";
 import { createVariant, deleteVariant } from "@/lib/db/variants";
-import { getShopBySlug } from "@/lib/db/shops";
-import { getDevUserId } from "@/lib/auth/dev";
-import { db } from "@/lib/db";
+import { requireShopAccess } from "@/lib/auth";
 
 // ============================================================
 // Shared Types
@@ -59,30 +57,21 @@ function extractFieldErrors(
  * Helper: Resolve shopId from slug and verify user has access.
  *
  * MULTI-TENANT: This is the gatekeeper. Every product action must:
- * 1. Resolve shop from slug
- * 2. Verify the current user belongs to that shop
- * 3. Return the shopId for data access queries
- *
- * Phase 3: Replace getDevUserId() with real Clerk auth.
+ * 1. Authenticate user via Clerk
+ * 2. Resolve shop from slug
+ * 3. Verify user belongs to that shop via ShopUser table
+ * 4. Return { shopId, userId } for downstream queries
  */
 async function resolveShopAccess(
   shopSlug: string
 ): Promise<{ shopId: string; userId: string } | null> {
-  const userId = await getDevUserId();
-  if (!userId) return null;
-
-  const shop = await getShopBySlug(shopSlug);
-  if (!shop) return null;
-
-  // Verify user belongs to this shop
-  const membership = await db.shopUser.findUnique({
-    where: { userId_shopId: { userId, shopId: shop.id } },
-    select: { id: true },
-  });
-
-  if (!membership) return null;
-
-  return { shopId: shop.id, userId };
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access) return null;
+    return { shopId: access.shopId, userId: access.userId };
+  } catch {
+    return null;
+  }
 }
 
 // ============================================================
