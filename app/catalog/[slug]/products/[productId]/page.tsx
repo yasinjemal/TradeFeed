@@ -107,64 +107,91 @@ export default async function ProductDetailPage({
       </Link>
 
       {/* ── Product Card ──────────────────────────────────── */}
-      <div className="bg-white rounded-3xl border border-stone-200/60 overflow-hidden shadow-sm">
+      <div className="bg-white rounded-3xl border border-stone-200/50 overflow-hidden shadow-sm shadow-stone-200/50">
         {/* ── Image Gallery ─────────────────────────────── */}
-        <div className="relative aspect-square bg-gradient-to-br from-stone-100 to-stone-50">
-          {product.images.length > 0 ? (
-            <img
-              src={product.images[0]!.url}
-              alt={product.images[0]!.altText || product.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-stone-300">
-              <svg
-                className="w-16 h-16"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={0.75}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
-                />
-              </svg>
-              <span className="text-sm font-medium">No image available</span>
-            </div>
-          )}
+        <div className="relative">
+          {/* Hero image */}
+          <div className="relative aspect-square bg-stone-100 overflow-hidden">
+            <div className="absolute inset-0 shimmer" />
+            {product.images.length > 0 ? (
+              <img
+                src={product.images[0]!.url}
+                alt={product.images[0]!.altText || product.name}
+                className="relative w-full h-full object-cover"
+              />
+            ) : (
+              <div className="relative w-full h-full flex flex-col items-center justify-center gap-3 text-stone-300 bg-gradient-to-br from-stone-50 to-stone-100">
+                <svg
+                  className="w-16 h-16"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={0.75}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
+                  />
+                </svg>
+                <span className="text-sm font-medium">No image available</span>
+              </div>
+            )}
 
-          {/* Image gallery dots */}
+            {/* Image gallery dots */}
+            {product.images.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 backdrop-blur-sm rounded-full px-2.5 py-1.5">
+                {product.images.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      i === 0 ? "bg-white" : "bg-white/40"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Sold out overlay */}
+            {totalStock === 0 && (
+              <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+                <span className="bg-stone-900 text-white text-sm font-semibold px-5 py-2 rounded-full">
+                  Sold Out
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* ── Thumbnail strip ───────────────────────── */}
           {product.images.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {product.images.map((_, i) => (
+            <div className="flex gap-2 p-3 bg-stone-50/50 overflow-x-auto scrollbar-hide">
+              {product.images.map((img, i) => (
                 <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    i === 0 ? "bg-white" : "bg-white/50"
+                  key={img.id}
+                  className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                    i === 0
+                      ? "border-emerald-500 shadow-md shadow-emerald-100"
+                      : "border-transparent opacity-60 hover:opacity-100"
                   }`}
-                />
+                >
+                  <img
+                    src={img.url}
+                    alt={img.altText || `${product.name} photo ${i + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
               ))}
-            </div>
-          )}
-
-          {/* Sold out overlay */}
-          {totalStock === 0 && (
-            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
-              <span className="bg-stone-900 text-white text-sm font-semibold px-5 py-2 rounded-full">
-                Sold Out
-              </span>
             </div>
           )}
         </div>
 
         {/* ── Product Info ───────────────────────────────── */}
-        <div className="p-5 sm:p-6 space-y-5">
+        <div className="p-5 sm:p-6 space-y-6">
           {/* Category + Name */}
           <div>
             {product.category && (
-              <span className="text-xs uppercase tracking-wider font-semibold text-emerald-600 mb-1 block">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[11px] uppercase tracking-wider font-semibold mb-2">
                 {product.category.name}
               </span>
             )}
@@ -172,14 +199,14 @@ export default async function ProductDetailPage({
               {product.name}
             </h1>
             {product.description && (
-              <p className="text-stone-500 text-sm mt-2 leading-relaxed">
+              <p className="text-stone-500 text-sm mt-2.5 leading-relaxed">
                 {product.description}
               </p>
             )}
           </div>
 
           {/* Price Range */}
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 bg-stone-50 rounded-2xl px-4 py-3 border border-stone-100">
             <span className="text-2xl sm:text-3xl font-bold text-stone-900">
               {formatZAR(minPrice)}
             </span>
@@ -188,7 +215,11 @@ export default async function ProductDetailPage({
                 – {formatZAR(maxPrice)}
               </span>
             )}
+            <span className="text-xs text-stone-400 ml-auto">per unit</span>
           </div>
+
+          {/* ── Divider ─────────────────────────────── */}
+          <div className="border-t border-stone-100" />
 
           {/* ── Available Sizes ────────────────────────── */}
           <div>
@@ -246,10 +277,13 @@ export default async function ProductDetailPage({
           )}
 
           {/* ── Variant Table ──────────────────────────── */}
-          <div>
-            <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5">
-              Stock & Pricing
-            </h3>
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5 select-none">
+              <span>Stock & Pricing</span>
+              <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </summary>
             <div className="bg-stone-50 rounded-2xl border border-stone-200/60 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
@@ -306,7 +340,10 @@ export default async function ProductDetailPage({
                 </tbody>
               </table>
             </div>
-          </div>
+          </details>
+
+          {/* ── Divider ─────────────────────────────── */}
+          <div className="border-t border-stone-100" />
 
           {/* ── Add to Cart / Sold Out ────────────────── */}
           <div className="pt-2">

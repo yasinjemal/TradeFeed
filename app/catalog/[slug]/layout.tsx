@@ -69,36 +69,44 @@ export default async function CatalogLayout({
 
   return (
     <CartProvider shopSlug={slug} whatsappNumber={shop.whatsappNumber}>
-      <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
+      <div className="min-h-screen bg-[#fafaf9]">
       {/* ── Shop Header ─────────────────────────────────── */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-stone-200/60">
-        <div className="max-w-5xl mx-auto px-4 py-3">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-stone-200/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="max-w-5xl mx-auto px-4 py-3.5">
           <div className="flex items-center justify-between gap-3">
             {/* Shop Identity */}
             <Link
               href={`/catalog/${slug}`}
-              className="flex items-center gap-3 min-w-0"
+              className="flex items-center gap-3 min-w-0 group"
             >
               {/* Logo circle — gradient fallback if no logo */}
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-emerald-400 via-emerald-600 to-emerald-700 flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-200/50 ring-2 ring-white">
                 {shop.logoUrl ? (
                   <img
                     src={shop.logoUrl}
                     alt={shop.name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-11 h-11 rounded-full object-cover"
                   />
                 ) : (
-                  <span className="text-white font-bold text-sm">
+                  <span className="text-white font-bold text-base">
                     {shop.name.charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
               <div className="min-w-0">
-                <h1 className="font-bold text-stone-900 truncate text-sm sm:text-base">
-                  {shop.name}
-                </h1>
+                <div className="flex items-center gap-1.5">
+                  <h1 className="font-bold text-stone-900 truncate text-sm sm:text-base group-hover:text-emerald-700 transition-colors">
+                    {shop.name}
+                  </h1>
+                  {/* Verified-style dot */}
+                  <span className="flex-shrink-0 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center" title="Verified Seller">
+                    <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
                 {shop.description && (
-                  <p className="text-xs text-stone-500 truncate hidden sm:block">
+                  <p className="text-[11px] text-stone-400 truncate mt-0.5">
                     {shop.description}
                   </p>
                 )}
@@ -134,14 +142,19 @@ export default async function CatalogLayout({
       <CartButton />
 
       {/* ── Footer ───────────────────────────────────────── */}
-      <footer className="border-t border-stone-200/60 bg-white/50 mt-12">
+      <footer className="border-t border-stone-100 bg-white/80 backdrop-blur-sm mt-12">
         <div className="max-w-5xl mx-auto px-4 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
-            <p>
+            <p className="flex items-center gap-1.5">
+              <span className="w-4 h-4 rounded bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+                <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </span>
               Powered by{" "}
               <Link
                 href="/"
-                className="font-medium text-stone-600 hover:text-emerald-600 transition-colors"
+                className="font-semibold text-stone-600 hover:text-emerald-600 transition-colors"
               >
                 TradeFeed
               </Link>

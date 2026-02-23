@@ -92,10 +92,11 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* ── Summary Bar ─────────────────────────────────── */}
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <p className="text-sm text-stone-500">
             <span className="font-semibold text-stone-700">{productCount}</span>{" "}
             {productCount === 1 ? "product" : "products"} available
@@ -108,7 +109,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
             {categories.map((cat) => (
               <span
                 key={cat.id}
-                className="inline-flex items-center px-2.5 py-1 rounded-full bg-stone-100 text-stone-600 text-xs font-medium whitespace-nowrap"
+                className="inline-flex items-center px-2.5 py-1 rounded-full bg-white border border-stone-200/60 text-stone-600 text-xs font-medium whitespace-nowrap shadow-sm"
               >
                 {cat.name}
               </span>
@@ -161,18 +162,21 @@ function ProductCard({ product, shopSlug }: ProductCardProps) {
       href={`/catalog/${shopSlug}/products/${product.id}`}
       className="group block"
     >
-      <div className="bg-white rounded-2xl border border-stone-200/60 overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-stone-200/50 hover:border-stone-300/60 hover:-translate-y-0.5 active:scale-[0.98]">
+      <div className="bg-white rounded-2xl border border-stone-200/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-stone-200/60 hover:border-stone-200 hover:-translate-y-1 active:scale-[0.98]">
         {/* ── Image ─────────────────────────────────── */}
-        <div className="relative aspect-[4/5] bg-gradient-to-br from-stone-100 to-stone-50 overflow-hidden">
+        <div className="relative aspect-[3/4] bg-stone-100 overflow-hidden">
+          {/* Shimmer placeholder */}
+          <div className="absolute inset-0 shimmer" />
+
           {primaryImage ? (
             <img
               src={primaryImage.url}
               alt={primaryImage.altText || product.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="relative w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-stone-300">
+            <div className="relative w-full h-full flex flex-col items-center justify-center gap-2 text-stone-300 bg-gradient-to-br from-stone-50 to-stone-100">
               <svg
                 className="w-10 h-10 sm:w-12 sm:h-12"
                 fill="none"
@@ -190,10 +194,13 @@ function ProductCard({ product, shopSlug }: ProductCardProps) {
             </div>
           )}
 
+          {/* Gradient overlay at bottom for readability */}
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+
           {/* Out of stock overlay */}
           {totalStock === 0 && (
-            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-              <span className="bg-stone-800 text-white text-xs font-semibold px-3 py-1 rounded-full">
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center">
+              <span className="bg-stone-900 text-white text-[11px] font-semibold px-3.5 py-1.5 rounded-full tracking-wide uppercase">
                 Sold Out
               </span>
             </div>
@@ -201,26 +208,36 @@ function ProductCard({ product, shopSlug }: ProductCardProps) {
 
           {/* Color dots (top-right) */}
           {colors.length > 1 && (
-            <div className="absolute top-2 right-2 flex gap-1">
+            <div className="absolute top-2.5 right-2.5 flex gap-1 bg-white/80 backdrop-blur-sm rounded-full px-1.5 py-1 shadow-sm">
               {colors.slice(0, 4).map((color) => (
                 <span
                   key={color}
-                  className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                  className="w-3.5 h-3.5 rounded-full border border-white shadow-sm"
                   style={{ backgroundColor: colorToHex(color) }}
                   title={color}
                 />
               ))}
               {colors.length > 4 && (
-                <span className="w-4 h-4 rounded-full bg-stone-200 border-2 border-white shadow-sm flex items-center justify-center text-[8px] font-bold text-stone-500">
+                <span className="w-3.5 h-3.5 rounded-full bg-stone-200 border border-white shadow-sm flex items-center justify-center text-[7px] font-bold text-stone-500">
                   +{colors.length - 4}
                 </span>
               )}
             </div>
           )}
+
+          {/* Quick price badge (bottom-left) */}
+          <div className="absolute bottom-2.5 left-2.5">
+            <span className="bg-white/90 backdrop-blur-sm text-stone-900 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+              {formatZAR(minPrice)}
+              {minPrice !== maxPrice && (
+                <span className="text-stone-400 font-normal"> +</span>
+              )}
+            </span>
+          </div>
         </div>
 
         {/* ── Info ──────────────────────────────────── */}
-        <div className="p-3 sm:p-3.5 space-y-2">
+        <div className="p-3 sm:p-3.5 space-y-1.5">
           {/* Category label */}
           {product.category && (
             <span className="text-[10px] uppercase tracking-wider font-semibold text-emerald-600">
@@ -229,34 +246,22 @@ function ProductCard({ product, shopSlug }: ProductCardProps) {
           )}
 
           {/* Product name */}
-          <h3 className="font-semibold text-stone-900 text-sm leading-tight line-clamp-2 group-hover:text-emerald-700 transition-colors">
+          <h3 className="font-semibold text-stone-800 text-[13px] sm:text-sm leading-snug line-clamp-2 group-hover:text-emerald-700 transition-colors">
             {product.name}
           </h3>
 
-          {/* Price */}
-          <div className="flex items-baseline gap-1">
-            <span className="text-sm sm:text-base font-bold text-stone-900">
-              {formatZAR(minPrice)}
-            </span>
-            {minPrice !== maxPrice && (
-              <span className="text-xs text-stone-400">
-                – {formatZAR(maxPrice)}
-              </span>
-            )}
-          </div>
-
           {/* Size pills */}
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 pt-0.5">
             {sizes.slice(0, 5).map((size) => (
               <span
                 key={size}
-                className="inline-flex items-center px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 text-[10px] font-medium"
+                className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-stone-50 border border-stone-100 text-stone-500 text-[10px] font-medium"
               >
                 {size}
               </span>
             ))}
             {sizes.length > 5 && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-stone-100 text-stone-400 text-[10px] font-medium">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-stone-50 border border-stone-100 text-stone-400 text-[10px] font-medium">
                 +{sizes.length - 5}
               </span>
             )}
