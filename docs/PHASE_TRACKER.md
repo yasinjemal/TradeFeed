@@ -2,7 +2,7 @@
 
 > Single source of truth for project progress.
 > Updated after every completed feature.
-> Last updated: **2026-02-26** (Tier 3)
+> Last updated: **2026-02-27** (Phase 9)
 
 ---
 
@@ -21,6 +21,7 @@
 | 6 | Scale & Intelligence (Partial) | ✅ Complete | Analytics, rate limiting. WhatsApp Business API deferred. |
 | 7 | SEO & Discovery | ✅ Complete | Dynamic OG images, JSON-LD, sitemap, robots.txt |
 | 8 | Admin & Compliance | ✅ Complete | Platform admin, seller verification, POPIA legal pages, cookie consent |
+| 9 | Buyer & Order Experience | ✅ Complete | Order tracking, stock validation, wishlist, recently viewed |
 
 ---
 
@@ -305,6 +306,46 @@
 
 ---
 
+## Phase 9 — Buyer & Order Experience ✅
+
+> Order tracking, stock validation at checkout, wishlist/favourites, recently viewed products.
+
+### 9A — Order System ✅
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 9A.1 | Prisma schema — Order, OrderItem, WishlistItem models + OrderStatus enum | ✅ Done | 3 new models, 1 enum (PENDING/CONFIRMED/SHIPPED/DELIVERED/CANCELLED) |
+| 9A.2 | Order data access layer (`lib/db/orders.ts`) | ✅ Done | generateOrderNumber (TF-YYYYMMDD-XXXX), validateStock, createOrder (transactional + stock decrement), listOrders, getOrder, updateOrderStatus, getOrderStats |
+| 9A.3 | Order server actions (`app/actions/orders.ts`) | ✅ Done | checkoutAction (buyer), updateOrderStatusAction (seller) with transition validation |
+| 9A.4 | Cart checkout integration | ✅ Done | cart-panel.tsx calls checkoutAction before WhatsApp — validates stock, creates order, shows errors |
+| 9A.5 | Seller orders dashboard page | ✅ Done | `/dashboard/[slug]/orders` — stats cards, status filter tabs, expandable order cards, status actions |
+| 9A.6 | Orders nav link in dashboard | ✅ Done | Added to dashboard-nav.tsx with clipboard-document-check icon |
+
+### 9B — Wishlist / Favourites ✅
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 9B.1 | Wishlist types (`lib/wishlist/types.ts`) | ✅ Done | WishlistItem, WishlistContextValue interfaces |
+| 9B.2 | Wishlist context (`lib/wishlist/wishlist-context.tsx`) | ✅ Done | localStorage-based, scoped by shopSlug, toggle/add/remove/clear |
+| 9B.3 | Wishlist heart button (`components/catalog/wishlist-heart.tsx`) | ✅ Done | Toggle heart icon on product cards, prevents link navigation, bounce animation |
+| 9B.4 | Wishlist panel (`components/catalog/wishlist-panel.tsx`) | ✅ Done | Slide-out drawer showing favourited products with links to detail pages |
+| 9B.5 | Floating wishlist button (`components/catalog/wishlist-button.tsx`) | ✅ Done | Bottom-left floating button with count badge |
+| 9B.6 | Catalog layout integration | ✅ Done | WishlistProvider wraps cart, WishlistButton alongside CartButton |
+| 9B.7 | Product card heart integration | ✅ Done | WishlistHeart on every product card in catalog grid |
+
+### 9C — Recently Viewed ✅
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 9C.1 | Recently viewed tracker (`lib/recently-viewed/recently-viewed.tsx`) | ✅ Done | localStorage-based, max 12 items, deduplicates, scoped by shopSlug |
+| 9C.2 | Recently viewed strip (`components/catalog/recently-viewed-strip.tsx`) | ✅ Done | Horizontal scrollable strip with product thumbnails + prices |
+| 9C.3 | Product detail page integration | ✅ Done | RecentlyViewedTracker records view, strip shows below product (excludes current) |
+| 9C.4 | Catalog page integration | ✅ Done | Strip shows below product grid on main catalog page |
+
+**Phase 9 complete — 2026-02-27** 🎉
+
+---
+
 ## Complete Git Log
 
 | Commit | Message | Date |
@@ -351,12 +392,12 @@
 
 | Category | Count |
 |----------|-------|
-| Prisma models | 10 (Shop, User, ShopUser, Category, Product, ProductImage, ProductVariant, AnalyticsEvent, Plan, Subscription) |
-| Enums | 3 (`UserRole`, `EventType`, `SubscriptionStatus`) |
-| App routes (pages) | 18 |
+| Prisma models | 13 (Shop, User, ShopUser, Category, Product, ProductImage, ProductVariant, AnalyticsEvent, Plan, Subscription, Order, OrderItem, WishlistItem) |
+| Enums | 4 (`UserRole`, `EventType`, `SubscriptionStatus`, `OrderStatus`) |
+| App routes (pages) | 19 |
 | API routes | 5 (Clerk webhook, Uploadthing, PayFast ITN, OG image, sitemap/robots) |
-| Server actions | 24 functions across 8 files |
-| Data access functions | 40 across 8 files (`shops`, `products`, `catalog`, `variants`, `categories`, `analytics`, `subscriptions`, `admin`) |
+| Server actions | 26 functions across 9 files |
+| Data access functions | 47 across 9 files (`shops`, `products`, `catalog`, `variants`, `categories`, `analytics`, `subscriptions`, `admin`, `orders`) |
 | Zod schemas | 8 |
 | Components | 42 files across 9 directories (`ui`, `shop`, `dashboard`, `product`, `catalog`, `category`, `analytics`, `billing`, `admin`) |
 | shadcn components | button, input, label, card, form, textarea, badge, copy-button |
@@ -374,7 +415,8 @@ lib/db/
 ├── categories.ts      — getCategories, getCategory, createCategory, updateCategory, deleteCategory
 ├── analytics.ts       — trackEvent, getAnalyticsOverview, getDailyAnalytics, getTopProducts, getUniqueVisitors
 ├── subscriptions.ts   — getFreePlan, getPlans, getShopSubscription, createFreeSubscription, upgradeSubscription, cancelSubscription, checkProductLimit
-└── admin.ts           — getAdminStats, getAdminShops, setShopVerified, setShopActive
+├── admin.ts           — getAdminStats, getAdminShops, setShopVerified, setShopActive
+└── orders.ts          — generateOrderNumber, validateStock, createOrder, listOrders, getOrder, updateOrderStatus, getOrderStats
 
 app/actions/
 ├── shop.ts            — createShopAction (+ auto-assign free subscription)
@@ -384,7 +426,8 @@ app/actions/
 ├── category.ts        — createCategory, updateCategory, deleteCategory
 ├── analytics.ts       — trackWhatsAppClickAction, trackWhatsAppCheckoutAction
 ├── billing.ts         — createCheckoutAction, cancelSubscriptionAction
-└── admin.ts           — verifyShopAction, unverifyShopAction, deactivateShopAction, reactivateShopAction
+├── admin.ts           — verifyShopAction, unverifyShopAction, deactivateShopAction, reactivateShopAction
+└── orders.ts          — checkoutAction, updateOrderStatusAction
 
 lib/auth/index.ts      — getUser, requireUser, requireShopAccess
 lib/auth/admin.ts      — isAdmin, requireAdmin (env-based ADMIN_USER_IDS)
@@ -420,6 +463,7 @@ Protected (require Clerk auth):
   /dashboard/[slug]/analytics          — Analytics dashboard (views, clicks, top products, period toggle)
   /dashboard/[slug]/billing            — Billing dashboard (plan cards, usage meter, PayFast upgrade)
   /dashboard/[slug]/settings           — Shop settings (profile, location, social)
+  /dashboard/[slug]/orders             — Orders dashboard (stats, filter, status management)
 
 Admin (require Clerk auth + ADMIN_USER_IDS):
   /admin                               — Platform admin dashboard (stats, shop list, verify/deactivate)
@@ -443,7 +487,7 @@ API:
 | ~~**Product sorting**~~ | ✅ Fixed | Sort dropdown (newest, price low→high, price high→low, A→Z) in `catalog-search-filter.tsx`. |
 | ~~**No rate limiting**~~ | ✅ Fixed | In-memory sliding window rate limiter. Catalog: 60 req/min, API: 30 req/min. Upgrade to Upstash for serverless. |
 | ~~**Legacy `lib/dev-auth.ts`**~~ | ✅ Fixed | Deleted — no longer exists. |
-| **Cart — no server validation** | 🟢 Low | Stock quantities validated client-side only. |
+| ~~**Cart — no server validation**~~ | ✅ Fixed | checkoutAction validates stock server-side before order creation (Phase 9). |
 | **Rate limiter — in-memory** | 🟢 Low | Works single-instance. Upgrade to Upstash Redis for multi-instance serverless. |
 | ~~**POPIA compliance**~~ | ✅ Fixed | Privacy policy + terms of service pages. Cookie consent banner. Legal links in footer. |
 
@@ -474,4 +518,4 @@ API:
 10. **WhatsApp Business API** — Automated order confirmations + delivery updates.
 11. **Advanced admin** — Financial reports, revenue tracking, seller analytics.
 12. **Multi-shop support** — One user managing multiple shops.
-13. **Buyer accounts** — Order history, favourites, saved carts.
+13. ~~**Buyer accounts** — Order history, favourites, saved carts.~~ ✅ Partial — Wishlist + recently viewed (localStorage, Phase 9). Order history for logged-in buyers future.

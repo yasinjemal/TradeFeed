@@ -57,6 +57,7 @@ model Shop {
   categories  Category[]                      // Product categories for this shop
   subscription Subscription?                  // Current billing subscription
   promotedListings PromotedListing[]          // Marketplace promoted listings
+  orders      Order[]                         // Orders placed at this shop
 
   @@index([slug])
   @@index([isActive])
@@ -394,4 +395,105 @@ enum PromotedListingStatus {
   ACTIVE                                          // Currently running
   EXPIRED                                         // Past expiresAt date
   CANCELLED                                       // Manually cancelled or refunded
+}
+
+// ============================================================
+// ORDER: Tracks WhatsApp checkout orders
+// Created when a buyer sends a WhatsApp order from the cart.
+// Gives sellers visibility into what was ordered.
+//
+// FLOW: Cart → Validate stock → Create order → Open WhatsApp
+// STATUS: PENDING → CONFIRMED → SHIPPED → DELIVERED (or CANCELLED)
+// ============================================================
+model Order {
+  id              String       @id @default(cuid())
+  orderNumber     String       @unique              // Human-readable: "TF-20260224-A1B2"
+  status          OrderStatus  @default(PENDING)
+
+  shopId          String
+  shop            Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // Buyer info (captured at checkout — no account needed)
+  buyerName       String?                           // Optional buyer name
+  buyerPhone      String?                           // WhatsApp number used for order (PII — POPIA)
+  buyerNote       String?                           // Optional note from buyer
+
+  // Totals (snapshot at order time — prices may change later)
+  totalCents      Int                               // Total order value in ZAR cents
+  itemCount       Int                               // Total quantity of items
+
+  // WhatsApp tracking
+  whatsappSent    Boolean      @default(true)       // Whether WA message was opened
+  whatsappMessage String?                           // Snapshot of the order message sent
+
+  // Relations
+  items           OrderItem[]
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([shopId, status])
+  @@index([shopId, createdAt])
+  @@index([orderNumber])
+}
+
+// ============================================================
+// ORDER ITEM: Individual line items in an order
+// Snapshots product/variant info at time of order (prices don't change)
+// ============================================================
+model OrderItem {
+  id              String  @id @default(cuid())
+
+  orderId         String
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId       String                            // Reference to product (may be deleted later)
+  variantId       String                            // Reference to variant (may be deleted later)
+
+  // Snapshot fields — preserved even if product/variant is deleted
+  productName     String                            // e.g. "Floral Summer Dress"
+  option1Label    String  @default("Size")          // e.g. "Size", "Storage"
+  option1Value    String                            // e.g. "M", "128GB"
+  option2Label    String  @default("Color")         // e.g. "Color", "Flavor"
+  option2Value    String?                           // e.g. "Red" — nullable
+
+  priceInCents    Int                               // Price per unit at order time
+  quantity        Int                               // How many ordered
+
+  createdAt       DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+enum OrderStatus {
+  PENDING                                           // Order placed, awaiting seller confirmation
+  CONFIRMED                                         // Seller confirmed — preparing order
+  SHIPPED                                           // Order dispatched / ready for collection
+  DELIVERED                                         // Buyer received order
+  CANCELLED                                         // Order cancelled by buyer or seller
+}
+
+// ============================================================
+// WISHLIST ITEM: Buyer favourites (optional — logged-in buyers)
+// Phase 9 — saved products for later.
+// Uses visitorId (hashed) for anonymous, userId for logged-in.
+// ============================================================
+model WishlistItem {
+  id         String  @id @default(cuid())
+  
+  productId  String
+  shopId     String                                 // Denormalised for fast queries
+
+  // Visitor tracking (anonymous buyers)
+  visitorId  String?                                // Hashed IP/fingerprint for anonymous
+  userId     String?                                // Clerk userId for logged-in buyers
+
+  createdAt  DateTime @default(now())
+
+  @@unique([productId, visitorId])                  // One wishlist entry per product per visitor
+  @@unique([productId, userId])                     // One wishlist entry per product per user
+  @@index([visitorId])
+  @@index([userId])
+  @@index([shopId])
 }

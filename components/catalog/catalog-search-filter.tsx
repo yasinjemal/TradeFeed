@@ -9,6 +9,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { WishlistHeart } from "./wishlist-heart";
 
 interface CatalogProduct {
   id: string;
@@ -296,6 +297,16 @@ function ProductCard({
           )}
 
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+
+          {/* Wishlist Heart */}
+          <div className="absolute top-2.5 left-2.5 z-10">
+            <WishlistHeart
+              productId={product.id}
+              productName={product.name}
+              imageUrl={primaryImage?.url ?? null}
+              priceInCents={minPrice}
+            />
+          </div>
 
           {totalStock === 0 && (
             <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center">

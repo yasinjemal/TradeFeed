@@ -16,7 +16,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CartProvider } from "@/lib/cart/cart-context";
+import { WishlistProvider } from "@/lib/wishlist/wishlist-context";
 import { CartButton } from "@/components/catalog/cart-button";
+import { WishlistButton } from "@/components/catalog/wishlist-button";
 import { generateShopJsonLd } from "@/lib/seo/json-ld";
 
 interface CatalogLayoutProps {
@@ -85,6 +87,7 @@ export default async function CatalogLayout({
 
   return (
     <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber}>
+    <WishlistProvider shopSlug={slug}>
       {/* JSON-LD Structured Data for SEO */}
       {generateShopJsonLd(shop).map((schema, i) => (
         <script
@@ -177,6 +180,9 @@ export default async function CatalogLayout({
       {/* ── Floating Cart Button ─────────────────────────── */}
       <CartButton />
 
+      {/* ── Floating Wishlist Button ─────────────────────── */}
+      <WishlistButton shopSlug={slug} />
+
       {/* ── Footer ───────────────────────────────────────── */}
       <footer className="border-t border-stone-100 bg-white/80 backdrop-blur-sm mt-12">
         <div className="max-w-5xl mx-auto px-4 py-6">
@@ -229,6 +235,7 @@ export default async function CatalogLayout({
         </div>
       </footer>
     </div>
+    </WishlistProvider>
     </CartProvider>
   );
 }

@@ -21,6 +21,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ShopProfile } from "@/components/catalog/shop-profile";
 import { CatalogSearchFilter } from "@/components/catalog/catalog-search-filter";
+import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
 
 interface CatalogPageProps {
   params: Promise<{ slug: string }>;
@@ -107,6 +108,9 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
         shopId={shop.id}
         categories={categories}
       />
+
+      {/* ── Recently Viewed ──────────────────────────────── */}
+      <RecentlyViewedStrip shopSlug={slug} />
 
       {/* ── Marketplace Cross-Link ────────────────────── */}
       <div className="bg-gradient-to-r from-stone-50 to-emerald-50/30 rounded-2xl border border-stone-200/50 p-6 text-center">

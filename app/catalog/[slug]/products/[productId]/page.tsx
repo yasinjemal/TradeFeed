@@ -22,6 +22,8 @@ import { AddToCart } from "@/components/catalog/add-to-cart";
 import { ProductImageGallery } from "@/components/catalog/product-image-gallery";
 import { ShareProduct } from "@/components/catalog/share-product";
 import { generateProductJsonLd } from "@/lib/seo/json-ld";
+import { RecentlyViewedTracker } from "@/lib/recently-viewed/recently-viewed";
+import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -109,6 +111,14 @@ export default async function ProductDetailPage({
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Track this product view in localStorage */}
+      <RecentlyViewedTracker
+        shopSlug={slug}
+        productId={product.id}
+        productName={product.name}
+        imageUrl={product.images[0]?.url ?? null}
+        priceInCents={minPrice}
+      />
       {/* JSON-LD Structured Data for SEO */}
       {generateProductJsonLd(shop, product).map((schema, i) => (
         <script
@@ -381,6 +391,11 @@ export default async function ProductDetailPage({
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── Recently Viewed ─────────────────────────────── */}
+      <div className="mt-6">
+        <RecentlyViewedStrip shopSlug={slug} excludeProductId={product.id} />
       </div>
 
       {/* ── Marketplace Cross-Link ─────────────────────── */}
