@@ -34,9 +34,13 @@ const isPublicRoute = createRouteMatcher([
 // Routes that should be rate-limited
 const isCatalogRoute = createRouteMatcher(["/catalog/(.*)"]);
 const isApiRoute = createRouteMatcher(["/api/(.*)"]);
+// Routes that should SKIP rate limiting (Uploadthing needs unrestricted callback access)
+const isUploadthingRoute = createRouteMatcher(["/api/uploadthing(.*)"]);
+const isWebhookRoute = createRouteMatcher(["/api/webhooks/(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   // ── Rate limiting on public routes ──────────────────────
+  // Skip rate limiting for Uploadthing (server callbacks) and webhooks
   if (isCatalogRoute(request)) {
     const key = getRateLimitKey(request, "catalog");
     const result = rateLimit(key, 60, 60_000); // 60 req/min
@@ -50,7 +54,7 @@ export default clerkMiddleware(async (auth, request) => {
         },
       });
     }
-  } else if (isApiRoute(request)) {
+  } else if (isApiRoute(request) && !isUploadthingRoute(request) && !isWebhookRoute(request)) {
     const key = getRateLimitKey(request, "api");
     const result = rateLimit(key, 30, 60_000); // 30 req/min
     if (!result.allowed) {

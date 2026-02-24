@@ -13,6 +13,11 @@ import { auth } from "@clerk/nextjs/server";
 
 const f = createUploadthing();
 
+// Validate that the UPLOADTHING_TOKEN is present at startup
+if (!process.env.UPLOADTHING_TOKEN) {
+  console.error("[UploadThing] ❌ UPLOADTHING_TOKEN env var is missing! Uploads will fail.");
+}
+
 export const ourFileRouter = {
   /**
    * Product image uploader.
