@@ -6,11 +6,12 @@
 // ============================================================
 
 import Link from "next/link";
-import { getShopBySlug } from "@/lib/db/shops";
+import { getShopBySlug, getShopsForUser } from "@/lib/db/shops";
 import { requireShopAccess } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
+import { ShopSwitcher } from "@/components/dashboard/shop-switcher";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -35,7 +36,10 @@ export default async function DashboardLayout({
     notFound();
   }
 
-  const shop = await getShopBySlug(slug);
+  const [shop, userShops] = await Promise.all([
+    getShopBySlug(slug),
+    getShopsForUser(access.userId),
+  ]);
   if (!shop) {
     notFound();
   }
@@ -63,9 +67,15 @@ export default async function DashboardLayout({
               <svg className="w-4 h-4 text-stone-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
-              <span className="text-sm font-medium text-stone-600 truncate max-w-[200px]">
-                {shop.name}
-              </span>
+              <ShopSwitcher
+                currentSlug={slug}
+                shops={userShops.map((s) => ({
+                  id: s.id,
+                  slug: s.slug,
+                  name: s.name,
+                  role: s.role,
+                }))}
+              />
             </div>
           </div>
 
