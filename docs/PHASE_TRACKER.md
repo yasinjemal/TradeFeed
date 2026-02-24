@@ -12,9 +12,13 @@
 |-------|------|--------|-------------|
 | 1 | Foundation | ✅ Complete | Schema, project structure, database, config |
 | 2 | Core Commerce | ✅ Complete | Shop, products, catalog, WhatsApp checkout |
-| 3 | Auth & Security | ⬜ Not Started | Clerk auth, role-based access, rate limiting |
-| 4 | Monetisation | ⬜ Not Started | PayFast billing, subscription tiers |
-| 5 | Scale & Intelligence | ⬜ Not Started | Analytics, WhatsApp Business API, admin |
+| 3 | Auth & Security | ✅ Complete | Clerk auth, webhook sync, role-based access |
+| 3.5 | UI Polish & Redesigns | ✅ Complete | Loading states, image gallery, dashboard redesign |
+| 3.6 | Trust & Discovery | ✅ Complete | Shop profiles, maps, search, share, settings redesign |
+| 3.7 | Dashboard Redesign | ✅ Complete | Rich stats, active nav, share catalog, pro layout |
+| 4 | Media & Categories | ⬜ Not Started | Uploadthing CDN images, category management UI |
+| 5 | Monetisation | ⬜ Not Started | PayFast billing, subscription tiers |
+| 6 | Scale & Intelligence | ⬜ Not Started | Analytics, WhatsApp Business API, admin |
 
 ---
 
@@ -24,13 +28,13 @@
 
 | # | Task | Status | Commit | Notes |
 |---|------|--------|--------|-------|
-| 1.1 | Manager docs (VISION, DECISIONS, AI_RULES) | ✅ Done | `ca615bf` | Project charter locked |
+| 1.1 | Manager docs (VISION, DECISIONS, AI_RULES) | ✅ Done | `ca615bf` | Project charter locked, 14 decisions |
 | 1.2 | Next.js 16 + TypeScript strict scaffolding | ✅ Done | `ca615bf` | App Router, Turbopack, `noUncheckedIndexedAccess` |
 | 1.3 | Prisma schema (7 models) | ✅ Done | `ca615bf` | Shop, User, ShopUser, Category, Product, ProductImage, ProductVariant |
 | 1.4 | Tailwind v4 + shadcn/ui setup | ✅ Done | `ca615bf` | PostCSS ESM fix applied |
 | 1.5 | Neon PostgreSQL connection | ✅ Done | `8259e30` | `eu-central-1`, connection pooling |
 | 1.6 | Initial migration (`init-foundation`) | ✅ Done | `8259e30` | All 7 tables created |
-| 1.7 | Dev seed user | ✅ Done | `8259e30` | `yasin@tradefeed.dev`, ID: `cmlzn0ymo0000uyvgep882qyv` |
+| 1.7 | Dev seed user | ✅ Done | `8259e30` | `yasin@tradefeed.dev` |
 
 **Phase 1 complete — 2026-02-23**
 
@@ -61,7 +65,7 @@
 | 2B.1 | Product + Variant Zod schemas | ✅ Done | `f30ab1d` | `priceInRands` → cents transform via Zod |
 | 2B.2 | Product data access layer | ✅ Done | `f30ab1d` | All queries scoped by `shopId` |
 | 2B.3 | Variant data access layer | ✅ Done | `f30ab1d` | Ownership chain: variant → product → shop |
-| 2B.4 | Product + Variant server actions | ✅ Done | `f30ab1d` | 5 actions: CRUD product + add/delete variant |
+| 2B.4 | Product + Variant server actions | ✅ Done | `f30ab1d` | 6 actions: CRUD product + add/delete/bulk-create variant |
 | 2B.5 | Dashboard layout + navigation | ✅ Done | `f30ab1d` | Overview, Products, View Catalog nav links |
 | 2B.6 | Product list page | ✅ Done | `f30ab1d` | Grid cards with price range, stock, active badge |
 | 2B.7 | Create product form + page | ✅ Done | `f30ab1d` | `useActionState` → redirect to product detail |
@@ -72,8 +76,6 @@
 **Product CRUD complete — 2026-02-23**
 
 ### 2C — Public Catalog Page ✅
-
-> Shareable storefront for buyers — the link sellers drop in WhatsApp groups.
 
 | # | Task | Status | Commit | Notes |
 |---|------|--------|--------|-------|
@@ -87,8 +89,6 @@
 **Public Catalog complete — 2026-02-23**
 
 ### 2D — WhatsApp Structured Checkout ✅
-
-> Buyer selects items → generates pre-filled WhatsApp message → opens `wa.me` link.
 
 | # | Task | Status | Commit | Notes |
 |---|------|--------|--------|-------|
@@ -106,53 +106,147 @@
 
 ---
 
-## Phase 3 — Auth & Security ⬜
+## Phase 3 — Auth & Security ✅
 
-> Replace dev auth with real Clerk authentication, role-based access.
+> Real Clerk authentication replacing dev auth, webhook user sync, role-based shop access.
 
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 3.1 | Clerk integration + webhook user sync | ⬜ | Replace `getDevUserId()` |
-| 3.2 | Protected routes middleware | ⬜ | Dashboard pages require auth |
-| 3.3 | Role-based access (OWNER/MANAGER/STAFF) | ⬜ | ShopUser roles enforced on mutations |
-| 3.4 | Session management + sign out | ⬜ | Clerk session handling |
-| 3.5 | Rate limiting on public routes | ⬜ | Catalog + checkout abuse prevention |
+| # | Task | Status | Commit | Notes |
+|---|------|--------|--------|-------|
+| 3.1 | Clerk integration + webhook user sync | ✅ Done | `e8b2e55` | `@clerk/nextjs` v6.38.2, Svix signature verification |
+| 3.2 | Webhook route (`/api/webhooks/clerk`) | ✅ Done | `e8b2e55` | Handles `user.created`, `user.updated`, `user.deleted` events |
+| 3.3 | Auth helpers (`lib/auth.ts`) | ✅ Done | `e8b2e55` | `getUser()`, `requireUser()`, `requireShopAccess()` — all use real Clerk `auth()` |
+| 3.4 | Protected routes middleware | ✅ Done | `e8b2e55` | `clerkMiddleware` + `createRouteMatcher`, dashboard pages require auth |
+| 3.5 | Role-based access (OWNER/MANAGER/STAFF) | ✅ Done | `e8b2e55` | `requireShopAccess()` checks ShopUser membership, returns `{ user, shopUser }` |
+| 3.6 | Sign-in / sign-up pages | ✅ Done | `e8b2e55` | `/sign-in/[[...sign-in]]`, `/sign-up/[[...sign-up]]` with Clerk components |
+| 3.7 | UserButton in dashboard | ✅ Done | `e8b2e55` | Session management + sign out via Clerk `<UserButton>` |
+| 3.8 | All server actions migrated to Clerk | ✅ Done | `e8b2e55` | shop.ts, product.ts, image.ts, shop-settings.ts all import from `lib/auth` |
+| 3.9 | Rate limiting on public routes | ⬜ Todo | — | Deferred to pre-launch (Phase 6) |
+
+**Phase 3 complete — 2026-02-24** (rate limiting deferred)
 
 ---
 
-## Phase 4 — Monetisation ⬜
+## Phase 3.5 — UI Polish ✅
+
+> Loading states, image gallery, refined cards, and modern dashboard UI.
+
+| # | Task | Status | Commit | Notes |
+|---|------|--------|--------|-------|
+| 3.5.1 | Shimmer loading skeletons | ✅ Done | `28f34f9` | Catalog + dashboard loading states |
+| 3.5.2 | Image gallery thumbnails | ✅ Done | `28f34f9` | Product detail thumbnail strip |
+| 3.5.3 | Refined card styles | ✅ Done | `28f34f9` | Product cards with better shadows/spacing |
+| 3.5.4 | Fixed broken image URLs | ✅ Done | `28f34f9` | Image display fallbacks |
+| 3.5.5 | Product dashboard redesign | ✅ Done | `d16e51b` | Modern UI for product management |
+| 3.5.6 | Drag & drop image upload | ✅ Done | `d16e51b` | Client-side compression (1200px max, JPEG 0.7), max 8 images, 5MB limit |
+| 3.5.7 | Smart variant creator | ✅ Done | `d16e51b` | Bulk size×color matrix creation with preset prices |
+| 3.5.8 | Interactive image gallery | ✅ Done | `6f16677` | Click thumbnails, swipe gestures, arrow navigation |
+
+**UI Polish complete — 2026-02-24**
+
+---
+
+## Phase 3.6 — Trust & Discovery ✅
+
+> Shop profiles, location/maps, catalog search, share buttons, settings redesign.
+
+| # | Task | Status | Commit | Notes |
+|---|------|--------|--------|-------|
+| 3.6.1 | Schema migration — 12 new Shop fields | ✅ Done | `1734222` | address, city, province, lat/lng, aboutText, businessHours, social links, isVerified, bannerUrl |
+| 3.6.2 | Shop settings Zod schema | ✅ Done | `1734222` | Province/city validation, social URL validation |
+| 3.6.3 | Shop settings server action | ✅ Done | `1734222` | `updateShopSettings()` in `lib/actions/shop-settings.ts` |
+| 3.6.4 | Shop settings page | ✅ Done | `1734222` | `/dashboard/[slug]/settings` route |
+| 3.6.5 | Shop profile component | ✅ Done | `1734222` | Public-facing shop info display |
+| 3.6.6 | Catalog search & filter | ✅ Done | `1734222` | Client-side search, price range, category filter |
+| 3.6.7 | Share product buttons | ✅ Done | `1734222` | WhatsApp + copy link sharing |
+| 3.6.8 | Trust indicators in catalog layout | ✅ Done | `1734222` | Verified badge, location display |
+| 3.6.9 | Settings page — mind-blowing redesign | ✅ Done | `c192f9a` | Dark gradient hero, SVG completeness ring, accordion sections, GPS auto-detect, city→province linking, toggle switches, 3 hour presets, branded social icons, floating sticky save bar, success toast, character counters |
+
+**Trust & Discovery complete — 2026-02-24**
+
+---
+
+## Phase 3.7 — Dashboard Redesign ✅
+
+> Rich data overview, polished navigation, and pro-level dashboard layout.
+
+| # | Task | Status | Commit | Notes |
+|---|------|--------|--------|-------|
+| 3.7.1 | Dashboard stats data layer | ✅ Done | `aaf37fb` | `getDashboardStats()` — 5 parallel DB queries (products, variants, stock, prices, recent) |
+| 3.7.2 | Overview page redesign | ✅ Done | `aaf37fb` | Dark gradient hero, 4 stat cards, profile completeness CTA, share catalog + WhatsApp share, recent products with thumbnails, quick actions grid, getting started tips |
+| 3.7.3 | Dashboard layout redesign | ✅ Done | `aaf37fb` | Glassmorphism header, `backdrop-blur-xl`, branded TradeFeed logo, breadcrumb nav |
+| 3.7.4 | Active state navigation | ✅ Done | `aaf37fb` | Client `DashboardNav` component with `usePathname()`, icon nav links, emerald active styling |
+| 3.7.5 | Copy-to-clipboard component | ✅ Done | `aaf37fb` | Reusable `CopyButton` with checkmark animation + fallback |
+
+**Dashboard Redesign complete — 2026-02-24**
+
+---
+
+## Phase 4 — Media & Categories ⬜
+
+> Swap base64 image storage to CDN, add category management for organized catalogs.
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 4.1 | Uploadthing integration | ⬜ | Install `uploadthing`, create upload endpoint, configure env vars |
+| 4.2 | Migrate image upload action to Uploadthing | ⬜ | Swap `lib/actions/image.ts` from base64 → Uploadthing URL storage |
+| 4.3 | Update image upload component | ⬜ | Point `ProductImageUpload` to new endpoint |
+| 4.4 | Base64 → CDN data migration script | ⬜ | One-time script to upload existing base64 images to CDN |
+| 4.5 | Category management UI (dashboard) | ⬜ | CRUD for shop-scoped categories |
+| 4.6 | Category assignment on product form | ⬜ | Dropdown/select for category when creating/editing products |
+| 4.7 | Catalog category filter (public) | ⬜ | Category pills/tabs on public catalog page |
+| 4.8 | Product edit form | ⬜ | Edit name, description, isActive, category on existing products |
+| 4.9 | Product ordering/sorting | ⬜ | Pin featured products, sort by newest/price |
+
+---
+
+## Phase 5 — Monetisation ⬜
 
 > Subscription billing with PayFast for SA-native payments.
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 4.1 | PayFast integration | ⬜ | SA payment gateway, ZAR billing |
-| 4.2 | Subscription tiers (Free / Pro) | ⬜ | Product count limits, feature gating |
-| 4.3 | Billing dashboard | ⬜ | Current plan, invoice history |
-| 4.4 | POPIA compliance audit | ⬜ | Privacy policy, data deletion, consent |
+| 5.1 | Subscription schema (Plan model) | ⬜ | Plan tiers, features, limits |
+| 5.2 | PayFast integration | ⬜ | SA payment gateway, ZAR billing, ITN webhook |
+| 5.3 | Free tier gate (10 products) | ⬜ | Enforce product count limit on free plan |
+| 5.4 | Pro tier unlock (R199/mo) | ⬜ | Unlimited products, priority badge |
+| 5.5 | Billing dashboard page | ⬜ | Current plan, upgrade CTA, invoice history |
+| 5.6 | POPIA compliance audit | ⬜ | Privacy policy, data deletion, consent |
 
 ---
 
-## Phase 5 — Scale & Intelligence ⬜
+## Phase 6 — Scale & Intelligence ⬜
 
-> Analytics, WhatsApp Business API, admin tooling.
+> Analytics, WhatsApp Business API, admin tooling, performance optimization.
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 5.1 | Catalog view analytics | ⬜ | Page views, product clicks, conversion |
-| 5.2 | WhatsApp Business API integration | ⬜ | Order confirmation, delivery updates |
-| 5.3 | Admin dashboard (cross-tenant) | ⬜ | Platform metrics, seller management |
-| 5.4 | Image optimization pipeline | ⬜ | Uploadthing/Cloudinary CDN |
+| 6.1 | Catalog view tracking (page views, product clicks) | ⬜ | Lightweight client-side analytics |
+| 6.2 | WhatsApp click tracking | ⬜ | Count `wa.me` link opens per product/shop |
+| 6.3 | Analytics dashboard for sellers | ⬜ | Views, clicks, top products chart |
+| 6.4 | Rate limiting on public routes | ⬜ | Upstash Ratelimit or similar |
+| 6.5 | WhatsApp Business API integration | ⬜ | Order confirmations, delivery updates |
+| 6.6 | Admin dashboard (cross-tenant) | ⬜ | Platform metrics, seller management |
+| 6.7 | Seller verification flow | ⬜ | `isVerified` admin approval, trust badge |
+| 6.8 | SEO optimization | ⬜ | Dynamic OG images, structured data, sitemap |
 
 ---
 
-## Git Log
+## Complete Git Log
 
 | Commit | Message | Date |
 |--------|---------|------|
+| `aaf37fb` | feat: redesign dashboard overview & layout with rich stats, active nav, share catalog | 2026-02-24 |
+| `c192f9a` | style: mind-blowing settings page redesign | 2026-02-24 |
+| `1734222` | feat: trust & discovery — shop profiles, maps, search, share buttons | 2026-02-24 |
+| `6f16677` | fix: interactive image gallery — click thumbnails, swipe, arrows | 2026-02-24 |
+| `d16e51b` | feat: product dashboard redesign — image upload, smart variants, modern UI | 2026-02-24 |
+| `e8b2e55` | feat: Phase 3 — Clerk auth, webhook user sync, route protection, role-based access | 2026-02-24 |
+| `28f34f9` | style: UI polish — shimmer loading, image gallery, refined cards, loading skeletons | 2026-02-24 |
+| `0b3044a` | chore: update phase tracker — 2D checkout complete, Phase 2 done | 2026-02-24 |
 | `2f0bf30` | feat: WhatsApp structured checkout — cart, add-to-cart, panel, message builder | 2026-02-24 |
 | `9512485` | chore: update phase tracker — 2C public catalog complete | 2026-02-23 |
 | `292862e` | feat: public catalog — storefront layout, product grid, detail page, WhatsApp order | 2026-02-23 |
+| `6ef3224` | chore: add phase tracker to docs | 2026-02-23 |
 | `f30ab1d` | feat: product CRUD — validation, data access, server actions, dashboard UI | 2026-02-23 |
 | `21bccd2` | feat: shop creation — Zod validation, data access, server action, UI form | 2026-02-23 |
 | `8259e30` | fix: postcss ESM export, add Neon DB, run init migration | 2026-02-23 |
@@ -160,14 +254,107 @@
 
 ---
 
-## Key Technical Notes
+## Architecture Summary
 
-- **Dev server**: port 3005 (3000/3001 occupied)
-- **Prisma**: Locked to v6.x (v7 breaks `url` in datasource)
-- **Prisma types**: Inferred via `NonNullable<Awaited<ReturnType<...>>>` (v6 doesn't export model types)
-- **Transaction typing**: `Omit<typeof db, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">`
-- **Zod v4**: Issues use `PropertyKey[]` for path (not `(string | number)[]`)
-- **PostCSS**: Must use ESM `export default` in `.mjs` config
-- **shadcn components**: button, input, label, card, form, textarea, badge
-- **Cart**: React Context + localStorage, scoped per shop slug (`tradefeed_cart_{slug}`)
-- **Checkout**: Client-side cart → structured WhatsApp message → `wa.me` URL → clears cart
+### Tech Stack
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| Framework | Next.js (App Router) | 16.1.6 |
+| Language | TypeScript (strict) | `noUncheckedIndexedAccess: true` |
+| ORM | Prisma | v6.x (v7 breaks `url` in datasource) |
+| Database | PostgreSQL (Neon) | `eu-central-1`, connection pooling |
+| Auth | Clerk | `@clerk/nextjs` v6.38.2 |
+| CSS | Tailwind CSS v4 + shadcn/ui | PostCSS ESM |
+| Validation | Zod v4 | Issues use `PropertyKey[]` for path |
+| Deployment | Vercel (planned) | — |
+
+### Project Stats
+
+| Category | Count |
+|----------|-------|
+| Prisma models | 7 (Shop, User, ShopUser, Category, Product, ProductImage, ProductVariant) |
+| Enums | 1 (`UserRole` — OWNER, MANAGER, STAFF) |
+| App routes (pages) | 11 |
+| API routes | 1 (Clerk webhook) |
+| Server actions | 10 functions across 4 files |
+| Data access functions | 20 across 4 files (`shops`, `products`, `catalog`, `variants`) |
+| Zod schemas | 6 |
+| Components | 26 files across 5 directories (`ui`, `shop`, `dashboard`, `product`, `catalog`) |
+| shadcn components | button, input, label, card, form, textarea, badge, copy-button |
+| Locked decisions | 14 (in `docs/DECISIONS.md`) |
+
+### Data Layer Map
+
+```
+lib/db/
+├── prisma.ts          — Prisma client singleton
+├── shops.ts           — createShop, getShopBySlug, updateShopSettings, getShopForUser, getShopsForUser, getDashboardStats
+├── products.ts        — createProduct, getProducts, getProduct, updateProduct, deleteProduct, countProducts
+├── catalog.ts         — getPublicShop, getPublicProducts, getPublicProduct, countActiveProducts
+└── variants.ts        — createVariant, updateVariant, deleteVariant, bulkCreateVariants
+
+lib/actions/
+├── shop.ts            — createShopAction
+├── shop-settings.ts   — updateShopSettingsAction
+├── product.ts         — createProduct, updateProduct, deleteProduct, addVariant, deleteVariant, bulkCreateVariants
+└── image.ts           — uploadImages (base64), deleteImage
+
+lib/auth.ts            — getUser, requireUser, requireShopAccess
+middleware.ts          — clerkMiddleware, public route matcher (/catalog, /sign-in, /sign-up, /api/webhooks)
+```
+
+### Route Map
+
+```
+Public:
+  /                                    — Landing → redirect to create-shop
+  /sign-in/[[...sign-in]]             — Clerk sign-in
+  /sign-up/[[...sign-up]]             — Clerk sign-up
+  /catalog/[slug]                      — Public shop storefront
+  /catalog/[slug]/products/[productId] — Public product detail
+
+Protected (require Clerk auth):
+  /create-shop                         — Shop creation form
+  /dashboard/[slug]                    — Dashboard overview (rich stats)
+  /dashboard/[slug]/products           — Product list
+  /dashboard/[slug]/products/new       — Create product form
+  /dashboard/[slug]/products/[id]      — Product detail + edit
+  /dashboard/[slug]/settings           — Shop settings (profile, location, social)
+
+API:
+  /api/webhooks/clerk                  — Clerk webhook (user.created/updated/deleted)
+```
+
+### Known Technical Debt
+
+| Issue | Severity | Notes |
+|-------|----------|-------|
+| **Base64 images in DB** | 🔴 Critical | ~150-200KB per image stored as data URI in Postgres. Will crush performance at scale. Swap to Uploadthing (D-009). |
+| **No category management UI** | 🟡 Medium | Model exists but sellers can't create/assign categories. Catalogs unnavigable past ~20 products. |
+| **No product edit form** | 🟡 Medium | Sellers can create but not edit products (must delete and recreate). |
+| **No rate limiting** | 🟡 Medium | Public catalog routes have no abuse prevention. Need before marketing. |
+| **Legacy `lib/dev-auth.ts`** | 🟢 Low | Dead file, no longer imported anywhere. Safe to delete. |
+| **Cart — no server validation** | 🟢 Low | Stock quantities validated client-side only. |
+
+---
+
+## What's Next — Priority Roadmap
+
+### 🔴 Immediate (Phase 4 — Launch Blockers)
+
+1. **Uploadthing CDN images** — Base64 in Postgres is a ticking time bomb. 100 sellers × 20 products × 4 images ≈ 12GB of base64 in DB.
+2. **Category management UI** — Buyers can't browse by "dresses", "sneakers", etc.
+3. **Product edit form** — Sellers need to update prices/stock without recreating products.
+
+### 🟡 Revenue (Phase 5 — Monetise)
+
+4. **Simple analytics** — Catalog views + WhatsApp click tracking. Sellers won't pay for what they can't measure.
+5. **PayFast subscriptions** — Free (10 products) → Pro R199/mo (unlimited). Revenue engine.
+6. **Rate limiting** — Must-have before any marketing push.
+
+### 🟢 Growth (Phase 6 — Competitive Moat)
+
+7. **WhatsApp Business API** — Automated order confirmations + delivery updates.
+8. **Seller verification admin flow** — Trust is everything in SA wholesale.
+9. **SEO + OG images** — Organic discovery via Google and social shares.
