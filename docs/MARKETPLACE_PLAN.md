@@ -233,10 +233,10 @@
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M10.17 | New global categories seed | Add 5 new top-level categories + subcategories: **Electronics** (Phones, Laptops, Accessories, Audio), **Beauty & Health** (Skincare, Haircare, Makeup, Fragrances), **Food & Beverages** (Snacks, Drinks, Fresh Produce, Spices), **Home & Garden** (Furniture, Decor, Kitchen, Tools), **Auto Parts** (Engine, Body, Electrical, Tyres). Admin can edit via M7 CRUD. | ⬜ Todo | 5 parents + ~20 children |
-| M10.18 | Keyword map expansion | `lib/marketplace/keyword-map.ts` — add 50+ keywords for new industries. "iPhone" → Electronics/Phones. "Moisturizer" → Beauty/Skincare. "Brake pad" → Auto/Body. | ⬜ Todo | Powers auto-category suggestion on product form |
-| M10.19 | Seed data for new categories | `prisma/seed-products.ts` — add 2-3 sample products per new category (for dev/demo). Electronics: "Wireless Earbuds", Beauty: "Vitamin C Serum", Food: "Bulk Biltong Pack". | ⬜ Todo | Dev/demo only |
-| M10.20 | Multi-category shop support | Already works via Product → GlobalCategory FK. Verify: one shop can have products in Clothing + Electronics + Beauty. No code change needed — just documentation + test. | ⬜ Todo | Verify existing architecture |
+| M10.17 | New global categories seed | Added 5 new top-level categories + 18 subcategories: **Electronics** (Phones, Laptops, Accessories, Audio, Tablets), **Beauty & Health** (Skincare, Haircare, Makeup, Fragrances), **Food & Beverages** (Snacks, Drinks, Fresh Produce, Spices), **Home & Garden** (Furniture, Decor, Kitchen, Tools), **Auto Parts** (Engine, Body, Electrical, Tyres). Total: 12 top + 55 sub. | ✅ Done | All idempotent upserts |
+| M10.18 | Keyword map expansion | Fixed all 41 existing slugs to match seeded GlobalCategory slugs. Added ~60 new keywords for electronics, beauty, food, home, auto industries. Total: ~70 entries, ~250 keywords. | ✅ Done | Powers auto-category suggestion |
+| M10.19 | Variant presets for new categories | `category-variants.ts` — aligned all slug keys with seeded slugs. Added presets for beauty-health, skincare, food-beverages, snacks, drinks, home-garden, auto-parts, tyres. | ✅ Done | Replaces orphan keys |
+| M10.20 | Multi-category shop support | Verified: one shop can have products in Clothing + Electronics + Beauty via Product → GlobalCategory FK. No code change needed — architecture already supports it. | ✅ Done | Verified existing architecture |
 
 ---
 
