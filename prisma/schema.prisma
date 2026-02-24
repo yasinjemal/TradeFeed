@@ -418,6 +418,12 @@ model Order {
   buyerPhone      String?                           // WhatsApp number used for order (PII — POPIA)
   buyerNote       String?                           // Optional note from buyer
 
+  // Delivery address (optional — captured at checkout)
+  deliveryAddress  String?                           // Street address line
+  deliveryCity     String?                           // City
+  deliveryProvince String?                           // Province (e.g. "Gauteng")
+  deliveryPostalCode String?                         // Postal/ZIP code
+
   // Totals (snapshot at order time — prices may change later)
   totalCents      Int                               // Total order value in ZAR cents
   itemCount       Int                               // Total quantity of items

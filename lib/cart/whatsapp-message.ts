@@ -30,13 +30,21 @@
 
 import type { CartItem } from "./types";
 
+export interface DeliveryAddress {
+  address: string;
+  city: string;
+  province: string;
+  postalCode: string;
+}
+
 /**
  * Build a structured WhatsApp order message from cart items.
  *
  * @param items - Cart items to include in the order
+ * @param delivery - Optional delivery address
  * @returns URL-encoded message string ready for wa.me
  */
-export function buildWhatsAppMessage(items: CartItem[]): string {
+export function buildWhatsAppMessage(items: CartItem[], delivery?: DeliveryAddress | null): string {
   if (items.length === 0) return "";
 
   const totalCents = items.reduce(
@@ -65,12 +73,18 @@ export function buildWhatsAppMessage(items: CartItem[]): string {
     })
     .join("\n\n");
 
+  // Build delivery section if provided
+  const deliverySection = delivery?.address
+    ? `\n📍 *Deliver to:*\n   ${delivery.address}\n   ${delivery.city}, ${delivery.province} ${delivery.postalCode}\n`
+    : "";
+
   const message =
     `📋 *New Order from TradeFeed*\n\n` +
     `${lineItems}\n\n` +
     `─────────────────\n` +
     `*Total: R ${totalRands}*\n` +
-    `Items: ${totalItems}\n\n` +
+    `Items: ${totalItems}` +
+    `${deliverySection}\n\n` +
     `Thank you! 🙏`;
 
   return message;
@@ -85,9 +99,10 @@ export function buildWhatsAppMessage(items: CartItem[]): string {
  */
 export function buildWhatsAppCheckoutUrl(
   whatsappNumber: string,
-  items: CartItem[]
+  items: CartItem[],
+  delivery?: DeliveryAddress | null,
 ): string {
-  const message = buildWhatsAppMessage(items);
+  const message = buildWhatsAppMessage(items, delivery);
   const phone = whatsappNumber.replace("+", "");
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }

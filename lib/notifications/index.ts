@@ -65,6 +65,10 @@ export async function notifyNewOrder(order: {
   shopId: string;
   buyerName: string | null;
   buyerPhone: string | null;
+  deliveryAddress: string | null;
+  deliveryCity: string | null;
+  deliveryProvince: string | null;
+  deliveryPostalCode: string | null;
   totalCents: number;
   itemCount: number;
   items: {
@@ -95,6 +99,10 @@ export async function notifyNewOrder(order: {
       orderNumber: order.orderNumber,
       buyerName: order.buyerName ?? undefined,
       buyerPhone: order.buyerPhone ?? undefined,
+      deliveryAddress: order.deliveryAddress ?? undefined,
+      deliveryCity: order.deliveryCity ?? undefined,
+      deliveryProvince: order.deliveryProvince ?? undefined,
+      deliveryPostalCode: order.deliveryPostalCode ?? undefined,
       totalCents: order.totalCents,
       itemCount: order.itemCount,
       items: order.items,

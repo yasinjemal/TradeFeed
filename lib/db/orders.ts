@@ -48,6 +48,10 @@ export interface CreateOrderInput {
   buyerName?: string;
   buyerPhone?: string;
   buyerNote?: string;
+  deliveryAddress?: string;
+  deliveryCity?: string;
+  deliveryProvince?: string;
+  deliveryPostalCode?: string;
   whatsappMessage?: string;
 }
 
@@ -136,6 +140,10 @@ export async function createOrder(input: CreateOrderInput) {
         buyerName: input.buyerName,
         buyerPhone: input.buyerPhone,
         buyerNote: input.buyerNote,
+        deliveryAddress: input.deliveryAddress,
+        deliveryCity: input.deliveryCity,
+        deliveryProvince: input.deliveryProvince,
+        deliveryPostalCode: input.deliveryPostalCode,
         totalCents,
         itemCount,
         whatsappMessage: input.whatsappMessage,

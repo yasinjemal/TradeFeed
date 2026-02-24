@@ -35,6 +35,10 @@ interface Order {
   buyerName: string | null;
   buyerPhone: string | null;
   buyerNote: string | null;
+  deliveryAddress: string | null;
+  deliveryCity: string | null;
+  deliveryProvince: string | null;
+  deliveryPostalCode: string | null;
   totalCents: number;
   itemCount: number;
   items: OrderItem[];
@@ -360,7 +364,7 @@ function OrderCard({
           </div>
 
           {/* Buyer info */}
-          {(order.buyerPhone || order.buyerNote) && (
+          {(order.buyerPhone || order.buyerNote || order.deliveryAddress) && (
             <div className="text-xs text-stone-500 space-y-1 bg-stone-50 rounded-lg p-3">
               {order.buyerPhone && (
                 <div>
@@ -368,6 +372,14 @@ function OrderCard({
                 </div>
               )}
               {order.buyerNote && <div>📝 {order.buyerNote}</div>}
+              {order.deliveryAddress && (
+                <div>
+                  📍 {order.deliveryAddress}
+                  {order.deliveryCity ? `, ${order.deliveryCity}` : ""}
+                  {order.deliveryProvince ? `, ${order.deliveryProvince}` : ""}
+                  {order.deliveryPostalCode ? ` ${order.deliveryPostalCode}` : ""}
+                </div>
+              )}
             </div>
           )}
 

@@ -45,6 +45,10 @@ export async function checkoutAction(
   buyerName?: string,
   buyerPhone?: string,
   buyerNote?: string,
+  deliveryAddress?: string,
+  deliveryCity?: string,
+  deliveryProvince?: string,
+  deliveryPostalCode?: string,
 ): Promise<ActionResult> {
   try {
     // 1. Validate stock
@@ -76,6 +80,10 @@ export async function checkoutAction(
       buyerName,
       buyerPhone,
       buyerNote,
+      deliveryAddress,
+      deliveryCity,
+      deliveryProvince,
+      deliveryPostalCode,
       whatsappMessage,
     });
 
@@ -85,6 +93,10 @@ export async function checkoutAction(
       shopId,
       buyerName: buyerName ?? null,
       buyerPhone: buyerPhone ?? null,
+      deliveryAddress: deliveryAddress ?? null,
+      deliveryCity: deliveryCity ?? null,
+      deliveryProvince: deliveryProvince ?? null,
+      deliveryPostalCode: deliveryPostalCode ?? null,
       totalCents: order.totalCents,
       itemCount: order.itemCount,
       items: order.items.map((i) => ({

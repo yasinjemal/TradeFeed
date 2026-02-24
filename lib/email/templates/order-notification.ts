@@ -10,6 +10,10 @@ interface OrderEmailData {
   orderNumber: string;
   buyerName?: string;
   buyerPhone?: string;
+  deliveryAddress?: string;
+  deliveryCity?: string;
+  deliveryProvince?: string;
+  deliveryPostalCode?: string;
   totalCents: number;
   itemCount: number;
   items: {
@@ -72,6 +76,7 @@ export function newOrderEmailHtml(data: OrderEmailData): string {
           </tr>
           ${data.buyerName ? `<tr><td style="color: #78716c; font-size: 13px; padding: 4px 0;">Buyer</td><td style="text-align: right; color: #1c1917;">${data.buyerName}</td></tr>` : ""}
           ${data.buyerPhone ? `<tr><td style="color: #78716c; font-size: 13px; padding: 4px 0;">WhatsApp</td><td style="text-align: right; color: #1c1917;">${data.buyerPhone}</td></tr>` : ""}
+          ${data.deliveryAddress ? `<tr><td style="color: #78716c; font-size: 13px; padding: 4px 0;">📍 Delivery</td><td style="text-align: right; color: #1c1917;">${data.deliveryAddress}${data.deliveryCity ? `, ${data.deliveryCity}` : ""}${data.deliveryProvince ? `, ${data.deliveryProvince}` : ""}${data.deliveryPostalCode ? ` ${data.deliveryPostalCode}` : ""}</td></tr>` : ""}
           <tr>
             <td style="color: #78716c; font-size: 13px; padding: 4px 0;">Items</td>
             <td style="text-align: right; color: #1c1917;">${data.itemCount}</td>
