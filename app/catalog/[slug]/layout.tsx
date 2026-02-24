@@ -17,6 +17,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CartProvider } from "@/lib/cart/cart-context";
 import { CartButton } from "@/components/catalog/cart-button";
+import { generateShopJsonLd } from "@/lib/seo/json-ld";
 
 interface CatalogLayoutProps {
   children: React.ReactNode;
@@ -39,6 +40,14 @@ export async function generateMetadata({
     return { title: "Shop Not Found — TradeFeed" };
   }
 
+  const ogUrl = new URL("/api/og", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+  ogUrl.searchParams.set("type", "shop");
+  ogUrl.searchParams.set("name", shop.name);
+  ogUrl.searchParams.set("description", shop.description || `Browse ${shop.name}'s catalog on TradeFeed`);
+  if (shop.city) ogUrl.searchParams.set("city", shop.city);
+  ogUrl.searchParams.set("productCount", String(shop._count.products));
+  if (shop.isVerified) ogUrl.searchParams.set("verified", "true");
+
   return {
     title: `${shop.name} — TradeFeed`,
     description:
@@ -48,6 +57,13 @@ export async function generateMetadata({
       description:
         shop.description || `Browse ${shop.name}'s catalog on TradeFeed`,
       type: "website",
+      images: [{ url: ogUrl.toString(), width: 1200, height: 630, alt: shop.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${shop.name} — TradeFeed`,
+      description: shop.description || `Browse ${shop.name}'s catalog on TradeFeed`,
+      images: [ogUrl.toString()],
     },
   };
 }
@@ -69,6 +85,14 @@ export default async function CatalogLayout({
 
   return (
     <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber}>
+      {/* JSON-LD Structured Data for SEO */}
+      {generateShopJsonLd(shop).map((schema, i) => (
+        <script
+          key={`shop-ld-${i}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
       <div className="min-h-screen bg-[#fafaf9]">
       {/* ── Shop Header ─────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-stone-200/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
@@ -195,6 +219,12 @@ export default async function CatalogLayout({
             >
               {displayPhone}
             </a>
+          </div>
+          {/* Legal links */}
+          <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-stone-400">
+            <Link href="/privacy" className="hover:text-emerald-600 transition-colors">Privacy</Link>
+            <span>·</span>
+            <Link href="/terms" className="hover:text-emerald-600 transition-colors">Terms</Link>
           </div>
         </div>
       </footer>

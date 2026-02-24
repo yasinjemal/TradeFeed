@@ -2,7 +2,7 @@
 
 > Single source of truth for project progress.
 > Updated after every completed feature.
-> Last updated: **2026-02-26**
+> Last updated: **2026-02-26** (Tier 3)
 
 ---
 
@@ -18,7 +18,9 @@
 | 3.7 | Dashboard Redesign | ✅ Complete | Rich stats, active nav, share catalog, pro layout |
 | 4 | Media & Categories | ✅ Complete | Uploadthing CDN images, category management UI, product edit |
 | 5 | Monetisation | ✅ Complete | PayFast billing, subscription tiers, free tier gate |
-| 6 | Scale & Intelligence (Partial) | ✅ Complete | Analytics, rate limiting. WhatsApp Business API + SEO deferred. |
+| 6 | Scale & Intelligence (Partial) | ✅ Complete | Analytics, rate limiting. WhatsApp Business API deferred. |
+| 7 | SEO & Discovery | ✅ Complete | Dynamic OG images, JSON-LD, sitemap, robots.txt |
+| 8 | Admin & Compliance | ✅ Complete | Platform admin, seller verification, POPIA legal pages, cookie consent |
 
 ---
 
@@ -259,9 +261,47 @@
 | 6.7 | WhatsApp Business API integration | ⬜ Todo | Order confirmations, delivery updates — deferred |
 | 6.8 | Admin dashboard (cross-tenant) | ⬜ Todo | Platform metrics, seller management — deferred |
 | 6.9 | Seller verification flow | ⬜ Todo | `isVerified` admin approval, trust badge — deferred |
-| 6.10 | SEO optimization | ⬜ Todo | Dynamic OG images, structured data, sitemap — deferred |
+| 6.10 | SEO optimization | ✅ Done | Moved to Phase 7 — see below |
 
 **Phase 6 (Tier 2 items) complete — 2026-02-26** 🎉
+
+---
+
+## Phase 7 — SEO & Discovery ✅
+
+> Search engine optimization for organic traffic via Google and WhatsApp link previews.
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 7.1 | Dynamic OG image API | ✅ Done | `app/api/og/route.tsx` — Edge runtime, shop + product OG images |
+| 7.2 | OG metadata in catalog layout | ✅ Done | Dynamic OpenGraph + Twitter card images for WhatsApp previews |
+| 7.3 | OG metadata in product pages | ✅ Done | Product image, price, shop name in OG cards |
+| 7.4 | JSON-LD structured data | ✅ Done | `lib/seo/json-ld.ts` — LocalBusiness + Product + BreadcrumbList |
+| 7.5 | Dynamic sitemap | ✅ Done | `app/sitemap.ts` — all active shops + products, auto-updating |
+| 7.6 | robots.txt | ✅ Done | `app/robots.ts` — allows crawlers on public, blocks dashboard/admin |
+
+**Phase 7 complete — 2026-02-26** 🎉
+
+---
+
+## Phase 8 — Admin & Compliance ✅
+
+> Platform admin dashboard for seller verification and POPIA compliance.
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 8.1 | Admin auth (env-based) | ✅ Done | `lib/auth/admin.ts` — ADMIN_USER_IDS env var, `isAdmin()`, `requireAdmin()` |
+| 8.2 | Admin data layer | ✅ Done | `lib/db/admin.ts` — getAdminStats, getAdminShops (search/filter/paginate), setShopVerified, setShopActive |
+| 8.3 | Admin server actions | ✅ Done | `app/actions/admin.ts` — verify, unverify, deactivate, reactivate shops |
+| 8.4 | Admin layout | ✅ Done | `app/admin/layout.tsx` — dark theme, admin auth gate, branded header |
+| 8.5 | Admin dashboard page | ✅ Done | `app/admin/page.tsx` — platform stats, shop list with search/filter/pagination |
+| 8.6 | Admin shop list component | ✅ Done | `components/admin/admin-shop-list.tsx` — verify/unverify/activate/deactivate toggles |
+| 8.7 | Privacy policy (POPIA) | ✅ Done | `app/privacy/page.tsx` — 11-section SA POPIA-compliant policy |
+| 8.8 | Terms of service | ✅ Done | `app/terms/page.tsx` — 12-section TOS with SA law references |
+| 8.9 | Cookie consent banner | ✅ Done | `components/cookie-consent.tsx` — dismissible, localStorage persistence |
+| 8.10 | Legal links in catalog footer | ✅ Done | Privacy + Terms links in catalog footer |
+
+**Phase 8 complete — 2026-02-26** 🎉
 
 ---
 
@@ -269,6 +309,7 @@
 
 | Commit | Message | Date |
 |--------|---------|------|
+| `d80e07b` | feat: Tier 3 — SEO, admin dashboard, POPIA compliance | 2026-02-26 |
 | `e2dce75` | feat: Tier 2 — analytics dashboard, rate limiting, PayFast subscriptions | 2026-02-26 |
 | `42b7883` | feat: Tier 1 quick wins — image migration script | 2026-02-25 |
 | `aaf37fb` | feat: redesign dashboard overview & layout with rich stats, active nav, share catalog | 2026-02-24 |
@@ -312,12 +353,12 @@
 |----------|-------|
 | Prisma models | 10 (Shop, User, ShopUser, Category, Product, ProductImage, ProductVariant, AnalyticsEvent, Plan, Subscription) |
 | Enums | 3 (`UserRole`, `EventType`, `SubscriptionStatus`) |
-| App routes (pages) | 14 |
-| API routes | 4 (Clerk webhook, Uploadthing, PayFast ITN webhook, Analytics) |
-| Server actions | 20 functions across 7 files |
-| Data access functions | 35 across 7 files (`shops`, `products`, `catalog`, `variants`, `categories`, `analytics`, `subscriptions`) |
+| App routes (pages) | 18 |
+| API routes | 5 (Clerk webhook, Uploadthing, PayFast ITN, OG image, sitemap/robots) |
+| Server actions | 24 functions across 8 files |
+| Data access functions | 40 across 8 files (`shops`, `products`, `catalog`, `variants`, `categories`, `analytics`, `subscriptions`, `admin`) |
 | Zod schemas | 8 |
-| Components | 38 files across 8 directories (`ui`, `shop`, `dashboard`, `product`, `catalog`, `category`, `analytics`, `billing`) |
+| Components | 42 files across 9 directories (`ui`, `shop`, `dashboard`, `product`, `catalog`, `category`, `analytics`, `billing`, `admin`) |
 | shadcn components | button, input, label, card, form, textarea, badge, copy-button |
 | Locked decisions | 14 (in `docs/DECISIONS.md`) |
 
@@ -332,7 +373,8 @@ lib/db/
 ├── variants.ts        — createVariant, updateVariant, deleteVariant, bulkCreateVariants
 ├── categories.ts      — getCategories, getCategory, createCategory, updateCategory, deleteCategory
 ├── analytics.ts       — trackEvent, getAnalyticsOverview, getDailyAnalytics, getTopProducts, getUniqueVisitors
-└── subscriptions.ts   — getFreePlan, getPlans, getShopSubscription, createFreeSubscription, upgradeSubscription, cancelSubscription, checkProductLimit
+├── subscriptions.ts   — getFreePlan, getPlans, getShopSubscription, createFreeSubscription, upgradeSubscription, cancelSubscription, checkProductLimit
+└── admin.ts           — getAdminStats, getAdminShops, setShopVerified, setShopActive
 
 app/actions/
 ├── shop.ts            — createShopAction (+ auto-assign free subscription)
@@ -341,9 +383,12 @@ app/actions/
 ├── image.ts           — saveProductImages (CDN URLs), deleteProductImage (CDN + DB)
 ├── category.ts        — createCategory, updateCategory, deleteCategory
 ├── analytics.ts       — trackWhatsAppClickAction, trackWhatsAppCheckoutAction
-└── billing.ts         — createCheckoutAction, cancelSubscriptionAction
+├── billing.ts         — createCheckoutAction, cancelSubscriptionAction
+└── admin.ts           — verifyShopAction, unverifyShopAction, deactivateShopAction, reactivateShopAction
 
 lib/auth/index.ts      — getUser, requireUser, requireShopAccess
+lib/auth/admin.ts      — isAdmin, requireAdmin (env-based ADMIN_USER_IDS)
+lib/seo/json-ld.ts     — generateShopJsonLd, generateProductJsonLd
 lib/uploadthing.ts     — useUploadThing, UploadButton, UploadDropzone (typed to OurFileRouter)
 lib/ut-api.ts          — UTApi instance (server-side file deletion)
 lib/payfast.ts         — buildPayFastCheckoutUrl, validatePayFastITN, generateSignature
@@ -358,8 +403,12 @@ Public:
   /                                    — Landing → redirect to create-shop
   /sign-in/[[...sign-in]]             — Clerk sign-in
   /sign-up/[[...sign-up]]             — Clerk sign-up
-  /catalog/[slug]                      — Public shop storefront (+ PAGE_VIEW tracking)
-  /catalog/[slug]/products/[productId] — Public product detail (+ PRODUCT_VIEW tracking)
+  /catalog/[slug]                      — Public shop storefront (+ PAGE_VIEW tracking + JSON-LD)
+  /catalog/[slug]/products/[productId] — Public product detail (+ PRODUCT_VIEW tracking + JSON-LD)
+  /privacy                             — POPIA privacy policy
+  /terms                               — Terms of service
+  /sitemap.xml                         — Dynamic sitemap (all shops + products)
+  /robots.txt                          — Crawler rules
 
 Protected (require Clerk auth):
   /create-shop                         — Shop creation form (+ auto-assign free plan)
@@ -372,10 +421,14 @@ Protected (require Clerk auth):
   /dashboard/[slug]/billing            — Billing dashboard (plan cards, usage meter, PayFast upgrade)
   /dashboard/[slug]/settings           — Shop settings (profile, location, social)
 
+Admin (require Clerk auth + ADMIN_USER_IDS):
+  /admin                               — Platform admin dashboard (stats, shop list, verify/deactivate)
+
 API:
   /api/webhooks/clerk                  — Clerk webhook (user.created/updated/deleted)
   /api/webhooks/payfast                — PayFast ITN webhook (subscription COMPLETE/CANCELLED)
   /api/uploadthing                     — Uploadthing file upload endpoint (GET + POST)
+  /api/og                              — Dynamic OG image generation (Edge runtime)
 ```
 
 ### Known Technical Debt
@@ -392,7 +445,7 @@ API:
 | ~~**Legacy `lib/dev-auth.ts`**~~ | ✅ Fixed | Deleted — no longer exists. |
 | **Cart — no server validation** | 🟢 Low | Stock quantities validated client-side only. |
 | **Rate limiter — in-memory** | 🟢 Low | Works single-instance. Upgrade to Upstash Redis for multi-instance serverless. |
-| **POPIA compliance** | 🟡 Medium | Privacy policy + data deletion not yet implemented. Required before public launch. |
+| ~~**POPIA compliance**~~ | ✅ Fixed | Privacy policy + terms of service pages. Cookie consent banner. Legal links in footer. |
 
 ---
 
@@ -410,9 +463,15 @@ API:
 5. ~~**PayFast subscriptions**~~ — Free (10 products) → Pro R199/mo (unlimited). Billing page + ITN webhook.
 6. ~~**Rate limiting**~~ — In-memory sliding window on catalog (60/min) + API (30/min) routes.
 
-### 🟡 Tier 3 — Growth & Competitive Moat (Next)
+### ✅ Tier 3 — SEO, Admin & Compliance — COMPLETE
 
-7. **WhatsApp Business API** — Automated order confirmations + delivery updates.
-8. **Seller verification admin flow** — Trust is everything in SA wholesale. Admin dashboard for `isVerified` approval.
-9. **SEO + OG images** — Dynamic OG images via `ImageResponse`, structured data (JSON-LD), sitemap.xml.
-10. **POPIA compliance** — Privacy policy page, data deletion flow, consent management.
+7. ~~**SEO + OG images**~~ — Dynamic OG images (Edge), JSON-LD structured data, sitemap.xml, robots.txt.
+8. ~~**Seller verification admin flow**~~ — Platform admin dashboard with verify/unverify/activate/deactivate.
+9. ~~**POPIA compliance**~~ — Privacy policy, terms of service, cookie consent banner.
+
+### 🟡 Tier 4 — Advanced Features (Future)
+
+10. **WhatsApp Business API** — Automated order confirmations + delivery updates.
+11. **Advanced admin** — Financial reports, revenue tracking, seller analytics.
+12. **Multi-shop support** — One user managing multiple shops.
+13. **Buyer accounts** — Order history, favourites, saved carts.

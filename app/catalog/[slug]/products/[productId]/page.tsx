@@ -21,6 +21,7 @@ import type { Metadata } from "next";
 import { AddToCart } from "@/components/catalog/add-to-cart";
 import { ProductImageGallery } from "@/components/catalog/product-image-gallery";
 import { ShareProduct } from "@/components/catalog/share-product";
+import { generateProductJsonLd } from "@/lib/seo/json-ld";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -41,6 +42,13 @@ export async function generateMetadata({
   const prices = product.variants.map((v) => v.priceInCents);
   const minPrice = prices.length > 0 ? formatZAR(Math.min(...prices)) : "";
 
+  const ogUrl = new URL("/api/og", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+  ogUrl.searchParams.set("type", "product");
+  ogUrl.searchParams.set("name", product.name);
+  ogUrl.searchParams.set("shopName", shop.name);
+  if (minPrice) ogUrl.searchParams.set("price", `From ${minPrice}`);
+  if (product.images[0]?.url) ogUrl.searchParams.set("image", product.images[0].url);
+
   return {
     title: `${product.name} — ${shop.name}`,
     description: product.description || `${product.name} from ${minPrice} at ${shop.name}`,
@@ -48,7 +56,13 @@ export async function generateMetadata({
       title: `${product.name} — ${shop.name}`,
       description: product.description || `${product.name} from ${minPrice}`,
       type: "website",
-      images: product.images[0]?.url ? [product.images[0].url] : [],
+      images: [{ url: ogUrl.toString(), width: 1200, height: 630, alt: product.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} — ${shop.name}`,
+      description: product.description || `${product.name} from ${minPrice}`,
+      images: [ogUrl.toString()],
     },
   };
 }
@@ -91,6 +105,14 @@ export default async function ProductDetailPage({
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* JSON-LD Structured Data for SEO */}
+      {generateProductJsonLd(shop, product).map((schema, i) => (
+        <script
+          key={`product-ld-${i}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
       {/* ── Back Link ─────────────────────────────────────── */}
       <Link
         href={`/catalog/${slug}`}
