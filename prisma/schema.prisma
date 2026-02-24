@@ -28,7 +28,24 @@ model Shop {
   description String?                         // Optional shop description
   whatsappNumber String                       // Shop's WhatsApp number for orders (PII — POPIA)
   logoUrl     String?                         // Shop logo image URL (stored externally, not in DB)
+  bannerUrl   String?                         // Shop banner/cover image URL
   isActive    Boolean  @default(true)         // Soft-disable without deleting
+  isVerified  Boolean  @default(false)        // Admin-verified seller badge
+
+  // ── Location ─────────────────────────────────────────
+  address     String?                         // Street address (e.g. "Shop 42, Marble Tower")
+  city        String?                         // City (e.g. "Johannesburg")
+  province    String?                         // Province (e.g. "Gauteng")
+  latitude    Float?                          // GPS latitude for map pin
+  longitude   Float?                          // GPS longitude for map pin
+
+  // ── Profile ──────────────────────────────────────────
+  aboutText   String?                         // Extended about/bio for seller profile
+  businessHours String?                       // JSON string: {"mon":"08:00-17:00", ...}
+  instagram   String?                         // Instagram handle (without @)
+  facebook    String?                         // Facebook page URL or username
+  tiktok      String?                         // TikTok handle (without @)
+  website     String?                         // External website URL
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -80,6 +80,12 @@ export default async function DashboardLayout({
               Products
             </Link>
             <Link
+              href={`/dashboard/${slug}/settings`}
+              className="rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            >
+              Settings
+            </Link>
+            <Link
               href={`/catalog/${slug}`}
               className="rounded-md px-3 py-2 text-sm font-medium text-green-600 hover:bg-green-50 transition-colors"
               target="_blank"

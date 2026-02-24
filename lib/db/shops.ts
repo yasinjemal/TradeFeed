@@ -13,6 +13,7 @@
 
 import { db } from "@/lib/db";
 import type { ShopCreateInput } from "@/lib/validation/shop";
+import type { ShopSettingsInput } from "@/lib/validation/shop-settings";
 import { generateSlug, generateUniqueSlug } from "@/lib/utils/slug";
 
 // Infer the Shop type from Prisma's return types.
@@ -99,6 +100,48 @@ export async function createShop(
 export async function getShopBySlug(slug: string): Promise<ShopResult | null> {
   return db.shop.findUnique({
     where: { slug, isActive: true },
+  });
+}
+
+/**
+ * Update a shop's profile/settings.
+ *
+ * WHAT: Partial update of shop fields (name, location, hours, socials, etc.)
+ * WHY: Sellers need to fill in their profile progressively after creation.
+ *
+ * MULTI-TENANT: shopId required. Access control happens in the server action.
+ */
+export async function updateShopSettings(
+  shopId: string,
+  input: ShopSettingsInput,
+): Promise<ShopResult> {
+  return db.shop.update({
+    where: { id: shopId },
+    data: {
+      ...(input.name !== undefined && { name: input.name }),
+      ...(input.description !== undefined && {
+        description: input.description || null,
+      }),
+      ...(input.aboutText !== undefined && {
+        aboutText: input.aboutText || null,
+      }),
+      ...(input.address !== undefined && { address: input.address || null }),
+      ...(input.city !== undefined && { city: input.city || null }),
+      ...(input.province !== undefined && { province: input.province || null }),
+      ...(input.latitude !== undefined && { latitude: input.latitude ?? null }),
+      ...(input.longitude !== undefined && {
+        longitude: input.longitude ?? null,
+      }),
+      ...(input.businessHours !== undefined && {
+        businessHours: input.businessHours || null,
+      }),
+      ...(input.instagram !== undefined && {
+        instagram: input.instagram || null,
+      }),
+      ...(input.facebook !== undefined && { facebook: input.facebook || null }),
+      ...(input.tiktok !== undefined && { tiktok: input.tiktok || null }),
+      ...(input.website !== undefined && { website: input.website || null }),
+    },
   });
 }
 

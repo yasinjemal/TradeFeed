@@ -19,6 +19,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { AddToCart } from "@/components/catalog/add-to-cart";
 import { ProductImageGallery } from "@/components/catalog/product-image-gallery";
+import { ShareProduct } from "@/components/catalog/share-product";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -137,6 +138,16 @@ export default async function ProductDetailPage({
                 {product.description}
               </p>
             )}
+
+            {/* ── Share Buttons ─────────────────────────── */}
+            <div className="mt-3">
+              <ShareProduct
+                productName={product.name}
+                productUrl={`${process.env.NEXT_PUBLIC_BASE_URL ?? "https://tradefeed.co.za"}/catalog/${slug}/products/${product.id}`}
+                price={minPrice === maxPrice ? formatZAR(minPrice) : `${formatZAR(minPrice)} – ${formatZAR(maxPrice)}`}
+                shopName={shop.name}
+              />
+            </div>
           </div>
 
           {/* Price Range */}

@@ -98,16 +98,28 @@ export default async function CatalogLayout({
                   <h1 className="font-bold text-stone-900 truncate text-sm sm:text-base group-hover:text-emerald-700 transition-colors">
                     {shop.name}
                   </h1>
-                  {/* Verified-style dot */}
-                  <span className="flex-shrink-0 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center" title="Verified Seller">
-                    <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
+                  {/* Verified badge — only show if actually verified */}
+                  {shop.isVerified && (
+                    <span className="flex-shrink-0 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center" title="Verified Seller">
+                      <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                  )}
                 </div>
                 {shop.description && (
                   <p className="text-[11px] text-stone-400 truncate mt-0.5">
                     {shop.description}
+                  </p>
+                )}
+                {/* City badge */}
+                {shop.city && (
+                  <p className="text-[10px] text-stone-400 flex items-center gap-1 mt-0.5">
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
+                    {shop.city}{shop.province ? `, ${shop.province}` : ""}
                   </p>
                 )}
               </div>
@@ -144,6 +156,22 @@ export default async function CatalogLayout({
       {/* ── Footer ───────────────────────────────────────── */}
       <footer className="border-t border-stone-100 bg-white/80 backdrop-blur-sm mt-12">
         <div className="max-w-5xl mx-auto px-4 py-6">
+          {/* Trust indicators row */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mb-4 text-[11px] text-stone-400">
+            {shop.isVerified && (
+              <span className="inline-flex items-center gap-1 text-emerald-600 font-medium">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Verified Seller
+              </span>
+            )}
+            <span>
+              Member since {new Date(shop.createdAt).toLocaleDateString("en-ZA", { month: "short", year: "numeric" })}
+            </span>
+            <span>{shop._count.products} {shop._count.products === 1 ? "product" : "products"} listed</span>
+            {shop.city && <span>📍 {shop.city}</span>}
+          </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
             <p className="flex items-center gap-1.5">
               <span className="w-4 h-4 rounded bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">

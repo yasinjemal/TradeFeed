@@ -35,6 +35,30 @@ export async function getCatalogShop(slug: string) {
       description: true,
       whatsappNumber: true,
       logoUrl: true,
+      bannerUrl: true,
+      isVerified: true,
+      // Location
+      address: true,
+      city: true,
+      province: true,
+      latitude: true,
+      longitude: true,
+      // Profile
+      aboutText: true,
+      businessHours: true,
+      instagram: true,
+      facebook: true,
+      tiktok: true,
+      website: true,
+      // Trust
+      createdAt: true,
+      _count: {
+        select: {
+          products: {
+            where: { isActive: true },
+          },
+        },
+      },
     },
   });
 }
