@@ -19,6 +19,7 @@ import {
   type CreateOrderInput,
 } from "@/lib/db/orders";
 import { requireShopAccess } from "@/lib/auth";
+import { notifyNewOrder, checkAndNotifyLowStock } from "@/lib/notifications";
 import type { OrderStatus } from "@prisma/client";
 
 type ActionResult = {
@@ -78,7 +79,31 @@ export async function checkoutAction(
       whatsappMessage,
     });
 
-    // 3. Revalidate the catalog (stock counts changed)
+    // 3. Fire-and-forget notifications (don't block checkout)
+    notifyNewOrder({
+      orderNumber: order.orderNumber,
+      shopId,
+      buyerName: buyerName ?? null,
+      buyerPhone: buyerPhone ?? null,
+      totalCents: order.totalCents,
+      itemCount: order.itemCount,
+      items: order.items.map((i) => ({
+        productName: i.productName,
+        option1Label: i.option1Label,
+        option1Value: i.option1Value,
+        option2Label: i.option2Label,
+        option2Value: i.option2Value,
+        priceInCents: i.priceInCents,
+        quantity: i.quantity,
+      })),
+    }).catch(() => {});
+
+    checkAndNotifyLowStock(
+      shopId,
+      items.map((i) => i.variantId),
+    ).catch(() => {});
+
+    // 4. Revalidate the catalog (stock counts changed)
     revalidatePath(`/catalog/${shopSlug}`);
 
     return { success: true, orderNumber: order.orderNumber };

@@ -497,3 +497,86 @@ model WishlistItem {
   @@index([userId])
   @@index([shopId])
 }
+
+// ============================================================
+// REVIEW: Buyer reviews & ratings for products
+// Phase 10 — buyers can rate and review products after purchase.
+// Reviews require seller approval before they appear publicly.
+// ============================================================
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int                                   // 1-5 star rating
+  title       String?                               // Optional review title
+  comment     String?                               // Review text body
+
+  shopId      String                                // Tenant scope
+  productId   String                                // Which product was reviewed
+
+  // Buyer info (no account required — like orders)
+  buyerName   String                                // Reviewer display name
+  buyerEmail  String?                               // Optional email for follow-up
+
+  // Moderation
+  isApproved  Boolean  @default(false)              // Seller must approve before public display
+  isVerified  Boolean  @default(false)              // Whether buyer actually purchased
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([shopId])
+  @@index([productId, isApproved])
+  @@index([shopId, isApproved])
+}
+
+// ============================================================
+// NOTIFICATION PREFERENCE: Per-shop email notification settings
+// Controls which events trigger email notifications.
+// ============================================================
+model NotificationPreference {
+  id                    String  @id @default(cuid())
+  shopId                String  @unique              // One pref record per shop
+
+  // What to notify about
+  orderNotifications    Boolean @default(true)       // New order placed
+  lowStockAlerts        Boolean @default(true)       // Stock drops below threshold
+  reviewNotifications   Boolean @default(true)       // New review submitted
+
+  // Thresholds
+  lowStockThreshold     Int     @default(5)          // Alert when variant stock <= this
+
+  // Override email (defaults to shop owner's email if null)
+  notificationEmail     String?                      // Custom email for notifications
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([shopId])
+}
+
+// ============================================================
+// BULK IMPORT JOB: Track CSV import progress
+// Created when a seller uploads a CSV file for bulk product import.
+// ============================================================
+model BulkImportJob {
+  id            String           @id @default(cuid())
+  shopId        String
+  fileName      String                               // Original CSV filename
+  status        BulkImportStatus @default(PROCESSING)
+  totalRows     Int              @default(0)          // Total rows in CSV
+  successCount  Int              @default(0)          // Successfully imported
+  errorCount    Int              @default(0)          // Failed rows
+  errors        String?                               // JSON array of error details
+  completedAt   DateTime?                             // When processing finished
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([shopId])
+  @@index([shopId, status])
+}
+
+enum BulkImportStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}

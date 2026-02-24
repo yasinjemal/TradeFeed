@@ -14,6 +14,7 @@
 
 import { getCatalogProduct, getCatalogShop } from "@/lib/db/catalog";
 import { trackEvent } from "@/lib/db/analytics";
+import { getProductReviews, getReviewAggregation } from "@/lib/db/reviews";
 import { formatZAR } from "@/types";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -24,6 +25,7 @@ import { ShareProduct } from "@/components/catalog/share-product";
 import { generateProductJsonLd } from "@/lib/seo/json-ld";
 import { RecentlyViewedTracker } from "@/lib/recently-viewed/recently-viewed";
 import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
+import { ProductReviews } from "@/components/reviews/product-reviews";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -87,6 +89,12 @@ export default async function ProductDetailPage({
   const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
   const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+
+  // ── Fetch reviews in parallel ──────────────────────────
+  const [reviews, reviewAgg] = await Promise.all([
+    getProductReviews(productId),
+    getReviewAggregation(productId),
+  ]);
 
   // Group variants by size for structured display
   const uniqueSizes = Array.from(new Set(product.variants.map((v) => v.size)));
@@ -391,6 +399,17 @@ export default async function ProductDetailPage({
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── Product Reviews ─────────────────────────────── */}
+      <div className="mt-8">
+        <ProductReviews
+          shopId={shop.id}
+          shopSlug={slug}
+          productId={product.id}
+          reviews={reviews}
+          aggregation={reviewAgg}
+        />
       </div>
 
       {/* ── Recently Viewed ─────────────────────────────── */}

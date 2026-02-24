@@ -54,12 +54,20 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
             catalog
           </p>
         </div>
-        <Link
-          href={`/dashboard/${slug}/products/new`}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-300 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
-        >
-          + Add Product
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/dashboard/${slug}/products/import`}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50 transition"
+          >
+            📦 Bulk Import
+          </Link>
+          <Link
+            href={`/dashboard/${slug}/products/new`}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-300 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+          >
+            + Add Product
+          </Link>
+        </div>
       </div>
 
       {/* ── Empty State ─────────────────────────────────── */}
