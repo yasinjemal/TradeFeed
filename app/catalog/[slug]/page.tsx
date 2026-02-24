@@ -18,6 +18,7 @@ import {
 } from "@/lib/db/catalog";
 import { trackEvent } from "@/lib/db/analytics";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { ShopProfile } from "@/components/catalog/shop-profile";
 import { CatalogSearchFilter } from "@/components/catalog/catalog-search-filter";
 
@@ -106,6 +107,28 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
         shopId={shop.id}
         categories={categories}
       />
+
+      {/* ── Marketplace Cross-Link ────────────────────── */}
+      <div className="bg-gradient-to-r from-stone-50 to-emerald-50/30 rounded-2xl border border-stone-200/50 p-6 text-center">
+        <p className="text-stone-500 text-sm mb-1">
+          Want to see products from other sellers?
+        </p>
+        <Link
+          href="/marketplace"
+          className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-semibold text-sm transition-colors group"
+        >
+          Browse more on TradeFeed Marketplace
+          <svg
+            className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </Link>
+      </div>
     </div>
   );
 }

@@ -376,6 +376,28 @@ export default async function ProductDetailPage({
           )}
         </div>
       </div>
+
+      {/* ── Marketplace Cross-Link ─────────────────────── */}
+      <div className="mt-6 bg-gradient-to-r from-stone-50 to-emerald-50/30 rounded-2xl border border-stone-200/50 p-5 text-center">
+        <p className="text-stone-500 text-sm mb-2">
+          Looking for more products like this?
+        </p>
+        <Link
+          href={product.category ? `/marketplace?category=${encodeURIComponent(product.category.name.toLowerCase().replace(/\s+/g, "-"))}` : "/marketplace"}
+          className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-semibold text-sm transition-colors group"
+        >
+          Browse {product.category ? product.category.name : "all products"} on TradeFeed Marketplace
+          <svg
+            className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </Link>
+      </div>
     </div>
   );
 }

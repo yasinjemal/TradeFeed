@@ -99,12 +99,12 @@
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M4.1 | Marketplace OG image | Dynamic OG: "Browse 1,000+ products from SA sellers on TradeFeed" | ⬜ Todo | |
-| M4.2 | Category SEO pages | `/marketplace?category=hoodies` gets unique meta title: "Hoodies — TradeFeed Marketplace" | ⬜ Todo | Or `/marketplace/hoodies` with catch-all |
-| M4.3 | JSON-LD `ItemList` | Structured data for Google Shopping potential | ⬜ Todo | |
-| M4.4 | Sitemap entries | Add `/marketplace` + each category page to sitemap.ts | ⬜ Todo | |
+| M4.1 | Marketplace OG image | Dynamic OG: "Browse 1,000+ products from SA sellers on TradeFeed" | ✅ Done | type=marketplace in /api/og |
+| M4.2 | Category SEO pages | `/marketplace?category=hoodies` gets unique meta title: "Hoodies — TradeFeed Marketplace" | ✅ Done | generateMetadata() with dynamic titles, OG, Twitter cards |
+| M4.3 | JSON-LD `ItemList` | Structured data for Google Shopping potential | ✅ Done | ItemList + BreadcrumbList + WebPage schemas |
+| M4.4 | Sitemap entries | Add `/marketplace` + each category page to sitemap.ts | ✅ Done | Top-level + subcategory pages included |
 | M4.5 | Landing page "Browse" link | Add "Browse Marketplace" CTA to landing page navbar + hero | ✅ Done | Added in M3 — navbar + hero CTA |
-| M4.6 | Catalog cross-link | "More from this seller" + "Browse more on TradeFeed Marketplace" links on catalog pages | ⬜ Todo | |
+| M4.6 | Catalog cross-link | "More from this seller" + "Browse more on TradeFeed Marketplace" links on catalog pages | ✅ Done | Cross-links on catalog + product detail pages |
 
 ---
 

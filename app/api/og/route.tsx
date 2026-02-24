@@ -27,6 +27,10 @@ export async function GET(request: NextRequest) {
     return generateProductOG(searchParams);
   }
 
+  if (type === "marketplace") {
+    return generateMarketplaceOG(searchParams);
+  }
+
   return generateShopOG(searchParams);
 }
 
@@ -331,6 +335,177 @@ function generateProductOG(params: URLSearchParams) {
               Order on WhatsApp
             </span>
           </div>
+        </div>
+      </div>
+    ),
+    {
+      width: 1200,
+      height: 630,
+    }
+  );
+}
+
+// ── Marketplace OG Image ───────────────────────────────
+function generateMarketplaceOG(params: URLSearchParams) {
+  const category = params.get("category") || "";
+  const productCount = params.get("productCount") || "1,000+";
+  const sellerCount = params.get("sellerCount") || "";
+
+  const title = category
+    ? `${category} — TradeFeed Marketplace`
+    : "TradeFeed Marketplace";
+  const subtitle = category
+    ? `Browse ${productCount} ${category.toLowerCase()} products from SA sellers`
+    : `Browse ${productCount} products from South Africa's top sellers`;
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: "#1c1917",
+          padding: "60px",
+          fontFamily: "sans-serif",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Top gradient accent */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "6px",
+            background: "linear-gradient(90deg, #10b981, #059669, #047857)",
+            display: "flex",
+          }}
+        />
+
+        {/* Background decorative grid */}
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            right: "-40px",
+            display: "flex",
+            flexWrap: "wrap",
+            width: "400px",
+            gap: "12px",
+            opacity: 0.08,
+          }}
+        >
+          {Array.from({ length: 9 }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: "120px",
+                height: "120px",
+                borderRadius: "16px",
+                backgroundColor: "#10b981",
+                display: "flex",
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "48px" }}>
+          <div
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #10b981, #047857)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontSize: "24px",
+              fontWeight: 800,
+            }}
+          >
+            T
+          </div>
+          <span style={{ color: "#a8a29e", fontSize: "20px", fontWeight: 600 }}>
+            TradeFeed
+          </span>
+        </div>
+
+        {/* Title */}
+        <span
+          style={{
+            color: "white",
+            fontSize: "52px",
+            fontWeight: 800,
+            lineHeight: 1.2,
+            marginBottom: "20px",
+            maxWidth: "800px",
+          }}
+        >
+          {title}
+        </span>
+
+        {/* Subtitle */}
+        <p
+          style={{
+            color: "#a8a29e",
+            fontSize: "26px",
+            lineHeight: 1.5,
+            maxWidth: "700px",
+            marginBottom: "auto",
+          }}
+        >
+          {subtitle}
+        </p>
+
+        {/* Bottom stats bar */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "32px",
+            borderTop: "1px solid #292524",
+            paddingTop: "24px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div
+              style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                backgroundColor: "#10b981",
+                display: "flex",
+              }}
+            />
+            <span style={{ color: "#d6d3d1", fontSize: "18px" }}>
+              {productCount} products
+            </span>
+          </div>
+          {sellerCount && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  backgroundColor: "#059669",
+                  display: "flex",
+                }}
+              />
+              <span style={{ color: "#d6d3d1", fontSize: "18px" }}>
+                {sellerCount} sellers
+              </span>
+            </div>
+          )}
+          <span style={{ color: "#78716c", fontSize: "18px" }}>
+            South Africa&apos;s Wholesale Fashion Hub
+          </span>
         </div>
       </div>
     ),

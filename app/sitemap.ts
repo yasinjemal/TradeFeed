@@ -1,11 +1,13 @@
 // ============================================================
 // Dynamic Sitemap — /sitemap.xml
 // ============================================================
-// Generates a sitemap listing all active shops and their products
-// for search engine crawlers. Updates automatically.
+// Generates a sitemap listing all active shops, products,
+// marketplace pages, and category pages for search engine crawlers.
 //
 // URLS:
 //   - / (home)
+//   - /marketplace (marketplace hub)
+//   - /marketplace?category=[slug] (each category)
 //   - /catalog/[slug] (each active shop)
 //   - /catalog/[slug]/products/[id] (each active product)
 //   - /privacy, /terms (legal pages)
@@ -26,6 +28,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
+      url: `${APP_URL}/marketplace`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
       url: `${APP_URL}/privacy`,
       lastModified: new Date(),
       changeFrequency: "monthly",
@@ -38,6 +46,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
   ];
+
+  // ── Marketplace category pages ────────────────────────
+  const globalCategories = await db.globalCategory.findMany({
+    where: { parentId: null }, // Top-level categories only — subcategories are filtered via parent
+    select: { slug: true, updatedAt: true },
+  });
+
+  const categoryPages: MetadataRoute.Sitemap = globalCategories.map((cat) => ({
+    url: `${APP_URL}/marketplace?category=${cat.slug}`,
+    lastModified: cat.updatedAt,
+    changeFrequency: "daily" as const,
+    priority: 0.8,
+  }));
+
+  // Also include subcategories
+  const subCategories = await db.globalCategory.findMany({
+    where: { parentId: { not: null } },
+    select: { slug: true, updatedAt: true },
+  });
+
+  const subCategoryPages: MetadataRoute.Sitemap = subCategories.map((cat) => ({
+    url: `${APP_URL}/marketplace?category=${cat.slug}`,
+    lastModified: cat.updatedAt,
+    changeFrequency: "daily" as const,
+    priority: 0.7,
+  }));
 
   // ── Shop catalog pages ────────────────────────────────
   const shops = await db.shop.findMany({
@@ -76,5 +110,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...shopPages, ...productPages];
+  return [...staticPages, ...categoryPages, ...subCategoryPages, ...shopPages, ...productPages];
 }
