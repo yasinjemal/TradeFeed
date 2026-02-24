@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CookieConsent } from "@/components/cookie-consent";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -34,6 +35,21 @@ export default function RootLayout({
       <html lang="en">
         <body>
           {children}
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              style: {
+                background: "#1c1917",
+                color: "#fafaf9",
+                border: "none",
+                borderRadius: "12px",
+                fontSize: "13px",
+                padding: "12px 16px",
+              },
+            }}
+            expand={false}
+            richColors
+          />
           <CookieConsent />
         </body>
       </html>

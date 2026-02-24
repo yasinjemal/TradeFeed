@@ -21,6 +21,7 @@ import { FeaturedCarousel } from "./featured-carousel";
 import { FeaturedShopCard } from "./featured-shop-card";
 import { CategoryBar } from "./category-bar";
 import { MarketplaceFilterSheet } from "./marketplace-filter-sheet";
+import { BackToTop } from "@/components/ui/back-to-top";
 import {
   trackMarketplaceViewAction,
   trackPromotedImpressionsAction,
@@ -449,7 +450,7 @@ export function MarketplaceShell({
                       onClick={() => updateFilters({ page: String(currentPage + 1) })}
                       className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-all"
                     >
-                      Load More →
+                      Next Page →
                     </button>
                   )}
                 </div>
@@ -491,6 +492,7 @@ export function MarketplaceShell({
           setFilterOpen(false);
         }}
       />
+      <BackToTop />
     </main>
   );
 }

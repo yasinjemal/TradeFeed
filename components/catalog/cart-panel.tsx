@@ -164,7 +164,12 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       />
 
       {/* ── Panel ─────────────────────────────────────────── */}
-      <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+      <div
+        className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Shopping cart"
+      >
         {/* ── Header ──────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200">
           <div>
@@ -226,6 +231,23 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 key={item.variantId}
                 className="flex gap-3 p-3 rounded-xl bg-stone-50 border border-stone-100"
               >
+                {/* Thumbnail */}
+                <div className="w-12 h-12 rounded-lg bg-stone-200 overflow-hidden flex-shrink-0">
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.productName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-stone-300">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
                 {/* Item Details */}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-stone-900 text-sm truncate">
@@ -248,6 +270,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                         onClick={() =>
                           updateQuantity(item.variantId, item.quantity - 1)
                         }
+                        aria-label={`Decrease quantity of ${item.productName}`}
                         className="w-8 h-8 flex items-center justify-center text-stone-500 hover:bg-stone-50 transition-colors"
                       >
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -265,6 +288,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                           )
                         }
                         disabled={item.quantity >= item.maxStock}
+                        aria-label={`Increase quantity of ${item.productName}`}
                         className="w-8 h-8 flex items-center justify-center text-stone-500 hover:bg-stone-50 transition-colors disabled:text-stone-300"
                       >
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">

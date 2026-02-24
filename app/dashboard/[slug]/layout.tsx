@@ -12,6 +12,7 @@ import { notFound, redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { ShopSwitcher } from "@/components/dashboard/shop-switcher";
+import { DashboardMobileNav } from "@/components/dashboard/mobile-nav";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -49,8 +50,10 @@ export default async function DashboardLayout({
       {/* ── Top Nav ─────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          {/* Brand + Shop */}
-          <div className="flex items-center gap-3 min-w-0">
+          {/* Brand + Shop + Mobile Menu */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <DashboardMobileNav slug={slug} shopName={shop.name} />
+
             <Link
               href={`/dashboard/${slug}`}
               className="flex items-center gap-2 flex-shrink-0"

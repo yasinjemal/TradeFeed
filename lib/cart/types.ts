@@ -18,6 +18,7 @@ export interface CartItem {
   variantId: string;
   productId: string;
   productName: string;
+  imageUrl?: string;         // Product thumbnail for cart display
   size: string;              // option1 value (kept as "size" for DB compat)
   color: string | null;      // option2 value (kept as "color" for DB compat)
   option1Label: string;      // e.g. "Size", "Storage", "Weight"

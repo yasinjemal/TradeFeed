@@ -19,6 +19,7 @@
 import { useState, useCallback } from "react";
 import { useCart } from "@/lib/cart/cart-context";
 import { formatZAR } from "@/types";
+import { toast } from "sonner";
 
 interface Variant {
   id: string;
@@ -31,6 +32,7 @@ interface Variant {
 interface AddToCartProps {
   productId: string;
   productName: string;
+  imageUrl?: string;
   variants: Variant[];
   option1Label?: string;
   option2Label?: string;
@@ -39,6 +41,7 @@ interface AddToCartProps {
 export function AddToCart({
   productId,
   productName,
+  imageUrl,
   variants,
   option1Label = "Size",
   option2Label = "Color",
@@ -115,6 +118,7 @@ export function AddToCart({
       variantId: selectedVariant.id,
       productId,
       productName,
+      imageUrl,
       size: selectedVariant.size,
       color: selectedVariant.color,
       option1Label,
@@ -122,6 +126,12 @@ export function AddToCart({
       priceInCents: selectedVariant.priceInCents,
       maxStock: selectedVariant.stock,
     }, quantity);
+
+    // Show toast
+    toast.success(`${productName} added to cart`, {
+      description: `${quantity}× ${selectedVariant.size}${selectedVariant.color ? " / " + selectedVariant.color : ""} — ${formatZAR(selectedVariant.priceInCents * quantity)}`,
+      duration: 2500,
+    });
 
     // Show feedback
     setJustAdded(true);

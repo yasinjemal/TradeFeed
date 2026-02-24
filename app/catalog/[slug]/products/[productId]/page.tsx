@@ -344,6 +344,7 @@ export default async function ProductDetailPage({
               <AddToCart
                 productId={product.id}
                 productName={product.name}
+                imageUrl={product.images[0]?.url}
                 option1Label={option1Label}
                 option2Label={option2Label}
                 variants={product.variants.map((v) => ({

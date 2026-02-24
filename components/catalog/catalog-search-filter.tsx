@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import { WishlistHeart } from "./wishlist-heart";
 
@@ -42,8 +42,22 @@ export function CatalogSearchFilter({
   categories,
 }: CatalogSearchFilterProps) {
   const [search, setSearch] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sort, setSort] = useState<SortOption>("newest");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setInputValue(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setSearch(value), 300);
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    setInputValue("");
+    setSearch("");
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+  }, []);
 
   // ── Filter & Sort ───────────────────────────────────────
   const filtered = useMemo(() => {

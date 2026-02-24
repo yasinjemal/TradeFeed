@@ -49,7 +49,7 @@ export function WishlistPanel({ isOpen, onClose, shopSlug }: WishlistPanelProps)
       />
 
       {/* ── Panel ─────────────────────────────────────────── */}
-      <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+      <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col" role="dialog" aria-modal="true" aria-label="Favourites">
         {/* ── Header ──────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200">
           <div>
@@ -137,7 +137,7 @@ export function WishlistPanel({ isOpen, onClose, shopSlug }: WishlistPanelProps)
                 {/* Remove */}
                 <button
                   onClick={() => removeItem(item.productId)}
-                  className="self-start w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+                  className="self-start w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 sm:opacity-0 sm:group-hover:opacity-100"
                   title="Remove from favourites"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

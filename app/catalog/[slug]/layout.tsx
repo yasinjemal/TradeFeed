@@ -20,6 +20,7 @@ import { WishlistProvider } from "@/lib/wishlist/wishlist-context";
 import { CartButton } from "@/components/catalog/cart-button";
 import { WishlistButton } from "@/components/catalog/wishlist-button";
 import { generateShopJsonLd } from "@/lib/seo/json-ld";
+import { BackToTop } from "@/components/ui/back-to-top";
 
 interface CatalogLayoutProps {
   children: React.ReactNode;
@@ -234,6 +235,7 @@ export default async function CatalogLayout({
           </div>
         </div>
       </footer>
+      <BackToTop />
     </div>
     </WishlistProvider>
     </CartProvider>
