@@ -162,9 +162,18 @@ model Product {
   globalCategoryId String?                    // Platform-wide marketplace category
   globalCategory   GlobalCategory? @relation(fields: [globalCategoryId], references: [id], onDelete: SetNull)
 
+  // ── Dynamic Variant Labels ───────────────────────────
+  // What do the variant axes mean for THIS product?
+  // Clothing: "Size" / "Color" (default)
+  // Electronics: "Storage" / "Color"
+  // Food: "Weight" / "Flavor"
+  // Existing data defaults to "Size"/"Color" — zero migration risk.
+  option1Label  String  @default("Size")      // Label for variant.size column
+  option2Label  String  @default("Color")     // Label for variant.color column
+
   // Relations
   images      ProductImage[]                  // Product images (URLs only)
-  variants    ProductVariant[]                // Size/color variants with stock
+  variants    ProductVariant[]                // Product variants with stock
   promotedListings PromotedListing[]          // Marketplace promotions for this product
 
   createdAt   DateTime @default(now())

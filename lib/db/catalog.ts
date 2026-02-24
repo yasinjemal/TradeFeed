@@ -143,6 +143,8 @@ export async function getCatalogProduct(productId: string, shopId: string) {
       id: true,
       name: true,
       description: true,
+      option1Label: true,
+      option2Label: true,
       category: {
         select: {
           id: true,

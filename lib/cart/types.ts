@@ -5,21 +5,23 @@
 //
 // DESIGN:
 // - Cart is per-shop (scoped by shopSlug)
-// - Items keyed by variantId (unique size+color per product)
+// - Items keyed by variantId (unique per option1+option2 per product)
 // - Prices in cents (ZAR) — consistent with DB
 // - Quantities are positive integers
 // ============================================================
 
 /**
  * A single item in the cart.
- * Keyed by variantId — each size/color combo is a separate line item.
+ * Keyed by variantId — each option combo is a separate line item.
  */
 export interface CartItem {
   variantId: string;
   productId: string;
   productName: string;
-  size: string;
-  color: string | null;
+  size: string;              // option1 value (kept as "size" for DB compat)
+  color: string | null;      // option2 value (kept as "color" for DB compat)
+  option1Label: string;      // e.g. "Size", "Storage", "Weight"
+  option2Label: string;      // e.g. "Color", "Shade", "Flavor"
   priceInCents: number;
   quantity: number;
   maxStock: number; // Prevents over-ordering

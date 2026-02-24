@@ -2,7 +2,7 @@
 // Component — Variant List
 // ============================================================
 // Displays all variants for a product in a table.
-// Each row shows size, color, price, stock, and a delete button.
+// Column headers use dynamic labels (option1Label / option2Label).
 // ============================================================
 
 "use client";
@@ -26,9 +26,17 @@ interface VariantListProps {
   variants: Variant[];
   shopSlug: string;
   productId: string;
+  option1Label?: string;
+  option2Label?: string;
 }
 
-export function VariantList({ variants, shopSlug, productId }: VariantListProps) {
+export function VariantList({
+  variants,
+  shopSlug,
+  productId,
+  option1Label = "Size",
+  option2Label = "Color",
+}: VariantListProps) {
   const [isPending, startTransition] = useTransition();
 
   function handleDelete(variantId: string) {
@@ -45,7 +53,7 @@ export function VariantList({ variants, shopSlug, productId }: VariantListProps)
         <CardContent className="py-8 text-center">
           <div className="text-3xl mb-2">📏</div>
           <p className="text-sm text-muted-foreground">
-            No variants yet. Add sizes, colors, and pricing below.
+            No variants yet. Add {option1Label.toLowerCase()}s, {option2Label.toLowerCase()}s, and pricing below.
           </p>
         </CardContent>
       </Card>
@@ -64,8 +72,8 @@ export function VariantList({ variants, shopSlug, productId }: VariantListProps)
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left">
-                <th className="pb-2 font-medium">Size</th>
-                <th className="pb-2 font-medium">Color</th>
+                <th className="pb-2 font-medium">{option1Label}</th>
+                <th className="pb-2 font-medium">{option2Label}</th>
                 <th className="pb-2 font-medium">Price</th>
                 <th className="pb-2 font-medium">Stock</th>
                 <th className="pb-2 font-medium">SKU</th>

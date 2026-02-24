@@ -7,7 +7,7 @@
 // DESIGN:
 // - Slides in from the right (mobile-friendly)
 // - Backdrop blur overlay (feels premium)
-// - Each item: product name, size, color, price, qty stepper, remove
+// - Each item: product name, option1, option2, price, qty stepper, remove
 // - Footer: total + "Send Order on WhatsApp" button
 // - Clear cart option
 // - Closes on backdrop tap or X button
@@ -161,11 +161,11 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="inline-flex items-center px-2 py-0.5 rounded bg-stone-200 text-stone-700 text-xs font-medium">
-                      {item.size}
+                      {item.option1Label ?? "Size"}: {item.size}
                     </span>
                     {item.color && (
                       <span className="text-xs text-stone-500">
-                        {item.color}
+                        {item.option2Label ?? "Color"}: {item.color}
                       </span>
                     )}
                   </div>

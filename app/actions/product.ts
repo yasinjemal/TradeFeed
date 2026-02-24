@@ -112,6 +112,8 @@ export async function createProductAction(
       description: formData.get("description") as string,
       categoryId: (formData.get("categoryId") as string) || "",
       globalCategoryId: (formData.get("globalCategoryId") as string) || "",
+      option1Label: (formData.get("option1Label") as string) || "Size",
+      option2Label: (formData.get("option2Label") as string) || "Color",
       isActive: formData.get("isActive") === "on",
     };
 
@@ -159,6 +161,8 @@ export async function updateProductAction(
       description: formData.get("description") as string,
       categoryId: (formData.get("categoryId") as string) || "",
       globalCategoryId: (formData.get("globalCategoryId") as string) || "",
+      option1Label: (formData.get("option1Label") as string) || undefined,
+      option2Label: (formData.get("option2Label") as string) || undefined,
       isActive: formData.get("isActive") === "on",
     };
 
@@ -221,7 +225,7 @@ export async function deleteProductAction(
 // ============================================================
 
 /**
- * Add a variant (size+color+price+stock) to a product.
+ * Add a variant (option1+option2+price+stock) to a product.
  *
  * WHAT: Validates variant input → verifies shop access → creates variant.
  * WHY: Variants are the buyable unit. No variants = nothing to order.
@@ -272,7 +276,7 @@ export async function addVariantAction(
     ) {
       return {
         success: false,
-        error: "A variant with this size and color already exists.",
+        error: "A variant with these options already exists.",
       };
     }
     console.error("[addVariantAction] Error:", error);
@@ -310,10 +314,10 @@ export async function deleteVariantAction(
 // ── batchCreateVariantsAction ───────────────────────────────
 
 /**
- * Batch create variants from size × color combinations.
+ * Batch create variants from option1 × option2 combinations.
  *
- * WHAT: Smart variant creator calls this with arrays of sizes/colors.
- * WHY: Wholesalers need to create many size/color combos at once.
+ * WHAT: Smart variant creator calls this with arrays of option values.
+ * WHY: Wholesalers need to create many option combos at once.
  * Skips duplicates automatically.
  */
 export async function batchCreateVariantsAction(

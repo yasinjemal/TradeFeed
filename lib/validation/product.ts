@@ -50,6 +50,21 @@ export const productCreateSchema = z.object({
     .optional()
     .or(z.literal("")),
 
+  // Dynamic variant labels (Option C — additive columns)
+  option1Label: z
+    .string()
+    .trim()
+    .min(1, "Option 1 label is required")
+    .max(50, "Label must be under 50 characters")
+    .default("Size"),
+
+  option2Label: z
+    .string()
+    .trim()
+    .min(1, "Option 2 label is required")
+    .max(50, "Label must be under 50 characters")
+    .default("Color"),
+
   isActive: z.boolean().default(true),
 });
 
@@ -89,6 +104,20 @@ export const productUpdateSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
+
+  option1Label: z
+    .string()
+    .trim()
+    .min(1, "Option 1 label is required")
+    .max(50)
+    .optional(),
+
+  option2Label: z
+    .string()
+    .trim()
+    .min(1, "Option 2 label is required")
+    .max(50)
+    .optional(),
 
   isActive: z.boolean().optional(),
 });

@@ -158,7 +158,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             </div>
           </div>
           <p className="text-3xl font-bold text-stone-900">{stats.variantCount}</p>
-          <p className="text-sm text-stone-500 mt-0.5">Size/Color variants</p>
+          <p className="text-sm text-stone-500 mt-0.5">Product variants</p>
         </div>
 
         {/* Price Range */}

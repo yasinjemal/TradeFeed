@@ -1,7 +1,8 @@
 // ============================================================
 // Component — Add Variant Form
 // ============================================================
-// Form to add a size+color+price+stock variant to a product.
+// Form to add a variant (option1+option2+price+stock) to a product.
+// Labels are dynamic — read from product.option1Label / option2Label.
 // Inline form on the product detail page.
 //
 // PRICE UX: Seller types in Rands (e.g. "299.99").
@@ -20,9 +21,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface AddVariantFormProps {
   shopSlug: string;
   productId: string;
+  option1Label?: string;
+  option2Label?: string;
 }
 
-export function AddVariantForm({ shopSlug, productId }: AddVariantFormProps) {
+export function AddVariantForm({
+  shopSlug,
+  productId,
+  option1Label = "Size",
+  option2Label = "Color",
+}: AddVariantFormProps) {
   const boundAction = addVariantAction.bind(null, shopSlug, productId);
   const [state, formAction, isPending] = useActionState(boundAction, null);
 
@@ -48,13 +56,13 @@ export function AddVariantForm({ shopSlug, productId }: AddVariantFormProps) {
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {/* Size — Required */}
+            {/* Option 1 — Required */}
             <div className="space-y-2">
-              <Label htmlFor="size">Size *</Label>
+              <Label htmlFor="size">{option1Label} *</Label>
               <Input
                 id="size"
                 name="size"
-                placeholder="e.g. S, M, L, XL, 32"
+                placeholder={`e.g. ${option1Label === "Size" ? "S, M, L, XL, 32" : option1Label === "Storage" ? "64GB, 128GB, 256GB" : option1Label === "Weight" ? "250g, 500g, 1kg" : "Value"}`}
                 required
                 disabled={isPending}
               />
@@ -65,15 +73,15 @@ export function AddVariantForm({ shopSlug, productId }: AddVariantFormProps) {
               )}
             </div>
 
-            {/* Color — Optional */}
+            {/* Option 2 — Optional */}
             <div className="space-y-2">
               <Label htmlFor="color">
-                Color <span className="text-muted-foreground">(optional)</span>
+                {option2Label} <span className="text-muted-foreground">(optional)</span>
               </Label>
               <Input
                 id="color"
                 name="color"
-                placeholder="e.g. Red, Blue, Black"
+                placeholder={`e.g. ${option2Label === "Color" ? "Red, Blue, Black" : option2Label === "Shade" ? "Light, Medium, Dark" : option2Label === "Flavor" ? "Original, BBQ, Chilli" : "Value"}`}
                 disabled={isPending}
               />
               {state?.fieldErrors?.color && (

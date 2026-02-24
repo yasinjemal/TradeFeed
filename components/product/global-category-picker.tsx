@@ -17,6 +17,7 @@ interface GlobalCategoryPickerProps {
   productName?: string;
   suggestedSlug?: string | null;
   disabled?: boolean;
+  onCategoryChange?: (slug: string | null) => void;
 }
 
 export function GlobalCategoryPicker({
@@ -25,6 +26,7 @@ export function GlobalCategoryPicker({
   productName,
   suggestedSlug,
   disabled = false,
+  onCategoryChange,
 }: GlobalCategoryPickerProps) {
   const [value, setValue] = useState(defaultValue || "");
   const [showSuggestion, setShowSuggestion] = useState(false);
@@ -58,10 +60,22 @@ export function GlobalCategoryPicker({
     setShowSuggestion(false);
   }, [suggestedSlug, categories, value]);
 
+  // Helper: resolve category ID → slug for variant label lookup
+  const resolveSlug = (categoryId: string): string | null => {
+    for (const parent of categories) {
+      if (parent.id === categoryId) return parent.slug;
+      for (const child of parent.children) {
+        if (child.id === categoryId) return child.slug;
+      }
+    }
+    return null;
+  };
+
   const handleSuggestionAccept = () => {
     if (suggestedCategoryId) {
       setValue(suggestedCategoryId);
       setShowSuggestion(false);
+      onCategoryChange?.(resolveSlug(suggestedCategoryId));
     }
   };
 
@@ -104,7 +118,10 @@ export function GlobalCategoryPicker({
         id="globalCategoryId"
         name="globalCategoryId"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          setValue(e.target.value);
+          onCategoryChange?.(e.target.value ? resolveSlug(e.target.value) : null);
+        }}
         disabled={disabled}
         className="flex h-12 w-full rounded-xl border-2 border-stone-200 bg-white px-3 py-2 text-base text-stone-900 focus:border-emerald-400 focus:outline-none disabled:opacity-50"
       >

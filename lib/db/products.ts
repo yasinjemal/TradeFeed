@@ -34,6 +34,8 @@ export async function createProduct(
       shopId,
       categoryId: input.categoryId || null,
       globalCategoryId: input.globalCategoryId || null,
+      option1Label: input.option1Label ?? "Size",
+      option2Label: input.option2Label ?? "Color",
     },
     include: {
       variants: true,
@@ -137,6 +139,8 @@ export async function updateProduct(
       ...(input.globalCategoryId !== undefined && {
         globalCategoryId: input.globalCategoryId || null,
       }),
+      ...(input.option1Label !== undefined && { option1Label: input.option1Label }),
+      ...(input.option2Label !== undefined && { option2Label: input.option2Label }),
     },
     include: {
       variants: { orderBy: { createdAt: "asc" } },

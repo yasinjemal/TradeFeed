@@ -36,7 +36,7 @@ async function verifyProductOwnership(
 /**
  * Create a new variant for a product.
  *
- * WHAT: Adds a size+color+price+stock combination to a product.
+ * WHAT: Adds an option1+option2+price+stock combination to a product.
  * WHY: Variants are the buyable unit — what buyers actually order.
  *
  * MULTI-TENANT: Verifies product belongs to shop before creating.
@@ -106,8 +106,8 @@ export async function updateVariant(
 /**
  * Delete a variant.
  *
- * WHAT: Removes a size+color variant from a product.
- * WHY: Seller discontinues a specific size/color combo.
+ * WHAT: Removes a variant from a product.
+ * WHY: Seller discontinues a specific option combo.
  *
  * MULTI-TENANT: Verifies ownership before deletion.
  */

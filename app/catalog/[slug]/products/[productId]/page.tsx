@@ -6,8 +6,8 @@
 // DESIGN: Mobile-first, smooth, trust-building:
 // - Large product image with gallery dots
 // - Clear product name + description
-// - Variant table: size, color, price, stock
-// - AddToCart picker: size → color → quantity → add
+// - Variant table: option1, option2, price, stock
+// - AddToCart picker: option1 → option2 → quantity → add
 // - WhatsApp enquiry link (secondary, or primary when sold out)
 // - Back to catalog link
 // ============================================================
@@ -92,12 +92,16 @@ export default async function ProductDetailPage({
     new Set(product.variants.map((v) => v.color).filter(Boolean))
   ) as string[];
 
+  // Derive dynamic option labels (from product or defaults)
+  const option1Label = product.option1Label ?? "Size";
+  const option2Label = product.option2Label ?? "Color";
+
   // Build the WhatsApp enquiry message
   const waMessage = encodeURIComponent(
     `Hi! I'm interested in *${product.name}*\n\n` +
-      `Available sizes: ${uniqueSizes.join(", ")}\n` +
+      `Available ${option1Label.toLowerCase()}s: ${uniqueSizes.join(", ")}\n` +
       (uniqueColors.length > 0
-        ? `Colors: ${uniqueColors.join(", ")}\n`
+        ? `${option2Label}s: ${uniqueColors.join(", ")}\n`
         : "") +
       `\nPlease let me know availability and pricing. Thank you! 🙏`
   );
@@ -195,7 +199,7 @@ export default async function ProductDetailPage({
           {/* ── Available Sizes ────────────────────────── */}
           <div>
             <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5">
-              Available Sizes
+              Available {option1Label}s
             </h3>
             <div className="flex flex-wrap gap-2">
               {uniqueSizes.map((size) => {
@@ -228,7 +232,7 @@ export default async function ProductDetailPage({
           {uniqueColors.length > 0 && (
             <div>
               <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5">
-                Colors
+                {option2Label}s
               </h3>
               <div className="flex flex-wrap gap-2">
                 {uniqueColors.map((color) => (
@@ -260,11 +264,11 @@ export default async function ProductDetailPage({
                 <thead>
                   <tr className="text-left border-b border-stone-200/60">
                     <th className="px-4 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider">
-                      Size
+                      {option1Label}
                     </th>
                     {uniqueColors.length > 0 && (
                       <th className="px-4 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider">
-                        Color
+                        {option2Label}
                       </th>
                     )}
                     <th className="px-4 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider">
@@ -322,6 +326,8 @@ export default async function ProductDetailPage({
               <AddToCart
                 productId={product.id}
                 productName={product.name}
+                option1Label={option1Label}
+                option2Label={option2Label}
                 variants={product.variants.map((v) => ({
                   id: v.id,
                   size: v.size,

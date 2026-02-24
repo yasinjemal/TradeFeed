@@ -2,16 +2,16 @@
 // Component — Add to Cart
 // ============================================================
 // Interactive variant picker for the product detail page.
-// Buyer selects size → color (if applicable) → quantity → add.
+// Buyer selects option1 → option2 (if applicable) → quantity → add.
 //
 // DESIGN:
-// - Size pills: tap to select, shows which are in stock
-// - Color chips: appear after size selection, filtered to available
+// - Option1 pills: tap to select, shows which are in stock
+// - Option2 chips: appear after option1 selection, filtered to available
 // - Quantity stepper: +/- buttons, capped at stock
 // - Add button: green with satisfying feedback animation
 // - Shows selected variant price
 //
-// STATE FLOW: size → color → quantity → add to cart
+// STATE FLOW: option1 → option2 → quantity → add to cart
 // ============================================================
 
 "use client";
@@ -32,9 +32,17 @@ interface AddToCartProps {
   productId: string;
   productName: string;
   variants: Variant[];
+  option1Label?: string;
+  option2Label?: string;
 }
 
-export function AddToCart({ productId, productName, variants }: AddToCartProps) {
+export function AddToCart({
+  productId,
+  productName,
+  variants,
+  option1Label = "Size",
+  option2Label = "Color",
+}: AddToCartProps) {
   const { addItem } = useCart();
 
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -109,6 +117,8 @@ export function AddToCart({ productId, productName, variants }: AddToCartProps) 
       productName,
       size: selectedVariant.size,
       color: selectedVariant.color,
+      option1Label,
+      option2Label,
       priceInCents: selectedVariant.priceInCents,
       maxStock: selectedVariant.stock,
     }, quantity);
@@ -119,7 +129,7 @@ export function AddToCart({ productId, productName, variants }: AddToCartProps) 
 
     // Reset for next add
     setQuantity(1);
-  }, [selectedVariant, canAdd, addItem, productId, productName, quantity]);
+  }, [selectedVariant, canAdd, addItem, productId, productName, option1Label, option2Label, quantity]);
 
   // ── Check if a size has any stock ────────────────────────
   const sizeHasStock = (size: string): boolean =>
@@ -130,7 +140,7 @@ export function AddToCart({ productId, productName, variants }: AddToCartProps) 
       {/* ── Size Selector ───────────────────────────────── */}
       <div>
         <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5">
-          Select Size
+          Select {option1Label}
         </h3>
         <div className="flex flex-wrap gap-2">
           {uniqueSizes.map((size) => {
@@ -161,7 +171,7 @@ export function AddToCart({ productId, productName, variants }: AddToCartProps) 
       {selectedSize && availableColors.length > 0 && (
         <div className="animate-in fade-in slide-in-from-top-2 duration-200">
           <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5">
-            Select Color
+            Select {option2Label}
           </h3>
           <div className="flex flex-wrap gap-2">
             {availableColors.map((color) => {
@@ -274,12 +284,12 @@ export function AddToCart({ productId, productName, variants }: AddToCartProps) 
       {/* ── Prompt to select ────────────────────────────── */}
       {!selectedSize && (
         <p className="text-sm text-stone-400 text-center py-2">
-          ↑ Select a size to add to your order
+          ↑ Select a {option1Label.toLowerCase()} to add to your order
         </p>
       )}
       {selectedSize && availableColors.length > 0 && !selectedColor && (
         <p className="text-sm text-stone-400 text-center py-2">
-          ↑ Select a color to continue
+          ↑ Select a {option2Label.toLowerCase()} to continue
         </p>
       )}
     </div>

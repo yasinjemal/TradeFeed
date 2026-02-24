@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useActionState, useState, useMemo } from "react";
+import { useActionState, useState, useMemo, useEffect } from "react";
 import { createProductAction } from "@/app/actions/product";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { GlobalCategoryPicker } from "@/components/product/global-category-picker";
 import type { GlobalCategoryOption } from "@/lib/db/global-categories";
 import { suggestGlobalCategory } from "@/lib/db/global-categories";
+import { getVariantLabels } from "@/lib/config/category-variants";
 
 /* ── Product Type Tiles ─────────────────────────────────── */
 const PRODUCT_TYPES = [
@@ -53,9 +54,21 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
   const [state, formAction, isPending] = useActionState(boundAction, null);
   const [name, setName] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [option1Label, setOption1Label] = useState("Size");
+  const [option2Label, setOption2Label] = useState("Color");
+  const [selectedGlobalCategorySlug, setSelectedGlobalCategorySlug] = useState<string | null>(null);
 
   // M8.3: Auto-suggest global category based on product name
   const suggestedSlug = useMemo(() => suggestGlobalCategory(name), [name]);
+
+  // Auto-update variant labels when global category changes
+  useEffect(() => {
+    if (selectedGlobalCategorySlug) {
+      const labels = getVariantLabels(selectedGlobalCategorySlug);
+      setOption1Label(labels.option1Label);
+      setOption2Label(labels.option2Label);
+    }
+  }, [selectedGlobalCategorySlug]);
 
   const handleTypeSelect = (label: string) => {
     setSelectedType(label);
@@ -182,8 +195,52 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
               productName={name}
               suggestedSlug={suggestedSlug}
               disabled={isPending}
+              onCategoryChange={setSelectedGlobalCategorySlug}
             />
           )}
+
+          {/* Variant Labels (auto-set from category, editable) */}
+          <div className="space-y-2">
+            <details className="group">
+              <summary className="cursor-pointer text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors flex items-center gap-2">
+                <span className="transition-transform group-open:rotate-90">▶</span>
+                Variant Options: {option1Label} / {option2Label}
+              </summary>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="option1Label" className="text-xs text-stone-500">
+                    Option 1 Label
+                  </Label>
+                  <Input
+                    id="option1Label"
+                    name="option1Label"
+                    value={option1Label}
+                    onChange={(e) => setOption1Label(e.target.value)}
+                    placeholder="Size"
+                    disabled={isPending}
+                    className="h-9 text-sm rounded-lg"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="option2Label" className="text-xs text-stone-500">
+                    Option 2 Label
+                  </Label>
+                  <Input
+                    id="option2Label"
+                    name="option2Label"
+                    value={option2Label}
+                    onChange={(e) => setOption2Label(e.target.value)}
+                    placeholder="Color"
+                    disabled={isPending}
+                    className="h-9 text-sm rounded-lg"
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-stone-400 mt-1.5">
+                These labels define what your variant options mean (e.g. Size/Color for clothing, Storage/Color for phones)
+              </p>
+            </details>
+          </div>
 
           {/* Active Toggle */}
           <label className="flex items-center gap-3 cursor-pointer group">
@@ -227,7 +284,7 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
           </Button>
 
           <p className="text-xs text-center text-stone-400">
-            Next step: add photos and size/color variants
+            Next step: add photos and product variants
           </p>
         </form>
       </div>

@@ -3,7 +3,7 @@
 // ============================================================
 // The powerhouse product management page. Features:
 // - Image gallery with drag & drop upload
-// - Smart variant creator (click-to-select sizes/colors)
+// - Smart variant creator (click-to-select option1/option2 values)
 // - Variant card grid with visual stock indicators
 // - Collapsible manual add + danger zone
 // ============================================================
@@ -12,6 +12,7 @@ import { getProduct } from "@/lib/db/products";
 import { getShopBySlug } from "@/lib/db/shops";
 import { getCategories } from "@/lib/db/categories";
 import { getGlobalCategoryTree } from "@/lib/db/global-categories";
+import { getVariantPreset } from "@/lib/config/category-variants";
 import { requireShopAccess } from "@/lib/auth";
 import { formatZAR } from "@/types";
 import { notFound } from "next/navigation";
@@ -56,6 +57,11 @@ export default async function ProductDetailPage({
   ]);
 
   // ── Computed stats ───────────────────────────────────────
+  const option1Label = product.option1Label ?? "Size";
+  const option2Label = product.option2Label ?? "Color";
+  const globalSlug = product.globalCategory?.slug ?? null;
+  const preset = getVariantPreset(globalSlug);
+
   const prices = product.variants.map((v) => v.priceInCents);
   const minPrice = prices.length > 0 ? Math.min(...prices) : null;
   const maxPrice = prices.length > 0 ? Math.max(...prices) : null;
@@ -189,13 +195,13 @@ export default async function ProductDetailPage({
               </div>
             )}
             <div className="flex items-center justify-between text-sm">
-              <span className="text-stone-500">Unique sizes</span>
+              <span className="text-stone-500">Unique {option1Label.toLowerCase()}s</span>
               <span className="font-medium text-stone-700">
                 {new Set(product.variants.map((v) => v.size)).size}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-stone-500">Colors</span>
+              <span className="text-stone-500">{option2Label}s</span>
               <span className="font-medium text-stone-700">
                 {new Set(product.variants.map((v) => v.color).filter(Boolean))
                   .size || "—"}
@@ -222,6 +228,8 @@ export default async function ProductDetailPage({
               isActive: product.isActive,
               categoryId: product.categoryId,
               globalCategoryId: product.globalCategoryId,
+              option1Label,
+              option2Label,
             }}
             categories={categories.map((c) => ({ id: c.id, name: c.name }))}
             globalCategories={globalCategories}
@@ -236,6 +244,9 @@ export default async function ProductDetailPage({
       <SmartVariantCreator
         shopSlug={slug}
         productId={product.id}
+        option1Label={option1Label}
+        option2Label={option2Label}
+        preset={preset}
         existingVariants={product.variants.map((v) => ({
           size: v.size,
           color: v.color,
@@ -263,6 +274,8 @@ export default async function ProductDetailPage({
           }))}
           shopSlug={slug}
           productId={product.id}
+          option1Label={option1Label}
+          option2Label={option2Label}
         />
       </div>
 
@@ -273,7 +286,7 @@ export default async function ProductDetailPage({
           Add custom variant manually
         </summary>
         <div className="mt-3">
-          <AddVariantForm shopSlug={slug} productId={product.id} />
+          <AddVariantForm shopSlug={slug} productId={product.id} option1Label={option1Label} option2Label={option2Label} />
         </div>
       </details>
 

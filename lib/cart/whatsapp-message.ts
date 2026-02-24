@@ -11,12 +11,12 @@
 //      Size: M | Color: Red
 //      R 299.99
 //
-//   2× Basic T-Shirt
-//      Size: L
-//      R 199.98
+//   2× Wireless Earbuds
+//      Storage: 128GB | Color: Black
+//      R 499.98
 //
 //   ─────────────────
-//   *Total: R 499.97*
+//   *Total: R 999.97*
 //   Items: 3
 //
 //   Thank you! 🙏
@@ -50,9 +50,11 @@ export function buildWhatsAppMessage(items: CartItem[]): string {
   const lineItems = items
     .map((item) => {
       const priceDisplay = ((item.priceInCents * item.quantity) / 100).toFixed(2);
-      const details: string[] = [`Size: ${item.size}`];
+      const opt1Label = item.option1Label || "Size";
+      const opt2Label = item.option2Label || "Color";
+      const details: string[] = [`${opt1Label}: ${item.size}`];
       if (item.color) {
-        details.push(`Color: ${item.color}`);
+        details.push(`${opt2Label}: ${item.color}`);
       }
 
       return (

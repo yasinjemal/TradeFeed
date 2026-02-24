@@ -2,9 +2,10 @@
 // Component — Smart Variant Creator
 // ============================================================
 // Visual batch variant creator with:
-// - Pre-built size chips (Letters / Numbers / Shoes)
-// - Color swatches with hex preview
-// - Auto-generates all size × color combinations
+// - Dynamic option labels (Size/Color, Storage/Color, Weight/Flavor)
+// - Pre-built option1 chips (letters / numbers / shoes / custom)
+// - Option2 swatches (color hex preview when applicable)
+// - Auto-generates all option1 × option2 combinations
 // - Skips duplicates that already exist
 // - Price + stock for the whole batch
 // ============================================================
@@ -13,11 +14,16 @@
 
 import { useState, useTransition } from "react";
 import { batchCreateVariantsAction } from "@/app/actions/product";
+import type { VariantPreset } from "@/lib/config/category-variants";
+import { DEFAULT_VARIANT_PRESET } from "@/lib/config/category-variants";
 
 interface SmartVariantCreatorProps {
   shopSlug: string;
   productId: string;
   existingVariants: { size: string; color: string | null }[];
+  option1Label?: string;
+  option2Label?: string;
+  preset?: VariantPreset;
 }
 
 // ── Size Presets ────────────────────────────────────────────
@@ -69,12 +75,19 @@ export function SmartVariantCreator({
   shopSlug,
   productId,
   existingVariants,
+  option1Label = "Size",
+  option2Label = "Color",
+  preset = DEFAULT_VARIANT_PRESET,
 }: SmartVariantCreatorProps) {
-  const [sizeType, setSizeType] = useState<"letters" | "numbers" | "shoes">(
-    "letters"
-  );
-  const [selectedSizes, setSelectedSizes] = useState<Set<string>>(new Set());
-  const [selectedColors, setSelectedColors] = useState<Set<string>>(new Set());
+  // Use preset data for option1 tabs and option2 swatches
+  const option1PresetGroups = preset.option1Presets ?? [LETTER_SIZES, NUMBER_SIZES, SHOE_SIZES];
+  const option1PresetLabels = preset.option1PresetLabels ?? ["S / M / L", "28 – 44", "Shoes"];
+  const option2PresetValues = preset.option2Presets ?? COLORS;
+  const isOption2Color = option2Label.toLowerCase() === "color" || option2Label.toLowerCase() === "shade";
+
+  const [activeGroup, setActiveGroup] = useState(0);
+  const [selectedOption1s, setSelectedOption1s] = useState<Set<string>>(new Set());
+  const [selectedOption2s, setSelectedOption2s] = useState<Set<string>>(new Set());
   const [price, setPrice] = useState("299.99");
   const [stock, setStock] = useState("50");
   const [isPending, startTransition] = useTransition();
@@ -83,39 +96,34 @@ export function SmartVariantCreator({
     message: string;
   } | null>(null);
 
-  const sizes =
-    sizeType === "letters"
-      ? LETTER_SIZES
-      : sizeType === "numbers"
-        ? NUMBER_SIZES
-        : SHOE_SIZES;
+  const currentOption1Values = option1PresetGroups[activeGroup] ?? [];
 
   // ── Toggles ──────────────────────────────────────────────
 
-  const toggleSize = (size: string) => {
-    const next = new Set(selectedSizes);
-    next.has(size) ? next.delete(size) : next.add(size);
-    setSelectedSizes(next);
+  const toggleOption1 = (val: string) => {
+    const next = new Set(selectedOption1s);
+    next.has(val) ? next.delete(val) : next.add(val);
+    setSelectedOption1s(next);
     setResult(null);
   };
 
-  const toggleColor = (color: string) => {
-    const next = new Set(selectedColors);
-    next.has(color) ? next.delete(color) : next.add(color);
-    setSelectedColors(next);
+  const toggleOption2 = (val: string) => {
+    const next = new Set(selectedOption2s);
+    next.has(val) ? next.delete(val) : next.add(val);
+    setSelectedOption2s(next);
     setResult(null);
   };
 
-  const selectAllSizes = () => {
-    setSelectedSizes(new Set(sizes));
+  const selectAllOption1 = () => {
+    setSelectedOption1s(new Set(currentOption1Values));
     setResult(null);
   };
-  const clearSizes = () => {
-    setSelectedSizes(new Set());
+  const clearOption1 = () => {
+    setSelectedOption1s(new Set());
     setResult(null);
   };
-  const clearColors = () => {
-    setSelectedColors(new Set());
+  const clearOption2 = () => {
+    setSelectedOption2s(new Set());
     setResult(null);
   };
 
@@ -124,10 +132,10 @@ export function SmartVariantCreator({
   const existingSet = new Set(
     existingVariants.map((v) => `${v.size}|${v.color ?? ""}`)
   );
-  const colorsToUse =
-    selectedColors.size > 0 ? Array.from(selectedColors) : [""];
-  const newCombinations = Array.from(selectedSizes).flatMap((size) =>
-    colorsToUse.filter((color) => !existingSet.has(`${size}|${color}`))
+  const option2sToUse =
+    selectedOption2s.size > 0 ? Array.from(selectedOption2s) : [""];
+  const newCombinations = Array.from(selectedOption1s).flatMap((opt1) =>
+    option2sToUse.filter((opt2) => !existingSet.has(`${opt1}|${opt2}`))
   );
   const newCount = newCombinations.length;
 
@@ -144,8 +152,8 @@ export function SmartVariantCreator({
       const res = await batchCreateVariantsAction(
         shopSlug,
         productId,
-        Array.from(selectedSizes),
-        Array.from(selectedColors),
+        Array.from(selectedOption1s),
+        Array.from(selectedOption2s),
         priceInCents,
         stockNum
       );
@@ -154,8 +162,8 @@ export function SmartVariantCreator({
           success: true,
           message: `${newCount} variant${newCount > 1 ? "s" : ""} created!`,
         });
-        setSelectedSizes(new Set());
-        setSelectedColors(new Set());
+        setSelectedOption1s(new Set());
+        setSelectedOption2s(new Set());
       } else {
         setResult({ success: false, message: res.error || "Failed" });
       }
@@ -170,44 +178,42 @@ export function SmartVariantCreator({
           ✨ Quick Add Variants
         </h3>
         <p className="text-sm text-stone-500 mt-1">
-          Select sizes &amp; colors, set pricing — we generate all combinations
+          Select {option1Label.toLowerCase()}s &amp; {option2Label.toLowerCase()}s, set pricing — we generate all combinations
         </p>
       </div>
 
-      {/* ── Size Type Tabs ──────────────────────────────── */}
+      {/* ── Option 1 Tabs ──────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-medium text-stone-700">Sizes</label>
-          <div className="flex rounded-lg bg-stone-100 p-0.5">
-            {(["letters", "numbers", "shoes"] as const).map((type) => (
-              <button
-                key={type}
-                onClick={() => {
-                  setSizeType(type);
-                  setSelectedSizes(new Set());
-                  setResult(null);
-                }}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200
-                  ${sizeType === type ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-700"}`}
-              >
-                {type === "letters"
-                  ? "S / M / L"
-                  : type === "numbers"
-                    ? "28 – 44"
-                    : "Shoes"}
-              </button>
-            ))}
-          </div>
+          <label className="text-sm font-medium text-stone-700">{option1Label}s</label>
+          {option1PresetGroups.length > 1 && (
+            <div className="flex rounded-lg bg-stone-100 p-0.5">
+              {option1PresetLabels.map((label, idx) => (
+                <button
+                  key={label}
+                  onClick={() => {
+                    setActiveGroup(idx);
+                    setSelectedOption1s(new Set());
+                    setResult(null);
+                  }}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200
+                    ${activeGroup === idx ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-700"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Size Chips */}
+        {/* Option 1 Chips */}
         <div className="flex flex-wrap gap-2">
-          {sizes.map((size) => {
-            const selected = selectedSizes.has(size);
+          {currentOption1Values.map((val) => {
+            const selected = selectedOption1s.has(val);
             return (
               <button
-                key={size}
-                onClick={() => toggleSize(size)}
+                key={val}
+                onClick={() => toggleOption1(val)}
                 className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border-2
                   ${
                     selected
@@ -215,7 +221,7 @@ export function SmartVariantCreator({
                       : "bg-white border-stone-200 text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
                   }`}
               >
-                {size}
+                {val}
               </button>
             );
           })}
@@ -223,14 +229,14 @@ export function SmartVariantCreator({
 
         <div className="flex gap-2 mt-2">
           <button
-            onClick={selectAllSizes}
+            onClick={selectAllOption1}
             className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
           >
             Select All
           </button>
           <span className="text-stone-300">·</span>
           <button
-            onClick={clearSizes}
+            onClick={clearOption1}
             className="text-xs text-stone-500 hover:text-stone-700 font-medium"
           >
             Clear
@@ -238,55 +244,78 @@ export function SmartVariantCreator({
         </div>
       </div>
 
-      {/* ── Color Swatches ──────────────────────────────── */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-medium text-stone-700">
-            Colors{" "}
-            <span className="text-stone-400 font-normal">(optional)</span>
-          </label>
-          {selectedColors.size > 0 && (
-            <button
-              onClick={clearColors}
-              className="text-xs text-stone-500 hover:text-stone-700 font-medium"
-            >
-              Clear ({selectedColors.size})
-            </button>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2.5">
-          {COLORS.map(({ name, hex }) => {
-            const selected = selectedColors.has(name);
-            const isLight = LIGHT_COLORS.has(name);
-            return (
+      {/* ── Option 2 Swatches / Chips ──────────────────── */}
+      {option2PresetValues.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm font-medium text-stone-700">
+              {option2Label}s{" "}
+              <span className="text-stone-400 font-normal">(optional)</span>
+            </label>
+            {selectedOption2s.size > 0 && (
               <button
-                key={name}
-                onClick={() => toggleColor(name)}
-                title={name}
-                className={`group relative w-10 h-10 rounded-xl transition-all duration-200 border-2
-                  ${
-                    selected
-                      ? "scale-110 shadow-lg ring-2 ring-emerald-400 ring-offset-2 border-emerald-500"
-                      : `${isLight ? "border-stone-200" : "border-transparent"} hover:scale-105 hover:shadow-md`
-                  }`}
-                style={{ backgroundColor: hex }}
+                onClick={clearOption2}
+                className="text-xs text-stone-500 hover:text-stone-700 font-medium"
               >
-                {selected && (
-                  <span
-                    className={`absolute inset-0 flex items-center justify-center text-base font-bold ${isLight ? "text-stone-800" : "text-white"}`}
-                  >
-                    ✓
-                  </span>
-                )}
-                {/* Tooltip */}
-                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-stone-500 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none bg-white px-1.5 py-0.5 rounded shadow-sm border border-stone-100">
-                  {name}
-                </span>
+                Clear ({selectedOption2s.size})
               </button>
-            );
-          })}
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            {option2PresetValues.map((item) => {
+              const name = typeof item === "string" ? item : item.name;
+              const hex = typeof item === "string" ? null : item.hex;
+              const selected = selectedOption2s.has(name);
+              const isLight = LIGHT_COLORS.has(name);
+
+              // Color swatch mode (has hex)
+              if (hex && isOption2Color) {
+                return (
+                  <button
+                    key={name}
+                    onClick={() => toggleOption2(name)}
+                    title={name}
+                    className={`group relative w-10 h-10 rounded-xl transition-all duration-200 border-2
+                      ${
+                        selected
+                          ? "scale-110 shadow-lg ring-2 ring-emerald-400 ring-offset-2 border-emerald-500"
+                          : `${isLight ? "border-stone-200" : "border-transparent"} hover:scale-105 hover:shadow-md`
+                      }`}
+                    style={{ backgroundColor: hex }}
+                  >
+                    {selected && (
+                      <span
+                        className={`absolute inset-0 flex items-center justify-center text-base font-bold ${isLight ? "text-stone-800" : "text-white"}`}
+                      >
+                        ✓
+                      </span>
+                    )}
+                    <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-stone-500 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none bg-white px-1.5 py-0.5 rounded shadow-sm border border-stone-100">
+                      {name}
+                    </span>
+                  </button>
+                );
+              }
+
+              // Text chip mode (no hex or not a color field)
+              return (
+                <button
+                  key={name}
+                  onClick={() => toggleOption2(name)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border-2
+                    ${
+                      selected
+                        ? "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-200/60 scale-105"
+                        : "bg-white border-stone-200 text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+                    }`}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Price & Stock ───────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4">
@@ -346,8 +375,8 @@ export function SmartVariantCreator({
           ? "Creating variants..."
           : newCount > 0
             ? `✨ Generate ${newCount} Variant${newCount > 1 ? "s" : ""}`
-            : selectedSizes.size === 0
-              ? "Select sizes to get started"
+            : selectedOption1s.size === 0
+              ? `Select ${option1Label.toLowerCase()}s to get started`
               : "All combinations already exist"}
       </button>
 

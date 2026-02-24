@@ -30,6 +30,8 @@ interface EditProductFormProps {
     isActive: boolean;
     categoryId: string | null;
     globalCategoryId: string | null;
+    option1Label: string;
+    option2Label: string;
   };
   categories: Category[];
   globalCategories?: GlobalCategoryOption[];
@@ -168,6 +170,10 @@ export function EditProductForm({
             />
           </div>
         )}
+
+        {/* Variant Labels (preserved) */}
+        <input type="hidden" name="option1Label" value={product.option1Label} />
+        <input type="hidden" name="option2Label" value={product.option2Label} />
 
         {/* Active Toggle */}
         <label className="flex items-center gap-3 cursor-pointer group">

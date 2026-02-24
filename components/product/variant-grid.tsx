@@ -2,8 +2,8 @@
 // Component — Variant Grid
 // ============================================================
 // Modern card grid displaying all product variants.
-// Each card shows size, color dot, price, stock indicator.
-// Delete on hover with smooth animations.
+// Shows option1 value as heading, option2 with optional color dot.
+// Dynamic labels from product.option1Label / option2Label.
 // ============================================================
 
 "use client";
@@ -25,6 +25,8 @@ interface VariantGridProps {
   variants: Variant[];
   shopSlug: string;
   productId: string;
+  option1Label?: string;
+  option2Label?: string;
 }
 
 // ── Color hex map ──────────────────────────────────────────
@@ -95,6 +97,8 @@ export function VariantGrid({
   variants,
   shopSlug,
   productId,
+  option1Label = "Size",
+  option2Label = "Color",
 }: VariantGridProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -105,13 +109,16 @@ export function VariantGrid({
     });
   }
 
+  // Determine if option2 values look like colors (for dot display)
+  const isOption2Color = option2Label.toLowerCase() === "color" || option2Label.toLowerCase() === "shade";
+
   if (variants.length === 0) {
     return (
       <div className="rounded-2xl border-2 border-dashed border-stone-200 py-12 text-center">
         <div className="text-4xl mb-3">📏</div>
         <p className="text-sm font-medium text-stone-500">No variants yet</p>
         <p className="text-xs text-stone-400 mt-1">
-          Use the quick creator above to add sizes and colors
+          Use the quick creator above to add {option1Label.toLowerCase()}s and {option2Label.toLowerCase()}s
         </p>
       </div>
     );
@@ -145,23 +152,23 @@ export function VariantGrid({
               {v.size}
             </div>
 
-            {/* Color */}
+            {/* Option 2 */}
             {v.color ? (
               <div className="flex items-center gap-1.5 mt-1.5">
-                {colorHex ? (
+                {isOption2Color && colorHex ? (
                   <span
                     className={`w-3.5 h-3.5 rounded-full shrink-0 ${isLight ? "border border-stone-300" : ""}`}
                     style={{ backgroundColor: colorHex }}
                   />
-                ) : (
+                ) : isOption2Color ? (
                   <span className="w-3.5 h-3.5 rounded-full shrink-0 bg-stone-300" />
-                )}
+                ) : null}
                 <span className="text-xs text-stone-500 truncate">
                   {v.color}
                 </span>
               </div>
             ) : (
-              <div className="mt-1.5 text-xs text-stone-400">No color</div>
+              <div className="mt-1.5 text-xs text-stone-400">No {option2Label.toLowerCase()}</div>
             )}
 
             {/* Divider */}
