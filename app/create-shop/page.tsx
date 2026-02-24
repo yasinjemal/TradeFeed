@@ -52,7 +52,7 @@ export default function CreateShopPage() {
           </h1>
 
           <p className="mt-4 text-stone-400 text-base lg:text-lg max-w-md leading-relaxed">
-            Give your clothing business a professional storefront link. Share it on WhatsApp and let buyers browse, pick sizes, and order — all structured.
+            Give your business a professional storefront link. Share it on WhatsApp and let buyers browse, select options, and order — all structured.
           </p>
 
           {/* Feature checklist */}

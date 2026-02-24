@@ -97,11 +97,11 @@ export default async function HomePage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Built for South African clothing sellers
+            Built for South African sellers
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1]">
-            Structure Your Clothing Inventory.{" "}
+            Structure Your Product Inventory.{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-300">
               Replace WhatsApp Chaos.
             </span>
@@ -191,7 +191,7 @@ export default async function HomePage() {
                   <div className="flex-1 flex justify-center">
                     <div className="flex items-center gap-2 px-4 py-1 bg-stone-800/80 rounded-lg text-[11px] text-stone-500 font-mono">
                       <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                      tradefeed.co.za/catalog/jeppe-fashion-hub
+                      tradefeed.co.za/catalog/jeppe-wholesale-hub
                     </div>
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export default async function HomePage() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-stone-200 text-sm">Jeppe Fashion Hub</span>
+                          <span className="font-semibold text-stone-200 text-sm">Jeppe Wholesale Hub</span>
                           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium border border-emerald-500/20">✓ Verified</span>
                         </div>
                         <span className="text-[11px] text-stone-500">📍 Johannesburg, Gauteng · 48 products</span>
@@ -222,7 +222,7 @@ export default async function HomePage() {
 
                   {/* Category pills */}
                   <div className="flex gap-2 mb-4 overflow-hidden">
-                    {["All", "Hoodies", "Pants", "Tees", "Jackets", "Accessories"].map((cat, i) => (
+                    {["All", "Popular", "New Arrivals", "On Sale", "Trending", "Featured"].map((cat, i) => (
                       <span key={cat} className={`px-3 py-1 rounded-full text-[10px] font-medium whitespace-nowrap ${i === 0 ? "bg-emerald-600 text-white" : "bg-stone-800 text-stone-400 border border-stone-700/50"}`}>{cat}</span>
                     ))}
                   </div>
@@ -242,11 +242,11 @@ export default async function HomePage() {
                   <div className="grid grid-cols-3 gap-3">
                     {[
                       { name: "Oversized Hoodie", price: "R 280", badge: "BEST SELLER", badgeColor: "bg-amber-500", img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop&q=80", colors: ["bg-stone-800", "bg-amber-700", "bg-emerald-700"] },
-                      { name: "Cargo Pants", price: "R 320", badge: null, badgeColor: "", img: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=400&h=400&fit=crop&q=80", colors: ["bg-stone-800", "bg-stone-500"] },
-                      { name: "Graphic Tee Pack", price: "R 150", badge: "NEW", badgeColor: "bg-emerald-500", img: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400&h=400&fit=crop&q=80", colors: ["bg-white", "bg-stone-900", "bg-blue-700"] },
+                      { name: "Wireless Earbuds", price: "R 350", badge: "NEW", badgeColor: "bg-emerald-500", img: "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop&q=80", colors: ["bg-white", "bg-stone-900"] },
+                      { name: "Vitamin C Serum", price: "R 180", badge: null, badgeColor: "", img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop&q=80", colors: ["bg-amber-300", "bg-emerald-300"] },
                       { name: "Denim Jacket", price: "R 450", badge: null, badgeColor: "", img: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=400&h=400&fit=crop&q=80", colors: ["bg-blue-600", "bg-stone-700"] },
-                      { name: "Track Set", price: "R 380", badge: "HOT", badgeColor: "bg-red-500", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop&q=80", colors: ["bg-stone-900", "bg-red-700"] },
-                      { name: "Bucket Hat", price: "R 120", badge: null, badgeColor: "", img: "https://images.unsplash.com/photo-1588850561407-ed78c334e67a?w=400&h=400&fit=crop&q=80", colors: ["bg-stone-900", "bg-amber-600", "bg-emerald-700"] },
+                      { name: "Biltong Pack 500g", price: "R 120", badge: "HOT", badgeColor: "bg-red-500", img: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=400&fit=crop&q=80", colors: ["bg-amber-700", "bg-red-700"] },
+                      { name: "Phone Case", price: "R 95", badge: null, badgeColor: "", img: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=400&h=400&fit=crop&q=80", colors: ["bg-stone-900", "bg-blue-600", "bg-rose-500"] },
                     ].map((product) => (
                       <div key={product.name} className="group rounded-xl bg-stone-800/40 border border-stone-700/30 overflow-hidden hover:border-emerald-500/30 transition-all hover:shadow-lg hover:shadow-emerald-500/5">
                         <div className="aspect-square relative overflow-hidden">
@@ -303,7 +303,7 @@ export default async function HomePage() {
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-[8px]">JF</div>
                     <div>
-                      <p className="text-[9px] font-semibold text-stone-200">Jeppe Fashion Hub</p>
+                      <p className="text-[9px] font-semibold text-stone-200">Jeppe Wholesale Hub</p>
                       <p className="text-[7px] text-stone-500">48 products</p>
                     </div>
                   </div>
@@ -312,8 +312,8 @@ export default async function HomePage() {
                   <div className="grid grid-cols-2 gap-1.5">
                     {[
                       { img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&h=200&fit=crop&q=80", name: "Hoodie", price: "R 280" },
-                      { img: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=200&h=200&fit=crop&q=80", name: "Cargo", price: "R 320" },
-                      { img: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=200&h=200&fit=crop&q=80", name: "Tee Pack", price: "R 150" },
+                      { img: "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=200&h=200&fit=crop&q=80", name: "Earbuds", price: "R 350" },
+                      { img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop&q=80", name: "Serum", price: "R 180" },
                       { img: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=200&h=200&fit=crop&q=80", name: "Denim", price: "R 450" },
                     ].map((p) => (
                       <div key={p.name} className="rounded-lg overflow-hidden bg-stone-800/60">
@@ -349,7 +349,7 @@ export default async function HomePage() {
 
           {/* Caption */}
           <p className="text-center text-xs text-stone-500 mt-10 max-w-md mx-auto">
-            ↑ Your customers see a professional catalog — browse products, pick sizes, and order via WhatsApp. No app needed.
+            ↑ Your customers see a professional catalog — browse products, select options, and order via WhatsApp. No app needed.
           </p>
         </div>
       </section>
@@ -362,7 +362,7 @@ export default async function HomePage() {
               This Is What Your Orders Look Like
             </h2>
             <p className="mt-2 text-stone-400 text-sm">
-              No more &ldquo;what size?&rdquo; &ldquo;what color?&rdquo; back and forth. Clean, structured orders.
+              No more &ldquo;which one?&rdquo; &ldquo;is it available?&rdquo; back and forth. Clean, structured orders.
             </p>
           </div>
 
@@ -436,7 +436,7 @@ export default async function HomePage() {
               {
                 step: "1",
                 title: "Upload Products",
-                desc: "Add photos, prices, sizes, and colors. Drag & drop images — we compress and host them on a global CDN.",
+                desc: "Add photos, prices, and product options. Drag & drop images — we compress and host them on a global CDN.",
                 icon: (
                   <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
                 ),
@@ -452,7 +452,7 @@ export default async function HomePage() {
               {
                 step: "3",
                 title: "Get WhatsApp Orders",
-                desc: "Customers browse, pick sizes & quantities, and send you a clean structured order on WhatsApp. Done.",
+                desc: "Customers browse, select options & quantities, and send you a clean structured order on WhatsApp. Done.",
                 icon: (
                   <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
                 ),
@@ -489,7 +489,7 @@ export default async function HomePage() {
               Everything You Need to Sell Smarter
             </h2>
             <p className="mt-3 text-stone-400 text-lg">
-              Built specifically for how South African clothing sellers actually work.
+              Built specifically for how South African sellers actually work.
             </p>
           </div>
 
@@ -514,8 +514,8 @@ export default async function HomePage() {
                 iconColor: "text-emerald-400",
               },
               {
-                title: "Size & Color Variants",
-                desc: "Set up S/M/L/XL with different colors and stock levels. Customers pick exactly what they want.",
+                title: "Product Variants",
+                desc: "Set up size, color, storage, weight — any product option. Customers pick exactly what they want.",
                 icon: (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" /></svg>
                 ),
@@ -524,7 +524,7 @@ export default async function HomePage() {
               },
               {
                 title: "Structured Orders",
-                desc: "Customers add to cart with size + quantity. You get clean, organized WhatsApp orders.",
+                desc: "Customers add to cart with their chosen options. You get clean, organized WhatsApp orders.",
                 icon: (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
                 ),
@@ -602,7 +602,7 @@ export default async function HomePage() {
             Sellers Love TradeFeed
           </h2>
           <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">
-            Hear from fashion sellers who replaced WhatsApp chaos with a
+            Hear from sellers who replaced WhatsApp chaos with a
             proper catalog system.
           </p>
 
@@ -658,7 +658,7 @@ export default async function HomePage() {
           </div>
 
           <p className="mt-10 text-xs text-stone-600">
-            📍 Trusted by clothing sellers across Johannesburg, Durban, Cape Town, Pretoria, and beyond
+            📍 Trusted by sellers across Johannesburg, Durban, Cape Town, Pretoria, and beyond
           </p>
         </div>
       </section>

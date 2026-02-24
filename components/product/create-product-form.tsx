@@ -19,22 +19,27 @@ import { suggestGlobalCategory } from "@/lib/db/global-categories";
 
 /* ── Product Type Tiles ─────────────────────────────────── */
 const PRODUCT_TYPES = [
+  // Clothing
   { label: "T-Shirt", emoji: "👕" },
-  { label: "Polo Shirt", emoji: "👔" },
   { label: "Hoodie", emoji: "🧥" },
   { label: "Jacket", emoji: "🧥" },
   { label: "Jeans", emoji: "👖" },
-  { label: "Chinos", emoji: "👖" },
-  { label: "Shorts", emoji: "🩳" },
   { label: "Dress", emoji: "👗" },
-  { label: "Tracksuit", emoji: "🏃" },
-  { label: "Vest", emoji: "🦺" },
-  { label: "Cap", emoji: "🧢" },
   { label: "Sneakers", emoji: "👟" },
-  { label: "Formal Shirt", emoji: "👔" },
-  { label: "Blouse", emoji: "👚" },
-  { label: "Sweater", emoji: "🧶" },
-  { label: "Skirt", emoji: "👗" },
+  // Electronics
+  { label: "Phone", emoji: "📱" },
+  { label: "Earbuds", emoji: "🎧" },
+  { label: "Charger", emoji: "🔌" },
+  // Beauty
+  { label: "Skincare", emoji: "🧴" },
+  { label: "Fragrance", emoji: "🌸" },
+  // Food
+  { label: "Snack Pack", emoji: "🍿" },
+  { label: "Beverage", emoji: "🥤" },
+  // Home & General
+  { label: "Home Decor", emoji: "🏠" },
+  { label: "Accessory", emoji: "👜" },
+  { label: "Other", emoji: "📦" },
 ] as const;
 
 interface CreateProductFormProps {
@@ -111,7 +116,7 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
               name="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Black Oversized T-Shirt"
+              placeholder="e.g. Your Product Name"
               required
               minLength={2}
               maxLength={200}

@@ -189,8 +189,8 @@ export function generateMarketplaceJsonLd(
       ? `${categoryName} — TradeFeed Marketplace`
       : "TradeFeed Marketplace",
     description: categoryName
-      ? `Browse ${categoryName.toLowerCase()} from South Africa's top clothing sellers on TradeFeed.`
-      : "Discover products from South Africa's top clothing sellers on TradeFeed Marketplace.",
+      ? `Browse ${categoryName.toLowerCase()} from South Africa's top sellers on TradeFeed.`
+      : "Discover products from South Africa's top sellers on TradeFeed Marketplace.",
     url: pageUrl,
     numberOfItems: products.length,
     itemListElement: products.map((product, index) => ({
@@ -238,8 +238,8 @@ export function generateMarketplaceJsonLd(
       ? `${categoryName} — TradeFeed Marketplace`
       : "TradeFeed Marketplace",
     description: categoryName
-      ? `Shop ${categoryName.toLowerCase()} from SA's top clothing sellers on TradeFeed.`
-      : "South Africa's wholesale fashion marketplace. Browse products from top sellers.",
+      ? `Shop ${categoryName.toLowerCase()} from SA's top sellers on TradeFeed.`
+      : "South Africa's wholesale marketplace. Browse products from top sellers.",
     url: pageUrl,
     isPartOf: {
       "@type": "WebSite",

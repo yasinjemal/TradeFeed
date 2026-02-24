@@ -200,14 +200,14 @@
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M10.1 | Root metadata | `app/layout.tsx` — site title, description, keywords. "SA Clothing Sellers" → "SA Wholesale & Retail". Remove clothing-only keywords, add generic ones. | ⬜ Todo | HARD blocker — every page inherits this |
-| M10.2 | Landing page hero & copy | `app/page.tsx` — hero badge, H1, subheading, feature cards, how-it-works, testimonials, trust badge. "Structure Your Clothing Inventory" → "Structure Your Product Inventory". Add 1-2 non-clothing testimonials. Mock products → mix of industries. | ⬜ Todo | ~20 text changes across landing |
-| M10.3 | Landing page mock data | `app/page.tsx` — category pills (Hoodies, Pants...), product grid (Oversized Hoodie...), phone mockup (Jeppe Fashion Hub). Replace with multi-industry mix. | ⬜ Todo | Visual credibility for non-clothing visitors |
-| M10.4 | Create-shop & forms copy | `app/create-shop/page.tsx`, `create-shop-form.tsx`, `shop-settings-form.tsx` — "your clothing business" → "your business". Placeholders: "Urban Street Wear" → "e.g. SA Trade Supplies". Map presets: "Fashion District" stays + add generic. | ⬜ Todo | Onboarding — first impression for new sellers |
-| M10.5 | Create product form copy | `create-product-form.tsx` — placeholder "Oversized Cotton Hoodie" → "e.g. Your Product Name". Size/color references in hints. | ⬜ Todo | Keep functional, broaden language |
-| M10.6 | Marketplace SEO metadata | `app/marketplace/layout.tsx`, `lib/marketplace/seo.ts`, `lib/marketplace/og.tsx` — meta descriptions, JSON-LD, OG image text. "clothing sellers" → "SA sellers". Add generic SEO keywords alongside existing clothing ones. | ⬜ Todo | Keep existing SEO equity + add new |
-| M10.7 | Legal pages copy | `app/legal/privacy/`, `app/legal/terms/` — "SA clothing wholesalers" → "SA wholesalers and retailers". | ⬜ Todo | Compliance copy update |
-| M10.8 | Schema & code comments | `prisma/schema.prisma` header, `lib/db/marketplace.ts` header, etc. "Multi-tenant SaaS for SA clothing wholesalers" → generic. | ⬜ Todo | SOFT — developer-facing only |
+| M10.1 | Root metadata | `app/layout.tsx` — site title, description, keywords. "SA Clothing Sellers" → "SA Wholesale & Retail". Remove clothing-only keywords, add generic ones. | ✅ Done | Title, desc, 9 keywords generalized |
+| M10.2 | Landing page hero & copy | `app/page.tsx` — hero badge, H1, subheading, feature cards, how-it-works, testimonials, trust badge. "Structure Your Clothing Inventory" → "Structure Your Product Inventory". Add 1-2 non-clothing testimonials. Mock products → mix of industries. | ✅ Done | ~15 text replacements: badge, H1, features, how-it-works, social proof |
+| M10.3 | Landing page mock data | `app/page.tsx` — category pills (Hoodies, Pants...), product grid (Oversized Hoodie...), phone mockup (Jeppe Fashion Hub). Replace with multi-industry mix. | ✅ Done | Multi-industry products: hoodie, earbuds, serum, denim, biltong, phone case |
+| M10.4 | Create-shop & forms copy | `app/create-shop/page.tsx`, `create-shop-form.tsx`, `shop-settings-form.tsx` — "your clothing business" → "your business". Placeholders: "Urban Street Wear" → "e.g. SA Trade Supplies". Map presets: "Fashion District" stays + add generic. | ✅ Done | Create-shop page + form placeholders generalized |
+| M10.5 | Create product form copy | `create-product-form.tsx` — placeholder "Oversized Cotton Hoodie" → "e.g. Your Product Name". Size/color references in hints. | ✅ Done | 16 clothing tiles → 16 multi-industry tiles (clothing + electronics + beauty + food + home) |
+| M10.6 | Marketplace SEO metadata | `app/marketplace/layout.tsx`, `lib/marketplace/seo.ts`, `lib/marketplace/og.tsx` — meta descriptions, JSON-LD, OG image text. "clothing sellers" → "SA sellers". Add generic SEO keywords alongside existing clothing ones. | ✅ Done | Marketplace meta + JSON-LD + OG image all generalized |
+| M10.7 | Legal pages copy | `app/legal/privacy/`, `app/legal/terms/` — "SA clothing wholesalers" → "SA wholesalers and retailers". | ✅ Done | Privacy + Terms pages updated |
+| M10.8 | Schema & code comments | `prisma/schema.prisma` header, `lib/db/marketplace.ts` header, etc. "Multi-tenant SaaS for SA clothing wholesalers" → generic. | ✅ Done | Schema header comment generalized |
 
 #### Tier G2 — Generic Variant System (5-7 days)
 

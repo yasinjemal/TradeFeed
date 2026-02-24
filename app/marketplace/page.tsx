@@ -54,8 +54,8 @@ export async function generateMetadata({
     : "Marketplace — Browse SA's Best Products | TradeFeed";
 
   const description = categoryName
-    ? `Shop ${categoryName.toLowerCase()} from South Africa's top clothing sellers on TradeFeed. Wholesale & retail prices. Order via WhatsApp.`
-    : "Discover products from South Africa's top clothing sellers. Browse hoodies, sneakers, dresses, accessories and more. Wholesale & retail prices.";
+    ? `Shop ${categoryName.toLowerCase()} from South Africa's top sellers on TradeFeed. Wholesale & retail prices. Order via WhatsApp.`
+    : "Discover products from South Africa's top sellers. Browse thousands of products across all categories. Wholesale & retail prices.";
 
   // Build OG image URL
   const ogUrl = new URL("/api/og", APP_URL);
@@ -71,9 +71,9 @@ export async function generateMetadata({
     description,
     keywords: [
       "TradeFeed marketplace",
-      "South Africa clothing",
-      "wholesale fashion",
-      "buy clothing online SA",
+      "South Africa wholesale",
+      "SA marketplace",
+      "buy wholesale online SA",
       ...(categoryName ? [categoryName.toLowerCase(), `buy ${categoryName.toLowerCase()} SA`] : []),
     ],
     alternates: { canonical: canonicalUrl },

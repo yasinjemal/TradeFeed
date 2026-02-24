@@ -504,7 +504,7 @@ function generateMarketplaceOG(params: URLSearchParams) {
             </div>
           )}
           <span style={{ color: "#78716c", fontSize: "18px" }}>
-            South Africa&apos;s Wholesale Fashion Hub
+            South Africa&apos;s Wholesale Marketplace
           </span>
         </div>
       </div>

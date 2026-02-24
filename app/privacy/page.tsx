@@ -40,7 +40,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-stone-900">1. Introduction</h2>
             <p className="text-stone-600 leading-relaxed">
               TradeFeed (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) operates the TradeFeed platform
-              (tradefeed.co.za), a digital catalog service for South African clothing wholesalers and
+              (tradefeed.co.za), a digital catalog service for South African wholesalers and
               retailers. We are committed to protecting your personal information in compliance with
               the Protection of Personal Information Act, 2013 (POPIA) and other applicable South
               African legislation.

@@ -1,5 +1,5 @@
 // TradeFeed — Prisma Schema
-// Multi-tenant SaaS for SA clothing wholesalers
+// Multi-tenant SaaS for SA wholesalers & retailers
 // 
 // RULES:
 // - Every tenant-scoped model has a `shopId` field

@@ -4,17 +4,19 @@ import { CookieConsent } from "@/components/cookie-consent";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TradeFeed — Structured Clothing Catalogs for WhatsApp Sellers",
+  title: "TradeFeed — Structured Product Catalogs for WhatsApp Sellers",
   description:
-    "Upload products. Share your catalog link. Get organized orders via WhatsApp — no app download required. Built for South African clothing wholesalers & retailers.",
+    "Upload products. Share your catalog link. Get organized orders via WhatsApp — no app download required. Built for South African wholesalers & retailers.",
   keywords: [
     "WhatsApp catalog",
-    "clothing wholesale South Africa",
+    "wholesale South Africa",
     "digital catalog",
     "WhatsApp selling",
-    "Jeppe fashion",
+    "Jeppe wholesale",
     "SA wholesale",
-    "clothing inventory",
+    "product inventory",
+    "SA marketplace",
+    "buy online South Africa",
   ],
 };
 

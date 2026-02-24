@@ -3,7 +3,7 @@
 // ============================================================
 // Terms of service for TradeFeed platform.
 // Covers seller responsibilities, buyer guidelines, and
-// acceptable use for the SA wholesale clothing market.
+// acceptable use for the SA wholesale market.
 // ============================================================
 
 import type { Metadata } from "next";
@@ -50,7 +50,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-stone-900">2. Description of Service</h2>
             <p className="text-stone-600 leading-relaxed">
-              TradeFeed provides a digital catalog platform that enables South African clothing
+              TradeFeed provides a digital catalog platform that enables South African
               wholesalers (&ldquo;Sellers&rdquo;) to create online product catalogs and connect with
               retailers and buyers (&ldquo;Buyers&rdquo;) via WhatsApp. TradeFeed is a catalog and
               communication tool — we do not process orders, handle payments between buyers and

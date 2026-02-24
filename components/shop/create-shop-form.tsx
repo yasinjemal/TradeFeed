@@ -72,7 +72,7 @@ export function CreateShopForm() {
               id="name"
               name="name"
               type="text"
-              placeholder="e.g. Marble Tower Fashions"
+              placeholder="e.g. SA Trade Supplies"
               required
               minLength={2}
               maxLength={100}
@@ -160,7 +160,7 @@ export function CreateShopForm() {
           <textarea
             id="description"
             name="description"
-            placeholder="Tell buyers what you sell — e.g. Premium streetwear, hoodies, caps & sneakers. Jeppe, JHB."
+            placeholder="Tell buyers what you sell — e.g. Quality products at wholesale prices. Based in Jeppe, JHB."
             maxLength={500}
             rows={3}
             disabled={isPending}
