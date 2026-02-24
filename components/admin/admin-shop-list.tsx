@@ -18,6 +18,7 @@ import {
   unverifyShopAction,
   deactivateShopAction,
   reactivateShopAction,
+  toggleFeaturedShopAction,
 } from "@/app/actions/admin";
 
 interface AdminShop {
@@ -30,6 +31,7 @@ interface AdminShop {
   province: string | null;
   isActive: boolean;
   isVerified: boolean;
+  isFeaturedShop: boolean;
   logoUrl: string | null;
   createdAt: Date;
   _count: { products: number };
@@ -224,6 +226,11 @@ export function AdminShopList({
                           ✓ Verified
                         </span>
                       )}
+                      {shop.isFeaturedShop && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                          ⭐ Featured
+                        </span>
+                      )}
                       {!shop.isActive && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">
                           Inactive
@@ -277,6 +284,24 @@ export function AdminShopList({
                         Verify
                       </button>
                     )}
+
+                    {/* M7.2 — Featured toggle */}
+                    <button
+                      onClick={() =>
+                        handleAction(
+                          (id: string) => toggleFeaturedShopAction(id, !shop.isFeaturedShop),
+                          shop.id
+                        )
+                      }
+                      disabled={isPending}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all disabled:opacity-50 ${
+                        shop.isFeaturedShop
+                          ? "border-amber-700 text-amber-400 hover:text-stone-400 hover:border-stone-700"
+                          : "border-stone-700 text-stone-400 hover:text-amber-400 hover:border-amber-700"
+                      }`}
+                    >
+                      {shop.isFeaturedShop ? "Unfeature" : "Feature"}
+                    </button>
 
                     {/* Activate/Deactivate */}
                     {shop.isActive ? (

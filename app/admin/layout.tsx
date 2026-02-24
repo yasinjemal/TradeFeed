@@ -6,9 +6,10 @@
 // ============================================================
 
 import { isAdmin } from "@/lib/auth/admin";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import { AdminNav } from "@/components/admin/admin-nav";
 
 export default async function AdminLayout({
   children,
@@ -59,6 +60,9 @@ export default async function AdminLayout({
           </div>
         </div>
       </header>
+
+      {/* ── Admin Navigation ─────────────────────────────── */}
+      <AdminNav />
 
       {/* ── Main Content ─────────────────────────────────── */}
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-8">

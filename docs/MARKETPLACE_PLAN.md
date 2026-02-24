@@ -139,18 +139,18 @@
 
 ---
 
-### Phase M7 — Admin Marketplace Management
+### Phase M7 — Admin Marketplace Management ✅
 
 > Platform admin controls for marketplace and promotions.
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M7.1 | Admin global category CRUD | `/admin/categories` — create, edit, reorder, deactivate global categories. Tree view for parent/child. | ⬜ Todo | |
-| M7.2 | Admin featured shops | Toggle `isFeaturedShop` from admin shop list. Featured shops get free promotion on marketplace. | ⬜ Todo | Already have admin shop list |
-| M7.3 | Promotion revenue dashboard | Total promotion revenue: daily, weekly, monthly. Top spending sellers. Most promoted categories. | ⬜ Todo | |
-| M7.4 | Promotion moderation | Admin can cancel/pause a promotion if product violates guidelines. | ⬜ Todo | |
-| M7.5 | Marketplace analytics | Total marketplace views/day. Search terms (what are people looking for?). Category popularity. Geographic distribution. | ⬜ Todo | |
-| M7.6 | Content guidelines | Rules for what can be promoted. Automated check: product must have image, description, active variants. | ⬜ Todo | |
+| M7.1 | Admin global category CRUD | `/admin/categories` — create, edit, reorder, deactivate global categories. Tree view for parent/child. | ✅ Done | Full CRUD with modal form, slug auto-gen, reorder arrows, tree view |
+| M7.2 | Admin featured shops | Toggle `isFeaturedShop` from admin shop list. Featured shops get free promotion on marketplace. | ✅ Done | Feature/Unfeature button + ⭐ badge on shop cards |
+| M7.3 | Promotion revenue dashboard | Total promotion revenue: daily, weekly, monthly. Top spending sellers. Most promoted categories. | ✅ Done | `/admin/promotions` — 4 revenue cards, tier breakdown, top 8 spenders, category chart |
+| M7.4 | Promotion moderation | Admin can cancel/pause a promotion if product violates guidelines. | ✅ Done | Cancel button on active promotions, status filter tabs, inline guideline badges |
+| M7.5 | Marketplace analytics | Total marketplace views/day. Search terms (what are people looking for?). Category popularity. Geographic distribution. | ✅ Done | `/admin/analytics` — daily traffic chart, category popularity bars, province distribution, search terms placeholder |
+| M7.6 | Content guidelines | Rules for what can be promoted. Automated check: product must have image, description, active variants. | ✅ Done | Automated scan on `/admin/promotions`, red violation cards with per-issue badges + cancel action |
 
 ---
 
