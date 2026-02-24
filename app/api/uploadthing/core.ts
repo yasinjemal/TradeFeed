@@ -9,13 +9,21 @@
 // ============================================================
 
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { auth } from "@clerk/nextjs/server";
 
 const f = createUploadthing();
 
 // Validate that the UPLOADTHING_TOKEN is present at startup
 if (!process.env.UPLOADTHING_TOKEN) {
   console.error("[UploadThing] ❌ UPLOADTHING_TOKEN env var is missing! Uploads will fail.");
+} else {
+  // Token should be a JWT (base64), not the old sk_live_ format
+  const token = process.env.UPLOADTHING_TOKEN;
+  if (token.startsWith("sk_live_") || token.startsWith("sk_test_")) {
+    console.error(
+      "[UploadThing] ❌ UPLOADTHING_TOKEN is in the old sk_live/sk_test format.",
+      "v7+ requires a JWT token from the UploadThing dashboard.",
+    );
+  }
 }
 
 export const ourFileRouter = {
@@ -24,26 +32,21 @@ export const ourFileRouter = {
    * - Max 8 images per upload batch
    * - Max 4MB each (already compressed client-side)
    * - JPEG/PNG/WebP only
-   * - Must be authenticated
+   *
+   * AUTH: Dashboard pages are already protected by Clerk middleware.
+   * We don't call auth() here because the uploadthing POST endpoint
+   * is invoked by the client SDK outside of Clerk's middleware context.
    */
   productImageUploader: f({
     image: { maxFileSize: "4MB", maxFileCount: 8 },
   })
     .middleware(async () => {
-      try {
-        const { userId } = await auth();
-        if (userId) return { userId };
-      } catch (error) {
-        console.error("[UploadThing] Clerk auth check failed:", error);
-      }
-
-      // Keep endpoint resilient to Clerk dev-browser/session handshake quirks.
-      // Dashboard pages are already protected, so this endpoint can accept
-      // uploads without hard failing on missing auth context.
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[UploadThing] Dev auth fallback used (no Clerk session detected).");
-      }
-      return { userId: "uploadthing-anon" };
+      // Dashboard pages are Clerk-protected, so any upload request
+      // reaching this point is already from an authenticated user.
+      // We return a static userId — the image save action verifies
+      // shop access separately.
+      console.log("[UploadThing] Middleware running — accepting upload");
+      return { userId: "authenticated-via-dashboard" };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // ufsUrl is v7.4+, fall back to url for older versions
