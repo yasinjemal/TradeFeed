@@ -54,22 +54,22 @@
 
 ---
 
-### Phase M2 — Marketplace Data Layer
+### Phase M2 — Marketplace Data Layer ✅
 
 > Cross-shop queries, search, and ranking logic.
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M2.1 | `lib/db/marketplace.ts` | New data access file for all marketplace queries | ⬜ Todo | |
-| M2.2 | `getMarketplaceProducts()` | Cross-shop product query. Filters: globalCategory, priceRange, province/city, verifiedOnly, search text. Sorting: trending, newest, price asc/desc. Pagination: cursor-based or offset. Returns: product + first image + price range + shop name + shop location + isPromoted flag. | ⬜ Todo | Only active products from active shops |
-| M2.3 | `getPromotedProducts()` | Active promoted listings (not expired), ordered by tier (SPOTLIGHT > FEATURED > BOOST), then by recency. Includes product + shop info. | ⬜ Todo | |
-| M2.4 | `getGlobalCategories()` | All active global categories with product counts. Tree structure (parent + children). | ⬜ Todo | Cached aggressively |
-| M2.5 | `getTrendingProducts()` | Products with highest (PRODUCT_VIEW + WHATSAPP_CLICK) in last 7 days. Cross-shop. Top 20. | ⬜ Todo | |
-| M2.6 | `getFeaturedShops()` | Shops with `isFeaturedShop=true` OR shops with active SPOTLIGHT promotions. Includes product count + shop profile. | ⬜ Todo | |
-| M2.7 | `searchMarketplace()` | Full-text search across product names, descriptions, shop names, category names. PostgreSQL `ILIKE` or `tsvector` if needed. | ⬜ Todo | Start with ILIKE, upgrade to pg_trgm later |
-| M2.8 | `trackPromotedImpression()` | Increment `impressions` on PromotedListing. Batch-friendly (fire-and-forget). | ⬜ Todo | |
-| M2.9 | `trackPromotedClick()` | Increment `clicks` on PromotedListing + fire analytics event. | ⬜ Todo | |
-| M2.10 | Interleaving algorithm | Merge promoted + organic results. Pattern: positions 1-4 organic, position 5 promoted, 6-9 organic, position 10 promoted, repeating. Promoted items labeled "Sponsored". | ⬜ Todo | Pure application logic, not DB |
+| M2.1 | `lib/db/marketplace.ts` | New data access file for all marketplace queries | ✅ Done | 500+ lines, 10 exports |
+| M2.2 | `getMarketplaceProducts()` | Cross-shop product query. Filters: globalCategory, priceRange, province/city, verifiedOnly, search text. Sorting: trending, newest, price asc/desc. Pagination: cursor-based or offset. Returns: product + first image + price range + shop name + shop location + isPromoted flag. | ✅ Done | Offset pagination, ILIKE search |
+| M2.3 | `getPromotedProducts()` | Active promoted listings (not expired), ordered by tier (SPOTLIGHT > FEATURED > BOOST), then by recency. Includes product + shop info. | ✅ Done | Tier desc + startsAt desc |
+| M2.4 | `getGlobalCategories()` | All active global categories with product counts. Tree structure (parent + children). | ✅ Done | Tree build + rolled-up counts |
+| M2.5 | `getTrendingProducts()` | Products with highest (PRODUCT_VIEW + WHATSAPP_CLICK) in last 7 days. Cross-shop. Top 20. | ✅ Done | Also includes MARKETPLACE_CLICK |
+| M2.6 | `getFeaturedShops()` | Shops with `isFeaturedShop=true` OR shops with active SPOTLIGHT promotions. Includes product count + shop profile. | ✅ Done | OR query on isFeaturedShop + spotlight |
+| M2.7 | `searchMarketplace()` | Full-text search across product names, descriptions, shop names, category names. PostgreSQL `ILIKE` or `tsvector` if needed. | ✅ Done | V1: ILIKE via getMarketplaceProducts |
+| M2.8 | `trackPromotedImpressions()` | Increment `impressions` on PromotedListing. Batch-friendly (fire-and-forget). | ✅ Done | updateMany with ID array |
+| M2.9 | `trackPromotedClick()` | Increment `clicks` on PromotedListing + fire analytics event. | ✅ Done | Parallel: increment + PROMOTED_CLICK event |
+| M2.10 | Interleaving algorithm | Merge promoted + organic results. Pattern: positions 1-4 organic, position 5 promoted, 6-9 organic, position 10 promoted, repeating. Promoted items labeled "Sponsored". | ✅ Done | Deduplicates, fills remaining slots |
 
 ---
 
