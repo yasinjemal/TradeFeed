@@ -199,3 +199,63 @@ export async function getShopsForUser(userId: string) {
     role: su.role,
   }));
 }
+
+/**
+ * Get aggregated dashboard stats for a shop.
+ *
+ * WHAT: Single query batch for overview metrics.
+ * WHY: Dashboard needs product count, stock totals, price range, profile status.
+ */
+export async function getDashboardStats(shopId: string) {
+  const [
+    productCount,
+    activeProductCount,
+    variantAgg,
+    recentProducts,
+    outOfStockCount,
+  ] = await Promise.all([
+    // Total products
+    db.product.count({ where: { shopId } }),
+    // Active products
+    db.product.count({ where: { shopId, isActive: true } }),
+    // Variant aggregates: total stock, price range
+    db.productVariant.aggregate({
+      where: { product: { shopId } },
+      _sum: { stock: true },
+      _min: { priceInCents: true },
+      _max: { priceInCents: true },
+      _count: true,
+    }),
+    // 5 most recent products with primary image
+    db.product.findMany({
+      where: { shopId },
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        isActive: true,
+        createdAt: true,
+        images: { take: 1, orderBy: { position: "asc" }, select: { url: true } },
+        variants: { select: { stock: true, priceInCents: true } },
+        category: { select: { name: true } },
+      },
+    }),
+    // Out of stock variants
+    db.productVariant.count({
+      where: { product: { shopId }, stock: 0 },
+    }),
+  ]);
+
+  return {
+    productCount,
+    activeProductCount,
+    inactiveProductCount: productCount - activeProductCount,
+    variantCount: variantAgg._count,
+    totalStock: variantAgg._sum.stock ?? 0,
+    minPrice: variantAgg._min.priceInCents,
+    maxPrice: variantAgg._max.priceInCents,
+    outOfStockCount,
+    recentProducts,
+  };
+}
