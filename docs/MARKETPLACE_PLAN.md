@@ -35,22 +35,22 @@
 
 ## 🗂️ Feature Phases
 
-### Phase M1 — Schema & Global Categories
+### Phase M1 — Schema & Global Categories ✅
 
 > Database changes and platform-wide category system.
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M1.1 | `GlobalCategory` model | Platform-wide categories (not per-shop). Fields: `id`, `name`, `slug`, `icon`, `description`, `displayOrder`, `parentId` (self-ref for subcategories), `imageUrl`, `isActive`, `createdAt` | ⬜ Todo | |
-| M1.2 | Seed initial categories | Clothing-focused but named generically. Top-level: Men's, Women's, Unisex, Kids, Accessories. Sub-categories: Hoodies, T-Shirts, Jackets, Pants, Dresses, Sneakers, Caps, Bags, etc. | ⬜ Todo | Keep names general — "Tops" not "Blouses" |
-| M1.3 | `globalCategoryId` on Product | Optional FK from Product → GlobalCategory. Sellers map their products to a platform category for marketplace discovery. | ⬜ Todo | Nullable — not required |
-| M1.4 | `PromotedListing` model | Tracks promoted products. Fields: `id`, `shopId`, `productId`, `tier` (enum), `startsAt`, `expiresAt`, `impressions`, `clicks`, `status` (ACTIVE/EXPIRED/CANCELLED), `amountPaidCents`, `payfastPaymentId`, `createdAt` | ⬜ Todo | |
-| M1.5 | `PromotionTier` enum | `BOOST` (R49/wk), `FEATURED` (R149/wk), `SPOTLIGHT` (R399/wk) | ⬜ Todo | Pricing adjustable later |
-| M1.6 | `PromotedListingStatus` enum | `ACTIVE`, `EXPIRED`, `CANCELLED` | ⬜ Todo | |
-| M1.7 | New `EventType` values | Add to existing enum: `MARKETPLACE_VIEW`, `MARKETPLACE_CLICK`, `PROMOTED_IMPRESSION`, `PROMOTED_CLICK` | ⬜ Todo | Extends current analytics |
-| M1.8 | `isFeaturedShop` on Shop | Boolean flag — admin can feature a shop on marketplace. Free promotion for early adopters / strategic partners. | ⬜ Todo | |
-| M1.9 | Prisma migration | Run `prisma migrate dev --name marketplace-schema` | ⬜ Todo | |
-| M1.10 | Global category seed script | `scripts/seed-global-categories.ts` — idempotent upsert of all categories + subcategories | ⬜ Todo | `npm run seed:categories` |
+| M1.1 | `GlobalCategory` model | Platform-wide categories (not per-shop). Fields: `id`, `name`, `slug`, `icon`, `description`, `displayOrder`, `parentId` (self-ref for subcategories), `imageUrl`, `isActive`, `createdAt` | ✅ Done | Self-referential tree |
+| M1.2 | Seed initial categories | Clothing-focused but named generically. Top-level: Men's, Women's, Unisex, Kids, Footwear, Accessories, Formal & Traditional. 34 subcategories. | ✅ Done | 7 top-level + 34 sub = 41 total |
+| M1.3 | `globalCategoryId` on Product | Optional FK from Product → GlobalCategory. Sellers map their products to a platform category for marketplace discovery. | ✅ Done | Nullable — not required |
+| M1.4 | `PromotedListing` model | Tracks promoted products. Fields: `id`, `shopId`, `productId`, `tier` (enum), `startsAt`, `expiresAt`, `impressions`, `clicks`, `status` (ACTIVE/EXPIRED/CANCELLED), `amountPaidCents`, `payfastPaymentId`, `createdAt` | ✅ Done | Indexed on status+expiresAt, tier+status |
+| M1.5 | `PromotionTier` enum | `BOOST` (R49/wk), `FEATURED` (R149/wk), `SPOTLIGHT` (R399/wk) | ✅ Done | Pricing adjustable later |
+| M1.6 | `PromotedListingStatus` enum | `ACTIVE`, `EXPIRED`, `CANCELLED` | ✅ Done | |
+| M1.7 | New `EventType` values | Add to existing enum: `MARKETPLACE_VIEW`, `MARKETPLACE_CLICK`, `PROMOTED_IMPRESSION`, `PROMOTED_CLICK` | ✅ Done | Extends current analytics |
+| M1.8 | `isFeaturedShop` on Shop | Boolean flag — admin can feature a shop on marketplace. Free promotion for early adopters / strategic partners. | ✅ Done | Indexed |
+| M1.9 | Prisma migration | Applied via `prisma db push` (consistent with prior schema changes) | ✅ Done | Client regenerated |
+| M1.10 | Global category seed script | `scripts/seed-global-categories.ts` — idempotent upsert of all categories + subcategories | ✅ Done | `npm run seed:categories` |
 
 ---
 
