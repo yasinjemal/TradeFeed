@@ -186,16 +186,57 @@
 
 ### Phase M10 — Generalization (Beyond Clothing) 🌍
 
-> Expanding TradeFeed to support any product category.
+> Expand TradeFeed from clothing-only to multi-category: electronics, beauty, food, auto parts, home goods.
+> 95% of the platform is already industry-agnostic. The remaining 5% is variant labels, copy, categories, and presets.
+> Builds on research audit: `docs/GENERALIZATION_RESEARCH.md`
+>
+> **Strategy:** 3 tiers. G1 = copy (1-2 days), G2 = variant system (5-7 days), G3 = category expansion (3-4 days).
+> **Schema approach:** Option C (additive columns) — zero migration risk. Keep `size`/`color`, add `option1Label`/`option2Label` on Product.
+
+#### Tier G1 — Copy & Metadata Generalization (1-2 days)
+
+> Zero code logic changes. Broaden all clothing-specific language to inclusive copy.
+> Non-clothing sellers can sign up without feeling excluded.
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M10.1 | Add new top-level categories | Electronics, Beauty & Health, Home & Garden, Food & Beverages, Auto Parts, etc. | ⬜ Todo | **Don't rush** — only when demand exists |
-| M10.2 | Category-specific variant types | Clothing: size + color. Electronics: storage + color. Food: weight + flavor. Configurable per global category. | ⬜ Todo | Current size/color works for clothing. Abstract when needed. |
-| M10.3 | Industry-specific landing pages | `/marketplace/electronics`, `/marketplace/beauty` — each with unique hero, popular categories, featured sellers. | ⬜ Todo | |
-| M10.4 | Seller industry tag | Shop profile field: "What do you sell?" — Clothing, Electronics, Beauty, Mixed. Helps with marketplace filtering. | ⬜ Todo | |
-| M10.5 | Rename "clothing" references | Audit all copy/UI for clothing-specific language. Replace with generic terms. | ⬜ Todo | Landing page, onboarding, etc. |
-| M10.6 | Multi-category shop support | One shop can sell across categories (clothing + accessories + beauty). Products in different global categories. | ⬜ Todo | Already possible with current Product → GlobalCategory FK |
+| M10.1 | Root metadata | `app/layout.tsx` — site title, description, keywords. "SA Clothing Sellers" → "SA Wholesale & Retail". Remove clothing-only keywords, add generic ones. | ⬜ Todo | HARD blocker — every page inherits this |
+| M10.2 | Landing page hero & copy | `app/page.tsx` — hero badge, H1, subheading, feature cards, how-it-works, testimonials, trust badge. "Structure Your Clothing Inventory" → "Structure Your Product Inventory". Add 1-2 non-clothing testimonials. Mock products → mix of industries. | ⬜ Todo | ~20 text changes across landing |
+| M10.3 | Landing page mock data | `app/page.tsx` — category pills (Hoodies, Pants...), product grid (Oversized Hoodie...), phone mockup (Jeppe Fashion Hub). Replace with multi-industry mix. | ⬜ Todo | Visual credibility for non-clothing visitors |
+| M10.4 | Create-shop & forms copy | `app/create-shop/page.tsx`, `create-shop-form.tsx`, `shop-settings-form.tsx` — "your clothing business" → "your business". Placeholders: "Urban Street Wear" → "e.g. SA Trade Supplies". Map presets: "Fashion District" stays + add generic. | ⬜ Todo | Onboarding — first impression for new sellers |
+| M10.5 | Create product form copy | `create-product-form.tsx` — placeholder "Oversized Cotton Hoodie" → "e.g. Your Product Name". Size/color references in hints. | ⬜ Todo | Keep functional, broaden language |
+| M10.6 | Marketplace SEO metadata | `app/marketplace/layout.tsx`, `lib/marketplace/seo.ts`, `lib/marketplace/og.tsx` — meta descriptions, JSON-LD, OG image text. "clothing sellers" → "SA sellers". Add generic SEO keywords alongside existing clothing ones. | ⬜ Todo | Keep existing SEO equity + add new |
+| M10.7 | Legal pages copy | `app/legal/privacy/`, `app/legal/terms/` — "SA clothing wholesalers" → "SA wholesalers and retailers". | ⬜ Todo | Compliance copy update |
+| M10.8 | Schema & code comments | `prisma/schema.prisma` header, `lib/db/marketplace.ts` header, etc. "Multi-tenant SaaS for SA clothing wholesalers" → generic. | ⬜ Todo | SOFT — developer-facing only |
+
+#### Tier G2 — Generic Variant System (5-7 days)
+
+> The structural unlock. Makes the platform work for ANY product category.
+> Schema: additive columns on Product (`option1Label`, `option2Label`) — defaults to "Size"/"Color".
+> Variant creator: category-based presets (clothing=size/color, electronics=storage/color, food=weight/flavor, custom=seller-defined).
+> Existing clothing data untouched — zero migration risk.
+
+| # | Feature | Description | Status | Notes |
+|---|---------|-------------|--------|-------|
+| M10.9 | Schema: variant label columns | Add `option1Label String @default("Size")` and `option2Label String @default("Color")` to `Product` model. Migration: additive (no data change). All existing products auto-default to Size/Color. | ⬜ Todo | Option C from research — lowest risk |
+| M10.10 | Smart Variant Creator rework | `smart-variant-creator.tsx` — detect product's `option1Label`/`option2Label`. Show category-based presets: Clothing (S-3XL + colors), Electronics (32-512GB + colors), Beauty (50-200ml + shades), Food (250g-1kg + flavors), Custom (seller names attributes). Matrix generation logic unchanged — just labels swap. | ⬜ Todo | Biggest UI change — keep clothing preset as default |
+| M10.11 | Add Variant Form generalize | `add-variant-form.tsx` — field labels read from product's `option1Label`/`option2Label` instead of hardcoded "Size"/"Color". | ⬜ Todo | |
+| M10.12 | Variant List/Grid generalize | `variant-list.tsx`, `variant-grid.tsx` — table headers read from product's option labels. Interface typed to `option1`/`option2` or kept as `size`/`color` with display labels from product. | ⬜ Todo | |
+| M10.13 | Catalog product page display | `app/catalog/[slug]/products/[id]/page.tsx` — "Available Sizes" → "Available {option1Label}". "Colors" → "{option2Label}". Size chips + color swatches adapt to any attribute. | ⬜ Todo | Customer-facing — must look polished |
+| M10.14 | Product actions refactor | `app/actions/product.ts` — `createProduct` accepts `option1Label`/`option2Label`. `generateVariantMatrix` stays same logic but writes labels. Server action reads labels for display. | ⬜ Todo | |
+| M10.15 | Product type tiles dynamic | `create-product-form.tsx` — 16 hardcoded clothing tiles → dynamic per GlobalCategory. Clothing sellers still see Hoodie/Dress/Jeans. Electronics sellers see Phone/Laptop/Tablet. Fallback: generic list. Load from category presets config. | ⬜ Todo | |
+| M10.16 | Category → variant preset map | New config: `lib/config/category-presets.ts` — maps GlobalCategory slugs to default option labels + preset values. `"mens-clothing" → { option1: "Size", option2: "Color", presets1: ["S","M","L","XL","2XL"] }`. `"electronics" → { option1: "Storage", option2: "Color", presets1: ["32GB","64GB","128GB","256GB"] }`. | ⬜ Todo | Central config — admin could manage later |
+
+#### Tier G3 — Category Expansion & Industry Pages (3-4 days)
+
+> Add non-clothing categories, expand keyword map, create industry entry points.
+
+| # | Feature | Description | Status | Notes |
+|---|---------|-------------|--------|-------|
+| M10.17 | New global categories seed | Add 5 new top-level categories + subcategories: **Electronics** (Phones, Laptops, Accessories, Audio), **Beauty & Health** (Skincare, Haircare, Makeup, Fragrances), **Food & Beverages** (Snacks, Drinks, Fresh Produce, Spices), **Home & Garden** (Furniture, Decor, Kitchen, Tools), **Auto Parts** (Engine, Body, Electrical, Tyres). Admin can edit via M7 CRUD. | ⬜ Todo | 5 parents + ~20 children |
+| M10.18 | Keyword map expansion | `lib/marketplace/keyword-map.ts` — add 50+ keywords for new industries. "iPhone" → Electronics/Phones. "Moisturizer" → Beauty/Skincare. "Brake pad" → Auto/Body. | ⬜ Todo | Powers auto-category suggestion on product form |
+| M10.19 | Seed data for new categories | `prisma/seed-products.ts` — add 2-3 sample products per new category (for dev/demo). Electronics: "Wireless Earbuds", Beauty: "Vitamin C Serum", Food: "Bulk Biltong Pack". | ⬜ Todo | Dev/demo only |
+| M10.20 | Multi-category shop support | Already works via Product → GlobalCategory FK. Verify: one shop can have products in Clothing + Electronics + Beauty. No code change needed — just documentation + test. | ⬜ Todo | Verify existing architecture |
 
 ---
 
@@ -218,16 +259,18 @@
 | **Featured** | R 149 / week | 7 days | Featured carousel placement + priority feed + "Featured" amber badge. ~3x more visibility than Boost. |
 | **Spotlight** | R 399 / week | 7 days | Top of marketplace, featured carousel, "⭐ Spotlight" badge, newsletter inclusion (future). ~8x more visibility. |
 
-### Revenue Projections (Conservative)
+### Revenue Projections (After Generalization — Multi-Category)
 
 | Metric | Month 1 | Month 3 | Month 6 | Month 12 |
 |--------|---------|---------|---------|----------|
-| Active shops | 50 | 200 | 500 | 1,000 |
-| Shops promoting (% adoption) | 5 (10%) | 30 (15%) | 100 (20%) | 250 (25%) |
+| Active shops (clothing) | 50 | 200 | 500 | 1,000 |
+| Active shops (electronics + beauty + other) | 10 | 80 | 300 | 800 |
+| **Total active shops** | **60** | **280** | **800** | **1,800** |
+| Shops promoting (% adoption) | 6 (10%) | 42 (15%) | 160 (20%) | 450 (25%) |
 | Avg spend per promoter / month | R 100 | R 200 | R 300 | R 400 |
-| **Promotion revenue** | **R 500** | **R 6,000** | **R 30,000** | **R 100,000** |
-| Subscription revenue (Pro) | R 1,000 | R 8,000 | R 30,000 | R 80,000 |
-| **Total MRR** | **R 1,500** | **R 14,000** | **R 60,000** | **R 180,000** |
+| **Promotion revenue** | **R 600** | **R 8,400** | **R 48,000** | **R 180,000** |
+| Subscription revenue (Pro) | R 1,200 | R 11,200 | R 48,000 | **R 144,000** |
+| **Total MRR** | **R 1,800** | **R 19,600** | **R 96,000** | **R 324,000** |
 
 ---
 
@@ -235,18 +278,18 @@
 
 > Recommended build sequence. Each phase is independently shippable.
 
-| Order | Phase | Effort | Revenue Impact | Ship When |
-|-------|-------|--------|---------------|-----------|
-| **1st** | M1 — Schema & Global Categories | Medium | Foundation | Week 1 |
-| **2nd** | M2 — Marketplace Data Layer | Medium | Foundation | Week 1–2 |
-| **3rd** | M3 — Marketplace Page | Large | 🟢 Organic growth | Week 2–3 |
-| **4th** | M8 — Seller Category Mapping | Small | Discovery quality | Week 3 |
-| **5th** | M4 — SEO & Discovery | Small | 🟢 Organic traffic | Week 3–4 |
-| **6th** | M5 — Promoted Listings | Medium | 💰 Direct revenue | Week 4–5 |
-| **7th** | M6 — Seller Promotion Dashboard | Medium | Self-serve ads | Week 5–6 |
-| **8th** | M7 — Admin Management | Medium | Operations | Week 6–7 |
-| **9th** | M9 — Advanced Discovery | Ongoing | Engagement | Month 2+ |
-| **10th** | M10 — Generalization | Large | Market expansion | Month 3+ (when demand exists) |
+| Order | Phase | Effort | Revenue Impact | Status |
+|-------|-------|--------|---------------|--------|
+| **1st** | M1 — Schema & Global Categories | Medium | Foundation | ✅ Shipped |
+| **2nd** | M2 — Marketplace Data Layer | Medium | Foundation | ✅ Shipped |
+| **3rd** | M3 — Marketplace Page | Large | 🟢 Organic growth | ✅ Shipped |
+| **4th** | M8 — Seller Category Mapping | Small | Discovery quality | ✅ Shipped |
+| **5th** | M4 — SEO & Discovery | Small | 🟢 Organic traffic | ✅ Shipped |
+| **6th** | M5 — Promoted Listings | Medium | 💰 Direct revenue | ✅ Shipped |
+| **7th** | M6 — Seller Promotion Dashboard | Medium | Self-serve ads | ✅ Shipped |
+| **8th** | M7 — Admin Management | Medium | Operations | ✅ Shipped |
+| **9th** | M10 — Generalization (G1+G2+G3) | Medium | 🚀 5x market expansion | 🔄 Building now |
+| **10th** | M9 — Advanced Discovery | Ongoing | Engagement | ⬜ After M10 |
 
 ---
 
