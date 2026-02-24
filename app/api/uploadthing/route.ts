@@ -8,6 +8,10 @@
 import { createRouteHandler } from "uploadthing/next";
 import { ourFileRouter } from "./core";
 
+// Pass token explicitly — Vercel serverless can miss auto-detected env vars
 export const { GET, POST } = createRouteHandler({
   router: ourFileRouter,
+  config: {
+    token: process.env.UPLOADTHING_TOKEN,
+  },
 });

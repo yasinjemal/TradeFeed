@@ -35,10 +35,12 @@ export const ourFileRouter = {
       return { userId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
+      // ufsUrl is v7.4+, fall back to url for older versions
+      const fileUrl = file.ufsUrl ?? file.url;
       console.log("[UploadThing] Upload complete for user:", metadata.userId);
-      console.log("[UploadThing] File URL:", file.ufsUrl);
+      console.log("[UploadThing] File URL:", fileUrl);
       // Return data to client's onClientUploadComplete
-      return { url: file.ufsUrl, key: file.key, name: file.name };
+      return { url: fileUrl, key: file.key, name: file.name };
     }),
 } satisfies FileRouter;
 
