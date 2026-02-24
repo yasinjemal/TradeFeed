@@ -123,19 +123,19 @@
 
 ---
 
-### Phase M6 — Seller Promotion Dashboard
+### Phase M6 — Seller Promotion Dashboard ✅
 
 > Sellers manage their promotions from the dashboard.
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M6.1 | Route: `/dashboard/[slug]/promote` | New dashboard tab — "Promote" with megaphone icon | ⬜ Todo | |
-| M6.2 | Active promotions list | Currently promoted products with: tier badge, impressions, clicks, CTR%, days remaining, status. | ⬜ Todo | |
-| M6.3 | Promote a product | Product picker dropdown → tier selector (Boost/Featured/Spotlight) → duration selector (1/2/4 weeks) → price preview → "Pay & Promote" button → PayFast. | ⬜ Todo | |
-| M6.4 | Performance stats | Per-promotion: impressions vs clicks chart. Comparison: "Your promoted products got 3x more views than organic." | ⬜ Todo | |
-| M6.5 | ROI indicator | "Your R149 Featured listing got 47 clicks → estimated 5–8 WhatsApp orders" | ⬜ Todo | Based on platform conversion rate |
-| M6.6 | Promotion history | Past promotions with: product, tier, dates, total impressions/clicks, amount paid. | ⬜ Todo | |
-| M6.7 | Dashboard nav update | Add "Promote" link to DashboardNav component | ⬜ Todo | |
+| M6.1 | Route: `/dashboard/[slug]/promote` | New dashboard tab — "Promote" with megaphone icon | ✅ Done | Built in M5 |
+| M6.2 | Active promotions list | Currently promoted products with: tier badge, impressions, clicks, CTR%, days remaining, status. | ✅ Done | Built in M5, enhanced with Active/History tabs |
+| M6.3 | Promote a product | Product picker dropdown → tier selector (Boost/Featured/Spotlight) → duration selector (1/2/4 weeks) → price preview → "Pay & Promote" button → PayFast. | ✅ Done | Built in M5 |
+| M6.4 | Performance stats | Per-promotion: impressions vs clicks chart. Comparison: "Your promoted products got 3x more views than organic." | ✅ Done | CSS bar chart per promotion, ComparisonBanner with multiplier |
+| M6.5 | ROI indicator | "Your R149 Featured listing got 47 clicks → estimated 5–8 WhatsApp orders" | ✅ Done | Per-promo ROI micro-indicators + global ROI card with conversion rate |
+| M6.6 | Promotion history | Past promotions with: product, tier, dates, total impressions/clicks, amount paid. | ✅ Done | Active/History tabbed view, date ranges, paid amounts |
+| M6.7 | Dashboard nav update | Add "Promote" link to DashboardNav component | ✅ Done | Built in M5 |
 
 ---
 
