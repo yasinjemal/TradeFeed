@@ -61,6 +61,7 @@ export interface MarketplaceProduct {
   maxPriceCents: number;
   variantCount: number;
   shop: {
+    id: string;
     slug: string;
     name: string;
     city: string | null;
@@ -227,6 +228,7 @@ export async function getMarketplaceProducts(
         },
         shop: {
           select: {
+            id: true,
             slug: true,
             name: true,
             city: true,
@@ -325,6 +327,7 @@ export async function getPromotedProducts(
           },
           shop: {
             select: {
+              id: true,
               slug: true,
               name: true,
               city: true,
@@ -498,6 +501,7 @@ export async function getTrendingProducts(
       },
       shop: {
         select: {
+          id: true,
           slug: true,
           name: true,
           city: true,

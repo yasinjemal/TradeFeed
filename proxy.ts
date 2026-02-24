@@ -1,21 +1,15 @@
 // ============================================================
-// Clerk Middleware — Route Protection + Rate Limiting
+// Clerk Proxy â€” Route Protection + Rate Limiting
 // ============================================================
 // Protects private routes (dashboard, create-shop, API).
 // Public routes: home, catalog, sign-in, sign-up, webhooks.
 // Rate limits public routes to prevent abuse.
-//
-// HOW IT WORKS:
-// - clerkMiddleware() runs on every request
-// - We define public route matchers for unauthenticated access
-// - Everything else requires auth (dashboard, create-shop, etc.)
-// - Unauthenticated users hitting private routes get redirected to /sign-in
-// - Public catalog/API routes are rate-limited per IP
 // ============================================================
 
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
+import { reportRateLimitEvent } from "@/lib/telemetry";
 
 // Routes that DON'T require authentication
 const isPublicRoute = createRouteMatcher([
@@ -41,12 +35,12 @@ const isUploadthingRoute = createRouteMatcher(["/api/uploadthing(.*)"]);
 const isWebhookRoute = createRouteMatcher(["/api/webhooks/(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
-  // ── Rate limiting on public routes ──────────────────────
   // Skip rate limiting for Uploadthing (server callbacks) and webhooks
   if (isCatalogRoute(request) || isMarketplaceRoute(request)) {
     const key = getRateLimitKey(request, "catalog");
     const result = rateLimit(key, 60, 60_000); // 60 req/min
     if (!result.allowed) {
+      reportRateLimitEvent("catalog", key, 60);
       return new NextResponse("Too many requests. Please try again later.", {
         status: 429,
         headers: {
@@ -60,6 +54,7 @@ export default clerkMiddleware(async (auth, request) => {
     const key = getRateLimitKey(request, "api");
     const result = rateLimit(key, 30, 60_000); // 30 req/min
     if (!result.allowed) {
+      reportRateLimitEvent("api", key, 30);
       return NextResponse.json(
         { error: "Rate limit exceeded" },
         {
@@ -72,7 +67,7 @@ export default clerkMiddleware(async (auth, request) => {
     }
   }
 
-  // ── Auth protection ─────────────────────────────────────
+  // Auth protection
   if (!isPublicRoute(request)) {
     await auth.protect();
   }

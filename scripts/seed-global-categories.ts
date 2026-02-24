@@ -123,6 +123,75 @@ const CATEGORIES: CategoryDef[] = [
       { name: "Formal Dresses", slug: "formal-dresses", icon: "👗", description: "Evening gowns, cocktail dresses, matric dance", displayOrder: 3 },
     ],
   },
+
+  // ── NEW INDUSTRIES ───────────────────────────────────────
+
+  {
+    name: "Electronics",
+    slug: "electronics",
+    icon: "📱",
+    description: "Phones, laptops, audio equipment and accessories",
+    displayOrder: 8,
+    children: [
+      { name: "Phones", slug: "phones", icon: "📱", description: "Smartphones, feature phones, refurbished phones", displayOrder: 1 },
+      { name: "Laptops & Computers", slug: "laptops", icon: "💻", description: "Laptops, desktops, monitors", displayOrder: 2 },
+      { name: "Accessories", slug: "electronics-accessories", icon: "🔌", description: "Chargers, cables, cases, power banks", displayOrder: 3 },
+      { name: "Audio", slug: "audio", icon: "🎧", description: "Earphones, headphones, speakers, soundbars", displayOrder: 4 },
+      { name: "Tablets", slug: "tablets", icon: "📲", description: "iPads, Android tablets, e-readers", displayOrder: 5 },
+    ],
+  },
+  {
+    name: "Beauty & Health",
+    slug: "beauty-health",
+    icon: "💄",
+    description: "Skincare, haircare, makeup and fragrances",
+    displayOrder: 9,
+    children: [
+      { name: "Skincare", slug: "skincare", icon: "🧴", description: "Moisturizers, serums, sunscreen, cleansers", displayOrder: 1 },
+      { name: "Haircare", slug: "haircare", icon: "💇", description: "Shampoo, conditioner, treatments, wigs, weaves", displayOrder: 2 },
+      { name: "Makeup", slug: "makeup", icon: "💄", description: "Foundation, lipstick, mascara, eyeshadow", displayOrder: 3 },
+      { name: "Fragrances", slug: "fragrances", icon: "🌸", description: "Perfumes, colognes, body sprays", displayOrder: 4 },
+    ],
+  },
+  {
+    name: "Food & Beverages",
+    slug: "food-beverages",
+    icon: "🍽️",
+    description: "Snacks, drinks, fresh produce and spices",
+    displayOrder: 10,
+    children: [
+      { name: "Snacks", slug: "snacks", icon: "🍿", description: "Biltong, droëwors, chips, nuts, dried fruit", displayOrder: 1 },
+      { name: "Drinks", slug: "drinks", icon: "🥤", description: "Juices, cooldrinks, coffee, tea, energy drinks", displayOrder: 2 },
+      { name: "Fresh Produce", slug: "fresh-produce", icon: "🥬", description: "Fruit, vegetables, organic produce", displayOrder: 3 },
+      { name: "Spices & Sauces", slug: "spices", icon: "🌶️", description: "Spices, seasonings, chutneys, braai sauces", displayOrder: 4 },
+    ],
+  },
+  {
+    name: "Home & Garden",
+    slug: "home-garden",
+    icon: "🏠",
+    description: "Furniture, decor, kitchen and garden tools",
+    displayOrder: 11,
+    children: [
+      { name: "Furniture", slug: "furniture", icon: "🪑", description: "Tables, chairs, shelves, beds, couches", displayOrder: 1 },
+      { name: "Decor", slug: "decor", icon: "🖼️", description: "Wall art, candles, cushions, vases", displayOrder: 2 },
+      { name: "Kitchen", slug: "kitchen", icon: "🍳", description: "Pots, pans, utensils, storage containers", displayOrder: 3 },
+      { name: "Tools", slug: "tools", icon: "🔧", description: "Power tools, hand tools, garden equipment", displayOrder: 4 },
+    ],
+  },
+  {
+    name: "Auto Parts",
+    slug: "auto-parts",
+    icon: "🚗",
+    description: "Engine parts, body panels, electrical and tyres",
+    displayOrder: 12,
+    children: [
+      { name: "Engine Parts", slug: "auto-engine", icon: "⚙️", description: "Filters, spark plugs, alternators, belts", displayOrder: 1 },
+      { name: "Body Parts", slug: "auto-body", icon: "🚗", description: "Bumpers, fenders, mirrors, door panels", displayOrder: 2 },
+      { name: "Electrical", slug: "auto-electrical", icon: "🔋", description: "Batteries, headlights, wiring, starters", displayOrder: 3 },
+      { name: "Tyres & Wheels", slug: "tyres", icon: "🛞", description: "Tyres, rims, mags, wheel caps", displayOrder: 4 },
+    ],
+  },
 ];
 
 // ── Seed function ──────────────────────────────────────────

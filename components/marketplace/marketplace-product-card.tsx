@@ -28,10 +28,10 @@ const formatZAR = (cents: number) =>
 export function MarketplaceProductCard({ product, compact = false }: MarketplaceProductCardProps) {
   const handleClick = () => {
     // Track marketplace click
-    trackMarketplaceClickAction(product.shop.slug, product.id);
+    trackMarketplaceClickAction(product.shop.id, product.id);
     // Track promoted click if sponsored
     if (product.promotion) {
-      trackPromotedClickAction(product.promotion.promotedListingId, product.shop.slug, product.id);
+      trackPromotedClickAction(product.promotion.promotedListingId, product.shop.id, product.id);
     }
   };
 

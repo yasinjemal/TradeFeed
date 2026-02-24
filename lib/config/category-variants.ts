@@ -82,7 +82,9 @@ const CATEGORY_VARIANT_MAP: Record<string, VariantPreset> = {
   // ── Clothing ─────────────────────────────────────────────
   "mens-clothing": CLOTHING_PRESET,
   "womens-clothing": CLOTHING_PRESET,
-  "kids-clothing": CLOTHING_PRESET,
+  kids: CLOTHING_PRESET,
+  unisex: CLOTHING_PRESET,
+  "formal-traditional": CLOTHING_PRESET,
   footwear: {
     ...CLOTHING_PRESET,
     option1Presets: [SHOE_SIZES, NUMBER_SIZES],
@@ -128,8 +130,8 @@ const CATEGORY_VARIANT_MAP: Record<string, VariantPreset> = {
     ],
   },
 
-  // ── Beauty & Personal Care ───────────────────────────────
-  beauty: {
+  // ── Beauty & Health ──────────────────────────────────────
+  "beauty-health": {
     option1Label: "Size",
     option2Label: "Shade",
     option1Presets: [
@@ -146,9 +148,15 @@ const CATEGORY_VARIANT_MAP: Record<string, VariantPreset> = {
       { name: "Nude", hex: "#E8C4A2" },
     ],
   },
+  skincare: {
+    option1Label: "Size",
+    option2Label: "Type",
+    option1Presets: [["30ml", "50ml", "100ml", "200ml", "500ml"]],
+    option1PresetLabels: ["Volume"],
+  },
 
   // ── Food & Beverages ─────────────────────────────────────
-  food: {
+  "food-beverages": {
     option1Label: "Weight",
     option2Label: "Flavor",
     option1Presets: [
@@ -156,7 +164,13 @@ const CATEGORY_VARIANT_MAP: Record<string, VariantPreset> = {
     ],
     option1PresetLabels: ["Weight"],
   },
-  beverages: {
+  snacks: {
+    option1Label: "Weight",
+    option2Label: "Flavor",
+    option1Presets: [["50g", "100g", "250g", "500g", "1kg"]],
+    option1PresetLabels: ["Weight"],
+  },
+  drinks: {
     option1Label: "Size",
     option2Label: "Flavor",
     option1Presets: [
@@ -165,13 +179,27 @@ const CATEGORY_VARIANT_MAP: Record<string, VariantPreset> = {
     option1PresetLabels: ["Volume"],
   },
 
-  // ── Home & Living ────────────────────────────────────────
-  "home-decor": {
+  // ── Home & Garden ────────────────────────────────────────
+  "home-garden": {
     option1Label: "Size",
     option2Label: "Color",
     option1Presets: [["S", "M", "L", "XL"]],
     option1PresetLabels: ["Sizes"],
     option2Presets: SA_COLORS,
+  },
+
+  // ── Auto Parts ───────────────────────────────────────────
+  "auto-parts": {
+    option1Label: "Fitment",
+    option2Label: "Type",
+    option1Presets: [["Universal", "OEM", "Aftermarket"]],
+    option1PresetLabels: ["Fitment"],
+  },
+  tyres: {
+    option1Label: "Size",
+    option2Label: "Brand",
+    option1Presets: [["155/80R13", "175/65R14", "195/55R15", "205/55R16", "225/45R17", "235/40R18"]],
+    option1PresetLabels: ["Tyre Size"],
   },
 };
 

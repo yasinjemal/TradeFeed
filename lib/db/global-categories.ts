@@ -159,60 +159,84 @@ export async function bulkSetGlobalCategory(
 // ============================================================
 
 const KEYWORD_MAP: Record<string, string[]> = {
-  // Men's Clothing
-  "mens-t-shirts": ["t-shirt", "tee", "tshirt", "t shirt"],
-  "mens-shirts": ["shirt", "formal shirt", "button-down", "oxford"],
-  "hoodies-sweaters": ["hoodie", "sweater", "sweatshirt", "pullover", "fleece", "crewneck"],
-  "mens-jackets": ["jacket", "bomber", "windbreaker", "puffer", "denim jacket"],
-  "mens-jeans": ["jeans", "denim", "slim fit jeans", "straight jeans"],
-  "mens-trousers": ["trousers", "chinos", "pants", "cargo", "joggers", "sweatpants"],
-  "mens-shorts": ["shorts", "swim shorts", "board shorts"],
-  "tracksuits-sets": ["tracksuit", "track suit", "matching set", "two piece"],
-  "vests-tanks": ["vest", "tank", "tank top", "sleeveless"],
-  "mens-underwear": ["underwear", "boxer", "briefs", "underpants"],
+  // ── Men's Clothing ───────────────────────────────────────
+  "mens-tshirts": ["t-shirt", "tee", "tshirt", "t shirt", "graphic tee"],
+  "mens-shirts-polos": ["shirt", "formal shirt", "button-down", "oxford", "polo"],
+  "mens-hoodies-sweaters": ["hoodie", "sweater", "sweatshirt", "pullover", "fleece", "crewneck"],
+  "mens-jackets-coats": ["jacket", "bomber", "windbreaker", "puffer", "denim jacket", "coat"],
+  "mens-pants-joggers": ["jeans", "denim", "slim fit", "trousers", "chinos", "pants", "cargo", "joggers", "sweatpants"],
+  "mens-shorts": ["shorts", "swim shorts", "board shorts", "gym shorts"],
+  "mens-track-sets": ["tracksuit", "track suit", "matching set", "two piece", "sweat set"],
 
-  // Women's Clothing
+  // ── Women's Clothing ─────────────────────────────────────
   "womens-dresses": ["dress", "maxi dress", "mini dress", "sundress", "bodycon"],
-  "womens-tops": ["top", "blouse", "crop top", "camisole", "tunic"],
+  "womens-tops-blouses": ["top", "blouse", "crop top", "camisole", "tunic", "bodysuit"],
   "womens-skirts": ["skirt", "mini skirt", "maxi skirt", "pencil skirt", "pleated"],
-  "womens-jeans": ["women jeans", "ladies jeans", "skinny jeans", "mom jeans"],
-  "womens-trousers": ["women trousers", "palazzo", "culottes", "wide leg"],
-  "leggings-tights": ["leggings", "tights", "yoga pants", "compression"],
-  "womens-jackets": ["women jacket", "blazer", "cardigan", "coat"],
-  "womens-lingerie": ["lingerie", "bra", "panties", "nightwear", "sleepwear"],
-  "activewear": ["activewear", "sportswear", "gym wear", "fitness", "workout"],
+  "womens-pants-leggings": ["women jeans", "ladies jeans", "skinny jeans", "mom jeans", "leggings", "tights", "yoga pants", "palazzo", "culottes", "wide leg"],
+  "womens-jackets-coats": ["women jacket", "blazer", "cardigan", "women coat", "trench"],
+  "womens-hoodies-sweaters": ["women hoodie", "women sweater", "women pullover"],
+  "womens-activewear": ["activewear", "sportswear", "gym wear", "fitness", "workout", "sports bra"],
 
-  // Unisex
-  "unisex-tees": ["unisex t-shirt", "unisex tee"],
-  "unisex-hoodies": ["unisex hoodie", "oversized hoodie"],
-  "unisex-caps": ["cap", "beanie", "bucket hat", "snapback", "trucker hat", "hat"],
+  // ── Unisex ───────────────────────────────────────────────
+  "unisex-streetwear": ["streetwear", "unisex", "oversized", "urban"],
+  "unisex-basics": ["unisex t-shirt", "unisex tee", "blank hoodie", "plain tee"],
+  "unisex-loungewear": ["loungewear", "pajamas", "sleepwear", "nightwear"],
 
-  // Kids
-  "boys-clothing": ["boys", "boy"],
-  "girls-clothing": ["girls", "girl"],
-  "baby-clothing": ["baby", "infant", "onesie", "romper", "babygrow"],
-  "school-uniforms": ["school uniform", "school shirt", "school pants"],
+  // ── Kids ─────────────────────────────────────────────────
+  "kids-boys": ["boys", "boy", "boys clothing"],
+  "kids-girls": ["girls", "girl", "girls clothing"],
+  "kids-baby": ["baby", "infant", "onesie", "romper", "babygrow", "newborn"],
 
-  // Footwear
-  "sneakers": ["sneaker", "sneakers", "trainers", "kicks", "running shoes"],
+  // ── Footwear ─────────────────────────────────────────────
+  sneakers: ["sneaker", "sneakers", "trainers", "kicks", "running shoes"],
   "formal-shoes": ["formal shoes", "oxford shoes", "loafers", "brogues", "dress shoes"],
   "sandals-slides": ["sandals", "slides", "flip flops", "slippers"],
-  "boots": ["boots", "ankle boots", "chelsea boots", "combat boots", "work boots"],
-  "kids-shoes": ["kids shoes", "children shoes", "baby shoes"],
+  boots: ["boots", "ankle boots", "chelsea boots", "combat boots", "work boots"],
 
-  // Accessories
+  // ── Accessories ──────────────────────────────────────────
+  "caps-hats": ["cap", "beanie", "bucket hat", "snapback", "trucker hat", "hat", "fitted cap"],
   "bags-backpacks": ["bag", "backpack", "handbag", "tote", "duffel", "sling bag", "crossbody"],
-  "belts": ["belt", "leather belt"],
-  "wallets": ["wallet", "purse", "card holder"],
-  "sunglasses": ["sunglasses", "shades", "glasses"],
-  "jewellery": ["jewellery", "jewelry", "necklace", "bracelet", "ring", "earring", "chain", "pendant"],
-  "scarves-wraps": ["scarf", "scarves", "wrap", "shawl", "hijab"],
-  "watches": ["watch", "watches", "timepiece", "smartwatch"],
+  belts: ["belt", "leather belt", "canvas belt"],
+  sunglasses: ["sunglasses", "shades", "glasses"],
+  jewelry: ["jewellery", "jewelry", "necklace", "bracelet", "ring", "earring", "chain", "pendant"],
+  "scarves-wraps": ["scarf", "scarves", "wrap", "shawl", "hijab", "durag"],
+  watches: ["watch", "watches", "timepiece", "smartwatch"],
 
-  // Formal & Traditional
-  "suits-blazers": ["suit", "blazer", "tuxedo", "two piece suit", "three piece"],
-  "traditional-african": ["traditional", "african", "dashiki", "ankara", "shweshwe", "isicholo", "umqhele"],
-  "formal-dresses": ["formal dress", "evening gown", "cocktail dress", "prom dress"],
+  // ── Formal & Traditional ─────────────────────────────────
+  "suits-blazers": ["suit", "blazer", "tuxedo", "two piece suit", "three piece", "waistcoat"],
+  "traditional-wear": ["traditional", "african", "dashiki", "ankara", "shweshwe", "isicholo", "umqhele"],
+  "formal-dresses": ["formal dress", "evening gown", "cocktail dress", "prom dress", "matric dance"],
+
+  // ── Electronics ──────────────────────────────────────────
+  phones: ["phone", "iphone", "samsung", "smartphone", "cellphone", "cell phone", "mobile"],
+  laptops: ["laptop", "notebook", "macbook", "chromebook", "ultrabook"],
+  "electronics-accessories": ["charger", "cable", "usb", "power bank", "adapter", "screen protector", "phone case"],
+  audio: ["earphones", "headphones", "earbuds", "airpods", "speaker", "bluetooth speaker", "soundbar"],
+  tablets: ["tablet", "ipad", "tab"],
+
+  // ── Beauty & Health ──────────────────────────────────────
+  skincare: ["skincare", "moisturizer", "moisturiser", "sunscreen", "face wash", "serum", "cleanser", "toner"],
+  haircare: ["shampoo", "conditioner", "hair oil", "hair treatment", "wig", "weave", "braids"],
+  makeup: ["makeup", "lipstick", "foundation", "mascara", "eyeshadow", "concealer", "primer"],
+  fragrances: ["perfume", "cologne", "fragrance", "eau de toilette", "body spray", "deodorant"],
+
+  // ── Food & Beverages ─────────────────────────────────────
+  snacks: ["snack", "chips", "biltong", "droewors", "nuts", "dried fruit", "popcorn", "chocolate"],
+  drinks: ["juice", "cooldrink", "soda", "energy drink", "water", "tea", "coffee", "rooibos"],
+  "fresh-produce": ["fresh", "fruit", "vegetables", "organic", "farm"],
+  spices: ["spice", "spices", "seasoning", "curry", "masala", "chutney", "sauce", "braai"],
+
+  // ── Home & Garden ────────────────────────────────────────
+  furniture: ["furniture", "table", "chair", "shelf", "desk", "couch", "sofa", "bed"],
+  decor: ["decor", "decoration", "wall art", "candle", "vase", "cushion", "pillow", "throw"],
+  kitchen: ["kitchen", "pot", "pan", "utensil", "plate", "cup", "mug", "cutlery", "tupperware"],
+  tools: ["tool", "tools", "drill", "hammer", "screwdriver", "wrench", "pliers"],
+
+  // ── Auto Parts ───────────────────────────────────────────
+  "auto-engine": ["engine", "motor", "filter", "oil filter", "air filter", "spark plug", "alternator"],
+  "auto-body": ["bumper", "fender", "door panel", "mirror", "grille", "hood"],
+  "auto-electrical": ["car battery", "headlight", "tail light", "wiring", "fuse", "starter"],
+  tyres: ["tyre", "tire", "tyres", "tires", "wheel", "rim", "mag"],
 };
 
 /**

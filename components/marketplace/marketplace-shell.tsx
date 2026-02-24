@@ -25,6 +25,7 @@ import {
   trackMarketplaceViewAction,
   trackPromotedImpressionsAction,
 } from "@/app/actions/marketplace";
+import { buildMarketplaceSearchParams } from "@/lib/marketplace/search-params";
 
 interface MarketplaceShellProps {
   products: MarketplaceProduct[];
@@ -84,19 +85,11 @@ export function MarketplaceShell({
   const updateFilters = useCallback(
     (updates: Record<string, string | undefined>) => {
       startTransition(() => {
-        const params = new URLSearchParams(searchParams.toString());
-        for (const [key, value] of Object.entries(updates)) {
-          if (value === undefined || value === "") {
-            params.delete(key);
-          } else {
-            params.set(key, value);
-          }
-        }
-        // Reset to page 1 when filters change (unless page is being set)
-        if (!("page" in updates)) {
-          params.delete("page");
-        }
-        router.push(`/marketplace?${params.toString()}`, { scroll: false });
+        const nextParams = buildMarketplaceSearchParams(
+          searchParams.toString(),
+          updates
+        );
+        router.push(`/marketplace?${nextParams}`, { scroll: false });
       });
     },
     [router, searchParams, startTransition]

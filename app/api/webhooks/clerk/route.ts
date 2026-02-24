@@ -25,6 +25,7 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { reportError } from "@/lib/telemetry";
 
 // Clerk webhook event types we care about
 type ClerkUserEvent = {
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
         "svix-signature": svixSignature,
       }) as ClerkUserEvent;
     } catch (err) {
-      console.error("[clerk-webhook] Signature verification failed:", err);
+      await reportError("clerk-webhook-signature", err);
       return NextResponse.json(
         { error: "Invalid signature" },
         { status: 401 }
@@ -95,7 +96,9 @@ export async function POST(request: Request) {
       );
 
       if (!primaryEmail) {
-        console.error("[clerk-webhook] No primary email for user:", data.id);
+        await reportError("clerk-webhook-primary-email-missing", new Error("No primary email"), {
+          clerkUserId: data.id,
+        });
         return NextResponse.json(
           { error: "No primary email" },
           { status: 400 }

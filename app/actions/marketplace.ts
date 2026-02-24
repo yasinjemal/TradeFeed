@@ -11,6 +11,7 @@
 
 import { trackPromotedClick, trackPromotedImpressions } from "@/lib/db/marketplace";
 import { trackEvent } from "@/lib/db/analytics";
+import { reportError } from "@/lib/telemetry";
 
 /**
  * Track a click on a promoted listing.
@@ -21,7 +22,15 @@ export async function trackPromotedClickAction(
   shopId: string,
   productId: string
 ) {
-  await trackPromotedClick(promotedListingId, shopId, productId);
+  try {
+    await trackPromotedClick(promotedListingId, shopId, productId);
+  } catch (error) {
+    await reportError("trackPromotedClickAction", error, {
+      promotedListingId,
+      shopId,
+      productId,
+    });
+  }
 }
 
 /**
@@ -31,17 +40,27 @@ export async function trackPromotedClickAction(
 export async function trackPromotedImpressionsAction(
   promotedListingIds: string[]
 ) {
-  await trackPromotedImpressions(promotedListingIds);
+  try {
+    await trackPromotedImpressions(promotedListingIds);
+  } catch (error) {
+    await reportError("trackPromotedImpressionsAction", error, {
+      promotedListingCount: promotedListingIds.length,
+    });
+  }
 }
 
 /**
  * Track a marketplace page view.
  */
 export async function trackMarketplaceViewAction() {
-  await trackEvent({
-    type: "MARKETPLACE_VIEW",
-    shopId: "platform", // Platform-level event, not shop-specific
-  });
+  try {
+    await trackEvent({
+      type: "MARKETPLACE_VIEW",
+      shopId: "platform", // Platform-level event, not shop-specific
+    });
+  } catch (error) {
+    await reportError("trackMarketplaceViewAction", error);
+  }
 }
 
 /**
@@ -51,9 +70,13 @@ export async function trackMarketplaceClickAction(
   shopId: string,
   productId: string
 ) {
-  await trackEvent({
-    type: "MARKETPLACE_CLICK",
-    shopId,
-    productId,
-  });
+  try {
+    await trackEvent({
+      type: "MARKETPLACE_CLICK",
+      shopId,
+      productId,
+    });
+  } catch (error) {
+    await reportError("trackMarketplaceClickAction", error, { shopId, productId });
+  }
 }

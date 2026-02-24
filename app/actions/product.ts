@@ -35,6 +35,37 @@ type ActionResult = {
   fieldErrors?: Record<string, string[]>;
 };
 
+type ProductActionDeps = {
+  requireShopAccess: typeof requireShopAccess;
+  createProduct: typeof createProduct;
+  updateProduct: typeof updateProduct;
+  deleteProduct: typeof deleteProduct;
+  createVariant: typeof createVariant;
+  deleteVariant: typeof deleteVariant;
+  batchCreateVariants: typeof batchCreateVariants;
+  revalidatePath: typeof revalidatePath;
+  redirect: typeof redirect;
+  checkProductLimit: (
+    shopId: string
+  ) => Promise<{ allowed: boolean; current: number; limit: number }>;
+};
+
+const defaultDeps: ProductActionDeps = {
+  requireShopAccess,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  createVariant,
+  deleteVariant,
+  batchCreateVariants,
+  revalidatePath,
+  redirect,
+  async checkProductLimit(shopId: string) {
+    const { checkProductLimit } = await import("@/lib/db/subscriptions");
+    return checkProductLimit(shopId);
+  },
+};
+
 /**
  * Helper: Extract Zod field errors into a flat record.
  * WHY: UI needs { fieldName: ["error message"] } format for display.
@@ -63,10 +94,11 @@ function extractFieldErrors(
  * 4. Return { shopId, userId } for downstream queries
  */
 async function resolveShopAccess(
-  shopSlug: string
+  shopSlug: string,
+  deps: ProductActionDeps
 ): Promise<{ shopId: string; userId: string } | null> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await deps.requireShopAccess(shopSlug);
     if (!access) return null;
     return { shopId: access.shopId, userId: access.userId };
   } catch {
@@ -87,18 +119,18 @@ async function resolveShopAccess(
 export async function createProductAction(
   shopSlug: string,
   _prevState: ActionResult | null,
-  formData: FormData
+  formData: FormData,
+  deps: ProductActionDeps = defaultDeps
 ): Promise<ActionResult> {
   try {
     // 1. Verify access
-    const access = await resolveShopAccess(shopSlug);
+    const access = await resolveShopAccess(shopSlug, deps);
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }
 
     // 1b. Check product limit (free tier gate)
-    const { checkProductLimit } = await import("@/lib/db/subscriptions");
-    const limit = await checkProductLimit(access.shopId);
+    const limit = await deps.checkProductLimit(access.shopId);
     if (!limit.allowed) {
       return {
         success: false,
@@ -127,10 +159,10 @@ export async function createProductAction(
     }
 
     // 3. Create product via data access layer
-    const product = await createProduct(parsed.data, access.shopId);
+    const product = await deps.createProduct(parsed.data, access.shopId);
 
     // 4. Redirect to product detail page (to add variants)
-    redirect(`/dashboard/${shopSlug}/products/${product.id}`);
+    deps.redirect(`/dashboard/${shopSlug}/products/${product.id}`);
   } catch (error: unknown) {
     // Re-throw redirect
     if (error instanceof Error && "digest" in error) {
@@ -148,10 +180,11 @@ export async function updateProductAction(
   shopSlug: string,
   productId: string,
   _prevState: ActionResult | null,
-  formData: FormData
+  formData: FormData,
+  deps: ProductActionDeps = defaultDeps
 ): Promise<ActionResult> {
   try {
-    const access = await resolveShopAccess(shopSlug);
+    const access = await resolveShopAccess(shopSlug, deps);
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }
@@ -175,14 +208,14 @@ export async function updateProductAction(
       };
     }
 
-    const updated = await updateProduct(productId, access.shopId, parsed.data);
+    const updated = await deps.updateProduct(productId, access.shopId, parsed.data);
     if (!updated) {
       return { success: false, error: "Product not found." };
     }
 
     // Revalidate the products page to show updated data
-    revalidatePath(`/dashboard/${shopSlug}/products`);
-    revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
+    deps.revalidatePath(`/dashboard/${shopSlug}/products`);
+    deps.revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
 
     return { success: true };
   } catch (error: unknown) {
@@ -196,21 +229,22 @@ export async function updateProductAction(
  */
 export async function deleteProductAction(
   shopSlug: string,
-  productId: string
+  productId: string,
+  deps: ProductActionDeps = defaultDeps
 ): Promise<ActionResult> {
   try {
-    const access = await resolveShopAccess(shopSlug);
+    const access = await resolveShopAccess(shopSlug, deps);
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }
 
-    const deleted = await deleteProduct(productId, access.shopId);
+    const deleted = await deps.deleteProduct(productId, access.shopId);
     if (!deleted) {
       return { success: false, error: "Product not found." };
     }
 
-    revalidatePath(`/dashboard/${shopSlug}/products`);
-    redirect(`/dashboard/${shopSlug}/products`);
+    deps.revalidatePath(`/dashboard/${shopSlug}/products`);
+    deps.redirect(`/dashboard/${shopSlug}/products`);
   } catch (error: unknown) {
     if (error instanceof Error && "digest" in error) {
       throw error;
@@ -236,10 +270,11 @@ export async function addVariantAction(
   shopSlug: string,
   productId: string,
   _prevState: ActionResult | null,
-  formData: FormData
+  formData: FormData,
+  deps: ProductActionDeps = defaultDeps
 ): Promise<ActionResult> {
   try {
-    const access = await resolveShopAccess(shopSlug);
+    const access = await resolveShopAccess(shopSlug, deps);
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }
@@ -261,12 +296,12 @@ export async function addVariantAction(
       };
     }
 
-    const variant = await createVariant(productId, access.shopId, parsed.data);
+    const variant = await deps.createVariant(productId, access.shopId, parsed.data);
     if (!variant) {
       return { success: false, error: "Product not found or access denied." };
     }
 
-    revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
+    deps.revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
     return { success: true };
   } catch (error: unknown) {
     // Handle unique constraint violation (duplicate size+color)
@@ -290,20 +325,21 @@ export async function addVariantAction(
 export async function deleteVariantAction(
   shopSlug: string,
   productId: string,
-  variantId: string
+  variantId: string,
+  deps: ProductActionDeps = defaultDeps
 ): Promise<ActionResult> {
   try {
-    const access = await resolveShopAccess(shopSlug);
+    const access = await resolveShopAccess(shopSlug, deps);
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }
 
-    const deleted = await deleteVariant(variantId, access.shopId);
+    const deleted = await deps.deleteVariant(variantId, access.shopId);
     if (!deleted) {
       return { success: false, error: "Variant not found." };
     }
 
-    revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
+    deps.revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
     return { success: true };
   } catch (error: unknown) {
     console.error("[deleteVariantAction] Error:", error);
@@ -326,10 +362,11 @@ export async function batchCreateVariantsAction(
   sizes: string[],
   colors: string[],
   priceInCents: number,
-  stock: number
+  stock: number,
+  deps: ProductActionDeps = defaultDeps
 ): Promise<ActionResult> {
   try {
-    const access = await resolveShopAccess(shopSlug);
+    const access = await resolveShopAccess(shopSlug, deps);
     if (!access) return { success: false, error: "Access denied." };
 
     // Generate all size × color combinations
@@ -339,14 +376,14 @@ export async function batchCreateVariantsAction(
       colorsToUse.map((color) => ({ size, color, priceInCents, stock }))
     );
 
-    const result = await batchCreateVariants(
+    const result = await deps.batchCreateVariants(
       productId,
       access.shopId,
       variants
     );
     if (!result) return { success: false, error: "Product not found." };
 
-    revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
+    deps.revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
     return { success: true };
   } catch (error: unknown) {
     console.error("[batchCreateVariantsAction] Error:", error);

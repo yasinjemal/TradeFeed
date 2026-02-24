@@ -23,6 +23,7 @@ import { validatePayFastITN } from "@/lib/payfast";
 import { upgradeSubscription, cancelSubscription } from "@/lib/db/subscriptions";
 import { parsePromotionPaymentId, calculatePromotionPrice } from "@/lib/config/promotions";
 import { createPromotedListing } from "@/lib/db/promotions";
+import { reportError } from "@/lib/telemetry";
 
 export async function POST(request: Request) {
   try {
@@ -42,7 +43,10 @@ export async function POST(request: Request) {
     // Validate signature
     const validation = validatePayFastITN(body);
     if (!validation.valid) {
-      console.error("[PayFast ITN] Validation failed:", validation.error);
+      await reportError("payfast-itn-validation", new Error(validation.error ?? "Unknown validation error"), {
+        paymentId,
+        paymentStatus,
+      });
       return NextResponse.json(
         { error: validation.error },
         { status: 400 },
@@ -66,7 +70,7 @@ export async function POST(request: Request) {
     // ── Route: Subscription payment ─────────────────────
     return handleSubscriptionPayment(paymentId, paymentStatus, body);
   } catch (error) {
-    console.error("[PayFast ITN] Error:", error);
+    await reportError("payfast-itn-post", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -92,8 +96,10 @@ async function handlePromotionPayment(
   const receivedAmountCents = Math.round(parseFloat(body["amount_gross"] ?? "0") * 100);
   if (Math.abs(receivedAmountCents - expectedAmount) > 100) {
     // Allow R1 tolerance for rounding
-    console.error(
-      `[PayFast ITN] Promotion amount mismatch: expected ${expectedAmount}, got ${receivedAmountCents}`
+    await reportError(
+      "payfast-itn-promotion-amount-mismatch",
+      new Error("Promotion amount mismatch"),
+      { expectedAmount, receivedAmountCents, paymentId: body["m_payment_id"] }
     );
     return NextResponse.json(
       { error: "Amount mismatch" },
@@ -116,7 +122,12 @@ async function handlePromotionPayment(
       `[PayFast ITN] Promotion created: ${listing.id} (${promoData.tier}, ${promoData.weeks}wk)`
     );
   } catch (err) {
-    console.error("[PayFast ITN] Failed to create promotion:", err);
+    await reportError("payfast-itn-create-promotion", err, {
+      shopId: promoData.shopId,
+      productId: promoData.productId,
+      tier: promoData.tier,
+      weeks: promoData.weeks,
+    });
     return NextResponse.json(
       { error: "Failed to create promotion" },
       { status: 500 },
