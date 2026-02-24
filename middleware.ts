@@ -20,6 +20,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",                   // Clerk sign-up
   "/catalog/(.*)",                  // Public storefront (buyer-facing)
   "/api/webhooks/(.*)",             // Clerk webhooks (server-to-server)
+  "/api/uploadthing(.*)",           // Uploadthing CDN upload endpoint
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

@@ -36,9 +36,10 @@ const PRODUCT_TYPES = [
 
 interface CreateProductFormProps {
   shopSlug: string;
+  categories?: { id: string; name: string }[];
 }
 
-export function CreateProductForm({ shopSlug }: CreateProductFormProps) {
+export function CreateProductForm({ shopSlug, categories = [] }: CreateProductFormProps) {
   const boundAction = createProductAction.bind(null, shopSlug);
   const [state, formAction, isPending] = useActionState(boundAction, null);
   const [name, setName] = useState("");
@@ -138,6 +139,29 @@ export function CreateProductForm({ shopSlug }: CreateProductFormProps) {
               </p>
             )}
           </div>
+
+          {/* Category */}
+          {categories.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="categoryId" className="text-sm font-medium">
+                Category{" "}
+                <span className="text-stone-400 font-normal">(optional)</span>
+              </Label>
+              <select
+                id="categoryId"
+                name="categoryId"
+                disabled={isPending}
+                className="flex h-12 w-full rounded-xl border-2 border-stone-200 bg-white px-3 py-2 text-base text-stone-900 focus:border-emerald-400 focus:outline-none disabled:opacity-50"
+              >
+                <option value="">No category</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Active Toggle */}
           <label className="flex items-center gap-3 cursor-pointer group">

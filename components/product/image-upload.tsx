@@ -1,18 +1,20 @@
 // ============================================================
-// Component — Image Upload (Drag & Drop)
+// Component — Image Upload (Uploadthing CDN + Drag & Drop)
 // ============================================================
-// Beautiful drag & drop image upload with:
+// Beautiful drag & drop image upload powered by Uploadthing:
 // - Client-side compression (1200px max, JPEG 0.85 quality)
+// - Direct CDN upload via useUploadThing hook
+// - Real upload progress bar
 // - Preview grid with main image highlight
-// - Delete on hover
-// - Upload progress feedback
+// - Delete on hover (removes from CDN + DB)
 // ============================================================
 
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { useUploadThing } from "@/lib/uploadthing";
 import {
-  uploadProductImagesAction,
+  saveProductImagesAction,
   deleteProductImageAction,
 } from "@/app/actions/image";
 
@@ -71,9 +73,19 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { startUpload } = useUploadThing("productImageUploader", {
+    onUploadProgress: (p) => setUploadProgress(p),
+    onUploadError: (err) => {
+      setError(err.message || "Upload failed. Try again.");
+      setIsUploading(false);
+      setUploadProgress(0);
+    },
+  });
 
   const processFiles = useCallback(
     async (fileList: FileList | File[]) => {
@@ -88,24 +100,42 @@ export function ImageUpload({
       }
 
       setIsUploading(true);
+      setUploadProgress(0);
       try {
+        // Compress images client-side before CDN upload
         const compressed = await Promise.all(files.map(compressImage));
-        const formData = new FormData();
-        for (const file of compressed) formData.append("images", file);
-        const result = await uploadProductImagesAction(
+
+        // Upload directly to Uploadthing CDN
+        const result = await startUpload(compressed);
+        if (!result) {
+          setError("Upload failed. Try again.");
+          return;
+        }
+
+        // Save CDN URLs to our database
+        const uploadedImages = result.map((r) => ({
+          url: r.serverData.url,
+          key: r.serverData.key,
+          name: r.serverData.name,
+        }));
+
+        const saveResult = await saveProductImagesAction(
           shopSlug,
           productId,
-          formData
+          uploadedImages
         );
-        if (!result.success) setError(result.error ?? "Upload failed");
+        if (!saveResult.success) {
+          setError(saveResult.error ?? "Failed to save images");
+        }
       } catch {
         setError("Upload failed. Try again.");
       } finally {
         setIsUploading(false);
+        setUploadProgress(0);
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     },
-    [images.length, shopSlug, productId]
+    [images.length, shopSlug, productId, startUpload]
   );
 
   const handleDrop = useCallback(
@@ -121,7 +151,8 @@ export function ImageUpload({
     async (imageId: string) => {
       setDeletingId(imageId);
       try {
-        await deleteProductImageAction(shopSlug, productId, imageId);
+        const result = await deleteProductImageAction(shopSlug, productId, imageId);
+        if (!result.success) setError(result.error ?? "Failed to delete");
       } catch {
         setError("Failed to delete");
       } finally {
@@ -185,7 +216,7 @@ export function ImageUpload({
           }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => !isUploading && fileInputRef.current?.click()}
           className={`relative rounded-xl border-2 border-dashed cursor-pointer transition-all duration-300
             ${
               isDragging
@@ -197,9 +228,18 @@ export function ImageUpload({
           <div className="flex flex-col items-center justify-center py-8 px-4">
             {isUploading ? (
               <>
-                <div className="w-8 h-8 border-[3px] border-emerald-500 border-t-transparent rounded-full animate-spin mb-3" />
+                {/* Progress bar */}
+                <div className="w-full max-w-[200px] h-2 bg-stone-200 rounded-full overflow-hidden mb-3">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
                 <p className="text-sm font-medium text-emerald-700">
-                  Compressing & uploading...
+                  Uploading to CDN... {uploadProgress}%
+                </p>
+                <p className="text-xs text-stone-400 mt-1">
+                  Images are delivered via global CDN ⚡
                 </p>
               </>
             ) : (
@@ -218,7 +258,7 @@ export function ImageUpload({
                 </p>
                 <p className="text-xs text-stone-400 mt-1">
                   or click to browse · {remaining} slot
-                  {remaining !== 1 ? "s" : ""} left · JPEG, PNG · max 5MB
+                  {remaining !== 1 ? "s" : ""} left · JPEG, PNG · max 4MB
                 </p>
               </>
             )}

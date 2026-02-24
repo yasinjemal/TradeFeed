@@ -3,6 +3,10 @@
 // ============================================================
 
 import { CreateProductForm } from "@/components/product/create-product-form";
+import { getCategories } from "@/lib/db/categories";
+import { getShopBySlug } from "@/lib/db/shops";
+import { requireShopAccess } from "@/lib/auth";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 
 interface NewProductPageProps {
@@ -11,6 +15,20 @@ interface NewProductPageProps {
 
 export default async function NewProductPage({ params }: NewProductPageProps) {
   const { slug } = await params;
+
+  // Auth
+  let access: Awaited<ReturnType<typeof requireShopAccess>>;
+  try {
+    access = await requireShopAccess(slug);
+  } catch {
+    redirect("/sign-in");
+  }
+  if (!access) return notFound();
+
+  const shop = await getShopBySlug(slug);
+  if (!shop) return notFound();
+
+  const categories = await getCategories(shop.id);
 
   return (
     <div className="space-y-6">
@@ -25,7 +43,10 @@ export default async function NewProductPage({ params }: NewProductPageProps) {
         Products
       </Link>
 
-      <CreateProductForm shopSlug={slug} />
+      <CreateProductForm
+        shopSlug={slug}
+        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+      />
     </div>
   );
 }

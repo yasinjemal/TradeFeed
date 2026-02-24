@@ -10,12 +10,14 @@
 
 import { getProduct } from "@/lib/db/products";
 import { getShopBySlug } from "@/lib/db/shops";
+import { getCategories } from "@/lib/db/categories";
 import { requireShopAccess } from "@/lib/auth";
 import { formatZAR } from "@/types";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ImageUpload } from "@/components/product/image-upload";
+import { EditProductForm } from "@/components/product/edit-product-form";
 import { SmartVariantCreator } from "@/components/product/smart-variant-creator";
 import { VariantGrid } from "@/components/product/variant-grid";
 import { AddVariantForm } from "@/components/product/add-variant-form";
@@ -45,6 +47,9 @@ export default async function ProductDetailPage({
   // ── Fetch product ────────────────────────────────────────
   const product = await getProduct(productId, shop.id);
   if (!product) return notFound();
+
+  // ── Fetch categories for edit form ──────────────────────
+  const categories = await getCategories(shop.id);
 
   // ── Computed stats ───────────────────────────────────────
   const prices = product.variants.map((v) => v.priceInCents);
@@ -186,6 +191,19 @@ export default async function ProductDetailPage({
               </Link>
             </div>
           </div>
+
+          {/* Edit Product */}
+          <EditProductForm
+            shopSlug={slug}
+            productId={product.id}
+            product={{
+              name: product.name,
+              description: product.description,
+              isActive: product.isActive,
+              categoryId: product.categoryId,
+            }}
+            categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          />
         </div>
       </div>
 

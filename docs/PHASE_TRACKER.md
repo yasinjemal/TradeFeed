@@ -2,7 +2,7 @@
 
 > Single source of truth for project progress.
 > Updated after every completed feature.
-> Last updated: **2026-02-24**
+> Last updated: **2026-02-25**
 
 ---
 
@@ -16,7 +16,7 @@
 | 3.5 | UI Polish & Redesigns | ✅ Complete | Loading states, image gallery, dashboard redesign |
 | 3.6 | Trust & Discovery | ✅ Complete | Shop profiles, maps, search, share, settings redesign |
 | 3.7 | Dashboard Redesign | ✅ Complete | Rich stats, active nav, share catalog, pro layout |
-| 4 | Media & Categories | ⬜ Not Started | Uploadthing CDN images, category management UI |
+| 4 | Media & Categories | ✅ Complete | Uploadthing CDN images, category management UI, product edit |
 | 5 | Monetisation | ⬜ Not Started | PayFast billing, subscription tiers |
 | 6 | Scale & Intelligence | ⬜ Not Started | Analytics, WhatsApp Business API, admin |
 
@@ -181,21 +181,46 @@
 
 ---
 
-## Phase 4 — Media & Categories ⬜
+## Phase 4 — Media & Categories ✅
 
-> Swap base64 image storage to CDN, add category management for organized catalogs.
+> CDN image upload via Uploadthing, category management, product edit form.
+
+### 4A — Uploadthing CDN Images ✅
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 4.1 | Uploadthing integration | ⬜ | Install `uploadthing`, create upload endpoint, configure env vars |
-| 4.2 | Migrate image upload action to Uploadthing | ⬜ | Swap `lib/actions/image.ts` from base64 → Uploadthing URL storage |
-| 4.3 | Update image upload component | ⬜ | Point `ProductImageUpload` to new endpoint |
-| 4.4 | Base64 → CDN data migration script | ⬜ | One-time script to upload existing base64 images to CDN |
-| 4.5 | Category management UI (dashboard) | ⬜ | CRUD for shop-scoped categories |
-| 4.6 | Category assignment on product form | ⬜ | Dropdown/select for category when creating/editing products |
-| 4.7 | Catalog category filter (public) | ⬜ | Category pills/tabs on public catalog page |
-| 4.8 | Product edit form | ⬜ | Edit name, description, isActive, category on existing products |
-| 4.9 | Product ordering/sorting | ⬜ | Pin featured products, sort by newest/price |
+| 4A.1 | Install `uploadthing` + `@uploadthing/react` packages | ✅ Done | 18 packages added |
+| 4A.2 | Uploadthing FileRouter (`app/api/uploadthing/core.ts`) | ✅ Done | `productImageUploader` endpoint: image, 4MB max, 8 per batch, Clerk auth middleware |
+| 4A.3 | Route handler (`app/api/uploadthing/route.ts`) | ✅ Done | `createRouteHandler()` exporting GET + POST |
+| 4A.4 | Typed React hooks (`lib/uploadthing.ts`) | ✅ Done | `useUploadThing`, `UploadButton`, `UploadDropzone` all typed to `OurFileRouter` |
+| 4A.5 | Server-side UTApi (`lib/ut-api.ts`) | ✅ Done | `UTApi` instance for server-side file deletion |
+| 4A.6 | Clerk middleware updated | ✅ Done | `/api/uploadthing(.*)` added to public routes |
+| 4A.7 | Prisma schema — `key` field on `ProductImage` | ✅ Done | Stores Uploadthing file key for CDN deletion |
+| 4A.8 | Rewrote image upload action | ✅ Done | `saveProductImagesAction()` receives CDN URLs (no more base64). `deleteProductImageAction()` removes from CDN + DB. |
+| 4A.9 | Rewrote image upload component | ✅ Done | `useUploadThing` hook, real progress bar, CDN upload, client-side compression preserved |
+| 4A.10 | `.env.example` updated | ✅ Done | `UPLOADTHING_TOKEN` (single token, not secret+appId) |
+
+### 4B — Category Management ✅
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 4B.1 | Category Zod validation schema | ✅ Done | `lib/validation/category.ts` — name: 2-100 chars |
+| 4B.2 | Category data access layer | ✅ Done | `lib/db/categories.ts` — getCategories, createCategory, updateCategory, deleteCategory with auto-slug |
+| 4B.3 | Category server actions | ✅ Done | `app/actions/category.ts` — create, update, delete with auth |
+| 4B.4 | Category manager component | ✅ Done | `components/category/category-manager.tsx` — inline add/rename/delete, product count badges |
+| 4B.5 | Categories dashboard page | ✅ Done | `/dashboard/[slug]/categories` — stats (total, with products, empty), full CRUD |
+| 4B.6 | Dashboard nav updated | ✅ Done | "Categories" link with tag icon added to `DashboardNav` |
+
+### 4C — Product Edit & Category Assignment ✅
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 4C.1 | Category dropdown on create product form | ✅ Done | Select category when creating products (optional) |
+| 4C.2 | Create product page fetches categories | ✅ Done | Server-side category fetch, passed as props |
+| 4C.3 | Edit product form component | ✅ Done | `components/product/edit-product-form.tsx` — inline toggle view/edit, name, description, category, isActive |
+| 4C.4 | Product detail page integration | ✅ Done | Edit form in right column, categories fetched server-side |
+
+**Phase 4 complete — 2026-02-25** 🎉
 
 ---
 
@@ -265,6 +290,7 @@
 | ORM | Prisma | v6.x (v7 breaks `url` in datasource) |
 | Database | PostgreSQL (Neon) | `eu-central-1`, connection pooling |
 | Auth | Clerk | `@clerk/nextjs` v6.38.2 |
+| Image CDN | Uploadthing | `uploadthing` + `@uploadthing/react` |
 | CSS | Tailwind CSS v4 + shadcn/ui | PostCSS ESM |
 | Validation | Zod v4 | Issues use `PropertyKey[]` for path |
 | Deployment | Vercel (planned) | — |
@@ -275,12 +301,12 @@
 |----------|-------|
 | Prisma models | 7 (Shop, User, ShopUser, Category, Product, ProductImage, ProductVariant) |
 | Enums | 1 (`UserRole` — OWNER, MANAGER, STAFF) |
-| App routes (pages) | 11 |
-| API routes | 1 (Clerk webhook) |
-| Server actions | 10 functions across 4 files |
-| Data access functions | 20 across 4 files (`shops`, `products`, `catalog`, `variants`) |
-| Zod schemas | 6 |
-| Components | 26 files across 5 directories (`ui`, `shop`, `dashboard`, `product`, `catalog`) |
+| App routes (pages) | 12 |
+| API routes | 2 (Clerk webhook, Uploadthing) |
+| Server actions | 14 functions across 5 files |
+| Data access functions | 25 across 5 files (`shops`, `products`, `catalog`, `variants`, `categories`) |
+| Zod schemas | 8 |
+| Components | 30 files across 6 directories (`ui`, `shop`, `dashboard`, `product`, `catalog`, `category`) |
 | shadcn components | button, input, label, card, form, textarea, badge, copy-button |
 | Locked decisions | 14 (in `docs/DECISIONS.md`) |
 
@@ -292,16 +318,20 @@ lib/db/
 ├── shops.ts           — createShop, getShopBySlug, updateShopSettings, getShopForUser, getShopsForUser, getDashboardStats
 ├── products.ts        — createProduct, getProducts, getProduct, updateProduct, deleteProduct, countProducts
 ├── catalog.ts         — getPublicShop, getPublicProducts, getPublicProduct, countActiveProducts
-└── variants.ts        — createVariant, updateVariant, deleteVariant, bulkCreateVariants
+├── variants.ts        — createVariant, updateVariant, deleteVariant, bulkCreateVariants
+└── categories.ts      — getCategories, getCategory, createCategory, updateCategory, deleteCategory
 
 lib/actions/
 ├── shop.ts            — createShopAction
 ├── shop-settings.ts   — updateShopSettingsAction
 ├── product.ts         — createProduct, updateProduct, deleteProduct, addVariant, deleteVariant, bulkCreateVariants
-└── image.ts           — uploadImages (base64), deleteImage
+├── image.ts           — saveProductImages (CDN URLs), deleteProductImage (CDN + DB)
+└── category.ts        — createCategory, updateCategory, deleteCategory
 
 lib/auth.ts            — getUser, requireUser, requireShopAccess
-middleware.ts          — clerkMiddleware, public route matcher (/catalog, /sign-in, /sign-up, /api/webhooks)
+lib/uploadthing.ts     — useUploadThing, UploadButton, UploadDropzone (typed to OurFileRouter)
+lib/ut-api.ts          — UTApi instance (server-side file deletion)
+middleware.ts          — clerkMiddleware, public routes (/catalog, /sign-in, /sign-up, /api/webhooks, /api/uploadthing)
 ```
 
 ### Route Map
@@ -318,21 +348,24 @@ Protected (require Clerk auth):
   /create-shop                         — Shop creation form
   /dashboard/[slug]                    — Dashboard overview (rich stats)
   /dashboard/[slug]/products           — Product list
-  /dashboard/[slug]/products/new       — Create product form
-  /dashboard/[slug]/products/[id]      — Product detail + edit
+  /dashboard/[slug]/products/new       — Create product form (with category dropdown)
+  /dashboard/[slug]/products/[id]      — Product detail + edit form + variants
+  /dashboard/[slug]/categories         — Category management (CRUD)
   /dashboard/[slug]/settings           — Shop settings (profile, location, social)
 
 API:
   /api/webhooks/clerk                  — Clerk webhook (user.created/updated/deleted)
+  /api/uploadthing                     — Uploadthing file upload endpoint (GET + POST)
 ```
 
 ### Known Technical Debt
 
 | Issue | Severity | Notes |
 |-------|----------|-------|
-| **Base64 images in DB** | 🔴 Critical | ~150-200KB per image stored as data URI in Postgres. Will crush performance at scale. Swap to Uploadthing (D-009). |
-| **No category management UI** | 🟡 Medium | Model exists but sellers can't create/assign categories. Catalogs unnavigable past ~20 products. |
-| **No product edit form** | 🟡 Medium | Sellers can create but not edit products (must delete and recreate). |
+| ~~**Base64 images in DB**~~ | ✅ Fixed | Swapped to Uploadthing CDN in Phase 4. Old base64 images may need migration script. |
+| ~~**No category management UI**~~ | ✅ Fixed | Full CRUD at `/dashboard/[slug]/categories`, dropdown on create/edit forms. |
+| ~~**No product edit form**~~ | ✅ Fixed | Inline edit form on product detail page. |
+| **Base64 → CDN migration script** | 🟡 Medium | Existing base64 images in DB need one-time upload to CDN. |
 | **No rate limiting** | 🟡 Medium | Public catalog routes have no abuse prevention. Need before marketing. |
 | **Legacy `lib/dev-auth.ts`** | 🟢 Low | Dead file, no longer imported anywhere. Safe to delete. |
 | **Cart — no server validation** | 🟢 Low | Stock quantities validated client-side only. |
@@ -341,11 +374,11 @@ API:
 
 ## What's Next — Priority Roadmap
 
-### 🔴 Immediate (Phase 4 — Launch Blockers)
+### 🔴 Immediate (Phase 4 Remaining)
 
-1. **Uploadthing CDN images** — Base64 in Postgres is a ticking time bomb. 100 sellers × 20 products × 4 images ≈ 12GB of base64 in DB.
-2. **Category management UI** — Buyers can't browse by "dresses", "sneakers", etc.
-3. **Product edit form** — Sellers need to update prices/stock without recreating products.
+1. **Base64 → CDN migration script** — Existing images need one-time upload to Uploadthing CDN.
+2. **Catalog category filter** — Public catalog should have category tabs/pills for browsing.
+3. **Product sorting** — Pin featured products, sort by newest/price.
 
 ### 🟡 Revenue (Phase 5 — Monetise)
 
