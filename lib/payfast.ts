@@ -99,6 +99,67 @@ export function buildPayFastCheckoutUrl(params: CheckoutParams): string {
   return `${baseUrl}?${queryString}`;
 }
 
+// ── Promotion (One-Time) Checkout ────────────────────────────
+
+interface PromotionCheckoutParams {
+  /** Format: "promo_{shopId}_{productId}_{tier}_{weeks}" */
+  paymentId: string;
+  shopSlug: string;
+  amountInCents: number;
+  itemName: string;
+  itemDescription: string;
+  buyerEmail: string;
+  buyerFirstName?: string;
+  buyerLastName?: string;
+}
+
+/**
+ * Build a PayFast checkout URL for a ONE-TIME promotion payment.
+ *
+ * Key difference from subscription checkout:
+ * - No subscription_type, billing_date, recurring_amount, frequency, cycles
+ * - m_payment_id starts with "promo_" so the webhook can distinguish it
+ * - Return/cancel URLs point to /dashboard/{slug}/promote
+ */
+export function buildPromotionCheckoutUrl(params: PromotionCheckoutParams): string {
+  const config = getConfig();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+  const amountInRands = (params.amountInCents / 100).toFixed(2);
+
+  // PayFast field order matters for signature generation
+  const data: Record<string, string> = {
+    merchant_id: config.merchantId,
+    merchant_key: config.merchantKey,
+    return_url: `${appUrl}/dashboard/${params.shopSlug}/promote?status=success`,
+    cancel_url: `${appUrl}/dashboard/${params.shopSlug}/promote?status=cancelled`,
+    notify_url: `${appUrl}/api/webhooks/payfast`,
+    name_first: params.buyerFirstName ?? "",
+    name_last: params.buyerLastName ?? "",
+    email_address: params.buyerEmail,
+    m_payment_id: params.paymentId,
+    amount: amountInRands,
+    item_name: params.itemName,
+    item_description: params.itemDescription,
+    // NO subscription fields — this is a one-time payment
+  };
+
+  // Remove empty values
+  const filteredData = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== ""),
+  );
+
+  // Generate signature
+  const signature = generateSignature(filteredData, config.passphrase);
+  filteredData["signature"] = signature;
+
+  // Build URL
+  const baseUrl = config.sandbox ? PAYFAST_SANDBOX_URL : PAYFAST_LIVE_URL;
+  const queryString = new URLSearchParams(filteredData).toString();
+
+  return `${baseUrl}?${queryString}`;
+}
+
 /**
  * Generate a PayFast MD5 signature.
  *

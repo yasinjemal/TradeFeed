@@ -9,6 +9,7 @@ import {
 } from "@/lib/db/marketplace";
 import { MarketplaceShell } from "@/components/marketplace/marketplace-shell";
 import { generateMarketplaceJsonLd } from "@/lib/seo/json-ld";
+import { expirePromotedListings } from "@/lib/db/promotions";
 
 // ============================================================
 // /marketplace — Public Discovery Page
@@ -110,6 +111,9 @@ export default async function MarketplacePage({
     page: params.page ? parseInt(params.page, 10) : 1,
     pageSize: 24,
   };
+
+  // M5.4 — Expire stale promotions before fetching (fast updateMany)
+  await expirePromotedListings();
 
   // Fetch all data in parallel
   const [productsResult, promoted, categories, trending, featuredShops] =

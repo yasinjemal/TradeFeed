@@ -108,18 +108,18 @@
 
 ---
 
-### Phase M5 — Promoted Listings (Monetization) 💰
+### Phase M5 — Promoted Listings (Monetization) 💰 ✅
 
 > Sellers pay to get their products shown first.
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M5.1 | Promotion tiers & pricing | **Boost** R49/wk — mixed into feed with "Sponsored" label. **Featured** R149/wk — carousel + priority feed + "Featured" badge. **Spotlight** R399/wk — top of marketplace + carousel + "⭐ Spotlight" badge. | ⬜ Todo | Prices adjustable via Plan/config |
-| M5.2 | Promotion purchase flow | Seller picks product → picks tier → picks duration (1/2/4 weeks) → PayFast checkout → ITN confirms → PromotedListing created → product appears in marketplace immediately. | ⬜ Todo | Reuse PayFast integration |
-| M5.3 | PayFast promotion webhook | Extend existing ITN webhook to handle promotion payments (different `m_payment_id` prefix or custom field). | ⬜ Todo | |
-| M5.4 | Promotion expiry cron/check | Check `expiresAt` on page load or via Vercel cron. Mark expired listings as EXPIRED. | ⬜ Todo | Start with on-load check, add cron later |
-| M5.5 | "Sponsored" badge component | Reusable badge: amber for Boost, gold for Featured, gradient for Spotlight. | ⬜ Todo | |
-| M5.6 | Impression & click tracking | Every time a promoted product is rendered → increment impressions. Every click → increment clicks. Both fire-and-forget. | ⬜ Todo | |
+| M5.1 | Promotion tiers & pricing | **Boost** R49/wk — mixed into feed with "Sponsored" label. **Featured** R149/wk — carousel + priority feed + "Featured" badge. **Spotlight** R399/wk — top of marketplace + carousel + "⭐ Spotlight" badge. | ✅ Done | lib/config/promotions.ts — centralised config with discount pricing for 2/4 weeks |
+| M5.2 | Promotion purchase flow | Seller picks product → picks tier → picks duration (1/2/4 weeks) → PayFast checkout → ITN confirms → PromotedListing created → product appears in marketplace immediately. | ✅ Done | /dashboard/[slug]/promote — 3-step form with live price preview, PayFast redirect |
+| M5.3 | PayFast promotion webhook | Extend existing ITN webhook to handle promotion payments (different `m_payment_id` prefix or custom field). | ✅ Done | "promo_" prefix routing in ITN handler, amount verification, auto PromotedListing creation |
+| M5.4 | Promotion expiry cron/check | Check `expiresAt` on page load or via Vercel cron. Mark expired listings as EXPIRED. | ✅ Done | expirePromotedListings() on marketplace page load + promote dashboard load |
+| M5.5 | "Sponsored" badge component | Reusable badge: amber for Boost, gold for Featured, gradient for Spotlight. | ✅ Done | Already existed in M3 (marketplace-product-card.tsx) — reused in promote dashboard |
+| M5.6 | Impression & click tracking | Every time a promoted product is rendered → increment impressions. Every click → increment clicks. Both fire-and-forget. | ✅ Done | Already existed in M2 (trackPromotedImpressions/Click) — verified working with M5 |
 
 ---
 
