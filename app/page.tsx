@@ -250,7 +250,6 @@ export default async function HomePage() {
                     ].map((product) => (
                       <div key={product.name} className="group rounded-xl bg-stone-800/40 border border-stone-700/30 overflow-hidden hover:border-emerald-500/30 transition-all hover:shadow-lg hover:shadow-emerald-500/5">
                         <div className="aspect-square relative overflow-hidden">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={product.img}
                             alt={product.name}
@@ -318,7 +317,6 @@ export default async function HomePage() {
                       { img: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=200&h=200&fit=crop&q=80", name: "Denim", price: "R 450" },
                     ].map((p) => (
                       <div key={p.name} className="rounded-lg overflow-hidden bg-stone-800/60">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={p.img} alt={p.name} className="w-full aspect-square object-cover" />
                         <div className="p-1.5">
                           <p className="text-[7px] text-stone-300 truncate">{p.name}</p>

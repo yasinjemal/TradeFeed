@@ -33,11 +33,13 @@ export async function createProduct(
       isActive: input.isActive,
       shopId,
       categoryId: input.categoryId || null,
+      globalCategoryId: input.globalCategoryId || null,
     },
     include: {
       variants: true,
       images: { orderBy: { position: "asc" } },
       category: true,
+      globalCategory: true,
     },
   });
 }
@@ -62,6 +64,7 @@ export async function getProducts(shopId: string) {
         take: 1, // Only the primary image for list view
       },
       category: true,
+      globalCategory: true,
     },
     orderBy: { createdAt: "desc" },
   });
@@ -91,6 +94,7 @@ export async function getProduct(productId: string, shopId: string) {
         orderBy: { position: "asc" },
       },
       category: true,
+      globalCategory: true,
     },
   });
 }
@@ -130,11 +134,15 @@ export async function updateProduct(
       ...(input.categoryId !== undefined && {
         categoryId: input.categoryId || null,
       }),
+      ...(input.globalCategoryId !== undefined && {
+        globalCategoryId: input.globalCategoryId || null,
+      }),
     },
     include: {
       variants: { orderBy: { createdAt: "asc" } },
       images: { orderBy: { position: "asc" } },
       category: true,
+      globalCategory: true,
     },
   });
 }

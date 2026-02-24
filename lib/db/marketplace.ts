@@ -253,7 +253,7 @@ export async function getMarketplaceProducts(
   ]);
 
   // ── Transform results ───────────────────────────────────
-  let products: MarketplaceProduct[] = rawProducts.map((p) => {
+  const products: MarketplaceProduct[] = rawProducts.map((p) => {
     const prices = p.variants.map((v) => v.priceInCents);
     const minP = prices.length > 0 ? Math.min(...prices) : 0;
     const maxP = prices.length > 0 ? Math.max(...prices) : 0;

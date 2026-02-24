@@ -44,6 +44,12 @@ export const productCreateSchema = z.object({
     .optional()
     .or(z.literal("")),
 
+  globalCategoryId: z
+    .string()
+    .cuid()
+    .optional()
+    .or(z.literal("")),
+
   isActive: z.boolean().default(true),
 });
 
@@ -71,6 +77,13 @@ export const productUpdateSchema = z.object({
     .or(z.literal("")),
 
   categoryId: z
+    .string()
+    .cuid()
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  globalCategoryId: z
     .string()
     .cuid()
     .optional()

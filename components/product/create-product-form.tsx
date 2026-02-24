@@ -7,12 +7,15 @@
 
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useMemo } from "react";
 import { createProductAction } from "@/app/actions/product";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { GlobalCategoryPicker } from "@/components/product/global-category-picker";
+import type { GlobalCategoryOption } from "@/lib/db/global-categories";
+import { suggestGlobalCategory } from "@/lib/db/global-categories";
 
 /* ── Product Type Tiles ─────────────────────────────────── */
 const PRODUCT_TYPES = [
@@ -37,13 +40,17 @@ const PRODUCT_TYPES = [
 interface CreateProductFormProps {
   shopSlug: string;
   categories?: { id: string; name: string }[];
+  globalCategories?: GlobalCategoryOption[];
 }
 
-export function CreateProductForm({ shopSlug, categories = [] }: CreateProductFormProps) {
+export function CreateProductForm({ shopSlug, categories = [], globalCategories = [] }: CreateProductFormProps) {
   const boundAction = createProductAction.bind(null, shopSlug);
   const [state, formAction, isPending] = useActionState(boundAction, null);
   const [name, setName] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
+
+  // M8.3: Auto-suggest global category based on product name
+  const suggestedSlug = useMemo(() => suggestGlobalCategory(name), [name]);
 
   const handleTypeSelect = (label: string) => {
     setSelectedType(label);
@@ -161,6 +168,16 @@ export function CreateProductForm({ shopSlug, categories = [] }: CreateProductFo
                 ))}
               </select>
             </div>
+          )}
+
+          {/* Marketplace Category (M8.1 — Global Category Picker) */}
+          {globalCategories.length > 0 && (
+            <GlobalCategoryPicker
+              categories={globalCategories}
+              productName={name}
+              suggestedSlug={suggestedSlug}
+              disabled={isPending}
+            />
           )}
 
           {/* Active Toggle */}

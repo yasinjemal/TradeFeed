@@ -111,6 +111,7 @@ export async function createProductAction(
       name: formData.get("name") as string,
       description: formData.get("description") as string,
       categoryId: (formData.get("categoryId") as string) || "",
+      globalCategoryId: (formData.get("globalCategoryId") as string) || "",
       isActive: formData.get("isActive") === "on",
     };
 
@@ -157,6 +158,7 @@ export async function updateProductAction(
       name: formData.get("name") as string,
       description: formData.get("description") as string,
       categoryId: (formData.get("categoryId") as string) || "",
+      globalCategoryId: (formData.get("globalCategoryId") as string) || "",
       isActive: formData.get("isActive") === "on",
     };
 

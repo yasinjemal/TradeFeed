@@ -11,6 +11,7 @@
 import { getProduct } from "@/lib/db/products";
 import { getShopBySlug } from "@/lib/db/shops";
 import { getCategories } from "@/lib/db/categories";
+import { getGlobalCategoryTree } from "@/lib/db/global-categories";
 import { requireShopAccess } from "@/lib/auth";
 import { formatZAR } from "@/types";
 import { notFound } from "next/navigation";
@@ -49,7 +50,10 @@ export default async function ProductDetailPage({
   if (!product) return notFound();
 
   // ── Fetch categories for edit form ──────────────────────
-  const categories = await getCategories(shop.id);
+  const [categories, globalCategories] = await Promise.all([
+    getCategories(shop.id),
+    getGlobalCategoryTree(),
+  ]);
 
   // ── Computed stats ───────────────────────────────────────
   const prices = product.variants.map((v) => v.priceInCents);
@@ -168,6 +172,22 @@ export default async function ProductDetailPage({
                 </span>
               </div>
             )}
+            {product.globalCategory && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-stone-500">Marketplace</span>
+                <span className="inline-flex items-center gap-1 font-medium text-emerald-600">
+                  🏪 {product.globalCategory.name}
+                </span>
+              </div>
+            )}
+            {!product.globalCategory && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-stone-500">Marketplace</span>
+                <span className="text-amber-500 text-xs font-medium">
+                  Not mapped
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between text-sm">
               <span className="text-stone-500">Unique sizes</span>
               <span className="font-medium text-stone-700">
@@ -201,8 +221,10 @@ export default async function ProductDetailPage({
               description: product.description,
               isActive: product.isActive,
               categoryId: product.categoryId,
+              globalCategoryId: product.globalCategoryId,
             }}
             categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+            globalCategories={globalCategories}
           />
         </div>
       </div>

@@ -160,10 +160,10 @@
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M8.1 | Global category picker on product form | Dropdown on create/edit product form: "Marketplace Category (optional)". Shows tree: Men's → Hoodies, Women's → Dresses, etc. | ⬜ Todo | |
-| M8.2 | Bulk category mapping | Dashboard tool: "Map your products to marketplace categories" — list of unmapped products with quick-assign dropdown. | ⬜ Todo | Encourages sellers to categorize |
-| M8.3 | Category suggestion | When seller types product name, suggest a global category. "Oversized Hoodie" → suggests "Men's → Hoodies & Sweaters". | ⬜ Todo | Simple keyword matching first |
-| M8.4 | "Improve discoverability" nudge | Dashboard banner: "12 of your products aren't in marketplace categories. Map them to get discovered!" | ⬜ Todo | |
+| M8.1 | Global category picker on product form | Dropdown on create/edit product form: "Marketplace Category (optional)". Shows tree: Men's → Hoodies, Women's → Dresses, etc. | ✅ Done | GlobalCategoryPicker on create + edit forms |
+| M8.2 | Bulk category mapping | Dashboard tool: "Map your products to marketplace categories" — list of unmapped products with quick-assign dropdown. | ✅ Done | /dashboard/[slug]/marketplace-categories bulk tool |
+| M8.3 | Category suggestion | When seller types product name, suggest a global category. "Oversized Hoodie" → suggests "Men's → Hoodies & Sweaters". | ✅ Done | KEYWORD_MAP with 150+ keywords, auto-suggest in forms |
+| M8.4 | "Improve discoverability" nudge | Dashboard banner: "12 of your products aren't in marketplace categories. Map them to get discovered!" | ✅ Done | Products page banner + badges + Quick Info display |
 
 ---
 

@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { getShopBySlug } from "@/lib/db/shops";
 import { getProducts } from "@/lib/db/products";
+import { countUnmappedProducts } from "@/lib/db/global-categories";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 
@@ -18,9 +19,32 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
   if (!shop) notFound();
 
   const products = await getProducts(shop.id);
+  const mappingStats = await countUnmappedProducts(shop.id);
 
   return (
     <div className="space-y-6">
+      {/* ── Discoverability Nudge (M8.4) ─────────────── */}
+      {mappingStats.unmapped > 0 && mappingStats.total > 0 && (
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-4">
+          <span className="text-2xl flex-shrink-0">🔍</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-800">
+              {mappingStats.unmapped} of {mappingStats.total} product{mappingStats.total !== 1 ? "s" : ""}{" "}
+              {mappingStats.unmapped === 1 ? "isn't" : "aren't"} discoverable on the marketplace
+            </p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Assign marketplace categories to help buyers find your products
+            </p>
+          </div>
+          <Link
+            href={`/dashboard/${slug}/marketplace-categories`}
+            className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors shadow-sm"
+          >
+            Map Now →
+          </Link>
+        </div>
+      )}
+
       {/* ── Header ──────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
@@ -80,7 +104,6 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
                   {/* Image */}
                   {product.images.length > 0 ? (
                     <div className="aspect-square bg-stone-100 overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={product.images[0]?.url}
                         alt={product.name}
@@ -104,6 +127,11 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
                           <p className="text-xs text-stone-400 mt-0.5">
                             {product.category.name}
                           </p>
+                        )}
+                        {product.globalCategory && (
+                          <span className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-100 text-emerald-600 text-[9px] font-medium">
+                            🏪 {product.globalCategory.name}
+                          </span>
                         )}
                       </div>
                       <span

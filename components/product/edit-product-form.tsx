@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { GlobalCategoryPicker } from "@/components/product/global-category-picker";
+import type { GlobalCategoryOption } from "@/lib/db/global-categories";
 
 interface Category {
   id: string;
@@ -27,8 +29,10 @@ interface EditProductFormProps {
     description: string | null;
     isActive: boolean;
     categoryId: string | null;
+    globalCategoryId: string | null;
   };
   categories: Category[];
+  globalCategories?: GlobalCategoryOption[];
 }
 
 export function EditProductForm({
@@ -36,6 +40,7 @@ export function EditProductForm({
   productId,
   product,
   categories,
+  globalCategories = [],
 }: EditProductFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const boundAction = updateProductAction.bind(null, shopSlug, productId);
@@ -67,6 +72,11 @@ export function EditProductForm({
               <p className="text-xs text-stone-500 line-clamp-2">
                 {product.description}
               </p>
+            )}
+            {product.globalCategoryId && (
+              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-medium">
+                🏪 Marketplace
+              </span>
             )}
           </div>
           <span className="text-stone-300 group-hover:text-emerald-500 transition-colors flex-shrink-0 ml-3">
@@ -145,6 +155,17 @@ export function EditProductForm({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* Marketplace Category (M8.1) */}
+        {globalCategories.length > 0 && (
+          <div className="space-y-1.5">
+            <GlobalCategoryPicker
+              categories={globalCategories}
+              defaultValue={product.globalCategoryId}
+              disabled={isPending}
+            />
           </div>
         )}
 
