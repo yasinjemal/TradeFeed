@@ -53,6 +53,12 @@ export default async function HomePage() {
             </span>
           </Link>
           <div className="flex items-center gap-3">
+            <Link
+              href="/marketplace"
+              className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-400 hover:text-white transition-colors"
+            >
+              Marketplace
+            </Link>
             {clerkId ? (
               <Link
                 href={ctaHref}
@@ -124,6 +130,12 @@ export default async function HomePage() {
                 Sign In
               </Link>
             )}
+            <Link
+              href="/marketplace"
+              className="inline-flex items-center justify-center px-6 py-4 text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              Browse Marketplace →
+            </Link>
           </div>
 
           <p className="mt-4 text-xs text-stone-600">

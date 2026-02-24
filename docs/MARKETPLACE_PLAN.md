@@ -73,23 +73,23 @@
 
 ---
 
-### Phase M3 — Marketplace Page (Public)
+### Phase M3 — Marketplace Page (Public) ✅
 
 > The main discovery page at `/marketplace`.
 
 | # | Feature | Description | Status | Notes |
 |---|---------|-------------|--------|-------|
-| M3.1 | Route: `/marketplace` | Public, no auth. Added to middleware public routes + rate limiting. | ⬜ Todo | 60 req/min like catalog |
-| M3.2 | Hero section | "Discover SA's Best Products" headline. Search bar (product/shop name). Category pill row for quick filtering. | ⬜ Todo | Dark theme matching landing page |
-| M3.3 | Featured carousel | Horizontal scrollable section: "🔥 Featured Products". Shows FEATURED + SPOTLIGHT promoted listings. "Sponsored" badge in amber. | ⬜ Todo | Only shows if promoted products exist |
-| M3.4 | Product discovery grid | Main feed — 4 cols desktop, 2 cols mobile. Each card: product image, name, price range (R), shop name, location badge, verified badge if applicable. Promoted items interleaved with "Sponsored" label. | ⬜ Todo | |
-| M3.5 | Filter sidebar / sheet | Filters: Category (tree), Price range (min/max), Province, Verified sellers only. Mobile: bottom sheet. Desktop: left sidebar or top bar. | ⬜ Todo | |
-| M3.6 | Sort dropdown | Trending, Newest, Price Low→High, Price High→Low, Most Popular | ⬜ Todo | |
-| M3.7 | Pagination | "Load more" button or infinite scroll. Cursor-based for performance. | ⬜ Todo | Start with "Load more" — simpler |
-| M3.8 | Empty state | "No products found" with suggestion to adjust filters or browse all. | ⬜ Todo | |
-| M3.9 | Product card → links to catalog | Clicking a marketplace product card goes to `/catalog/[shopSlug]/products/[productId]`. Preserves the per-shop buying experience. | ⬜ Todo | Track MARKETPLACE_CLICK event |
-| M3.10 | Loading skeleton | Shimmer grid matching product card layout | ⬜ Todo | |
-| M3.11 | Mobile responsiveness | Full mobile-first design. Bottom sheet filters. Sticky search bar. | ⬜ Todo | |
+| M3.1 | Route: `/marketplace` | Public, no auth. Added to middleware public routes + rate limiting. | ✅ Done | 60 req/min, same as catalog |
+| M3.2 | Hero section | "Discover SA's Best Products" headline. Search bar (product/shop name). Category pill row for quick filtering. | ✅ Done | Dark theme, desktop+mobile search |
+| M3.3 | Featured carousel | Horizontal scrollable section: "🔥 Featured Products". Shows FEATURED + SPOTLIGHT promoted listings. "Sponsored" badge in amber. | ✅ Done | Only renders when promoted exist |
+| M3.4 | Product discovery grid | Main feed — 4 cols desktop, 2 cols mobile. Each card: product image, name, price range (R), shop name, location badge, verified badge if applicable. Promoted items interleaved with "Sponsored" label. | ✅ Done | 3 tier badges: Spotlight/Featured/Sponsored |
+| M3.5 | Filter sidebar / sheet | Filters: Category (tree), Price range (min/max), Province, Verified sellers only. Mobile: bottom sheet. Desktop: left sidebar or top bar. | ✅ Done | Slide-over panel, 9 SA provinces |
+| M3.6 | Sort dropdown | Trending, Newest, Price Low→High, Price High→Low, Most Popular | ✅ Done | URL param driven |
+| M3.7 | Pagination | "Load more" button or infinite scroll. Cursor-based for performance. | ✅ Done | Offset pagination, prev/next |
+| M3.8 | Empty state | "No products found" with suggestion to adjust filters or browse all. | ✅ Done | Clear all + Browse All CTA |
+| M3.9 | Product card → links to catalog | Clicking a marketplace product card goes to `/catalog/[shopSlug]/products/[productId]`. Preserves the per-shop buying experience. | ✅ Done | Tracks MARKETPLACE_CLICK + PROMOTED_CLICK |
+| M3.10 | Loading skeleton | Shimmer grid matching product card layout | ✅ Done | loading.tsx with staggered animation |
+| M3.11 | Mobile responsiveness | Full mobile-first design. Bottom sheet filters. Sticky search bar. | ✅ Done | Mobile search, filter sheet, 2-col grid |
 
 ---
 
@@ -103,7 +103,7 @@
 | M4.2 | Category SEO pages | `/marketplace?category=hoodies` gets unique meta title: "Hoodies — TradeFeed Marketplace" | ⬜ Todo | Or `/marketplace/hoodies` with catch-all |
 | M4.3 | JSON-LD `ItemList` | Structured data for Google Shopping potential | ⬜ Todo | |
 | M4.4 | Sitemap entries | Add `/marketplace` + each category page to sitemap.ts | ⬜ Todo | |
-| M4.5 | Landing page "Browse" link | Add "Browse Marketplace" CTA to landing page navbar + hero | ⬜ Todo | |
+| M4.5 | Landing page "Browse" link | Add "Browse Marketplace" CTA to landing page navbar + hero | ✅ Done | Added in M3 — navbar + hero CTA |
 | M4.6 | Catalog cross-link | "More from this seller" + "Browse more on TradeFeed Marketplace" links on catalog pages | ⬜ Todo | |
 
 ---

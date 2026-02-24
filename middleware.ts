@@ -23,6 +23,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",                   // Clerk sign-in
   "/sign-up(.*)",                   // Clerk sign-up
   "/catalog/(.*)",                  // Public storefront (buyer-facing)
+  "/marketplace(.*)",               // Public marketplace (discovery)
   "/api/webhooks/(.*)",             // Clerk webhooks (server-to-server)
   "/api/uploadthing(.*)",           // Uploadthing CDN upload endpoint
   "/api/og(.*)",                    // Dynamic OG image generation
@@ -33,6 +34,7 @@ const isPublicRoute = createRouteMatcher([
 
 // Routes that should be rate-limited
 const isCatalogRoute = createRouteMatcher(["/catalog/(.*)"]);
+const isMarketplaceRoute = createRouteMatcher(["/marketplace(.*)"]);
 const isApiRoute = createRouteMatcher(["/api/(.*)"]);
 // Routes that should SKIP rate limiting (Uploadthing needs unrestricted callback access)
 const isUploadthingRoute = createRouteMatcher(["/api/uploadthing(.*)"]);
@@ -41,7 +43,7 @@ const isWebhookRoute = createRouteMatcher(["/api/webhooks/(.*)"]);
 export default clerkMiddleware(async (auth, request) => {
   // ── Rate limiting on public routes ──────────────────────
   // Skip rate limiting for Uploadthing (server callbacks) and webhooks
-  if (isCatalogRoute(request)) {
+  if (isCatalogRoute(request) || isMarketplaceRoute(request)) {
     const key = getRateLimitKey(request, "catalog");
     const result = rateLimit(key, 60, 60_000); // 60 req/min
     if (!result.allowed) {
