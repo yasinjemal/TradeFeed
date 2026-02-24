@@ -38,6 +38,8 @@ function startCleanup() {
       }
     }
   }, 60_000);
+  // Do not keep Node process alive just for cleanup in tests/CLI contexts.
+  cleanupInterval.unref?.();
 }
 
 interface RateLimitResult {

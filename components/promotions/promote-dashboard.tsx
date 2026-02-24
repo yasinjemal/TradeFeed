@@ -556,7 +556,7 @@ function PromotionRow({
 }) {
   const isActive = promo.status === "ACTIVE" && new Date(promo.expiresAt) > new Date();
   const daysLeft = isActive
-    ? Math.max(0, Math.ceil((new Date(promo.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    ? Math.max(0, Math.ceil((new Date(promo.expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
     : 0;
   const ctr = promo.impressions > 0
     ? ((promo.clicks / promo.impressions) * 100).toFixed(1)

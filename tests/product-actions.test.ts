@@ -1,8 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createProductAction, updateProductAction } from "@/app/actions/product";
+import {
+  createProductAction,
+  updateProductAction,
+  type ProductActionDeps,
+} from "@/app/actions/product";
 
-function buildBaseDeps() {
+function buildBaseDeps(): ProductActionDeps {
   return {
     requireShopAccess: async () => ({ shopId: "shop_1", userId: "user_1", role: "OWNER" }),
     createProduct: async () => ({ id: "prod_1" }),
@@ -14,7 +18,7 @@ function buildBaseDeps() {
     revalidatePath: () => {},
     redirect: () => {},
     checkProductLimit: async () => ({ allowed: true, current: 1, limit: 10 }),
-  };
+  } as unknown as ProductActionDeps;
 }
 
 test("createProductAction returns access denied when auth boundary fails", async () => {
@@ -24,7 +28,7 @@ test("createProductAction returns access denied when auth boundary fails", async
   const form = new FormData();
   form.set("name", "Product Name");
 
-  const result = await createProductAction("shop-slug", null, form, deps as never);
+  const result = await createProductAction("shop-slug", null, form, deps);
   assert.equal(result.success, false);
   assert.equal(result.error, "Shop not found or access denied.");
 });
@@ -36,7 +40,7 @@ test("createProductAction enforces product limit before creation", async () => {
   const form = new FormData();
   form.set("name", "Product Name");
 
-  const result = await createProductAction("shop-slug", null, form, deps as never);
+  const result = await createProductAction("shop-slug", null, form, deps);
   assert.equal(result.success, false);
   assert.match(result.error ?? "", /Product limit reached/);
 });
@@ -47,9 +51,10 @@ test("updateProductAction returns not found when data layer does not find produc
 
   const form = new FormData();
   form.set("name", "Updated Name");
+  form.set("description", "");
   form.set("isActive", "on");
 
-  const result = await updateProductAction("shop-slug", "prod_404", null, form, deps as never);
+  const result = await updateProductAction("shop-slug", "prod_404", null, form, deps);
   assert.equal(result.success, false);
   assert.equal(result.error, "Product not found.");
 });

@@ -81,7 +81,11 @@ export function ImageUpload({
   const { startUpload } = useUploadThing("productImageUploader", {
     onUploadProgress: (p) => setUploadProgress(p),
     onUploadError: (err) => {
-      setError(err.message || "Upload failed. Try again.");
+      const message =
+        err?.message && err.message.trim().length > 0
+          ? err.message
+          : "Upload failed. Check server logs and your UploadThing token.";
+      setError(message);
       setIsUploading(false);
       setUploadProgress(0);
     },

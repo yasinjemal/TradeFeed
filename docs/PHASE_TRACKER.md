@@ -393,7 +393,7 @@ lib/uploadthing.ts     — useUploadThing, UploadButton, UploadDropzone (typed t
 lib/ut-api.ts          — UTApi instance (server-side file deletion)
 lib/payfast.ts         — buildPayFastCheckoutUrl, validatePayFastITN, generateSignature
 lib/rate-limit.ts      — rateLimit (sliding window), getRateLimitKey
-middleware.ts          — clerkMiddleware, rate limiting (catalog 60/min, API 30/min), public routes
+proxy.ts               — clerkMiddleware, rate limiting (catalog 60/min, API 30/min), public routes
 ```
 
 ### Route Map

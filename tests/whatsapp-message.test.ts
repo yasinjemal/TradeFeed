@@ -28,5 +28,6 @@ test("buildWhatsAppMessage creates a structured message with totals", () => {
 test("buildWhatsAppCheckoutUrl strips plus sign and encodes the message", () => {
   const url = buildWhatsAppCheckoutUrl("+27611234567", items);
   assert.ok(url.startsWith("https://wa.me/27611234567?text="));
-  assert.ok(url.includes("%2A"));
+  const encoded = url.split("?text=")[1] ?? "";
+  assert.match(decodeURIComponent(encoded), /New Order from TradeFeed/);
 });

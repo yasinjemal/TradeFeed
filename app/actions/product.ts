@@ -35,7 +35,7 @@ type ActionResult = {
   fieldErrors?: Record<string, string[]>;
 };
 
-type ProductActionDeps = {
+export type ProductActionDeps = {
   requireShopAccess: typeof requireShopAccess;
   createProduct: typeof createProduct;
   updateProduct: typeof updateProduct;
