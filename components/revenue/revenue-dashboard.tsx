@@ -8,6 +8,7 @@
 // ============================================================
 
 import Link from "next/link";
+import { useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import type {
   RevenueOverview,
@@ -15,6 +16,14 @@ import type {
   TopProduct,
   RevenueByStatus,
 } from "@/lib/db/revenue";
+import { ExportButtons } from "@/components/export/export-buttons";
+import {
+  generateCsv,
+  downloadFile,
+  printReport,
+  formatRandsPlain,
+  formatDateShort,
+} from "@/lib/export/reports";
 
 interface RevenueDashboardProps {
   overview: RevenueOverview;
@@ -57,6 +66,110 @@ export function RevenueDashboard({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // ── Export Handlers ─────────────────────────────────────
+  const handleExportCsv = useCallback(() => {
+    // Sheet 1 data: Daily revenue
+    const dailyCsv = generateCsv(
+      [
+        { key: "date", label: "Date" },
+        { key: "revenue", label: "Revenue (ZAR)" },
+        { key: "orders", label: "Orders" },
+      ],
+      daily.map((d) => ({
+        date: formatDateShort(d.date),
+        revenue: (d.revenueCents / 100).toFixed(2),
+        orders: d.orders,
+      })),
+    );
+
+    // Append top products section
+    const productRows = topProducts.map((p) => ({
+      rank: "",
+      product: p.productName,
+      revenue: (p.revenueCents / 100).toFixed(2),
+      units: p.unitsSold,
+    }));
+    const productCsv = generateCsv(
+      [
+        { key: "rank", label: "" },
+        { key: "product", label: "Product" },
+        { key: "revenue", label: "Revenue (ZAR)" },
+        { key: "units", label: "Units Sold" },
+      ],
+      productRows,
+    );
+
+    // Combine both sections
+    const combined = dailyCsv + "\n\nTop Products by Revenue\n" + productCsv;
+    downloadFile(combined, `tradefeed-revenue-${days}d-${new Date().toISOString().slice(0, 10)}.csv`);
+  }, [daily, topProducts, days]);
+
+  const handleExportPdf = useCallback(() => {
+    const summaryHtml = `
+      <div class="summary-grid">
+        <div class="summary-card"><div class="label">Revenue (${days}d)</div><div class="value">${formatRandsPlain(overview.periodRevenueCents)}</div></div>
+        <div class="summary-card"><div class="label">Orders (${days}d)</div><div class="value">${overview.periodOrders}</div></div>
+        <div class="summary-card"><div class="label">All-Time Revenue</div><div class="value">${formatRandsPlain(overview.totalRevenueCents)}</div></div>
+        <div class="summary-card"><div class="label">Avg Order Value</div><div class="value">${formatRandsPlain(overview.averageOrderCents)}</div></div>
+      </div>
+    `;
+
+    const dailyRows = daily
+      .filter((d) => d.revenueCents > 0)
+      .map(
+        (d) => `
+          <tr>
+            <td>${formatDateShort(d.date)}</td>
+            <td class="text-right font-bold">${formatRandsPlain(d.revenueCents)}</td>
+            <td class="text-center">${d.orders}</td>
+          </tr>`,
+      )
+      .join("");
+
+    const productRows = topProducts
+      .map(
+        (p, i) => `
+          <tr>
+            <td class="text-center">${i + 1}</td>
+            <td>${p.productName}</td>
+            <td class="text-right font-bold">${formatRandsPlain(p.revenueCents)}</td>
+            <td class="text-center">${p.unitsSold}</td>
+          </tr>`,
+      )
+      .join("");
+
+    const statusRows = byStatus
+      .map(
+        (s) => `
+          <tr>
+            <td style="text-transform:capitalize">${s.status.toLowerCase()}</td>
+            <td class="text-right font-bold">${formatRandsPlain(s.revenueCents)}</td>
+            <td class="text-center">${s.count}</td>
+          </tr>`,
+      )
+      .join("");
+
+    printReport(`Revenue Report — Last ${days} Days`, `
+      <h1>Revenue Report — Last ${days} Days</h1>
+      ${summaryHtml}
+      <h2>Daily Revenue</h2>
+      <table>
+        <thead><tr><th>Date</th><th class="text-right">Revenue</th><th class="text-center">Orders</th></tr></thead>
+        <tbody>${dailyRows || '<tr><td colspan="3" class="text-center">No data</td></tr>'}</tbody>
+      </table>
+      <h2>Top Products by Revenue</h2>
+      <table>
+        <thead><tr><th class="text-center">#</th><th>Product</th><th class="text-right">Revenue</th><th class="text-center">Units</th></tr></thead>
+        <tbody>${productRows || '<tr><td colspan="4" class="text-center">No data</td></tr>'}</tbody>
+      </table>
+      <h2>Revenue by Status</h2>
+      <table>
+        <thead><tr><th>Status</th><th class="text-right">Revenue</th><th class="text-center">Orders</th></tr></thead>
+        <tbody>${statusRows}</tbody>
+      </table>
+    `);
+  }, [daily, topProducts, byStatus, overview, days]);
+
   // ── Period Toggle ─────────────────────────────────────
   const periods = [
     { label: "7d", value: "7" },
@@ -71,26 +184,29 @@ export function RevenueDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Period Toggle */}
-      <div className="flex gap-2">
-        {periods.map((p) => {
-          const isActive = String(days) === p.value;
-          const params = new URLSearchParams(searchParams.toString());
-          params.set("days", p.value);
-          return (
-            <Link
-              key={p.value}
-              href={`${pathname}?${params.toString()}`}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                isActive
-                  ? "bg-emerald-600 text-white"
-                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-              }`}
-            >
-              {p.label}
-            </Link>
-          );
-        })}
+      {/* Period Toggle + Export */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex gap-2">
+          {periods.map((p) => {
+            const isActive = String(days) === p.value;
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("days", p.value);
+            return (
+              <Link
+                key={p.value}
+                href={`${pathname}?${params.toString()}`}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-emerald-600 text-white"
+                    : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                }`}
+              >
+                {p.label}
+              </Link>
+            );
+          })}
+        </div>
+        <ExportButtons onExportCsv={handleExportCsv} onExportPdf={handleExportPdf} />
       </div>
 
       {/* Stat Cards */}

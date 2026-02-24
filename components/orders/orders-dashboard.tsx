@@ -10,10 +10,18 @@
 
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { updateOrderStatusAction } from "@/app/actions/orders";
 import type { OrderStatus } from "@prisma/client";
+import { ExportButtons } from "@/components/export/export-buttons";
+import {
+  generateCsv,
+  downloadFile,
+  printReport,
+  formatRandsPlain,
+  formatDate,
+} from "@/lib/export/reports";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -135,8 +143,95 @@ export function OrdersDashboard({
 }: OrdersDashboardProps) {
   const router = useRouter();
 
+  // ── Export Handlers ──────────────────────────────────
+  const handleExportCsv = useCallback(() => {
+    const csv = generateCsv(
+      [
+        { key: "orderNumber", label: "Order #" },
+        { key: "date", label: "Date" },
+        { key: "status", label: "Status" },
+        { key: "buyerName", label: "Buyer" },
+        { key: "buyerPhone", label: "Phone" },
+        { key: "deliveryAddress", label: "Delivery Address" },
+        { key: "deliveryCity", label: "City" },
+        { key: "deliveryProvince", label: "Province" },
+        { key: "itemCount", label: "Items" },
+        { key: "total", label: "Total (ZAR)" },
+        { key: "itemDetails", label: "Item Details" },
+      ],
+      orders.map((o) => ({
+        orderNumber: o.orderNumber,
+        date: formatDate(o.createdAt),
+        status: o.status,
+        buyerName: o.buyerName ?? "",
+        buyerPhone: o.buyerPhone ?? "",
+        deliveryAddress: o.deliveryAddress ?? "",
+        deliveryCity: o.deliveryCity ?? "",
+        deliveryProvince: o.deliveryProvince ?? "",
+        itemCount: o.itemCount,
+        total: (o.totalCents / 100).toFixed(2),
+        itemDetails: o.items
+          .map((i) => `${i.productName} (${i.option1Value}${i.option2Value ? "/" + i.option2Value : ""}) x${i.quantity}`)
+          .join("; "),
+      })),
+    );
+    const suffix = currentStatus ? `-${currentStatus.toLowerCase()}` : "";
+    downloadFile(csv, `tradefeed-orders${suffix}-${new Date().toISOString().slice(0, 10)}.csv`);
+  }, [orders, currentStatus]);
+
+  const handleExportPdf = useCallback(() => {
+    const statusLabel = currentStatus ? currentStatus.charAt(0) + currentStatus.slice(1).toLowerCase() : "All";
+    const summaryHtml = `
+      <div class="summary-grid">
+        <div class="summary-card"><div class="label">Total Orders</div><div class="value">${stats.total}</div></div>
+        <div class="summary-card"><div class="label">Pending</div><div class="value">${stats.pending}</div></div>
+        <div class="summary-card"><div class="label">Revenue</div><div class="value">${formatRandsPlain(stats.revenueCents)}</div></div>
+        <div class="summary-card"><div class="label">Delivered</div><div class="value">${stats.delivered}</div></div>
+      </div>
+    `;
+    const tableRows = orders
+      .map(
+        (o) => `
+          <tr>
+            <td class="font-bold">${o.orderNumber}</td>
+            <td>${formatDate(o.createdAt)}</td>
+            <td>${o.status}</td>
+            <td>${o.buyerName ?? "—"}</td>
+            <td>${o.deliveryCity ?? "—"}</td>
+            <td class="text-center">${o.itemCount}</td>
+            <td class="text-right font-bold">${formatRandsPlain(o.totalCents)}</td>
+          </tr>`,
+      )
+      .join("");
+
+    printReport(`Orders Report — ${statusLabel}`, `
+      <h1>Orders Report — ${statusLabel}</h1>
+      ${summaryHtml}
+      <h2>${orders.length} Orders</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Buyer</th>
+            <th>City</th>
+            <th class="text-center">Items</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    `);
+  }, [orders, stats, currentStatus]);
+
   return (
     <div className="space-y-6">
+      {/* ── Export Buttons ────────────────────────────── */}
+      <div className="flex justify-end">
+        <ExportButtons onExportCsv={handleExportCsv} onExportPdf={handleExportPdf} />
+      </div>
+
       {/* ── Stats Cards ──────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
