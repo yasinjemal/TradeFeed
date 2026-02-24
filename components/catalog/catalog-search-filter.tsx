@@ -28,6 +28,7 @@ interface CatalogProduct {
 interface CatalogSearchFilterProps {
   products: CatalogProduct[];
   shopSlug: string;
+  shopId: string;
   categories: { id: string; name: string }[];
 }
 
@@ -36,6 +37,7 @@ type SortOption = "newest" | "price-low" | "price-high" | "name";
 export function CatalogSearchFilter({
   products,
   shopSlug,
+  shopId: _shopId,
   categories,
 }: CatalogSearchFilterProps) {
   const [search, setSearch] = useState("");

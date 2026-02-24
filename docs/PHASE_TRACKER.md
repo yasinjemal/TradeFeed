@@ -2,7 +2,7 @@
 
 > Single source of truth for project progress.
 > Updated after every completed feature.
-> Last updated: **2026-02-25**
+> Last updated: **2026-02-26**
 
 ---
 
@@ -17,8 +17,8 @@
 | 3.6 | Trust & Discovery | ✅ Complete | Shop profiles, maps, search, share, settings redesign |
 | 3.7 | Dashboard Redesign | ✅ Complete | Rich stats, active nav, share catalog, pro layout |
 | 4 | Media & Categories | ✅ Complete | Uploadthing CDN images, category management UI, product edit |
-| 5 | Monetisation | ⬜ Not Started | PayFast billing, subscription tiers |
-| 6 | Scale & Intelligence | ⬜ Not Started | Analytics, WhatsApp Business API, admin |
+| 5 | Monetisation | ✅ Complete | PayFast billing, subscription tiers, free tier gate |
+| 6 | Scale & Intelligence (Partial) | ✅ Complete | Analytics, rate limiting. WhatsApp Business API + SEO deferred. |
 
 ---
 
@@ -224,35 +224,44 @@
 
 ---
 
-## Phase 5 — Monetisation ⬜
+## Phase 5 — Monetisation ✅
 
 > Subscription billing with PayFast for SA-native payments.
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 5.1 | Subscription schema (Plan model) | ⬜ | Plan tiers, features, limits |
-| 5.2 | PayFast integration | ⬜ | SA payment gateway, ZAR billing, ITN webhook |
-| 5.3 | Free tier gate (10 products) | ⬜ | Enforce product count limit on free plan |
-| 5.4 | Pro tier unlock (R199/mo) | ⬜ | Unlimited products, priority badge |
-| 5.5 | Billing dashboard page | ⬜ | Current plan, upgrade CTA, invoice history |
-| 5.6 | POPIA compliance audit | ⬜ | Privacy policy, data deletion, consent |
+| 5.1 | Subscription schema (Plan + Subscription models) | ✅ Done | Plan tiers, SubscriptionStatus enum, PayFast token storage |
+| 5.2 | PayFast integration | ✅ Done | `lib/payfast.ts` — checkout URL builder, ITN validation, MD5 signatures |
+| 5.3 | PayFast ITN webhook | ✅ Done | `app/api/webhooks/payfast/route.ts` — handles COMPLETE + CANCELLED |
+| 5.4 | Free tier gate (10 products) | ✅ Done | `checkProductLimit()` enforced in `createProductAction` |
+| 5.5 | Pro tier unlock (R199/mo) | ✅ Done | Unlimited products via `upgradeSubscription()` |
+| 5.6 | Billing dashboard page | ✅ Done | `/dashboard/[slug]/billing` — plan cards, usage meter, upgrade CTA |
+| 5.7 | Auto-assign free plan on shop creation | ✅ Done | `createShopAction` → `createFreeSubscription()` |
+| 5.8 | Plan seed script | ✅ Done | `scripts/seed-plans.ts` — idempotent Free + Pro upsert, `npm run seed:plans` |
+| 5.9 | POPIA compliance audit | ⬜ Todo | Privacy policy, data deletion, consent — deferred |
+
+**Phase 5 complete — 2026-02-26** 🎉
 
 ---
 
-## Phase 6 — Scale & Intelligence ⬜
+## Phase 6 — Scale & Intelligence (Partial) ✅
 
-> Analytics, WhatsApp Business API, admin tooling, performance optimization.
+> Analytics, rate limiting, and performance. WhatsApp Business API + admin deferred.
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 6.1 | Catalog view tracking (page views, product clicks) | ⬜ | Lightweight client-side analytics |
-| 6.2 | WhatsApp click tracking | ⬜ | Count `wa.me` link opens per product/shop |
-| 6.3 | Analytics dashboard for sellers | ⬜ | Views, clicks, top products chart |
-| 6.4 | Rate limiting on public routes | ⬜ | Upstash Ratelimit or similar |
-| 6.5 | WhatsApp Business API integration | ⬜ | Order confirmations, delivery updates |
-| 6.6 | Admin dashboard (cross-tenant) | ⬜ | Platform metrics, seller management |
-| 6.7 | Seller verification flow | ⬜ | `isVerified` admin approval, trust badge |
-| 6.8 | SEO optimization | ⬜ | Dynamic OG images, structured data, sitemap |
+| 6.1 | Analytics schema (AnalyticsEvent model) | ✅ Done | EventType enum: PAGE_VIEW, PRODUCT_VIEW, WHATSAPP_CLICK, WHATSAPP_CHECKOUT |
+| 6.2 | Analytics data layer | ✅ Done | `lib/db/analytics.ts` — trackEvent, getAnalyticsOverview, getDailyAnalytics, getTopProducts, getUniqueVisitors |
+| 6.3 | Catalog view tracking | ✅ Done | Fire-and-forget `trackEvent()` on catalog + product detail pages |
+| 6.4 | WhatsApp click + checkout tracking | ✅ Done | Server actions in `app/actions/analytics.ts`, tracked in cart-panel checkout |
+| 6.5 | Analytics dashboard for sellers | ✅ Done | `/dashboard/[slug]/analytics` — stat cards, bar chart (pure CSS/SVG), top products, period toggle |
+| 6.6 | Rate limiting on public routes | ✅ Done | `lib/rate-limit.ts` — in-memory sliding window, catalog: 60 req/min, API: 30 req/min |
+| 6.7 | WhatsApp Business API integration | ⬜ Todo | Order confirmations, delivery updates — deferred |
+| 6.8 | Admin dashboard (cross-tenant) | ⬜ Todo | Platform metrics, seller management — deferred |
+| 6.9 | Seller verification flow | ⬜ Todo | `isVerified` admin approval, trust badge — deferred |
+| 6.10 | SEO optimization | ⬜ Todo | Dynamic OG images, structured data, sitemap — deferred |
+
+**Phase 6 (Tier 2 items) complete — 2026-02-26** 🎉
 
 ---
 
@@ -260,6 +269,8 @@
 
 | Commit | Message | Date |
 |--------|---------|------|
+| `e2dce75` | feat: Tier 2 — analytics dashboard, rate limiting, PayFast subscriptions | 2026-02-26 |
+| `42b7883` | feat: Tier 1 quick wins — image migration script | 2026-02-25 |
 | `aaf37fb` | feat: redesign dashboard overview & layout with rich stats, active nav, share catalog | 2026-02-24 |
 | `c192f9a` | style: mind-blowing settings page redesign | 2026-02-24 |
 | `1734222` | feat: trust & discovery — shop profiles, maps, search, share buttons | 2026-02-24 |
@@ -299,14 +310,14 @@
 
 | Category | Count |
 |----------|-------|
-| Prisma models | 7 (Shop, User, ShopUser, Category, Product, ProductImage, ProductVariant) |
-| Enums | 1 (`UserRole` — OWNER, MANAGER, STAFF) |
-| App routes (pages) | 12 |
-| API routes | 2 (Clerk webhook, Uploadthing) |
-| Server actions | 14 functions across 5 files |
-| Data access functions | 25 across 5 files (`shops`, `products`, `catalog`, `variants`, `categories`) |
+| Prisma models | 10 (Shop, User, ShopUser, Category, Product, ProductImage, ProductVariant, AnalyticsEvent, Plan, Subscription) |
+| Enums | 3 (`UserRole`, `EventType`, `SubscriptionStatus`) |
+| App routes (pages) | 14 |
+| API routes | 4 (Clerk webhook, Uploadthing, PayFast ITN webhook, Analytics) |
+| Server actions | 20 functions across 7 files |
+| Data access functions | 35 across 7 files (`shops`, `products`, `catalog`, `variants`, `categories`, `analytics`, `subscriptions`) |
 | Zod schemas | 8 |
-| Components | 30 files across 6 directories (`ui`, `shop`, `dashboard`, `product`, `catalog`, `category`) |
+| Components | 38 files across 8 directories (`ui`, `shop`, `dashboard`, `product`, `catalog`, `category`, `analytics`, `billing`) |
 | shadcn components | button, input, label, card, form, textarea, badge, copy-button |
 | Locked decisions | 14 (in `docs/DECISIONS.md`) |
 
@@ -319,19 +330,25 @@ lib/db/
 ├── products.ts        — createProduct, getProducts, getProduct, updateProduct, deleteProduct, countProducts
 ├── catalog.ts         — getPublicShop, getPublicProducts, getPublicProduct, countActiveProducts
 ├── variants.ts        — createVariant, updateVariant, deleteVariant, bulkCreateVariants
-└── categories.ts      — getCategories, getCategory, createCategory, updateCategory, deleteCategory
+├── categories.ts      — getCategories, getCategory, createCategory, updateCategory, deleteCategory
+├── analytics.ts       — trackEvent, getAnalyticsOverview, getDailyAnalytics, getTopProducts, getUniqueVisitors
+└── subscriptions.ts   — getFreePlan, getPlans, getShopSubscription, createFreeSubscription, upgradeSubscription, cancelSubscription, checkProductLimit
 
-lib/actions/
-├── shop.ts            — createShopAction
+app/actions/
+├── shop.ts            — createShopAction (+ auto-assign free subscription)
 ├── shop-settings.ts   — updateShopSettingsAction
-├── product.ts         — createProduct, updateProduct, deleteProduct, addVariant, deleteVariant, bulkCreateVariants
+├── product.ts         — createProduct (+ product limit check), updateProduct, deleteProduct, addVariant, deleteVariant, bulkCreateVariants
 ├── image.ts           — saveProductImages (CDN URLs), deleteProductImage (CDN + DB)
-└── category.ts        — createCategory, updateCategory, deleteCategory
+├── category.ts        — createCategory, updateCategory, deleteCategory
+├── analytics.ts       — trackWhatsAppClickAction, trackWhatsAppCheckoutAction
+└── billing.ts         — createCheckoutAction, cancelSubscriptionAction
 
-lib/auth.ts            — getUser, requireUser, requireShopAccess
+lib/auth/index.ts      — getUser, requireUser, requireShopAccess
 lib/uploadthing.ts     — useUploadThing, UploadButton, UploadDropzone (typed to OurFileRouter)
 lib/ut-api.ts          — UTApi instance (server-side file deletion)
-middleware.ts          — clerkMiddleware, public routes (/catalog, /sign-in, /sign-up, /api/webhooks, /api/uploadthing)
+lib/payfast.ts         — buildPayFastCheckoutUrl, validatePayFastITN, generateSignature
+lib/rate-limit.ts      — rateLimit (sliding window), getRateLimitKey
+middleware.ts          — clerkMiddleware, rate limiting (catalog 60/min, API 30/min), public routes
 ```
 
 ### Route Map
@@ -341,20 +358,23 @@ Public:
   /                                    — Landing → redirect to create-shop
   /sign-in/[[...sign-in]]             — Clerk sign-in
   /sign-up/[[...sign-up]]             — Clerk sign-up
-  /catalog/[slug]                      — Public shop storefront
-  /catalog/[slug]/products/[productId] — Public product detail
+  /catalog/[slug]                      — Public shop storefront (+ PAGE_VIEW tracking)
+  /catalog/[slug]/products/[productId] — Public product detail (+ PRODUCT_VIEW tracking)
 
 Protected (require Clerk auth):
-  /create-shop                         — Shop creation form
+  /create-shop                         — Shop creation form (+ auto-assign free plan)
   /dashboard/[slug]                    — Dashboard overview (rich stats)
   /dashboard/[slug]/products           — Product list
-  /dashboard/[slug]/products/new       — Create product form (with category dropdown)
+  /dashboard/[slug]/products/new       — Create product form (with category dropdown + product limit)
   /dashboard/[slug]/products/[id]      — Product detail + edit form + variants
   /dashboard/[slug]/categories         — Category management (CRUD)
+  /dashboard/[slug]/analytics          — Analytics dashboard (views, clicks, top products, period toggle)
+  /dashboard/[slug]/billing            — Billing dashboard (plan cards, usage meter, PayFast upgrade)
   /dashboard/[slug]/settings           — Shop settings (profile, location, social)
 
 API:
   /api/webhooks/clerk                  — Clerk webhook (user.created/updated/deleted)
+  /api/webhooks/payfast                — PayFast ITN webhook (subscription COMPLETE/CANCELLED)
   /api/uploadthing                     — Uploadthing file upload endpoint (GET + POST)
 ```
 
@@ -368,9 +388,11 @@ API:
 | ~~**Base64 → CDN migration script**~~ | ✅ Fixed | `scripts/migrate-images.ts` — one-time script uploads base64 images to Uploadthing CDN. |
 | ~~**Catalog category filter**~~ | ✅ Fixed | Category pills on public catalog, client-side filtering in `catalog-search-filter.tsx`. |
 | ~~**Product sorting**~~ | ✅ Fixed | Sort dropdown (newest, price low→high, price high→low, A→Z) in `catalog-search-filter.tsx`. |
-| **No rate limiting** | 🟡 Medium | Public catalog routes have no abuse prevention. Need before marketing. |
+| ~~**No rate limiting**~~ | ✅ Fixed | In-memory sliding window rate limiter. Catalog: 60 req/min, API: 30 req/min. Upgrade to Upstash for serverless. |
 | ~~**Legacy `lib/dev-auth.ts`**~~ | ✅ Fixed | Deleted — no longer exists. |
 | **Cart — no server validation** | 🟢 Low | Stock quantities validated client-side only. |
+| **Rate limiter — in-memory** | 🟢 Low | Works single-instance. Upgrade to Upstash Redis for multi-instance serverless. |
+| **POPIA compliance** | 🟡 Medium | Privacy policy + data deletion not yet implemented. Required before public launch. |
 
 ---
 
@@ -382,14 +404,15 @@ API:
 2. ~~**Catalog category filter**~~ — Category pills on public catalog (already built in Phase 3.6).
 3. ~~**Product sorting**~~ — Sort dropdown on public catalog (already built in Phase 3.6).
 
-### 🟡 Revenue (Phase 5 — Monetise)
+### ✅ Tier 2 Revenue & Intelligence — COMPLETE
 
-4. **Simple analytics** — Catalog views + WhatsApp click tracking. Sellers won't pay for what they can't measure.
-5. **PayFast subscriptions** — Free (10 products) → Pro R199/mo (unlimited). Revenue engine.
-6. **Rate limiting** — Must-have before any marketing push.
+4. ~~**Simple analytics**~~ — Catalog views + WhatsApp click tracking + seller analytics dashboard.
+5. ~~**PayFast subscriptions**~~ — Free (10 products) → Pro R199/mo (unlimited). Billing page + ITN webhook.
+6. ~~**Rate limiting**~~ — In-memory sliding window on catalog (60/min) + API (30/min) routes.
 
-### 🟢 Growth (Phase 6 — Competitive Moat)
+### 🟡 Tier 3 — Growth & Competitive Moat (Next)
 
 7. **WhatsApp Business API** — Automated order confirmations + delivery updates.
-8. **Seller verification admin flow** — Trust is everything in SA wholesale.
-9. **SEO + OG images** — Organic discovery via Google and social shares.
+8. **Seller verification admin flow** — Trust is everything in SA wholesale. Admin dashboard for `isVerified` approval.
+9. **SEO + OG images** — Dynamic OG images via `ImageResponse`, structured data (JSON-LD), sitemap.xml.
+10. **POPIA compliance** — Privacy policy page, data deletion flow, consent management.

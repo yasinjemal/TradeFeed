@@ -96,6 +96,16 @@ export async function createProductAction(
       return { success: false, error: "Shop not found or access denied." };
     }
 
+    // 1b. Check product limit (free tier gate)
+    const { checkProductLimit } = await import("@/lib/db/subscriptions");
+    const limit = await checkProductLimit(access.shopId);
+    if (!limit.allowed) {
+      return {
+        success: false,
+        error: `Product limit reached (${limit.current}/${limit.limit}). Upgrade to Pro for unlimited products.`,
+      };
+    }
+
     // 2. Extract and validate
     const rawInput = {
       name: formData.get("name") as string,

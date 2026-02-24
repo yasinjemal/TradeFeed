@@ -54,6 +54,7 @@ model Shop {
   users       ShopUser[]                      // Users linked to this shop
   products    Product[]                       // Products belonging to this shop
   categories  Category[]                      // Product categories for this shop
+  subscription Subscription?                  // Current billing subscription
 
   @@index([slug])
   @@index([isActive])
@@ -213,4 +214,84 @@ model ProductVariant {
   @@unique([productId, size, color])
   @@index([productId])
   @@index([productId, isActive])
+}
+
+// ============================================================
+// ANALYTICS EVENT: Lightweight page view + click tracking
+// Tracks catalog views, product views, and WhatsApp clicks.
+// ============================================================
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      EventType                        // PAGE_VIEW, PRODUCT_VIEW, WHATSAPP_CLICK
+  shopId    String                           // Tenant scope
+  productId String?                          // Optional — null for catalog-level events
+  
+  // Visitor metadata (no PII — just anonymised fingerprint)
+  visitorId String?                          // Hashed IP or anonymous session ID
+  userAgent String?                          // Browser user-agent (for device stats)
+  referrer  String?                          // Where the visitor came from
+
+  createdAt DateTime @default(now())
+
+  @@index([shopId, type, createdAt])
+  @@index([shopId, productId, type])
+  @@index([createdAt])
+}
+
+enum EventType {
+  PAGE_VIEW                                  // Catalog page view
+  PRODUCT_VIEW                               // Individual product detail view
+  WHATSAPP_CLICK                             // WhatsApp order/enquiry button tap
+  WHATSAPP_CHECKOUT                          // Cart checkout via WhatsApp
+}
+
+// ============================================================
+// SUBSCRIPTION PLAN: Defines available plans + features
+// Phase 5 — PayFast billing.
+// ============================================================
+model Plan {
+  id             String   @id @default(cuid())
+  name           String                      // "Free", "Pro", "Business"
+  slug           String   @unique            // "free", "pro", "business"
+  priceInCents   Int      @default(0)        // Monthly price in ZAR cents (0 = free)
+  productLimit   Int      @default(10)       // Max products (0 = unlimited)
+  features       String?                     // JSON array of feature strings
+  isActive       Boolean  @default(true)
+
+  subscriptions  Subscription[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ============================================================
+// SUBSCRIPTION: Links a shop to a plan with billing state
+// ============================================================
+model Subscription {
+  id              String             @id @default(cuid())
+  status          SubscriptionStatus @default(ACTIVE)
+
+  shopId          String             @unique     // One subscription per shop
+  shop            Shop               @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  planId          String
+  plan            Plan               @relation(fields: [planId], references: [id])
+
+  // PayFast billing
+  payfastToken    String?                        // PayFast subscription token (for cancellations)
+  currentPeriodStart DateTime @default(now())
+  currentPeriodEnd   DateTime?                   // null = no expiry (free plan)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([shopId])
+  @@index([planId])
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
 }

@@ -54,4 +54,6 @@ export interface CartContextValue {
   whatsappNumber: string;
   /** Shop slug for localStorage scoping */
   shopSlug: string;
+  /** Shop ID for analytics tracking */
+  shopId: string;
 }

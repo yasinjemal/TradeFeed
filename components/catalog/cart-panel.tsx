@@ -25,6 +25,7 @@ import { useEffect, useCallback } from "react";
 import { useCart } from "@/lib/cart/cart-context";
 import { buildWhatsAppCheckoutUrl } from "@/lib/cart/whatsapp-message";
 import { formatZAR } from "@/types";
+import { trackWhatsAppCheckoutAction } from "@/app/actions/analytics";
 
 interface CartPanelProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
     totalItems,
     totalPriceInCents,
     whatsappNumber,
+    shopId,
   } = useCart();
 
   // Close on Escape key
@@ -66,10 +68,13 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
     const url = buildWhatsAppCheckoutUrl(whatsappNumber, items);
     window.open(url, "_blank", "noopener,noreferrer");
 
+    // Track checkout event (fire-and-forget)
+    void trackWhatsAppCheckoutAction(shopId);
+
     // Clear cart after opening WhatsApp
     clearCart();
     onClose();
-  }, [items, whatsappNumber, clearCart, onClose]);
+  }, [items, whatsappNumber, shopId, clearCart, onClose]);
 
   const handleClearCart = useCallback(() => {
     if (!confirm("Remove all items from your cart?")) return;

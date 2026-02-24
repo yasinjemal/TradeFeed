@@ -81,12 +81,14 @@ function saveCart(shopSlug: string, items: CartItem[]): void {
 interface CartProviderProps {
   children: React.ReactNode;
   shopSlug: string;
+  shopId: string;
   whatsappNumber: string;
 }
 
 export function CartProvider({
   children,
   shopSlug,
+  shopId,
   whatsappNumber,
 }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -178,6 +180,7 @@ export function CartProvider({
       totalPriceInCents,
       whatsappNumber,
       shopSlug,
+      shopId,
     }),
     [
       items,
@@ -189,6 +192,7 @@ export function CartProvider({
       totalPriceInCents,
       whatsappNumber,
       shopSlug,
+      shopId,
     ]
   );
 

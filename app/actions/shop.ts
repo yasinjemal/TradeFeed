@@ -87,7 +87,14 @@ export async function createShopAction(
     // 4. Create shop via data access layer (NOT direct Prisma call)
     const shop = await createShop(parsed.data, userId);
 
-    // 5. Redirect to the shop dashboard
+    // 5. Auto-assign Free subscription to new shop
+    const { createFreeSubscription } = await import("@/lib/db/subscriptions");
+    await createFreeSubscription(shop.id).catch((err: unknown) => {
+      console.error("[createShopAction] Failed to create free subscription:", err);
+      // Non-fatal — shop is still created
+    });
+
+    // 6. Redirect to the shop dashboard
     // redirect() throws internally — Next.js handles this
     redirect(`/dashboard/${shop.slug}`);
   } catch (error: unknown) {

@@ -13,6 +13,7 @@
 // ============================================================
 
 import { getCatalogProduct, getCatalogShop } from "@/lib/db/catalog";
+import { trackEvent } from "@/lib/db/analytics";
 import { formatZAR } from "@/types";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -61,6 +62,9 @@ export default async function ProductDetailPage({
 
   const product = await getCatalogProduct(productId, shop.id);
   if (!product) return notFound();
+
+  // ── Track product view (fire-and-forget) ───────────────
+  void trackEvent({ type: "PRODUCT_VIEW", shopId: shop.id, productId });
 
   // ── Derive data ────────────────────────────────────────
   const prices = product.variants.map((v) => v.priceInCents);

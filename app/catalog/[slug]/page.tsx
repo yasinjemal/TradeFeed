@@ -16,6 +16,7 @@ import {
   getCatalogProducts,
   getCatalogShop,
 } from "@/lib/db/catalog";
+import { trackEvent } from "@/lib/db/analytics";
 import { notFound } from "next/navigation";
 import { ShopProfile } from "@/components/catalog/shop-profile";
 import { CatalogSearchFilter } from "@/components/catalog/catalog-search-filter";
@@ -30,6 +31,9 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   if (!shop) return notFound();
 
   const products = await getCatalogProducts(shop.id);
+
+  // ── Track page view (fire-and-forget — don't block render) ──
+  void trackEvent({ type: "PAGE_VIEW", shopId: shop.id });
 
   // ── Empty State ────────────────────────────────────────
   if (products.length === 0) {
@@ -99,6 +103,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
       <CatalogSearchFilter
         products={products}
         shopSlug={slug}
+        shopId={shop.id}
         categories={categories}
       />
     </div>

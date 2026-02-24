@@ -68,7 +68,7 @@ export default async function CatalogLayout({
   );
 
   return (
-    <CartProvider shopSlug={slug} whatsappNumber={shop.whatsappNumber}>
+    <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber}>
       <div className="min-h-screen bg-[#fafaf9]">
       {/* ── Shop Header ─────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-stone-200/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
