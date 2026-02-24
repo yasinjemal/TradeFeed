@@ -11,7 +11,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "npx tsx prisma/seed.ts"
+    "db:seed": "npx tsx prisma/seed.ts",
+    "migrate:images": "npx tsx scripts/migrate-images.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.38.2",

@@ -362,23 +362,25 @@ API:
 
 | Issue | Severity | Notes |
 |-------|----------|-------|
-| ~~**Base64 images in DB**~~ | ✅ Fixed | Swapped to Uploadthing CDN in Phase 4. Old base64 images may need migration script. |
+| ~~**Base64 images in DB**~~ | ✅ Fixed | Swapped to Uploadthing CDN in Phase 4. Migration script created: `npm run migrate:images`. |
 | ~~**No category management UI**~~ | ✅ Fixed | Full CRUD at `/dashboard/[slug]/categories`, dropdown on create/edit forms. |
 | ~~**No product edit form**~~ | ✅ Fixed | Inline edit form on product detail page. |
-| **Base64 → CDN migration script** | 🟡 Medium | Existing base64 images in DB need one-time upload to CDN. |
+| ~~**Base64 → CDN migration script**~~ | ✅ Fixed | `scripts/migrate-images.ts` — one-time script uploads base64 images to Uploadthing CDN. |
+| ~~**Catalog category filter**~~ | ✅ Fixed | Category pills on public catalog, client-side filtering in `catalog-search-filter.tsx`. |
+| ~~**Product sorting**~~ | ✅ Fixed | Sort dropdown (newest, price low→high, price high→low, A→Z) in `catalog-search-filter.tsx`. |
 | **No rate limiting** | 🟡 Medium | Public catalog routes have no abuse prevention. Need before marketing. |
-| **Legacy `lib/dev-auth.ts`** | 🟢 Low | Dead file, no longer imported anywhere. Safe to delete. |
+| ~~**Legacy `lib/dev-auth.ts`**~~ | ✅ Fixed | Deleted — no longer exists. |
 | **Cart — no server validation** | 🟢 Low | Stock quantities validated client-side only. |
 
 ---
 
 ## What's Next — Priority Roadmap
 
-### 🔴 Immediate (Phase 4 Remaining)
+### ✅ Tier 1 Quick Wins — COMPLETE
 
-1. **Base64 → CDN migration script** — Existing images need one-time upload to Uploadthing CDN.
-2. **Catalog category filter** — Public catalog should have category tabs/pills for browsing.
-3. **Product sorting** — Pin featured products, sort by newest/price.
+1. ~~**Base64 → CDN migration script**~~ — `scripts/migrate-images.ts` created. Run `npm run migrate:images`.
+2. ~~**Catalog category filter**~~ — Category pills on public catalog (already built in Phase 3.6).
+3. ~~**Product sorting**~~ — Sort dropdown on public catalog (already built in Phase 3.6).
 
 ### 🟡 Revenue (Phase 5 — Monetise)
 
