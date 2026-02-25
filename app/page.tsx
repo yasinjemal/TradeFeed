@@ -101,7 +101,7 @@ export default async function HomePage() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <MobileNav ctaHref={ctaHref} ctaLabel={ctaLabel} isSignedIn={!!clerkId} />
+            <MobileNav ctaHref={ctaHref} ctaLabel={ctaLabel} isSignedIn={!!clerkId} stats={{ shops: shopCount, products: productCount, orders: orderCount }} />
             {clerkId ? (
               <Link
                 href={ctaHref}
