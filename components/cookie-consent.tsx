@@ -55,8 +55,8 @@ export function CookieConsent() {
                 We respect your privacy
               </p>
               <p className="text-xs text-stone-400 leading-relaxed">
-                TradeFeed uses essential cookies for authentication only. We don&apos;t use
-                third-party tracking. Our analytics are first-party and anonymised.{" "}
+                TradeFeed uses essential cookies for authentication and Google Analytics
+                for anonymised traffic insights. We don&apos;t share data with advertisers.{" "}
                 <Link
                   href="/privacy"
                   className="text-emerald-400 hover:underline"

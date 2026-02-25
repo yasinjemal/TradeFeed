@@ -18,12 +18,14 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",                   // Clerk sign-up
   "/catalog/(.*)",                  // Public storefront (buyer-facing)
   "/marketplace(.*)",               // Public marketplace (discovery)
+  "/track(.*)",                     // Public order tracking (buyer-facing)
   "/api/webhooks/(.*)",             // Clerk webhooks (server-to-server)
   "/api/uploadthing(.*)",           // Uploadthing CDN upload endpoint
   "/api/og(.*)",                    // Dynamic OG image generation
   "/privacy",                       // Privacy policy (POPIA)
   "/terms",                         // Terms of service
   "/sitemap.xml",                   // SEO sitemap
+  "/robots.txt",                    // SEO robots
 ]);
 
 // Routes that should be rate-limited

@@ -184,10 +184,13 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-stone-900">8. Cookies & Analytics</h2>
             <p className="text-stone-600 leading-relaxed">
-              TradeFeed uses essential cookies for authentication (Clerk session management). We
-              use anonymised, first-party analytics to track catalog page views and WhatsApp click
-              counts — no third-party tracking scripts (no Google Analytics, no Facebook Pixel).
-              We do not track individual buyers across sessions.
+              TradeFeed uses essential cookies for authentication (Clerk session management) and
+              anonymised, first-party analytics to track catalog page views and WhatsApp click
+              counts. We also use Google Analytics 4 (GA4) to understand aggregate traffic
+              patterns, page popularity, and user flow. GA4 uses cookies to distinguish unique
+              visitors but we have IP anonymisation enabled and do not enable Google advertising
+              features. No Facebook Pixel or other third-party tracking scripts are used.
+              We do not track individual buyers across sessions or share data with advertisers.
             </p>
           </section>
 
