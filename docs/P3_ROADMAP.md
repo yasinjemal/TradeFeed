@@ -84,7 +84,7 @@
 - Remove `'unsafe-inline'` from `script-src`
 - Estimated effort: **2–3 hours**
 
-### 2.2 ⬜ POPIA Data Retention Automation
+### 2.2 ✅ POPIA Data Retention Automation
 
 **Current:** Privacy policy states data retention rules but no automated cleanup.
 **Goal:** Scheduled job to purge old PII (buyer phone numbers) from orders older than 24 months.
@@ -211,7 +211,7 @@
 
 ## 5. Seller Experience
 
-### 5.1 ⬜ Bulk Product Import (CSV/Excel)
+### 5.1 ✅ Bulk Product Import (CSV/Excel)
 
 **Current:** Products created one-by-one via form.
 **Goal:** Upload CSV/Excel to create multiple products at once.
@@ -231,7 +231,7 @@
 - Status transition buttons with optimistic UI
 - Estimated effort: **4–6 hours**
 
-### 5.3 ⬜ Multi-Shop Support
+### 5.3 ✅ Multi-Shop Support
 
 **Current:** Schema supports it (ShopUser join table) but UI assumes one shop per user.
 **Goal:** Shop switcher dropdown in dashboard nav for users with multiple shops.
@@ -240,7 +240,7 @@
 - Show shop selector if user has > 1 shop
 - Estimated effort: **2–3 hours**
 
-### 5.4 ⬜ Product Variant Bulk Editor
+### 5.4 ✅ Product Variant Bulk Editor
 
 **Current:** Variants edited one-by-one on product edit page.
 **Goal:** Spreadsheet-like inline editor for batch stock/price updates.
@@ -316,7 +316,7 @@
 - Alert: Email + WhatsApp on downtime
 - Estimated effort: **1 hour**
 
-### 7.3 ⬜ Database Query Performance
+### 7.3 ✅ Database Query Performance
 
 **Current:** No query logging or slow query detection.
 **Goal:** Enable Prisma query logging in dev, add indexes for common queries.

@@ -20,9 +20,10 @@ import {
   productCreateSchema,
   productUpdateSchema,
   variantCreateSchema,
+  variantUpdateSchema,
 } from "@/lib/validation/product";
 import { createProduct, updateProduct, deleteProduct } from "@/lib/db/products";
-import { createVariant, deleteVariant, batchCreateVariants } from "@/lib/db/variants";
+import { createVariant, deleteVariant, batchCreateVariants, updateVariant } from "@/lib/db/variants";
 import { requireShopAccess } from "@/lib/auth";
 
 // ============================================================
@@ -388,5 +389,121 @@ export async function batchCreateVariantsAction(
   } catch (error: unknown) {
     console.error("[batchCreateVariantsAction] Error:", error);
     return { success: false, error: "Failed to create variants." };
+  }
+}
+
+// ============================================================
+// VARIANT UPDATE ACTIONS
+// ============================================================
+
+/**
+ * Update a single variant's price, stock, or SKU.
+ *
+ * WHAT: Partial update of variant fields.
+ * WHY: Seller adjusts pricing or restocks from the bulk editor.
+ */
+export async function updateVariantAction(
+  shopSlug: string,
+  productId: string,
+  variantId: string,
+  data: {
+    priceInRands?: string;
+    stock?: string;
+    sku?: string;
+  },
+  deps: ProductActionDeps = defaultDeps
+): Promise<ActionResult> {
+  try {
+    const access = await resolveShopAccess(shopSlug, deps);
+    if (!access) {
+      return { success: false, error: "Shop not found or access denied." };
+    }
+
+    const parsed = variantUpdateSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: "Please fix the errors below.",
+        fieldErrors: extractFieldErrors(parsed.error.issues),
+      };
+    }
+
+    const updated = await updateVariant(variantId, access.shopId, parsed.data);
+    if (!updated) {
+      return { success: false, error: "Variant not found or access denied." };
+    }
+
+    deps.revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("[updateVariantAction] Error:", error);
+    return { success: false, error: "Something went wrong. Please try again." };
+  }
+}
+
+/**
+ * Bulk update multiple variants at once (price + stock).
+ *
+ * WHAT: Accepts array of variant edits, validates each, updates in sequence.
+ * WHY: Bulk editor saves all changed rows in one action call.
+ */
+export async function bulkUpdateVariantsAction(
+  shopSlug: string,
+  productId: string,
+  updates: {
+    variantId: string;
+    priceInRands: string;
+    stock: string;
+    sku?: string;
+  }[]
+): Promise<ActionResult & { updatedCount?: number; errors?: string[] }> {
+  try {
+    const access = await resolveShopAccess(shopSlug, defaultDeps);
+    if (!access) {
+      return { success: false, error: "Shop not found or access denied." };
+    }
+
+    if (updates.length === 0) {
+      return { success: true, updatedCount: 0 };
+    }
+
+    if (updates.length > 200) {
+      return { success: false, error: "Too many variants (max 200 at once)." };
+    }
+
+    const errors: string[] = [];
+    let updatedCount = 0;
+
+    for (const upd of updates) {
+      const parsed = variantUpdateSchema.safeParse({
+        priceInRands: upd.priceInRands,
+        stock: upd.stock,
+        ...(upd.sku !== undefined && { sku: upd.sku }),
+      });
+
+      if (!parsed.success) {
+        errors.push(`Variant ${upd.variantId}: Invalid data`);
+        continue;
+      }
+
+      const updated = await updateVariant(upd.variantId, access.shopId, parsed.data);
+      if (updated) {
+        updatedCount++;
+      } else {
+        errors.push(`Variant ${upd.variantId}: Not found or access denied`);
+      }
+    }
+
+    revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
+    revalidatePath(`/catalog/${shopSlug}`);
+
+    return {
+      success: errors.length === 0,
+      updatedCount,
+      ...(errors.length > 0 && { errors, error: `${errors.length} variant(s) failed to update.` }),
+    };
+  } catch (error: unknown) {
+    console.error("[bulkUpdateVariantsAction] Error:", error);
+    return { success: false, error: "Something went wrong. Please try again." };
   }
 }

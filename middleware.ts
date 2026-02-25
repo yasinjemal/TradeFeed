@@ -23,6 +23,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/uploadthing(.*)",           // Uploadthing CDN upload endpoint
   "/api/og(.*)",                    // Dynamic OG image generation
   "/api/health",                    // Health check (uptime monitoring)
+  "/api/cron/(.*)",                  // Vercel Cron jobs (server-to-server)
   "/privacy",                       // Privacy policy (POPIA)
   "/terms",                         // Terms of service
   "/sitemap.xml",                   // SEO sitemap

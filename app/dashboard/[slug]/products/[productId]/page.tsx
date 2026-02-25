@@ -22,6 +22,7 @@ import { ImageUpload } from "@/components/product/image-upload";
 import { EditProductForm } from "@/components/product/edit-product-form";
 import { SmartVariantCreator } from "@/components/product/smart-variant-creator";
 import { VariantGrid } from "@/components/product/variant-grid";
+import { VariantBulkEditor } from "@/components/product/variant-bulk-editor";
 import { AddVariantForm } from "@/components/product/add-variant-form";
 import { DeleteProductButton } from "@/components/product/delete-product-button";
 
@@ -253,7 +254,7 @@ export default async function ProductDetailPage({
         }))}
       />
 
-      {/* ── Variant Grid ────────────────────────────────── */}
+      {/* ── Variant Bulk Editor ──────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-stone-900">
@@ -262,8 +263,11 @@ export default async function ProductDetailPage({
               ({product.variants.length})
             </span>
           </h2>
+          <span className="text-xs text-stone-400">
+            Edit price, stock &amp; SKU inline • Save All when done
+          </span>
         </div>
-        <VariantGrid
+        <VariantBulkEditor
           variants={product.variants.map((v) => ({
             id: v.id,
             size: v.size,
