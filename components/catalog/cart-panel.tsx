@@ -31,6 +31,7 @@ import {
 import { formatZAR } from "@/types";
 import { trackWhatsAppCheckoutAction } from "@/app/actions/analytics";
 import { checkoutAction } from "@/app/actions/orders";
+import { toast } from "sonner";
 
 const SA_PROVINCES = [
   "Eastern Cape",
@@ -142,7 +143,19 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       // 5. Track checkout event (fire-and-forget)
       void trackWhatsAppCheckoutAction(shopId);
 
-      // 6. Clear cart after opening WhatsApp
+      // 6. Show tracking notification
+      if (result.orderNumber) {
+        toast.success("Order placed!", {
+          description: `Order ${result.orderNumber} — Track your order anytime.`,
+          action: result.trackingUrl ? {
+            label: "Track Order",
+            onClick: () => window.open(result.trackingUrl!, "_self"),
+          } : undefined,
+          duration: 10000,
+        });
+      }
+
+      // 7. Clear cart after opening WhatsApp
       clearCart();
       onClose();
     });

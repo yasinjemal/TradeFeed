@@ -262,11 +262,24 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
               </div>
             ))}
           </div>
-          {/* Total */}
+          {/* Total + Reorder */}
           <div className="px-6 py-4 border-t border-stone-700/50 bg-stone-900/80 flex items-center justify-between">
             <span className="text-sm font-medium text-stone-400">Order Total</span>
             <span className="text-lg font-extrabold text-emerald-400">{formatRand(order.totalCents)}</span>
           </div>
+          {(order.status === "DELIVERED" || order.status === "CANCELLED") && (
+            <div className="px-6 py-3 border-t border-stone-800/30 bg-stone-900/40">
+              <Link
+                href={`/${order.shop.slug}`}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-600/20"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.181-3.182" />
+                </svg>
+                Reorder from {order.shop.name}
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* ── Buyer & Shop Info Row ───────────────────────── */}

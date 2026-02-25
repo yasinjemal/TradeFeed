@@ -23,7 +23,7 @@ import { db } from "@/lib/db";
  * POPIA: WhatsApp number is shown intentionally — it's the order channel.
  */
 export async function getCatalogShop(slug: string) {
-  return db.shop.findFirst({
+  const shop = await db.shop.findFirst({
     where: {
       slug,
       isActive: true,
@@ -57,10 +57,29 @@ export async function getCatalogShop(slug: string) {
           products: {
             where: { isActive: true },
           },
+          orders: {
+            where: { status: "DELIVERED" },
+          },
+          reviews: {
+            where: { isApproved: true },
+          },
         },
       },
     },
   });
+
+  if (!shop) return null;
+
+  // Calculate average review rating
+  const reviewAgg = await db.review.aggregate({
+    where: { shopId: shop.id, isApproved: true },
+    _avg: { rating: true },
+  });
+
+  return {
+    ...shop,
+    avgRating: reviewAgg._avg.rating ?? 0,
+  };
 }
 
 /**

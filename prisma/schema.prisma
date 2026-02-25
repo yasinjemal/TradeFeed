@@ -48,6 +48,10 @@ model Shop {
   tiktok      String?                         // TikTok handle (without @)
   website     String?                         // External website URL
 
+  // ── Referral ─────────────────────────────────────────
+  referralCode  String?  @unique              // Auto-generated referral code (e.g. "TF-ABC123")
+  referredBy    String?                       // Slug of the shop that referred this seller
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -58,10 +62,12 @@ model Shop {
   subscription Subscription?                  // Current billing subscription
   promotedListings PromotedListing[]          // Marketplace promoted listings
   orders      Order[]                         // Orders placed at this shop
+  reviews     Review[]                        // Reviews for this shop's products
 
   @@index([slug])
   @@index([isActive])
   @@index([isFeaturedShop])
+  @@index([referralCode])
 }
 
 // ============================================================
@@ -516,6 +522,7 @@ model Review {
   comment     String?                               // Review text body
 
   shopId      String                                // Tenant scope
+  shop        Shop     @relation(fields: [shopId], references: [id])
   productId   String                                // Which product was reviewed
 
   // Buyer info (no account required — like orders)

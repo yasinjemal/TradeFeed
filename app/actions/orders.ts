@@ -26,6 +26,7 @@ type ActionResult = {
   success: boolean;
   error?: string;
   orderNumber?: string;
+  trackingUrl?: string;
 };
 
 // ── Checkout Action (Buyer) ─────────────────────────────────
@@ -118,7 +119,7 @@ export async function checkoutAction(
     // 4. Revalidate the catalog (stock counts changed)
     revalidatePath(`/catalog/${shopSlug}`);
 
-    return { success: true, orderNumber: order.orderNumber };
+    return { success: true, orderNumber: order.orderNumber, trackingUrl: `/track/${encodeURIComponent(order.orderNumber)}` };
   } catch (error) {
     console.error("[checkoutAction] Error:", error);
     return { success: false, error: "Failed to place order. Please try again." };

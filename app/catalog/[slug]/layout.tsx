@@ -21,6 +21,7 @@ import { CartButton } from "@/components/catalog/cart-button";
 import { WishlistButton } from "@/components/catalog/wishlist-button";
 import { generateShopJsonLd } from "@/lib/seo/json-ld";
 import { BackToTop } from "@/components/ui/back-to-top";
+import { ShareCatalog } from "@/components/catalog/share-catalog";
 
 interface CatalogLayoutProps {
   children: React.ReactNode;
@@ -153,7 +154,14 @@ export default async function CatalogLayout({
               </div>
             </Link>
 
-            {/* WhatsApp Contact Button */}
+            {/* Share + WhatsApp Contact */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <ShareCatalog
+                shopName={shop.name}
+                shopSlug={slug}
+                productCount={shop._count.products}
+                variant="icon"
+              />
             <a
               href={`https://wa.me/${shop.whatsappNumber.replace("+", "")}`}
               target="_blank"
@@ -171,6 +179,7 @@ export default async function CatalogLayout({
               <span className="hidden sm:inline">WhatsApp</span>
               <span className="sm:hidden">Chat</span>
             </a>
+            </div>
           </div>
         </div>
       </header>

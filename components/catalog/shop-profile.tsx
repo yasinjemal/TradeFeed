@@ -29,7 +29,8 @@ interface ShopProfileProps {
     isVerified: boolean;
     whatsappNumber: string;
     createdAt: Date;
-    _count: { products: number };
+    avgRating: number;
+    _count: { products: number; orders: number; reviews: number };
   };
 }
 
@@ -86,6 +87,14 @@ export function ShopProfile({ shop }: ShopProfileProps) {
                 </svg>
                 Verified
               </span>
+            )}
+            {shop.avgRating > 0 && (
+              <span className="inline-flex items-center gap-1 text-amber-600 font-medium">
+                ⭐ {shop.avgRating.toFixed(1)} ({shop._count.reviews})
+              </span>
+            )}
+            {shop._count.orders > 0 && (
+              <span className="text-emerald-600 font-medium">✅ {shop._count.orders} orders fulfilled</span>
             )}
             <span>📦 {shop._count.products} products</span>
             <span className="hidden sm:inline">•</span>
@@ -283,9 +292,11 @@ export function ShopProfile({ shop }: ShopProfileProps) {
           )}
 
           {/* Trust Footer */}
-          <div className="pt-3 border-t border-stone-100 flex items-center gap-4 text-xs text-stone-400">
-            <span>🛡️ Member since {memberSince}</span>
-            <span>📦 {shop._count.products} products listed</span>
+          <div className="pt-3 border-t border-stone-100 flex flex-wrap items-center gap-3 text-xs text-stone-400">
+            <span>🛡️ Since {memberSince}</span>
+            <span>📦 {shop._count.products} products</span>
+            {shop._count.orders > 0 && <span>✅ {shop._count.orders} orders delivered</span>}
+            {shop.avgRating > 0 && <span>⭐ {shop.avgRating.toFixed(1)} avg rating ({shop._count.reviews} reviews)</span>}
             {shop.isVerified && <span className="text-emerald-600">✅ Verified seller</span>}
           </div>
         </div>

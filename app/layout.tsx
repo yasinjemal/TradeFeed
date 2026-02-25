@@ -33,6 +33,15 @@ export default function RootLayout({
       afterSignOutUrl="/"
     >
       <html lang="en">
+        <head>
+          {/* PWA */}
+          <link rel="manifest" href="/manifest.json" />
+          <meta name="theme-color" content="#059669" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta name="apple-mobile-web-app-title" content="TradeFeed" />
+          <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+        </head>
         <body>
           {children}
           <Toaster
@@ -51,6 +60,12 @@ export default function RootLayout({
             richColors
           />
           <CookieConsent />
+          {/* Register Service Worker for PWA */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`
+            }}
+          />
         </body>
       </html>
     </ClerkProvider>

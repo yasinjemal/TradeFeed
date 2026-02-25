@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline — TradeFeed</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0c0a09;
+      color: #fafaf9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+    .logo {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #34d399, #059669);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 30px rgba(5,150,105,0.2);
+    }
+    .logo span { color: #fff; font-weight: 800; font-size: 24px; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+    h1 span { color: #34d399; }
+    p { color: #78716c; font-size: 0.95rem; max-width: 360px; line-height: 1.6; margin-bottom: 1.5rem; }
+    button {
+      padding: 12px 32px;
+      border-radius: 12px;
+      border: none;
+      background: #059669;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover { background: #34d399; }
+    .hint {
+      position: fixed; bottom: 2rem;
+      color: #57534e; font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo"><span>T</span></div>
+  <h1>Trade<span>Feed</span></h1>
+  <p>
+    You're offline right now. Check your internet connection and try again.
+    Your cart and wishlist are saved locally — they'll be here when you're back online.
+  </p>
+  <button onclick="window.location.reload()">Try Again</button>
+  <p class="hint">Load shedding? Your data is safe. 🔌</p>
+</body>
+</html>
