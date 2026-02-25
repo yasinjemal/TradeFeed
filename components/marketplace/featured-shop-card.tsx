@@ -5,6 +5,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import type { FeaturedShop } from "@/lib/db/marketplace";
 
 interface FeaturedShopCardProps {
@@ -17,9 +18,11 @@ export function FeaturedShopCard({ shop }: FeaturedShopCardProps) {
       <div className="w-[200px] sm:w-[220px] bg-stone-900 rounded-2xl border border-stone-800/50 p-4 transition-all duration-300 hover:border-stone-700 hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-0.5">
         <div className="flex items-center gap-3 mb-3">
           {shop.logoUrl ? (
-            <img
+            <Image
               src={shop.logoUrl}
               alt={shop.name}
+              width={40}
+              height={40}
               className="w-10 h-10 rounded-full object-cover border-2 border-stone-700 group-hover:border-emerald-500/50 transition-colors"
             />
           ) : (

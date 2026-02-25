@@ -8,8 +8,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useCallback } from "react";
-import Link from "next/link";
-import { WishlistHeart } from "./wishlist-heart";
+import Link from "next/link";import Image from "next/image";import { WishlistHeart } from "./wishlist-heart";
 
 interface CatalogProduct {
   id: string;
@@ -285,11 +284,12 @@ function ProductCard({
         <div className="relative aspect-[3/4] bg-stone-100 overflow-hidden">
           <div className="absolute inset-0 shimmer" />
           {primaryImage ? (
-            <img
+            <Image
               src={primaryImage.url}
               alt={primaryImage.altText || product.name}
-              className="relative w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-              loading="lazy"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="relative object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             />
           ) : (
             <div className="relative w-full h-full flex flex-col items-center justify-center gap-2 text-stone-300 bg-gradient-to-br from-stone-50 to-stone-100">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import {
@@ -7,6 +8,7 @@ import {
   AnimatedGradient,
   FaqItem,
 } from "@/components/landing/animated-stats";
+import { MobileNav } from "@/components/landing/mobile-nav";
 
 // ============================================================
 // TradeFeed Landing Page — Industry-Grade Conversion Machine
@@ -99,6 +101,7 @@ export default async function HomePage() {
           </div>
 
           <div className="flex items-center gap-2.5">
+            <MobileNav ctaHref={ctaHref} ctaLabel={ctaLabel} isSignedIn={!!clerkId} />
             {clerkId ? (
               <Link
                 href={ctaHref}
@@ -329,7 +332,7 @@ export default async function HomePage() {
                       ].map((product) => (
                         <div key={product.name} className="group rounded-xl bg-stone-800/40 border border-stone-700/30 overflow-hidden hover:border-emerald-500/30 transition-all hover:shadow-lg hover:shadow-emerald-500/5">
                           <div className="aspect-square relative overflow-hidden">
-                            <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                            <Image src={product.img} alt={product.name} fill sizes="200px" className="object-cover group-hover:scale-105 transition-transform duration-500" />
                             {product.badge && <span className={`absolute top-2 left-2 ${product.badgeColor} text-white text-[9px] font-bold px-2 py-0.5 rounded-md shadow-lg`}>{product.badge}</span>}
                           </div>
                           <div className="p-2.5">
@@ -377,7 +380,9 @@ export default async function HomePage() {
                         { img: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=200&h=200&fit=crop&q=80", name: "Denim", price: "R 450" },
                       ].map((p) => (
                         <div key={p.name} className="rounded-lg overflow-hidden bg-stone-800/60">
-                          <img src={p.img} alt={p.name} className="w-full aspect-square object-cover" loading="lazy" />
+                          <div className="relative w-full aspect-square">
+                            <Image src={p.img} alt={p.name} fill sizes="100px" className="object-cover" />
+                          </div>
                           <div className="p-1.5">
                             <p className="text-[7px] text-stone-300 truncate">{p.name}</p>
                             <p className="text-[8px] font-bold text-emerald-400">{p.price}</p>
@@ -639,7 +644,7 @@ export default async function HomePage() {
                   </div>
                   <p className="text-sm text-stone-300 leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
                   <div className="mt-5 flex items-center gap-3 pt-5 border-t border-stone-800/50">
-                    <img src={t.img} alt={t.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-stone-800" loading="lazy" />
+                    <Image src={t.img} alt={t.name} width={40} height={40} className="rounded-full object-cover ring-2 ring-stone-800" />
                     <div>
                       <p className="text-sm font-semibold text-stone-200">{t.name}</p>
                       <p className="text-[11px] text-stone-500">{t.location}</p>

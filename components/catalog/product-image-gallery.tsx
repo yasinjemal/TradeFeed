@@ -13,6 +13,8 @@
 
 "use client";
 
+import Image from "next/image";
+
 import { useState, useCallback, useRef, type TouchEvent } from "react";
 
 interface GalleryImage {
@@ -119,11 +121,14 @@ export function ProductImageGallery({
         <div className="absolute inset-0 shimmer" />
 
         {currentImage && (
-          <img
+          <Image
             key={currentImage.id}
             src={currentImage.url}
             alt={currentImage.altText || `${productName} photo ${activeIndex + 1}`}
-            className={`relative w-full h-full object-cover transition-opacity duration-300 ${
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority={activeIndex === 0}
+            className={`object-cover transition-opacity duration-300 ${
               isTransitioning ? "opacity-0" : "opacity-100"
             }`}
           />
@@ -235,11 +240,12 @@ export function ProductImageGallery({
               }`}
               aria-label={`View image ${i + 1}`}
             >
-              <img
+              <Image
                 src={img.url}
                 alt={img.altText || `${productName} photo ${i + 1}`}
-                className="w-full h-full object-cover"
-                loading="lazy"
+                fill
+                sizes="80px"
+                className="object-cover"
               />
             </button>
           ))}

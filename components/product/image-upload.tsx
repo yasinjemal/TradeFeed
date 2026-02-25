@@ -12,6 +12,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import NextImage from "next/image";
 import { useUploadThing } from "@/lib/uploadthing";
 import {
   saveProductImagesAction,
@@ -180,10 +181,12 @@ export function ImageUpload({
                 ${i === 0 ? "col-span-2 row-span-2 border-emerald-300 shadow-sm" : "border-stone-200"}
                 ${deletingId === img.id ? "opacity-40 scale-95" : "hover:border-emerald-400"}`}
             >
-              <img
+              <NextImage
                 src={img.url}
                 alt={img.altText ?? "Product"}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 50vw, 200px"
+                className="object-cover"
               />
               {/* Main badge */}
               {i === 0 && (

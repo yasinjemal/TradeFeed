@@ -22,6 +22,7 @@
 "use client";
 
 import { useEffect, useCallback, useState, useTransition } from "react";
+import Image from "next/image";
 import { useCart } from "@/lib/cart/cart-context";
 import {
   buildWhatsAppCheckoutUrl,
@@ -65,6 +66,8 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
 
   const [isPending, startTransition] = useTransition();
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [buyerName, setBuyerName] = useState("");
+  const [buyerPhone, setBuyerPhone] = useState("");
   const [showDelivery, setShowDelivery] = useState(false);
   const [delivery, setDelivery] = useState<DeliveryAddress>({
     address: "",
@@ -122,8 +125,8 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         shopSlug,
         orderItems,
         whatsappMessage,
-        undefined, // buyerName
-        undefined, // buyerPhone
+        buyerName.trim() || undefined,
+        buyerPhone.trim() || undefined,
         undefined, // buyerNote
         deliveryData?.address || undefined,
         deliveryData?.city || undefined,
@@ -247,9 +250,11 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 {/* Thumbnail */}
                 <div className="w-12 h-12 rounded-lg bg-stone-200 overflow-hidden flex-shrink-0">
                   {item.imageUrl ? (
-                    <img
+                    <Image
                       src={item.imageUrl}
                       alt={item.productName}
+                      width={48}
+                      height={48}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -354,6 +359,39 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 <span>{checkoutError}</span>
               </div>
             )}
+
+            {/* ── Buyer Info (Optional) ─────────────────── */}
+            <div className="space-y-2.5 p-3 bg-stone-50 rounded-xl border border-stone-100">
+              <p className="text-xs font-medium text-stone-500">Your details <span className="text-stone-400">(optional)</span></p>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label htmlFor="buyer-name" className="block text-xs font-medium text-stone-500 mb-1">
+                    Name
+                  </label>
+                  <input
+                    id="buyer-name"
+                    type="text"
+                    placeholder="Your name"
+                    value={buyerName}
+                    onChange={(e) => setBuyerName(e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-stone-900 placeholder:text-stone-400"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="buyer-phone" className="block text-xs font-medium text-stone-500 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    id="buyer-phone"
+                    type="tel"
+                    placeholder="07X XXX XXXX"
+                    value={buyerPhone}
+                    onChange={(e) => setBuyerPhone(e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-stone-900 placeholder:text-stone-400"
+                  />
+                </div>
+              </div>
+            </div>
 
             {/* ── Delivery Address Toggle ─────────────────── */}
             <button

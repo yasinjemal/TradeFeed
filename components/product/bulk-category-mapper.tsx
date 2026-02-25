@@ -8,6 +8,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   setProductGlobalCategoryAction,
@@ -236,9 +237,11 @@ export function BulkCategoryMapper({
                 {/* Product Info */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   {product.images[0]?.url ? (
-                    <img
+                    <Image
                       src={product.images[0].url}
                       alt={product.name}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-lg object-cover border border-stone-200"
                     />
                   ) : (

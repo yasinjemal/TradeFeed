@@ -3,6 +3,7 @@
 // ============================================================
 
 import Link from "next/link";
+import Image from "next/image";
 import { getShopBySlug } from "@/lib/db/shops";
 import { getProducts } from "@/lib/db/products";
 import { countUnmappedProducts } from "@/lib/db/global-categories";
@@ -111,11 +112,13 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
                 <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden transition-all duration-300 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-50 hover:-translate-y-0.5 h-full">
                   {/* Image */}
                   {product.images.length > 0 ? (
-                    <div className="aspect-square bg-stone-100 overflow-hidden">
-                      <img
-                        src={product.images[0]?.url}
+                    <div className="aspect-square bg-stone-100 overflow-hidden relative">
+                      <Image
+                        src={product.images[0]!.url}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
                   ) : (

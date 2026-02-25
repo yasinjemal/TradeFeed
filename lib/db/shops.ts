@@ -207,12 +207,18 @@ export async function getShopsForUser(userId: string) {
  * WHY: Dashboard needs product count, stock totals, price range, profile status.
  */
 export async function getDashboardStats(shopId: string) {
+  // Start of today (UTC — fine for daily aggregates)
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
   const [
     productCount,
     activeProductCount,
     variantAgg,
     recentProducts,
     outOfStockCount,
+    ordersToday,
+    revenueToday,
   ] = await Promise.all([
     // Total products
     db.product.count({ where: { shopId } }),
@@ -245,6 +251,15 @@ export async function getDashboardStats(shopId: string) {
     db.productVariant.count({
       where: { product: { shopId }, stock: 0 },
     }),
+    // Orders placed today
+    db.order.count({
+      where: { shopId, createdAt: { gte: startOfToday } },
+    }),
+    // Revenue today (sum of totalCents)
+    db.order.aggregate({
+      where: { shopId, createdAt: { gte: startOfToday } },
+      _sum: { totalCents: true },
+    }),
   ]);
 
   return {
@@ -257,5 +272,7 @@ export async function getDashboardStats(shopId: string) {
     maxPrice: variantAgg._max.priceInCents,
     outOfStockCount,
     recentProducts,
+    ordersToday,
+    revenueTodayCents: revenueToday._sum.totalCents ?? 0,
   };
 }

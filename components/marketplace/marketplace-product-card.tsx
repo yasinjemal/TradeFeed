@@ -8,6 +8,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import type { MarketplaceProduct } from "@/lib/db/marketplace";
 import { trackMarketplaceClickAction, trackPromotedClickAction } from "@/app/actions/marketplace";
 
@@ -45,11 +46,12 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
         {/* Image */}
         <div className={`relative ${compact ? "aspect-square" : "aspect-[3/4]"} bg-stone-800 overflow-hidden`}>
           {product.imageUrl ? (
-            <img
+            <Image
               src={product.imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-              loading="lazy"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-stone-600">
@@ -111,9 +113,11 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
           {!compact && (
             <div className="flex items-center gap-1.5 pt-0.5">
               {product.shop.logoUrl ? (
-                <img
+                <Image
                   src={product.shop.logoUrl}
                   alt={product.shop.name}
+                  width={16}
+                  height={16}
                   className="w-4 h-4 rounded-full object-cover border border-stone-700"
                 />
               ) : (

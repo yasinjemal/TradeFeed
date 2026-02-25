@@ -11,6 +11,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 interface OverviewData {
@@ -162,9 +163,11 @@ export function AnalyticsDashboard({
                 </span>
                 <div className="w-10 h-10 rounded-lg bg-stone-100 overflow-hidden flex-shrink-0">
                   {product.imageUrl ? (
-                    <img
+                    <Image
                       src={product.imageUrl}
                       alt={product.name}
+                      width={40}
+                      height={40}
                       className="w-full h-full object-cover"
                     />
                   ) : (

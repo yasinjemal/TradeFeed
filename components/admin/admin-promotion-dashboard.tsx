@@ -7,6 +7,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { adminCancelPromotionAction } from "@/app/actions/admin";
 import type { PromotionRevenueStats, AdminPromotion, ContentViolation } from "@/lib/db/admin";
@@ -290,7 +291,7 @@ export function AdminPromotionDashboard({
                   {/* Product image */}
                   <div className="w-10 h-10 rounded-lg bg-stone-800 overflow-hidden flex-shrink-0">
                     {promo.product.imageUrl ? (
-                      <img src={promo.product.imageUrl} alt="" className="w-full h-full object-cover" />
+                      <Image src={promo.product.imageUrl} alt="" width={40} height={40} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-stone-600 text-[10px]">
                         No img

@@ -10,6 +10,7 @@
 import { useEffect } from "react";
 import { useWishlist } from "@/lib/wishlist/wishlist-context";
 import Link from "next/link";
+import Image from "next/image";
 import { formatZAR } from "@/types";
 
 interface WishlistPanelProps {
@@ -106,9 +107,11 @@ export function WishlistPanel({ isOpen, onClose, shopSlug }: WishlistPanelProps)
                   className="w-16 h-16 rounded-lg bg-stone-200 overflow-hidden flex-shrink-0"
                 >
                   {item.imageUrl ? (
-                    <img
+                    <Image
                       src={item.imageUrl}
                       alt={item.productName}
+                      width={64}
+                      height={64}
                       className="w-full h-full object-cover"
                     />
                   ) : (

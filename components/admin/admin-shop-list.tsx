@@ -12,6 +12,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   verifyShopAction,
@@ -203,9 +204,11 @@ export function AdminShopList({
                   {/* Logo */}
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-stone-700 to-stone-800 flex items-center justify-center flex-shrink-0">
                     {shop.logoUrl ? (
-                      <img
+                      <Image
                         src={shop.logoUrl}
                         alt={shop.name}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-xl object-cover"
                       />
                     ) : (

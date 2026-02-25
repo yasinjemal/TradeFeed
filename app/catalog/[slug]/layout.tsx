@@ -13,6 +13,7 @@
 
 import { getCatalogShop } from "@/lib/db/catalog";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CartProvider } from "@/lib/cart/cart-context";
@@ -111,9 +112,11 @@ export default async function CatalogLayout({
               {/* Logo circle — gradient fallback if no logo */}
               <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-emerald-400 via-emerald-600 to-emerald-700 flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-200/50 ring-2 ring-white">
                 {shop.logoUrl ? (
-                  <img
+                  <Image
                     src={shop.logoUrl}
                     alt={shop.name}
+                    width={44}
+                    height={44}
                     className="w-11 h-11 rounded-full object-cover"
                   />
                 ) : (

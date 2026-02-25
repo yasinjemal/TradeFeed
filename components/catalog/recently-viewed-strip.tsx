@@ -8,6 +8,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRecentlyViewed } from "@/lib/recently-viewed/recently-viewed";
 import { formatZAR } from "@/types";
 
@@ -51,13 +52,14 @@ export function RecentlyViewedStrip({
           >
             <div className="bg-white rounded-xl border border-stone-200/50 overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
               {/* Image */}
-              <div className="aspect-square bg-stone-100 overflow-hidden">
+              <div className="aspect-square bg-stone-100 overflow-hidden relative">
                 {item.imageUrl ? (
-                  <img
+                  <Image
                     src={item.imageUrl}
                     alt={item.productName}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="lazy"
+                    fill
+                    sizes="120px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-stone-300">

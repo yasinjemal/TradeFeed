@@ -8,6 +8,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getOrderByNumber } from "@/lib/db/tracking";
 import { OrderTimeline } from "@/components/tracking/order-timeline";
 import { TrackingSearch } from "@/components/tracking/tracking-search";
@@ -329,9 +330,11 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
             <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3">Seller</h3>
             <div className="flex items-center gap-3 mb-3">
               {order.shop.logoUrl ? (
-                <img
+                <Image
                   src={order.shop.logoUrl}
                   alt={order.shop.name}
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-lg object-cover ring-1 ring-stone-700"
                 />
               ) : (

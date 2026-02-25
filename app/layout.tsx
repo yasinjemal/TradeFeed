@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tradefeed.co.za"),
   title: "TradeFeed — Structured Product Catalogs for WhatsApp Sellers",
   description:
     "Upload products. Share your catalog link. Get organized orders via WhatsApp — no app download required. Built for South African wholesalers & retailers.",
@@ -20,6 +21,30 @@ export const metadata: Metadata = {
     "SA marketplace",
     "buy online South Africa",
   ],
+  openGraph: {
+    type: "website",
+    siteName: "TradeFeed",
+    title: "TradeFeed — WhatsApp Catalogs for SA Wholesalers",
+    description:
+      "Upload products, share your catalog link, get structured WhatsApp orders. Free for South African wholesalers & retailers.",
+    url: "https://tradefeed.co.za",
+    images: [
+      {
+        url: "/api/og?title=TradeFeed&subtitle=WhatsApp+Catalogs+for+SA+Wholesalers",
+        width: 1200,
+        height: 630,
+        alt: "TradeFeed — WhatsApp Catalogs for SA Wholesalers",
+      },
+    ],
+    locale: "en_ZA",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TradeFeed — WhatsApp Catalogs for SA Wholesalers",
+    description:
+      "Upload products, share your catalog link, get structured WhatsApp orders. Free for South African wholesalers & retailers.",
+    images: ["/api/og?title=TradeFeed&subtitle=WhatsApp+Catalogs+for+SA+Wholesalers"],
+  },
 };
 
 export default function RootLayout({
