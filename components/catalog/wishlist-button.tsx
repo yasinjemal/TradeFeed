@@ -29,11 +29,11 @@ export function WishlistButton({ shopSlug }: WishlistButtonProps) {
 
   return (
     <>
-      {/* ── Floating Button ──────────────────────────────── */}
-      <div className="fixed bottom-6 left-4 sm:left-6 z-40">
+      {/* ── Floating Button (above bottom nav) ────────────── */}
+      <div className="fixed bottom-[4.5rem] left-3 sm:left-4 z-40">
         <button
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 bg-white hover:bg-stone-50 text-stone-700 pl-3.5 pr-4 py-2.5 rounded-2xl shadow-xl shadow-stone-300/30 border border-stone-200/80 transition-all duration-200 hover:shadow-2xl active:scale-95"
+          className="flex items-center gap-2 bg-white hover:bg-stone-50 text-stone-700 pl-3 pr-3.5 py-2 rounded-2xl shadow-lg shadow-stone-200/40 border border-stone-200/60 transition-all duration-200 active:scale-95"
         >
           {/* Heart icon */}
           <div className="relative">
