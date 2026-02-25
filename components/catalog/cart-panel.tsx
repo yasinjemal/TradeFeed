@@ -68,6 +68,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [buyerName, setBuyerName] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
+  const [buyerNote, setBuyerNote] = useState("");
   const [showDelivery, setShowDelivery] = useState(false);
   const [delivery, setDelivery] = useState<DeliveryAddress>({
     address: "",
@@ -127,7 +128,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         whatsappMessage,
         buyerName.trim() || undefined,
         buyerPhone.trim() || undefined,
-        undefined, // buyerNote
+        buyerNote.trim() || undefined, // buyerNote
         deliveryData?.address || undefined,
         deliveryData?.city || undefined,
         deliveryData?.province || undefined,
@@ -390,6 +391,20 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                     className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-stone-900 placeholder:text-stone-400"
                   />
                 </div>
+              </div>
+              <div>
+                <label htmlFor="buyer-note" className="block text-xs font-medium text-stone-500 mb-1">
+                  Order notes
+                </label>
+                <textarea
+                  id="buyer-note"
+                  placeholder="Any special instructions…"
+                  value={buyerNote}
+                  onChange={(e) => setBuyerNote(e.target.value)}
+                  rows={2}
+                  maxLength={500}
+                  className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-stone-900 placeholder:text-stone-400 resize-none"
+                />
               </div>
             </div>
 

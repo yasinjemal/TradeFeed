@@ -20,6 +20,9 @@ import { expirePromotedListings } from "@/lib/db/promotions";
 // Server component: fetches initial data, passes to client shell.
 // ============================================================
 
+// ISR: revalidate marketplace every 5 minutes for fresh listings
+export const revalidate = 300;
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 interface MarketplacePageProps {

@@ -56,6 +56,9 @@ export async function generateMetadata({
   return {
     title: `${product.name} — ${shop.name}`,
     description: product.description || `${product.name} from ${minPrice} at ${shop.name}`,
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za"}/catalog/${slug}/products/${productId}`,
+    },
     openGraph: {
       title: `${product.name} — ${shop.name}`,
       description: product.description || `${product.name} from ${minPrice}`,
@@ -128,7 +131,7 @@ export default async function ProductDetailPage({
         priceInCents={minPrice}
       />
       {/* JSON-LD Structured Data for SEO */}
-      {generateProductJsonLd(shop, product).map((schema, i) => (
+      {generateProductJsonLd(shop, product, reviewAgg).map((schema, i) => (
         <script
           key={`product-ld-${i}`}
           type="application/ld+json"

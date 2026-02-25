@@ -20,6 +20,9 @@ import { trackEvent } from "@/lib/db/analytics";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ShopProfile } from "@/components/catalog/shop-profile";
+
+// ISR: revalidate catalog pages every 60 seconds for near-real-time updates
+export const revalidate = 60;
 import { CatalogSearchFilter } from "@/components/catalog/catalog-search-filter";
 import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
 

@@ -96,7 +96,8 @@ export function generateProductJsonLd(
     images: { url: string }[];
     variants: { priceInCents: number; stock: number; isActive?: boolean }[];
     category: { name: string } | null;
-  }
+  },
+  reviewAgg?: { averageRating: number; totalReviews: number } | null
 ) {
   const activePrices = product.variants
     .filter((v) => v.isActive !== false)
@@ -120,6 +121,17 @@ export function generateProductJsonLd(
       "@type": "Brand",
       name: shop.name,
     },
+    ...(reviewAgg && reviewAgg.totalReviews > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: reviewAgg.averageRating.toFixed(1),
+            reviewCount: reviewAgg.totalReviews,
+            bestRating: "5",
+            worstRating: "1",
+          },
+        }
+      : {}),
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "ZAR",

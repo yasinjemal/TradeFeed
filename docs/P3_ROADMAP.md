@@ -3,7 +3,7 @@
 > Priority 3 enhancements identified during the Feb 2026 site audit.
 > P1 (critical) and P2 (important) items are complete — see commit `e852f3f`.
 > These P3 items are **nice-to-haves** that improve performance, UX, and revenue.
-> Last updated: **2026-02-25**
+> Last updated: **2026-02-26**
 
 ---
 
@@ -29,7 +29,7 @@
 - Env vars: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
 - Estimated effort: **1–2 hours**
 
-### 1.2 ⬜ ISR / Static Generation for High-Traffic Pages
+### 1.2 ✅ ISR / Static Generation for High-Traffic Pages
 
 **Current:** All catalog and marketplace pages are fully dynamic (server-rendered on every request).
 **Goal:** Use Incremental Static Regeneration (ISR) for pages that don't change often.
@@ -60,7 +60,7 @@
 - Pass `placeholder="blur"` + `blurDataURL` to `<Image>`
 - Estimated effort: **3–4 hours** (schema migration + upload hook + component updates)
 
-### 1.5 ⬜ Service Worker Cache Strategy
+### 1.5 ✅ Service Worker Cache Strategy
 
 **Current:** SW just serves `offline.html` on network failure.
 **Goal:** Implement stale-while-revalidate for catalog pages + cache product images.
@@ -106,7 +106,7 @@
 
 ## 3. SEO & Discoverability
 
-### 3.1 ⬜ Structured Data for Products (JSON-LD Enhancement)
+### 3.1 ✅ Structured Data for Products (JSON-LD Enhancement)
 
 **Current:** JSON-LD on product detail pages covers basic `Product` schema.
 **Goal:** Add `AggregateOffer`, `AggregateRating`, `Review`, and `Brand` to product JSON-LD.
@@ -115,7 +115,7 @@
 - Add `offers.priceCurrency: "ZAR"`, `offers.availability`, `aggregateRating`
 - Estimated effort: **1–2 hours**
 
-### 3.2 ⬜ Breadcrumb JSON-LD
+### 3.2 ✅ Breadcrumb JSON-LD
 
 **Current:** No breadcrumb structured data.
 **Goal:** Add `BreadcrumbList` schema to catalog and product pages.
@@ -124,7 +124,7 @@
 - `/catalog/[slug]/products/[productId]` → Home > Marketplace > Shop > Product
 - Estimated effort: **1 hour**
 
-### 3.3 ⬜ Per-Shop OG Images
+### 3.3 ✅ Per-Shop OG Images
 
 **Current:** Shops share the generic TradeFeed OG image.
 **Goal:** Generate per-shop OG images with shop name, logo, product count.
@@ -133,7 +133,7 @@
 - Add `openGraph` metadata to `app/catalog/[slug]/layout.tsx`
 - Estimated effort: **1–2 hours**
 
-### 3.4 ⬜ Canonical URLs
+### 3.4 ✅ Canonical URLs
 
 **Current:** No explicit canonical tags.
 **Goal:** Add `alternates.canonical` to metadata on all pages to prevent duplicate content.
@@ -167,7 +167,7 @@
 - Sync localStorage wishlist to DB on sign-in
 - Estimated effort: **4–6 hours**
 
-### 4.3 ⬜ Product Search (Full-Text)
+### 4.3 ✅ Product Search (Full-Text)
 
 **Current:** Catalog has client-side text filter (searches name only in loaded products).
 **Goal:** Server-side full-text search with Prisma `search` or PostgreSQL `tsvector`.
@@ -177,7 +177,7 @@
 - Add search bar to marketplace page
 - Estimated effort: **3–4 hours**
 
-### 4.4 ⬜ Cart Persistence (LocalStorage Restore)
+### 4.4 ✅ Cart Persistence (LocalStorage Restore)
 
 **Current:** Cart state is in React context only — lost on refresh.
 **Goal:** Persist cart to `localStorage` and restore on page load.
@@ -187,7 +187,7 @@
 - Hydrate on mount (handle SSR safely)
 - Estimated effort: **1–2 hours**
 
-### 4.5 ⬜ Checkout Notes / Gift Message
+### 4.5 ✅ Checkout Notes / Gift Message
 
 **Current:** `buyerNote` field exists on Order schema but no UI to fill it.
 **Goal:** Add optional note/instructions textarea in cart panel.
@@ -221,7 +221,7 @@
 - Validate rows, show preview, bulk create via Prisma `createMany`
 - Estimated effort: **4–6 hours**
 
-### 5.2 ⬜ Order Management Dashboard
+### 5.2 ✅ Order Management Dashboard
 
 **Current:** Sellers see orders list but limited management.
 **Goal:** Full order lifecycle: confirm → pack → dispatch → deliver, with WhatsApp status notifications.
@@ -250,7 +250,7 @@
 - Bulk save action
 - Estimated effort: **3–4 hours**
 
-### 5.5 ⬜ Low Stock Alerts
+### 5.5 ✅ Low Stock Alerts
 
 **Current:** Dashboard shows out-of-stock count but no proactive alerts.
 **Goal:** WhatsApp notification or in-app alert when any variant stock drops below threshold.
@@ -307,7 +307,7 @@
 - Wire into `global-error.tsx` and `error.tsx`
 - Estimated effort: **1–2 hours**
 
-### 7.2 ⬜ Uptime Monitoring
+### 7.2 ✅ Uptime Monitoring
 
 **Current:** No uptime monitoring.
 **Goal:** Set up free uptime monitoring (BetterUptime, UptimeRobot, or Checkly).

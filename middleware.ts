@@ -22,6 +22,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks/(.*)",             // Clerk webhooks (server-to-server)
   "/api/uploadthing(.*)",           // Uploadthing CDN upload endpoint
   "/api/og(.*)",                    // Dynamic OG image generation
+  "/api/health",                    // Health check (uptime monitoring)
   "/privacy",                       // Privacy policy (POPIA)
   "/terms",                         // Terms of service
   "/sitemap.xml",                   // SEO sitemap

@@ -227,6 +227,33 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}
+      {/* Low Stock Warning Banner                            */}
+      {/* ═══════════════════════════════════════════════════ */}
+      {stats.outOfStockCount > 0 && (
+        <Link
+          href={`/dashboard/${slug}/notifications`}
+          className="group flex items-center gap-4 rounded-2xl border border-red-200/80 bg-gradient-to-r from-red-50 to-orange-50 p-5 hover:shadow-lg hover:shadow-red-100/50 transition-all"
+        >
+          <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+            <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-red-900 text-sm">
+              {stats.outOfStockCount} variant{stats.outOfStockCount !== 1 ? "s" : ""} out of stock
+            </h3>
+            <p className="text-xs text-red-700/70 mt-0.5">
+              Tap to review and restock — don&apos;t miss sales!
+            </p>
+          </div>
+          <svg className="w-5 h-5 text-red-400 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </Link>
+      )}
+
+      {/* ═══════════════════════════════════════════════════ */}
       {/* Profile Completeness CTA + Share Catalog            */}
       {/* ═══════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

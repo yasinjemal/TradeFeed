@@ -57,6 +57,9 @@ export async function generateMetadata({
     title: `${shop.name} — TradeFeed`,
     description:
       shop.description || `Browse ${shop.name}'s catalog on TradeFeed`,
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za"}/catalog/${slug}`,
+    },
     openGraph: {
       title: `${shop.name} — TradeFeed`,
       description:
