@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CookieConsent } from "@/components/cookie-consent";
 import { Toaster } from "sonner";
@@ -60,6 +61,14 @@ export default function RootLayout({
             richColors
           />
           <CookieConsent />
+          {/* Google Analytics 4 */}
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=G-TL499XE6KR"
+            strategy="afterInteractive"
+          />
+          <Script id="ga4-init" strategy="afterInteractive">
+            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TL499XE6KR');`}
+          </Script>
           {/* Register Service Worker for PWA */}
           <script
             dangerouslySetInnerHTML={{
