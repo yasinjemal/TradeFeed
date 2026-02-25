@@ -51,12 +51,12 @@ export function MobileNav({ ctaHref, ctaLabel, isSignedIn }: MobileNavProps) {
         <div className="fixed inset-0 z-[60] md:hidden">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            className="absolute inset-0 bg-stone-950/80 backdrop-blur-md animate-in fade-in duration-200"
             onClick={() => setOpen(false)}
           />
 
-          {/* Slide-in panel */}
-          <div className="absolute right-0 top-0 bottom-0 w-72 bg-stone-950 border-l border-stone-800/50 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+          {/* Full-screen panel on mobile, side-panel on tablet */}
+          <div className="absolute inset-0 sm:left-auto sm:w-80 bg-stone-950 sm:border-l sm:border-stone-800/50 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
             {/* Close button */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-stone-800/50">
               <span className="font-bold text-lg tracking-tight">
