@@ -82,6 +82,11 @@ model User {
   firstName     String?
   lastName      String?
   imageUrl      String?
+
+  // Admin moderation
+  isBanned      Boolean  @default(false)      // Platform-wide ban
+  bannedReason  String?                       // Why the user was banned
+  bannedAt      DateTime?                     // When the ban was applied
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -159,6 +164,11 @@ model Product {
   name        String                          // e.g. "Floral Summer Dress"
   description String?                         // Product description
   isActive    Boolean @default(true)          // Controls visibility on public catalog
+
+  // Admin moderation
+  isFlagged   Boolean @default(false)          // Flagged for policy violation
+  flagReason  String?                          // Why it was flagged
+  flaggedAt   DateTime?                        // When it was flagged
 
   shopId      String
   shop        Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
@@ -592,4 +602,26 @@ enum BulkImportStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+// ============================================================
+// ADMIN AUDIT LOG: Track all admin actions for accountability
+// Records who did what, when, and to which entity.
+// ============================================================
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminId     String                               // Clerk user ID of the admin
+  adminEmail  String                               // Email snapshot for readability
+  action      String                               // e.g. "VERIFY_SHOP", "BAN_USER", "FLAG_PRODUCT"
+  entityType  String                               // e.g. "Shop", "User", "Product", "Category"
+  entityId    String                               // ID of the affected entity
+  entityName  String?                              // Human-readable name snapshot
+  details     String?                              // JSON with extra context / before-after
+  
+  createdAt   DateTime @default(now())
+
+  @@index([adminId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
 }

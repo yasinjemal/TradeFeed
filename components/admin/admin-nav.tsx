@@ -11,7 +11,11 @@ const NAV_ITEMS = [
   { href: "/admin", label: "Overview", icon: "📊" },
   { href: "/admin/categories", label: "Categories", icon: "📂" },
   { href: "/admin/promotions", label: "Promotions", icon: "📢" },
+  { href: "/admin/orders", label: "Orders", icon: "📦" },
+  { href: "/admin/users", label: "Users", icon: "👥" },
+  { href: "/admin/moderation", label: "Moderation", icon: "🛡️" },
   { href: "/admin/analytics", label: "Analytics", icon: "📈" },
+  { href: "/admin/audit-log", label: "Audit Log", icon: "📋" },
 ] as const;
 
 export function AdminNav() {

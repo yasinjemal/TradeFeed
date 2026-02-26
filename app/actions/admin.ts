@@ -3,6 +3,7 @@
 // ============================================================
 // Actions for platform-level admin operations.
 // All actions require platform admin auth (ADMIN_USER_IDS).
+// Every mutation is audit-logged via logAdminAction().
 // ============================================================
 
 "use server";
@@ -18,6 +19,9 @@ import {
   deleteGlobalCategory,
   adminCancelPromotion,
 } from "@/lib/db/admin";
+import { logAdminAction } from "@/lib/db/admin-audit";
+import { banUser, unbanUser } from "@/lib/db/admin-users";
+import { flagProduct, unflagProduct } from "@/lib/db/admin-moderation";
 import { revalidatePath } from "next/cache";
 
 type ActionResult = { success: true; message: string } | { success: false; error: string };
@@ -31,8 +35,12 @@ type ActionResult = { success: true; message: string } | { success: false; error
  */
 export async function verifyShopAction(shopId: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const shop = await setShopVerified(shopId, true);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "SHOP_VERIFY", entityType: "shop", entityId: shopId, entityName: shop.name,
+    });
     revalidatePath("/admin");
     revalidatePath(`/catalog/${shop.name}`);
     return { success: true, message: `${shop.name} has been verified.` };
@@ -49,8 +57,12 @@ export async function verifyShopAction(shopId: string): Promise<ActionResult> {
  */
 export async function unverifyShopAction(shopId: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const shop = await setShopVerified(shopId, false);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "SHOP_UNVERIFY", entityType: "shop", entityId: shopId, entityName: shop.name,
+    });
     revalidatePath("/admin");
     return { success: true, message: `${shop.name} verification removed.` };
   } catch (error) {
@@ -66,8 +78,12 @@ export async function unverifyShopAction(shopId: string): Promise<ActionResult> 
  */
 export async function deactivateShopAction(shopId: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const shop = await setShopActive(shopId, false);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "SHOP_DEACTIVATE", entityType: "shop", entityId: shopId, entityName: shop.name,
+    });
     revalidatePath("/admin");
     return { success: true, message: `${shop.name} has been deactivated.` };
   } catch (error) {
@@ -83,8 +99,12 @@ export async function deactivateShopAction(shopId: string): Promise<ActionResult
  */
 export async function reactivateShopAction(shopId: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const shop = await setShopActive(shopId, true);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "SHOP_REACTIVATE", entityType: "shop", entityId: shopId, entityName: shop.name,
+    });
     revalidatePath("/admin");
     return { success: true, message: `${shop.name} has been reactivated.` };
   } catch (error) {
@@ -100,8 +120,13 @@ export async function reactivateShopAction(shopId: string): Promise<ActionResult
  */
 export async function toggleFeaturedShopAction(shopId: string, featured: boolean): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const shop = await setShopFeatured(shopId, featured);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: featured ? "SHOP_FEATURE" : "SHOP_UNFEATURE",
+      entityType: "shop", entityId: shopId, entityName: shop.name,
+    });
     revalidatePath("/admin");
     revalidatePath("/marketplace");
     return {
@@ -135,8 +160,12 @@ export async function createCategoryAction(data: {
   displayOrder?: number;
 }): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const cat = await createGlobalCategory(data);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "CATEGORY_CREATE", entityType: "category", entityId: cat.id, entityName: cat.name,
+    });
     revalidatePath("/admin/categories");
     revalidatePath("/marketplace");
     return { success: true, message: `Category "${cat.name}" created.` };
@@ -165,8 +194,13 @@ export async function updateCategoryAction(
   }
 ): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const cat = await updateGlobalCategory(categoryId, data);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "CATEGORY_UPDATE", entityType: "category", entityId: categoryId, entityName: cat.name,
+      details: data as Record<string, unknown>,
+    });
     revalidatePath("/admin/categories");
     revalidatePath("/marketplace");
     return { success: true, message: `Category "${cat.name}" updated.` };
@@ -185,8 +219,13 @@ export async function reorderCategoriesAction(
   updates: { id: string; displayOrder: number }[]
 ): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     await reorderCategories(updates);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "CATEGORY_REORDER", entityType: "category", entityId: "batch",
+      entityName: `${updates.length} categories`,
+    });
     revalidatePath("/admin/categories");
     revalidatePath("/marketplace");
     return { success: true, message: "Categories reordered." };
@@ -203,9 +242,13 @@ export async function reorderCategoriesAction(
  */
 export async function deleteCategoryAction(categoryId: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const result = await deleteGlobalCategory(categoryId);
     if (!result) return { success: false, error: "Category not found." };
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "CATEGORY_DELETE", entityType: "category", entityId: categoryId, entityName: result.name,
+    });
     revalidatePath("/admin/categories");
     revalidatePath("/marketplace");
     return { success: true, message: `Category "${result.name}" deleted.` };
@@ -226,8 +269,13 @@ export async function deleteCategoryAction(categoryId: string): Promise<ActionRe
  */
 export async function adminCancelPromotionAction(promotionId: string): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const result = await adminCancelPromotion(promotionId);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "PROMOTION_CANCEL", entityType: "promotion", entityId: promotionId,
+      entityName: `${result.product.name} (${result.shop.name})`,
+    });
     revalidatePath("/admin/promotions");
     return {
       success: true,
@@ -237,6 +285,104 @@ export async function adminCancelPromotionAction(promotionId: string): Promise<A
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to cancel promotion.",
+    };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// User Management — Ban / Unban
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Ban a user from the platform.
+ */
+export async function banUserAction(userId: string, reason: string): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const user = await banUser(userId, reason);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "USER_BAN", entityType: "user", entityId: userId,
+      entityName: user.email || userId,
+      details: { reason },
+    });
+    revalidatePath("/admin/users");
+    return { success: true, message: `User ${user.email} has been banned.` };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to ban user.",
+    };
+  }
+}
+
+/**
+ * Unban a user — restores platform access.
+ */
+export async function unbanUserAction(userId: string): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const user = await unbanUser(userId);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "USER_UNBAN", entityType: "user", entityId: userId,
+      entityName: user.email || userId,
+    });
+    revalidatePath("/admin/users");
+    return { success: true, message: `User ${user.email} has been unbanned.` };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to unban user.",
+    };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Product Moderation — Flag / Unflag
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Flag a product for policy violation — deactivates it.
+ */
+export async function flagProductAction(productId: string, reason: string): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const product = await flagProduct(productId, reason);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "PRODUCT_FLAG", entityType: "product", entityId: productId,
+      entityName: `${product.name} (${product.shop.name})`,
+      details: { reason },
+    });
+    revalidatePath("/admin/moderation");
+    return { success: true, message: `"${product.name}" has been flagged and deactivated.` };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to flag product.",
+    };
+  }
+}
+
+/**
+ * Unflag a product — restores it.
+ */
+export async function unflagProductAction(productId: string): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const product = await unflagProduct(productId);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "PRODUCT_UNFLAG", entityType: "product", entityId: productId,
+      entityName: `${product.name} (${product.shop.name})`,
+    });
+    revalidatePath("/admin/moderation");
+    return { success: true, message: `"${product.name}" has been restored.` };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to unflag product.",
     };
   }
 }
