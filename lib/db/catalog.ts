@@ -229,3 +229,102 @@ export async function getCatalogProductCount(shopId: string) {
     },
   });
 }
+
+/**
+ * Get all active combos for a shop's public catalog.
+ *
+ * WHAT: Returns combos with their items, images, and category.
+ * WHY: Buyers see combo deals in the catalog — bundles at special prices.
+ *
+ * FILTERING:
+ * - Only active combos (isActive: true)
+ * - Only combos with stock > 0
+ * - Sorted newest first
+ */
+export async function getCatalogCombos(shopId: string) {
+  return db.combo.findMany({
+    where: {
+      shopId,
+      isActive: true,
+      stock: { gt: 0 },
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      priceCents: true,
+      retailPriceCents: true,
+      stock: true,
+      comboCategory: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+      items: {
+        select: {
+          id: true,
+          productName: true,
+          variantLabel: true,
+          quantity: true,
+        },
+      },
+      images: {
+        where: { position: 0 },
+        select: {
+          url: true,
+          altText: true,
+        },
+        take: 1,
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/**
+ * Get a single combo for the public catalog detail page.
+ */
+export async function getCatalogCombo(comboId: string, shopId: string) {
+  return db.combo.findFirst({
+    where: {
+      id: comboId,
+      shopId,
+      isActive: true,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      priceCents: true,
+      retailPriceCents: true,
+      stock: true,
+      comboCategory: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+      items: {
+        select: {
+          id: true,
+          productName: true,
+          variantLabel: true,
+          quantity: true,
+          productId: true,
+        },
+      },
+      images: {
+        select: {
+          id: true,
+          url: true,
+          altText: true,
+          position: true,
+        },
+        orderBy: { position: "asc" },
+      },
+    },
+  });
+}

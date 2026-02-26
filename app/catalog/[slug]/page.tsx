@@ -15,6 +15,7 @@
 import {
   getCatalogProducts,
   getCatalogShop,
+  getCatalogCombos,
 } from "@/lib/db/catalog";
 import { trackEvent } from "@/lib/db/analytics";
 import { notFound } from "next/navigation";
@@ -24,6 +25,7 @@ import { ShopProfile } from "@/components/catalog/shop-profile";
 // ISR: revalidate catalog pages every 60 seconds for near-real-time updates
 export const revalidate = 60;
 import { CatalogSearchFilter } from "@/components/catalog/catalog-search-filter";
+import { ComboSection } from "@/components/catalog/combo-section";
 import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
 
 interface CatalogPageProps {
@@ -35,7 +37,10 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   const shop = await getCatalogShop(slug);
   if (!shop) return notFound();
 
-  const products = await getCatalogProducts(shop.id);
+  const [products, combos] = await Promise.all([
+    getCatalogProducts(shop.id),
+    getCatalogCombos(shop.id),
+  ]);
 
   // ── Track page view (fire-and-forget — don't block render) ──
   void trackEvent({ type: "PAGE_VIEW", shopId: shop.id });
@@ -103,6 +108,9 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
     <div className="space-y-5">
       {/* ── Shop Profile (collapsible trust section) ───── */}
       <ShopProfile shop={shop} />
+
+      {/* ── Combo Deals ─────────────────────────────── */}
+      <ComboSection combos={combos} shopSlug={slug} />
 
       {/* ── Search, Filter & Product Grid ─────────────── */}
       <CatalogSearchFilter

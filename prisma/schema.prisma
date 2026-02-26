@@ -60,6 +60,8 @@ model Shop {
   users       ShopUser[]                      // Users linked to this shop
   products    Product[]                       // Products belonging to this shop
   categories  Category[]                      // Product categories for this shop
+  combos          Combo[]                     // Combo deals for this shop
+  comboCategories ComboCategory[]             // Combo categories for this shop
   subscription Subscription?                  // Current billing subscription
   promotedListings PromotedListing[]          // Marketplace promoted listings
   orders      Order[]                         // Orders placed at this shop
@@ -639,6 +641,97 @@ enum BulkImportStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+// ============================================================
+// COMBO CATEGORY: Per-shop categories for combo deals
+// e.g. "Double Combo", "Triple Combo", "Summer Deals"
+// ============================================================
+model ComboCategory {
+  id       String @id @default(cuid())
+  name     String                             // e.g. "Double Combo", "Triple Combo"
+  slug     String                             // URL-safe (unique within shop)
+
+  shopId   String
+  shop     Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  combos   Combo[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([shopId, slug])
+  @@index([shopId])
+}
+
+// ============================================================
+// COMBO: Bundle deals — multiple products at a special price
+// e.g. "Jeans + Shirt Combo" at R499 (instead of R650 separately)
+// ============================================================
+model Combo {
+  id               String  @id @default(cuid())
+  name             String                      // e.g. "Jeans + Shirt Combo"
+  description      String?                     // Optional description
+  priceCents       Int                         // Combo deal price in ZAR cents
+  retailPriceCents Int?                        // Optional retail combo price
+  stock            Int     @default(0)         // Available quantity
+  isActive         Boolean @default(true)      // Controls visibility
+
+  shopId           String
+  shop             Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  comboCategoryId  String?
+  comboCategory    ComboCategory? @relation(fields: [comboCategoryId], references: [id], onDelete: SetNull)
+
+  items            ComboItem[]                 // Products included in this combo
+  images           ComboImage[]                // Combo images
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([shopId])
+  @@index([shopId, isActive])
+  @@index([comboCategoryId])
+}
+
+// ============================================================
+// COMBO ITEM: Products included in a combo bundle
+// Snapshot fields preserved even if original product is deleted.
+// ============================================================
+model ComboItem {
+  id            String @id @default(cuid())
+
+  comboId       String
+  combo         Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  // Reference to actual product/variant (nullable — may be deleted)
+  productId     String?
+  variantId     String?
+
+  // Snapshot fields (preserved even if product deleted)
+  productName   String                         // e.g. "Slim Fit Jeans"
+  variantLabel  String?                        // e.g. "Size 32 / Blue"
+  quantity      Int     @default(1)            // How many of this item in the combo
+
+  @@index([comboId])
+}
+
+// ============================================================
+// COMBO IMAGE: External image URLs for a combo
+// ============================================================
+model ComboImage {
+  id        String @id @default(cuid())
+  url       String                             // CDN image URL (Uploadthing)
+  key       String?                            // Uploadthing file key (for deletion)
+  altText   String?                            // Accessibility alt text
+  position  Int    @default(0)                 // Display order (0 = primary)
+
+  comboId   String
+  combo     Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([comboId])
 }
 
 // ============================================================
