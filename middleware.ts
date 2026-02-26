@@ -89,16 +89,19 @@ export default clerkMiddleware(async (auth, request) => {
 
   const csp = [
     "default-src 'self'",
-    // Scripts: nonce-based (modern browsers ignore unsafe-inline when nonce present)
+    // Scripts: nonce-based CSP Level 2.
+    // 'unsafe-inline' is a fallback for CSP Level 1 browsers only —
+    // modern browsers (Chrome 69+, Firefox 68+, Safari 15.4+) ignore
+    // 'unsafe-inline' when a nonce is present. This is per W3C spec.
     `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clerk.accounts.dev https://challenges.cloudflare.com`,
-    // Styles: own + inline (Tailwind)
+    // Styles: own + inline (Tailwind JIT injects inline styles)
     "style-src 'self' 'unsafe-inline'",
     // Images: own, Unsplash, Clerk, UploadThing CDN, data URIs
     "img-src 'self' data: blob: https://images.unsplash.com https://img.clerk.com https://images.clerk.dev https://utfs.io https://*.ufs.sh",
     // Fonts: own
     "font-src 'self' data:",
-    // Connect: own, GA4, Clerk, UploadThing
-    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com",
+    // Connect: own, GA4, Clerk, UploadThing, Sentry
+    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io",
     // Frames: Clerk challenges, Cloudflare
     "frame-src 'self' https://*.clerk.accounts.dev https://challenges.cloudflare.com",
     // Workers: own (service worker)
@@ -113,6 +116,11 @@ export default clerkMiddleware(async (auth, request) => {
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
+  // HSTS: enforce HTTPS (1 year, include subdomains)
+  response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  // Permissions Policy: restrict browser features not needed by TradeFeed
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+
 
   return response;
 });
