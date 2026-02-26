@@ -3,6 +3,7 @@ import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth/admin";
+import { unstable_cache } from "next/cache";
 import {
   AnimatedCounter,
   ScrollReveal,
@@ -29,6 +30,20 @@ import { MobileNav } from "@/components/landing/mobile-nav";
 //  12. Final CTA
 //  13. Footer (extended)
 // ============================================================
+
+// Cache platform stats for 5 minutes — avoids 3 COUNT queries on every landing page hit
+const getPlatformStats = unstable_cache(
+  async () => {
+    const [shopCount, productCount, orderCount] = await Promise.all([
+      db.shop.count({ where: { isActive: true } }),
+      db.product.count({ where: { isActive: true } }),
+      db.order.count(),
+    ]);
+    return { shopCount, productCount, orderCount };
+  },
+  ["platform-stats"],
+  { revalidate: 300 } // 5 minutes
+);
 
 export default async function HomePage() {
   // ── Auth-aware CTA ────────────────────────────────────
@@ -60,11 +75,9 @@ export default async function HomePage() {
       : "Create Your Shop"
     : "Start Selling Free";
 
-  // ── Live platform stats + admin check (parallel) ──────
-  const [shopCount, productCount, orderCount, adminClerkId] = await Promise.all([
-    db.shop.count({ where: { isActive: true } }),
-    db.product.count({ where: { isActive: true } }),
-    db.order.count(),
+  // ── Live platform stats (cached) + admin check (parallel) ──
+  const [{ shopCount, productCount, orderCount }, adminClerkId] = await Promise.all([
+    getPlatformStats(),
     isAdmin(),
   ]);
   const userIsAdmin = !!adminClerkId;

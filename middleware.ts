@@ -81,8 +81,8 @@ export default clerkMiddleware(async (auth, request) => {
 
   const csp = [
     "default-src 'self'",
-    // Scripts: own, GA4, Clerk
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://*.clerk.accounts.dev https://challenges.cloudflare.com",
+    // Scripts: own, GA4, Clerk (unsafe-inline needed for GA4 snippet + SW reg)
+    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.clerk.accounts.dev https://challenges.cloudflare.com",
     // Styles: own + inline (Tailwind)
     "style-src 'self' 'unsafe-inline'",
     // Images: own, Unsplash, Clerk, UploadThing CDN, data URIs
