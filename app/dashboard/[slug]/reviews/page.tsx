@@ -11,20 +11,16 @@ import { ReviewsDashboard } from "@/components/reviews/reviews-dashboard";
 
 interface ReviewsPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ filter?: string }>;
 }
 
-export default async function ReviewsPage({ params, searchParams }: ReviewsPageProps) {
+export default async function ReviewsPage({ params }: ReviewsPageProps) {
   const { slug } = await params;
-  const query = await searchParams;
 
   const access = await requireShopAccess(slug);
   if (!access) notFound();
 
-  const filter = query.filter === "pending" ? false : query.filter === "approved" ? true : undefined;
-
   const [reviews, stats] = await Promise.all([
-    getShopReviews(access.shopId, { isApproved: filter }),
+    getShopReviews(access.shopId),
     getReviewStats(access.shopId),
   ]);
 
@@ -33,7 +29,7 @@ export default async function ReviewsPage({ params, searchParams }: ReviewsPageP
       <div>
         <h1 className="text-2xl font-bold text-stone-900">Reviews</h1>
         <p className="text-sm text-stone-500 mt-1">
-          Manage customer reviews and ratings for your products
+          Customer reviews appear automatically — delete any you find inappropriate
         </p>
       </div>
 
@@ -41,7 +37,6 @@ export default async function ReviewsPage({ params, searchParams }: ReviewsPageP
         reviews={JSON.parse(JSON.stringify(reviews))}
         stats={stats}
         shopSlug={slug}
-        currentFilter={query.filter}
       />
     </div>
   );

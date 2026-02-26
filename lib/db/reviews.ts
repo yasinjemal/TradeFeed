@@ -48,7 +48,7 @@ export async function createReview(input: CreateReviewInput) {
       comment: input.comment || null,
       buyerName: input.buyerName,
       buyerEmail: input.buyerEmail || null,
-      isApproved: false, // Always starts unapproved
+      isApproved: true, // Auto-approved — seller can delete unwanted reviews
       isVerified: false,
     },
   });

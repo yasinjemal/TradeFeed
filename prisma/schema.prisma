@@ -548,7 +548,7 @@ model Review {
   buyerEmail  String?                               // Optional email for follow-up
 
   // Moderation
-  isApproved  Boolean  @default(false)              // Seller must approve before public display
+  isApproved  Boolean  @default(true)               // Auto-approved; seller can delete unwanted reviews
   isVerified  Boolean  @default(false)              // Whether buyer actually purchased
 
   createdAt   DateTime @default(now())

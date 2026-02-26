@@ -10,7 +10,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireShopAccess } from "@/lib/auth";
-import { createReview, approveReview, deleteReview } from "@/lib/db/reviews";
+import { createReview, deleteReview } from "@/lib/db/reviews";
 import { notifyNewReview } from "@/lib/notifications";
 
 type ActionResult = {
@@ -79,25 +79,6 @@ export async function submitReviewAction(
   } catch (error) {
     console.error("[submitReviewAction] Error:", error);
     return { success: false, error: "Failed to submit review." };
-  }
-}
-
-// ── Approve Review (Seller) ─────────────────────────────────
-
-export async function approveReviewAction(
-  shopSlug: string,
-  reviewId: string,
-): Promise<ActionResult> {
-  try {
-    const access = await requireShopAccess(shopSlug);
-    if (!access) return { success: false, error: "Access denied." };
-
-    await approveReview(reviewId, access.shopId);
-    revalidatePath(`/dashboard/${shopSlug}/reviews`);
-    return { success: true };
-  } catch (error) {
-    console.error("[approveReviewAction] Error:", error);
-    return { success: false, error: "Failed to approve review." };
   }
 }
 
