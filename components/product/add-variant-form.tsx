@@ -93,7 +93,7 @@ export function AddVariantForm({
 
             {/* Price in Rands */}
             <div className="space-y-2">
-              <Label htmlFor="priceInRands">Price (ZAR) *</Label>
+              <Label htmlFor="priceInRands">Wholesale Price (ZAR) *</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                   R
@@ -113,6 +113,31 @@ export function AddVariantForm({
               {state?.fieldErrors?.priceInRands && (
                 <p className="text-xs text-red-600">
                   {state.fieldErrors.priceInRands[0]}
+                </p>
+              )}
+            </div>
+
+            {/* Retail Price (optional) */}
+            <div className="space-y-2">
+              <Label htmlFor="retailPriceInRands">Retail Price (ZAR) <span className="text-muted-foreground">(optional)</span></Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  R
+                </span>
+                <Input
+                  id="retailPriceInRands"
+                  name="retailPriceInRands"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="399.99"
+                  className="pl-7"
+                  disabled={isPending}
+                />
+              </div>
+              {state?.fieldErrors?.retailPriceInRands && (
+                <p className="text-xs text-red-600">
+                  {state.fieldErrors.retailPriceInRands[0]}
                 </p>
               )}
             </div>

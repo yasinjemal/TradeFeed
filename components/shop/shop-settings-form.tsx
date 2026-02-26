@@ -100,6 +100,8 @@ interface ShopSettingsFormProps {
   initialData: {
     name: string;
     description: string | null;
+    whatsappNumber: string;
+    retailWhatsappNumber: string | null;
     aboutText: string | null;
     address: string | null;
     city: string | null;
@@ -379,6 +381,44 @@ export function ShopSettingsForm({
             <p className="text-[11px] text-stone-400">
               💡 Tip: Mention your years of experience, what brands you carry, and what makes you different
             </p>
+          </div>
+
+          {/* WhatsApp Numbers */}
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">📱</span>
+              <span className="text-sm font-semibold text-stone-800">WhatsApp Numbers</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="whatsappNumber" className="text-sm font-medium">
+                  Wholesale WhatsApp *
+                </Label>
+                <Input
+                  id="whatsappNumber"
+                  name="whatsappNumber"
+                  defaultValue={initialData.whatsappNumber}
+                  placeholder="+27612345678"
+                  className="rounded-xl h-12 border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+                  disabled={isPending}
+                />
+                <p className="text-[11px] text-stone-400">Main number for wholesale orders</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="retailWhatsappNumber" className="text-sm font-medium">
+                  Retail WhatsApp <span className="text-stone-400">(optional)</span>
+                </Label>
+                <Input
+                  id="retailWhatsappNumber"
+                  name="retailWhatsappNumber"
+                  defaultValue={initialData.retailWhatsappNumber ?? ""}
+                  placeholder="+27612345679"
+                  className="rounded-xl h-12 border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+                  disabled={isPending}
+                />
+                <p className="text-[11px] text-stone-400">Separate number for retail customers</p>
+              </div>
+            </div>
           </div>
         </div>
       </Section>

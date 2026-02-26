@@ -86,7 +86,7 @@ export default async function CatalogLayout({
   if (!shop) return notFound();
 
   return (
-    <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber}>
+    <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined}>
     <WishlistProvider shopSlug={slug}>
       {/* JSON-LD Structured Data for SEO */}
       {generateShopJsonLd(shop).map((schema, i) => (

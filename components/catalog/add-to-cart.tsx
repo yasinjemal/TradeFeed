@@ -26,6 +26,7 @@ interface Variant {
   size: string;
   color: string | null;
   priceInCents: number;
+  retailPriceCents: number | null;
   stock: number;
 }
 
@@ -221,7 +222,12 @@ export function AddToCart({
               <span className="text-2xl font-bold text-stone-900">
                 {formatZAR(selectedVariant.priceInCents)}
               </span>
-              <span className="text-xs text-stone-500 ml-2">each</span>
+              <span className="text-xs text-stone-500 ml-1">each</span>
+              {selectedVariant.retailPriceCents && (
+                <div className="text-xs text-stone-400 mt-0.5">
+                  Retail: <span className="font-semibold text-stone-500">{formatZAR(selectedVariant.retailPriceCents)}</span>
+                </div>
+              )}
             </div>
             <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

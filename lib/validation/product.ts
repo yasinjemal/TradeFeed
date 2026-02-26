@@ -163,6 +163,19 @@ export const variantCreateSchema = z.object({
     )
     .transform((rands) => Math.round(rands * 100)), // Convert to cents
 
+  // Optional retail price (higher than wholesale)
+  retailPriceInRands: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal(""))
+    .transform((val) => {
+      if (!val || val === "") return undefined;
+      const num = parseFloat(val);
+      if (isNaN(num) || num <= 0) return undefined;
+      return Math.round(num * 100);
+    }),
+
   stock: z
     .string()
     .trim()
@@ -213,6 +226,20 @@ export const variantUpdateSchema = z.object({
     .pipe(z.number().positive("Price must be greater than zero").max(999999))
     .transform((rands) => Math.round(rands * 100))
     .optional(),
+
+  retailPriceInRands: z
+    .string()
+    .trim()
+    .optional()
+    .nullable()
+    .or(z.literal(""))
+    .transform((val) => {
+      if (val === null) return null; // Explicitly cleared
+      if (!val || val === "") return undefined; // Not provided
+      const num = parseFloat(val);
+      if (isNaN(num) || num <= 0) return undefined;
+      return Math.round(num * 100);
+    }),
 
   stock: z
     .string()

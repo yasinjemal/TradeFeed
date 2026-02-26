@@ -55,6 +55,8 @@ export interface CartContextValue {
   totalPriceInCents: number;
   /** WhatsApp number for checkout */
   whatsappNumber: string;
+  /** Optional retail WhatsApp number */
+  retailWhatsappNumber?: string;
   /** Shop slug for localStorage scoping */
   shopSlug: string;
   /** Shop ID for analytics tracking */

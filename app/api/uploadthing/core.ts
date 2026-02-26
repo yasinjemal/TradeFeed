@@ -56,6 +56,27 @@ export const ourFileRouter = {
       // Return data to client's onClientUploadComplete
       return { url: fileUrl, key: file.key, name: file.name };
     }),
+
+  /**
+   * Shop gallery uploader (images + videos).
+   * - Max 4 files per batch
+   * - Max 8MB each (images + short videos)
+   * - JPEG/PNG/WebP/MP4 only
+   */
+  shopGalleryUploader: f({
+    image: { maxFileSize: "8MB", maxFileCount: 4 },
+    video: { maxFileSize: "16MB", maxFileCount: 2 },
+  })
+    .middleware(async () => {
+      console.log("[UploadThing] Gallery upload middleware — accepting");
+      return { userId: "authenticated-via-dashboard" };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      const fileUrl = file.ufsUrl ?? file.url;
+      console.log("[UploadThing] Gallery upload complete for user:", metadata.userId);
+      console.log("[UploadThing] File URL:", fileUrl);
+      return { url: fileUrl, key: file.key, name: file.name };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

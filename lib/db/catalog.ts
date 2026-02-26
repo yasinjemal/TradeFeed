@@ -34,6 +34,7 @@ export async function getCatalogShop(slug: string) {
       slug: true,
       description: true,
       whatsappNumber: true,
+      retailWhatsappNumber: true,
       logoUrl: true,
       bannerUrl: true,
       isVerified: true,
@@ -52,6 +53,18 @@ export async function getCatalogShop(slug: string) {
       website: true,
       // Trust
       createdAt: true,
+      // Gallery
+      gallery: {
+        select: {
+          id: true,
+          url: true,
+          type: true,
+          caption: true,
+          position: true,
+        },
+        orderBy: { position: "asc" as const },
+        take: 12,
+      },
       _count: {
         select: {
           products: {
@@ -133,6 +146,7 @@ export async function getCatalogProducts(shopId: string) {
           size: true,
           color: true,
           priceInCents: true,
+          retailPriceCents: true,
           stock: true,
         },
         orderBy: [{ size: "asc" }, { color: "asc" }],
@@ -187,6 +201,7 @@ export async function getCatalogProduct(productId: string, shopId: string) {
           size: true,
           color: true,
           priceInCents: true,
+          retailPriceCents: true,
           stock: true,
         },
         orderBy: [{ priceInCents: "asc" }, { size: "asc" }, { color: "asc" }],

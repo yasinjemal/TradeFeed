@@ -364,6 +364,7 @@ export async function batchCreateVariantsAction(
   colors: string[],
   priceInCents: number,
   stock: number,
+  retailPriceCents?: number | null,
   deps: ProductActionDeps = defaultDeps
 ): Promise<ActionResult> {
   try {
@@ -374,7 +375,13 @@ export async function batchCreateVariantsAction(
     const colorsToUse: (string | null)[] =
       colors.length > 0 ? colors : [null];
     const variants = sizes.flatMap((size) =>
-      colorsToUse.map((color) => ({ size, color, priceInCents, stock }))
+      colorsToUse.map((color) => ({
+        size,
+        color,
+        priceInCents,
+        stock,
+        retailPriceCents: retailPriceCents ?? null,
+      }))
     );
 
     const result = await deps.batchCreateVariants(

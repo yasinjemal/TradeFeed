@@ -24,6 +24,7 @@ interface CatalogProduct {
     size: string;
     color: string | null;
     priceInCents: number;
+    retailPriceCents: number | null;
     stock: number;
   }[];
 }
@@ -353,13 +354,23 @@ function ProductCard({
             </div>
           )}
 
-          <div className="absolute bottom-3 left-3">
+          <div className="absolute bottom-3 left-3 flex flex-col gap-1">
             <span className="rounded-full bg-white/95 px-3 py-1.5 text-sm font-extrabold tracking-tight text-stone-900 shadow-sm backdrop-blur-sm">
               {formatZAR(minPrice)}
               {minPrice !== maxPrice && (
                 <span className="text-stone-400 font-normal"> +</span>
               )}
             </span>
+            {(() => {
+              const rp = product.variants.map(v => v.retailPriceCents).filter((p): p is number => p !== null);
+              if (rp.length === 0) return null;
+              const minRp = Math.min(...rp);
+              return (
+                <span className="rounded-full bg-emerald-50/95 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 shadow-sm backdrop-blur-sm">
+                  Retail {formatZAR(minRp)}+
+                </span>
+              );
+            })()}
           </div>
         </div>
 

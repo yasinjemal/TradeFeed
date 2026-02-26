@@ -17,6 +17,7 @@ interface Variant {
   size: string;
   color: string | null;
   priceInCents: number;
+  retailPriceCents: number | null;
   stock: number;
   sku: string | null;
 }
@@ -177,7 +178,14 @@ export function VariantGrid({
             {/* Price */}
             <div className="text-sm font-bold text-emerald-600">
               {formatZAR(v.priceInCents)}
+              <span className="text-[10px] font-normal text-stone-400 ml-1">wholesale</span>
             </div>
+            {v.retailPriceCents && (
+              <div className="text-xs font-semibold text-stone-500 mt-0.5">
+                {formatZAR(v.retailPriceCents)}
+                <span className="text-[10px] font-normal text-stone-400 ml-1">retail</span>
+              </div>
+            )}
 
             {/* Stock */}
             <div className="mt-1">

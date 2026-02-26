@@ -76,6 +76,21 @@ export const shopSettingsSchema = z.object({
     .optional()
     .or(z.literal("")),
 
+  // WhatsApp numbers
+  whatsappNumber: z
+    .string()
+    .trim()
+    .max(20, "Number too long")
+    .optional()
+    .or(z.literal("")),
+
+  retailWhatsappNumber: z
+    .string()
+    .trim()
+    .max(20, "Number too long")
+    .optional()
+    .or(z.literal("")),
+
   // Location
   address: z
     .string()

@@ -83,6 +83,7 @@ interface CartProviderProps {
   shopSlug: string;
   shopId: string;
   whatsappNumber: string;
+  retailWhatsappNumber?: string;
 }
 
 export function CartProvider({
@@ -90,6 +91,7 @@ export function CartProvider({
   shopSlug,
   shopId,
   whatsappNumber,
+  retailWhatsappNumber,
 }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -179,6 +181,7 @@ export function CartProvider({
       totalItems,
       totalPriceInCents,
       whatsappNumber,
+      retailWhatsappNumber,
       shopSlug,
       shopId,
     }),
@@ -191,6 +194,7 @@ export function CartProvider({
       totalItems,
       totalPriceInCents,
       whatsappNumber,
+      retailWhatsappNumber,
       shopSlug,
       shopId,
     ]

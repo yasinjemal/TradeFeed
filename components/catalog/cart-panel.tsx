@@ -60,6 +60,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
     totalItems,
     totalPriceInCents,
     whatsappNumber,
+    retailWhatsappNumber,
     shopId,
     shopSlug,
   } = useCart();
@@ -70,6 +71,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
   const [buyerPhone, setBuyerPhone] = useState("");
   const [buyerNote, setBuyerNote] = useState("");
   const [showDelivery, setShowDelivery] = useState(false);
+  const [orderType, setOrderType] = useState<"wholesale" | "retail">("wholesale");
   const [delivery, setDelivery] = useState<DeliveryAddress>({
     address: "",
     city: "",
@@ -167,8 +169,11 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       }
 
       // 4. Open WhatsApp with structured message (includes order number)
+      const checkoutNumber = orderType === "retail" && retailWhatsappNumber
+        ? retailWhatsappNumber
+        : whatsappNumber;
       const url = buildWhatsAppCheckoutUrl(
-        whatsappNumber,
+        checkoutNumber,
         items,
         deliveryData,
         result.orderNumber,
@@ -194,7 +199,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       clearCart();
       onClose();
     });
-  }, [items, isPending, shopId, shopSlug, whatsappNumber, clearCart, onClose, showDelivery, delivery]);
+  }, [items, isPending, shopId, shopSlug, whatsappNumber, retailWhatsappNumber, orderType, clearCart, onClose, showDelivery, delivery]);
 
   const handleClearCart = useCallback(() => {
     if (!confirm("Remove all items from your cart?")) return;
@@ -546,6 +551,32 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
             </div>
 
             {/* WhatsApp Checkout Button */}
+            {retailWhatsappNumber && (
+              <div className="flex rounded-xl border border-stone-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setOrderType("wholesale")}
+                  className={`flex-1 py-2.5 text-xs font-semibold transition-colors ${
+                    orderType === "wholesale"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-stone-50 text-stone-600 hover:bg-stone-100"
+                  }`}
+                >
+                  🏭 Wholesale
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderType("retail")}
+                  className={`flex-1 py-2.5 text-xs font-semibold transition-colors ${
+                    orderType === "retail"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-stone-50 text-stone-600 hover:bg-stone-100"
+                  }`}
+                >
+                  🛍️ Retail
+                </button>
+              </div>
+            )}
             <button
               onClick={handleCheckout}
               disabled={isPending}

@@ -27,6 +27,7 @@ model Shop {
   slug        String   @unique                // URL-safe identifier for public catalog (e.g. "marble-tower-fashions")
   description String?                         // Optional shop description
   whatsappNumber String                       // Shop's WhatsApp number for orders (PII — POPIA)
+  retailWhatsappNumber String?                 // Optional second WhatsApp number for retail orders
   logoUrl     String?                         // Shop logo image URL (stored externally, not in DB)
   bannerUrl   String?                         // Shop banner/cover image URL
   isActive    Boolean  @default(true)         // Soft-disable without deleting
@@ -63,6 +64,7 @@ model Shop {
   promotedListings PromotedListing[]          // Marketplace promoted listings
   orders      Order[]                         // Orders placed at this shop
   reviews     Review[]                        // Reviews for this shop's products
+  gallery     ShopGalleryItem[]               // Shop profile images & videos
 
   @@index([slug])
   @@index([isActive])
@@ -239,7 +241,8 @@ model ProductVariant {
   id           String @id @default(cuid())
   size         String                         // e.g. "S", "M", "L", "XL", "2XL", "30", "32"
   color        String?                        // e.g. "Red", "Blue" — optional for some products
-  priceInCents Int                            // Price in ZAR cents (e.g. 29999 = R299.99)
+  priceInCents Int                            // Wholesale price in ZAR cents (e.g. 29999 = R299.99)
+  retailPriceCents Int?                        // Optional retail price in ZAR cents (shown to retail buyers)
   stock        Int    @default(0)             // Current stock count for this variant
   sku          String?                        // Optional SKU for seller's own tracking
   isActive     Boolean @default(true)         // Can hide individual variants
@@ -526,6 +529,31 @@ model WishlistItem {
   @@index([visitorId])
   @@index([userId])
   @@index([shopId])
+}
+
+// ============================================================
+// SHOP GALLERY ITEM: Images & videos on the shop profile
+// Builds buyer trust by showing the physical shop, team, etc.
+// ============================================================
+model ShopGalleryItem {
+  id        String  @id @default(cuid())
+  url       String                              // CDN URL (Uploadthing)
+  key       String?                             // Uploadthing file key (for deletion)
+  type      GalleryMediaType @default(IMAGE)    // IMAGE or VIDEO
+  caption   String?                             // Optional caption
+  position  Int     @default(0)                 // Display order
+
+  shopId    String
+  shop      Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([shopId, position])
+}
+
+enum GalleryMediaType {
+  IMAGE
+  VIDEO
 }
 
 // ============================================================

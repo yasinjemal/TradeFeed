@@ -73,6 +73,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const prices = product.variants.map((v) => v.priceInCents);
   const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
   const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+  const retailPrices = product.variants.map((v) => v.retailPriceCents).filter((p): p is number => p !== null);
+  const minRetailPrice = retailPrices.length > 0 ? Math.min(...retailPrices) : null;
+  const maxRetailPrice = retailPrices.length > 0 ? Math.max(...retailPrices) : null;
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
 
   const [reviews, reviewAgg] = await Promise.all([
@@ -93,6 +96,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       "\nPlease let me know availability and pricing. Thank you!"
   );
   const waLink = `https://wa.me/${shop.whatsappNumber.replace("+", "")}?text=${waMessage}`;
+  const retailWaLink = shop.retailWhatsappNumber
+    ? `https://wa.me/${shop.retailWhatsappNumber.replace("+", "")}?text=${waMessage}`
+    : null;
 
   return (
     <div className="mx-auto w-full max-w-3xl">
@@ -140,6 +146,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               {minPrice !== maxPrice && <span className="text-base font-medium text-stone-400">- {formatZAR(maxPrice)}</span>}
               <span className="ml-auto text-xs text-stone-400">per unit</span>
             </div>
+            {minRetailPrice && (
+              <div className="mt-1 flex items-baseline gap-1.5 text-sm text-stone-500">
+                <span className="text-xs text-stone-400">Retail:</span>
+                <span className="font-semibold">{formatZAR(minRetailPrice)}</span>
+                {maxRetailPrice && minRetailPrice !== maxRetailPrice && (
+                  <span className="text-stone-400">- {formatZAR(maxRetailPrice)}</span>
+                )}
+              </div>
+            )}
             <div className="mt-2 flex items-center gap-2 text-xs font-medium">
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 ${totalStock > 0 ? "bg-emerald-100 text-emerald-700" : "bg-stone-200 text-stone-600"}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${totalStock > 0 ? "bg-emerald-500" : "bg-stone-500"}`} />
@@ -161,7 +176,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 option1Label={option1Label}
                 option2Label={option2Label}
                 quickOrderHref={waLink}
-                variants={product.variants.map((v) => ({ id: v.id, size: v.size, color: v.color, priceInCents: v.priceInCents, stock: v.stock }))}
+                variants={product.variants.map((v) => ({ id: v.id, size: v.size, color: v.color, priceInCents: v.priceInCents, retailPriceCents: v.retailPriceCents, stock: v.stock }))}
               />
             ) : (
               <div className="flex flex-col items-center gap-3 py-3">
@@ -174,8 +189,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           </div>
 
           <a href={waLink} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 sm:hidden">
-            Quick order on WhatsApp
+            {retailWaLink ? "🏭 Wholesale WhatsApp" : "Quick order on WhatsApp"}
           </a>
+          {retailWaLink && (
+            <a href={retailWaLink} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 sm:hidden">
+              🛍️ Retail WhatsApp
+            </a>
+          )}
         </div>
       </div>
 

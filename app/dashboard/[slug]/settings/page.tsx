@@ -6,9 +6,11 @@
 // ============================================================
 
 import { getShopBySlug } from "@/lib/db/shops";
+import { getShopGallery } from "@/lib/db/gallery";
 import { requireShopAccess } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { ShopSettingsForm } from "@/components/shop/shop-settings-form";
+import { ShopGalleryUpload } from "@/components/shop/shop-gallery-upload";
 import Link from "next/link";
 
 interface SettingsPageProps {
@@ -28,6 +30,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
   const shop = await getShopBySlug(slug);
   if (!shop) return notFound();
+
+  const galleryItems = await getShopGallery(shop.id);
 
   // Calculate profile completeness
   const checks = [
@@ -134,6 +138,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
         initialData={{
           name: shop.name,
           description: shop.description,
+          whatsappNumber: shop.whatsappNumber,
+          retailWhatsappNumber: shop.retailWhatsappNumber,
           aboutText: shop.aboutText,
           address: shop.address,
           city: shop.city,
@@ -147,6 +153,21 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           website: shop.website,
         }}
       />
+
+      {/* ── Gallery ──────────────────────────────────────── */}
+      <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+        <ShopGalleryUpload
+          shopSlug={slug}
+          initialItems={galleryItems.map((item) => ({
+            id: item.id,
+            url: item.url,
+            key: item.key,
+            type: item.type,
+            caption: item.caption,
+            position: item.position,
+          }))}
+        />
+      </div>
     </div>
   );
 }

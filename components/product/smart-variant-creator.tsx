@@ -89,6 +89,7 @@ export function SmartVariantCreator({
   const [selectedOption1s, setSelectedOption1s] = useState<Set<string>>(new Set());
   const [selectedOption2s, setSelectedOption2s] = useState<Set<string>>(new Set());
   const [price, setPrice] = useState("299.99");
+  const [retailPrice, setRetailPrice] = useState("");
   const [stock, setStock] = useState("50");
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<{
@@ -144,9 +145,11 @@ export function SmartVariantCreator({
   const handleGenerate = () => {
     if (newCount === 0) return;
     const priceInCents = Math.round(parseFloat(price) * 100);
+    const retailPriceInCents = retailPrice.trim() ? Math.round(parseFloat(retailPrice) * 100) : null;
     const stockNum = parseInt(stock, 10);
     if (isNaN(priceInCents) || priceInCents <= 0) return;
     if (isNaN(stockNum) || stockNum < 0) return;
+    if (retailPriceInCents !== null && (isNaN(retailPriceInCents) || retailPriceInCents <= 0)) return;
 
     startTransition(async () => {
       const res = await batchCreateVariantsAction(
@@ -155,7 +158,8 @@ export function SmartVariantCreator({
         Array.from(selectedOption1s),
         Array.from(selectedOption2s),
         priceInCents,
-        stockNum
+        stockNum,
+        retailPriceInCents,
       );
       if (res.success) {
         setResult({
@@ -318,10 +322,10 @@ export function SmartVariantCreator({
       )}
 
       {/* ── Price & Stock ───────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <label className="text-sm font-medium text-stone-700 mb-1.5 block">
-            Price per unit
+            Wholesale Price
           </label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-stone-400">
@@ -336,6 +340,29 @@ export function SmartVariantCreator({
                 setPrice(e.target.value);
                 setResult(null);
               }}
+              className="w-full rounded-xl border-2 border-stone-200 pl-8 pr-3 py-2.5 text-sm font-medium
+                focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="text-sm font-medium text-stone-700 mb-1.5 block">
+            Retail Price <span className="text-stone-400 font-normal text-xs">(optional)</span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-stone-400">
+              R
+            </span>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={retailPrice}
+              onChange={(e) => {
+                setRetailPrice(e.target.value);
+                setResult(null);
+              }}
+              placeholder="—"
               className="w-full rounded-xl border-2 border-stone-200 pl-8 pr-3 py-2.5 text-sm font-medium
                 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
             />
