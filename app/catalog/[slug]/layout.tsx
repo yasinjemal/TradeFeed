@@ -19,7 +19,6 @@ import Link from "next/link";
 import { CartProvider } from "@/lib/cart/cart-context";
 import { WishlistProvider } from "@/lib/wishlist/wishlist-context";
 import { WishlistButton } from "@/components/catalog/wishlist-button";
-import { CartButton } from "@/components/catalog/cart-button";
 import { generateShopJsonLd } from "@/lib/seo/json-ld";
 import { ShareCatalog } from "@/components/catalog/share-catalog";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -182,7 +181,6 @@ export default async function CatalogLayout({
           </footer>
         </div>
 
-        <CartButton />
         <WishlistButton shopSlug={slug} />
       </CatalogAppShell>
     </WishlistProvider>
