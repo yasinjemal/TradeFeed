@@ -100,6 +100,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
 
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
+        if (!first || !last) return;
 
         if (e.shiftKey && document.activeElement === first) {
           e.preventDefault();
@@ -165,8 +166,13 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         return;
       }
 
-      // 4. Open WhatsApp with structured message
-      const url = buildWhatsAppCheckoutUrl(whatsappNumber, items, deliveryData);
+      // 4. Open WhatsApp with structured message (includes order number)
+      const url = buildWhatsAppCheckoutUrl(
+        whatsappNumber,
+        items,
+        deliveryData,
+        result.orderNumber,
+      );
       window.open(url, "_blank", "noopener,noreferrer");
 
       // 5. Track checkout event (fire-and-forget)

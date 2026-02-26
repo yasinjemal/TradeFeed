@@ -1,18 +1,4 @@
-// ============================================================
-// Page — Public Product Detail (/catalog/[slug]/products/[productId])
-// ============================================================
-// The product page buyers see when they tap a card in the grid.
-//
-// DESIGN: Mobile-first, smooth, trust-building:
-// - Large product image with gallery dots
-// - Clear product name + description
-// - Variant table: option1, option2, price, stock
-// - AddToCart picker: option1 → option2 → quantity → add
-// - WhatsApp enquiry link (secondary, or primary when sold out)
-// - Back to catalog link
-// ============================================================
-
-import { getCatalogProduct, getCatalogShop } from "@/lib/db/catalog";
+﻿import { getCatalogProduct, getCatalogShop } from "@/lib/db/catalog";
 import { trackEvent } from "@/lib/db/analytics";
 import { getProductReviews, getReviewAggregation } from "@/lib/db/reviews";
 import { formatZAR } from "@/types";
@@ -54,29 +40,27 @@ export async function generateMetadata({
   if (product.images[0]?.url) ogUrl.searchParams.set("image", product.images[0].url);
 
   return {
-    title: `${product.name} — ${shop.name}`,
+    title: `${product.name} - ${shop.name}`,
     description: product.description || `${product.name} from ${minPrice} at ${shop.name}`,
     alternates: {
       canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za"}/catalog/${slug}/products/${productId}`,
     },
     openGraph: {
-      title: `${product.name} — ${shop.name}`,
+      title: `${product.name} - ${shop.name}`,
       description: product.description || `${product.name} from ${minPrice}`,
       type: "website",
       images: [{ url: ogUrl.toString(), width: 1200, height: 630, alt: product.name }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.name} — ${shop.name}`,
+      title: `${product.name} - ${shop.name}`,
       description: product.description || `${product.name} from ${minPrice}`,
       images: [ogUrl.toString()],
     },
   };
 }
 
-export default async function ProductDetailPage({
-  params,
-}: ProductDetailPageProps) {
+export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug, productId } = await params;
   const shop = await getCatalogShop(slug);
   if (!shop) return notFound();
@@ -84,45 +68,34 @@ export default async function ProductDetailPage({
   const product = await getCatalogProduct(productId, shop.id);
   if (!product) return notFound();
 
-  // ── Track product view (fire-and-forget) ───────────────
   void trackEvent({ type: "PRODUCT_VIEW", shopId: shop.id, productId });
 
-  // ── Derive data ────────────────────────────────────────
   const prices = product.variants.map((v) => v.priceInCents);
   const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
   const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
 
-  // ── Fetch reviews in parallel ──────────────────────────
   const [reviews, reviewAgg] = await Promise.all([
     getProductReviews(productId),
     getReviewAggregation(productId),
   ]);
 
-  // Group variants by size for structured display
   const uniqueSizes = Array.from(new Set(product.variants.map((v) => v.size)));
-  const uniqueColors = Array.from(
-    new Set(product.variants.map((v) => v.color).filter(Boolean))
-  ) as string[];
+  const uniqueColors = Array.from(new Set(product.variants.map((v) => v.color).filter(Boolean))) as string[];
 
-  // Derive dynamic option labels (from product or defaults)
   const option1Label = product.option1Label ?? "Size";
   const option2Label = product.option2Label ?? "Color";
 
-  // Build the WhatsApp enquiry message
   const waMessage = encodeURIComponent(
     `Hi! I'm interested in *${product.name}*\n\n` +
       `Available ${option1Label.toLowerCase()}s: ${uniqueSizes.join(", ")}\n` +
-      (uniqueColors.length > 0
-        ? `${option2Label}s: ${uniqueColors.join(", ")}\n`
-        : "") +
-      `\nPlease let me know availability and pricing. Thank you! 🙏`
+      (uniqueColors.length > 0 ? `${option2Label}s: ${uniqueColors.join(", ")}\n` : "") +
+      "\nPlease let me know availability and pricing. Thank you!"
   );
   const waLink = `https://wa.me/${shop.whatsappNumber.replace("+", "")}?text=${waMessage}`;
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Track this product view in localStorage */}
+    <div className="mx-auto w-full max-w-3xl">
       <RecentlyViewedTracker
         shopSlug={slug}
         productId={product.id}
@@ -130,219 +103,56 @@ export default async function ProductDetailPage({
         imageUrl={product.images[0]?.url ?? null}
         priceInCents={minPrice}
       />
-      {/* JSON-LD Structured Data for SEO */}
+
       {generateProductJsonLd(shop, product, reviewAgg).map((schema, i) => (
-        <script
-          key={`product-ld-${i}`}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
+        <script key={`product-ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       ))}
-      {/* ── Back Link ─────────────────────────────────────── */}
-      <Link
-        href={`/catalog/${slug}`}
-        className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-700 transition-colors mb-4 group"
-      >
-        <svg
-          className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15.75 19.5L8.25 12l7.5-7.5"
-          />
+
+      <Link href={`/catalog/${slug}`} className="group mb-4 inline-flex items-center gap-1.5 text-sm text-stone-500 transition-colors hover:text-stone-700">
+        <svg className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
         </svg>
         Back to catalog
       </Link>
 
-      {/* ── Product Card ──────────────────────────────────── */}
-      <div className="bg-white rounded-3xl border border-stone-200/50 overflow-hidden shadow-sm shadow-stone-200/50">
-        {/* ── Image Gallery (interactive) ─────────────── */}
-        <ProductImageGallery
-          images={product.images.map((img) => ({
-            id: img.id,
-            url: img.url,
-            altText: img.altText,
-          }))}
-          productName={product.name}
-          soldOut={totalStock === 0}
-        />
+      <div className="-mx-3 overflow-hidden sm:mx-0 sm:rounded-3xl sm:border sm:border-stone-200/60 sm:shadow-sm sm:shadow-stone-200/50">
+        <ProductImageGallery images={product.images.map((img) => ({ id: img.id, url: img.url, altText: img.altText }))} productName={product.name} soldOut={totalStock === 0} />
+      </div>
 
-        {/* ── Product Info ───────────────────────────────── */}
-        <div className="p-5 sm:p-6 space-y-6">
-          {/* Category + Name */}
+      <div className="mt-4 rounded-3xl bg-white p-5 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200/60 sm:p-6">
+        <div className="space-y-6">
           <div>
-            {product.category && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[11px] uppercase tracking-wider font-semibold mb-2">
-                {product.category.name}
-              </span>
-            )}
-            <h1 className="text-xl sm:text-2xl font-bold text-stone-900 leading-tight">
-              {product.name}
-            </h1>
-            {product.description && (
-              <p className="text-stone-500 text-sm mt-2.5 leading-relaxed">
-                {product.description}
-              </p>
-            )}
-
-            {/* ── Share Buttons ─────────────────────────── */}
+            {product.category && <span className="mb-2 inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">{product.category.name}</span>}
+            <h1 className="text-xl font-bold leading-tight text-stone-900 sm:text-2xl">{product.name}</h1>
             <div className="mt-3">
               <ShareProduct
                 productName={product.name}
                 productUrl={`${process.env.NEXT_PUBLIC_BASE_URL ?? "https://tradefeed.co.za"}/catalog/${slug}/products/${product.id}`}
-                price={minPrice === maxPrice ? formatZAR(minPrice) : `${formatZAR(minPrice)} – ${formatZAR(maxPrice)}`}
+                price={minPrice === maxPrice ? formatZAR(minPrice) : `${formatZAR(minPrice)} - ${formatZAR(maxPrice)}`}
                 shopName={shop.name}
               />
             </div>
           </div>
 
-          {/* Price Range */}
-          <div className="flex items-baseline gap-2 bg-stone-50 rounded-2xl px-4 py-3 border border-stone-100">
-            <span className="text-2xl sm:text-3xl font-bold text-stone-900">
-              {formatZAR(minPrice)}
-            </span>
-            {minPrice !== maxPrice && (
-              <span className="text-base text-stone-400 font-medium">
-                – {formatZAR(maxPrice)}
+          <div className="rounded-2xl border border-stone-100 bg-stone-50 px-4 py-3">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl">{formatZAR(minPrice)}</span>
+              {minPrice !== maxPrice && <span className="text-base font-medium text-stone-400">- {formatZAR(maxPrice)}</span>}
+              <span className="ml-auto text-xs text-stone-400">per unit</span>
+            </div>
+            <div className="mt-2 flex items-center gap-2 text-xs font-medium">
+              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 ${totalStock > 0 ? "bg-emerald-100 text-emerald-700" : "bg-stone-200 text-stone-600"}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${totalStock > 0 ? "bg-emerald-500" : "bg-stone-500"}`} />
+                {totalStock > 0 ? `${totalStock} in stock` : "Out of stock"}
               </span>
-            )}
-            <span className="text-xs text-stone-400 ml-auto">per unit</span>
-          </div>
-
-          {/* ── Divider ─────────────────────────────── */}
-          <div className="border-t border-stone-100" />
-
-          {/* ── Available Sizes ────────────────────────── */}
-          <div>
-            <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5">
-              Available {option1Label}s
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {uniqueSizes.map((size) => {
-                const sizeVariants = product.variants.filter(
-                  (v) => v.size === size
-                );
-                const sizeStock = sizeVariants.reduce(
-                  (sum, v) => sum + v.stock,
-                  0
-                );
-                const inStock = sizeStock > 0;
-
-                return (
-                  <span
-                    key={size}
-                    className={`inline-flex items-center justify-center min-w-[2.5rem] px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                      inStock
-                        ? "bg-stone-900 text-white"
-                        : "bg-stone-100 text-stone-400 line-through"
-                    }`}
-                  >
-                    {size}
-                  </span>
-                );
-              })}
             </div>
           </div>
 
-          {/* ── Colors ────────────────────────────────── */}
-          {uniqueColors.length > 0 && (
-            <div>
-              <h3 className="text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5">
-                {option2Label}s
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {uniqueColors.map((color) => (
-                  <span
-                    key={color}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-stone-50 border border-stone-200 text-sm text-stone-700"
-                  >
-                    <span
-                      className="w-3 h-3 rounded-full border border-stone-300"
-                      style={{ backgroundColor: colorToHex(color) }}
-                    />
-                    {color}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          {product.description && <p className="text-sm leading-relaxed text-stone-600">{product.description}</p>}
 
-          {/* ── Variant Table ──────────────────────────── */}
-          <details className="group">
-            <summary className="flex items-center justify-between cursor-pointer text-xs uppercase tracking-wider font-semibold text-stone-500 mb-2.5 select-none">
-              <span>Stock & Pricing</span>
-              <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-              </svg>
-            </summary>
-            <div className="bg-stone-50 rounded-2xl border border-stone-200/60 overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left border-b border-stone-200/60">
-                    <th className="px-4 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider">
-                      {option1Label}
-                    </th>
-                    {uniqueColors.length > 0 && (
-                      <th className="px-4 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider">
-                        {option2Label}
-                      </th>
-                    )}
-                    <th className="px-4 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th className="px-4 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider text-right">
-                      Stock
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-200/40">
-                  {product.variants.map((variant) => (
-                    <tr
-                      key={variant.id}
-                      className={
-                        variant.stock === 0 ? "text-stone-400" : "text-stone-700"
-                      }
-                    >
-                      <td className="px-4 py-2.5 font-medium">
-                        {variant.size}
-                      </td>
-                      {uniqueColors.length > 0 && (
-                        <td className="px-4 py-2.5">
-                          {variant.color || "—"}
-                        </td>
-                      )}
-                      <td className="px-4 py-2.5 font-semibold">
-                        {formatZAR(variant.priceInCents)}
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        {variant.stock > 0 ? (
-                          <span className="inline-flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            {variant.stock}
-                          </span>
-                        ) : (
-                          <span className="text-stone-400 text-xs font-medium">
-                            Out of stock
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </details>
-
-          {/* ── Divider ─────────────────────────────── */}
           <div className="border-t border-stone-100" />
 
-          {/* ── Add to Cart / Sold Out ────────────────── */}
-          <div className="pt-2">
+          <div className="pt-2" id="add-to-cart">
             {totalStock > 0 ? (
               <AddToCart
                 productId={product.id}
@@ -350,140 +160,45 @@ export default async function ProductDetailPage({
                 imageUrl={product.images[0]?.url}
                 option1Label={option1Label}
                 option2Label={option2Label}
-                variants={product.variants.map((v) => ({
-                  id: v.id,
-                  size: v.size,
-                  color: v.color,
-                  priceInCents: v.priceInCents,
-                  stock: v.stock,
-                }))}
+                quickOrderHref={waLink}
+                variants={product.variants.map((v) => ({ id: v.id, size: v.size, color: v.color, priceInCents: v.priceInCents, stock: v.stock }))}
               />
             ) : (
               <div className="flex flex-col items-center gap-3 py-3">
-                <p className="text-stone-500 text-sm font-medium">
-                  This product is currently sold out
-                </p>
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 text-sm font-medium transition-colors"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="w-4 h-4 fill-current"
-                    aria-hidden="true"
-                  >
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
+                <p className="text-sm font-medium text-stone-500">This product is currently sold out</p>
+                <a href={waLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700">
                   Ask about restock on WhatsApp
                 </a>
               </div>
             )}
           </div>
 
-          {/* ── WhatsApp Enquiry (secondary) ──────────── */}
-          {totalStock > 0 && (
-            <div className="flex items-center justify-center pt-1">
-              <a
-                href={waLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-stone-400 hover:text-emerald-600 transition-colors"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="w-3.5 h-3.5 fill-current"
-                  aria-hidden="true"
-                >
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                </svg>
-                Or ask a question on WhatsApp
-              </a>
-            </div>
-          )}
+          <a href={waLink} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 sm:hidden">
+            Quick order on WhatsApp
+          </a>
         </div>
       </div>
 
-      {/* ── Product Reviews ─────────────────────────────── */}
       <div className="mt-8">
-        <ProductReviews
-          shopId={shop.id}
-          shopSlug={slug}
-          productId={product.id}
-          reviews={reviews}
-          aggregation={reviewAgg}
-        />
+        <ProductReviews shopId={shop.id} shopSlug={slug} productId={product.id} reviews={reviews} aggregation={reviewAgg} />
       </div>
 
-      {/* ── Recently Viewed ─────────────────────────────── */}
       <div className="mt-6">
         <RecentlyViewedStrip shopSlug={slug} excludeProductId={product.id} />
       </div>
 
-      {/* ── Marketplace Cross-Link ─────────────────────── */}
-      <div className="mt-6 bg-gradient-to-r from-stone-50 to-emerald-50/30 rounded-2xl border border-stone-200/50 p-5 text-center">
-        <p className="text-stone-500 text-sm mb-2">
-          Looking for more products like this?
-        </p>
+      <div className="mt-6 rounded-2xl border border-stone-200/50 bg-gradient-to-r from-stone-50 to-emerald-50/30 p-5 text-center">
+        <p className="mb-2 text-sm text-stone-500">Looking for more products like this?</p>
         <Link
           href={product.category ? `/marketplace?category=${encodeURIComponent(product.category.name.toLowerCase().replace(/\s+/g, "-"))}` : "/marketplace"}
-          className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-semibold text-sm transition-colors group"
+          className="group inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-700"
         >
           Browse {product.category ? product.category.name : "all products"} on TradeFeed Marketplace
-          <svg
-            className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
+          <svg className="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </Link>
       </div>
     </div>
   );
-}
-
-// ================================================================
-// Helper: Color name → CSS hex
-// ================================================================
-
-function colorToHex(color: string): string {
-  const colorMap: Record<string, string> = {
-    black: "#1a1a1a",
-    white: "#f5f5f5",
-    red: "#dc2626",
-    blue: "#2563eb",
-    navy: "#1e3a5f",
-    green: "#16a34a",
-    yellow: "#eab308",
-    pink: "#ec4899",
-    purple: "#9333ea",
-    orange: "#ea580c",
-    grey: "#6b7280",
-    gray: "#6b7280",
-    brown: "#92400e",
-    beige: "#d4b896",
-    cream: "#fffdd0",
-    maroon: "#800000",
-    olive: "#556b2f",
-    teal: "#0d9488",
-    coral: "#f97316",
-    khaki: "#bdb76b",
-    gold: "#ca8a04",
-    silver: "#a8a29e",
-    charcoal: "#374151",
-    burgundy: "#800020",
-    tan: "#d2b48c",
-    mint: "#a7f3d0",
-    lavender: "#c4b5fd",
-    peach: "#fdba74",
-    rose: "#fb7185",
-    sky: "#38bdf8",
-    denim: "#1e40af",
-  };
-
-  return colorMap[color.toLowerCase()] || "#9ca3af";
 }

@@ -112,12 +112,9 @@ export default async function RootLayout({
             {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TL499XE6KR');`}
           </Script>
           {/* Register Service Worker for PWA */}
-          <script
-            nonce={nonce}
-            dangerouslySetInnerHTML={{
-              __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`
-            }}
-          />
+          <Script id="sw-register" strategy="afterInteractive" nonce={nonce}>
+            {`if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`}
+          </Script>
         </body>
       </html>
     </ClerkProvider>

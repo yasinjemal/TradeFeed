@@ -42,9 +42,14 @@ export interface DeliveryAddress {
  *
  * @param items - Cart items to include in the order
  * @param delivery - Optional delivery address
+ * @param orderNumber - Optional order number (e.g. "TF-20260224-A1B2") to include at top
  * @returns URL-encoded message string ready for wa.me
  */
-export function buildWhatsAppMessage(items: CartItem[], delivery?: DeliveryAddress | null): string {
+export function buildWhatsAppMessage(
+  items: CartItem[],
+  delivery?: DeliveryAddress | null,
+  orderNumber?: string,
+): string {
   if (items.length === 0) return "";
 
   const totalCents = items.reduce(
@@ -78,13 +83,23 @@ export function buildWhatsAppMessage(items: CartItem[], delivery?: DeliveryAddre
     ? `\n📍 *Deliver to:*\n   ${delivery.address}\n   ${delivery.city}, ${delivery.province} ${delivery.postalCode}\n`
     : "";
 
+  // Include order number in header when available (for tracking)
+  const header = orderNumber
+    ? `🛍️ *New Order #${orderNumber}*\n\n`
+    : `📋 *New Order from TradeFeed*\n\n`;
+
+  const trackingLine = orderNumber
+    ? `\n📦 Track: tradefeed.co.za/track/${orderNumber}\n`
+    : "";
+
   const message =
-    `📋 *New Order from TradeFeed*\n\n` +
+    header +
     `${lineItems}\n\n` +
     `─────────────────\n` +
     `*Total: R ${totalRands}*\n` +
     `Items: ${totalItems}` +
-    `${deliverySection}\n\n` +
+    `${deliverySection}` +
+    `${trackingLine}\n` +
     `Thank you! 🙏`;
 
   return message;
@@ -101,8 +116,9 @@ export function buildWhatsAppCheckoutUrl(
   whatsappNumber: string,
   items: CartItem[],
   delivery?: DeliveryAddress | null,
+  orderNumber?: string,
 ): string {
-  const message = buildWhatsAppMessage(items, delivery);
+  const message = buildWhatsAppMessage(items, delivery, orderNumber);
   const phone = whatsappNumber.replace("+", "");
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }

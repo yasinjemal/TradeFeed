@@ -10,7 +10,8 @@
 import { useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { SHIMMER_LIGHT } from "@/lib/image-placeholder";import { WishlistHeart } from "./wishlist-heart";
+import { SHIMMER_LIGHT } from "@/lib/image-placeholder";
+import { WishlistHeart } from "./wishlist-heart";
 
 interface CatalogProduct {
   id: string;
@@ -126,15 +127,15 @@ export function CatalogSearchFilter({
           </svg>
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={inputValue}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search products, sizes, colors..."
             className="w-full rounded-xl border border-stone-200 bg-white pl-10 pr-4 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all"
           />
-          {search && (
+          {inputValue && (
             <button
               type="button"
-              onClick={() => setSearch("")}
+              onClick={clearSearch}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-stone-200 flex items-center justify-center text-stone-500 hover:bg-stone-300 transition-colors"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -235,7 +236,7 @@ export function CatalogSearchFilter({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {filtered.map((product) => (
             <ProductCard
               key={product.id}
@@ -282,8 +283,8 @@ function ProductCard({
       href={`/catalog/${shopSlug}/products/${product.id}`}
       className="group block"
     >
-      <div className="bg-white rounded-2xl border border-stone-200/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-stone-200/60 hover:border-stone-200 hover:-translate-y-1 active:scale-[0.98]">
-        <div className="relative aspect-[3/4] bg-stone-100 overflow-hidden">
+      <div className="overflow-hidden rounded-3xl bg-white shadow-sm shadow-stone-200/70 ring-1 ring-stone-200/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-stone-300/50 active:scale-[0.99]">
+        <div className="relative aspect-[4/5] bg-stone-100 overflow-hidden">
           <div className="absolute inset-0 shimmer" />
           {primaryImage ? (
             <Image
@@ -293,7 +294,7 @@ function ProductCard({
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               placeholder="blur"
               blurDataURL={SHIMMER_LIGHT}
-              className="relative object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+              className="relative object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
             <div className="relative w-full h-full flex flex-col items-center justify-center gap-2 text-stone-300 bg-gradient-to-br from-stone-50 to-stone-100">
@@ -314,10 +315,10 @@ function ProductCard({
             </div>
           )}
 
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
 
           {/* Wishlist Heart */}
-          <div className="absolute top-2.5 left-2.5 z-10">
+          <div className="absolute left-2.5 top-2.5 z-10">
             <WishlistHeart
               productId={product.id}
               productName={product.name}
@@ -335,7 +336,7 @@ function ProductCard({
           )}
 
           {colors.length > 1 && (
-            <div className="absolute top-2.5 right-2.5 flex gap-1 bg-white/80 backdrop-blur-sm rounded-full px-1.5 py-1 shadow-sm">
+            <div className="absolute right-2.5 top-2.5 flex gap-1 rounded-full bg-white/85 px-1.5 py-1 backdrop-blur-sm shadow-sm">
               {colors.slice(0, 4).map((color) => (
                 <span
                   key={color}
@@ -352,8 +353,8 @@ function ProductCard({
             </div>
           )}
 
-          <div className="absolute bottom-2.5 left-2.5">
-            <span className="bg-white/90 backdrop-blur-sm text-stone-900 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+          <div className="absolute bottom-3 left-3">
+            <span className="rounded-full bg-white/95 px-3 py-1.5 text-sm font-extrabold tracking-tight text-stone-900 shadow-sm backdrop-blur-sm">
               {formatZAR(minPrice)}
               {minPrice !== maxPrice && (
                 <span className="text-stone-400 font-normal"> +</span>
@@ -362,26 +363,26 @@ function ProductCard({
           </div>
         </div>
 
-        <div className="p-3 sm:p-3.5 space-y-1.5">
+        <div className="space-y-2 p-3.5 sm:p-4">
           {product.category && (
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-emerald-600">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600">
               {product.category.name}
             </span>
           )}
-          <h3 className="font-semibold text-stone-800 text-[13px] sm:text-sm leading-snug line-clamp-2 group-hover:text-emerald-700 transition-colors">
+          <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-stone-900 transition-colors group-hover:text-emerald-700 sm:text-[15px]">
             {product.name}
           </h3>
-          <div className="flex flex-wrap gap-1 pt-0.5">
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
             {sizes.slice(0, 5).map((size) => (
               <span
                 key={size}
-                className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-stone-50 border border-stone-100 text-stone-500 text-[10px] font-medium"
+                className="inline-flex items-center rounded-md bg-stone-50 px-2 py-1 text-[10px] font-medium text-stone-500"
               >
                 {size}
               </span>
             ))}
             {sizes.length > 5 && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-stone-50 border border-stone-100 text-stone-400 text-[10px] font-medium">
+              <span className="inline-flex items-center rounded-md bg-stone-50 px-2 py-1 text-[10px] font-medium text-stone-400">
                 +{sizes.length - 5}
               </span>
             )}
