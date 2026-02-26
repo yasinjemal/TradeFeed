@@ -1,0 +1,262 @@
+{
+  "common": {
+    "appName": "TradeFeed",
+    "signIn": "Ngena",
+    "signUp": "Bhalisa",
+    "signOut": "Phuma",
+    "loading": "Iyalayisha…",
+    "save": "Gcina",
+    "cancel": "Khansela",
+    "delete": "Susa",
+    "edit": "Hlela",
+    "search": "Sesha",
+    "close": "Vala",
+    "back": "Emuva",
+    "next": "Okulandelayo",
+    "viewAll": "Buka konke",
+    "learnMore": "Funda kabanzi",
+    "tryAgain": "Zama futhi",
+    "goHome": "Ekhaya",
+    "skipToContent": "Yeqa uye kokubhaliwe",
+    "currency": "R{amount}",
+    "free": "Mahhala",
+    "perMonth": "/ngenyanga"
+  },
+  "nav": {
+    "features": "Izici",
+    "pricing": "Amanani",
+    "faq": "Imibuzo",
+    "marketplace": "Imakethe",
+    "dashboard": "Ideshibhodi",
+    "createShop": "Dala Isitolo",
+    "browseMarketplace": "Bhrowuza Imakethe",
+    "startFree": "Qala Mahhala"
+  },
+  "landing": {
+    "hero": {
+      "title": "Imikhiqizo Yakho. Ilinki Eyodwa Yekhathalogi. Ama-odela e-WhatsApp.",
+      "subtitle": "Layisha imikhiqizo yakho, yabelana ngelinki yekhathalogi yakho, futhi uthole ama-odela ahlelekile nge-WhatsApp. Yakhelwe abathengisi beSA nabadayisi.",
+      "cta": "Qala Ukudayisa Mahhala",
+      "ctaSecondary": "Bhrowuza Imakethe",
+      "trustedBy": "Kuthenjwe abathengisi baseSA"
+    },
+    "features": {
+      "title": "Konke Okudingayo Ukudayisa Ngokuhlakanipha",
+      "subtitle": "Shintsha ama-voice notes nezithombe ezisakazekile ze-WhatsApp ngekhathalogi yemikhiqizo ehloniphekile.",
+      "whatsapp": {
+        "title": "Ukukhokha Nge-WhatsApp Kuqala",
+        "description": "Abathengi babhrowuza ikhathalogi yakho futhi bathumele ama-odela ahlelekile ngqo ku-WhatsApp yakho — akudingeki ukulanda uhlelo lokusebenza."
+      },
+      "mobile": {
+        "title": "Isebenza Kunoma Yiliphi Ifoni",
+        "description": "Ikhathalogi yakho ilayisha ngokushesha kunoma yiliphi i-smartphone. Iklanyelwe abathengi baseSA abasebenzisa idatha."
+      },
+      "variants": {
+        "title": "Izinhlobonhlobo Zemikhiqizo",
+        "description": "Engeza ubukhulu, imibala, nezinketho ezingokwezifiso. Landelela isitoko ngohlobo ngalunye."
+      },
+      "analytics": {
+        "title": "Yazi Izinombolo Zakho",
+        "description": "Bona ukuthi yimiphi imikhiqizo ethola ukubukwa, futhi landelela ukusebenza kwakho kokudayisa."
+      },
+      "import": {
+        "title": "Ukulayisha Okuningi",
+        "description": "Layisha amakhulu emikhiqizo ngesikhathi esisodwa nge-CSV. Akudingeki uyengeze ngayinye."
+      },
+      "marketplace": {
+        "title": "Ukutholakala Emakethe",
+        "description": "Tholwa abathengi abasha. Imikhiqizo yakho ivela emakethe ye-TradeFeed nabanye abadayisi baseSA."
+      }
+    },
+    "pricing": {
+      "title": "Amanani Alula, Asobala",
+      "subtitle": "Qala mahhala. Thuthukisa uma ukulungele.",
+      "freePlan": {
+        "name": "Mahhala",
+        "price": "R0",
+        "period": "njalo",
+        "cta": "Qala Mahhala",
+        "features": [
+          "Kuze kube imikhiqizo engu-10",
+          "Ikhasi lekhathalogi lomphakathi",
+          "Ukukhokha nge-WhatsApp",
+          "Ukuhlaziya okuyisisekelo",
+          "Idizayini ye-mobile kuqala"
+        ]
+      },
+      "proPlan": {
+        "name": "Pro",
+        "price": "R199",
+        "period": "/ngenyanga",
+        "cta": "Thola i-Pro",
+        "features": [
+          "Imikhiqizo engenamkhawulo",
+          "Ukulayisha okuningi nge-CSV",
+          "Ukuhlaziya okuthuthukisiwe",
+          "Imikhangiso ekhushulwe",
+          "Ukwesekwa okubalulekile",
+          "Ibhrendi yesitolo engokwezifiso"
+        ]
+      }
+    },
+    "faq": {
+      "title": "Imibuzo Evame Ukubuzwa",
+      "items": [
+        {
+          "q": "Ukuodela kwe-WhatsApp kusebenza kanjani?",
+          "a": "Abathengi babhrowuza ikhathalogi yakho ku-inthanethi, bengeza izinto ekalini yabo, bese becindezela 'Thumela I-Odela ku-WhatsApp'. Lokhu kuvula i-WhatsApp nomlayezo ohlelekile."
+        },
+        {
+          "q": "Ingabe abathengi bami badinga ukulanda uhlelo lokusebenza?",
+          "a": "Cha. Ikhathalogi yakho yikhasi lewebhu elisebenza kunoma yiliphi ibhrawuza le-mobile. Abathengi bavele bavule ilinki oyabelana ngayo ku-WhatsApp."
+        },
+        {
+          "q": "Ingabe idatha yami iphephile?",
+          "a": "Yebo. Idatha yesitolo ngasinye ihlukaniswe ngokuphelele. Asikho esinye isitolo esingabona imikhiqizo yakho noma ulwazi lwamakhasimende. Sihambisana ne-POPIA."
+        },
+        {
+          "q": "Ngingakuzama mahhala?",
+          "a": "Yebo impela. Iplani Yamahhala ikuvumela ukufaka imikhiqizo engu-10 ngokukukhokha okugcwele kwe-WhatsApp. Akudingeki ikhadi lokuboleka."
+        },
+        {
+          "q": "Nizamukela ziphi izindlela zokukhokha?",
+          "a": "Samukela izinkokhelo nge-PayFast — isango sokukhokha esethenjwayo saseNingizimu Afrika."
+        },
+        {
+          "q": "Ngingayilayisha uhlu lwami lwemikhiqizo olukhona?",
+          "a": "Yebo! Abadayisi be-Pro bangalayisha ifayela le-CSV ukulayisha amakhulu emikhiqizo ngesikhathi esisodwa."
+        },
+        {
+          "q": "Nisendaweni yini?",
+          "a": "I-TradeFeed yakhelwe eNingizimu Afrika, ngeNingizimu Afrika. Siyakuqonda ukuphithizela kwase-Jeppe Street."
+        },
+        {
+          "q": "Ngiqala kanjani?",
+          "a": "Bhalisa, dala isitolo sakho, layisha umkhiqizo wakho wokuqala, bese wabelana ngelinki yekhathalogi yakho. Kuthatha imizuzu engaphansi kwemihlanu."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ukulungele Ukudayisa Ngokuhlakanipha?",
+      "subtitle": "Hlangana nabathengisi baseSA asebevele besebenzisa i-TradeFeed ukuphatha izikhathalogi zabo.",
+      "button": "Dala Ikhathalogi Yakho Yamahhala"
+    }
+  },
+  "marketplace": {
+    "title": "Imakethe",
+    "subtitle": "Thola imikhiqizo kubadayisi abaphezulu baseNingizimu Afrika",
+    "searchPlaceholder": "Sesha imikhiqizo…",
+    "filters": {
+      "category": "Isigaba",
+      "priceRange": "Ibanga Lamanani",
+      "province": "Isifundazwe",
+      "verifiedOnly": "Abadayisi Abaqinisekisiwe Kuphela",
+      "clearAll": "Sula Konke"
+    },
+    "sort": {
+      "newest": "Okusha Kakhulu",
+      "trending": "Okuthandwayo",
+      "priceAsc": "Inani: Eliphansi kuya Kweliphezulu",
+      "priceDesc": "Inani: Eliphezulu kuya Kweliphansi",
+      "popular": "Okudumile"
+    },
+    "results": "{count} imikhiqizo itholiwe",
+    "noResults": "Ayikho imikhiqizo etholiwe",
+    "noResultsHint": "Zama ukusesha okwehlukile noma ulungise izihluzi zakho.",
+    "sponsored": "Okukhushulwe",
+    "verified": "Umdayisi Oqinisekisiwe",
+    "featured": "Okukhethekile"
+  },
+  "catalog": {
+    "addToCart": "Engeza Ekalini",
+    "askOnWhatsApp": "Buza ku-WhatsApp",
+    "outOfStock": "Kuphelile",
+    "inStock": "{count} esitokweni",
+    "selectSize": "Khetha Ubukhulu",
+    "selectColor": "Khetha Umbala",
+    "viewProduct": "Buka Umkhiqizo",
+    "comingSoon": "Iyeza Maduze",
+    "settingUp": "{shopName} ilungisa ikhathalogi yayo. Buya maduze!",
+    "browseMore": "Ufuna ukubona imikhiqizo kwabanye abadayisi?",
+    "browseMarketplace": "Bhrowuza okunye ku-TradeFeed Imakethe"
+  },
+  "cart": {
+    "title": "I-Odela Yakho",
+    "items": "{count} {count, plural, one {into} other {izinto}}",
+    "empty": "Ikali yakho ayinalutho",
+    "continueBrowsing": "Qhubeka ubhrowuze",
+    "orderTotal": "Isamba Se-Odela",
+    "clearAll": "Sula konke",
+    "checkout": "Thumela I-Odela ku-WhatsApp",
+    "placingOrder": "Ibeka I-Odela…",
+    "opensWhatsApp": "Ivula i-WhatsApp nemininingwane ye-odela yakho",
+    "yourDetails": "Imininingwane yakho",
+    "optional": "ongayifaki",
+    "name": "Igama",
+    "phone": "Ifoni",
+    "orderNotes": "Amanothi e-odela",
+    "addDelivery": "Engeza ikheli lokuthunyelwa",
+    "removeDelivery": "Susa ikheli lokuthunyelwa",
+    "streetAddress": "Ikheli Lomgwaqo",
+    "city": "Idolobha",
+    "province": "Isifundazwe",
+    "postalCode": "Ikhodi Yeposi",
+    "selectProvince": "Khetha isifundazwe…"
+  },
+  "wishlist": {
+    "title": "Okuthandayo",
+    "itemsSaved": "{count} {count, plural, one {into} other {izinto}} zigciniwe",
+    "empty": "Awukabi nakuthandayo",
+    "emptyHint": "Cindezela isithonjana senhliziyo emikiqizweni oyithandayo",
+    "browseProducts": "Bhrowuza imikhiqizo",
+    "clearAll": "Sula konke okuthandayo"
+  },
+  "dashboard": {
+    "title": "Ideshibhodi",
+    "overview": "Uhlolojikelele",
+    "products": "Imikhiqizo",
+    "orders": "Ama-Odela",
+    "analytics": "Ukuhlaziya",
+    "revenue": "Imali Engenayo",
+    "reviews": "Izibuyekezo",
+    "promotions": "Imikhangiso",
+    "settings": "Izilungiselelo",
+    "billing": "Ukukhokha",
+    "referrals": "Ukuthumela"
+  },
+  "orders": {
+    "orderPlaced": "I-odela ibekiwe!",
+    "trackOrder": "Landelela I-Odela",
+    "status": {
+      "pending": "Ilindile",
+      "confirmed": "Iqinisekisiwe",
+      "shipped": "Ithunyelwe",
+      "delivered": "Ithunyelwe",
+      "cancelled": "Ikhanseliwe"
+    }
+  },
+  "errors": {
+    "somethingWrong": "Kukhona okungahambanga kahle",
+    "unexpectedError": "Kwenzeke iphutha elingalindelekile. Ithimba lethu lazisiwe.",
+    "tryAgain": "Zama Futhi",
+    "pageNotFound": "Ikhasi Alitholakali",
+    "pageNotFoundDesc": "Ikhasi olifunayo alikho noma lishenziwe.",
+    "offline": "Awuxhunyiwe njengamanje",
+    "offlineDesc": "Hlola uxhumano lwakho lwe-inthanethi bese uzama futhi. Ikali yakho nokuthandayo kugcinwe — kuzoba lapha uma ubuya.",
+    "loadShedding": "Ukucishwa kukagesi? Idatha yakho iphephile."
+  },
+  "footer": {
+    "tagline": "Izikhathalogi ezihlelekile zabathengisi baseSA nabadayisi",
+    "product": "Umkhiqizo",
+    "company": "Inkampani",
+    "legal": "Okusemthethweni",
+    "privacy": "Inqubomgomo Yobumfihlo",
+    "terms": "Imibandela Yesevisi",
+    "support": "Ukwesekwa",
+    "copyright": "© {year} TradeFeed. Onke amalungelo agodliwe."
+  },
+  "language": {
+    "switchLanguage": "Ulimi",
+    "current": "isiZulu"
+  }
+}

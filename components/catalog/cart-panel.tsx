@@ -21,7 +21,7 @@
 
 "use client";
 
-import { useEffect, useCallback, useState, useTransition } from "react";
+import { useEffect, useCallback, useState, useTransition, useRef } from "react";
 import Image from "next/image";
 import { useCart } from "@/lib/cart/cart-context";
 import {
@@ -77,16 +77,41 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
     postalCode: "",
   });
 
-  // Close on Escape key
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Close on Escape + focus trap
   useEffect(() => {
     if (!isOpen) return;
 
+    closeButtonRef.current?.focus();
+
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab" && panelRef.current) {
+        const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    // Prevent body scroll when panel is open
     document.body.style.overflow = "hidden";
 
     return () => {
@@ -182,6 +207,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
 
       {/* ── Panel ─────────────────────────────────────────── */}
       <div
+        ref={panelRef}
         className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col"
         role="dialog"
         aria-modal="true"
@@ -191,12 +217,14 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200">
           <div>
             <h2 className="font-bold text-stone-900 text-lg">Your Order</h2>
-            <p className="text-xs text-stone-500 mt-0.5">
+            <p className="text-xs text-stone-500 mt-0.5" aria-live="polite">
               {totalItems} {totalItems === 1 ? "item" : "items"}
             </p>
           </div>
           <button
+            ref={closeButtonRef}
             onClick={onClose}
+            aria-label="Close cart"
             className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-stone-100 transition-colors text-stone-500"
           >
             <svg
@@ -327,6 +355,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 <button
                   onClick={() => removeItem(item.variantId)}
                   className="self-start w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
+                  aria-label={`Remove ${item.productName} from cart`}
                   title="Remove item"
                 >
                   <svg
@@ -353,7 +382,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
           <div className="border-t border-stone-200 px-5 py-4 space-y-3 bg-white">
             {/* Stock Error */}
             {checkoutError && (
-              <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              <div role="alert" className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
                 <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                 </svg>

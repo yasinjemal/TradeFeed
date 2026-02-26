@@ -254,6 +254,7 @@ model ProductVariant {
   @@unique([productId, size, color])
   @@index([productId])
   @@index([productId, isActive])
+  @@index([productId, stock])
 }
 
 // ============================================================
@@ -276,6 +277,7 @@ model AnalyticsEvent {
   @@index([shopId, type, createdAt])
   @@index([shopId, productId, type])
   @@index([createdAt])
+  @@index([visitorId])
 }
 
 enum EventType {
@@ -555,6 +557,7 @@ model Review {
   @@index([shopId])
   @@index([productId, isApproved])
   @@index([shopId, isApproved])
+  @@index([productId, rating])
 }
 
 // ============================================================

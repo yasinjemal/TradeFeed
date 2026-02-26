@@ -119,3 +119,36 @@ export function newOrderEmailHtml(data: OrderEmailData): string {
 </body>
 </html>`;
 }
+
+export function newOrderEmailText(data: OrderEmailData): string {
+  const itemLines = data.items
+    .map(
+      (item) =>
+        `  - ${item.productName} (${item.option1Label}: ${item.option1Value}${item.option2Value ? `, ${item.option2Label}: ${item.option2Value}` : ""}) x${item.quantity} = ${formatRands(item.priceInCents * item.quantity)}`
+    )
+    .join("\n");
+
+  const deliveryLine = data.deliveryAddress
+    ? `Delivery: ${data.deliveryAddress}${data.deliveryCity ? `, ${data.deliveryCity}` : ""}${data.deliveryProvince ? `, ${data.deliveryProvince}` : ""}${data.deliveryPostalCode ? ` ${data.deliveryPostalCode}` : ""}`
+    : "";
+
+  return [
+    `NEW ORDER RECEIVED — ${data.shopName}`,
+    "",
+    `Order: ${data.orderNumber}`,
+    data.buyerName ? `Buyer: ${data.buyerName}` : "",
+    data.buyerPhone ? `WhatsApp: ${data.buyerPhone}` : "",
+    deliveryLine,
+    `Items: ${data.itemCount}`,
+    `Total: ${formatRands(data.totalCents)}`,
+    "",
+    "Items:",
+    itemLines,
+    "",
+    `View order: ${data.dashboardUrl}`,
+    "",
+    "— TradeFeed",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}

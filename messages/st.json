@@ -1,0 +1,262 @@
+{
+  "common": {
+    "appName": "TradeFeed",
+    "signIn": "Kena",
+    "signUp": "Ingodisa",
+    "signOut": "Tswa",
+    "loading": "E ntse e laesha…",
+    "save": "Boloka",
+    "cancel": "Hlakola",
+    "delete": "Hlakola",
+    "edit": "Fetola",
+    "search": "Batla",
+    "close": "Kwala",
+    "back": "Morao",
+    "next": "E latelang",
+    "viewAll": "Sheba Tsohle",
+    "learnMore": "Ithute Haholoanyane",
+    "tryAgain": "Leka Hape",
+    "goHome": "Hae",
+    "skipToContent": "Tlola o ye ditheong",
+    "currency": "R{amount}",
+    "free": "Mahala",
+    "perMonth": "/ka khoeli"
+  },
+  "nav": {
+    "features": "Dikarolo",
+    "pricing": "Ditheko",
+    "faq": "Dipotso",
+    "marketplace": "Mmaraka",
+    "dashboard": "Dashiboto",
+    "createShop": "Theha Lebenkele",
+    "browseMarketplace": "Sheba Mmaraka",
+    "startFree": "Qala Mahala"
+  },
+  "landing": {
+    "hero": {
+      "title": "Dihlahiswa Tsa Hao. Lenane Le Le Leng. Di-Odara tsa WhatsApp.",
+      "subtitle": "Laisha dihlahiswa tsa hao, arolelana ka lenane la hao, mme o fumane di-odara tse hlophisitsweng ka WhatsApp. E ahetswe barekisi ba SA.",
+      "cta": "Qala Ho Rekisa Mahala",
+      "ctaSecondary": "Sheba Mmaraka",
+      "trustedBy": "E tshepilwe ke barekisi ba SA"
+    },
+    "features": {
+      "title": "Tsohle Tseo O Di Hlokang Ho Rekisa Ka Bohlale",
+      "subtitle": "Fetola di-voice notes le ditshwantsho tse qhalanyeng tsa WhatsApp ka lenane la dihlahiswa la profeshenale.",
+      "whatsapp": {
+        "title": "Ho Lefa Ka WhatsApp Pele",
+        "description": "Bareki ba sheba lenane la hao mme ba romele di-odara tse hlophisitsweng ho WhatsApp ya hao — ha ho hlokahale ho laisha app."
+      },
+      "mobile": {
+        "title": "E Sebetsa Ho Fono Efe Kapa Efe",
+        "description": "Lenane la hao le laesha kapele ho fono efe kapa efe ya smartphone. E etsetswe bareki ba SA ba sebedisang data."
+      },
+      "variants": {
+        "title": "Mefuta Ya Dihlahiswa",
+        "description": "Eketsa boholo, mebala, le dikgetho tse ikgethileng. Latela setoko ka mofuta o mong le o mong."
+      },
+      "analytics": {
+        "title": "Tseba Dinomoro Tsa Hao",
+        "description": "Bona hore ke dihlahiswa dife tse fumanang ho bonwa, mme o latele tshebetso ya hao ya thekiso."
+      },
+      "import": {
+        "title": "Ho Laisha Ho Hongata",
+        "description": "Laisha makgolo a dihlahiswa ka nako e le nngwe ka CSV."
+      },
+      "marketplace": {
+        "title": "Ho Fumanwa Mmarakeng",
+        "description": "Fumanwa ke bareki ba batjha. Dihlahiswa tsa hao di hlaha mmarakeng wa TradeFeed le barekisi ba bang ba SA."
+      }
+    },
+    "pricing": {
+      "title": "Ditheko Tse Bonolo, Tse Hlakileng",
+      "subtitle": "Qala mahala. Ntlafatsa ha o se o lokile.",
+      "freePlan": {
+        "name": "Mahala",
+        "price": "R0",
+        "period": "ka ho sa feleng",
+        "cta": "Qala Mahala",
+        "features": [
+          "Ho fihlela dihlahiswa tse 10",
+          "Leqephe la lenane la sechaba",
+          "Ho lefa ka WhatsApp",
+          "Tlhahlobo ya motheo",
+          "Moralo wa mobile pele"
+        ]
+      },
+      "proPlan": {
+        "name": "Pro",
+        "price": "R199",
+        "period": "/ka khoeli",
+        "cta": "Fumana Pro",
+        "features": [
+          "Dihlahiswa tse sa lekanyetswang",
+          "Ho laisha ho hongata ka CSV",
+          "Tlhahlobo e ntlafetseng",
+          "Dipapatso tse kgodisitsweng",
+          "Tshehetsro ya pele",
+          "Letshwao la lebenkele le ikgethileng"
+        ]
+      }
+    },
+    "faq": {
+      "title": "Dipotso Tse Botswang Kgafetsa",
+      "items": [
+        {
+          "q": "Ho odara ka WhatsApp ho sebetsa jwang?",
+          "a": "Bareki ba sheba lenane la hao inthaneteng, ba eketsa dintho karakeng ya bona, mme ba tobetsa 'Romela Odara ho WhatsApp'."
+        },
+        {
+          "q": "Na bareki ba ka ba hloka ho laisha app?",
+          "a": "Tjhe. Lenane la hao ke leqephe la webhe le sebetsang ho browser efe kapa efe ya mobile."
+        },
+        {
+          "q": "Na data ya ka e bolokehile?",
+          "a": "Ee. Data ya lebenkele le leng le le leng e arohantswe ka ho feletseng. Re latela POPIA."
+        },
+        {
+          "q": "Na nka e leka mahala?",
+          "a": "Ka nnete. Morero wa Mahala o o lumella ho beha dihlahiswa tse 10. Ha ho hlokahale karete ya mokitlane."
+        },
+        {
+          "q": "Le amohela mekgwa efe ya ho lefa?",
+          "a": "Re amohela ditefo ka PayFast — heke ya tefo e tshepehang ya Afrika Borwa."
+        },
+        {
+          "q": "Na nka laisha lethathamo la ka la dihlahiswa le seng le le teng?",
+          "a": "Ee! Barekisi ba Pro ba ka laisha faele ya CSV ho laisha makgolo a dihlahiswa ka nako e le nngwe."
+        },
+        {
+          "q": "Le ho kae?",
+          "a": "TradeFeed e ahilwe Afrika Borwa, bakeng sa Afrika Borwa."
+        },
+        {
+          "q": "Ke qala jwang?",
+          "a": "Ingodisa, theha lebenkele la hao, laisha sehlahiswa sa hao sa pele, mme o arolelane ka lenane la hao. Ho nka metsotso e ka tlase ho mehlano."
+        }
+      ]
+    },
+    "cta": {
+      "title": "O Lokile Ho Rekisa Ka Bohlale?",
+      "subtitle": "Kopana le barekisi ba SA ba seng ba sebedisa TradeFeed ho laola dinane tsa bona.",
+      "button": "Theha Lenane La Hao La Mahala"
+    }
+  },
+  "marketplace": {
+    "title": "Mmaraka",
+    "subtitle": "Fumana dihlahiswa ho barekisi ba holimo ba Afrika Borwa",
+    "searchPlaceholder": "Batla dihlahiswa…",
+    "filters": {
+      "category": "Sehlopha",
+      "priceRange": "Sekala sa Theko",
+      "province": "Provense",
+      "verifiedOnly": "Barekisi Ba Netefaditsweng Feela",
+      "clearAll": "Hlakola Tsohle"
+    },
+    "sort": {
+      "newest": "E Ncha Ka Ho Fetisisa",
+      "trending": "E Ratehang",
+      "priceAsc": "Theko: E Tlase Ho Ya Ho E Hodimo",
+      "priceDesc": "Theko: E Hodimo Ho Ya Ho E Tlase",
+      "popular": "E Tsebahalang"
+    },
+    "results": "{count} dihlahiswa di fumanoeng",
+    "noResults": "Ha ho dihlahiswa tse fumanoeng",
+    "noResultsHint": "Leka ho batla ho fapaneng kapa o fetole difilthara tsa hao.",
+    "sponsored": "E Kgodisitsweng",
+    "verified": "Morekisi O Netefaditsweng",
+    "featured": "E Kgethilweng"
+  },
+  "catalog": {
+    "addToCart": "Kenya Karakeng",
+    "askOnWhatsApp": "Botsa ho WhatsApp",
+    "outOfStock": "E Fedile",
+    "inStock": "{count} setokong",
+    "selectSize": "Kgetha Boholo",
+    "selectColor": "Kgetha Mmala",
+    "viewProduct": "Sheba Sehlahiswa",
+    "comingSoon": "E Etla Haufinyana",
+    "settingUp": "{shopName} e ntse e hlophisa lenane la yona. Kgutla haufinyana!",
+    "browseMore": "O batla ho bona dihlahiswa ho barekisi ba bang?",
+    "browseMarketplace": "Sheba tse ding ho TradeFeed Mmaraka"
+  },
+  "cart": {
+    "title": "Odara Ya Hao",
+    "items": "{count} {count, plural, one {ntho} other {dintho}}",
+    "empty": "Karaka ya hao ha e na letho",
+    "continueBrowsing": "Tswela pele ho sheba",
+    "orderTotal": "Kakaretso Ya Odara",
+    "clearAll": "Hlakola tsohle",
+    "checkout": "Romela Odara ho WhatsApp",
+    "placingOrder": "E Beha Odara…",
+    "opensWhatsApp": "E bula WhatsApp ka dintlha tsa odara ya hao",
+    "yourDetails": "Dintlha tsa hao",
+    "optional": "ha e hlokahale",
+    "name": "Lebitso",
+    "phone": "Fono",
+    "orderNotes": "Dinoutse tsa odara",
+    "addDelivery": "Eketsa aterese ya phano",
+    "removeDelivery": "Tlosa aterese ya phano",
+    "streetAddress": "Aterese Ya Seterata",
+    "city": "Toropo",
+    "province": "Provense",
+    "postalCode": "Khoutu Ya Poso",
+    "selectProvince": "Kgetha provense…"
+  },
+  "wishlist": {
+    "title": "Tse Ratwang",
+    "itemsSaved": "{count} {count, plural, one {ntho} other {dintho}} di bolokilwe",
+    "empty": "Ha ho tse ratwang ha jwale",
+    "emptyHint": "Tobetsa setshwantsho sa pelo dihlahisweng tseo o di ratang",
+    "browseProducts": "Sheba dihlahiswa",
+    "clearAll": "Hlakola tsohle tse ratwang"
+  },
+  "dashboard": {
+    "title": "Dashiboto",
+    "overview": "Kakaretso",
+    "products": "Dihlahiswa",
+    "orders": "Di-Odara",
+    "analytics": "Tlhahlobo",
+    "revenue": "Lekeno",
+    "reviews": "Ditlhahlobo",
+    "promotions": "Dipapatso",
+    "settings": "Ditlhophiso",
+    "billing": "Tokiso Ya Ditefelo",
+    "referrals": "Dikgothaletso"
+  },
+  "orders": {
+    "orderPlaced": "Odara e behilwe!",
+    "trackOrder": "Latela Odara",
+    "status": {
+      "pending": "E Emetse",
+      "confirmed": "E Netefaditsweng",
+      "shipped": "E Rometswe",
+      "delivered": "E Fihletsweng",
+      "cancelled": "E Hlakotswe"
+    }
+  },
+  "errors": {
+    "somethingWrong": "Ho na le se sa tsamayang hantle",
+    "unexpectedError": "Ho etsahetse phoso e sa lebellwang. Sehlopha sa rona se tsebisitswe.",
+    "tryAgain": "Leka Hape",
+    "pageNotFound": "Leqephe Ha Le Fumanehe",
+    "pageNotFoundDesc": "Leqephe leo o le batlang ha le yo kapa le sutheselitswe.",
+    "offline": "Ha o hokahane ha jwale",
+    "offlineDesc": "Hlahloba khokahanyo ya hao ya inthanete mme o leke hape. Karaka ya hao le tse ratwang di bolokilwe.",
+    "loadShedding": "Ho kgaolwa ha motlakase? Data ya hao e bolokehile."
+  },
+  "footer": {
+    "tagline": "Dinane tse hlophisitsweng bakeng sa barekisi ba SA",
+    "product": "Sehlahiswa",
+    "company": "Khampani",
+    "legal": "Molao",
+    "privacy": "Leano La Poraefesi",
+    "terms": "Dipehelo Tsa Tshebeletso",
+    "support": "Tshehetso",
+    "copyright": "© {year} TradeFeed. Ditokelo tsohle di sireleletswe."
+  },
+  "language": {
+    "switchLanguage": "Puo",
+    "current": "Sesotho"
+  }
+}

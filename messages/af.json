@@ -1,0 +1,262 @@
+{
+  "common": {
+    "appName": "TradeFeed",
+    "signIn": "Teken In",
+    "signUp": "Registreer",
+    "signOut": "Teken Uit",
+    "loading": "Laai…",
+    "save": "Stoor",
+    "cancel": "Kanselleer",
+    "delete": "Verwyder",
+    "edit": "Wysig",
+    "search": "Soek",
+    "close": "Maak toe",
+    "back": "Terug",
+    "next": "Volgende",
+    "viewAll": "Sien Alles",
+    "learnMore": "Meer Inligting",
+    "tryAgain": "Probeer Weer",
+    "goHome": "Tuisblad",
+    "skipToContent": "Spring na inhoud",
+    "currency": "R{amount}",
+    "free": "Gratis",
+    "perMonth": "/maand"
+  },
+  "nav": {
+    "features": "Kenmerke",
+    "pricing": "Pryse",
+    "faq": "Vrae",
+    "marketplace": "Markplek",
+    "dashboard": "Paneelbord",
+    "createShop": "Skep Winkel",
+    "browseMarketplace": "Blaai Markplek",
+    "startFree": "Begin Gratis"
+  },
+  "landing": {
+    "hero": {
+      "title": "Jou Produkte. Een Katalogus-Skakel. WhatsApp-Bestellings.",
+      "subtitle": "Laai jou produkte op, deel jou katalogus-skakel, en ontvang gestruktureerde bestellings via WhatsApp. Gebou vir SA groothandelaars en kleinhandelaars.",
+      "cta": "Begin Gratis Verkoop",
+      "ctaSecondary": "Blaai Markplek",
+      "trustedBy": "Vertrou deur SA groothandelaars"
+    },
+    "features": {
+      "title": "Alles Wat Jy Nodig Het om Slimmer te Verkoop",
+      "subtitle": "Vervang stemnota's en verspreide WhatsApp-foto's met 'n professionele produkkatalogus.",
+      "whatsapp": {
+        "title": "WhatsApp-Eerste Betaling",
+        "description": "Kopers blaai deur jou katalogus en stuur gestruktureerde bestellings direk na jou WhatsApp — geen app-aflaai nodig nie."
+      },
+      "mobile": {
+        "title": "Werk op Enige Foon",
+        "description": "Jou katalogus laai vinnig op enige slimfoon. Ontwerp vir Suid-Afrikaanse kopers op databegrooting."
+      },
+      "variants": {
+        "title": "Produkvariante",
+        "description": "Voeg groottes, kleure en pasgemaakte opsies by. Volg voorraad per variant."
+      },
+      "analytics": {
+        "title": "Ken Jou Syfers",
+        "description": "Sien watter produkte besigtigings kry en volg jou verkoopprestasie."
+      },
+      "import": {
+        "title": "Grootmaat-Invoer",
+        "description": "Laai honderde produkte gelyktydig op via CSV. Hoef hulle nie een vir een by te voeg nie."
+      },
+      "marketplace": {
+        "title": "Markplek Ontdekking",
+        "description": "Word deur nuwe kopers gevind. Jou produkte verskyn op die TradeFeed-markplek saam met ander SA-verkopers."
+      }
+    },
+    "pricing": {
+      "title": "Eenvoudige, Deursigtige Pryse",
+      "subtitle": "Begin gratis. Opgradeer wanneer jy gereed is.",
+      "freePlan": {
+        "name": "Gratis",
+        "price": "R0",
+        "period": "vir altyd",
+        "cta": "Begin Gratis",
+        "features": [
+          "Tot 10 produkte",
+          "Openbare katalogusblad",
+          "WhatsApp-betaling",
+          "Basiese analise",
+          "Mobiel-eerste ontwerp"
+        ]
+      },
+      "proPlan": {
+        "name": "Pro",
+        "price": "R199",
+        "period": "/maand",
+        "cta": "Gaan Pro",
+        "features": [
+          "Onbeperkte produkte",
+          "CSV grootmaat-invoer",
+          "Gevorderde analise",
+          "Bevorderde aanbiedings",
+          "Prioriteit-ondersteuning",
+          "Pasgemaakte winkelhandelsmerk"
+        ]
+      }
+    },
+    "faq": {
+      "title": "Gereelde Vrae",
+      "items": [
+        {
+          "q": "Hoe werk WhatsApp-bestelling?",
+          "a": "Kopers blaai deur jou katalogus aanlyn, voeg items by hul mandjie, en tik 'Stuur Bestelling op WhatsApp'. Dit open WhatsApp met 'n gestruktureerde boodskap."
+        },
+        {
+          "q": "Moet my kopers 'n app aflaai?",
+          "a": "Nee. Jou katalogus is 'n webblad wat in enige mobiele blaaier werk. Kopers maak net die skakel oop wat jy op WhatsApp deel."
+        },
+        {
+          "q": "Is my data veilig?",
+          "a": "Ja. Elke winkel se data is heeltemal geïsoleer. Geen ander verkoper kan jou produkte of kliënte-inligting sien nie. Ons voldoen aan POPIA."
+        },
+        {
+          "q": "Kan ek dit gratis probeer?",
+          "a": "Absoluut. Die Gratis-plan laat jou tot 10 produkte lys met volle WhatsApp-betaling. Geen kredietkaart nodig nie."
+        },
+        {
+          "q": "Watter betaalmetodes aanvaar julle?",
+          "a": "Ons aanvaar betalings via PayFast — Suid-Afrika se vertroude betaalpoort."
+        },
+        {
+          "q": "Kan ek my bestaande produklys invoer?",
+          "a": "Ja! Pro-plan verkopers kan 'n CSV-lêer oplaai om honderde produkte gelyktydig in te voer."
+        },
+        {
+          "q": "Waar is julle gebaseer?",
+          "a": "TradeFeed is in Suid-Afrika gebou, vir Suid-Afrika. Ons verstaan die Jeppe Street se hustle."
+        },
+        {
+          "q": "Hoe begin ek?",
+          "a": "Registreer, skep jou winkel, laai jou eerste produk op, en deel jou katalogus-skakel. Dit neem minder as 5 minute."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Gereed om Slimmer te Verkoop?",
+      "subtitle": "Sluit aan by SA groothandelaars wat reeds TradeFeed gebruik om hul katalogusse te bestuur.",
+      "button": "Skep Jou Gratis Katalogus"
+    }
+  },
+  "marketplace": {
+    "title": "Markplek",
+    "subtitle": "Ontdek produkte van Suid-Afrika se top verkopers",
+    "searchPlaceholder": "Soek produkte…",
+    "filters": {
+      "category": "Kategorie",
+      "priceRange": "Prysbereik",
+      "province": "Provinsie",
+      "verifiedOnly": "Slegs Geverifieerde Verkopers",
+      "clearAll": "Maak Alles Skoon"
+    },
+    "sort": {
+      "newest": "Nuutste",
+      "trending": "Neigings",
+      "priceAsc": "Prys: Laag na Hoog",
+      "priceDesc": "Prys: Hoog na Laag",
+      "popular": "Gewild"
+    },
+    "results": "{count} produkte gevind",
+    "noResults": "Geen produkte gevind nie",
+    "noResultsHint": "Probeer 'n ander soektog of pas jou filters aan.",
+    "sponsored": "Geborg",
+    "verified": "Geverifieerde Verkoper",
+    "featured": "Uitgelig"
+  },
+  "catalog": {
+    "addToCart": "Voeg by Mandjie",
+    "askOnWhatsApp": "Vra op WhatsApp",
+    "outOfStock": "Uit Voorraad",
+    "inStock": "{count} in voorraad",
+    "selectSize": "Kies Grootte",
+    "selectColor": "Kies Kleur",
+    "viewProduct": "Sien Produk",
+    "comingSoon": "Kom Binnekort",
+    "settingUp": "{shopName} stel hul katalogus op. Kom gou terug!",
+    "browseMore": "Wil jy produkte van ander verkopers sien?",
+    "browseMarketplace": "Blaai meer op TradeFeed Markplek"
+  },
+  "cart": {
+    "title": "Jou Bestelling",
+    "items": "{count} {count, plural, one {item} other {items}}",
+    "empty": "Jou mandjie is leeg",
+    "continueBrowsing": "Gaan voort met blaai",
+    "orderTotal": "Bestelling Totaal",
+    "clearAll": "Maak alles skoon",
+    "checkout": "Stuur Bestelling op WhatsApp",
+    "placingOrder": "Bestel Bestelling…",
+    "opensWhatsApp": "Open WhatsApp met jou bestelbesonderhede",
+    "yourDetails": "Jou besonderhede",
+    "optional": "opsioneel",
+    "name": "Naam",
+    "phone": "Foon",
+    "orderNotes": "Bestelnota's",
+    "addDelivery": "Voeg afleweradres by",
+    "removeDelivery": "Verwyder afleweradres",
+    "streetAddress": "Straatadres",
+    "city": "Stad",
+    "province": "Provinsie",
+    "postalCode": "Poskode",
+    "selectProvince": "Kies provinsie…"
+  },
+  "wishlist": {
+    "title": "Gunstelinge",
+    "itemsSaved": "{count} {count, plural, one {item} other {items}} gestoor",
+    "empty": "Nog geen gunstelinge nie",
+    "emptyHint": "Tik die hartjie-ikoon op produkte wat jy hou van",
+    "browseProducts": "Blaai produkte",
+    "clearAll": "Maak alle gunstelinge skoon"
+  },
+  "dashboard": {
+    "title": "Paneelbord",
+    "overview": "Oorsig",
+    "products": "Produkte",
+    "orders": "Bestellings",
+    "analytics": "Analise",
+    "revenue": "Inkomste",
+    "reviews": "Resensies",
+    "promotions": "Promosies",
+    "settings": "Instellings",
+    "billing": "Fakturering",
+    "referrals": "Verwysings"
+  },
+  "orders": {
+    "orderPlaced": "Bestelling geplaas!",
+    "trackOrder": "Volg Bestelling",
+    "status": {
+      "pending": "Hangend",
+      "confirmed": "Bevestig",
+      "shipped": "Versend",
+      "delivered": "Afgelewer",
+      "cancelled": "Gekanselleer"
+    }
+  },
+  "errors": {
+    "somethingWrong": "Iets het verkeerd gegaan",
+    "unexpectedError": "'n Onverwagte fout het voorgekom. Ons span is in kennis gestel.",
+    "tryAgain": "Probeer Weer",
+    "pageNotFound": "Bladsy Nie Gevind",
+    "pageNotFoundDesc": "Die bladsy waarna jy soek bestaan nie of is verskuif.",
+    "offline": "Jy is tans vanlyn",
+    "offlineDesc": "Kontroleer jou internetverbinding en probeer weer. Jou mandjie en gunstelinge is plaaslik gestoor.",
+    "loadShedding": "Beurtkrag? Jou data is veilig."
+  },
+  "footer": {
+    "tagline": "Gestruktureerde katalogusse vir SA groothandelaars en kleinhandelaars",
+    "product": "Produk",
+    "company": "Maatskappy",
+    "legal": "Regsgeldig",
+    "privacy": "Privaatheidsbeleid",
+    "terms": "Diensvoorwaardes",
+    "support": "Ondersteuning",
+    "copyright": "© {year} TradeFeed. Alle regte voorbehou."
+  },
+  "language": {
+    "switchLanguage": "Taal",
+    "current": "Afrikaans"
+  }
+}

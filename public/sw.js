@@ -10,7 +10,7 @@
 // - Resilience during SA load shedding
 // ============================================================
 
-const CACHE_NAME = "tradefeed-v2";
+const CACHE_NAME = "tradefeed-v3";
 const OFFLINE_URL = "/offline.html";
 const IMAGE_CACHE = "tradefeed-images-v1";
 const PAGE_CACHE = "tradefeed-pages-v1";
@@ -18,6 +18,8 @@ const PAGE_CACHE = "tradefeed-pages-v1";
 // Max entries per cache (prevent unbounded growth)
 const MAX_IMAGE_ENTRIES = 200;
 const MAX_PAGE_ENTRIES = 50;
+
+const API_CACHE = "tradefeed-api-v1";
 
 // Assets to pre-cache on install
 const PRECACHE_ASSETS = [
@@ -34,7 +36,7 @@ self.addEventListener("install", (event) => {
 
 // Activate: clean old caches
 self.addEventListener("activate", (event) => {
-  const VALID_CACHES = [CACHE_NAME, IMAGE_CACHE, PAGE_CACHE];
+  const VALID_CACHES = [CACHE_NAME, IMAGE_CACHE, PAGE_CACHE, API_CACHE];
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
@@ -127,6 +129,32 @@ self.addEventListener("fetch", (event) => {
               return response;
             })
         )
+      )
+    );
+    return;
+  }
+
+  // ── Next.js RSC data fetches for catalog pages: SWR ──
+  // Cache the JSON payloads that Next.js fetches for client navigation.
+  // These contain product/shop data and enable offline catalog browsing.
+  if (
+    url.pathname.startsWith("/catalog/") &&
+    event.request.headers.get("RSC") === "1"
+  ) {
+    event.respondWith(
+      caches.open(API_CACHE).then((cache) =>
+        cache.match(event.request).then((cached) => {
+          const networkFetch = fetch(event.request)
+            .then((response) => {
+              if (response.ok) {
+                cache.put(event.request, response.clone());
+              }
+              return response;
+            })
+            .catch(() => cached);
+
+          return cached || networkFetch;
+        })
       )
     );
     return;

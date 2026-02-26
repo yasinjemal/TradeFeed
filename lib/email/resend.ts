@@ -30,6 +30,7 @@ export async function sendEmail(options: {
   to: string | string[];
   subject: string;
   html: string;
+  text?: string;
   from?: string;
 }) {
   const resend = getResend();
@@ -51,6 +52,7 @@ export async function sendEmail(options: {
       to: Array.isArray(options.to) ? options.to : [options.to],
       subject: options.subject,
       html: options.html,
+      ...(options.text ? { text: options.text } : {}),
     });
 
     if (result.error) {

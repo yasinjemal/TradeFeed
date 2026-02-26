@@ -62,3 +62,25 @@ export function newReviewEmailHtml(data: ReviewEmailData): string {
 </body>
 </html>`;
 }
+
+export function newReviewEmailText(data: ReviewEmailData): string {
+  const stars = "★".repeat(data.rating) + "☆".repeat(5 - data.rating);
+
+  return [
+    `NEW REVIEW — ${data.shopName}`,
+    "",
+    `Product: ${data.productName}`,
+    `Rating: ${stars} (${data.rating}/5)`,
+    data.title ? `Title: "${data.title}"` : "",
+    data.comment ? `Comment: ${data.comment}` : "No written review — rating only.",
+    `By: ${data.buyerName}`,
+    "",
+    "This review is pending your approval before it appears publicly.",
+    "",
+    `Review & approve: ${data.dashboardUrl}`,
+    "",
+    "— TradeFeed",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}

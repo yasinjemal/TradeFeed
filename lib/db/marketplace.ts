@@ -17,6 +17,7 @@
 
 import { db } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
+import { searchProductIds } from "@/lib/db/search";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -179,13 +180,21 @@ export async function getMarketplaceProducts(
     };
   }
 
-  // Text search — ILIKE on product name and description (V1)
+  // Full-text search — PostgreSQL tsvector with pg_trgm fuzzy fallback
+  let searchProductOrder: string[] | null = null;
   if (search && search.trim().length > 0) {
-    const term = search.trim();
-    where.OR = [
-      { name: { contains: term, mode: "insensitive" } },
-      { description: { contains: term, mode: "insensitive" } },
-    ];
+    const hits = await searchProductIds(search, pageSize * 3);
+    if (hits.length > 0) {
+      searchProductOrder = hits.map((h) => h.id);
+      where.id = { in: searchProductOrder };
+    } else {
+      // No FTS or fuzzy results — fall back to ILIKE for basic substring match
+      const term = search.trim();
+      where.OR = [
+        { name: { contains: term, mode: "insensitive" } },
+        { description: { contains: term, mode: "insensitive" } },
+      ];
+    }
   }
 
   // ── Build ORDER BY ──────────────────────────────────────
@@ -273,8 +282,13 @@ export async function getMarketplaceProducts(
     };
   });
 
-  // Price sorting is handled at DB level via denormalized
-  // minPriceCents/maxPriceCents on Product model.
+  // When searching with full-text, re-sort by relevance ranking
+  if (searchProductOrder && searchProductOrder.length > 0) {
+    const orderMap = new Map(searchProductOrder.map((id, i) => [id, i]));
+    products.sort(
+      (a, b) => (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
+    );
+  }
 
   return {
     products,
@@ -623,9 +637,8 @@ export async function getFeaturedShops(
 /**
  * M2.7 — Search marketplace.
  *
- * Full-text search across product names, descriptions, shop names,
- * and category names. V1: PostgreSQL ILIKE with %term%.
- * Upgrade path: pg_trgm → Meilisearch/Algolia when scale demands.
+ * Full-text search using PostgreSQL tsvector with relevance ranking.
+ * Falls back to pg_trgm fuzzy matching, then ILIKE substring match.
  */
 export async function searchMarketplace(
   query: string,

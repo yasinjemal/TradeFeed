@@ -23,6 +23,29 @@
       "purpose": "any maskable"
     }
   ],
+  "shortcuts": [
+    {
+      "name": "Browse Marketplace",
+      "short_name": "Marketplace",
+      "description": "Discover products from SA wholesalers",
+      "url": "/marketplace",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Seller Dashboard",
+      "short_name": "Dashboard",
+      "description": "Manage your shop and products",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Create Shop",
+      "short_name": "New Shop",
+      "description": "Start selling on TradeFeed",
+      "url": "/create-shop",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    }
+  ],
   "screenshots": [],
   "prefer_related_applications": false
 }

@@ -94,3 +94,34 @@ export function lowStockAlertEmailHtml(data: LowStockEmailData): string {
 </body>
 </html>`;
 }
+
+export function lowStockAlertEmailText(data: LowStockEmailData): string {
+  const outOfStockCount = data.variants.filter((v) => v.currentStock === 0).length;
+
+  const variantLines = data.variants
+    .map(
+      (v) =>
+        `  - ${v.productName} (${v.option1Label}: ${v.option1Value}${v.option2Value ? `, ${v.option2Label}: ${v.option2Value}` : ""}${v.sku ? `, SKU: ${v.sku}` : ""}) — ${v.currentStock === 0 ? "OUT OF STOCK" : `${v.currentStock} left`}`
+    )
+    .join("\n");
+
+  return [
+    `LOW STOCK ALERT — ${data.shopName}`,
+    "",
+    `${data.variants.length} variant${data.variants.length > 1 ? "s" : ""} below threshold of ${data.threshold} units.`,
+    outOfStockCount > 0
+      ? `⚠ ${outOfStockCount} variant${outOfStockCount > 1 ? "s are" : " is"} completely out of stock!`
+      : "",
+    "",
+    "Variants:",
+    variantLines,
+    "",
+    `Manage stock: ${data.dashboardUrl}`,
+    "",
+    `Alert threshold: ${data.threshold} units — Manage in Settings > Notifications`,
+    "",
+    "— TradeFeed",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}

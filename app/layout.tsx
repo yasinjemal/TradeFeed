@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { headers } from "next/headers";
 import { ClerkProvider } from "@clerk/nextjs";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { CookieConsent } from "@/components/cookie-consent";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -54,6 +56,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const nonce = (await headers()).get("x-nonce") ?? "";
+  const locale = await getLocale();
+  const messages = await getMessages();
 
   return (
     <ClerkProvider
@@ -62,7 +66,7 @@ export default async function RootLayout({
       afterSignOutUrl="/"
       nonce={nonce}
     >
-      <html lang="en">
+      <html lang={locale}>
         <head>
           {/* PWA */}
           <link rel="manifest" href="/manifest.json" />
@@ -73,8 +77,15 @@ export default async function RootLayout({
           <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
         </head>
         <body>
-          {children}
-          <Toaster
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-emerald-600 focus:text-white focus:rounded-lg focus:text-sm focus:font-semibold"
+          >
+            Skip to content
+          </a>
+          <NextIntlClientProvider messages={messages}>
+            <main id="main-content">{children}</main>
+            <Toaster
             position="top-center"
             toastOptions={{
               style: {
@@ -89,7 +100,8 @@ export default async function RootLayout({
             expand={false}
             richColors
           />
-          <CookieConsent />
+            <CookieConsent />
+          </NextIntlClientProvider>
           {/* Google Analytics 4 */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-TL499XE6KR"

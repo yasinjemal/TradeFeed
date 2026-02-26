@@ -1,0 +1,262 @@
+{
+  "common": {
+    "appName": "TradeFeed",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "viewAll": "View All",
+    "learnMore": "Learn More",
+    "tryAgain": "Try Again",
+    "goHome": "Go Home",
+    "skipToContent": "Skip to content",
+    "currency": "R{amount}",
+    "free": "Free",
+    "perMonth": "/month"
+  },
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "marketplace": "Marketplace",
+    "dashboard": "Dashboard",
+    "createShop": "Create Shop",
+    "browseMarketplace": "Browse Marketplace",
+    "startFree": "Start Free"
+  },
+  "landing": {
+    "hero": {
+      "title": "Your Products. One Catalog Link. WhatsApp Orders.",
+      "subtitle": "Upload your products, share your catalog link, and receive structured orders via WhatsApp. Built for SA wholesalers & retailers.",
+      "cta": "Start Selling Free",
+      "ctaSecondary": "Browse Marketplace",
+      "trustedBy": "Trusted by SA wholesalers"
+    },
+    "features": {
+      "title": "Everything You Need to Sell Smarter",
+      "subtitle": "Replace voice notes and scattered WhatsApp images with a professional product catalog.",
+      "whatsapp": {
+        "title": "WhatsApp-First Checkout",
+        "description": "Buyers browse your catalog and send structured orders directly to your WhatsApp — no app download needed."
+      },
+      "mobile": {
+        "title": "Works on Any Phone",
+        "description": "Your catalog loads fast on any smartphone. Designed for mobile-first South African buyers on data budgets."
+      },
+      "variants": {
+        "title": "Product Variants",
+        "description": "Add sizes, colours, and custom options. Track stock per variant. Show buyers exactly what's available."
+      },
+      "analytics": {
+        "title": "Know Your Numbers",
+        "description": "See which products get views, which generate WhatsApp clicks, and track your sales performance."
+      },
+      "import": {
+        "title": "Bulk Import",
+        "description": "Upload hundreds of products at once via CSV. No need to add them one by one."
+      },
+      "marketplace": {
+        "title": "Marketplace Discovery",
+        "description": "Get found by new buyers. Your products appear on the TradeFeed marketplace alongside other SA sellers."
+      }
+    },
+    "pricing": {
+      "title": "Simple, Transparent Pricing",
+      "subtitle": "Start free. Upgrade when you're ready.",
+      "freePlan": {
+        "name": "Free",
+        "price": "R0",
+        "period": "forever",
+        "cta": "Start Free",
+        "features": [
+          "Up to 10 products",
+          "Public catalog page",
+          "WhatsApp checkout",
+          "Basic analytics",
+          "Mobile-first design"
+        ]
+      },
+      "proPlan": {
+        "name": "Pro",
+        "price": "R199",
+        "period": "/month",
+        "cta": "Go Pro",
+        "features": [
+          "Unlimited products",
+          "CSV bulk import",
+          "Advanced analytics",
+          "Promoted listings",
+          "Priority support",
+          "Custom shop branding"
+        ]
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "items": [
+        {
+          "q": "How does WhatsApp ordering work?",
+          "a": "Buyers browse your catalog online, add items to their cart, and tap 'Send Order on WhatsApp'. This opens WhatsApp with a structured message listing everything they want — sizes, colours, quantities, and totals."
+        },
+        {
+          "q": "Do my buyers need to download an app?",
+          "a": "No. Your catalog is a web page that works in any mobile browser. Buyers just open the link you share on WhatsApp."
+        },
+        {
+          "q": "Is my data safe?",
+          "a": "Yes. Every shop's data is completely isolated. No other seller can see your products, orders, or customer information. We comply with POPIA (South Africa's data protection law)."
+        },
+        {
+          "q": "Can I try it for free?",
+          "a": "Absolutely. The Free plan lets you list up to 10 products with full WhatsApp checkout. No credit card required."
+        },
+        {
+          "q": "What payment methods do you accept?",
+          "a": "We accept payments via PayFast — South Africa's trusted payment gateway. Pay with credit card, debit card, or EFT."
+        },
+        {
+          "q": "Can I import my existing product list?",
+          "a": "Yes! Pro plan sellers can upload a CSV file to bulk-import hundreds of products at once."
+        },
+        {
+          "q": "Where are you based?",
+          "a": "TradeFeed is built in South Africa, for South Africa. We understand the Jeppe Street hustle."
+        },
+        {
+          "q": "How do I get started?",
+          "a": "Sign up, create your shop, upload your first product, and share your catalog link. It takes less than 5 minutes."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to Sell Smarter?",
+      "subtitle": "Join SA wholesalers already using TradeFeed to manage their catalogs and get structured orders.",
+      "button": "Create Your Free Catalog"
+    }
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "subtitle": "Discover products from South Africa's top sellers",
+    "searchPlaceholder": "Search products…",
+    "filters": {
+      "category": "Category",
+      "priceRange": "Price Range",
+      "province": "Province",
+      "verifiedOnly": "Verified Sellers Only",
+      "clearAll": "Clear All"
+    },
+    "sort": {
+      "newest": "Newest",
+      "trending": "Trending",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low",
+      "popular": "Popular"
+    },
+    "results": "{count} products found",
+    "noResults": "No products found",
+    "noResultsHint": "Try a different search or adjust your filters.",
+    "sponsored": "Sponsored",
+    "verified": "Verified Seller",
+    "featured": "Featured"
+  },
+  "catalog": {
+    "addToCart": "Add to Cart",
+    "askOnWhatsApp": "Ask on WhatsApp",
+    "outOfStock": "Out of Stock",
+    "inStock": "{count} in stock",
+    "selectSize": "Select Size",
+    "selectColor": "Select Colour",
+    "viewProduct": "View Product",
+    "comingSoon": "Coming Soon",
+    "settingUp": "{shopName} is setting up their catalog. Check back soon for fresh stock!",
+    "browseMore": "Want to see products from other sellers?",
+    "browseMarketplace": "Browse more on TradeFeed Marketplace"
+  },
+  "cart": {
+    "title": "Your Order",
+    "items": "{count} {count, plural, one {item} other {items}}",
+    "empty": "Your cart is empty",
+    "continueBrowsing": "Continue browsing",
+    "orderTotal": "Order Total",
+    "clearAll": "Clear all",
+    "checkout": "Send Order on WhatsApp",
+    "placingOrder": "Placing Order…",
+    "opensWhatsApp": "Opens WhatsApp with your order details",
+    "yourDetails": "Your details",
+    "optional": "optional",
+    "name": "Name",
+    "phone": "Phone",
+    "orderNotes": "Order notes",
+    "addDelivery": "Add delivery address",
+    "removeDelivery": "Remove delivery address",
+    "streetAddress": "Street Address",
+    "city": "City",
+    "province": "Province",
+    "postalCode": "Postal Code",
+    "selectProvince": "Select province…"
+  },
+  "wishlist": {
+    "title": "Favourites",
+    "itemsSaved": "{count} {count, plural, one {item} other {items}} saved",
+    "empty": "No favourites yet",
+    "emptyHint": "Tap the heart icon on products you like",
+    "browseProducts": "Browse products",
+    "clearAll": "Clear all favourites"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "products": "Products",
+    "orders": "Orders",
+    "analytics": "Analytics",
+    "revenue": "Revenue",
+    "reviews": "Reviews",
+    "promotions": "Promotions",
+    "settings": "Settings",
+    "billing": "Billing",
+    "referrals": "Referrals"
+  },
+  "orders": {
+    "orderPlaced": "Order placed!",
+    "trackOrder": "Track Order",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    }
+  },
+  "errors": {
+    "somethingWrong": "Something went wrong",
+    "unexpectedError": "An unexpected error occurred. Our team has been notified.",
+    "tryAgain": "Try Again",
+    "pageNotFound": "Page Not Found",
+    "pageNotFoundDesc": "The page you're looking for doesn't exist or has been moved.",
+    "offline": "You're offline right now",
+    "offlineDesc": "Check your internet connection and try again. Your cart and wishlist are saved locally — they'll be here when you're back online.",
+    "loadShedding": "Load shedding? Your data is safe."
+  },
+  "footer": {
+    "tagline": "Structured catalogs for SA wholesalers & retailers",
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "support": "Support",
+    "copyright": "© {year} TradeFeed. All rights reserved."
+  },
+  "language": {
+    "switchLanguage": "Language",
+    "current": "English"
+  }
+}

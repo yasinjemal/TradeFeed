@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useWishlist } from "@/lib/wishlist/wishlist-context";
 import Link from "next/link";
 import Image from "next/image";
@@ -22,12 +22,38 @@ interface WishlistPanelProps {
 export function WishlistPanel({ isOpen, onClose, shopSlug }: WishlistPanelProps) {
   const { items, removeItem, clearWishlist, count } = useWishlist();
 
-  // Close on Escape key
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Close on Escape + focus trap
   useEffect(() => {
     if (!isOpen) return;
 
+    closeButtonRef.current?.focus();
+
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab" && panelRef.current) {
+        const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     }
 
     document.addEventListener("keydown", handleKeyDown);
@@ -50,22 +76,24 @@ export function WishlistPanel({ isOpen, onClose, shopSlug }: WishlistPanelProps)
       />
 
       {/* ── Panel ─────────────────────────────────────────── */}
-      <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col" role="dialog" aria-modal="true" aria-label="Favourites">
+      <div ref={panelRef} className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col" role="dialog" aria-modal="true" aria-label="Favourites">
         {/* ── Header ──────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200">
           <div>
             <h2 className="font-bold text-stone-900 text-lg flex items-center gap-2">
-              <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
               </svg>
               Favourites
             </h2>
-            <p className="text-xs text-stone-500 mt-0.5">
+            <p className="text-xs text-stone-500 mt-0.5" aria-live="polite">
               {count} {count === 1 ? "item" : "items"} saved
             </p>
           </div>
           <button
+            ref={closeButtonRef}
             onClick={onClose}
+            aria-label="Close favourites"
             className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-stone-100 transition-colors text-stone-500"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -141,6 +169,7 @@ export function WishlistPanel({ isOpen, onClose, shopSlug }: WishlistPanelProps)
                 <button
                   onClick={() => removeItem(item.productId)}
                   className="self-start w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 sm:opacity-0 sm:group-hover:opacity-100"
+                  aria-label={`Remove ${item.productName} from favourites`}
                   title="Remove from favourites"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
