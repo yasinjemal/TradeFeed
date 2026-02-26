@@ -12,6 +12,7 @@ import { requireShopAccess } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { parseCsv, autoMapColumns, validateColumnMapping, type CsvRow } from "@/lib/csv/parser";
 import { createProduct } from "@/lib/db/products";
+import { syncProductPriceRange } from "@/lib/db/variants";
 
 type ImportResult = {
   success: boolean;
@@ -272,6 +273,9 @@ export async function bulkImportAction(
             });
           }
         }
+
+        // Sync denormalized price range after creating all variants
+        await syncProductPriceRange(product.id);
       } catch (productErr) {
         skipped += groupRows.length;
         rowErrors.push({

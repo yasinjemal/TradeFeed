@@ -188,6 +188,12 @@ model Product {
   option1Label  String  @default("Size")      // Label for variant.size column
   option2Label  String  @default("Color")     // Label for variant.color column
 
+  // ── Denormalized Price Range ─────────────────────────
+  // Computed from active variants. Updated on variant create/update/delete.
+  // Enables efficient price sorting on marketplace queries.
+  minPriceCents Int     @default(0)            // Cheapest active variant price
+  maxPriceCents Int     @default(0)            // Most expensive active variant price
+
   // Relations
   images      ProductImage[]                  // Product images (URLs only)
   variants    ProductVariant[]                // Product variants with stock

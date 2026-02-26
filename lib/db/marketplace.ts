@@ -195,12 +195,10 @@ export async function getMarketplaceProducts(
       orderBy = { createdAt: "desc" };
       break;
     case "price_asc":
-      // Can't sort by nested variant price in Prisma directly;
-      // sort by createdAt and re-sort in application layer for price
-      orderBy = { createdAt: "desc" };
+      orderBy = { minPriceCents: "asc" };
       break;
     case "price_desc":
-      orderBy = { createdAt: "desc" };
+      orderBy = { maxPriceCents: "desc" };
       break;
     case "trending":
     case "popular":
@@ -275,12 +273,8 @@ export async function getMarketplaceProducts(
     };
   });
 
-  // ── Application-level price sorting ─────────────────────
-  if (sortBy === "price_asc") {
-    products.sort((a, b) => a.minPriceCents - b.minPriceCents);
-  } else if (sortBy === "price_desc") {
-    products.sort((a, b) => b.maxPriceCents - a.maxPriceCents);
-  }
+  // Price sorting is handled at DB level via denormalized
+  // minPriceCents/maxPriceCents on Product model.
 
   return {
     products,

@@ -31,9 +31,19 @@ interface PayFastConfig {
 }
 
 function getConfig(): PayFastConfig {
+  const merchantId = process.env.PAYFAST_MERCHANT_ID ?? "";
+  const merchantKey = process.env.PAYFAST_MERCHANT_KEY ?? "";
+
+  // Fail loudly in production if PayFast credentials are missing
+  if (process.env.NODE_ENV === "production" && (!merchantId || !merchantKey)) {
+    throw new Error(
+      "PayFast is not configured. Set PAYFAST_MERCHANT_ID and PAYFAST_MERCHANT_KEY in production."
+    );
+  }
+
   return {
-    merchantId: process.env.PAYFAST_MERCHANT_ID ?? "",
-    merchantKey: process.env.PAYFAST_MERCHANT_KEY ?? "",
+    merchantId,
+    merchantKey,
     passphrase: process.env.PAYFAST_PASSPHRASE ?? "",
     sandbox: process.env.NODE_ENV !== "production",
   };

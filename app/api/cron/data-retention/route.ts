@@ -26,7 +26,14 @@ export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    // CRON_SECRET not set — reject in production, warn in dev
+    if (process.env.NODE_ENV === "production") {
+      console.error("[data-retention] CRON_SECRET is not set — rejecting request");
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+    }
+    console.warn("[data-retention] ⚠ No CRON_SECRET — running unprotected (dev only)");
+  } else if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 401 }

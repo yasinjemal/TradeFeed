@@ -78,8 +78,15 @@ export async function POST(request: Request) {
       );
     }
   } else {
+    // CLERK_WEBHOOK_SECRET not set — reject in production
+    if (process.env.NODE_ENV === "production") {
+      console.error("[clerk-webhook] CLERK_WEBHOOK_SECRET is not set — rejecting in production");
+      return NextResponse.json(
+        { error: "Webhook secret not configured" },
+        { status: 500 }
+      );
+    }
     // DEV ONLY: Skip verification when CLERK_WEBHOOK_SECRET is not set
-    // WARNING: Never deploy without CLERK_WEBHOOK_SECRET set!
     console.warn("[clerk-webhook] ⚠ No CLERK_WEBHOOK_SECRET — skipping signature verification (dev only)");
     event = JSON.parse(payload) as ClerkUserEvent;
   }

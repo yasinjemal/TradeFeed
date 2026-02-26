@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 type TelemetryMeta = Record<string, unknown>;
 
 function serializeError(error: unknown): Record<string, unknown> {
@@ -22,6 +24,13 @@ export function reportRateLimitEvent(
     limit,
     timestamp: new Date().toISOString(),
   });
+
+  Sentry.addBreadcrumb({
+    category: "rate-limit",
+    message: `Rate limit hit: ${routeGroup}`,
+    data: { key, limit },
+    level: "warning",
+  });
 }
 
 export async function reportError(
@@ -36,19 +45,8 @@ export async function reportError(
     timestamp: new Date().toISOString(),
   });
 
-  // Optional Sentry bridge: only used when package + DSN are configured.
-  if (!process.env.SENTRY_DSN) return;
-
-  try {
-    const dynamicImport = new Function("m", "return import(m)") as (
-      moduleName: string
-    ) => Promise<{ captureException: (err: unknown, data?: unknown) => void }>;
-    const sentry = await dynamicImport("@sentry/nextjs");
-    sentry.captureException(error, {
-      tags: { context },
-      extra: meta,
-    });
-  } catch {
-    // Keep telemetry best-effort only.
-  }
+  Sentry.captureException(error, {
+    tags: { context },
+    extra: meta,
+  });
 }

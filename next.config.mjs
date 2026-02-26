@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -26,4 +28,15 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Only print logs for uploading source maps in CI
+  silent: !process.env.CI,
+
+  // Route browser Sentry events through Next.js to bypass ad blockers
+  tunnelRoute: "/monitoring",
+
+  // Disable source map upload until SENTRY_AUTH_TOKEN is configured
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+});

@@ -13,6 +13,29 @@
 import { db } from "@/lib/db";
 import type { VariantCreateInput, VariantUpdateInput } from "@/lib/validation/product";
 
+// ── Price Denormalization ──────────────────────────────────
+// After every variant create/update/delete, recalculate the
+// minPriceCents and maxPriceCents on the parent Product.
+// This enables efficient price sorting on marketplace queries
+// without joining/aggregating variants at read time.
+// ───────────────────────────────────────────────────────────
+
+export async function syncProductPriceRange(productId: string): Promise<void> {
+  const variants = await db.productVariant.findMany({
+    where: { productId, isActive: true },
+    select: { priceInCents: true },
+  });
+
+  const prices = variants.map((v) => v.priceInCents);
+  const minPriceCents = prices.length > 0 ? Math.min(...prices) : 0;
+  const maxPriceCents = prices.length > 0 ? Math.max(...prices) : 0;
+
+  await db.product.update({
+    where: { id: productId },
+    data: { minPriceCents, maxPriceCents },
+  });
+}
+
 /**
  * Verify a product belongs to a shop.
  *
@@ -54,7 +77,7 @@ export async function createVariant(
     return null;
   }
 
-  return db.productVariant.create({
+  const variant = await db.productVariant.create({
     data: {
       productId,
       size: input.size,
@@ -64,6 +87,11 @@ export async function createVariant(
       sku: input.sku || null,
     },
   });
+
+  // Keep denormalized price range in sync
+  await syncProductPriceRange(productId);
+
+  return variant;
 }
 
 /**
@@ -89,7 +117,7 @@ export async function updateVariant(
     return null;
   }
 
-  return db.productVariant.update({
+  const updated = await db.productVariant.update({
     where: { id: variantId },
     data: {
       ...(input.size !== undefined && { size: input.size }),
@@ -101,6 +129,13 @@ export async function updateVariant(
       ...(input.sku !== undefined && { sku: input.sku || null }),
     },
   });
+
+  // Keep denormalized price range in sync (price may have changed)
+  if (input.priceInRands !== undefined) {
+    await syncProductPriceRange(variant.productId);
+  }
+
+  return updated;
 }
 
 /**
@@ -122,9 +157,14 @@ export async function deleteVariant(variantId: string, shopId: string) {
     return null;
   }
 
-  return db.productVariant.delete({
+  const deleted = await db.productVariant.delete({
     where: { id: variantId },
   });
+
+  // Keep denormalized price range in sync
+  await syncProductPriceRange(variant.productId);
+
+  return deleted;
 }
 
 /**
@@ -142,7 +182,7 @@ export async function batchCreateVariants(
   const isOwner = await verifyProductOwnership(productId, shopId);
   if (!isOwner) return null;
 
-  return db.productVariant.createMany({
+  const result = await db.productVariant.createMany({
     data: variants.map((v) => ({
       productId,
       size: v.size,
@@ -152,4 +192,9 @@ export async function batchCreateVariants(
     })),
     skipDuplicates: true,
   });
+
+  // Keep denormalized price range in sync
+  await syncProductPriceRange(productId);
+
+  return result;
 }
