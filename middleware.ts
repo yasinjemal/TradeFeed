@@ -76,13 +76,21 @@ export default clerkMiddleware(async (auth, request) => {
     await auth.protect();
   }
 
-  // ── Content Security Policy ──────────────────────────────
-  const response = NextResponse.next();
+  // ── Content Security Policy (with per-request nonce) ────
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+
+  // Forward nonce to server components via request header
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   const csp = [
     "default-src 'self'",
-    // Scripts: own, GA4, Clerk (unsafe-inline needed for GA4 snippet + SW reg)
-    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.clerk.accounts.dev https://challenges.cloudflare.com",
+    // Scripts: nonce-based (modern browsers ignore unsafe-inline when nonce present)
+    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clerk.accounts.dev https://challenges.cloudflare.com`,
     // Styles: own + inline (Tailwind)
     "style-src 'self' 'unsafe-inline'",
     // Images: own, Unsplash, Clerk, UploadThing CDN, data URIs

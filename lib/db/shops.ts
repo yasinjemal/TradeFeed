@@ -53,7 +53,8 @@ async function slugExists(slug: string): Promise<boolean> {
  */
 export async function createShop(
   input: ShopCreateInput,
-  userId: string
+  userId: string,
+  referredBySlug?: string,
 ): Promise<ShopResult> {
   // Generate a unique slug from the shop name
   const baseSlug = generateSlug(input.name);
@@ -62,13 +63,14 @@ export async function createShop(
   // Transaction: Create shop + link owner atomically
   // WHY: If ShopUser creation fails, we don't want an orphaned shop
   const shop = await db.$transaction(async (tx: Omit<typeof db, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">) => {
-    // 1. Create the shop
+    // 1. Create the shop (with optional referral link)
     const newShop = await tx.shop.create({
       data: {
         name: input.name,
         slug,
         description: input.description || null,
         whatsappNumber: input.whatsappNumber,
+        referredBy: referredBySlug || null,
       },
     });
 

@@ -72,8 +72,8 @@ export default async function ReferralPage({ params }: ReferralPageProps) {
         <div className="space-y-3">
           {[
             { step: "1", title: "Share your invite link", desc: "Send your referral link to other sellers via WhatsApp" },
-            { step: "2", title: "They sign up", desc: "When they create a shop using your link, they're linked to you" },
-            { step: "3", title: "Community grows", desc: "More sellers = more buyers = more orders for everyone" },
+            { step: "2", title: "They sign up & create a shop", desc: "When they create a shop using your link, they're linked to you" },
+            { step: "3", title: "They upgrade to Pro", desc: "When your referral upgrades to a paid plan, you get 1 free month added to your subscription 🎉" },
           ].map((item) => (
             <div key={item.step} className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">

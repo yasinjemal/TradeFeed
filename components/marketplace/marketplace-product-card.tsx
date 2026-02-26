@@ -10,6 +10,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { MarketplaceProduct } from "@/lib/db/marketplace";
+import { SHIMMER_DARK } from "@/lib/image-placeholder";
 import { trackMarketplaceClickAction, trackPromotedClickAction } from "@/app/actions/marketplace";
 
 interface MarketplaceProductCardProps {
@@ -51,6 +52,8 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
               alt={product.name}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              placeholder="blur"
+              blurDataURL={SHIMMER_DARK}
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             />
           ) : (

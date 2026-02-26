@@ -23,6 +23,7 @@ import { shopCreateSchema } from "@/lib/validation/shop";
 import { createShop } from "@/lib/db/shops";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
+import { cookies } from "next/headers";
 
 /**
  * Server action result type.
@@ -84,8 +85,30 @@ export async function createShopAction(
     const user = await requireAuth();
     const userId = user.id;
 
+    // 3b. Check for referral code cookie (set during /sign-up?ref=CODE)
+    let referrerSlug: string | undefined;
+    try {
+      const cookieStore = await cookies();
+      const refCode = cookieStore.get("tf_ref")?.value;
+      if (refCode) {
+        const { db } = await import("@/lib/db");
+        const referrer = await db.shop.findFirst({
+          where: { referralCode: refCode, isActive: true },
+          select: { slug: true },
+        });
+        if (referrer) {
+          referrerSlug = referrer.slug;
+        }
+        // Clear the cookie regardless (one-time use)
+        cookieStore.delete("tf_ref");
+      }
+    } catch (err) {
+      console.error("[createShopAction] Referral lookup failed:", err);
+      // Non-fatal — shop creation continues without referral
+    }
+
     // 4. Create shop via data access layer (NOT direct Prisma call)
-    const shop = await createShop(parsed.data, userId);
+    const shop = await createShop(parsed.data, userId, referrerSlug);
 
     // 5. Auto-assign Free subscription to new shop
     const { createFreeSubscription } = await import("@/lib/db/subscriptions");

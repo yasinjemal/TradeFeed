@@ -13,6 +13,7 @@ import {
   getPromotableProducts,
   getPromotionPerformance,
   getPromotionComparison,
+  getPromotionFunnel,
 } from "@/lib/db/promotions";
 import { PromoteDashboard } from "@/components/promotions/promote-dashboard";
 
@@ -37,12 +38,13 @@ export default async function PromotePage({
   if (!access) return redirect("/");
 
   // Fetch all data in parallel
-  const [promotions, stats, products, performance, comparison] = await Promise.all([
+  const [promotions, stats, products, performance, comparison, funnel] = await Promise.all([
     getShopPromotions(access.shopId),
     getShopPromotionStats(access.shopId),
     getPromotableProducts(access.shopId),
     getPromotionPerformance(access.shopId),
     getPromotionComparison(access.shopId),
+    getPromotionFunnel(access.shopId),
   ]);
 
   return (
@@ -66,6 +68,7 @@ export default async function PromotePage({
         stats={stats}
         performance={performance}
         comparison={comparison}
+        funnel={funnel}
         status={query.status}
       />
     </div>

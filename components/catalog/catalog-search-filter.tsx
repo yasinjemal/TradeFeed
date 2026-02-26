@@ -8,7 +8,9 @@
 "use client";
 
 import { useState, useMemo, useRef, useCallback } from "react";
-import Link from "next/link";import Image from "next/image";import { WishlistHeart } from "./wishlist-heart";
+import Link from "next/link";
+import Image from "next/image";
+import { SHIMMER_LIGHT } from "@/lib/image-placeholder";import { WishlistHeart } from "./wishlist-heart";
 
 interface CatalogProduct {
   id: string;
@@ -289,6 +291,8 @@ function ProductCard({
               alt={primaryImage.altText || product.name}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              placeholder="blur"
+              blurDataURL={SHIMMER_LIGHT}
               className="relative object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             />
           ) : (

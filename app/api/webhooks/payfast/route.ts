@@ -150,6 +150,18 @@ async function handleSubscriptionPayment(
     case "COMPLETE": {
       await upgradeSubscription(shopId, "pro", token);
       console.log(`[PayFast ITN] Subscription activated for shop ${shopId}`);
+
+      // Apply referral reward: if this shop was referred, extend referrer's sub
+      try {
+        const { applyReferralReward } = await import("@/lib/db/referrals");
+        const result = await applyReferralReward(shopId);
+        if (result.applied) {
+          console.log(`[PayFast ITN] Referral reward applied to ${result.referrerSlug}`);
+        }
+      } catch (err) {
+        // Non-fatal — subscription is already activated
+        console.error("[PayFast ITN] Referral reward failed:", err);
+      }
       break;
     }
 

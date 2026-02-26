@@ -14,8 +14,8 @@
 "use client";
 
 import Image from "next/image";
-
 import { useState, useCallback, useRef, type TouchEvent } from "react";
+import { SHIMMER_LIGHT } from "@/lib/image-placeholder";
 
 interface GalleryImage {
   id: string;
@@ -128,6 +128,8 @@ export function ProductImageGallery({
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             priority={activeIndex === 0}
+            placeholder="blur"
+            blurDataURL={SHIMMER_LIGHT}
             className={`object-cover transition-opacity duration-300 ${
               isTransitioning ? "opacity-0" : "opacity-100"
             }`}

@@ -63,6 +63,20 @@ export interface PromotionComparison {
   conversionRate: number; // platform avg click → WA order rate
 }
 
+/** M6.6 — Conversion funnel for promoted products */
+export interface PromotionFunnelData {
+  impressions: number;
+  clicks: number;
+  productViews: number;
+  whatsappOrders: number;
+  /** Drop-off rates between each step (0-100) */
+  dropoff: {
+    impressionToClick: number;
+    clickToView: number;
+    viewToOrder: number;
+  };
+}
+
 // ── Expiry Check ─────────────────────────────────────────────
 
 /**
@@ -459,5 +473,92 @@ export async function getPromotionComparison(
     multiplier,
     estimatedOrders: { low: estimatedLow, high: estimatedHigh },
     conversionRate,
+  };
+}
+
+// ── M6.6 — Conversion Funnel ─────────────────────────────────
+
+/**
+ * M6.6 — Build a conversion funnel for all promoted products.
+ *
+ * Funnel steps:
+ * 1. Impressions  — from PromotedListing.impressions aggregate
+ * 2. Clicks       — from PromotedListing.clicks aggregate
+ * 3. Product Views — PRODUCT_VIEW events for promoted product IDs
+ * 4. WhatsApp Orders — WHATSAPP_CLICK/WHATSAPP_CHECKOUT for promoted product IDs
+ *
+ * Uses 30-day window, same as comparison.
+ */
+export async function getPromotionFunnel(
+  shopId: string,
+): Promise<PromotionFunnelData> {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  // Get promoted product IDs (active in last 30 days)
+  const promotedProducts = await db.promotedListing.findMany({
+    where: {
+      shopId,
+      createdAt: { gte: thirtyDaysAgo },
+    },
+    select: { productId: true },
+    distinct: ["productId"],
+  });
+
+  const promotedProductIds = promotedProducts.map((p) => p.productId);
+
+  // Aggregate all funnel stages in parallel
+  const [listingAgg, productViews, waOrders] = await Promise.all([
+    // Steps 1-2: impressions + clicks from PromotedListing
+    db.promotedListing.aggregate({
+      where: {
+        shopId,
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      _sum: { impressions: true, clicks: true },
+    }),
+
+    // Step 3: product views for promoted products only
+    promotedProductIds.length > 0
+      ? db.analyticsEvent.count({
+          where: {
+            shopId,
+            type: "PRODUCT_VIEW",
+            productId: { in: promotedProductIds },
+            createdAt: { gte: thirtyDaysAgo },
+          },
+        })
+      : 0,
+
+    // Step 4: WhatsApp orders for promoted products only
+    promotedProductIds.length > 0
+      ? db.analyticsEvent.count({
+          where: {
+            shopId,
+            type: { in: ["WHATSAPP_CLICK", "WHATSAPP_CHECKOUT"] },
+            productId: { in: promotedProductIds },
+            createdAt: { gte: thirtyDaysAgo },
+          },
+        })
+      : 0,
+  ]);
+
+  const impressions = listingAgg._sum.impressions ?? 0;
+  const clicks = listingAgg._sum.clicks ?? 0;
+
+  // Calculate drop-off rates
+  const pct = (from: number, to: number) =>
+    from > 0 ? Math.round(((from - to) / from) * 1000) / 10 : 0;
+
+  return {
+    impressions,
+    clicks,
+    productViews: productViews as number,
+    whatsappOrders: waOrders as number,
+    dropoff: {
+      impressionToClick: pct(impressions, clicks),
+      clickToView: pct(clicks, productViews as number),
+      viewToOrder: pct(productViews as number, waOrders as number),
+    },
   };
 }

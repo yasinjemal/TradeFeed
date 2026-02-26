@@ -15,6 +15,7 @@ import type {
   PromotionStats,
   PromotionDailyPerformance,
   PromotionComparison,
+  PromotionFunnelData,
 } from "@/lib/db/promotions";
 
 // ── Types ────────────────────────────────────────────────────
@@ -38,6 +39,7 @@ interface PromoteDashboardProps {
   stats: PromotionStats;
   performance: PromotionDailyPerformance[];
   comparison: PromotionComparison;
+  funnel: PromotionFunnelData;
   status?: string;
 }
 
@@ -70,6 +72,7 @@ export function PromoteDashboard({
   stats,
   performance,
   comparison,
+  funnel,
   status,
 }: PromoteDashboardProps) {
   const [selectedProduct, setSelectedProduct] = useState<string>("");
@@ -214,6 +217,57 @@ export function PromoteDashboard({
                 )}
               </p>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* ── M6.6 — Conversion Funnel ─────────────────── */}
+      {funnel.impressions > 0 && (
+        <div className="bg-white border border-stone-200 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <span className="text-xl">🔄</span>
+            <h2 className="text-lg font-bold text-stone-900">Conversion Funnel</h2>
+            <span className="text-xs text-stone-400 ml-auto">Last 30 days</span>
+          </div>
+
+          {/* Funnel bars */}
+          <div className="space-y-3">
+            <FunnelStep
+              label="Impressions"
+              value={funnel.impressions}
+              pct={100}
+              color="bg-stone-300"
+            />
+            <FunnelArrow dropoff={funnel.dropoff.impressionToClick} />
+            <FunnelStep
+              label="Clicks"
+              value={funnel.clicks}
+              pct={funnel.impressions > 0 ? (funnel.clicks / funnel.impressions) * 100 : 0}
+              color="bg-sky-400"
+            />
+            <FunnelArrow dropoff={funnel.dropoff.clickToView} />
+            <FunnelStep
+              label="Product Views"
+              value={funnel.productViews}
+              pct={funnel.impressions > 0 ? (funnel.productViews / funnel.impressions) * 100 : 0}
+              color="bg-amber-400"
+            />
+            <FunnelArrow dropoff={funnel.dropoff.viewToOrder} />
+            <FunnelStep
+              label="WhatsApp Orders"
+              value={funnel.whatsappOrders}
+              pct={funnel.impressions > 0 ? (funnel.whatsappOrders / funnel.impressions) * 100 : 0}
+              color="bg-emerald-500"
+            />
+          </div>
+
+          {/* Summary */}
+          {funnel.whatsappOrders > 0 && (
+            <p className="text-xs text-stone-500 mt-4 text-center">
+              Overall conversion: <strong className="text-emerald-700">
+                {((funnel.whatsappOrders / funnel.impressions) * 100).toFixed(2)}%
+              </strong> of promoted impressions led to a WhatsApp order
+            </p>
           )}
         </div>
       )}
@@ -662,5 +716,50 @@ function StatusBadge({ status, isActive }: { status: string; isActive: boolean }
     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-600">
       Cancelled
     </span>
+  );
+}
+
+// ── Funnel Components (M6.6) ─────────────────────────────────
+
+function FunnelStep({ label, value, pct, color }: {
+  label: string; value: number; pct: number; color: string;
+}) {
+  const barWidth = Math.max(pct, 4); // Minimum 4% width for visibility
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-28 text-right">
+        <p className="text-xs font-medium text-stone-700">{label}</p>
+      </div>
+      <div className="flex-1 relative">
+        <div className="h-8 bg-stone-50 rounded-lg overflow-hidden">
+          <div
+            className={`h-full ${color} rounded-lg transition-all duration-500 flex items-center justify-end pr-2`}
+            style={{ width: `${barWidth}%` }}
+          >
+            {pct >= 15 && (
+              <span className="text-[10px] font-bold text-white">{pct.toFixed(1)}%</span>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="w-20 text-right">
+        <p className="text-sm font-bold text-stone-900">{value.toLocaleString()}</p>
+      </div>
+    </div>
+  );
+}
+
+function FunnelArrow({ dropoff }: { dropoff: number }) {
+  return (
+    <div className="flex items-center gap-3 pl-28">
+      <div className="flex-1 flex items-center gap-2 px-2">
+        <svg className="w-3 h-3 text-stone-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+        </svg>
+        <span className="text-[10px] text-stone-400">
+          {dropoff > 0 ? `${dropoff}% drop-off` : "—"}
+        </span>
+      </div>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { headers } from "next/headers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CookieConsent } from "@/components/cookie-consent";
 import { Toaster } from "sonner";
@@ -47,16 +48,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? "";
+
   return (
     <ClerkProvider
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       afterSignOutUrl="/"
+      nonce={nonce}
     >
       <html lang="en">
         <head>
@@ -90,12 +94,14 @@ export default function RootLayout({
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-TL499XE6KR"
             strategy="afterInteractive"
+            nonce={nonce}
           />
-          <Script id="ga4-init" strategy="afterInteractive">
+          <Script id="ga4-init" strategy="afterInteractive" nonce={nonce}>
             {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TL499XE6KR');`}
           </Script>
           {/* Register Service Worker for PWA */}
           <script
+            nonce={nonce}
             dangerouslySetInnerHTML={{
               __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`
             }}
