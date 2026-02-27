@@ -396,7 +396,7 @@ export default async function HomePage() {
                     <div className="grid grid-cols-3 gap-3">
                       {[
                         { name: "Oversized Hoodie", price: "R 280", badge: "BEST SELLER", badgeColor: "bg-amber-500", img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop&q=80", colors: ["bg-stone-800", "bg-amber-700", "bg-emerald-700"] },
-                        { name: "Wireless Earbuds Pro", price: "R 350", badge: "NEW", badgeColor: "bg-emerald-500", img: "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=400&fit=crop&q=80", colors: ["bg-white", "bg-stone-900"] },
+                        { name: "Wireless Earbuds Pro", price: "R 350", badge: "NEW", badgeColor: "bg-emerald-500", img: "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&h=400&fit=crop&q=80", colors: ["bg-white", "bg-stone-900"] },
                         { name: "Vitamin C Serum", price: "R 180", badge: null, badgeColor: "", img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop&q=80", colors: ["bg-amber-300", "bg-emerald-300"] },
                         { name: "Classic Denim Jacket", price: "R 450", badge: null, badgeColor: "", img: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=400&h=400&fit=crop&q=80", colors: ["bg-blue-600", "bg-stone-700"] },
                         { name: "Dried Fruit Pack 500g", price: "R 120", badge: "HOT", badgeColor: "bg-red-500", img: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=400&fit=crop&q=80", colors: ["bg-amber-700", "bg-red-700"] },
@@ -447,7 +447,7 @@ export default async function HomePage() {
                     <div className="grid grid-cols-2 gap-1.5">
                       {[
                         { img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=200&h=200&fit=crop&q=80", name: "Hoodie", price: "R 280" },
-                        { img: "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=200&h=200&fit=crop&q=80", name: "Earbuds", price: "R 350" },
+                        { img: "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=200&h=200&fit=crop&q=80", name: "Earbuds", price: "R 350" },
                         { img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop&q=80", name: "Serum", price: "R 180" },
                         { img: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=200&h=200&fit=crop&q=80", name: "Denim", price: "R 450" },
                       ].map((p) => (

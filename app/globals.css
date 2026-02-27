@@ -194,6 +194,111 @@ nav, .no-select {
   animation: float 3s ease-in-out infinite;
 }
 
+/* ── Luxury VIP Animations ─────────────────────────────── */
+
+/* Gold shimmer sweep for premium elements */
+@keyframes gold-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.gold-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #b8860b 0%,
+    #ffd700 25%,
+    #fff8dc 50%,
+    #ffd700 75%,
+    #b8860b 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gold-shimmer 3s linear infinite;
+}
+
+/* Rotating border glow for VIP frames */
+@keyframes border-rotate {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* Pulsing glow for verified/premium badges */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.1); }
+  50% { box-shadow: 0 0 16px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.2); }
+}
+.pulse-glow-gold {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Diamond sparkle for top-tier sellers */
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+/* Breathing ring for profile pictures */
+@keyframes breathe-ring {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3), 0 0 0 6px rgba(255, 215, 0, 0.1); }
+  50% { box-shadow: 0 0 0 5px rgba(255, 215, 0, 0.5), 0 0 0 10px rgba(255, 215, 0, 0.15); }
+}
+.breathe-ring-gold {
+  animation: breathe-ring 3s ease-in-out infinite;
+}
+
+/* Emerald verified ring */
+@keyframes breathe-ring-emerald {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 0 0 6px rgba(16, 185, 129, 0.1); }
+  50% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.5), 0 0 0 10px rgba(16, 185, 129, 0.15); }
+}
+.breathe-ring-emerald {
+  animation: breathe-ring-emerald 3s ease-in-out infinite;
+}
+
+/* Gradient border animation for luxury frames */
+@keyframes gradient-border {
+  0% { border-color: #b8860b; }
+  25% { border-color: #ffd700; }
+  50% { border-color: #daa520; }
+  75% { border-color: #f0e68c; }
+  100% { border-color: #b8860b; }
+}
+
+/* Subtle entrance animation */
+@keyframes luxury-fade-in {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.luxury-fade-in {
+  animation: luxury-fade-in 0.6s ease-out forwards;
+}
+
+/* Crown float for top sellers */
+@keyframes crown-float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  25% { transform: translateY(-3px) rotate(0deg); }
+  50% { transform: translateY(-1px) rotate(3deg); }
+  75% { transform: translateY(-4px) rotate(0deg); }
+}
+.animate-crown {
+  animation: crown-float 4s ease-in-out infinite;
+}
+
+/* Verified checkmark pulse */
+@keyframes check-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.animate-check-pulse {
+  animation: check-pulse 2s ease-in-out infinite;
+}
+
 /* Image reveal on load */
 img {
   opacity: 1;

@@ -9,6 +9,7 @@
 
 import { useState, useTransition } from "react";
 import { deleteReviewAction } from "@/app/actions/reviews";
+import { IllustrationNoReviews } from "@/components/ui/illustrations";
 
 interface Review {
   id: string;
@@ -63,8 +64,9 @@ export function ReviewsDashboard({
 
       {/* Reviews List */}
       {reviews.length === 0 ? (
-        <div className="rounded-2xl border border-stone-200 bg-white p-12 text-center">
-          <p className="text-stone-400 text-lg mb-1">No reviews yet</p>
+        <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center">
+          <IllustrationNoReviews className="w-36 h-36 mx-auto mb-3" />
+          <p className="text-stone-700 text-base font-medium mb-1">No reviews yet</p>
           <p className="text-sm text-stone-400">Reviews will appear here as customers leave feedback.</p>
         </div>
       ) : (

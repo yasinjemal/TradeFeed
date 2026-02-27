@@ -174,6 +174,15 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
     setIsOpen(false);
   }, [pathname]);
 
+  // Listen for clicks on the hamburger trigger button in the header
+  useEffect(() => {
+    const trigger = document.getElementById("mobile-nav-trigger");
+    if (!trigger) return;
+    const open = () => setIsOpen(true);
+    trigger.addEventListener("click", open);
+    return () => trigger.removeEventListener("click", open);
+  }, []);
+
   // Lock body scroll when open
   useEffect(() => {
     if (isOpen) {
@@ -188,23 +197,11 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
 
   const handleClose = useCallback(() => setIsOpen(false), []);
 
-  return (
-    <>
-      {/* Hamburger Button — visible only on mobile */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl hover:bg-stone-100 transition-colors text-stone-600"
-        aria-label="Open navigation menu"
-      >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-        </svg>
-      </button>
+  // Drawer rendered outside the header — no backdrop-blur containing block
+  if (!isOpen) return null;
 
-      {/* Overlay + Drawer */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+  return (
+    <div className="fixed inset-0 z-[9999] md:hidden">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
@@ -286,7 +283,5 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
             </div>
           </div>
         </div>
-      )}
-    </>
   );
 }

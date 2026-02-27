@@ -48,6 +48,8 @@ export async function updateShopSettingsAction(
       name: (formData.get("name") as string) || undefined,
       description: formData.get("description") as string,
       aboutText: formData.get("aboutText") as string,
+      logoUrl: formData.get("logoUrl") as string,
+      bannerUrl: formData.get("bannerUrl") as string,
       whatsappNumber: formData.get("whatsappNumber") as string,
       retailWhatsappNumber: formData.get("retailWhatsappNumber") as string,
       address: formData.get("address") as string,

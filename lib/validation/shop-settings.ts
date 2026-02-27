@@ -76,6 +76,21 @@ export const shopSettingsSchema = z.object({
     .optional()
     .or(z.literal("")),
 
+  // Profile images
+  logoUrl: z
+    .string()
+    .trim()
+    .max(1000, "Logo URL too long")
+    .optional()
+    .or(z.literal("")),
+
+  bannerUrl: z
+    .string()
+    .trim()
+    .max(1000, "Banner URL too long")
+    .optional()
+    .or(z.literal("")),
+
   // WhatsApp numbers
   whatsappNumber: z
     .string()

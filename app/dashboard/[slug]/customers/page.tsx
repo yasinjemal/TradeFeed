@@ -13,6 +13,7 @@ import { getShopBySlug } from "@/lib/db/shops";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import type { Metadata } from "next";
+import { IllustrationNoCustomers } from "@/components/ui/illustrations";
 
 interface CustomersPageProps {
   params: Promise<{ slug: string }>;
@@ -199,7 +200,7 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
         </div>
       ) : (
         <div className="rounded-xl border border-stone-200 bg-white p-8 text-center">
-          <p className="text-3xl">👥</p>
+          <IllustrationNoCustomers className="w-36 h-36 mx-auto mb-3" />
           <p className="mt-2 text-sm font-medium text-stone-600">No customers yet</p>
           <p className="mt-1 text-xs text-stone-400">
             Customers will appear here once you receive orders with buyer info

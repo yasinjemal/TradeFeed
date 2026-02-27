@@ -119,24 +119,27 @@ export function WishlistProvider({ children, shopSlug, shopId }: WishlistProvide
 
   const toggleItem = useCallback(
     (item: Omit<WishlistItem, "addedAt">) => {
+      let removed = false;
       setItems((prev) => {
         const exists = prev.some((i) => i.productId === item.productId);
         if (exists) {
-          // Fire-and-forget server sync
-          void removeFromWishlistAction(item.productId);
+          removed = true;
           return prev.filter((i) => i.productId !== item.productId);
-        }
-        // Fire-and-forget server sync
-        if (shopId) {
-          void addToWishlistAction({
-            productId: item.productId,
-            shopId,
-            productName: item.productName,
-            imageUrl: item.imageUrl,
-          });
         }
         return [...prev, { ...item, addedAt: Date.now() }];
       });
+      // Fire-and-forget server sync — must be OUTSIDE the updater
+      // to avoid "Cannot update Router while rendering WishlistProvider"
+      if (removed) {
+        void removeFromWishlistAction(item.productId);
+      } else if (shopId) {
+        void addToWishlistAction({
+          productId: item.productId,
+          shopId,
+          productName: item.productName,
+          imageUrl: item.imageUrl,
+        });
+      }
     },
     [shopId],
   );

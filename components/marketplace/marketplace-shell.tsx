@@ -22,6 +22,7 @@ import { FeaturedShopCard } from "./featured-shop-card";
 import { CategoryBar } from "./category-bar";
 import { MarketplaceFilterSheet } from "./marketplace-filter-sheet";
 import { BackToTop } from "@/components/ui/back-to-top";
+import { IllustrationSearchNotFound } from "@/components/ui/illustrations";
 import {
   trackMarketplaceViewAction,
   trackPromotedImpressionsAction,
@@ -399,11 +400,7 @@ export function MarketplaceShell({
           {products.length === 0 ? (
             /* Empty State */
             <div className="flex flex-col items-center py-20 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-stone-900 border border-stone-800 flex items-center justify-center mb-4">
-                <svg className="w-10 h-10 text-stone-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                </svg>
-              </div>
+              <IllustrationSearchNotFound className="w-44 h-44 mb-4" />
               <h3 className="text-lg font-bold text-stone-300 mb-1">No products found</h3>
               <p className="text-sm text-stone-500 max-w-sm mb-4">
                 Try adjusting your filters, search for something else, or browse all products.

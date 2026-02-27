@@ -127,6 +127,12 @@ export async function updateShopSettings(
       ...(input.aboutText !== undefined && {
         aboutText: input.aboutText || null,
       }),
+      ...(input.logoUrl !== undefined && {
+        logoUrl: input.logoUrl || null,
+      }),
+      ...(input.bannerUrl !== undefined && {
+        bannerUrl: input.bannerUrl || null,
+      }),
       ...(input.whatsappNumber !== undefined && input.whatsappNumber && {
         whatsappNumber: input.whatsappNumber,
       }),

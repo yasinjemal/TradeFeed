@@ -77,6 +77,44 @@ export const ourFileRouter = {
       console.log("[UploadThing] File URL:", fileUrl);
       return { url: fileUrl, key: file.key, name: file.name };
     }),
+
+  /**
+   * Shop logo (profile picture) uploader.
+   * - 1 image only
+   * - Max 4MB, JPEG/PNG/WebP
+   */
+  shopLogoUploader: f({
+    image: { maxFileSize: "4MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      console.log("[UploadThing] Logo upload middleware — accepting");
+      return { userId: "authenticated-via-dashboard" };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      const fileUrl = file.ufsUrl ?? file.url;
+      console.log("[UploadThing] Logo upload complete for user:", metadata.userId);
+      console.log("[UploadThing] File URL:", fileUrl);
+      return { url: fileUrl, key: file.key, name: file.name };
+    }),
+
+  /**
+   * Shop banner image uploader.
+   * - 1 image only
+   * - Max 4MB, JPEG/PNG/WebP
+   */
+  shopBannerUploader: f({
+    image: { maxFileSize: "4MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      console.log("[UploadThing] Banner upload middleware — accepting");
+      return { userId: "authenticated-via-dashboard" };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      const fileUrl = file.ufsUrl ?? file.url;
+      console.log("[UploadThing] Banner upload complete for user:", metadata.userId);
+      console.log("[UploadThing] File URL:", fileUrl);
+      return { url: fileUrl, key: file.key, name: file.name };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

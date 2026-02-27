@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { IllustrationNotFound } from "@/components/ui/illustrations";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100 flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center">
-        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-stone-800 border border-stone-700 flex items-center justify-center">
-          <span className="text-4xl font-extrabold text-stone-500">404</span>
+        <div className="mx-auto mb-6">
+          <IllustrationNotFound className="w-56 h-56 mx-auto" />
         </div>
         <h1 className="text-2xl font-bold mb-2">Page Not Found</h1>
         <p className="text-stone-400 text-sm mb-8">

@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { updateOrderStatusAction } from "@/app/actions/orders";
 import type { OrderStatus } from "@prisma/client";
 import { ExportButtons } from "@/components/export/export-buttons";
+import { IllustrationNoOrders } from "@/components/ui/illustrations";
 import {
   generateCsv,
   downloadFile,
@@ -299,8 +300,8 @@ export function OrdersDashboard({
 
       {/* ── Order List ───────────────────────────────── */}
       {orders.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-stone-200">
-          <div className="text-4xl mb-3">📦</div>
+        <div className="text-center py-12 bg-white rounded-xl border border-stone-200">
+          <IllustrationNoOrders className="w-36 h-36 mx-auto mb-3" />
           <h3 className="text-lg font-semibold text-stone-700">No orders yet</h3>
           <p className="text-sm text-stone-500 mt-1">
             {currentStatus

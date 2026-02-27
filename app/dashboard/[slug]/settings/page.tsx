@@ -35,6 +35,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
   // Calculate profile completeness
   const checks = [
+    { key: "logo", label: "Profile picture", icon: "📸", done: !!shop.logoUrl },
+    { key: "banner", label: "Banner image", icon: "🖼️", done: !!shop.bannerUrl },
     { key: "description", label: "Description", icon: "📝", done: !!shop.description },
     { key: "aboutText", label: "About story", icon: "💬", done: !!shop.aboutText },
     { key: "address", label: "Address", icon: "🏠", done: !!shop.address },
@@ -141,6 +143,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           whatsappNumber: shop.whatsappNumber,
           retailWhatsappNumber: shop.retailWhatsappNumber,
           aboutText: shop.aboutText,
+          logoUrl: shop.logoUrl,
+          bannerUrl: shop.bannerUrl,
           address: shop.address,
           city: shop.city,
           province: shop.province,

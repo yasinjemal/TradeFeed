@@ -14,11 +14,14 @@
 "use client";
 
 import { useActionState, useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { updateShopSettingsAction } from "@/app/actions/shop-settings";
+import { useUploadThing } from "@/lib/uploadthing";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   SA_PROVINCES,
   DAYS_OF_WEEK,
@@ -103,6 +106,8 @@ interface ShopSettingsFormProps {
     whatsappNumber: string;
     retailWhatsappNumber: string | null;
     aboutText: string | null;
+    logoUrl: string | null;
+    bannerUrl: string | null;
     address: string | null;
     city: string | null;
     province: string | null;
@@ -144,6 +149,54 @@ export function ShopSettingsForm({
   // ── Character counters ──────────────────────────────────
   const [aboutLength, setAboutLength] = useState(initialData.aboutText?.length ?? 0);
   const [descLength, setDescLength] = useState(initialData.description?.length ?? 0);
+
+  // ── Image upload state ──────────────────────────────────
+  const [logoUrl, setLogoUrl] = useState(initialData.logoUrl ?? "");
+  const [bannerUrl, setBannerUrl] = useState(initialData.bannerUrl ?? "");
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  const { startUpload: startLogoUpload } = useUploadThing("shopLogoUploader", {
+    onClientUploadComplete: (results) => {
+      if (!results?.[0]) return;
+      setLogoUrl(results[0].serverData.url);
+      setLogoUploading(false);
+      toast.success("Profile picture uploaded!");
+    },
+    onUploadError: (error) => {
+      setLogoUploading(false);
+      toast.error(`Logo upload failed: ${error.message}`);
+    },
+  });
+
+  const { startUpload: startBannerUpload } = useUploadThing("shopBannerUploader", {
+    onClientUploadComplete: (results) => {
+      if (!results?.[0]) return;
+      setBannerUrl(results[0].serverData.url);
+      setBannerUploading(false);
+      toast.success("Banner image uploaded!");
+    },
+    onUploadError: (error) => {
+      setBannerUploading(false);
+      toast.error(`Banner upload failed: ${error.message}`);
+    },
+  });
+
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    startLogoUpload([file]);
+  };
+
+  const handleBannerSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBannerUploading(true);
+    startBannerUpload([file]);
+  };
 
   // ── Success animation ───────────────────────────────────
   const [showSuccess, setShowSuccess] = useState(false);
@@ -272,6 +325,24 @@ export function ShopSettingsForm({
       <input type="hidden" name="businessHours" value={JSON.stringify(hours)} />
       <input type="hidden" name="latitude" value={lat} />
       <input type="hidden" name="longitude" value={lng} />
+      <input type="hidden" name="logoUrl" value={logoUrl} />
+      <input type="hidden" name="bannerUrl" value={bannerUrl} />
+
+      {/* Hidden file inputs for uploads */}
+      <input
+        ref={logoInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleLogoSelect}
+      />
+      <input
+        ref={bannerInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleBannerSelect}
+      />
 
       {/* ── Success Toast ────────────────────────────────── */}
       {showSuccess && (
@@ -312,6 +383,174 @@ export function ShopSettingsForm({
           </div>
         </div>
       )}
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Section 0: Shop Images (Profile + Banner)           */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <Section
+        id="images"
+        icon="📸"
+        iconBg="bg-violet-50"
+        title="Shop Images"
+        subtitle="Upload your profile picture and banner — first thing buyers see"
+        badge={
+          logoUrl || bannerUrl ? (
+            <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {logoUrl && bannerUrl ? "Both set" : "1 of 2"}
+            </span>
+          ) : null
+        }
+      >
+        <div className="space-y-6">
+          {/* ── Profile Picture (Logo) ─────────────────── */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">👤</span>
+              Profile Picture
+            </Label>
+            <p className="text-[11px] text-stone-400 -mt-1">
+              Square image works best (e.g. 400×400). Shown as your shop avatar everywhere.
+            </p>
+
+            <div className="flex items-center gap-5">
+              {/* Preview */}
+              <div className="relative group">
+                {logoUrl ? (
+                  <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-stone-200 shadow-sm">
+                    <Image
+                      src={logoUrl}
+                      alt="Shop logo"
+                      fill
+                      className="object-cover"
+                      sizes="96px"
+                    />
+                    {/* Remove overlay */}
+                    <button
+                      type="button"
+                      onClick={() => setLogoUrl("")}
+                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                      title="Remove logo"
+                    >
+                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50 flex flex-col items-center justify-center text-stone-400">
+                    <svg className="w-8 h-8 mb-1" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                    <span className="text-[10px]">No logo</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload button */}
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={logoUploading || isPending}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-sm font-medium text-stone-700 hover:bg-violet-50 hover:border-violet-300 hover:text-violet-700 transition-all disabled:opacity-50"
+                >
+                  {logoUploading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                      </svg>
+                      {logoUrl ? "Change Photo" : "Upload Photo"}
+                    </>
+                  )}
+                </button>
+                <p className="text-[10px] text-stone-400">JPG, PNG or WebP • Max 4MB</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-stone-100" />
+
+          {/* ── Banner Image ───────────────────────────── */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">🖼️</span>
+              Banner Image
+            </Label>
+            <p className="text-[11px] text-stone-400 -mt-1">
+              Wide image works best (e.g. 1200×400). Shown as the hero background on your catalog page.
+            </p>
+
+            {/* Preview */}
+            <div className="relative group">
+              {bannerUrl ? (
+                <div className="relative w-full h-40 sm:h-48 rounded-2xl overflow-hidden border-2 border-stone-200 shadow-sm">
+                  <Image
+                    src={bannerUrl}
+                    alt="Shop banner"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 640px"
+                  />
+                  {/* Remove overlay */}
+                  <button
+                    type="button"
+                    onClick={() => setBannerUrl("")}
+                    className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all shadow-lg"
+                    title="Remove banner"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                  </button>
+                  {/* Change button overlay */}
+                  <button
+                    type="button"
+                    onClick={() => bannerInputRef.current?.click()}
+                    disabled={bannerUploading || isPending}
+                    className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-white/90 hover:bg-white text-stone-700 text-xs font-medium px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all shadow-lg backdrop-blur-sm"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
+                    </svg>
+                    Change
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => bannerInputRef.current?.click()}
+                  disabled={bannerUploading || isPending}
+                  className="w-full h-40 sm:h-48 rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50 hover:bg-violet-50 hover:border-violet-300 transition-all flex flex-col items-center justify-center gap-3 text-stone-400 hover:text-violet-500 disabled:opacity-50"
+                >
+                  {bannerUploading ? (
+                    <>
+                      <span className="w-8 h-8 border-3 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                      <span className="text-sm font-medium">Uploading banner...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M2.25 18V6a2.25 2.25 0 012.25-2.25h15A2.25 2.25 0 0121.75 6v12A2.25 2.25 0 0119.5 20.25h-15A2.25 2.25 0 012.25 18z" />
+                      </svg>
+                      <div className="text-center">
+                        <span className="text-sm font-medium block">Click to upload banner</span>
+                        <span className="text-[10px] text-stone-400">JPG, PNG or WebP • Max 4MB • Recommended 1200×400</span>
+                      </div>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </Section>
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* Section 1: Basic Info                               */}

@@ -81,6 +81,9 @@ function isCatalogPage(url) {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
+  // Skip non-http(s) requests (chrome-extension://, etc.)
+  if (!url.protocol.startsWith("http")) return;
+
   // ── Catalog / Marketplace navigation: Stale-While-Revalidate ──
   // Serve cached page instantly, then update cache in background.
   // Perfect for SA networks where latency can be high.

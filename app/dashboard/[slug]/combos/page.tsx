@@ -10,6 +10,8 @@ import { requireShopAccess } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
 import { formatZAR } from "@/types";
 import { ComboCategoryManager } from "@/components/combo/combo-category-manager";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IllustrationEmptyBox } from "@/components/ui/illustrations";
 
 interface CombosPageProps {
   params: Promise<{ slug: string }>;
@@ -84,18 +86,13 @@ export default async function CombosPage({ params }: CombosPageProps) {
 
       {/* Empty State */}
       {combos.length === 0 && (
-        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50/50 py-16 text-center">
-          <div className="text-5xl mb-4">📦</div>
-          <h2 className="text-lg font-semibold text-stone-900">No combos yet</h2>
-          <p className="text-sm text-stone-500 mt-1 max-w-sm mx-auto">
-            Create combo deals to bundle your products together. Buyers love saving money on bundles!
-          </p>
-          <Link
-            href={`/dashboard/${slug}/combos/new`}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-md mt-5 hover:bg-emerald-600 transition-colors"
-          >
-            Create Your First Combo
-          </Link>
+        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50/50">
+          <EmptyState
+            illustration={<IllustrationEmptyBox className="w-40 h-40" />}
+            heading="No combos yet"
+            description="Create combo deals to bundle your products together. Buyers love saving money on bundles!"
+            action={{ label: "Create Your First Combo", href: `/dashboard/${slug}/combos/new` }}
+          />
         </div>
       )}
 

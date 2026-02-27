@@ -89,6 +89,9 @@ export default async function CatalogLayout({
   // Compute seller tier for trust badges
   const tierData = await getSellerTierData(shop.id, shop);
 
+  // Determine premium status for luxury styling
+  const isPro = shop.subscription?.status === "ACTIVE" && shop.subscription.plan.slug !== "free";
+
   return (
     <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined}>
     <WishlistProvider shopSlug={slug} shopId={shop.id}>
@@ -102,13 +105,34 @@ export default async function CatalogLayout({
       ))}
       <CatalogAppShell
         header={
-          <div className="px-3 py-2.5 sm:px-4 sm:py-3">
+          <div className={`px-3 py-2.5 sm:px-4 sm:py-3 ${
+            isPro && shop.isVerified && (tierData.tier.key === "top" || tierData.tier.key === "established")
+              ? "bg-gradient-to-r from-amber-50/50 via-white to-amber-50/50"
+              : isPro || tierData.tier.key === "top"
+                ? "bg-gradient-to-r from-amber-50/30 via-white to-amber-50/30"
+                : ""
+          }`}>
             <div className="mx-auto flex max-w-5xl items-center justify-between gap-2">
               <Link
                 href={`/catalog/${slug}`}
                 className="group flex min-w-0 items-center gap-2.5"
               >
-                <div className="relative h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-emerald-400 via-emerald-600 to-emerald-700 ring-2 ring-emerald-100">
+                {/* ── Luxury Profile Avatar ───────────────── */}
+                <div className={`relative h-10 w-10 flex-shrink-0 rounded-full ${
+                  isPro && shop.isVerified
+                    ? "ring-2 ring-amber-400/80 pulse-glow-gold"
+                    : isPro || tierData.tier.key === "top"
+                      ? "ring-2 ring-amber-300/70"
+                      : shop.isVerified
+                        ? "ring-2 ring-emerald-400/60"
+                        : "ring-2 ring-stone-200"
+                } ${
+                  isPro
+                    ? "bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600"
+                    : shop.isVerified
+                      ? "bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600"
+                      : "bg-gradient-to-br from-stone-400 via-stone-500 to-stone-600"
+                }`}>
                   {shop.logoUrl ? (
                     <Image
                       src={shop.logoUrl}
@@ -119,32 +143,54 @@ export default async function CatalogLayout({
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center rounded-full">
-                      <span className="text-sm font-bold text-white">
+                      <span className="text-sm font-bold text-white drop-shadow-sm">
                         {shop.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
+                  )}
+                  {/* Mini badge on avatar */}
+                  {(shop.isVerified || isPro) && (
+                    <span className={`absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-white shadow-sm ${
+                      isPro ? "bg-gradient-to-r from-amber-400 to-yellow-500" : "bg-emerald-500"
+                    }`}>
+                      {isPro ? (
+                        <span className="text-[8px] text-white font-black">★</span>
+                      ) : (
+                        <svg className="h-2 w-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </span>
                   )}
                 </div>
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-1">
-                    <h1 className="truncate text-[15px] font-semibold leading-tight text-stone-900 transition-colors group-hover:text-emerald-700">
+                    <h1 className={`truncate text-[15px] font-extrabold leading-tight transition-colors ${
+                      isPro && shop.isVerified
+                        ? "gold-shimmer-text"
+                        : isPro
+                          ? "text-stone-900 group-hover:text-amber-700"
+                          : "text-stone-900 group-hover:text-emerald-700"
+                    }`}>
                       {shop.name}
                     </h1>
                     {shop.isVerified && (
-                      <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500" title="Verified Seller">
+                      <span className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full ${
+                        isPro ? "bg-gradient-to-r from-emerald-400 to-emerald-500" : "bg-emerald-500"
+                      }`} title="Verified Seller">
                         <svg className="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </span>
                     )}
-                    {shop.subscription?.status === "ACTIVE" && shop.subscription.plan.slug !== "free" && (
-                      <span className="flex-shrink-0 inline-flex items-center gap-0.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-1.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider shadow-sm" title="Pro Seller">
-                        ⭐ PRO
+                    {isPro && (
+                      <span className="flex-shrink-0 inline-flex items-center gap-0.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 px-1.5 py-0.5 text-[9px] font-black text-white uppercase tracking-wider shadow-md shadow-amber-200/40" title="Pro Seller">
+                        ★ PRO
                       </span>
                     )}
                     {tierData.tier.key !== "new" && (
-                      <span className={`flex-shrink-0 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold shadow-sm ${tierData.tier.bgColor} ${tierData.tier.textColor} border ${tierData.tier.borderColor}`} title={tierData.tier.description}>
+                      <span className={`flex-shrink-0 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold shadow-sm ${tierData.tier.bgColor} ${tierData.tier.textColor} border ${tierData.tier.borderColor}`} title={tierData.tier.description}>
                         {tierData.tier.emoji} {tierData.tier.label}
                       </span>
                     )}

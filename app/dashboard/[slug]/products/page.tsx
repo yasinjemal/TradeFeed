@@ -10,6 +10,8 @@ import { countUnmappedProducts } from "@/lib/db/global-categories";
 import { checkProductLimit } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IllustrationEmptyBox } from "@/components/ui/illustrations";
 
 interface ProductsPageProps {
   params: Promise<{ slug: string }>;
@@ -112,21 +114,13 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
 
       {/* ── Empty State ─────────────────────────────────── */}
       {products.length === 0 && (
-        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50/50 py-16 text-center">
-          <div className="text-5xl mb-4">👕</div>
-          <h2 className="text-lg font-semibold text-stone-900">
-            No products yet
-          </h2>
-          <p className="text-sm text-stone-500 mt-1 max-w-sm mx-auto">
-            Add your first product to start building your catalog. Buyers will
-            see them on your public page.
-          </p>
-          <Link
-            href={`/dashboard/${slug}/products/new`}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-md mt-5 hover:bg-emerald-600 transition-colors"
-          >
-            Add Your First Product
-          </Link>
+        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50/50">
+          <EmptyState
+            illustration={<IllustrationEmptyBox className="w-40 h-40" />}
+            heading="No products yet"
+            description="Add your first product to start building your catalog. Buyers will see them on your public page."
+            action={{ label: "Add Your First Product", href: `/dashboard/${slug}/products/new` }}
+          />
         </div>
       )}
 

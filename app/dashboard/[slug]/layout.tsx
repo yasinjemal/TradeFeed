@@ -56,7 +56,17 @@ export default async function DashboardLayout({
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           {/* Brand + Shop + Mobile Menu */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <DashboardMobileNav slug={slug} shopName={shop.name} />
+            {/* Hamburger — triggers mobile nav rendered outside header */}
+            <button
+              type="button"
+              id="mobile-nav-trigger"
+              className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl hover:bg-stone-100 transition-colors text-stone-600"
+              aria-label="Open navigation menu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
 
             <Link
               href={`/dashboard/${slug}`}
@@ -126,6 +136,9 @@ export default async function DashboardLayout({
           </div>
         </div>
       </header>
+
+      {/* Mobile nav rendered OUTSIDE header to avoid backdrop-blur containing block */}
+      <DashboardMobileNav slug={slug} shopName={shop.name} />
 
       {/* ── Page Content ────────────────────────────────── */}
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8">{children}</main>
