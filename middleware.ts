@@ -102,8 +102,8 @@ export default clerkMiddleware(async (auth, request) => {
     "font-src 'self' data:",
     // Connect: own, GA4, Clerk, UploadThing, Sentry
     "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io",
-    // Frames: Clerk challenges, Cloudflare
-    "frame-src 'self' https://*.clerk.accounts.dev https://challenges.cloudflare.com",
+    // Frames: Clerk challenges, Cloudflare, OpenStreetMap embed
+    "frame-src 'self' https://*.clerk.accounts.dev https://challenges.cloudflare.com https://www.openstreetmap.org",
     // Workers: own (service worker)
     "worker-src 'self' blob:",
     // Form actions: own
