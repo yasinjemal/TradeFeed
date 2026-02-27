@@ -17,6 +17,7 @@ import {
   getCatalogShop,
   getCatalogCombos,
 } from "@/lib/db/catalog";
+import { getSellerTierData } from "@/lib/db/shops";
 import { trackEvent } from "@/lib/db/analytics";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -37,9 +38,10 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   const shop = await getCatalogShop(slug);
   if (!shop) return notFound();
 
-  const [products, combos] = await Promise.all([
+  const [products, combos, tierData] = await Promise.all([
     getCatalogProducts(shop.id),
     getCatalogCombos(shop.id),
+    getSellerTierData(shop.id, shop),
   ]);
 
   // ── Track page view (fire-and-forget — don't block render) ──
@@ -50,7 +52,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
     return (
       <div className="space-y-5">
         {/* Still show shop profile even if no products */}
-        <ShopProfile shop={shop} />
+        <ShopProfile shop={shop} tierBadge={tierData.tier} />
 
         <div className="flex flex-col items-center justify-center py-20 px-4">
           <div className="w-20 h-20 rounded-full bg-stone-100 flex items-center justify-center mb-6">
@@ -107,7 +109,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   return (
     <div className="space-y-5">
       {/* ── Shop Profile (collapsible trust section) ───── */}
-      <ShopProfile shop={shop} />
+      <ShopProfile shop={shop} tierBadge={tierData.tier} />
 
       {/* ── Combo Deals ─────────────────────────────── */}
       <ComboSection combos={combos} shopSlug={slug} />

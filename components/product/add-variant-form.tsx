@@ -37,7 +37,7 @@ export function AddVariantForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Add Variant</CardTitle>
+        <CardTitle className="text-base">Add Option</CardTitle>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4">
@@ -51,7 +51,7 @@ export function AddVariantForm({
           {/* Success feedback */}
           {state?.success && (
             <div className="rounded-md bg-green-50 border border-green-200 p-3 text-sm text-green-700">
-              Variant added successfully!
+              Option added!
             </div>
           )}
 
@@ -177,7 +177,7 @@ export function AddVariantForm({
           </div>
 
           <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
-            {isPending ? "Adding..." : "Add Variant"}
+            {isPending ? "Adding..." : "Add Option"}
           </Button>
         </form>
       </CardContent>

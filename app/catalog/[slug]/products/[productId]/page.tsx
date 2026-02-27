@@ -9,6 +9,7 @@ import { AddToCart } from "@/components/catalog/add-to-cart";
 import { ProductImageGallery } from "@/components/catalog/product-image-gallery";
 import { ShareProduct } from "@/components/catalog/share-product";
 import { generateProductJsonLd } from "@/lib/seo/json-ld";
+import { RestockAlert } from "@/components/catalog/restock-alert";
 import { RecentlyViewedTracker } from "@/lib/recently-viewed/recently-viewed";
 import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
 import { ProductReviews } from "@/components/reviews/product-reviews";
@@ -184,6 +185,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 <a href={waLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700">
                   Ask about restock on WhatsApp
                 </a>
+                <div className="w-full border-t border-stone-100 pt-3">
+                  <RestockAlert productId={product.id} productName={product.name} shopId={shop.id} />
+                </div>
               </div>
             )}
           </div>

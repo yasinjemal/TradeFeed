@@ -50,6 +50,7 @@ export async function checkoutAction(
   deliveryCity?: string,
   deliveryProvince?: string,
   deliveryPostalCode?: string,
+  marketingConsent?: boolean,
 ): Promise<ActionResult> {
   try {
     // 1. Validate stock
@@ -86,6 +87,7 @@ export async function checkoutAction(
       deliveryProvince,
       deliveryPostalCode,
       whatsappMessage,
+      marketingConsent: marketingConsent ?? false,
     });
 
     // 3. Fire-and-forget notifications (don't block checkout)

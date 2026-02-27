@@ -70,6 +70,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
   const [buyerName, setBuyerName] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
   const [buyerNote, setBuyerNote] = useState("");
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [showDelivery, setShowDelivery] = useState(false);
   const [orderType, setOrderType] = useState<"wholesale" | "retail">("wholesale");
   const [delivery, setDelivery] = useState<DeliveryAddress>({
@@ -161,6 +162,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         deliveryData?.city || undefined,
         deliveryData?.province || undefined,
         deliveryData?.postalCode || undefined,
+        marketingConsent,
       );
 
       if (!result.success) {
@@ -551,6 +553,19 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
             </div>
 
             {/* WhatsApp Checkout Button */}
+            {/* Opt-in consent for future updates */}
+            <label className="flex items-start gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={marketingConsent}
+                onChange={(e) => setMarketingConsent(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <span className="text-[11px] text-stone-500 leading-tight group-hover:text-stone-600 transition-colors">
+                Send me updates about new products & deals from this seller on WhatsApp
+              </span>
+            </label>
+
             {retailWhatsappNumber && (
               <div className="flex rounded-xl border border-stone-200 overflow-hidden">
                 <button

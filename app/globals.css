@@ -10,6 +10,8 @@ body {
 }
 
 @theme inline {
+  --color-whatsapp: #25D366;
+  --color-whatsapp-hover: #20bd5a;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

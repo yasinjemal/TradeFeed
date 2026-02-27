@@ -164,7 +164,7 @@ export function SmartVariantCreator({
       if (res.success) {
         setResult({
           success: true,
-          message: `${newCount} variant${newCount > 1 ? "s" : ""} created!`,
+          message: `${newCount} option${newCount > 1 ? "s" : ""} created!`,
         });
         setSelectedOption1s(new Set());
         setSelectedOption2s(new Set());
@@ -179,7 +179,7 @@ export function SmartVariantCreator({
       {/* ── Header ──────────────────────────────────────── */}
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          ✨ Quick Add Variants
+          ✨ Quick Add Options
         </h3>
         <p className="text-sm text-stone-500 mt-1">
           Select {option1Label.toLowerCase()}s &amp; {option2Label.toLowerCase()}s, set pricing — we generate all combinations
@@ -370,7 +370,7 @@ export function SmartVariantCreator({
         </div>
         <div>
           <label className="text-sm font-medium text-stone-700 mb-1.5 block">
-            Stock per variant
+            Stock per option
           </label>
           <input
             type="number"
@@ -399,9 +399,9 @@ export function SmartVariantCreator({
           }`}
       >
         {isPending
-          ? "Creating variants..."
+          ? "Creating options..."
           : newCount > 0
-            ? `✨ Generate ${newCount} Variant${newCount > 1 ? "s" : ""}`
+            ? `✨ Generate ${newCount} Option${newCount > 1 ? "s" : ""}`
             : selectedOption1s.size === 0
               ? `Select ${option1Label.toLowerCase()}s to get started`
               : "All combinations already exist"}

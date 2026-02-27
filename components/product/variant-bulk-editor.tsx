@@ -114,7 +114,7 @@ export function VariantBulkEditor({
     startTransition(async () => {
       const result = await bulkUpdateVariantsAction(shopSlug, productId, updates);
       if (result.success) {
-        toast.success(`${result.updatedCount} variant${result.updatedCount !== 1 ? "s" : ""} updated`);
+        toast.success(`${result.updatedCount} option${result.updatedCount !== 1 ? "s" : ""} updated`);
         setDirtyIds(new Set());
       } else {
         toast.error(result.error ?? "Failed to update variants");
@@ -124,11 +124,11 @@ export function VariantBulkEditor({
 
   // Delete a single variant
   const handleDelete = (variantId: string) => {
-    if (!confirm("Delete this variant? This cannot be undone.")) return;
+    if (!confirm("Delete this option? This cannot be undone.")) return;
     startTransition(async () => {
       const result = await deleteVariantAction(shopSlug, productId, variantId);
       if (result.success) {
-        toast.success("Variant deleted");
+        toast.success("Option deleted");
         // Remove from dirty set
         setDirtyIds((prev) => {
           const next = new Set(prev);
@@ -136,7 +136,7 @@ export function VariantBulkEditor({
           return next;
         });
       } else {
-        toast.error(result.error ?? "Failed to delete variant");
+        toast.error(result.error ?? "Failed to delete option");
       }
     });
   };
@@ -154,7 +154,7 @@ export function VariantBulkEditor({
     return (
       <div className="rounded-2xl border-2 border-dashed border-stone-200 py-12 text-center">
         <div className="text-4xl mb-3">📏</div>
-        <p className="text-sm font-medium text-stone-500">No variants yet</p>
+        <p className="text-sm font-medium text-stone-500">No options yet</p>
         <p className="text-xs text-stone-400 mt-1">
           Use the quick creator above to add {option1Label.toLowerCase()}s and{" "}
           {option2Label.toLowerCase()}s
@@ -169,7 +169,7 @@ export function VariantBulkEditor({
       {dirtyCount > 0 && (
         <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5">
           <span className="text-sm font-medium text-emerald-800">
-            {dirtyCount} variant{dirtyCount !== 1 ? "s" : ""} changed
+            {dirtyCount} option{dirtyCount !== 1 ? "s" : ""} changed
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -319,7 +319,7 @@ export function VariantBulkEditor({
                     <button
                       onClick={() => handleDelete(v.id)}
                       disabled={isPending}
-                      title="Delete variant"
+                      title="Delete option"
                       className="w-7 h-7 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50
                         transition-colors disabled:opacity-50 flex items-center justify-center mx-auto"
                     >
@@ -337,7 +337,7 @@ export function VariantBulkEditor({
           <tfoot>
             <tr className="bg-stone-50 border-t border-stone-200">
               <td colSpan={2} className="px-3 py-2 text-xs font-medium text-stone-500">
-                {variants.length} variant{variants.length !== 1 ? "s" : ""}
+                {variants.length} option{variants.length !== 1 ? "s" : ""}
               </td>
               <td className="px-3 py-2 text-xs font-medium text-stone-500">
                 {(() => {

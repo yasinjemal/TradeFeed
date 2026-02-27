@@ -14,6 +14,7 @@ import { UserButton } from "@clerk/nextjs";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { ShopSwitcher } from "@/components/dashboard/shop-switcher";
 import { DashboardMobileNav } from "@/components/dashboard/mobile-nav";
+import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -127,7 +128,27 @@ export default async function DashboardLayout({
       </header>
 
       {/* ── Page Content ────────────────────────────────── */}
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8">{children}</main>
+
+      {/* ── Floating Add Product Button (mobile) ────────── */}
+      <a
+        href={`/dashboard/${slug}/products/new`}
+        className="fixed bottom-[4.5rem] right-4 z-50 md:hidden
+          w-14 h-14 rounded-full
+          bg-gradient-to-br from-emerald-500 to-emerald-600
+          text-white shadow-lg shadow-emerald-300/50
+          flex items-center justify-center
+          hover:shadow-xl hover:scale-105
+          active:scale-95 transition-all duration-200"
+        aria-label="Add product"
+      >
+        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </a>
+
+      {/* ── Mobile Bottom Tab Bar ───────────────────────── */}
+      <MobileBottomNav slug={slug} />
     </div>
   );
 }

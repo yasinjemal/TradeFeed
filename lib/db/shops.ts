@@ -149,6 +149,7 @@ export async function updateShopSettings(
       ...(input.facebook !== undefined && { facebook: input.facebook || null }),
       ...(input.tiktok !== undefined && { tiktok: input.tiktok || null }),
       ...(input.website !== undefined && { website: input.website || null }),
+      ...(input.whatsappGroupLink !== undefined && { whatsappGroupLink: input.whatsappGroupLink || null }),
     },
   });
 }
@@ -282,5 +283,82 @@ export async function getDashboardStats(shopId: string) {
     recentProducts,
     ordersToday,
     revenueTodayCents: revenueToday._sum.totalCents ?? 0,
+  };
+}
+
+// ── Seller Tier Metrics ─────────────────────────────────────
+import {
+  calculateTierPoints,
+  getTierForPoints,
+  getNextTier,
+  type TierMetrics,
+} from "@/lib/reputation/tiers";
+
+/**
+ * Compute the seller's reputation tier for a given shop.
+ * Returns the current tier, points, next tier and progress.
+ */
+export async function getSellerTierData(
+  shopId: string,
+  shop: {
+    createdAt: Date;
+    description?: string | null;
+    aboutText?: string | null;
+    address?: string | null;
+    city?: string | null;
+    latitude?: number | null;
+    businessHours?: string | null;
+    instagram?: string | null;
+    facebook?: string | null;
+    tiktok?: string | null;
+  }
+) {
+  const [activeProducts, totalOrders, reviewAgg] = await Promise.all([
+    db.product.count({ where: { shopId, isActive: true } }),
+    db.order.count({ where: { shopId } }),
+    db.review.aggregate({
+      where: { shopId, isApproved: true },
+      _avg: { rating: true },
+      _count: true,
+    }),
+  ]);
+
+  // Profile completeness (mirrors dashboard page logic)
+  const profileChecks = [
+    !!shop.description,
+    !!shop.aboutText,
+    !!shop.address,
+    !!shop.city,
+    shop.latitude !== null,
+    !!shop.businessHours,
+    !!shop.instagram || !!shop.facebook || !!shop.tiktok,
+  ];
+  const profileCompletePct = Math.round(
+    (profileChecks.filter(Boolean).length / profileChecks.length) * 100
+  );
+
+  const accountAgeDays = Math.floor(
+    (Date.now() - shop.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  const metrics: TierMetrics = {
+    activeProducts,
+    totalOrders,
+    avgRating: reviewAgg._avg.rating,
+    reviewCount: reviewAgg._count,
+    accountAgeDays,
+    profileCompletePct,
+  };
+
+  const points = calculateTierPoints(metrics);
+  const tier = getTierForPoints(points);
+  const next = getNextTier(tier);
+
+  return {
+    tier,
+    points,
+    nextTier: next,
+    progressToNext: next ? Math.min(Math.round(((points - tier.minPoints) / (next.minPoints - tier.minPoints)) * 100), 100) : 100,
+    metrics,
   };
 }

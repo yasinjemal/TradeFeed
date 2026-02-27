@@ -22,6 +22,10 @@ import {
   useState,
 } from "react";
 import type { WishlistContextValue, WishlistItem } from "./types";
+import {
+  addToWishlistAction,
+  removeFromWishlistAction,
+} from "@/app/actions/wishlist";
 
 const WishlistContext = createContext<WishlistContextValue | null>(null);
 
@@ -71,9 +75,10 @@ function saveWishlist(shopSlug: string, items: WishlistItem[]): void {
 interface WishlistProviderProps {
   children: React.ReactNode;
   shopSlug: string;
+  shopId?: string;
 }
 
-export function WishlistProvider({ children, shopSlug }: WishlistProviderProps) {
+export function WishlistProvider({ children, shopSlug, shopId }: WishlistProviderProps) {
   const [items, setItems] = useState<WishlistItem[]>([]);
 
   // Load from localStorage on mount
@@ -93,12 +98,23 @@ export function WishlistProvider({ children, shopSlug }: WishlistProviderProps) 
         if (prev.some((i) => i.productId === item.productId)) return prev;
         return [...prev, { ...item, addedAt: Date.now() }];
       });
+      // Fire-and-forget server sync
+      if (shopId) {
+        void addToWishlistAction({
+          productId: item.productId,
+          shopId,
+          productName: item.productName,
+          imageUrl: item.imageUrl,
+        });
+      }
     },
-    [],
+    [shopId],
   );
 
   const removeItem = useCallback((productId: string) => {
     setItems((prev) => prev.filter((i) => i.productId !== productId));
+    // Fire-and-forget server sync
+    void removeFromWishlistAction(productId);
   }, []);
 
   const toggleItem = useCallback(
@@ -106,12 +122,23 @@ export function WishlistProvider({ children, shopSlug }: WishlistProviderProps) 
       setItems((prev) => {
         const exists = prev.some((i) => i.productId === item.productId);
         if (exists) {
+          // Fire-and-forget server sync
+          void removeFromWishlistAction(item.productId);
           return prev.filter((i) => i.productId !== item.productId);
+        }
+        // Fire-and-forget server sync
+        if (shopId) {
+          void addToWishlistAction({
+            productId: item.productId,
+            shopId,
+            productName: item.productName,
+            imageUrl: item.imageUrl,
+          });
         }
         return [...prev, { ...item, addedAt: Date.now() }];
       });
     },
-    [],
+    [shopId],
   );
 
   const isInWishlist = useCallback(

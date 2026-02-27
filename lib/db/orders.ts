@@ -53,6 +53,7 @@ export interface CreateOrderInput {
   deliveryProvince?: string;
   deliveryPostalCode?: string;
   whatsappMessage?: string;
+  marketingConsent?: boolean;
 }
 
 export interface StockValidationResult {
@@ -147,6 +148,7 @@ export async function createOrder(input: CreateOrderInput) {
         totalCents,
         itemCount,
         whatsappMessage: input.whatsappMessage,
+        marketingConsent: input.marketingConsent ?? false,
         items: {
           create: input.items.map((item) => ({
             productId: item.productId,

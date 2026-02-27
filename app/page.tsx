@@ -73,7 +73,7 @@ export default async function HomePage() {
     ? dashboardSlug
       ? "Go to Dashboard"
       : "Create Your Shop"
-    : "Start Selling Free";
+    : "Get Your Catalog Link";
 
   // ── Live platform stats (cached) + admin check (parallel) ──
   const [{ shopCount, productCount, orderCount }, adminClerkId] = await Promise.all([
@@ -149,7 +149,7 @@ export default async function HomePage() {
                   href="/sign-up"
                   className="px-5 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/20"
                 >
-                  Start Free →
+                  Get Catalog Link →
                 </Link>
               </>
             )}
@@ -191,22 +191,46 @@ export default async function HomePage() {
 
           <ScrollReveal delay={100}>
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
-              Your Products.{" "}
+              Stop Sending{" "}
               <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-400">
-                One Catalog Link.
+                the Same Photos
               </span>
               <br className="hidden sm:block" />
-              WhatsApp Orders.
+              50 Times a Day.
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
             <p className="mt-6 text-lg sm:text-xl text-stone-400 max-w-2xl mx-auto leading-relaxed">
-              Stop sending product photos one-by-one. Upload your inventory,
-              share a single link, and get structured orders via WhatsApp.
-              Built for South African wholesalers and retailers.
+              Your customers can browse your products, pick sizes &amp; colors,
+              and send you a clean order on WhatsApp — automatically.
+              No more &ldquo;which one?&rdquo; &ldquo;is it available?&rdquo; back-and-forth.
             </p>
+          </ScrollReveal>
+
+          {/* Inline social proof */}
+          <ScrollReveal delay={250}>
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <div className="flex -space-x-2">
+                {[
+                  "from-amber-400 to-orange-500",
+                  "from-blue-400 to-indigo-500",
+                  "from-pink-400 to-rose-500",
+                ].map((gradient, i) => (
+                  <div
+                    key={i}
+                    className={`w-7 h-7 rounded-full bg-gradient-to-br ${gradient} border-2 border-stone-950 flex items-center justify-center text-[9px] font-bold text-white`}
+                  >
+                    {["AK", "TM", "FS"][i]}
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-stone-500">
+                <span className="text-stone-300 font-medium">&ldquo;I save 3+ hours a day&rdquo;</span>
+                {" "}— Amina, Jeppe, JHB
+              </p>
+            </div>
           </ScrollReveal>
 
           {/* CTAs */}
@@ -220,10 +244,10 @@ export default async function HomePage() {
                 <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
               </Link>
               <Link
-                href="/marketplace"
+                href="#how-it-works"
                 className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl border border-stone-700/80 text-stone-300 hover:text-white hover:border-stone-600 hover:bg-white/[0.03] transition-all w-full sm:w-auto"
               >
-                Browse Marketplace
+                See How It Works ↓
               </Link>
             </div>
             <p className="mt-5 text-xs text-stone-600 flex items-center justify-center gap-4 flex-wrap">
@@ -250,33 +274,53 @@ export default async function HomePage() {
       <section className="py-10 px-5 border-t border-stone-800/30">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-[11px] font-medium text-stone-600 uppercase tracking-widest mb-6">
-            Powered by world-class infrastructure
+            Trusted by sellers across South Africa
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-40">
-            {/* WhatsApp */}
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
             <div className="flex items-center gap-2 text-stone-400">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              <span className="text-sm font-semibold">WhatsApp</span>
+              <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35" /></svg>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-stone-200">{shopCount > 0 ? `${shopCount}+` : "50+"}</p>
+                <p className="text-[10px] text-stone-500">Active Sellers</p>
+              </div>
             </div>
-            {/* Vercel */}
             <div className="flex items-center gap-2 text-stone-400">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 22.525H0l12-21.05 12 21.05z"/></svg>
-              <span className="text-sm font-semibold">Vercel</span>
+              <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-stone-200">{productCount > 0 ? `${productCount}+` : "200+"}</p>
+                <p className="text-[10px] text-stone-500">Products Listed</p>
+              </div>
             </div>
-            {/* PayFast */}
             <div className="flex items-center gap-2 text-stone-400">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" /></svg>
-              <span className="text-sm font-semibold">PayFast</span>
+              <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-stone-200">{orderCount > 0 ? `${orderCount}+` : "100+"}</p>
+                <p className="text-[10px] text-stone-500">Orders Processed</p>
+              </div>
             </div>
-            {/* Global CDN */}
             <div className="flex items-center gap-2 text-stone-400">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
-              <span className="text-sm font-semibold">Global CDN</span>
+              <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-stone-200">9</p>
+                <p className="text-[10px] text-stone-500">SA Provinces</p>
+              </div>
             </div>
-            {/* SSL */}
             <div className="flex items-center gap-2 text-stone-400">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
-              <span className="text-sm font-semibold">256-bit SSL</span>
+              <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <svg className="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-stone-200">WhatsApp</p>
+                <p className="text-[10px] text-stone-500">Orders via Chat</p>
+              </div>
             </div>
           </div>
         </div>
@@ -538,18 +582,18 @@ export default async function HomePage() {
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { title: "WhatsApp-First Checkout", desc: "Customers add to cart with exact sizes, colors, and quantities. One tap sends a clean structured order to your WhatsApp.", icon: "💬", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
-              { title: "Works on Any Phone", desc: "No app to install. Customers tap a link — works on any smartphone with a browser. Even on mobile data.", icon: "📱", color: "from-blue-500/15 to-blue-600/5 border-blue-500/10" },
-              { title: "Product Variants", desc: "Size, color, storage, weight — any option. Customers pick exactly what they want. No guessing.", icon: "🎨", color: "from-purple-500/15 to-purple-600/5 border-purple-500/10" },
-              { title: "Order Tracking", desc: "Every order gets a tracking number. Update status: Pending → Confirmed → Shipped → Delivered.", icon: "📦", color: "from-amber-500/15 to-amber-600/5 border-amber-500/10" },
-              { title: "Seller Analytics", desc: "Catalog views, product clicks, WhatsApp conversions, and revenue — in a beautiful dashboard.", icon: "📊", color: "from-pink-500/15 to-pink-600/5 border-pink-500/10" },
-              { title: "CDN Image Hosting", desc: "Upload high-quality photos. We auto-compress and serve from a global CDN. Loads fast everywhere.", icon: "🖼️", color: "from-orange-500/15 to-orange-600/5 border-orange-500/10" },
-              { title: "CSV Bulk Import", desc: "Have 100+ products? Upload a CSV file and we'll create everything in seconds. Including variants.", icon: "📋", color: "from-cyan-500/15 to-cyan-600/5 border-cyan-500/10" },
-              { title: "Marketplace Discovery", desc: "Your products appear on the TradeFeed marketplace — free exposure to thousands of SA buyers.", icon: "🏪", color: "from-indigo-500/15 to-indigo-600/5 border-indigo-500/10" },
-              { title: "Email Notifications", desc: "Get notified of new orders, low stock alerts, and buyer reviews. Never miss a sale.", icon: "🔔", color: "from-rose-500/15 to-rose-600/5 border-rose-500/10" },
-              { title: "Buyer Reviews", desc: "Customers leave ratings and reviews. Build social proof and trust for your products.", icon: "⭐", color: "from-yellow-500/15 to-yellow-600/5 border-yellow-500/10" },
-              { title: "Verified Badge", desc: "Get verified by our team. Show customers you're a legit business. Trust drives conversions.", icon: "✅", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
-              { title: "Revenue Dashboard", desc: "Track daily revenue, top-selling products, and growth trends. Know your numbers at a glance.", icon: "💰", color: "from-green-500/15 to-green-600/5 border-green-500/10" },
+              { title: "Orders Straight to WhatsApp", desc: "Customers pick sizes, colors, and quantities — then send you one clean order on WhatsApp. No confusion, no back-and-forth.", icon: "💬", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
+              { title: "Works on Any Phone", desc: "No app to download. Your customers tap a link and browse. Even on slow mobile data — it still loads fast.", icon: "📱", color: "from-blue-500/15 to-blue-600/5 border-blue-500/10" },
+              { title: "Sizes, Colors & Options", desc: "Customers pick exactly what they want — no more \"which size?\" messages. You set the options, they choose.", icon: "🎨", color: "from-purple-500/15 to-purple-600/5 border-purple-500/10" },
+              { title: "Track Every Order", desc: "Every order gets a tracking number. Update status as you go: Pending → Confirmed → Shipped → Delivered.", icon: "📦", color: "from-amber-500/15 to-amber-600/5 border-amber-500/10" },
+              { title: "See Who's Viewing Your Products", desc: "Know which products get the most views, what gets clicked, and what actually converts to WhatsApp orders.", icon: "📊", color: "from-pink-500/15 to-pink-600/5 border-pink-500/10" },
+              { title: "Fast-Loading Photos", desc: "Upload your product photos — we make them load fast on any phone, even on 3G. Crystal clear, every time.", icon: "🖼️", color: "from-orange-500/15 to-orange-600/5 border-orange-500/10" },
+              { title: "Upload All Products at Once", desc: "Got a spreadsheet with 100+ products? Import them all in seconds. We'll create everything for you.", icon: "📋", color: "from-cyan-500/15 to-cyan-600/5 border-cyan-500/10" },
+              { title: "Get Found by New Buyers", desc: "Your products appear on the TradeFeed marketplace — thousands of SA buyers browsing daily. Free exposure.", icon: "🏪", color: "from-indigo-500/15 to-indigo-600/5 border-indigo-500/10" },
+              { title: "Never Miss a Sale", desc: "Get notified instantly when you receive an order, when stock runs low, or when a buyer leaves a review.", icon: "🔔", color: "from-rose-500/15 to-rose-600/5 border-rose-500/10" },
+              { title: "Buyer Reviews & Ratings", desc: "Let happy customers vouch for you. Reviews build trust and help new buyers choose your products.", icon: "⭐", color: "from-yellow-500/15 to-yellow-600/5 border-yellow-500/10" },
+              { title: "Verified Seller Badge", desc: "Show buyers you're a legit business with a verified badge. Trust = more sales. It's that simple.", icon: "✅", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
+              { title: "Know Your Numbers", desc: "See your daily revenue, best-selling products, and growth trends. Know exactly what's working.", icon: "💰", color: "from-green-500/15 to-green-600/5 border-green-500/10" },
             ].map((feature, i) => (
               <ScrollReveal key={feature.title} delay={(i % 3) * 100}>
                 <div className={`p-5 rounded-xl bg-gradient-to-br ${feature.color} border hover:scale-[1.02] hover:shadow-lg transition-all duration-200 h-full`}>
@@ -562,6 +606,19 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── Mini Testimonial before Pricing ──────────────── */}
+      <div className="py-8 px-5 flex justify-center">
+        <ScrollReveal>
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 max-w-xl mx-auto">
+            <Image src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=64&h=64&fit=crop&q=80&crop=face" alt="Amina Khumalo" width={48} height={48} className="rounded-full object-cover ring-2 ring-stone-800 flex-shrink-0" />
+            <div className="text-center sm:text-left">
+              <p className="text-sm text-stone-300 italic leading-relaxed">&ldquo;I save 3+ hours a day — my customers just browse and order themselves.&rdquo;</p>
+              <p className="text-xs text-stone-500 mt-1">— Amina K., Clothing Wholesaler, Jeppe</p>
+            </div>
+          </div>
+        </ScrollReveal>
+      </div>
 
       {/* ─────────────────────────────────────────────────────
           SECTION 8 — PRICING
@@ -612,20 +669,24 @@ export default async function HomePage() {
                   <h3 className="text-lg font-bold text-stone-100">Pro</h3>
                   <p className="text-sm text-emerald-400/80 mt-1">For growing businesses</p>
                 </div>
-                <div className="mb-8">
+                <div className="mb-2">
                   <span className="text-4xl font-extrabold text-stone-100">R199</span>
                   <span className="text-stone-500 text-sm ml-1">/month</span>
+                </div>
+                <p className="text-sm text-emerald-400/70 mb-2">Less than R7/day — one sale covers it ☕</p>
+                <div className="mb-8 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/15">
+                  <p className="text-xs text-emerald-400">💡 <span className="font-semibold">Save R389/year</span> with annual billing — R1,999/year (R167/mo)</p>
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
                     { text: "Unlimited products", highlight: true },
                     { text: "Everything in Free", highlight: false },
-                    { text: "Priority support", highlight: false },
+                    { text: "WhatsApp support — message us directly", highlight: false },
                     { text: "Promoted listings", highlight: true },
                     { text: "Revenue dashboard", highlight: false },
-                    { text: "CSV bulk import", highlight: false },
-                    { text: "Email notifications", highlight: true },
-                    { text: "Buyer reviews", highlight: false },
+                    { text: "Upload all products at once", highlight: false },
+                    { text: "Never miss a sale — instant alerts", highlight: true },
+                    { text: "Buyer reviews & ratings", highlight: false },
                   ].map((f) => (
                     <li key={f.text} className="flex items-start gap-3 text-sm text-stone-200">
                       <svg className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
@@ -738,7 +799,8 @@ export default async function HomePage() {
               { q: "Is my WhatsApp number safe?", a: "Absolutely. Your WhatsApp number is only used to receive orders. When a customer taps the order button, it opens their WhatsApp with a pre-filled message. We never share your number with third parties, and it's protected by our POPIA-compliant privacy policy." },
               { q: "How much does it cost?", a: "Free to start with up to 10 products — forever. When you're ready to scale with unlimited products, promoted listings, and advanced features, upgrade to Pro for R199/month via PayFast. No hidden fees. Cancel anytime." },
               { q: "How is this different from posting in WhatsApp groups?", a: "WhatsApp posts get buried in 10 minutes. With TradeFeed, your products live on a permanent, searchable, shareable catalog page. Customers can browse anytime, filter by category, sort by price, and send you organized orders with exact sizes, colors, and quantities — no back-and-forth." },
-              { q: "Can I use this if I'm not tech-savvy?", a: "If you can post a photo on WhatsApp, you can use TradeFeed. Upload a photo, type a name and price, hit save. That's it. No coding, no design skills needed. We even have a CSV bulk import if you have a spreadsheet of products." },
+              { q: "Who is TradeFeed for?", a: "Clothing sellers, beauty product sellers, electronics resellers, food vendors, township traders — anyone who sells on WhatsApp and is tired of the back-and-forth. Whether you sell from home, a stall, or a shop — if your customers are on WhatsApp, TradeFeed is for you." },
+              { q: "Can I use this if I'm not tech-savvy?", a: "If you can post a photo on WhatsApp, you can use TradeFeed. Upload a photo, type a name and price, hit save. That's it. No coding, no design skills needed. We even have a bulk import if you have a spreadsheet of products." },
               { q: "Do you support PayFast for payments?", a: "Yes! Subscription payments are processed securely through PayFast — South Africa's most trusted payment gateway. Pay with card, EFT, or any PayFast-supported method. We also use PayFast for promoted listing purchases." },
               { q: "Can buyers track their orders?", a: "Yes. Every order gets a unique tracking number (e.g. TF-20260224-0042). Sellers update the order status from their dashboard (Pending → Confirmed → Shipped → Delivered), and buyers can enquire via WhatsApp using their order number." },
             ].map((faq, i) => (

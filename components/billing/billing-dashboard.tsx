@@ -118,6 +118,22 @@ export function BillingDashboard({
         </div>
       </div>
 
+      {/* ── Pro Social Proof ─────────────────────────────── */}
+      {isFreePlan && (
+        <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-2xl border border-amber-200/60 p-5">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl flex-shrink-0">📈</span>
+            <div>
+              <p className="text-sm font-bold text-stone-800">Pro sellers earn 3× more on average</p>
+              <p className="text-xs text-stone-600 mt-1 leading-relaxed">
+                Unlimited products, promoted listings, and the trusted ⭐ PRO badge help you sell more.
+                For less than R7/day — one sale covers it.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Plan Comparison ──────────────────────────────── */}
       <div className="grid gap-4 md:grid-cols-2">
         {plans.map((plan) => (
@@ -213,6 +229,11 @@ function PlanCard({
         <span className="text-3xl font-bold text-stone-900">{priceDisplay}</span>
         {plan.priceInCents > 0 && (
           <span className="text-sm text-stone-400 ml-1">/month</span>
+        )}
+        {plan.priceInCents > 0 && (
+          <p className="text-xs text-emerald-600 mt-1">
+            💡 Save R389/year with annual billing
+          </p>
         )}
       </div>
 

@@ -12,7 +12,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { getShopBySlug, getDashboardStats } from "@/lib/db/shops";
+import { getShopBySlug, getDashboardStats, getSellerTierData } from "@/lib/db/shops";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -27,6 +27,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   if (!shop) notFound();
 
   const stats = await getDashboardStats(shop.id);
+  const tierData = await getSellerTierData(shop.id, shop);
 
   // Profile completeness
   const profileChecks = [
@@ -52,33 +53,33 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   return (
     <div className="space-y-8">
       {/* ═══════════════════════════════════════════════════ */}
-      {/* Hero Welcome                                        */}
+      {/* Hero Welcome — compact on mobile                    */}
       {/* ═══════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-900 via-stone-800 to-emerald-900 p-7 sm:p-10">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-900 via-stone-800 to-emerald-900 p-5 sm:p-10">
         <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-emerald-400/5 rounded-full blur-2xl" />
 
-        <div className="relative flex flex-col sm:flex-row items-start gap-5">
+        <div className="relative flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
           {/* Shop avatar */}
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-900/30 flex-shrink-0">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-900/30 flex-shrink-0">
             {shop.logoUrl ? (
-              <Image src={shop.logoUrl} alt={shop.name} width={64} height={64} className="w-16 h-16 rounded-2xl object-cover" />
+              <Image src={shop.logoUrl} alt={shop.name} width={64} height={64} className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover" />
             ) : (
-              <span className="text-3xl font-bold text-white">{shop.name.charAt(0).toUpperCase()}</span>
+              <span className="text-xl sm:text-3xl font-bold text-white">{shop.name.charAt(0).toUpperCase()}</span>
             )}
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="text-emerald-300/80 text-sm font-medium">{greeting} 👋</p>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
+            <p className="text-emerald-300/80 text-sm font-medium hidden sm:block">{greeting} 👋</p>
+            <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight sm:mt-1">
               {shop.name}
             </h1>
             {shop.description && (
-              <p className="text-stone-400 text-sm mt-1.5 max-w-md truncate">{shop.description}</p>
+              <p className="text-stone-400 text-sm mt-1 max-w-md truncate hidden sm:block">{shop.description}</p>
             )}
 
-            {/* Quick inline stats */}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
+            {/* Quick inline stats — hidden on mobile (shown in cards below) */}
+            <div className="hidden sm:flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
               <span className="flex items-center gap-1.5 text-sm text-stone-300">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
                 {stats.activeProductCount} active product{stats.activeProductCount !== 1 ? "s" : ""}
@@ -99,7 +100,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           <Link
             href={catalogUrl}
             target="_blank"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-500/20 active:scale-[0.98] flex-shrink-0"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-500/20 active:scale-[0.98] flex-shrink-0"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -110,10 +111,143 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}
-      {/* Stat Cards                                          */}
+      {/* Seller Tier Badge                                   */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <div className={`rounded-2xl border ${tierData.tier.borderColor} ${tierData.tier.bgColor} p-4 sm:p-5`}>
+        <div className="flex items-center gap-4">
+          <div className="text-2xl flex-shrink-0">{tierData.tier.emoji}</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className={`font-bold text-sm ${tierData.tier.textColor}`}>
+                {tierData.tier.label}
+              </h3>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/60 text-stone-600 font-medium">
+                {tierData.points} pts
+              </span>
+            </div>
+            {tierData.nextTier ? (
+              <div className="mt-2">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] text-stone-500">
+                    {tierData.nextTier.emoji} {tierData.nextTier.label} at {tierData.nextTier.minPoints} pts
+                  </span>
+                  <span className="text-[11px] font-medium text-stone-600">
+                    {tierData.progressToNext}%
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full bg-white/50 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-current opacity-40 transition-all duration-500"
+                    style={{ width: `${tierData.progressToNext}%` }}
+                  />
+                </div>
+                {/* Actionable tier hints */}
+                <p className="text-[10px] text-stone-500 mt-1.5">
+                  {tierData.metrics.activeProducts < 5 && `Add ${5 - tierData.metrics.activeProducts} more product${5 - tierData.metrics.activeProducts !== 1 ? "s" : ""} · `}
+                  {tierData.metrics.totalOrders < 25 && `${25 - tierData.metrics.totalOrders} more order${25 - tierData.metrics.totalOrders !== 1 ? "s" : ""} · `}
+                  {tierData.metrics.profileCompletePct < 100 && `Complete your profile`}
+                  {tierData.metrics.activeProducts >= 5 && tierData.metrics.totalOrders >= 25 && tierData.metrics.profileCompletePct >= 100 && `Keep getting great reviews!`}
+                </p>
+              </div>
+            ) : (
+              <p className="text-[11px] text-stone-500 mt-0.5">{tierData.tier.description}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Today's Performance — MOVED UP (orders first!)      */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        {/* Orders Today */}
+        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <svg className="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-600 font-medium">
+              Today
+            </span>
+          </div>
+          <p className="text-4xl sm:text-3xl font-bold text-stone-900">{stats.ordersToday}</p>
+          <p className="text-sm text-stone-500 mt-0.5">Orders today</p>
+        </div>
+
+        {/* Revenue Today */}
+        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <svg className="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 font-medium">
+              Today
+            </span>
+          </div>
+          <p className="text-4xl sm:text-3xl font-bold text-stone-900">{formatZAR(stats.revenueTodayCents)}</p>
+          <p className="text-sm text-stone-500 mt-0.5">Revenue today</p>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Share Catalog — PROMINENT (growth lever #1)         */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <div className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-r from-emerald-50/80 to-teal-50/80 p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-whatsapp flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-stone-900 text-sm">Share your catalog</h3>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="font-mono text-xs text-stone-600 truncate">tradefeed.co.za{catalogUrl}</span>
+                <CopyButton text={`https://tradefeed.co.za${catalogUrl}`} />
+              </div>
+            </div>
+          </div>
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(
+              `Check out my shop on TradeFeed! 🛍️\n\nhttps://tradefeed.co.za${catalogUrl}\n\n${shop.name} — ${shop.description ?? "Browse our wholesale catalog"}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-whatsapp hover:bg-whatsapp-hover text-white text-sm font-bold transition-all hover:shadow-lg hover:shadow-green-200 active:scale-[0.98] flex-shrink-0"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
+            Share on WhatsApp
+          </a>
+        </div>
+        {/* WhatsApp Status share — 1-tap broadcast */}
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-emerald-200/50">
+          <span className="text-xs text-stone-500">📢</span>
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(
+              `🛍️ New products just dropped!\n\nBrowse my catalog: https://tradefeed.co.za${catalogUrl}\n\n${shop.name} — Order via WhatsApp ✅`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium text-emerald-700 hover:text-emerald-900 transition-colors"
+          >
+            Post to WhatsApp Status →
+          </a>
+          <span className="text-[10px] text-stone-400 hidden sm:inline">Broadcast your catalog to all contacts</span>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Stat Cards — show 2 on mobile, 4 on desktop         */}
       {/* ═══════════════════════════════════════════════════ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Products */}
+        {/* Products — always visible */}
         <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -127,11 +261,11 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               </span>
             )}
           </div>
-          <p className="text-3xl font-bold text-stone-900">{stats.productCount}</p>
+          <p className="text-4xl sm:text-3xl font-bold text-stone-900">{stats.productCount}</p>
           <p className="text-sm text-stone-500 mt-0.5">Products</p>
         </div>
 
-        {/* Total Stock */}
+        {/* Total Stock — always visible */}
         <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -145,12 +279,12 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               </span>
             )}
           </div>
-          <p className="text-3xl font-bold text-stone-900">{stats.totalStock.toLocaleString()}</p>
+          <p className="text-4xl sm:text-3xl font-bold text-stone-900">{stats.totalStock.toLocaleString()}</p>
           <p className="text-sm text-stone-500 mt-0.5">Units in stock</p>
         </div>
 
-        {/* Variants */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
+        {/* Variants — hidden on mobile */}
+        <div className="hidden lg:block bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center group-hover:scale-110 transition-transform">
               <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -162,8 +296,8 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           <p className="text-sm text-stone-500 mt-0.5">Product variants</p>
         </div>
 
-        {/* Price Range */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
+        {/* Price Range — hidden on mobile */}
+        <div className="hidden lg:block bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
           <div className="flex items-center justify-between mb-3">
             <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform">
               <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -190,49 +324,12 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}
-      {/* Today's Performance                                 */}
-      {/* ═══════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        {/* Orders Today */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg className="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-              </svg>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-600 font-medium">
-              Today
-            </span>
-          </div>
-          <p className="text-3xl font-bold text-stone-900">{stats.ordersToday}</p>
-          <p className="text-sm text-stone-500 mt-0.5">Orders today</p>
-        </div>
-
-        {/* Revenue Today */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg className="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 font-medium">
-              Today
-            </span>
-          </div>
-          <p className="text-3xl font-bold text-stone-900">{formatZAR(stats.revenueTodayCents)}</p>
-          <p className="text-sm text-stone-500 mt-0.5">Revenue today</p>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════ */}
       {/* Low Stock Warning Banner                            */}
       {/* ═══════════════════════════════════════════════════ */}
       {stats.outOfStockCount > 0 && (
         <Link
           href={`/dashboard/${slug}/notifications`}
-          className="group flex items-center gap-4 rounded-2xl border border-red-200/80 bg-gradient-to-r from-red-50 to-orange-50 p-5 hover:shadow-lg hover:shadow-red-100/50 transition-all"
+          className="group flex items-center gap-4 rounded-2xl border border-red-200/80 bg-gradient-to-r from-red-50 to-orange-50 p-5 min-h-[56px] hover:shadow-lg hover:shadow-red-100/50 transition-all"
         >
           <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
             <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -254,9 +351,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       )}
 
       {/* ═══════════════════════════════════════════════════ */}
-      {/* Profile Completeness CTA + Share Catalog            */}
+      {/* Profile Completeness CTA                            */}
       {/* ═══════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div>
         {/* Profile CTA */}
         {profilePct < 100 ? (
           <Link
@@ -307,43 +404,6 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             </div>
           </div>
         )}
-
-        {/* Share Catalog */}
-        <div className="rounded-2xl border border-stone-200/80 bg-white p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <svg className="w-5 h-5 text-emerald-600" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-semibold text-stone-900">Share Your Catalog</h3>
-              <p className="text-xs text-stone-500">Send this link to your WhatsApp groups</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-stone-50 rounded-xl px-4 py-2.5 border border-stone-200 font-mono text-sm text-stone-700 truncate">
-              tradefeed.co.za{catalogUrl}
-            </div>
-            <CopyButton text={`https://tradefeed.co.za${catalogUrl}`} />
-          </div>
-
-          {/* WhatsApp share message */}
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(
-              `Check out my shop on TradeFeed! 🛍️\n\nhttps://tradefeed.co.za${catalogUrl}\n\n${shop.name} — ${shop.description ?? "Browse our wholesale catalog"}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-emerald-200 active:scale-[0.98]"
-          >
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-            Share on WhatsApp
-          </a>
-        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}
@@ -453,7 +513,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Link
           href={`/dashboard/${slug}/products/new`}
-          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-stone-200/80 bg-white hover:shadow-lg hover:shadow-stone-200/50 hover:border-emerald-200 transition-all group"
+          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-stone-200/80 bg-white hover:shadow-lg hover:shadow-stone-200/50 hover:border-emerald-200 transition-all group min-h-[100px]"
         >
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 group-hover:bg-emerald-100 flex items-center justify-center transition-colors group-hover:scale-110">
             <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -511,14 +571,20 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}
-      {/* Tips / Getting Started                              */}
+      {/* Tips / Getting Started — only for new sellers       */}
       {/* ═══════════════════════════════════════════════════ */}
-      {stats.productCount < 5 && (
-        <div className="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-stone-50 to-white p-6 space-y-4">
-          <h3 className="font-semibold text-stone-900 flex items-center gap-2">
-            <span className="text-lg">💡</span> Getting Started Tips
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {stats.productCount < 3 && (
+        <details className="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-stone-50 to-white overflow-hidden group/tips">
+          <summary className="p-5 sm:p-6 cursor-pointer list-none flex items-center justify-between hover:bg-stone-50/50 transition-colors">
+            <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+              <span className="text-lg">💡</span> Getting Started Tips
+            </h3>
+            <svg className="w-4 h-4 text-stone-400 transition-transform group-open/tips:rotate-180" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </summary>
+          <div className="px-5 sm:px-6 pb-5 sm:pb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="flex items-start gap-3 p-3 rounded-xl bg-white border border-stone-100">
               <span className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
               <div>
@@ -541,7 +607,8 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        </details>
       )}
     </div>
   );

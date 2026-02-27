@@ -112,6 +112,34 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
             {product.name}
           </h3>
 
+          {/* Star rating */}
+          {product.reviewCount > 0 && (
+            <div className="flex items-center gap-1">
+              <div className="flex items-center gap-px">
+                {[1, 2, 3, 4, 5].map((star) => {
+                  const filled = (product.avgRating ?? 0) >= star;
+                  const halfFilled = !filled && (product.avgRating ?? 0) >= star - 0.5;
+                  return (
+                    <svg
+                      key={star}
+                      className={`${compact ? "w-2.5 h-2.5" : "w-3 h-3"} ${filled ? "text-amber-400" : halfFilled ? "text-amber-400/60" : "text-stone-700"}`}
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd" />
+                    </svg>
+                  );
+                })}
+              </div>
+              <span className={`text-stone-500 font-medium ${compact ? "text-[9px]" : "text-[10px]"}`}>
+                {product.avgRating?.toFixed(1)}
+              </span>
+              <span className={`text-stone-600 ${compact ? "text-[9px]" : "text-[10px]"}`}>
+                ({product.reviewCount})
+              </span>
+            </div>
+          )}
+
           {/* Shop info */}
           {!compact && (
             <div className="flex items-center gap-1.5 pt-0.5">
@@ -133,6 +161,16 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
               <span className="text-[11px] text-stone-500 truncate">
                 {product.shop.name}
               </span>
+              {product.shop.subscription?.status === "ACTIVE" && product.shop.subscription.plan.slug !== "free" && (
+                <span className="inline-flex items-center px-1 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30 text-[8px] font-bold text-amber-400 uppercase tracking-wider flex-shrink-0">
+                  PRO
+                </span>
+              )}
+              {product.sellerTier && (
+                <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-stone-800 border border-stone-700/50 text-[8px] font-semibold text-stone-300 flex-shrink-0">
+                  {product.sellerTier.emoji} {product.sellerTier.label}
+                </span>
+              )}
               {product.shop.city && (
                 <>
                   <span className="text-stone-700">·</span>

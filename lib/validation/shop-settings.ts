@@ -160,6 +160,13 @@ export const shopSettingsSchema = z.object({
     .max(300)
     .optional()
     .or(z.literal("")),
+
+  whatsappGroupLink: z
+    .string()
+    .trim()
+    .max(300)
+    .optional()
+    .or(z.literal("")),
 });
 
 export type ShopSettingsInput = z.infer<typeof shopSettingsSchema>;

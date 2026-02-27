@@ -18,6 +18,7 @@
 import { db } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { searchProductIds } from "@/lib/db/search";
+import { calculateTierPoints, getTierForPoints, type TierMetrics } from "@/lib/reputation/tiers";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -26,7 +27,8 @@ export type MarketplaceSortBy =
   | "newest"
   | "price_asc"
   | "price_desc"
-  | "popular";
+  | "popular"
+  | "top_rated";
 
 export interface MarketplaceFilters {
   /** Global category slug (e.g. "hoodies-sweaters") */
@@ -69,6 +71,10 @@ export interface MarketplaceProduct {
     province: string | null;
     isVerified: boolean;
     logoUrl: string | null;
+    subscription: {
+      status: string;
+      plan: { slug: string; name: string };
+    } | null;
   };
   globalCategory: {
     name: string;
@@ -79,6 +85,12 @@ export interface MarketplaceProduct {
     tier: "BOOST" | "FEATURED" | "SPOTLIGHT";
     promotedListingId: string;
   } | null;
+  /** Average approved review rating (null if no reviews) */
+  avgRating: number | null;
+  /** Number of approved reviews */
+  reviewCount: number;
+  /** Seller reputation tier (null for "new" sellers) */
+  sellerTier: { key: string; label: string; emoji: string } | null;
   createdAt: Date;
 }
 
@@ -118,6 +130,121 @@ export interface FeaturedShop {
 }
 
 // ── Core Queries ─────────────────────────────────────────────
+
+/**
+ * Batch-enrich an array of MarketplaceProduct with review stats.
+ * Uses a single groupBy query to avoid N+1. Reviews must be approved.
+ */
+async function enrichWithReviewStats(
+  products: MarketplaceProduct[]
+): Promise<MarketplaceProduct[]> {
+  if (products.length === 0) return products;
+
+  const productIds = products.map((p) => p.id);
+
+  const reviewStats = await db.review.groupBy({
+    by: ["productId"],
+    where: {
+      productId: { in: productIds },
+      isApproved: true,
+    },
+    _avg: { rating: true },
+    _count: { rating: true },
+  });
+
+  const statsMap = new Map(
+    reviewStats.map((r) => [
+      r.productId,
+      {
+        avg: r._avg.rating ? Math.round(r._avg.rating * 10) / 10 : null,
+        count: r._count.rating,
+      },
+    ])
+  );
+
+  return products.map((p) => {
+    const stats = statsMap.get(p.id);
+    return {
+      ...p,
+      avgRating: stats?.avg ?? null,
+      reviewCount: stats?.count ?? 0,
+    };
+  });
+}
+
+/**
+ * Batch-enrich an array of MarketplaceProduct with seller tier badges.
+ * Uses parallel groupBy queries to avoid N+1.
+ * Only returns a badge for non-"new" sellers.
+ */
+async function enrichWithSellerTiers(
+  products: MarketplaceProduct[]
+): Promise<MarketplaceProduct[]> {
+  if (products.length === 0) return products;
+
+  const shopIds = [...new Set(products.map((p) => p.shop.id))];
+
+  const [shops, productCounts, orderCounts, reviewStats] = await Promise.all([
+    db.shop.findMany({
+      where: { id: { in: shopIds } },
+      select: {
+        id: true, createdAt: true, description: true, aboutText: true,
+        address: true, city: true, latitude: true, businessHours: true,
+        instagram: true, facebook: true, tiktok: true,
+      },
+    }),
+    db.product.groupBy({
+      by: ["shopId"],
+      where: { shopId: { in: shopIds }, isActive: true },
+      _count: true,
+    }),
+    db.order.groupBy({
+      by: ["shopId"],
+      where: { shopId: { in: shopIds } },
+      _count: true,
+    }),
+    db.review.groupBy({
+      by: ["shopId"],
+      where: { shopId: { in: shopIds }, isApproved: true },
+      _avg: { rating: true },
+      _count: { rating: true },
+    }),
+  ]);
+
+  const shopMap = new Map(shops.map((s) => [s.id, s]));
+  const pCountMap = new Map(productCounts.map((p) => [p.shopId, p._count]));
+  const oCountMap = new Map(orderCounts.map((o) => [o.shopId, o._count]));
+  const rMap = new Map(
+    reviewStats.map((r) => [r.shopId, { avg: r._avg.rating, count: r._count.rating }])
+  );
+
+  return products.map((p) => {
+    const s = shopMap.get(p.shop.id);
+    if (!s) return p;
+
+    const profileChecks = [
+      !!s.description, !!s.aboutText, !!s.address, !!s.city,
+      s.latitude !== null, !!s.businessHours,
+      !!s.instagram || !!s.facebook || !!s.tiktok,
+    ];
+    const metrics: TierMetrics = {
+      activeProducts: pCountMap.get(p.shop.id) ?? 0,
+      totalOrders: oCountMap.get(p.shop.id) ?? 0,
+      avgRating: rMap.get(p.shop.id)?.avg ?? null,
+      reviewCount: rMap.get(p.shop.id)?.count ?? 0,
+      accountAgeDays: Math.floor((Date.now() - s.createdAt.getTime()) / 86_400_000),
+      profileCompletePct: Math.round((profileChecks.filter(Boolean).length / profileChecks.length) * 100),
+    };
+
+    const points = calculateTierPoints(metrics);
+    const tier = getTierForPoints(points);
+
+    return {
+      ...p,
+      sellerTier: tier.key !== "new" ? { key: tier.key, label: tier.label, emoji: tier.emoji } : null,
+    };
+  });
+}
 
 /**
  * M2.2 — Get marketplace products (cross-shop).
@@ -211,7 +338,9 @@ export async function getMarketplaceProducts(
       break;
     case "trending":
     case "popular":
-      // Handled by getTrendingProducts() for true trending;
+    case "top_rated":
+      // top_rated is sorted post-query after enriching with reviews
+      // trending handled by getTrendingProducts() for true trending
       // fallback to newest for the main grid
       orderBy = { createdAt: "desc" };
       break;
@@ -242,6 +371,12 @@ export async function getMarketplaceProducts(
             province: true,
             isVerified: true,
             logoUrl: true,
+            subscription: {
+              select: {
+                status: true,
+                plan: { select: { slug: true, name: true } },
+              },
+            },
           },
         },
         images: {
@@ -262,7 +397,7 @@ export async function getMarketplaceProducts(
   ]);
 
   // ── Transform results ───────────────────────────────────
-  const products: MarketplaceProduct[] = rawProducts.map((p) => {
+  let products: MarketplaceProduct[] = rawProducts.map((p) => {
     const prices = p.variants.map((v) => v.priceInCents);
     const minP = prices.length > 0 ? Math.min(...prices) : 0;
     const maxP = prices.length > 0 ? Math.max(...prices) : 0;
@@ -278,6 +413,9 @@ export async function getMarketplaceProducts(
       shop: p.shop,
       globalCategory: p.globalCategory,
       promotion: null, // Will be enriched by interleaving
+      avgRating: null,
+      reviewCount: 0,
+      sellerTier: null,
       createdAt: p.createdAt,
     };
   });
@@ -288,6 +426,22 @@ export async function getMarketplaceProducts(
     products.sort(
       (a, b) => (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
     );
+  }
+
+  // Batch-enrich with review stats
+  products = await enrichWithReviewStats(products);
+
+  // Batch-enrich with seller tier badges
+  products = await enrichWithSellerTiers(products);
+
+  // Post-enrichment sort for top_rated
+  if (sortBy === "top_rated") {
+    products.sort((a, b) => {
+      const rA = a.avgRating ?? 0;
+      const rB = b.avgRating ?? 0;
+      if (rB !== rA) return rB - rA;
+      return b.reviewCount - a.reviewCount;
+    });
   }
 
   return {
@@ -342,6 +496,12 @@ export async function getPromotedProducts(
               province: true,
               isVerified: true,
               logoUrl: true,
+              subscription: {
+                select: {
+                  status: true,
+                  plan: { select: { slug: true, name: true } },
+                },
+              },
             },
           },
           images: {
@@ -364,7 +524,7 @@ export async function getPromotedProducts(
     take: limit,
   });
 
-  return promoted.map((pl) => {
+  const products: MarketplaceProduct[] = promoted.map((pl) => {
     const p = pl.product;
     const prices = p.variants.map((v) => v.priceInCents);
 
@@ -382,9 +542,14 @@ export async function getPromotedProducts(
         tier: pl.tier,
         promotedListingId: pl.id,
       },
+      avgRating: null,
+      reviewCount: 0,
+      sellerTier: null,
       createdAt: p.createdAt,
     };
   });
+
+  return enrichWithReviewStats(products);
 }
 
 /**
@@ -516,6 +681,12 @@ export async function getTrendingProducts(
           province: true,
           isVerified: true,
           logoUrl: true,
+          subscription: {
+            select: {
+              status: true,
+              plan: { select: { slug: true, name: true } },
+            },
+          },
         },
       },
       images: {
@@ -533,7 +704,7 @@ export async function getTrendingProducts(
   const productMap = new Map(products.map((p) => [p.id, p]));
 
   // Return in trending order (most events first), limited to `limit`
-  return trendingEvents
+  const trendingProducts: MarketplaceProduct[] = trendingEvents
     .filter((e) => e.productId && productMap.has(e.productId))
     .slice(0, limit)
     .map((e) => {
@@ -551,9 +722,14 @@ export async function getTrendingProducts(
         shop: p.shop,
         globalCategory: p.globalCategory,
         promotion: null,
+        avgRating: null,
+        reviewCount: 0,
+        sellerTier: null,
         createdAt: p.createdAt,
       };
     });
+
+  return enrichWithReviewStats(trendingProducts);
 }
 
 /**

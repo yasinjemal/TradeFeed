@@ -51,8 +51,16 @@ export async function getCatalogShop(slug: string) {
       facebook: true,
       tiktok: true,
       website: true,
+      whatsappGroupLink: true,
       // Trust
       createdAt: true,
+      // Subscription (for Pro badge)
+      subscription: {
+        select: {
+          status: true,
+          plan: { select: { slug: true, name: true } },
+        },
+      },
       // Gallery
       gallery: {
         select: {

@@ -40,7 +40,7 @@ export function VariantList({
   const [isPending, startTransition] = useTransition();
 
   function handleDelete(variantId: string) {
-    if (!confirm("Delete this variant? This cannot be undone.")) return;
+    if (!confirm("Delete this option? This cannot be undone.")) return;
 
     startTransition(async () => {
       await deleteVariantAction(shopSlug, productId, variantId);
@@ -53,7 +53,7 @@ export function VariantList({
         <CardContent className="py-8 text-center">
           <div className="text-3xl mb-2">📏</div>
           <p className="text-sm text-muted-foreground">
-            No variants yet. Add {option1Label.toLowerCase()}s, {option2Label.toLowerCase()}s, and pricing below.
+            No options yet. Add {option1Label.toLowerCase()}s, {option2Label.toLowerCase()}s, and pricing below.
           </p>
         </CardContent>
       </Card>
@@ -64,7 +64,7 @@ export function VariantList({
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          Variants ({variants.length})
+          Sizes & Colors ({variants.length})
         </CardTitle>
       </CardHeader>
       <CardContent>

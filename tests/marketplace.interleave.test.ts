@@ -22,9 +22,13 @@ function makeProduct(
       province: null,
       isVerified: false,
       logoUrl: null,
+      subscription: null,
     },
     globalCategory: null,
     promotion,
+    avgRating: null,
+    reviewCount: 0,
+    sellerTier: null,
     createdAt: new Date(),
   };
 }

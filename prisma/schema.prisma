@@ -48,6 +48,7 @@ model Shop {
   facebook    String?                         // Facebook page URL or username
   tiktok      String?                         // TikTok handle (without @)
   website     String?                         // External website URL
+  whatsappGroupLink String?                   // WhatsApp group invite link
 
   // ── Referral ─────────────────────────────────────────
   referralCode  String?  @unique              // Auto-generated referral code (e.g. "TF-ABC123")
@@ -461,6 +462,9 @@ model Order {
   whatsappSent    Boolean      @default(true)       // Whether WA message was opened
   whatsappMessage String?                           // Snapshot of the order message sent
 
+  // POPIA consent
+  marketingConsent Boolean     @default(false)       // Buyer opted in to receive WhatsApp updates
+
   // Relations
   items           OrderItem[]
 
@@ -519,10 +523,14 @@ model WishlistItem {
   
   productId  String
   shopId     String                                 // Denormalised for fast queries
+  productName String?                               // Denormalised for notifications
 
   // Visitor tracking (anonymous buyers)
   visitorId  String?                                // Hashed IP/fingerprint for anonymous
   userId     String?                                // Clerk userId for logged-in buyers
+
+  // Back-in-stock alert
+  notifyPhone String?                               // WhatsApp number for restock alert
 
   createdAt  DateTime @default(now())
 
@@ -531,6 +539,7 @@ model WishlistItem {
   @@index([visitorId])
   @@index([userId])
   @@index([shopId])
+  @@index([productId, notifyPhone])                 // For restock alert queries
 }
 
 // ============================================================

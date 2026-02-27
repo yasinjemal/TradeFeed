@@ -151,6 +151,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           facebook: shop.facebook,
           tiktok: shop.tiktok,
           website: shop.website,
+          whatsappGroupLink: shop.whatsappGroupLink,
         }}
       />
 

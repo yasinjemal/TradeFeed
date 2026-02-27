@@ -12,6 +12,7 @@
 // ============================================================
 
 import { getCatalogShop } from "@/lib/db/catalog";
+import { getSellerTierData } from "@/lib/db/shops";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import type { Metadata } from "next";
@@ -85,9 +86,12 @@ export default async function CatalogLayout({
 
   if (!shop) return notFound();
 
+  // Compute seller tier for trust badges
+  const tierData = await getSellerTierData(shop.id, shop);
+
   return (
     <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined}>
-    <WishlistProvider shopSlug={slug}>
+    <WishlistProvider shopSlug={slug} shopId={shop.id}>
       {/* JSON-LD Structured Data for SEO */}
       {generateShopJsonLd(shop).map((schema, i) => (
         <script
@@ -132,6 +136,16 @@ export default async function CatalogLayout({
                         <svg className="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
+                      </span>
+                    )}
+                    {shop.subscription?.status === "ACTIVE" && shop.subscription.plan.slug !== "free" && (
+                      <span className="flex-shrink-0 inline-flex items-center gap-0.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-1.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider shadow-sm" title="Pro Seller">
+                        ⭐ PRO
+                      </span>
+                    )}
+                    {tierData.tier.key !== "new" && (
+                      <span className={`flex-shrink-0 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold shadow-sm ${tierData.tier.bgColor} ${tierData.tier.textColor} border ${tierData.tier.borderColor}`} title={tierData.tier.description}>
+                        {tierData.tier.emoji} {tierData.tier.label}
                       </span>
                     )}
                   </div>

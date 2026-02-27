@@ -34,6 +34,7 @@ type ActionResult = {
   success: boolean;
   error?: string;
   fieldErrors?: Record<string, string[]>;
+  productId?: string;
 };
 
 export type ProductActionDeps = {
@@ -162,8 +163,25 @@ export async function createProductAction(
     // 3. Create product via data access layer
     const product = await deps.createProduct(parsed.data, access.shopId);
 
-    // 4. Redirect to product detail page (to add variants)
-    deps.redirect(`/dashboard/${shopSlug}/products/${product.id}`);
+    // 3b. Auto-create default variant if inline price was provided
+    const inlinePrice = formData.get("priceInRands") as string;
+    const inlineStock = formData.get("stock") as string;
+    if (inlinePrice && inlinePrice.trim() !== "") {
+      const { variantCreateSchema } = await import("@/lib/validation/product");
+      const variantInput = variantCreateSchema.safeParse({
+        size: "Default",
+        priceInRands: inlinePrice.trim(),
+        stock: (inlineStock && inlineStock.trim() !== "") ? inlineStock.trim() : "0",
+      });
+      if (variantInput.success) {
+        await deps.createVariant(product.id, access.shopId, variantInput.data);
+      }
+      // If variant validation fails, we still created the product — seller can add variants manually
+    }
+
+    // 4. Revalidate and return success (show success screen in form)
+    deps.revalidatePath(`/dashboard/${shopSlug}/products`);
+    return { success: true, productId: product.id };
   } catch (error: unknown) {
     // Re-throw redirect
     if (error instanceof Error && "digest" in error) {

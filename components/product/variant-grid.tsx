@@ -104,7 +104,7 @@ export function VariantGrid({
   const [isPending, startTransition] = useTransition();
 
   function handleDelete(variantId: string) {
-    if (!confirm("Delete this variant?")) return;
+    if (!confirm("Delete this option?")) return;
     startTransition(async () => {
       await deleteVariantAction(shopSlug, productId, variantId);
     });
@@ -117,7 +117,7 @@ export function VariantGrid({
     return (
       <div className="rounded-2xl border-2 border-dashed border-stone-200 py-12 text-center">
         <div className="text-4xl mb-3">📏</div>
-        <p className="text-sm font-medium text-stone-500">No variants yet</p>
+        <p className="text-sm font-medium text-stone-500">No options yet</p>
         <p className="text-xs text-stone-400 mt-1">
           Use the quick creator above to add {option1Label.toLowerCase()}s and {option2Label.toLowerCase()}s
         </p>

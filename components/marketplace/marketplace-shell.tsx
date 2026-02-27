@@ -341,6 +341,7 @@ export function MarketplaceShell({
             >
               <option value="newest">Newest</option>
               <option value="trending">Trending</option>
+              <option value="top_rated">Top Rated</option>
               <option value="price_asc">Price: Low → High</option>
               <option value="price_desc">Price: High → Low</option>
               <option value="popular">Popular</option>

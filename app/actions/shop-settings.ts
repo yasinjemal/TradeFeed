@@ -60,6 +60,7 @@ export async function updateShopSettingsAction(
       facebook: formData.get("facebook") as string,
       tiktok: formData.get("tiktok") as string,
       website: formData.get("website") as string,
+      whatsappGroupLink: formData.get("whatsappGroupLink") as string,
     };
 
     // 3. Validate
