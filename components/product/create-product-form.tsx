@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { GlobalCategoryPicker } from "@/components/product/global-category-picker";
 import { ImageUpload } from "@/components/product/image-upload";
 import type { GlobalCategoryOption } from "@/lib/db/global-categories";
-import { suggestGlobalCategory } from "@/lib/db/global-categories";
+import { suggestGlobalCategory } from "@/lib/config/category-suggest";
 import { getVariantLabels } from "@/lib/config/category-variants";
 import Link from "next/link";
 
