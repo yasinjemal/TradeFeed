@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { CookieConsent } from "@/components/cookie-consent";
+import { GlobalBottomNav } from "@/components/ui/global-bottom-nav";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -85,6 +86,7 @@ export default async function RootLayout({
           </a>
           <NextIntlClientProvider messages={messages}>
             <main id="main-content">{children}</main>
+            <GlobalBottomNav />
             <Toaster
             position="top-center"
             toastOptions={{

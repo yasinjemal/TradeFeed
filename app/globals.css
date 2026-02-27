@@ -146,7 +146,8 @@ button, a, input, select, textarea, [role="button"] {
 }
 
 /* Safe area padding utility for bottom nav */
-.safe-bottom {
+.safe-bottom,
+.safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
