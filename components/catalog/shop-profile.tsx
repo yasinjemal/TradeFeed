@@ -45,27 +45,34 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
 
   const hasLocation = shop.latitude !== null && shop.longitude !== null;
   const hasAddress = shop.address || shop.city;
-  const hasHours = shop.businessHours;
   const hasSocials = shop.instagram || shop.facebook || shop.tiktok || shop.website || shop.whatsappGroupLink;
   const hasAbout = shop.aboutText;
   const hasGallery = shop.gallery && shop.gallery.length > 0;
+
+  // Parse business hours — only treat as "has hours" if at least one day is configured.
+  // An empty object {} means no hours were set → don't show "Closed" in the trust bar.
+  const parsedHours: BusinessHours = shop.businessHours
+    ? (JSON.parse(shop.businessHours) as BusinessHours)
+    : {};
+  const hours = parsedHours;
+  const hasHours = Object.keys(parsedHours).length > 0;
 
   // Nothing to show
   if (!hasLocation && !hasAddress && !hasHours && !hasSocials && !hasAbout && !hasGallery) {
     return null;
   }
 
-  const hours: BusinessHours = hasHours
-    ? (JSON.parse(shop.businessHours!) as BusinessHours)
-    : {};
-
   // Is the shop currently open?
+  // Runs in the browser — uses device local time (correct for SA users viewing SA shops).
   const now = new Date();
   const dayIndex = now.getDay(); // 0=Sun, 1=Mon, ...
   const dayMap: DayKey[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
   const todayKey = dayMap[dayIndex]!;
   const todayHours = hours[todayKey];
-  const isOpenNow = todayHours && todayHours !== "Closed" ? checkIfOpen(todayHours, now) : false;
+  // Only show the open/closed pill if today's hours are explicitly configured.
+  // Prevents false "Closed" when the seller hasn't set hours for every day.
+  const hasTodayHours = todayHours !== undefined;
+  const isOpenNow = hasTodayHours && todayHours !== "Closed" ? checkIfOpen(todayHours, now) : false;
 
   const memberSince = shop.createdAt.toLocaleDateString("en-ZA", {
     month: "long",
@@ -119,7 +126,8 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
                 </span>
               </>
             )}
-            {hasHours && (
+            {/* Only show open/closed when today's hours are explicitly configured */}
+            {hasHours && hasTodayHours && (
               <>
                 <span>•</span>
                 <span className={isOpenNow ? "text-emerald-600 font-medium" : "text-red-500 font-medium"}>
@@ -211,16 +219,52 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
               )}
               {hasLocation && (
                 <div className="space-y-2">
-                  <div className="rounded-xl overflow-hidden border border-stone-200 h-48 sm:h-56">
-                    <iframe
-                      title="Shop Location"
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      loading="lazy"
-                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${shop.longitude! - 0.008}%2C${shop.latitude! - 0.005}%2C${shop.longitude! + 0.008}%2C${shop.latitude! + 0.005}&layer=mapnik&marker=${shop.latitude}%2C${shop.longitude}`}
+                  {/*
+                    Map card — OpenStreetMap embed iframes are blocked by browsers
+                    due to their X-Frame-Options: SAMEORIGIN header on external domains.
+                    Using a styled clickable card that opens Google Maps instead.
+                    Opens native Maps app on mobile devices automatically.
+                  */}
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${shop.latitude},${shop.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open shop location in Google Maps"
+                    className="block rounded-xl overflow-hidden border border-stone-200 hover:border-emerald-300 transition-all group relative h-48 sm:h-56"
+                  >
+                    {/* Map grid background */}
+                    <div
+                      className="absolute inset-0 bg-stone-100"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to right,#d1d5db 1px,transparent 1px),linear-gradient(to bottom,#d1d5db 1px,transparent 1px)",
+                        backgroundSize: "32px 32px",
+                      }}
                     />
-                  </div>
+                    {/* Decorative horizontal road */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-full h-5 bg-white/70" />
+                    </div>
+                    {/* Decorative vertical road */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="h-full w-6 bg-white/70" />
+                    </div>
+                    {/* Location pin + tap label */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                      <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white group-hover:scale-110 transition-transform">
+                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <span className="text-xs font-semibold bg-white px-3 py-1.5 rounded-full shadow-md text-stone-700 group-hover:bg-emerald-50 group-hover:text-emerald-700 transition-colors">
+                        Tap to open in Google Maps →
+                      </span>
+                    </div>
+                  </a>
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${shop.latitude},${shop.longitude}`}
                     target="_blank"
@@ -228,7 +272,7 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
                     className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c-.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
                     </svg>
                     Get directions on Google Maps
                   </a>
