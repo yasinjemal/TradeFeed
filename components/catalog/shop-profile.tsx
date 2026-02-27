@@ -41,7 +41,7 @@ interface ShopProfileProps {
 }
 
 export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   const hasLocation = shop.latitude !== null && shop.longitude !== null;
   const hasAddress = shop.address || shop.city;
