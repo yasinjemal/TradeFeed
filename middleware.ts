@@ -119,7 +119,8 @@ export default clerkMiddleware(async (auth, request) => {
   // HSTS: enforce HTTPS (1 year, include subdomains)
   response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   // Permissions Policy: restrict browser features not needed by TradeFeed
-  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+  // geolocation=(self) allows the GPS detect button on settings page
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self), payment=()");
 
 
   return response;

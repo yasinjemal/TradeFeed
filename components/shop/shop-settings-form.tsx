@@ -136,6 +136,7 @@ export function ShopSettingsForm({
   const [lat, setLat] = useState(initialData.latitude?.toString() ?? "");
   const [lng, setLng] = useState(initialData.longitude?.toString() ?? "");
   const [gpsStatus, setGpsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [gpsError, setGpsError] = useState("");
   const [cityValue, setCityValue] = useState(initialData.city ?? "");
   const [provinceValue, setProvinceValue] = useState(initialData.province ?? "");
 
@@ -235,10 +236,13 @@ export function ShopSettingsForm({
 
   const detectGPS = () => {
     if (!navigator.geolocation) {
+      setGpsError("Your browser doesn\u2019t support location services");
       setGpsStatus("error");
+      setTimeout(() => setGpsStatus("idle"), 4000);
       return;
     }
     setGpsStatus("loading");
+    setGpsError("");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLat(pos.coords.latitude.toFixed(6));
@@ -246,9 +250,16 @@ export function ShopSettingsForm({
         setGpsStatus("success");
         setTimeout(() => setGpsStatus("idle"), 2000);
       },
-      () => {
+      (err) => {
+        const msg =
+          err.code === 1
+            ? "Permission denied \u2014 allow location in your browser settings"
+            : err.code === 2
+              ? "Location unavailable \u2014 try a map preset below"
+              : "Request timed out \u2014 check your connection and try again";
+        setGpsError(msg);
         setGpsStatus("error");
-        setTimeout(() => setGpsStatus("idle"), 3000);
+        setTimeout(() => setGpsStatus("idle"), 5000);
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -788,7 +799,7 @@ export function ShopSettingsForm({
                     Location found!
                   </>
                 ) : gpsStatus === "error" ? (
-                  <>⚠️ GPS unavailable</>
+                  <>⚠️ {gpsError || "GPS unavailable"}</>
                 ) : (
                   <>
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
