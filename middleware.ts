@@ -97,13 +97,13 @@ export default clerkMiddleware(async (auth, request) => {
     // Styles: own + inline (Tailwind JIT injects inline styles)
     "style-src 'self' 'unsafe-inline'",
     // Images: own, Unsplash, Clerk, UploadThing CDN, data URIs
-    "img-src 'self' data: blob: https://images.unsplash.com https://img.clerk.com https://images.clerk.dev https://clerk.tradefeed.co.za https://utfs.io https://*.ufs.sh",
+    "img-src 'self' data: blob: https://images.unsplash.com https://img.clerk.com https://images.clerk.dev https://clerk.tradefeed.co.za https://utfs.io https://*.ufs.sh https://vercel.live https://vercel.com",
     // Fonts: own
-    "font-src 'self' data:",
+    "font-src 'self' data: https://vercel.live",
     // Media (video/audio): own + UploadThing CDN
     "media-src 'self' blob: https://utfs.io https://*.ufs.sh",
     // Connect: own, GA4, Clerk, UploadThing, Sentry
-    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://clerk.tradefeed.co.za https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com",
+    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://clerk.tradefeed.co.za https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com https://vercel.live https://vercel.com wss://*.pusher.com",
     // Frames: Clerk challenges, Cloudflare, OpenStreetMap embed
     "frame-src 'self' https://*.clerk.accounts.dev https://clerk.tradefeed.co.za https://challenges.cloudflare.com https://www.openstreetmap.org https://vercel.live",
     // Workers: own (service worker)
