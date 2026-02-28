@@ -93,7 +93,7 @@ export default clerkMiddleware(async (auth, request) => {
     // 'unsafe-inline' is a fallback for CSP Level 1 browsers only —
     // modern browsers (Chrome 69+, Firefox 68+, Safari 15.4+) ignore
     // 'unsafe-inline' when a nonce is present. This is per W3C spec.
-    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clerk.accounts.dev https://clerk.tradefeed.co.za https://challenges.cloudflare.com`,
+    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clerk.accounts.dev https://clerk.tradefeed.co.za https://challenges.cloudflare.com https://vercel.live`,
     // Styles: own + inline (Tailwind JIT injects inline styles)
     "style-src 'self' 'unsafe-inline'",
     // Images: own, Unsplash, Clerk, UploadThing CDN, data URIs
