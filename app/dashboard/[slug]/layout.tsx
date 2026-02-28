@@ -69,7 +69,7 @@ export default async function DashboardLayout({
             </button>
 
             <Link
-              href={`/dashboard/${slug}`}
+              href="/"
               className="flex items-center gap-2 flex-shrink-0"
             >
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-sm">

@@ -48,12 +48,12 @@ const tabs = [
     ),
   },
   {
-    label: "More",
-    href: (slug: string) => `/dashboard/${slug}`,
-    match: "__overview__",
+    label: "Explore",
+    href: () => "/marketplace",
+    match: "__never_active__",
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35m0 0A7.125 7.125 0 1 0 6.575 6.575a7.125 7.125 0 0 0 10.075 10.075Z" />
       </svg>
     ),
   },
