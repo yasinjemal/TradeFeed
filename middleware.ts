@@ -76,45 +76,8 @@ export default clerkMiddleware(async (auth, request) => {
     await auth.protect();
   }
 
-  // ── Content Security Policy (with per-request nonce) ────
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-
-  // Forward nonce to server components via request header
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
-
-  const response = NextResponse.next({
-    request: { headers: requestHeaders },
-  });
-
-  const csp = [
-    "default-src 'self'",
-    // Scripts: nonce-based CSP Level 2.
-    // 'unsafe-inline' is a fallback for CSP Level 1 browsers only —
-    // modern browsers (Chrome 69+, Firefox 68+, Safari 15.4+) ignore
-    // 'unsafe-inline' when a nonce is present. This is per W3C spec.
-    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clerk.accounts.dev https://*.clerk.com https://clerk.tradefeed.co.za https://challenges.cloudflare.com https://vercel.live`,
-    // Styles: own + inline (Tailwind JIT injects inline styles)
-    "style-src 'self' 'unsafe-inline'",
-    // Images: own, Unsplash, Clerk, UploadThing CDN, data URIs
-    "img-src 'self' data: blob: https://images.unsplash.com https://img.clerk.com https://*.clerk.com https://images.clerk.dev https://clerk.tradefeed.co.za https://utfs.io https://*.ufs.sh https://vercel.live https://vercel.com",
-    // Fonts: own
-    "font-src 'self' data: https://vercel.live",
-    // Media (video/audio): own + UploadThing CDN
-    "media-src 'self' blob: https://utfs.io https://*.ufs.sh",
-    // Connect: own, GA4, Clerk, UploadThing, Sentry
-    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://*.clerk.com https://clerk.tradefeed.co.za https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com https://vercel.live https://vercel.com wss://*.pusher.com",
-    // Frames: Clerk challenges, Cloudflare, OpenStreetMap embed
-    "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.tradefeed.co.za https://challenges.cloudflare.com https://www.openstreetmap.org https://vercel.live",
-    // Workers: own (service worker)
-    "worker-src 'self' blob:",
-    // Form actions: own
-    "form-action 'self'",
-    // Base URI
-    "base-uri 'self'",
-  ].join("; ");
-
-  response.headers.set("Content-Security-Policy", csp);
+  // ── Security headers (CSP is handled by Clerk's contentSecurityPolicy option) ──
+  const response = NextResponse.next();
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
@@ -124,11 +87,52 @@ export default clerkMiddleware(async (auth, request) => {
   // geolocation=(self) allows the GPS detect button on settings page
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self), payment=()");
 
-
   return response;
 }, {
   signInUrl: "/sign-in",
   signUpUrl: "/sign-up",
+  // ── Clerk Automatic CSP ────────────────────────────────
+  // Clerk handles all its own domains + nonce generation automatically.
+  // We only list OUR extra domains here — they get merged with Clerk's.
+  contentSecurityPolicy: {
+    strict: true,
+    directives: {
+      "script-src": [
+        "https://www.googletagmanager.com",
+        "https://vercel.live",
+      ],
+      "style-src": ["'unsafe-inline'"],
+      "img-src": [
+        "data:",
+        "blob:",
+        "https://images.unsplash.com",
+        "https://utfs.io",
+        "https://*.ufs.sh",
+        "https://vercel.live",
+        "https://vercel.com",
+      ],
+      "font-src": ["data:", "https://vercel.live"],
+      "media-src": ["blob:", "https://utfs.io", "https://*.ufs.sh"],
+      "connect-src": [
+        "https://www.google-analytics.com",
+        "https://www.googletagmanager.com",
+        "https://utfs.io",
+        "https://*.ufs.sh",
+        "https://*.uploadthing.com",
+        "https://*.sentry.io",
+        "https://*.ingest.sentry.io",
+        "https://api.openai.com",
+        "https://vercel.live",
+        "https://vercel.com",
+        "wss://*.pusher.com",
+      ],
+      "frame-src": [
+        "https://www.openstreetmap.org",
+        "https://vercel.live",
+      ],
+      "worker-src": ["blob:"],
+    },
+  },
 });
 
 export const config = {

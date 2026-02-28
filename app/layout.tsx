@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { headers } from "next/headers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -56,7 +55,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const nonce = (await headers()).get("x-nonce") ?? "";
   const locale = await getLocale();
   const messages = await getMessages();
 
@@ -67,7 +65,6 @@ export default async function RootLayout({
       afterSignOutUrl="/"
       signInFallbackRedirectUrl="/create-shop"
       signUpFallbackRedirectUrl="/create-shop"
-      nonce={nonce}
       dynamic
     >
       <html lang={locale}>
@@ -107,17 +104,16 @@ export default async function RootLayout({
           />
             <CookieConsent />
           </NextIntlClientProvider>
-          {/* Google Analytics 4 */}
+          {/* Google Analytics 4 — nonce auto-injected by Next.js + Clerk strict CSP */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-TL499XE6KR"
             strategy="afterInteractive"
-            nonce={nonce}
           />
-          <Script id="ga4-init" strategy="afterInteractive" nonce={nonce}>
+          <Script id="ga4-init" strategy="afterInteractive">
             {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TL499XE6KR');`}
           </Script>
           {/* Register Service Worker for PWA */}
-          <Script id="sw-register" strategy="afterInteractive" nonce={nonce}>
+          <Script id="sw-register" strategy="afterInteractive">
             {`if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`}
           </Script>
         </body>
