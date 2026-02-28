@@ -7,6 +7,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { createCheckoutAction, cancelSubscriptionAction } from "@/app/actions/billing";
 
 interface Plan {
@@ -25,6 +26,9 @@ interface Subscription {
   planId: string;
   plan: Plan;
   currentPeriodEnd: Date | null;
+  upgradeStatus?: string;
+  requestedPlanSlug?: string | null;
+  manualPaymentMethod?: string | null;
 }
 
 interface ProductLimit {
@@ -117,6 +121,60 @@ export function BillingDashboard({
           )}
         </div>
       </div>
+
+      {/* ── Upgrade Request Status Banner ────────────────── */}
+      {subscription?.upgradeStatus === "UNDER_REVIEW" && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-amber-800">Upgrade Under Review</p>
+            <p className="text-xs text-amber-700 mt-1">
+              Your upgrade request to <span className="font-medium">{subscription.requestedPlanSlug}</span> is being reviewed.
+              Payment via <span className="font-medium">{subscription.manualPaymentMethod}</span>.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {subscription?.upgradeStatus === "APPROVED" && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-emerald-800">Upgrade Approved! 🎉</p>
+            <p className="text-xs text-emerald-700 mt-1">Your plan has been upgraded successfully.</p>
+          </div>
+        </div>
+      )}
+
+      {subscription?.upgradeStatus === "REJECTED" && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-red-800">Upgrade Request Rejected</p>
+            <p className="text-xs text-red-700 mt-1">
+              Your upgrade request was not approved. Please contact support or try again.
+            </p>
+            <Link
+              href={`/dashboard/${shopSlug}/billing/upgrade`}
+              className="inline-block mt-2 text-xs text-red-600 hover:text-red-700 font-medium underline"
+            >
+              Submit a new request →
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* ── Pro Social Proof ─────────────────────────────── */}
       {isFreePlan && (
@@ -259,19 +317,12 @@ function PlanCard({
       )}
 
       {canUpgrade && (
-        <>
-          <button
-            type="button"
-            onClick={handleUpgrade}
-            disabled={isPending}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2.5 rounded-xl transition-all active:scale-[0.98] disabled:opacity-50"
-          >
-            {isPending ? "Loading..." : `Upgrade to ${plan.name}`}
-          </button>
-          {error && (
-            <p className="text-xs text-red-600 mt-2 text-center">{error}</p>
-          )}
-        </>
+        <Link
+          href={`/dashboard/${shopSlug}/billing/upgrade?plan=${plan.slug}`}
+          className="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2.5 rounded-xl transition-all active:scale-[0.98]"
+        >
+          Upgrade to {plan.name}
+        </Link>
       )}
 
       {isCurrent && plan.priceInCents === 0 && (

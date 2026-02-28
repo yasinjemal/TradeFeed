@@ -22,6 +22,14 @@ import {
 import { logAdminAction } from "@/lib/db/admin-audit";
 import { banUser, unbanUser } from "@/lib/db/admin-users";
 import { flagProduct, unflagProduct } from "@/lib/db/admin-moderation";
+import {
+  createPaymentMethod,
+  updatePaymentMethod,
+  deletePaymentMethod,
+  reorderPaymentMethods,
+  approveUpgradeRequest,
+  rejectUpgradeRequest,
+} from "@/lib/db/manual-payments";
 import { revalidatePath } from "next/cache";
 
 type ActionResult = { success: true; message: string } | { success: false; error: string };
@@ -383,6 +391,169 @@ export async function unflagProductAction(productId: string): Promise<ActionResu
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to unflag product.",
+    };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Manual Payment Methods
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Create a manual payment method.
+ */
+export async function createPaymentMethodAction(data: {
+  name: string;
+  description?: string;
+  instructions: string;
+}): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const method = await createPaymentMethod(data);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "PAYMENT_METHOD_CREATE", entityType: "payment_method",
+      entityId: method.id, entityName: method.name,
+    });
+    revalidatePath("/admin/payment-methods");
+    return { success: true, message: `"${method.name}" created.` };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to create payment method.",
+    };
+  }
+}
+
+/**
+ * Update a manual payment method.
+ */
+export async function updatePaymentMethodAction(
+  id: string,
+  data: {
+    name?: string;
+    description?: string;
+    instructions?: string;
+    isActive?: boolean;
+    displayOrder?: number;
+  },
+): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const method = await updatePaymentMethod(id, data);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "PAYMENT_METHOD_UPDATE", entityType: "payment_method",
+      entityId: method.id, entityName: method.name,
+    });
+    revalidatePath("/admin/payment-methods");
+    return { success: true, message: `"${method.name}" updated.` };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update payment method.",
+    };
+  }
+}
+
+/**
+ * Delete a manual payment method.
+ */
+export async function deletePaymentMethodAction(id: string): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const method = await deletePaymentMethod(id);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "PAYMENT_METHOD_DELETE", entityType: "payment_method",
+      entityId: method.id, entityName: method.name,
+    });
+    revalidatePath("/admin/payment-methods");
+    return { success: true, message: `"${method.name}" deleted.` };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete payment method.",
+    };
+  }
+}
+
+/**
+ * Reorder manual payment methods.
+ */
+export async function reorderPaymentMethodsAction(
+  orderedIds: string[],
+): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    await reorderPaymentMethods(orderedIds);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "PAYMENT_METHOD_REORDER", entityType: "payment_method",
+      entityId: "bulk", entityName: `${orderedIds.length} methods reordered`,
+    });
+    revalidatePath("/admin/payment-methods");
+    return { success: true, message: "Payment methods reordered." };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to reorder.",
+    };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Upgrade Request Review
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Approve an upgrade request — activates the requested plan.
+ */
+export async function approveUpgradeAction(
+  subscriptionId: string,
+  adminNote?: string,
+): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const result = await approveUpgradeRequest(subscriptionId, adminNote);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "UPGRADE_APPROVE", entityType: "subscription",
+      entityId: subscriptionId,
+      entityName: `${result.shop.name} → ${result.plan.name}`,
+    });
+    revalidatePath("/admin/upgrade-requests");
+    return { success: true, message: `${result.shop.name} upgraded to ${result.plan.name}.` };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to approve upgrade.",
+    };
+  }
+}
+
+/**
+ * Reject an upgrade request.
+ */
+export async function rejectUpgradeAction(
+  subscriptionId: string,
+  adminNote?: string,
+): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const result = await rejectUpgradeRequest(subscriptionId, adminNote);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "UPGRADE_REJECT", entityType: "subscription",
+      entityId: subscriptionId,
+      entityName: `${result.shop.name} — rejected`,
+    });
+    revalidatePath("/admin/upgrade-requests");
+    return { success: true, message: `Upgrade request for ${result.shop.name} rejected.` };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to reject upgrade.",
     };
   }
 }

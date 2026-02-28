@@ -7,6 +7,9 @@
 // ============================================================
 
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { db } from "@/lib/db";
 import { CreateShopForm } from "@/components/shop/create-shop-form";
 
 export const metadata = {
@@ -14,7 +17,27 @@ export const metadata = {
   description: "Set up your digital catalog for WhatsApp selling in minutes.",
 };
 
-export default function CreateShopPage() {
+export default async function CreateShopPage() {
+  // If the user is signed in and already has a shop, redirect to dashboard
+  const { userId: clerkId } = await auth();
+
+  if (clerkId) {
+    const user = await db.user.findUnique({
+      where: { clerkId },
+      select: {
+        shops: {
+          select: { shop: { select: { slug: true } } },
+          take: 1,
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    const existingSlug = user?.shops[0]?.shop.slug;
+    if (existingSlug) {
+      redirect(`/dashboard/${existingSlug}`);
+    }
+  }
   return (
     <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col lg:flex-row">
       {/* ── Left Panel — Branding & Trust ──────────────── */}

@@ -23,7 +23,7 @@ import { MobileNav } from "@/components/landing/mobile-nav";
 //   5. WhatsApp Before/After
 //   6. How It Works (3 steps + connecting line)
 //   7. Feature Showcase (12 cards)
-//   8. Pricing (Free vs Pro comparison table)
+//   8. Pricing (Free vs Pro vs Pro AI comparison)
 //   9. Testimonials (3 cards with Unsplash photos)
 //  10. Live Platform Stats Counter
 //  11. FAQ Accordion
@@ -624,7 +624,7 @@ export default async function HomePage() {
           SECTION 8 — PRICING
       ───────────────────────────────────────────────────── */}
       <section id="pricing" className="py-24 px-5 border-t border-stone-800/30">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium mb-4">💰 Simple, transparent pricing</div>
@@ -633,7 +633,7 @@ export default async function HomePage() {
             </div>
           </ScrollReveal>
 
-          <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Free Plan */}
             <ScrollReveal delay={0}>
               <div className="relative p-8 rounded-2xl bg-stone-900/60 border border-stone-800/60 hover:border-stone-700/80 transition-all h-full flex flex-col">
@@ -696,6 +696,47 @@ export default async function HomePage() {
                 </ul>
                 <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all">
                   Upgrade to Pro →
+                </Link>
+              </div>
+            </ScrollReveal>
+
+            {/* Pro AI Plan */}
+            <ScrollReveal delay={300}>
+              <div className="relative p-8 rounded-2xl bg-gradient-to-b from-violet-950/40 to-stone-900/60 border border-violet-500/30 hover:border-violet-500/50 transition-all h-full flex flex-col">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                  <div className="px-4 py-1 rounded-full bg-violet-600 text-white text-xs font-bold shadow-lg shadow-violet-600/30">✨ AI POWERED</div>
+                </div>
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-stone-100">Pro AI</h3>
+                  <p className="text-sm text-violet-400/80 mt-1">For power sellers</p>
+                </div>
+                <div className="mb-2">
+                  <span className="text-4xl font-extrabold text-stone-100">R299</span>
+                  <span className="text-stone-500 text-sm ml-1">/month</span>
+                </div>
+                <p className="text-sm text-violet-400/70 mb-2">AI generates listings for you — save hours ⚡</p>
+                <div className="mb-8 px-3 py-2 rounded-lg bg-violet-500/10 border border-violet-500/15">
+                  <p className="text-xs text-violet-400">💡 <span className="font-semibold">Save R589/year</span> with annual billing — R2,999/year (R250/mo)</p>
+                </div>
+                <ul className="space-y-3.5 mb-8 flex-1">
+                  {[
+                    { text: "Unlimited products", highlight: false },
+                    { text: "Everything in Pro", highlight: false },
+                    { text: "AI product generator", highlight: true },
+                    { text: "WhatsApp checkout", highlight: false },
+                    { text: "Advanced analytics", highlight: false },
+                    { text: "Priority support", highlight: false },
+                    { text: "Promoted listings", highlight: false },
+                    { text: "Custom branding (coming soon)", highlight: true },
+                  ].map((f) => (
+                    <li key={f.text} className="flex items-start gap-3 text-sm text-stone-200">
+                      <svg className="w-5 h-5 text-violet-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                      <span>{f.text}{f.highlight && <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 font-medium">NEW</span>}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white font-semibold text-sm shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+                  Upgrade to Pro AI →
                 </Link>
               </div>
             </ScrollReveal>

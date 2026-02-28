@@ -27,7 +27,6 @@ export default function SignInPage() {
 
       <ClerkLoaded>
         <SignIn
-          forceRedirectUrl="/create-shop"
           fallbackRedirectUrl="/create-shop"
           appearance={{
             elements: {

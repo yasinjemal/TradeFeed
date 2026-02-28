@@ -334,11 +334,30 @@ model Subscription {
   currentPeriodStart DateTime @default(now())
   currentPeriodEnd   DateTime?                   // null = no expiry (free plan)
 
+  // ── Manual Upgrade Request ────────────────────────────
+  upgradeStatus       UpgradeStatus @default(NONE)
+  requestedPlanSlug   String?                    // e.g. "pro-ai"
+  manualPaymentMethod String?                    // Name of payment method used
+  paymentReference    String?                    // Buyer's payment reference
+  proofOfPaymentUrl   String?                    // UploadThing URL for proof screenshot
+  adminNote           String?                    // Admin note on approval/rejection
+  approvedAt          DateTime?                  // When admin approved the upgrade
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   @@index([shopId])
   @@index([planId])
+  @@index([upgradeStatus])
+}
+
+enum UpgradeStatus {
+  NONE
+  REQUESTED
+  AWAITING_PAYMENT
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
 }
 
 enum SubscriptionStatus {
@@ -346,6 +365,22 @@ enum SubscriptionStatus {
   PAST_DUE
   CANCELLED
   TRIALING
+}
+
+// ============================================================
+// MANUAL PAYMENT METHOD: Admin-configured payment options
+// Used for manual upgrade flow before automated gateway.
+// ============================================================
+model ManualPaymentMethod {
+  id            String   @id @default(cuid())
+  name          String                       // e.g. "Bank Transfer", "Capitec Shop2Shop"
+  description   String?                      // Short description
+  instructions  String   @db.Text            // Rich instructions (markdown OK)
+  isActive      Boolean  @default(true)
+  displayOrder  Int      @default(0)         // Lower = shown first
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 // ============================================================
