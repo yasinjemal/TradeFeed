@@ -77,6 +77,18 @@ function isCatalogPage(url) {
   );
 }
 
+// Helper: guaranteed offline response (even if offline.html isn't cached)
+function offlineResponse() {
+  return caches.match(OFFLINE_URL).then(
+    (cached) =>
+      cached ||
+      new Response(
+        '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline — TradeFeed</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fafaf9;color:#292524;padding:24px;text-align:center}.c{max-width:400px}.icon{font-size:64px;margin-bottom:16px}h1{font-size:20px;font-weight:700;margin-bottom:8px}p{font-size:14px;color:#78716c;margin-bottom:24px}a{display:inline-block;padding:12px 24px;background:#10b981;color:#fff;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px}</style></head><body><div class="c"><div class="icon">📡</div><h1>You\'re offline</h1><p>Check your internet connection and try again. Your data is safe.</p><a href="/">Try Again</a></div></body></html>',
+        { status: 503, headers: { "Content-Type": "text/html" } }
+      )
+  );
+}
+
 // Fetch: strategy per request type
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
@@ -99,7 +111,7 @@ self.addEventListener("fetch", (event) => {
               }
               return response;
             })
-            .catch(() => cached || caches.match(OFFLINE_URL));
+            .catch(() => cached || offlineResponse());
 
           return cached || networkFetch;
         })
@@ -111,7 +123,7 @@ self.addEventListener("fetch", (event) => {
   // ── Other navigation: Network-first with offline fallback ──
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(OFFLINE_URL))
+      fetch(event.request).catch(() => offlineResponse())
     );
     return;
   }
