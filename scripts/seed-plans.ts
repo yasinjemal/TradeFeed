@@ -81,6 +81,43 @@ async function main() {
   });
   console.log(`  ✅ Pro plan:  ${proPlan.id}`);
 
+  // Pro AI plan
+  const proAiPlan = await db.plan.upsert({
+    where: { slug: "pro-ai" },
+    update: {
+      name: "Pro AI",
+      priceInCents: 29900, // R299.00
+      productLimit: 0, // 0 = unlimited
+      features: JSON.stringify([
+        "Unlimited products",
+        "AI product generator",
+        "WhatsApp checkout",
+        "Public catalog page",
+        "Advanced analytics",
+        "Priority support",
+        "Custom branding (coming soon)",
+      ]),
+      isActive: true,
+    },
+    create: {
+      name: "Pro AI",
+      slug: "pro-ai",
+      priceInCents: 29900,
+      productLimit: 0,
+      features: JSON.stringify([
+        "Unlimited products",
+        "AI product generator",
+        "WhatsApp checkout",
+        "Public catalog page",
+        "Advanced analytics",
+        "Priority support",
+        "Custom branding (coming soon)",
+      ]),
+      isActive: true,
+    },
+  });
+  console.log(`  ✅ Pro AI plan: ${proAiPlan.id}`);
+
   console.log("\n🎉 Plans seeded successfully!");
 }
 

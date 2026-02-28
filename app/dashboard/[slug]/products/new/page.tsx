@@ -6,6 +6,7 @@ import { CreateProductForm } from "@/components/product/create-product-form";
 import { getCategories } from "@/lib/db/categories";
 import { getGlobalCategoryTree } from "@/lib/db/global-categories";
 import { getShopBySlug } from "@/lib/db/shops";
+import { getShopSubscription } from "@/lib/db/subscriptions";
 import { requireShopAccess } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
@@ -29,10 +30,13 @@ export default async function NewProductPage({ params }: NewProductPageProps) {
   const shop = await getShopBySlug(slug);
   if (!shop) return notFound();
 
-  const [categories, globalCategories] = await Promise.all([
+  const [categories, globalCategories, subscription] = await Promise.all([
     getCategories(shop.id),
     getGlobalCategoryTree(),
+    getShopSubscription(shop.id),
   ]);
+
+  const planSlug = subscription?.plan.slug ?? "free";
 
   return (
     <div className="space-y-6">
@@ -51,6 +55,7 @@ export default async function NewProductPage({ params }: NewProductPageProps) {
         shopSlug={slug}
         categories={categories.map((c) => ({ id: c.id, name: c.name }))}
         globalCategories={globalCategories}
+        planSlug={planSlug}
       />
     </div>
   );

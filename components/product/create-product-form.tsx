@@ -18,6 +18,7 @@ import { ImageUpload } from "@/components/product/image-upload";
 import type { GlobalCategoryOption } from "@/lib/db/global-categories";
 import { suggestGlobalCategory } from "@/lib/config/category-suggest";
 import { getVariantLabels } from "@/lib/config/category-variants";
+import { toast } from "sonner";
 import Link from "next/link";
 
 /* ── Product Type Tiles ─────────────────────────────────── */
@@ -49,17 +50,25 @@ interface CreateProductFormProps {
   shopSlug: string;
   categories?: { id: string; name: string }[];
   globalCategories?: GlobalCategoryOption[];
+  planSlug?: string;
 }
 
-export function CreateProductForm({ shopSlug, categories = [], globalCategories = [] }: CreateProductFormProps) {
+export function CreateProductForm({ shopSlug, categories = [], globalCategories = [], planSlug = "free" }: CreateProductFormProps) {
   const boundAction = createProductAction.bind(null, shopSlug);
   const [state, formAction, isPending] = useActionState(boundAction, null);
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [option1Label, setOption1Label] = useState("Size");
   const [option2Label, setOption2Label] = useState("Color");
   const [selectedGlobalCategorySlug, setSelectedGlobalCategorySlug] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // ── AI Generation State ──────────────────────────────
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
+  const hasAiAccess = ["pro-ai", "business"].includes(planSlug);
 
   // M8.3: Auto-suggest global category based on product name
   const suggestedSlug = useMemo(() => suggestGlobalCategory(name), [name]);
@@ -77,6 +86,45 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
     setSelectedType(label);
     if (!name || PRODUCT_TYPES.some((t) => t.label === name)) {
       setName(label);
+    }
+  };
+
+  // ── AI Generation Handler ────────────────────────────
+  const handleAiGenerate = async () => {
+    if (!aiImageUrl) {
+      toast.error("Upload an image first, then generate with AI");
+      return;
+    }
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/ai/generate-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl: aiImageUrl, shopSlug }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.error === "PLAN_REQUIRED") {
+          setAiError("PLAN_REQUIRED");
+          return;
+        }
+        throw new Error(data.message || "AI generation failed");
+      }
+
+      // Prefill form fields
+      const ai = data.data;
+      setName(ai.name);
+      setDescription(ai.description);
+      setShowAdvanced(true);
+      toast.success("AI filled your product details! Review and edit before saving.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong";
+      setAiError(msg);
+      toast.error(msg);
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -203,6 +251,120 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
       </div>
 
       {/* ── Step 2: Product Details ──────────────────────── */}
+      {/* ── AI Product Generator (PRO_AI only) ───────── */}
+      {hasAiAccess ? (
+        <div className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/60 p-5 shadow-sm space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-xl">
+              ✨
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-emerald-900">AI Product Generator</h3>
+              <p className="text-xs text-emerald-600">Upload an image — AI fills the details</p>
+            </div>
+            <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-white">
+              Pro AI
+            </span>
+          </div>
+
+          {/* AI Image Dropzone */}
+          <div className="relative">
+            {aiImageUrl ? (
+              <div className="relative rounded-xl overflow-hidden border border-emerald-200 bg-white">
+                <img
+                  src={aiImageUrl}
+                  alt="Product for AI analysis"
+                  className="w-full h-48 object-contain bg-stone-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => setAiImageUrl(null)}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center text-xs hover:bg-black/70 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center gap-2 h-36 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/50 hover:bg-emerald-50 cursor-pointer transition-colors">
+                <span className="text-3xl">\uD83D\uDCF7</span>
+                <span className="text-sm font-medium text-emerald-700">Drop a product image here</span>
+                <span className="text-xs text-emerald-500">or tap to browse</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    // Create a local object URL for preview + upload
+                    const objectUrl = URL.createObjectURL(file);
+                    setAiImageUrl(objectUrl);
+                    // Upload to get a real URL for the AI
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      if (typeof reader.result === "string") {
+                        setAiImageUrl(reader.result);
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            )}
+          </div>
+
+          {/* Generate Button */}
+          <button
+            type="button"
+            onClick={handleAiGenerate}
+            disabled={aiLoading || !aiImageUrl}
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300
+              ${
+                aiLoading
+                  ? "bg-emerald-100 text-emerald-500 cursor-wait"
+                  : aiImageUrl
+                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-200 hover:-translate-y-0.5 active:translate-y-0"
+                    : "bg-stone-100 text-stone-400 cursor-not-allowed"
+              }`}
+          >
+            {aiLoading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                Analyzing image...
+              </>
+            ) : (
+              <>
+                ✨ Generate with AI
+              </>
+            )}
+          </button>
+
+          {/* AI Error */}
+          {aiError && aiError !== "PLAN_REQUIRED" && (
+            <p className="text-xs text-red-600 text-center">{aiError}</p>
+          )}
+        </div>
+      ) : (
+        /* Upgrade nudge for non-AI plans */
+        <div className="rounded-2xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center text-xl">
+              ✨
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-stone-700">AI Product Generator</h3>
+              <p className="text-xs text-stone-500">Upload an image, AI writes your listing. Available on Pro AI plan.</p>
+            </div>
+            <Link
+              href={`/dashboard/${shopSlug}/billing`}
+              className="flex-shrink-0 inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all"
+            >
+              ⚡ Upgrade
+            </Link>
+          </div>
+        </div>
+      )}
       <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
         <form action={formAction} className="space-y-5">
           {/* General error */}
@@ -246,6 +408,8 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             <Textarea
               id="description"
               name="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="Material, fit, style notes..."
               maxLength={2000}
               rows={3}

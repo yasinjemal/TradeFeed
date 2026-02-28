@@ -103,7 +103,7 @@ export default clerkMiddleware(async (auth, request) => {
     // Media (video/audio): own + UploadThing CDN
     "media-src 'self' blob: https://utfs.io https://*.ufs.sh",
     // Connect: own, GA4, Clerk, UploadThing, Sentry
-    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io",
+    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com",
     // Frames: Clerk challenges, Cloudflare, OpenStreetMap embed
     "frame-src 'self' https://*.clerk.accounts.dev https://challenges.cloudflare.com https://www.openstreetmap.org",
     // Workers: own (service worker)

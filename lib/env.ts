@@ -28,6 +28,7 @@ const envSchema = z.object({
   CLERK_WEBHOOK_SECRET: z.string().optional(),
   UPLOADTHING_TOKEN: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
   ADMIN_USER_IDS: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
