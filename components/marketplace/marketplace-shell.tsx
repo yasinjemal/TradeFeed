@@ -10,6 +10,7 @@
 import { useState, useEffect, useCallback, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useUser, UserButton } from "@clerk/nextjs";
 import type {
   MarketplaceProduct,
   CategoryWithCount,
@@ -65,6 +66,7 @@ export function MarketplaceShell({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const { isSignedIn } = useUser();
   const [search, setSearch] = useState(currentFilters.search ?? "");
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -170,18 +172,39 @@ export function MarketplaceShell({
           </form>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/sign-in"
-              className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-400 hover:text-white transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/sign-up"
-              className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-all"
-            >
-              Start Selling
-            </Link>
+            {isSignedIn ? (
+              <>
+                <Link
+                  href="/create-shop"
+                  className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-400 hover:text-white transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <UserButton
+                  afterSignOutUrl="/marketplace"
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8",
+                    },
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-400 hover:text-white transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-all"
+                >
+                  Start Selling
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -473,7 +496,11 @@ export function MarketplaceShell({
             <div className="flex items-center gap-6 text-xs text-stone-500">
               <Link href="/privacy" className="hover:text-stone-300 transition-colors">Privacy</Link>
               <Link href="/terms" className="hover:text-stone-300 transition-colors">Terms</Link>
-              <Link href="/sign-up" className="hover:text-emerald-400 transition-colors">Start Selling</Link>
+              {isSignedIn ? (
+                <Link href="/create-shop" className="hover:text-emerald-400 transition-colors">Dashboard</Link>
+              ) : (
+                <Link href="/sign-up" className="hover:text-emerald-400 transition-colors">Start Selling</Link>
+              )}
             </div>
           </div>
         </div>
