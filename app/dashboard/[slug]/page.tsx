@@ -12,10 +12,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { getShopBySlug, getDashboardStats, getSellerTierData } from "@/lib/db/shops";
+import { getShopBySlug, getDashboardStats, getSellerTierData, getSellerHealthMetrics } from "@/lib/db/shops";
+import { computeSellerHealth } from "@/lib/intelligence";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { CopyButton } from "@/components/ui/copy-button";
+import { SellerHealthCard } from "@/components/dashboard/seller-health-card";
 
 interface DashboardPageProps {
   params: Promise<{ slug: string }>;
@@ -26,8 +28,12 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const shop = await getShopBySlug(slug);
   if (!shop) notFound();
 
-  const stats = await getDashboardStats(shop.id);
-  const tierData = await getSellerTierData(shop.id, shop);
+  const [stats, tierData, healthMetrics] = await Promise.all([
+    getDashboardStats(shop.id),
+    getSellerTierData(shop.id, shop),
+    getSellerHealthMetrics(shop.id),
+  ]);
+  const health = computeSellerHealth(healthMetrics);
 
   // Profile completeness
   const profileChecks = [
@@ -155,6 +161,11 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           </div>
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Seller Health Intelligence                           */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <SellerHealthCard health={health} />
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* Today's Performance — MOVED UP (orders first!)      */}

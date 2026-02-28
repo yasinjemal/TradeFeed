@@ -215,6 +215,138 @@ export async function getShopsForUser(userId: string) {
   }));
 }
 
+// ── Seller Health Intelligence — Data Layer ─────────────────
+import type { SellerRawMetrics } from "@/lib/intelligence/seller-metrics";
+
+/**
+ * Fetch aggregated metrics for the Seller Health Intelligence system.
+ *
+ * WHAT: Collects all data points needed by computeSellerHealth().
+ * WHY: The health score needs product completeness, inventory health,
+ *       order reliability, activity, and catalog diversity metrics.
+ *
+ * PERFORMANCE: Uses parallel Prisma queries with aggregates.
+ * Typically ~7 queries, all indexed and scoped to shopId.
+ */
+export async function getSellerHealthMetrics(
+  shopId: string
+): Promise<SellerRawMetrics> {
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+  const fortyEightHoursAgo = new Date();
+  fortyEightHoursAgo.setHours(fortyEightHoursAgo.getHours() - 48);
+
+  const [
+    totalProducts,
+    productsWithImages,
+    productsWithDescription,
+    productsWithPrice,
+    productsWithStock,
+    totalVariants,
+    variantsInStock,
+    variantsLowStock,
+    totalOrders,
+    deliveredOrders,
+    cancelledOrders,
+    stalePendingOrders,
+    recentProductsAdded,
+    recentOrdersReceived,
+    categoryCount,
+  ] = await Promise.all([
+    // ── Product Completeness ─────────────────────────
+    db.product.count({
+      where: { shopId, isActive: true },
+    }),
+    db.product.count({
+      where: { shopId, isActive: true, images: { some: {} } },
+    }),
+    db.product.count({
+      where: { shopId, isActive: true, description: { not: null } },
+    }),
+    db.product.count({
+      where: {
+        shopId,
+        isActive: true,
+        variants: { some: { priceInCents: { gt: 0 } } },
+      },
+    }),
+    db.product.count({
+      where: {
+        shopId,
+        isActive: true,
+        variants: { some: { stock: { gt: 0 } } },
+      },
+    }),
+
+    // ── Inventory Health ─────────────────────────────
+    db.productVariant.count({
+      where: { product: { shopId, isActive: true } },
+    }),
+    db.productVariant.count({
+      where: { product: { shopId, isActive: true }, stock: { gt: 0 } },
+    }),
+    db.productVariant.count({
+      where: {
+        product: { shopId, isActive: true },
+        stock: { gte: 1, lte: 3 },
+      },
+    }),
+
+    // ── Order Reliability ────────────────────────────
+    db.order.count({ where: { shopId } }),
+    db.order.count({ where: { shopId, status: "DELIVERED" } }),
+    db.order.count({ where: { shopId, status: "CANCELLED" } }),
+    db.order.count({
+      where: {
+        shopId,
+        status: "PENDING",
+        createdAt: { lt: fortyEightHoursAgo },
+      },
+    }),
+
+    // ── Activity ─────────────────────────────────────
+    db.product.count({
+      where: {
+        shopId,
+        isActive: true,
+        createdAt: { gte: fourteenDaysAgo },
+      },
+    }),
+    db.order.count({
+      where: { shopId, createdAt: { gte: fourteenDaysAgo } },
+    }),
+
+    // ── Catalog Diversity ────────────────────────────
+    // Count distinct categories that have at least one active product
+    db.category.count({
+      where: {
+        shopId,
+        products: { some: { isActive: true } },
+      },
+    }),
+  ]);
+
+  return {
+    totalProducts,
+    productsWithImages,
+    productsWithDescription,
+    productsWithPrice,
+    productsWithStock,
+    totalVariants,
+    variantsInStock,
+    variantsLowStock,
+    totalOrders,
+    deliveredOrders,
+    cancelledOrders,
+    stalePendingOrders,
+    recentProductsAdded,
+    recentOrdersReceived,
+    activeProducts: totalProducts,
+    categoryCount,
+  };
+}
+
 /**
  * Get aggregated dashboard stats for a shop.
  *
