@@ -110,7 +110,7 @@ export async function requireAuth(): Promise<AuthUser> {
     },
   });
 
-  // If not in DB yet (webhook race condition), create from Clerk data
+  // If not in DB yet (webhook race condition OR dev→prod migration), handle it
   if (!user) {
     const clerkUser = await currentUser();
     if (!clerkUser) {
@@ -125,14 +125,10 @@ export async function requireAuth(): Promise<AuthUser> {
       throw new Error("Unauthorized: No email address.");
     }
 
-    user = await db.user.create({
-      data: {
-        clerkId,
-        email: primaryEmail,
-        firstName: clerkUser.firstName,
-        lastName: clerkUser.lastName,
-        imageUrl: clerkUser.imageUrl,
-      },
+    // Dev→Prod migration: user exists with old dev clerkId but same email.
+    // Update their clerkId instead of creating a duplicate.
+    const existingByEmail = await db.user.findUnique({
+      where: { email: primaryEmail },
       select: {
         id: true,
         clerkId: true,
@@ -142,6 +138,46 @@ export async function requireAuth(): Promise<AuthUser> {
         imageUrl: true,
       },
     });
+
+    if (existingByEmail) {
+      // Update clerkId to production value
+      user = await db.user.update({
+        where: { id: existingByEmail.id },
+        data: {
+          clerkId,
+          firstName: clerkUser.firstName ?? existingByEmail.firstName,
+          lastName: clerkUser.lastName ?? existingByEmail.lastName,
+          imageUrl: clerkUser.imageUrl ?? existingByEmail.imageUrl,
+        },
+        select: {
+          id: true,
+          clerkId: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          imageUrl: true,
+        },
+      });
+    } else {
+      // Truly new user — create fresh
+      user = await db.user.create({
+        data: {
+          clerkId,
+          email: primaryEmail,
+          firstName: clerkUser.firstName,
+          lastName: clerkUser.lastName,
+          imageUrl: clerkUser.imageUrl,
+        },
+        select: {
+          id: true,
+          clerkId: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          imageUrl: true,
+        },
+      });
+    }
   }
 
   return user;
