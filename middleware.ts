@@ -93,19 +93,19 @@ export default clerkMiddleware(async (auth, request) => {
     // 'unsafe-inline' is a fallback for CSP Level 1 browsers only —
     // modern browsers (Chrome 69+, Firefox 68+, Safari 15.4+) ignore
     // 'unsafe-inline' when a nonce is present. This is per W3C spec.
-    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clerk.accounts.dev https://clerk.tradefeed.co.za https://challenges.cloudflare.com https://vercel.live`,
+    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clerk.accounts.dev https://*.clerk.com https://clerk.tradefeed.co.za https://challenges.cloudflare.com https://vercel.live`,
     // Styles: own + inline (Tailwind JIT injects inline styles)
     "style-src 'self' 'unsafe-inline'",
     // Images: own, Unsplash, Clerk, UploadThing CDN, data URIs
-    "img-src 'self' data: blob: https://images.unsplash.com https://img.clerk.com https://images.clerk.dev https://clerk.tradefeed.co.za https://utfs.io https://*.ufs.sh https://vercel.live https://vercel.com",
+    "img-src 'self' data: blob: https://images.unsplash.com https://img.clerk.com https://*.clerk.com https://images.clerk.dev https://clerk.tradefeed.co.za https://utfs.io https://*.ufs.sh https://vercel.live https://vercel.com",
     // Fonts: own
     "font-src 'self' data: https://vercel.live",
     // Media (video/audio): own + UploadThing CDN
     "media-src 'self' blob: https://utfs.io https://*.ufs.sh",
     // Connect: own, GA4, Clerk, UploadThing, Sentry
-    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://clerk.tradefeed.co.za https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com https://vercel.live https://vercel.com wss://*.pusher.com",
+    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://*.clerk.accounts.dev https://*.clerk.com https://clerk.tradefeed.co.za https://api.clerk.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com https://vercel.live https://vercel.com wss://*.pusher.com",
     // Frames: Clerk challenges, Cloudflare, OpenStreetMap embed
-    "frame-src 'self' https://*.clerk.accounts.dev https://clerk.tradefeed.co.za https://challenges.cloudflare.com https://www.openstreetmap.org https://vercel.live",
+    "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.tradefeed.co.za https://challenges.cloudflare.com https://www.openstreetmap.org https://vercel.live",
     // Workers: own (service worker)
     "worker-src 'self' blob:",
     // Form actions: own
