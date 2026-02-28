@@ -10,7 +10,7 @@
 // - Resilience during SA load shedding
 // ============================================================
 
-const CACHE_NAME = "tradefeed-v3";
+const CACHE_NAME = "tradefeed-v4";
 const OFFLINE_URL = "/offline.html";
 const IMAGE_CACHE = "tradefeed-images-v1";
 const PAGE_CACHE = "tradefeed-pages-v1";
@@ -177,10 +177,11 @@ self.addEventListener("fetch", (event) => {
 
   // ── Static assets: cache-first strategy ──
   if (
-    event.request.destination === "image" ||
-    event.request.destination === "style" ||
-    event.request.destination === "script" ||
-    event.request.destination === "font"
+    url.origin === self.location.origin &&
+    (event.request.destination === "image" ||
+      event.request.destination === "style" ||
+      event.request.destination === "script" ||
+      event.request.destination === "font")
   ) {
     event.respondWith(
       caches.match(event.request).then(

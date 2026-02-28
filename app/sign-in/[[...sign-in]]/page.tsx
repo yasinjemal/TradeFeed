@@ -5,7 +5,7 @@
 // Catch-all route handles all Clerk sign-in flows (MFA, SSO, etc.)
 // ============================================================
 
-import { SignIn } from "@clerk/nextjs";
+import { ClerkLoaded, ClerkLoading, SignIn } from "@clerk/nextjs";
 
 export default function SignInPage() {
   return (
@@ -18,14 +18,25 @@ export default function SignInPage() {
           Sign in to manage your catalog
         </p>
       </div>
-      <SignIn
-        appearance={{
-          elements: {
-            rootBox: "mx-auto",
-            cardBox: "shadow-lg",
-          },
-        }}
-      />
+
+      <ClerkLoading>
+        <div className="w-full max-w-sm rounded-xl border border-stone-200 bg-white p-4 text-center text-sm text-stone-600 shadow-sm">
+          Loading secure sign-in...
+        </div>
+      </ClerkLoading>
+
+      <ClerkLoaded>
+        <SignIn
+          forceRedirectUrl="/create-shop"
+          fallbackRedirectUrl="/create-shop"
+          appearance={{
+            elements: {
+              rootBox: "mx-auto",
+              cardBox: "shadow-lg",
+            },
+          }}
+        />
+      </ClerkLoaded>
     </main>
   );
 }

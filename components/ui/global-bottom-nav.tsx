@@ -14,7 +14,14 @@ import { usePathname } from "next/navigation";
 // ============================================================
 
 /** Route prefixes where this nav is hidden (they have their own) */
-const HIDDEN_PREFIXES = ["/catalog/", "/dashboard/", "/admin"];
+const HIDDEN_PREFIXES = [
+  "/catalog/",
+  "/dashboard/",
+  "/admin",
+  "/sign-in",
+  "/sign-up",
+  "/create-shop",
+];
 
 export function GlobalBottomNav() {
   const pathname = usePathname();
