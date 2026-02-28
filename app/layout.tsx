@@ -68,6 +68,7 @@ export default async function RootLayout({
       signInFallbackRedirectUrl="/create-shop"
       signUpFallbackRedirectUrl="/create-shop"
       nonce={nonce}
+      dynamic
     >
       <html lang={locale}>
         <head>
