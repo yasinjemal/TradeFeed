@@ -65,6 +65,8 @@ export default async function RootLayout({
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       afterSignOutUrl="/"
+      signInFallbackRedirectUrl="/create-shop"
+      signUpFallbackRedirectUrl="/create-shop"
       nonce={nonce}
     >
       <html lang={locale}>

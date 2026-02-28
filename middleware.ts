@@ -126,6 +126,9 @@ export default clerkMiddleware(async (auth, request) => {
 
 
   return response;
+}, {
+  signInUrl: "/sign-in",
+  signUpUrl: "/sign-up",
 });
 
 export const config = {
