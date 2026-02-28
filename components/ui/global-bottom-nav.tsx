@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
 // ============================================================
 // Global Mobile Bottom Navigation
@@ -25,9 +26,15 @@ const HIDDEN_PREFIXES = [
 
 export function GlobalBottomNav() {
   const pathname = usePathname();
+  const { isSignedIn } = useUser();
 
   // Hide on routes that already have their own bottom navigation
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null;
+
+  const accountHref = isSignedIn ? "/create-shop" : "/sign-in";
+  const accountActive = isSignedIn
+    ? pathname.startsWith("/create-shop")
+    : pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 
   const tabs = [
     {
@@ -66,12 +73,9 @@ export function GlobalBottomNav() {
     },
     {
       key: "account",
-      href: "/sign-in",
+      href: accountHref,
       label: "Account",
-      isActive:
-        pathname.startsWith("/sign-in") ||
-        pathname.startsWith("/sign-up") ||
-        pathname.startsWith("/create-shop"),
+      isActive: accountActive,
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.9} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.964 0A9 9 0 1 0 6.018 18.725m11.964 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -86,7 +90,7 @@ export function GlobalBottomNav() {
       <div className="h-20 md:hidden" aria-hidden="true" />
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-stone-200/70 bg-white/95 backdrop-blur-xl shadow-[0_-8px_24px_rgba(0,0,0,0.06)]"
+        className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-stone-800/60 bg-stone-950/95 backdrop-blur-xl shadow-[0_-8px_24px_rgba(0,0,0,0.3)]"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Main navigation"
       >
@@ -97,8 +101,8 @@ export function GlobalBottomNav() {
               href={tab.href}
               className={`flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition-colors duration-200 ${
                 tab.isActive
-                  ? "text-emerald-600"
-                  : "text-stone-400 hover:text-stone-600"
+                  ? "text-emerald-400"
+                  : "text-stone-500 hover:text-stone-300"
               }`}
             >
               {tab.icon}
