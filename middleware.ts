@@ -95,9 +95,9 @@ export default clerkMiddleware(async (auth, request) => {
   // Clerk handles all its own domains + nonce generation automatically.
   // We only list OUR extra domains here — they get merged with Clerk's.
   contentSecurityPolicy: {
-    strict: true,
     directives: {
       "script-src": [
+        "'unsafe-inline'",
         "https://www.googletagmanager.com",
         "https://vercel.live",
       ],
