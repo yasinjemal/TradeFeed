@@ -36,6 +36,21 @@ export const aiProductResponseSchema = z.object({
     .string()
     .trim()
     .max(500, "Caption must be under 500 characters"),
+
+  // ── SEO fields ─────────────────────────────────────────
+  seoTitle: z
+    .string()
+    .trim()
+    .max(70, "SEO title must be under 70 characters")
+    .optional()
+    .default(""),
+
+  seoDescription: z
+    .string()
+    .trim()
+    .max(160, "SEO description must be under 160 characters")
+    .optional()
+    .default(""),
 });
 
 export type AiProductResponse = z.infer<typeof aiProductResponseSchema>;

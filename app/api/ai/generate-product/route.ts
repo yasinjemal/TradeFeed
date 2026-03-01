@@ -1,15 +1,17 @@
 // ============================================================
-// API Route — AI Product Generator
+// API Route — AI Product Generator (SEO-Optimized)
 // ============================================================
 // POST /api/ai/generate-product
 //
 // Accepts an image URL + shop slug, verifies the shop has
 // a PRO_AI plan, then calls OpenAI Vision to generate:
-//   - Product name
-//   - Description
+//   - SEO-optimized product name (Google Merchant friendly)
+//   - Keyword-rich product description
 //   - Category suggestion
-//   - Tags
+//   - Search-relevant tags
 //   - WhatsApp short caption
+//   - SEO title (for Google search results)
+//   - SEO meta description (for Google snippets)
 //
 // Returns structured JSON — does NOT auto-save to DB.
 // The seller reviews + edits before manually saving.
@@ -67,30 +69,58 @@ export async function POST(req: NextRequest) {
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
-        max_tokens: 800,
-        temperature: 0.7,
+        max_tokens: 1200,
+        temperature: 0.6,
         response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
-            content: `You are a product listing expert for a South African wholesale marketplace called TradeFeed. 
-Given a product image, generate structured product listing data.
-Return ONLY valid JSON with these exact fields:
+            content: `You are an SEO-specialist product listing expert for TradeFeed, a South African online marketplace.
+Your job: generate product listings that rank well on Google Shopping AND Google Search in South Africa.
+
+SEO RULES:
+- Product NAME: Use a Google Merchant Center-friendly title format.
+  Pattern: "[Brand if visible] [Product Type] [Key Feature] — [Material/Color/Size Range]"
+  Example: "Premium Oversized Hoodie — Fleece Lined, Unisex, S-XXL"
+  Keep 5-80 characters. Front-load the most important keyword.
+
+- Product DESCRIPTION: Write 100-350 characters. Structure it as:
+  Line 1: What it is + primary selling point.
+  Line 2: Key features (material, fit, size range, technical specs).
+  Line 3: Who it's for or use case.
+  Naturally include relevant search terms South African buyers would use.
+  Avoid keyword stuffing — write for humans first, Google second.
+
+- SEO TITLE (seoTitle): Optimized for Google search results. Under 60 characters.
+  Include the product type + "Buy Online" or "South Africa" or price-related term.
+  Example: "Oversized Fleece Hoodie — Buy Online | TradeFeed SA"
+
+- SEO DESCRIPTION (seoDescription): Meta description for Google. 120-155 characters.
+  Include a benefit, a feature, and a call-to-action.
+  Example: "Shop premium fleece-lined hoodies in S-XXL. Free catalog browsing, order via WhatsApp. Available now on TradeFeed."
+
+- TAGS: 5-8 search-relevant keywords buyers would type. Mix broad + specific.
+  Include "buy [product] online South Africa" variations and material/style terms.
+
+- SHORT CAPTION: WhatsApp-ready with emoji (under 160 chars). Include a call-to-action.
+
+Return ONLY valid JSON:
 {
-  "name": "Concise product name (2-80 chars)",
-  "description": "Compelling product description for wholesale buyers (50-300 chars). Mention material, style, and selling points.",
+  "name": "SEO-optimized product name (5-80 chars)",
+  "description": "Keyword-rich, structured product description (100-350 chars)",
   "category": "Best-fitting category from: T-Shirts, Hoodies, Jackets, Jeans, Dresses, Sneakers, Phones, Earbuds, Chargers, Skincare, Fragrance, Snacks, Beverages, Home Decor, Accessories, Other",
-  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
-  "shortCaption": "WhatsApp-ready caption with emoji (under 160 chars). Include a call-to-action."
-}
-Keep it professional, concise, and optimized for SA wholesale market.`,
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6"],
+  "shortCaption": "WhatsApp caption with emoji + CTA (under 160 chars)",
+  "seoTitle": "Google search title under 60 chars with Buy Online or SA keyword",
+  "seoDescription": "Google meta description 120-155 chars with benefit + feature + CTA"
+}`,
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: "Analyze this product image and generate a complete product listing:",
+                text: "Analyze this product image and generate a complete, SEO-optimized product listing for the South African market:",
               },
               {
                 type: "image_url",
@@ -122,13 +152,15 @@ Keep it professional, concise, and optimized for SA wholesale market.`,
     } else {
       // Mock fallback for development (no API key)
       aiResult = {
-        name: "Premium Wholesale Product",
+        name: "Premium Oversized Hoodie — Fleece Lined, Unisex, S-XXL",
         description:
-          "High-quality wholesale item perfect for resellers. Durable construction with modern styling. Available in bulk quantities at competitive prices.",
-        category: "Other",
-        tags: ["wholesale", "bulk", "premium", "trending", "new-arrival"],
+          "Stay warm in style with this premium fleece-lined oversized hoodie. Soft-touch cotton blend, relaxed fit with ribbed cuffs and kangaroo pocket. Available in sizes S to XXL — perfect for South African winters or casual everyday wear.",
+        category: "Hoodies",
+        tags: ["hoodie", "oversized hoodie", "fleece hoodie South Africa", "buy hoodie online", "winter clothing SA", "unisex hoodie"],
         shortCaption:
-          "🔥 New arrival! Premium quality at wholesale prices. DM to order in bulk! 📦",
+          "🔥 Premium fleece hoodie — S to XXL! Cozy, stylish & affordable. Order now via WhatsApp 📦",
+        seoTitle: "Oversized Fleece Hoodie — Buy Online | TradeFeed SA",
+        seoDescription: "Shop premium fleece-lined hoodies in S-XXL. Soft cotton blend, relaxed fit. Browse free, order via WhatsApp. Available now on TradeFeed.",
       };
     }
 

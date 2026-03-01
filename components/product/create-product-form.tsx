@@ -68,6 +68,7 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
+  const [aiSeoPreview, setAiSeoPreview] = useState<{ seoTitle: string; seoDescription: string; tags: string[] } | null>(null);
   const hasAiAccess = ["pro-ai", "business"].includes(planSlug);
 
   // M8.3: Auto-suggest global category based on product name
@@ -113,12 +114,20 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
         throw new Error(data.message || "AI generation failed");
       }
 
-      // Prefill form fields
+      // Prefill form fields with SEO-optimized content
       const ai = data.data;
       setName(ai.name);
       setDescription(ai.description);
       setShowAdvanced(true);
-      toast.success("AI filled your product details! Review and edit before saving.");
+      // Store SEO preview data for the seller to see
+      if (ai.seoTitle || ai.seoDescription || ai.tags?.length) {
+        setAiSeoPreview({
+          seoTitle: ai.seoTitle || ai.name,
+          seoDescription: ai.seoDescription || (ai.description || "").slice(0, 155),
+          tags: ai.tags || [],
+        });
+      }
+      toast.success("✨ AI generated SEO-optimized listing! Review below.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";
       setAiError(msg);
@@ -260,7 +269,7 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             </div>
             <div>
               <h3 className="text-sm font-bold text-emerald-900">AI Product Generator</h3>
-              <p className="text-xs text-emerald-600">Upload an image — AI fills the details</p>
+              <p className="text-xs text-emerald-600">Upload an image — AI writes SEO-optimized listing</p>
             </div>
             <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-white">
               Pro AI
@@ -331,11 +340,11 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             {aiLoading ? (
               <>
                 <span className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                Analyzing image...
+                Analyzing &amp; SEO optimizing...
               </>
             ) : (
               <>
-                ✨ Generate with AI
+                ✨ Generate SEO-Optimized Listing
               </>
             )}
           </button>
@@ -343,6 +352,37 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
           {/* AI Error */}
           {aiError && aiError !== "PLAN_REQUIRED" && (
             <p className="text-xs text-red-600 text-center">{aiError}</p>
+          )}
+
+          {/* SEO Preview — shows after AI generation */}
+          {aiSeoPreview && (
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">🔍 Google Preview</span>
+                <span className="flex-1 h-px bg-emerald-200" />
+              </div>
+              <div className="rounded-xl border border-stone-200 bg-white p-4 space-y-1.5 shadow-sm">
+                <p className="text-base font-medium text-blue-700 leading-snug truncate">
+                  {aiSeoPreview.seoTitle}
+                </p>
+                <p className="text-xs text-emerald-700 truncate">
+                  tradefeed.co.za &rsaquo; catalog &rsaquo; {shopSlug} &rsaquo; products
+                </p>
+                <p className="text-sm text-stone-600 leading-relaxed line-clamp-2">
+                  {aiSeoPreview.seoDescription}
+                </p>
+              </div>
+              {aiSeoPreview.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider mr-1">SEO Tags:</span>
+                  {aiSeoPreview.tags.map((tag) => (
+                    <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
       ) : (
@@ -354,7 +394,7 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             </div>
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-stone-700">AI Product Generator</h3>
-              <p className="text-xs text-stone-500">Upload an image, AI writes your listing. Available on Pro AI plan.</p>
+              <p className="text-xs text-stone-500">Upload an image, AI writes an SEO-optimized listing. Available on Pro AI plan.</p>
             </div>
             <Link
               href={`/dashboard/${shopSlug}/billing`}
