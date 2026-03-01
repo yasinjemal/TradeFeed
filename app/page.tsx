@@ -193,21 +193,21 @@ export default async function HomePage() {
 
           <ScrollReveal delay={100}>
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
-              Stop Sending{" "}
+              South Africa&apos;s{" "}
               <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-400">
-                the Same Photos
+                Online Marketplace
               </span>
               <br className="hidden sm:block" />
-              50 Times a Day.
+              for Sellers &amp; Buyers
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
             <p className="mt-6 text-lg sm:text-xl text-stone-400 max-w-2xl mx-auto leading-relaxed">
-              Your customers can browse your products, pick sizes &amp; colors,
-              and send you a clean order on WhatsApp — automatically.
-              No more &ldquo;which one?&rdquo; &ldquo;is it available?&rdquo; back-and-forth.
+              Create your online shop in South Africa for free. List products, share your catalog link,
+              and receive clean, structured orders via WhatsApp — no app download needed. The easiest way
+              to sell online in South Africa.
             </p>
           </ScrollReveal>
 
@@ -489,7 +489,7 @@ export default async function HomePage() {
         <ScrollReveal>
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-10">
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">From WhatsApp Chaos to Clean Orders</h2>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Sell Online in South Africa — Without the Chaos</h2>
               <p className="mt-2 text-stone-400 text-sm">No more &ldquo;which one?&rdquo; &ldquo;is it available?&rdquo; back and forth.</p>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch gap-6 justify-center">
@@ -547,7 +547,7 @@ export default async function HomePage() {
           <ScrollReveal>
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 border border-stone-700/50 text-stone-400 text-[11px] font-medium mb-4">⚡ Takes less than 5 minutes</div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Three Steps. Five Minutes. You&apos;re Live.</h2>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Create Your Online Shop in Three Steps</h2>
               <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">No coding, no designers, no expensive platforms. Just your products and a WhatsApp number.</p>
             </div>
           </ScrollReveal>
@@ -578,7 +578,7 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Everything You Need to Sell Smarter</h2>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Everything You Need to Sell Online in South Africa</h2>
               <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">Built specifically for how South African sellers actually work.</p>
             </div>
           </ScrollReveal>
@@ -630,7 +630,7 @@ export default async function HomePage() {
           <ScrollReveal>
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium mb-4">💰 Simple, transparent pricing</div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Start Free. Scale When Ready.</h2>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Start Free. Scale Your Online Shop When Ready.</h2>
               <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">No hidden fees, no surprises. Upgrade only when your business grows.</p>
             </div>
           </ScrollReveal>
@@ -869,10 +869,10 @@ export default async function HomePage() {
               🚀 Join {shopCount > 0 ? `${shopCount}+` : ""} South African sellers
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-              Ready to organize{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">your catalog?</span>
+              Ready to start{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">selling online?</span>
             </h2>
-            <p className="mt-5 text-stone-400 text-lg max-w-lg mx-auto">Stop losing orders in WhatsApp chaos. Create your professional catalog in minutes and share it with your customers today.</p>
+            <p className="mt-5 text-stone-400 text-lg max-w-lg mx-auto">Create your online shop in South Africa for free. List products in minutes and start receiving orders via WhatsApp today.</p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href={ctaHref} className="group inline-flex items-center justify-center px-10 py-4 text-base font-semibold rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:from-emerald-500 hover:to-emerald-400 transition-all shadow-2xl shadow-emerald-600/25 hover:shadow-emerald-500/35 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto">
                 {ctaLabel}
@@ -881,6 +881,100 @@ export default async function HomePage() {
               <Link href="/marketplace" className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-stone-400 hover:text-emerald-400 transition-colors">Browse Marketplace →</Link>
             </div>
             <p className="mt-5 text-xs text-stone-600">Free tier · No credit card · Set up in under 5 minutes · Cancel anytime</p>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────
+          SECTION 12B — SEO CONTENT SECTION
+      ───────────────────────────────────────────────────── */}
+      <section className="py-20 px-5 border-t border-stone-800/30 bg-stone-900/30">
+        <div className="max-w-4xl mx-auto">
+          <ScrollReveal>
+            <div className="prose prose-invert prose-stone max-w-none">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-100 mb-6">
+                Why Sell on TradeFeed — South Africa&apos;s Growing Online Marketplace
+              </h2>
+
+              <p className="text-stone-400 leading-relaxed mb-6">
+                TradeFeed is the <strong className="text-stone-200">online marketplace in South Africa</strong> built
+                for the way local sellers actually do business. Whether you&apos;re a clothing wholesaler in
+                Johannesburg, a beauty supplier in Cape Town, or an electronics reseller in Durban — TradeFeed
+                gives you the tools to <strong className="text-stone-200">sell online in South Africa</strong> without
+                the complexity and high fees of traditional e-commerce platforms.
+              </p>
+
+              <h3 className="text-xl font-bold text-stone-200 mt-10 mb-4">
+                Create Your Online Shop in South Africa — Free
+              </h3>
+              <p className="text-stone-400 leading-relaxed mb-6">
+                Setting up an online store shouldn&apos;t cost thousands of rands or require a web developer.
+                With TradeFeed, you can <strong className="text-stone-200">create your own online shop in South Africa</strong> in
+                under five minutes — completely free. Upload your product photos, set prices, add sizes and
+                colours, and you&apos;ll have a professional, mobile-friendly product catalog with its own
+                shareable link. Your customers browse on any smartphone — no app download needed.
+              </p>
+
+              <h3 className="text-xl font-bold text-stone-200 mt-10 mb-4">
+                WhatsApp-First Ordering — Built for South African Buyers
+              </h3>
+              <p className="text-stone-400 leading-relaxed mb-6">
+                South Africa has over 30 million WhatsApp users. Your customers are already there — so why
+                force them onto a complicated checkout page? TradeFeed integrates directly with WhatsApp,
+                allowing buyers to browse your products, select exact sizes and colours, and send you a clean,
+                structured order message. No sign-ups, no payment gateways, no friction. Just tap, pick,
+                and order. It&apos;s the smartest way to <strong className="text-stone-200">sell products online in South Africa</strong> using
+                the platform your customers already love.
+              </p>
+
+              <h3 className="text-xl font-bold text-stone-200 mt-10 mb-4">
+                Reach Customers Nationwide on Our Marketplace
+              </h3>
+              <p className="text-stone-400 leading-relaxed mb-6">
+                Every product you list on TradeFeed also appears on our{" "}
+                <Link href="/marketplace" className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
+                  public marketplace
+                </Link>
+                , where buyers from across all 9 South African provinces can discover and shop from local
+                sellers. Unlike posting in WhatsApp groups where your products get buried in minutes,
+                your TradeFeed catalog is permanent, searchable, and optimised for Google — giving you
+                free exposure to new customers 24/7.
+              </p>
+
+              <h3 className="text-xl font-bold text-stone-200 mt-10 mb-4">
+                Start Free, Upgrade Anytime
+              </h3>
+              <p className="text-stone-400 leading-relaxed mb-6">
+                List up to 10 products on our Free plan — forever. When your business grows, upgrade to
+                Pro for just R199/month for unlimited products, promoted listings, revenue analytics,
+                and instant order notifications. Payments are handled securely through PayFast, South Africa&apos;s
+                most trusted payment gateway.{" "}
+                <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}` : "/create-shop") : "/sign-up"} className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
+                  Create your online shop
+                </Link>
+                {" "}today and join hundreds of South African sellers who chose TradeFeed as their home
+                for selling online.
+              </p>
+
+              {/* Internal link cluster for SEO */}
+              <div className="mt-10 pt-8 border-t border-stone-800/50">
+                <h3 className="text-lg font-bold text-stone-300 mb-4">Explore TradeFeed</h3>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/marketplace" className="px-4 py-2 rounded-lg bg-stone-800/60 border border-stone-700/50 text-sm text-stone-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                    Browse Marketplace →
+                  </Link>
+                  <Link href={clerkId ? "/create-shop" : "/sign-up"} className="px-4 py-2 rounded-lg bg-stone-800/60 border border-stone-700/50 text-sm text-stone-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                    Create Online Shop →
+                  </Link>
+                  <Link href="#pricing" className="px-4 py-2 rounded-lg bg-stone-800/60 border border-stone-700/50 text-sm text-stone-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                    View Pricing →
+                  </Link>
+                  <Link href="#how-it-works" className="px-4 py-2 rounded-lg bg-stone-800/60 border border-stone-700/50 text-sm text-stone-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                    How It Works →
+                  </Link>
+                </div>
+              </div>
+            </div>
           </ScrollReveal>
         </div>
       </section>
@@ -895,7 +989,7 @@ export default async function HomePage() {
               <div className="flex items-center gap-2 mb-3">
                 <TradeFeedLogo size="sm" />
               </div>
-              <p className="text-xs text-stone-500 leading-relaxed">Structured product catalogs for WhatsApp sellers. Built for South Africa. 🇿🇦</p>
+              <p className="text-xs text-stone-500 leading-relaxed">South Africa&apos;s online marketplace for sellers and buyers. Create your online shop, list products, and sell via WhatsApp. 🇿🇦</p>
             </div>
             <div>
               <h4 className="text-xs font-semibold text-stone-300 uppercase tracking-wider mb-4">Product</h4>
@@ -923,7 +1017,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="pt-8 border-t border-stone-800/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-stone-600">© {new Date().getFullYear()} TradeFeed. All rights reserved. Made with ❤️ in South Africa.</p>
+            <p className="text-xs text-stone-600">© {new Date().getFullYear()} TradeFeed. South Africa&apos;s online marketplace. Made with ❤️ in South Africa.</p>
             <div className="flex items-center gap-4">
               <span className="text-xs text-stone-600 flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>

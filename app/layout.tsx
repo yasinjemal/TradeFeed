@@ -11,51 +11,64 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tradefeed.co.za"),
-  title: "TradeFeed — Structured Product Catalogs for WhatsApp Sellers",
+  title: {
+    default:
+      "TradeFeed | Online Marketplace South Africa — Sell Online & Create Your Shop",
+    template: "%s | TradeFeed — SA Online Marketplace",
+  },
   description:
-    "Upload products. Share your catalog link. Get organized orders via WhatsApp — no app download required. Built for South African wholesalers & retailers.",
+    "TradeFeed is South Africa's online marketplace where sellers create their own online shop for free, list products, and receive structured orders via WhatsApp. Join hundreds of sellers across all 9 provinces — start selling online in South Africa today.",
   icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/apple-icon.svg", type: "image/svg+xml" },
-    ],
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
   },
   keywords: [
+    "online marketplace South Africa",
+    "sell online South Africa",
+    "create online shop South Africa",
+    "South African marketplace",
+    "sell products online SA",
+    "create online store South Africa",
     "WhatsApp catalog",
-    "wholesale South Africa",
-    "digital catalog",
     "WhatsApp selling",
-    "Jeppe wholesale",
-    "SA wholesale",
-    "product inventory",
-    "SA marketplace",
     "buy online South Africa",
+    "SA marketplace",
+    "online shop South Africa free",
+    "ecommerce South Africa",
+    "wholesale South Africa",
+    "sell on WhatsApp",
+    "SA online store",
   ],
   openGraph: {
     type: "website",
     siteName: "TradeFeed",
-    title: "TradeFeed — WhatsApp Catalogs for SA Wholesalers",
+    title:
+      "TradeFeed | Online Marketplace South Africa — Sell Online & Create Your Shop",
     description:
-      "Upload products, share your catalog link, get structured WhatsApp orders. Free for South African wholesalers & retailers.",
+      "South Africa's online marketplace for sellers and buyers. Create your online shop for free, list products, and get orders via WhatsApp. Start selling online in South Africa today.",
     url: "https://tradefeed.co.za",
     images: [
       {
-        url: "/api/og?title=TradeFeed&subtitle=WhatsApp+Catalogs+for+SA+Wholesalers",
+        url: "/api/og?title=Online+Marketplace+South+Africa&subtitle=Sell+Online+%E2%80%A2+Create+Your+Shop+%E2%80%A2+Free+to+Start",
         width: 1200,
         height: 630,
-        alt: "TradeFeed — WhatsApp Catalogs for SA Wholesalers",
+        alt: "TradeFeed — Online Marketplace South Africa for Sellers & Buyers",
       },
     ],
     locale: "en_ZA",
   },
   twitter: {
     card: "summary_large_image",
-    title: "TradeFeed — WhatsApp Catalogs for SA Wholesalers",
+    title:
+      "TradeFeed | Online Marketplace South Africa — Sell Online & Create Your Shop",
     description:
-      "Upload products, share your catalog link, get structured WhatsApp orders. Free for South African wholesalers & retailers.",
-    images: ["/api/og?title=TradeFeed&subtitle=WhatsApp+Catalogs+for+SA+Wholesalers"],
+      "South Africa's online marketplace. Create your online shop for free, list products, and get orders via WhatsApp. Start selling online today.",
+    images: [
+      "/api/og?title=Online+Marketplace+South+Africa&subtitle=Sell+Online+%E2%80%A2+Create+Your+Shop+%E2%80%A2+Free+to+Start",
+    ],
+  },
+  alternates: {
+    canonical: "https://tradefeed.co.za",
   },
 };
 
