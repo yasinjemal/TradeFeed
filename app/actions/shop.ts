@@ -85,6 +85,16 @@ export async function createShopAction(
     const user = await requireAuth();
     const userId = user.id;
 
+    // 3a. Guard: prevent duplicate shops
+    const { db } = await import("@/lib/db");
+    const existingShop = await db.shopUser.findFirst({
+      where: { userId, role: "OWNER" },
+      select: { shop: { select: { slug: true } } },
+    });
+    if (existingShop) {
+      redirect(`/dashboard/${existingShop.shop.slug}`);
+    }
+
     // 3b. Check for referral code cookie (set during /sign-up?ref=CODE)
     let referrerSlug: string | undefined;
     try {
@@ -133,5 +143,56 @@ export async function createShopAction(
       success: false,
       error: "Something went wrong. Please try again.",
     };
+  }
+}
+
+// ============================================================
+// Delete Shop — Owner-only
+// ============================================================
+// Permanently deletes a shop and all its data (products, orders,
+// categories, variants, etc.). Only the shop OWNER can do this.
+// Requires the shop name as confirmation to prevent accidental deletion.
+// ============================================================
+
+export async function deleteShopAction(
+  shopSlug: string,
+  confirmName: string
+): Promise<ActionResult> {
+  try {
+    const user = await requireAuth();
+    const userId = user.id;
+
+    const { db } = await import("@/lib/db");
+
+    // Verify the user is the OWNER of this shop
+    const shopUser = await db.shopUser.findFirst({
+      where: {
+        userId,
+        role: "OWNER",
+        shop: { slug: shopSlug },
+      },
+      include: { shop: { select: { id: true, name: true } } },
+    });
+
+    if (!shopUser) {
+      return { success: false, error: "You don't have permission to delete this shop." };
+    }
+
+    // Confirm the shop name matches (safety check)
+    if (shopUser.shop.name.toLowerCase() !== confirmName.trim().toLowerCase()) {
+      return { success: false, error: "Shop name doesn't match. Please type the exact shop name." };
+    }
+
+    // Delete the shop — cascading deletes handle all related data
+    await db.shop.delete({ where: { id: shopUser.shop.id } });
+
+    // Redirect to dashboard (will create-shop if no shops left)
+    redirect("/dashboard");
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+      throw error;
+    }
+    console.error("[deleteShopAction] Error:", error);
+    return { success: false, error: "Something went wrong. Please try again." };
   }
 }

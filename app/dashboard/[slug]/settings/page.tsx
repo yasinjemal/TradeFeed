@@ -11,6 +11,7 @@ import { requireShopAccess } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { ShopSettingsForm } from "@/components/shop/shop-settings-form";
 import { ShopGalleryUpload } from "@/components/shop/shop-gallery-upload";
+import { DeleteShopButton } from "@/components/shop/delete-shop-button";
 import Link from "next/link";
 
 interface SettingsPageProps {
@@ -172,6 +173,18 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
             position: item.position,
           }))}
         />
+      </div>
+
+      {/* ── Danger Zone ──────────────────────────────────── */}
+      <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-red-500">🗑️</span>
+          <h2 className="text-sm font-bold text-red-700">Danger Zone</h2>
+        </div>
+        <p className="text-xs text-stone-500 mb-4">
+          Permanently delete this shop and all its products, orders, and data. This action cannot be undone.
+        </p>
+        <DeleteShopButton shopSlug={slug} shopName={shop.name} />
       </div>
     </div>
   );

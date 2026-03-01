@@ -171,7 +171,7 @@ export function MarketplaceShell({
             {isSignedIn ? (
               <>
                 <Link
-                  href="/create-shop"
+                  href="/dashboard"
                   className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-400 hover:text-white transition-colors"
                 >
                   Dashboard
@@ -488,7 +488,7 @@ export function MarketplaceShell({
               <Link href="/privacy" className="hover:text-stone-300 transition-colors">Privacy</Link>
               <Link href="/terms" className="hover:text-stone-300 transition-colors">Terms</Link>
               {isSignedIn ? (
-                <Link href="/create-shop" className="hover:text-emerald-400 transition-colors">Dashboard</Link>
+                <Link href="/dashboard" className="hover:text-emerald-400 transition-colors">Dashboard</Link>
               ) : (
                 <Link href="/sign-up" className="hover:text-emerald-400 transition-colors">Start Selling</Link>
               )}

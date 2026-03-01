@@ -85,8 +85,8 @@ export default async function RootLayout({
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       afterSignOutUrl="/"
-      signInFallbackRedirectUrl="/create-shop"
-      signUpFallbackRedirectUrl="/create-shop"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
     >
       <html lang={locale}>
         <head>

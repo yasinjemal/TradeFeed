@@ -31,9 +31,9 @@ export function GlobalBottomNav() {
   // Hide on routes that already have their own bottom navigation
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null;
 
-  const accountHref = isSignedIn ? "/create-shop" : "/sign-in";
+  const accountHref = isSignedIn ? "/dashboard" : "/sign-in";
   const accountActive = isSignedIn
-    ? pathname.startsWith("/create-shop")
+    ? pathname.startsWith("/dashboard") || pathname.startsWith("/create-shop")
     : pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 
   const tabs = [
