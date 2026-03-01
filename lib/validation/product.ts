@@ -65,6 +65,14 @@ export const productCreateSchema = z.object({
     .max(50, "Label must be under 50 characters")
     .default("Color"),
 
+  // Wholesale minimum order quantity
+  minWholesaleQty: z
+    .number()
+    .int("Must be a whole number")
+    .min(1, "Minimum order must be at least 1")
+    .max(99999, "Minimum order too high")
+    .default(1),
+
   isActive: z.boolean().default(true),
 });
 
@@ -117,6 +125,13 @@ export const productUpdateSchema = z.object({
     .trim()
     .min(1, "Option 2 label is required")
     .max(50)
+    .optional(),
+
+  minWholesaleQty: z
+    .number()
+    .int("Must be a whole number")
+    .min(1, "Minimum order must be at least 1")
+    .max(99999, "Minimum order too high")
     .optional(),
 
   isActive: z.boolean().optional(),

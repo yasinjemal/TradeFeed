@@ -193,6 +193,11 @@ model Product {
   option1Label  String  @default("Size")      // Label for variant.size column
   option2Label  String  @default("Color")     // Label for variant.color column
 
+  // ── Wholesale Minimum Order Quantity ───────────────────
+  // How many units a buyer must order at the wholesale price.
+  // Default 1 = no minimum. Enforced in cart + shown to buyers.
+  minWholesaleQty Int   @default(1)            // Minimum units per wholesale order
+
   // ── Denormalized Price Range ─────────────────────────
   // Computed from active variants. Updated on variant create/update/delete.
   // Enables efficient price sorting on marketplace queries.

@@ -186,6 +186,7 @@ export async function getCatalogProduct(productId: string, shopId: string) {
       description: true,
       option1Label: true,
       option2Label: true,
+      minWholesaleQty: true,
       category: {
         select: {
           id: true,

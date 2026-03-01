@@ -32,6 +32,7 @@ interface EditProductFormProps {
     globalCategoryId: string | null;
     option1Label: string;
     option2Label: string;
+    minWholesaleQty: number;
   };
   categories: Category[];
   globalCategories?: GlobalCategoryOption[];
@@ -174,6 +175,30 @@ export function EditProductForm({
         {/* Variant Labels (preserved) */}
         <input type="hidden" name="option1Label" value={product.option1Label} />
         <input type="hidden" name="option2Label" value={product.option2Label} />
+
+        {/* Minimum Wholesale Quantity */}
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-minWholesaleQty" className="text-xs font-medium text-stone-600">
+            Min. Wholesale Qty
+          </Label>
+          <div className="flex items-center gap-2">
+            <Input
+              id="edit-minWholesaleQty"
+              name="minWholesaleQty"
+              type="number"
+              min={1}
+              max={99999}
+              defaultValue={product.minWholesaleQty}
+              disabled={isPending}
+              className="rounded-lg border-stone-200 focus:border-emerald-400 h-10 w-28"
+            />
+            <span className="text-xs text-stone-400">units per order</span>
+          </div>
+          <p className="text-[11px] text-stone-400">Buyers must order at least this many units</p>
+          {state?.fieldErrors?.minWholesaleQty && (
+            <p className="text-xs text-red-600">{state.fieldErrors.minWholesaleQty[0]}</p>
+          )}
+        </div>
 
         {/* Active Toggle */}
         <label className="flex items-center gap-3 cursor-pointer group">

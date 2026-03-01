@@ -111,28 +111,30 @@ export function CartProvider({
 
   const addItem = useCallback(
     (newItem: Omit<CartItem, "quantity">, quantity = 1) => {
+      const minQty = newItem.minWholesaleQty ?? 1;
       setItems((prev) => {
         const existing = prev.find(
           (item) => item.variantId === newItem.variantId
         );
 
         if (existing) {
-          // Increment quantity, cap at maxStock
+          // Increment quantity, cap at maxStock, floor at minWholesaleQty
           const newQty = Math.min(
             existing.quantity + quantity,
             existing.maxStock
           );
           return prev.map((item) =>
             item.variantId === newItem.variantId
-              ? { ...item, quantity: newQty }
+              ? { ...item, quantity: Math.max(newQty, minQty) }
               : item
           );
         }
 
-        // Add new item, cap quantity at maxStock
+        // Add new item: start at minWholesaleQty, cap at maxStock
+        const startQty = Math.max(quantity, minQty);
         return [
           ...prev,
-          { ...newItem, quantity: Math.min(quantity, newItem.maxStock) },
+          { ...newItem, quantity: Math.min(startQty, newItem.maxStock) },
         ];
       });
     },
@@ -144,17 +146,20 @@ export function CartProvider({
   }, []);
 
   const updateQuantity = useCallback((variantId: string, quantity: number) => {
-    if (quantity <= 0) {
-      setItems((prev) => prev.filter((item) => item.variantId !== variantId));
-      return;
-    }
-    setItems((prev) =>
-      prev.map((item) =>
-        item.variantId === variantId
-          ? { ...item, quantity: Math.min(quantity, item.maxStock) }
-          : item
-      )
-    );
+    setItems((prev) => {
+      const item = prev.find((i) => i.variantId === variantId);
+      if (!item) return prev;
+      const minQty = item.minWholesaleQty ?? 1;
+      // If quantity drops below minimum, remove the item entirely
+      if (quantity < minQty) {
+        return prev.filter((i) => i.variantId !== variantId);
+      }
+      return prev.map((i) =>
+        i.variantId === variantId
+          ? { ...i, quantity: Math.min(quantity, i.maxStock) }
+          : i
+      );
+    });
   }, []);
 
   const clearCart = useCallback(() => {

@@ -318,12 +318,19 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                         onClick={() =>
                           updateQuantity(item.variantId, item.quantity - 1)
                         }
-                        aria-label={`Decrease quantity of ${item.productName}`}
+                        aria-label={item.quantity <= (item.minWholesaleQty ?? 1) ? `Remove ${item.productName}` : `Decrease quantity of ${item.productName}`}
+                        title={item.quantity <= (item.minWholesaleQty ?? 1) ? "Remove from cart" : "Decrease quantity"}
                         className="w-8 h-8 flex items-center justify-center text-stone-500 hover:bg-stone-50 transition-colors"
                       >
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
-                        </svg>
+                        {item.quantity <= (item.minWholesaleQty ?? 1) ? (
+                          <svg className="w-3 h-3 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                          </svg>
+                        ) : (
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
+                          </svg>
+                        )}
                       </button>
                       <span className="w-8 text-center font-semibold text-xs tabular-nums text-stone-900">
                         {item.quantity}
@@ -350,6 +357,9 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                       {formatZAR(item.priceInCents * item.quantity)}
                     </span>
                   </div>
+                  {(item.minWholesaleQty ?? 1) > 1 && (
+                    <p className="text-[10px] text-amber-600 mt-1">Min. {item.minWholesaleQty} units</p>
+                  )}
                 </div>
 
                 {/* Remove Button */}

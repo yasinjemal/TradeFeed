@@ -208,6 +208,12 @@ export default async function ProductDetailPage({
                   .size || "—"}
               </span>
             </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-stone-500">Min. order</span>
+              <span className={`font-medium ${product.minWholesaleQty > 1 ? "text-amber-600" : "text-stone-400"}`}>
+                {product.minWholesaleQty > 1 ? `${product.minWholesaleQty} units` : "No minimum"}
+              </span>
+            </div>
             <div className="pt-2 border-t border-stone-100">
               <Link
                 href={`/catalog/${slug}`}
@@ -231,6 +237,7 @@ export default async function ProductDetailPage({
               globalCategoryId: product.globalCategoryId,
               option1Label,
               option2Label,
+              minWholesaleQty: product.minWholesaleQty,
             }}
             categories={categories.map((c) => ({ id: c.id, name: c.name }))}
             globalCategories={globalCategories}

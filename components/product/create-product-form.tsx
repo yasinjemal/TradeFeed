@@ -619,6 +619,33 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             </p>
           </div>
 
+          {/* ── Min. Wholesale Qty ─────────────────────────── */}
+          <div className="space-y-2">
+            <Label htmlFor="minWholesaleQty" className="text-sm font-medium text-stone-800">
+              📦 Min. Wholesale Order
+            </Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="minWholesaleQty"
+                name="minWholesaleQty"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={99999}
+                defaultValue={1}
+                disabled={isPending}
+                className="rounded-lg border-2 border-stone-200 focus:border-emerald-400 h-11 text-base w-28"
+              />
+              <span className="text-sm text-stone-500">units per order</span>
+            </div>
+            <p className="text-[10px] text-stone-400">
+              Buyers must order at least this many units. Set to 1 for no minimum.
+            </p>
+            {state?.fieldErrors?.minWholesaleQty && (
+              <p className="text-xs text-red-600">{state.fieldErrors.minWholesaleQty[0]}</p>
+            )}
+          </div>
+
           {/* Active Toggle */}
           <label className="flex items-center gap-3 cursor-pointer group">
             <div className="relative">

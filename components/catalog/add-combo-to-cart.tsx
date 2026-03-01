@@ -48,6 +48,7 @@ export function AddComboToCart({
         option2Label: "Items",
         priceInCents: priceCents,
         maxStock: stock,
+        minWholesaleQty: 1,
       },
       quantity
     );

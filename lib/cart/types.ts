@@ -26,6 +26,7 @@ export interface CartItem {
   priceInCents: number;
   quantity: number;
   maxStock: number; // Prevents over-ordering
+  minWholesaleQty: number; // Minimum wholesale order quantity (default 1)
 }
 
 /**

@@ -148,6 +148,7 @@ export async function createProductAction(
       globalCategoryId: (formData.get("globalCategoryId") as string) || "",
       option1Label: (formData.get("option1Label") as string) || "Size",
       option2Label: (formData.get("option2Label") as string) || "Color",
+      minWholesaleQty: parseInt((formData.get("minWholesaleQty") as string) || "1", 10) || 1,
       isActive: formData.get("isActive") === "on",
     };
 
@@ -215,6 +216,7 @@ export async function updateProductAction(
       globalCategoryId: (formData.get("globalCategoryId") as string) || "",
       option1Label: (formData.get("option1Label") as string) || undefined,
       option2Label: (formData.get("option2Label") as string) || undefined,
+      minWholesaleQty: parseInt((formData.get("minWholesaleQty") as string) || "1", 10) || 1,
       isActive: formData.get("isActive") === "on",
     };
 

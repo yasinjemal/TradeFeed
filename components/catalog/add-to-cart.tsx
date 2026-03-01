@@ -38,6 +38,7 @@ interface AddToCartProps {
   option1Label?: string;
   option2Label?: string;
   quickOrderHref?: string;
+  minWholesaleQty?: number;
 }
 
 export function AddToCart({
@@ -48,12 +49,13 @@ export function AddToCart({
   option1Label = "Size",
   option2Label = "Color",
   quickOrderHref,
+  minWholesaleQty = 1,
 }: AddToCartProps) {
   const { addItem } = useCart();
 
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(minWholesaleQty);
   const [justAdded, setJustAdded] = useState(false);
 
   // ── Derived data ─────────────────────────────────────────
@@ -91,7 +93,7 @@ export function AddToCart({
     (size: string) => {
       setSelectedSize(size);
       setSelectedColor(null);
-      setQuantity(1);
+      setQuantity(minWholesaleQty);
 
       // Auto-select color if only one option
       const colorsForSize = Array.from(
@@ -111,8 +113,8 @@ export function AddToCart({
 
   const handleColorSelect = useCallback((color: string) => {
     setSelectedColor(color);
-    setQuantity(1);
-  }, []);
+    setQuantity(minWholesaleQty);
+  }, [minWholesaleQty]);
 
   const handleAdd = useCallback(() => {
     if (!selectedVariant || !canAdd) return;
@@ -128,6 +130,7 @@ export function AddToCart({
       option2Label,
       priceInCents: selectedVariant.priceInCents,
       maxStock: selectedVariant.stock,
+      minWholesaleQty,
     }, quantity);
 
     // Show toast
@@ -141,8 +144,8 @@ export function AddToCart({
     setTimeout(() => setJustAdded(false), 1500);
 
     // Reset for next add
-    setQuantity(1);
-  }, [selectedVariant, canAdd, addItem, productId, productName, option1Label, option2Label, quantity]);
+    setQuantity(minWholesaleQty);
+  }, [selectedVariant, canAdd, addItem, productId, productName, option1Label, option2Label, quantity, minWholesaleQty]);
 
   // ── Check if a size has any stock ────────────────────────
   const sizeHasStock = (size: string): boolean =>
@@ -242,8 +245,8 @@ export function AddToCart({
             </span>
             <div className="flex items-center bg-white rounded-xl border border-stone-200 overflow-hidden">
               <button
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                disabled={quantity <= 1}
+                onClick={() => setQuantity((q) => Math.max(minWholesaleQty, q - 1))}
+                disabled={quantity <= minWholesaleQty}
                 className="w-10 h-10 flex items-center justify-center text-stone-600 hover:bg-stone-50 transition-colors disabled:text-stone-300 disabled:cursor-not-allowed"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -269,6 +272,13 @@ export function AddToCart({
               </span>
             )}
           </div>
+
+          {/* MOQ notice */}
+          {minWholesaleQty > 1 && (
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 mb-4 flex items-center gap-1.5">
+              <span>📦</span> Min. order: <span className="font-bold">{minWholesaleQty} units</span>
+            </p>
+          )}
 
           <div className="hidden sm:block">
             <button

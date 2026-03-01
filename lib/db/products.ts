@@ -36,6 +36,7 @@ export async function createProduct(
       globalCategoryId: input.globalCategoryId || null,
       option1Label: input.option1Label ?? "Size",
       option2Label: input.option2Label ?? "Color",
+      minWholesaleQty: input.minWholesaleQty ?? 1,
     },
     include: {
       variants: true,
@@ -141,6 +142,7 @@ export async function updateProduct(
       }),
       ...(input.option1Label !== undefined && { option1Label: input.option1Label }),
       ...(input.option2Label !== undefined && { option2Label: input.option2Label }),
+      ...(input.minWholesaleQty !== undefined && { minWholesaleQty: input.minWholesaleQty }),
     },
     include: {
       variants: { orderBy: { createdAt: "asc" } },

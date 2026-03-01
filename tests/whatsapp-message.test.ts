@@ -15,6 +15,7 @@ const items: CartItem[] = [
     priceInCents: 25000,
     quantity: 2,
     maxStock: 10,
+    minWholesaleQty: 1,
   },
 ];
 

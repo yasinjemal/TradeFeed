@@ -168,6 +168,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 <span className={`h-1.5 w-1.5 rounded-full ${totalStock > 0 ? "bg-emerald-500" : "bg-stone-500"}`} />
                 {totalStock > 0 ? `${totalStock} in stock` : "Out of stock"}
               </span>
+              {product.minWholesaleQty > 1 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-700 px-2.5 py-1">
+                  📦 Min. {product.minWholesaleQty} units
+                </span>
+              )}
             </div>
           </div>
 
@@ -184,6 +189,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 option1Label={option1Label}
                 option2Label={option2Label}
                 quickOrderHref={waLink}
+                minWholesaleQty={product.minWholesaleQty}
                 variants={product.variants.map((v) => ({ id: v.id, size: v.size, color: v.color, priceInCents: v.priceInCents, retailPriceCents: v.retailPriceCents, stock: v.stock }))}
               />
             ) : (
