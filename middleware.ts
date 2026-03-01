@@ -24,6 +24,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/og(.*)",                    // Dynamic OG image generation
   "/api/health",                    // Health check (uptime monitoring)
   "/api/cron/(.*)",                  // Vercel Cron jobs (server-to-server)
+  "/api/merchant-feed",              // Google Merchant Center product feed
   "/privacy",                       // Privacy policy (POPIA)
   "/terms",                         // Terms of service
   "/sitemap.xml",                   // SEO sitemap
