@@ -211,6 +211,7 @@ export async function getCatalogProduct(productId: string, shopId: string) {
           priceInCents: true,
           retailPriceCents: true,
           stock: true,
+          sku: true,
         },
         orderBy: [{ priceInCents: "asc" }, { size: "asc" }, { color: "asc" }],
       },

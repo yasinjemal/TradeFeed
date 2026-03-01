@@ -49,8 +49,15 @@ export async function generateMetadata({
     openGraph: {
       title: `${product.name} - ${shop.name}`,
       description: product.description || `${product.name} from ${minPrice}`,
-      type: "website",
+      type: "article",
       images: [{ url: ogUrl.toString(), width: 1200, height: 630, alt: product.name }],
+    },
+    other: {
+      "product:price:amount": minPrice ? `${Math.min(...prices) / 100}` : "",
+      "product:price:currency": "ZAR",
+      "product:availability": product.variants.reduce((sum, v) => sum + v.stock, 0) > 0 ? "instock" : "oos",
+      "product:brand": shop.name,
+      "product:category": product.category?.name ?? "",
     },
     twitter: {
       card: "summary_large_image",
@@ -111,7 +118,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         priceInCents={minPrice}
       />
 
-      {generateProductJsonLd(shop, product, reviewAgg).map((schema, i) => (
+      {generateProductJsonLd(shop, product, reviewAgg, reviews).map((schema, i) => (
         <script key={`product-ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       ))}
 

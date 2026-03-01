@@ -6,6 +6,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import { CookieConsent } from "@/components/cookie-consent";
 import { GlobalBottomNav } from "@/components/ui/global-bottom-nav";
 import { Toaster } from "sonner";
+import { generateSiteJsonLd } from "@/lib/seo/json-ld";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -76,6 +77,14 @@ export default async function RootLayout({
     >
       <html lang={locale}>
         <head>
+          {/* Site-wide JSON-LD: Organization + WebSite (sitelinks search box) */}
+          {generateSiteJsonLd().map((schema, i) => (
+            <script
+              key={`site-ld-${i}`}
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+            />
+          ))}
           {/* PWA */}
           <link rel="manifest" href="/manifest.json" />
           <meta name="theme-color" content="#059669" />
