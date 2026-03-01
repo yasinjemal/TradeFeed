@@ -10,10 +10,12 @@
 // Color coding: emerald (good) → amber (warning) → red (critical)
 // ============================================================
 
+import Link from "next/link";
 import type { SellerHealthResult } from "@/lib/intelligence";
 
 interface SellerHealthCardProps {
   health: SellerHealthResult;
+  shopSlug: string;
 }
 
 // ── Color helpers ────────────────────────────────────────
@@ -78,7 +80,7 @@ const DIMENSIONS = [
 
 // ── Component ────────────────────────────────────────────
 
-export function SellerHealthCard({ health }: SellerHealthCardProps) {
+export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
   const { score, breakdown, suggestions } = health;
   const color = getScoreColor(score);
 
@@ -182,17 +184,40 @@ export function SellerHealthCard({ health }: SellerHealthCardProps) {
             💡 How to improve
           </p>
           <ul className="space-y-1.5">
-            {suggestions.map((s, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-2 text-[12px] text-stone-600 leading-relaxed"
-              >
-                <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold text-stone-400">
-                  {i + 1}
-                </span>
-                {s}
-              </li>
-            ))}
+            {suggestions.map((s, i) =>
+              s.href ? (
+                <li key={i}>
+                  <Link
+                    href={`/dashboard/${shopSlug}/${s.href}`}
+                    className="flex items-start gap-2 text-[12px] text-stone-600 leading-relaxed rounded-lg px-2 py-1.5 -mx-2 hover:bg-white/80 hover:text-stone-900 transition-colors group/tip"
+                  >
+                    <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold text-stone-400 group-hover/tip:text-emerald-500 group-hover/tip:bg-emerald-50 transition-colors">
+                      {i + 1}
+                    </span>
+                    <span className="flex-1">{s.text}</span>
+                    <svg
+                      className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-stone-300 group-hover/tip:text-emerald-500 group-hover/tip:translate-x-0.5 transition-all"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2.5}
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </Link>
+                </li>
+              ) : (
+                <li
+                  key={i}
+                  className="flex items-start gap-2 text-[12px] text-stone-600 leading-relaxed px-2 py-1.5 -mx-2"
+                >
+                  <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold text-stone-400">
+                    ✓
+                  </span>
+                  {s.text}
+                </li>
+              )
+            )}
           </ul>
         </div>
       )}

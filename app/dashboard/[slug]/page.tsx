@@ -165,7 +165,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       {/* ═══════════════════════════════════════════════════ */}
       {/* Seller Health Intelligence                           */}
       {/* ═══════════════════════════════════════════════════ */}
-      <SellerHealthCard health={health} />
+      <SellerHealthCard health={health} shopSlug={slug} />
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* Today's Performance — MOVED UP (orders first!)      */}

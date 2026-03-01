@@ -71,6 +71,16 @@ export interface SellerHealthBreakdown {
 }
 
 /**
+ * A single actionable suggestion with a link to the relevant page.
+ */
+export interface SellerSuggestion {
+  /** Human-readable suggestion text */
+  text: string;
+  /** Dashboard-relative path, e.g. "orders" → /dashboard/[slug]/orders */
+  href: string;
+}
+
+/**
  * Full health score result returned by computeSellerHealth().
  */
 export interface SellerHealthResult {
@@ -78,6 +88,6 @@ export interface SellerHealthResult {
   score: number;
   /** Per-dimension breakdown */
   breakdown: SellerHealthBreakdown;
-  /** Plain-language improvement suggestions (top 3) */
-  suggestions: string[];
+  /** Actionable improvement suggestions with links (top 3) */
+  suggestions: SellerSuggestion[];
 }

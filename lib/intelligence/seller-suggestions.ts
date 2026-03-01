@@ -15,29 +15,31 @@
 import type {
   SellerRawMetrics,
   SellerHealthBreakdown,
+  SellerSuggestion,
 } from "./seller-metrics";
 
 interface Suggestion {
   priority: number; // lower = more important
   text: string;
+  href: string; // dashboard-relative path
 }
 
 /**
  * Generate up to 3 prioritized suggestions.
- * Returns plain-language strings sorted by impact.
+ * Returns actionable suggestions with links sorted by impact.
  */
 export function generateSuggestions(
   metrics: SellerRawMetrics,
   breakdown: SellerHealthBreakdown
-): string[] {
+): SellerSuggestion[] {
   const suggestions: Suggestion[] = [];
 
   // ── No products at all — highest priority ──────────
   if (metrics.totalProducts === 0) {
     return [
-      "Add your first product to get started — even one product activates your health score.",
-      "Upload a product photo, set a price, and add stock to make it visible in the marketplace.",
-      "Organize products into categories to help buyers find what they need.",
+      { text: "Add your first product to get started — even one product activates your health score.", href: "products/new" },
+      { text: "Upload a product photo, set a price, and add stock to make it visible in the marketplace.", href: "products/new" },
+      { text: "Organize products into categories to help buyers find what they need.", href: "categories" },
     ];
   }
 
@@ -48,6 +50,7 @@ export function generateSuggestions(
     suggestions.push({
       priority: 1,
       text: `Add photos to ${missingImages} product${missingImages > 1 ? "s" : ""} — listings with images get 3× more views.`,
+      href: "products",
     });
   }
 
@@ -57,6 +60,7 @@ export function generateSuggestions(
     suggestions.push({
       priority: 3,
       text: `Write descriptions for ${missingDesc} product${missingDesc > 1 ? "s" : ""} — buyers need to know sizes, materials, and details.`,
+      href: "products",
     });
   }
 
@@ -66,6 +70,7 @@ export function generateSuggestions(
     suggestions.push({
       priority: 2,
       text: `${missingStock} product${missingStock > 1 ? "s have" : " has"} zero stock — update stock levels so buyers can order.`,
+      href: "products",
     });
   }
 
@@ -78,6 +83,7 @@ export function generateSuggestions(
     suggestions.push({
       priority: 4,
       text: `${metrics.variantsLowStock} variant${metrics.variantsLowStock > 1 ? "s are" : " is"} running low (1–3 units) — restock soon to avoid missed sales.`,
+      href: "products",
     });
   }
 
@@ -90,6 +96,7 @@ export function generateSuggestions(
       suggestions.push({
         priority: 2,
         text: `${outPct}% of your variants are out of stock — restocking will improve your health score.`,
+        href: "products",
       });
     }
   }
@@ -99,6 +106,7 @@ export function generateSuggestions(
     suggestions.push({
       priority: 1,
       text: `You have ${metrics.stalePendingOrders} pending order${metrics.stalePendingOrders > 1 ? "s" : ""} older than 48 hours — confirm or update them.`,
+      href: "orders",
     });
   }
 
@@ -109,6 +117,7 @@ export function generateSuggestions(
     suggestions.push({
       priority: 5,
       text: `Your cancellation rate is high — try to confirm orders quickly and keep stock accurate.`,
+      href: "orders",
     });
   }
 
@@ -120,6 +129,7 @@ export function generateSuggestions(
     suggestions.push({
       priority: 6,
       text: `Add more products to grow your catalog — aim for at least 10 active listings.`,
+      href: "products/new",
     });
   }
 
@@ -130,6 +140,7 @@ export function generateSuggestions(
     suggestions.push({
       priority: 7,
       text: `Keep your catalog fresh — adding new products regularly attracts repeat buyers.`,
+      href: "products/new",
     });
   }
 
@@ -138,6 +149,7 @@ export function generateSuggestions(
     suggestions.push({
       priority: 3,
       text: `Create categories and organize your products — it helps buyers browse and boosts your score.`,
+      href: "categories",
     });
   } else if (
     metrics.categoryCount === 1 &&
@@ -146,17 +158,18 @@ export function generateSuggestions(
     suggestions.push({
       priority: 8,
       text: `You only have 1 category — adding more helps buyers find products faster.`,
+      href: "categories",
     });
   }
 
   // ── All good! ──────────────────────────────────────
   if (suggestions.length === 0) {
-    return ["Your shop is in great shape! Keep adding products and fulfilling orders to maintain your score."];
+    return [{ text: "Your shop is in great shape! Keep adding products and fulfilling orders to maintain your score.", href: "" }];
   }
 
   // Sort by priority (lowest number = highest impact) and take top 3
   return suggestions
     .sort((a, b) => a.priority - b.priority)
     .slice(0, 3)
-    .map((s) => s.text);
+    .map((s) => ({ text: s.text, href: s.href }));
 }

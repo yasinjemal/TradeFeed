@@ -12,5 +12,6 @@ export type {
   SellerRawMetrics,
   SellerHealthBreakdown,
   SellerHealthResult,
+  SellerSuggestion,
 } from "./seller-metrics";
 export { generateSuggestions } from "./seller-suggestions";
