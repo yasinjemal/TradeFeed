@@ -100,14 +100,13 @@ export async function GET() {
       const productUrl = `${APP_URL}/catalog/${product.shop.slug}/products/${product.id}`;
       const primaryImage = product.images[0]?.url ?? "";
       const additionalImages = product.images
-        .slice(1, 10)
+        .slice(1, 5)
         .map((img) => img.url)
         .join(",");
 
-      const title = escapeField(product.name);
-      const description = escapeField(
-        product.description || `${product.name} from ${product.shop.name} on TradeFeed`
-      );
+      const title = escapeField(product.name).slice(0, 150);
+      const rawDesc = product.description || `${product.name} from ${product.shop.name} on TradeFeed`;
+      const description = escapeField(rawDesc).slice(0, 5000);
       const brand = escapeField(product.shop.name);
       const productType = product.globalCategory?.name
         || product.category?.name
