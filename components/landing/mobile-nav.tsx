@@ -99,7 +99,7 @@ export function MobileNav({
       {/* ── Hamburger Button ──────────────────────────── */}
       <button
         onClick={() => setOpen(true)}
-        className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/[0.06] active:scale-90 transition-all text-stone-300"
+        className="md:hidden flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-white/[0.06] hover:bg-white/[0.1] active:scale-90 transition-all text-stone-300"
         aria-label="Open menu"
         suppressHydrationWarning
       >
