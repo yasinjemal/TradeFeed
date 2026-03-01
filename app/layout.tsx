@@ -91,6 +91,14 @@ export default async function RootLayout({
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="apple-mobile-web-app-title" content="TradeFeed" />
+          {/* Google Analytics 4 — in <head> for Google Merchant Center verification */}
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=G-TL499XE6KR"
+            strategy="afterInteractive"
+          />
+          <Script id="ga4-init" strategy="afterInteractive">
+            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TL499XE6KR');`}
+          </Script>
         </head>
         <body>
           <a
@@ -119,14 +127,6 @@ export default async function RootLayout({
           />
             <CookieConsent />
           </NextIntlClientProvider>
-          {/* Google Analytics 4 — nonce auto-injected by Next.js + Clerk strict CSP */}
-          <Script
-            src="https://www.googletagmanager.com/gtag/js?id=G-TL499XE6KR"
-            strategy="afterInteractive"
-          />
-          <Script id="ga4-init" strategy="afterInteractive">
-            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TL499XE6KR');`}
-          </Script>
           {/* Register Service Worker for PWA */}
           <Script id="sw-register" strategy="afterInteractive">
             {`if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`}
