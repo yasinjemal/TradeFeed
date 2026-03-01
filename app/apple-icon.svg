@@ -6,8 +6,18 @@
     </linearGradient>
   </defs>
   <rect width="180" height="180" rx="40" fill="url(#bg)"/>
-  <path d="M52 52 H128 V71 H100 V132 H80 V71 H52 Z" fill="white"/>
-  <circle cx="124" cy="56" r="7.5" fill="#fff" opacity="0.9"/>
-  <path d="M113 41 A19 19 0 0 1 135 41" fill="none" stroke="#fff" stroke-width="3.8" stroke-linecap="round" opacity="0.6"/>
-  <path d="M106 33 A28 28 0 0 1 142 33" fill="none" stroke="#fff" stroke-width="3.8" stroke-linecap="round" opacity="0.35"/>
+  <!-- Chat bubble -->
+  <path d="M25 78c0-26 21-47 47-47h3c26 0 47 21 47 47v3c0 20-13 38-31 44L76 133l-18.5-10.4C39 116 25 103 25 87v-9Z" fill="white" opacity="0.3"/>
+  <path d="M35 131l12-15c-12-7.5-21-21-21-37" stroke="white" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.3"/>
+  <!-- Shopping bag -->
+  <rect x="72" y="57" width="75" height="86" rx="11" fill="white"/>
+  <!-- Bag handle -->
+  <path d="M93 57v-11a16.5 16.5 0 0 1 33 0v11" stroke="#059669" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+  <circle cx="93" cy="57" r="4.5" fill="#059669" opacity="0.8"/>
+  <circle cx="126" cy="57" r="4.5" fill="#059669" opacity="0.8"/>
+  <!-- Product grid -->
+  <rect x="86" y="84" width="20" height="20" rx="4" fill="#059669" opacity="0.25"/>
+  <rect x="112" y="84" width="20" height="20" rx="4" fill="#059669" opacity="0.25"/>
+  <rect x="86" y="110" width="20" height="20" rx="4" fill="#059669" opacity="0.25"/>
+  <rect x="112" y="110" width="20" height="20" rx="4" fill="#059669" opacity="0.15"/>
 </svg>

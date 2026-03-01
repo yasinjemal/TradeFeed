@@ -6,9 +6,18 @@
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <!-- Stylized T with a feed/signal accent -->
-  <path d="M149 149 H363 V203 H283 V373 H229 V203 H149 Z" fill="white"/>
-  <circle cx="352" cy="160" r="21" fill="#fff" opacity="0.9"/>
-  <path d="M320 117 A53 53 0 0 1 384 117" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" opacity="0.6"/>
-  <path d="M301 96 A80 80 0 0 1 403 96" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" opacity="0.35"/>
+  <!-- Chat bubble -->
+  <path d="M80 224c0-74.7 60.5-135.2 135.2-135.2h8c74.7 0 135.2 60.5 135.2 135.2v8c0 58.2-37 107.8-88.8 126.2L218 382l-53.3-29.9C118 333 80 293 80 248v-24Z" fill="white" opacity="0.3"/>
+  <path d="M112 374l34.7-42.7c-35.5-21.3-60.5-60.5-60.5-106.7" stroke="white" stroke-width="21" stroke-linecap="round" fill="none" opacity="0.3"/>
+  <!-- Shopping bag -->
+  <rect x="208" y="165" width="213" height="245" rx="32" fill="white"/>
+  <!-- Bag handle -->
+  <path d="M266 165v-32a48 48 0 0 1 96 0v32" stroke="#059669" stroke-width="19" stroke-linecap="round" fill="none"/>
+  <circle cx="266" cy="165" r="13" fill="#059669" opacity="0.8"/>
+  <circle cx="362" cy="165" r="13" fill="#059669" opacity="0.8"/>
+  <!-- Product grid -->
+  <rect x="248" y="245" width="59" height="59" rx="11" fill="#059669" opacity="0.25"/>
+  <rect x="322" y="245" width="59" height="59" rx="11" fill="#059669" opacity="0.25"/>
+  <rect x="248" y="319" width="59" height="59" rx="11" fill="#059669" opacity="0.25"/>
+  <rect x="322" y="319" width="59" height="59" rx="11" fill="#059669" opacity="0.15"/>
 </svg>

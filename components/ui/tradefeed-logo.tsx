@@ -1,8 +1,9 @@
 // ============================================================
 // Component — TradeFeed Logo (Reusable)
 // ============================================================
-// Renders the TradeFeed logo icon (T with signal accent) and
-// optional wordmark. Used in navbar, footer, mobile nav, etc.
+// Renders the TradeFeed logo icon (WhatsApp chat bubble +
+// shopping bag) and optional wordmark.
+// Used in navbar, footer, mobile nav, etc.
 //
 // USAGE:
 //   <TradeFeedLogo />                    — icon + wordmark (default)
@@ -25,9 +26,9 @@ interface TradeFeedLogoProps {
 }
 
 const sizeMap = {
-  sm: { icon: "w-6 h-6", text: "text-sm", iconText: "text-[9px]", radius: "rounded-md" },
-  md: { icon: "w-8 h-8", text: "text-lg", iconText: "text-sm", radius: "rounded-lg" },
-  lg: { icon: "w-10 h-10", text: "text-xl", iconText: "text-base", radius: "rounded-xl" },
+  sm: { icon: "w-6 h-6", text: "text-sm" },
+  md: { icon: "w-8 h-8", text: "text-lg" },
+  lg: { icon: "w-10 h-10", text: "text-xl" },
 } as const;
 
 export function TradeFeedLogo({
@@ -41,27 +42,56 @@ export function TradeFeedLogo({
 
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      {/* Icon mark */}
-      <span
-        className={`${s.icon} ${s.radius} bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 flex-shrink-0`}
+      {/* Icon mark — WhatsApp chat bubble + shopping bag */}
+      <svg
+        viewBox="0 0 64 64"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={`${s.icon} flex-shrink-0`}
       >
-        <svg
-          viewBox="0 0 32 32"
+        <defs>
+          <linearGradient id="tf-bag" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#34d399" />
+            <stop offset="100%" stopColor="#059669" />
+          </linearGradient>
+          <linearGradient id="tf-bubble" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#4ade80" />
+            <stop offset="100%" stopColor="#16a34a" />
+          </linearGradient>
+        </defs>
+        {/* Chat bubble (behind) */}
+        <path
+          d="M8 28C8 17.5 16.5 9 27 9h1c10.5 0 19 8.5 19 19v1c0 8.2-5.2 15.2-12.5 17.8L27 54l-7.5-4.2C12.5 47 8 40.5 8 33v-5Z"
+          fill="url(#tf-bubble)"
+          opacity="0.85"
+        />
+        {/* Chat bubble smile/tail */}
+        <path
+          d="M16 51l5-6c-5-3-8.5-8.5-8.5-15"
+          stroke="url(#tf-bubble)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
           fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className={`${s.icon}`}
-        >
-          <path d="M8 8H24V12H18V25H14V12H8Z" fill="white" />
-          <circle cx="23" cy="9" r="2" fill="white" opacity="0.9" />
-          <path
-            d="M20 6A5 5 0 0126 6"
-            stroke="white"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            opacity="0.6"
-          />
-        </svg>
-      </span>
+        />
+        {/* Shopping bag (front) */}
+        <rect x="28" y="22" width="28" height="32" rx="4" fill="url(#tf-bag)" />
+        {/* Bag handle */}
+        <path
+          d="M36 22v-4a6 6 0 0 1 12 0v4"
+          stroke="white"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        {/* Bag handle circles */}
+        <circle cx="36" cy="22" r="2" fill="white" opacity="0.9" />
+        <circle cx="48" cy="22" r="2" fill="white" opacity="0.9" />
+        {/* Product grid on bag */}
+        <rect x="34" y="33" width="7" height="7" rx="1.5" fill="white" opacity="0.5" />
+        <rect x="43" y="33" width="7" height="7" rx="1.5" fill="white" opacity="0.5" />
+        <rect x="34" y="42" width="7" height="7" rx="1.5" fill="white" opacity="0.5" />
+        <rect x="43" y="42" width="7" height="7" rx="1.5" fill="white" opacity="0.35" />
+      </svg>
 
       {/* Wordmark */}
       {!iconOnly && (
