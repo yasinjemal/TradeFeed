@@ -7,6 +7,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { TrackingSearch } from "@/components/tracking/tracking-search";
+import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 
 export const metadata: Metadata = {
   title: "Track Your Order | TradeFeed",
@@ -20,10 +21,7 @@ export default function TrackingLandingPage() {
       <header className="border-b border-stone-800/50 bg-stone-950/80 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto flex items-center justify-between px-5 h-14">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
-              <span className="text-white font-extrabold text-[10px]">T</span>
-            </div>
-            <span className="font-bold text-sm">Trade<span className="text-emerald-400">Feed</span></span>
+            <TradeFeedLogo size="sm" />
           </Link>
           <Link href="/marketplace" className="text-xs text-stone-500 hover:text-stone-300 transition-colors">
             Marketplace →

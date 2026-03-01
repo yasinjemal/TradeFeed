@@ -11,6 +11,7 @@ import {
   FaqItem,
 } from "@/components/landing/animated-stats";
 import { MobileNav } from "@/components/landing/mobile-nav";
+import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 
 // ============================================================
 // TradeFeed Landing Page — Industry-Grade Conversion Machine
@@ -90,12 +91,7 @@ export default async function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-stone-950/70 backdrop-blur-2xl border-b border-white/[0.04]">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-5 h-16">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
-              <span className="text-white font-extrabold text-sm">T</span>
-            </div>
-            <span className="font-bold text-lg tracking-tight">
-              Trade<span className="text-emerald-400">Feed</span>
-            </span>
+            <TradeFeedLogo />
           </Link>
 
           {/* Desktop nav links */}
@@ -897,8 +893,7 @@ export default async function HomePage() {
           <div className="grid sm:grid-cols-4 gap-8 mb-10">
             <div className="sm:col-span-1">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20"><span className="text-white font-extrabold text-[10px]">T</span></div>
-                <span className="font-bold text-base">Trade<span className="text-emerald-400">Feed</span></span>
+                <TradeFeedLogo size="sm" />
               </div>
               <p className="text-xs text-stone-500 leading-relaxed">Structured product catalogs for WhatsApp sellers. Built for South Africa. 🇿🇦</p>
             </div>

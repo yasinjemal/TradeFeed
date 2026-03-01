@@ -13,6 +13,14 @@ export const metadata: Metadata = {
   title: "TradeFeed — Structured Product Catalogs for WhatsApp Sellers",
   description:
     "Upload products. Share your catalog link. Get organized orders via WhatsApp — no app download required. Built for South African wholesalers & retailers.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/apple-icon.svg", type: "image/svg+xml" },
+    ],
+  },
   keywords: [
     "WhatsApp catalog",
     "wholesale South Africa",
@@ -74,7 +82,6 @@ export default async function RootLayout({
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="apple-mobile-web-app-title" content="TradeFeed" />
-          <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
         </head>
         <body>
           <a

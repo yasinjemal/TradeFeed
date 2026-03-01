@@ -9,6 +9,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { getOrderByNumber } from "@/lib/db/tracking";
 import { OrderTimeline } from "@/components/tracking/order-timeline";
 import { TrackingSearch } from "@/components/tracking/tracking-search";
@@ -38,10 +39,7 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
         <header className="border-b border-stone-800/50 bg-stone-950/80 backdrop-blur-xl">
           <div className="max-w-3xl mx-auto flex items-center justify-between px-5 h-14">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
-                <span className="text-white font-extrabold text-[10px]">T</span>
-              </div>
-              <span className="font-bold text-sm">Trade<span className="text-emerald-400">Feed</span></span>
+              <TradeFeedLogo size="sm" />
             </Link>
             <Link href="/marketplace" className="text-xs text-stone-500 hover:text-stone-300 transition-colors">
               Marketplace →
@@ -135,10 +133,7 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
       <header className="border-b border-stone-800/50 bg-stone-950/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-3xl mx-auto flex items-center justify-between px-5 h-14">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
-              <span className="text-white font-extrabold text-[10px]">T</span>
-            </div>
-            <span className="font-bold text-sm">Trade<span className="text-emerald-400">Feed</span></span>
+            <TradeFeedLogo size="sm" />
           </Link>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline text-xs text-stone-600 font-mono">{order.orderNumber}</span>

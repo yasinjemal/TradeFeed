@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { usePathname } from "next/navigation";
 
 const navItems = [
@@ -213,13 +214,8 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">T</span>
-                </div>
+                <TradeFeedLogo size="md" variant="dark" />
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-stone-900 truncate">
-                    Trade<span className="text-emerald-600">Feed</span>
-                  </p>
                   <p className="text-[11px] text-stone-400 truncate">{shopName}</p>
                 </div>
               </div>

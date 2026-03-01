@@ -10,6 +10,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { CreateShopForm } from "@/components/shop/create-shop-form";
 
 export const metadata = {
@@ -50,12 +51,7 @@ export default async function CreateShopPage() {
         {/* Top — Logo */}
         <div className="relative z-10">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/30 transition-shadow">
-              <span className="text-white font-extrabold text-sm">T</span>
-            </div>
-            <span className="font-bold text-xl tracking-tight">
-              Trade<span className="text-emerald-400">Feed</span>
-            </span>
+            <TradeFeedLogo size="lg" />
           </Link>
         </div>
 

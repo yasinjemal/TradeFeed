@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { getShopBySlug, getShopsForUser } from "@/lib/db/shops";
 import { requireShopAccess } from "@/lib/auth";
+import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { isAdmin } from "@/lib/auth/admin";
 import { notFound, redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
@@ -72,12 +73,7 @@ export default async function DashboardLayout({
               href="/"
               className="flex items-center gap-2 flex-shrink-0"
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-sm">
-                <span className="text-white text-sm font-bold">T</span>
-              </div>
-              <span className="text-lg font-bold tracking-tight hidden sm:inline">
-                Trade<span className="text-emerald-600">Feed</span>
-              </span>
+              <TradeFeedLogo variant="dark" />
             </Link>
 
             <div className="hidden sm:flex items-center gap-2 ml-1">

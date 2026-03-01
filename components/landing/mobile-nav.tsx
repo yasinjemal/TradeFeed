@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 
 interface MobileNavProps {
   ctaHref: string;
@@ -154,12 +155,7 @@ export function MobileNav({
             {/* ── Header ─────────────────────────────── */}
             <div className="flex items-center justify-between px-5 h-16">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                  <span className="text-white font-extrabold text-sm">T</span>
-                </div>
-                <span className="font-bold text-xl tracking-tight text-white">
-                  Trade<span className="text-emerald-400">Feed</span>
-                </span>
+                <TradeFeedLogo size="lg" />
               </div>
               <button
                 onClick={close}

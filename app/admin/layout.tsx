@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 
 export default async function AdminLayout({
   children,
