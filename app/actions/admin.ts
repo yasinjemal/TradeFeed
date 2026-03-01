@@ -523,6 +523,9 @@ export async function approveUpgradeAction(
       entityName: `${result.shop.name} → ${result.plan.name}`,
     });
     revalidatePath("/admin/upgrade-requests");
+    // Revalidate seller's billing page so they see the new plan
+    revalidatePath(`/dashboard/${result.shop.slug}/billing`);
+    revalidatePath(`/dashboard/${result.shop.slug}`);
     return { success: true, message: `${result.shop.name} upgraded to ${result.plan.name}.` };
   } catch (error) {
     return {
@@ -549,6 +552,9 @@ export async function rejectUpgradeAction(
       entityName: `${result.shop.name} — rejected`,
     });
     revalidatePath("/admin/upgrade-requests");
+    // Revalidate seller's billing page so they see the rejection status
+    revalidatePath(`/dashboard/${result.shop.slug}/billing`);
+    revalidatePath(`/dashboard/${result.shop.slug}`);
     return { success: true, message: `Upgrade request for ${result.shop.name} rejected.` };
   } catch (error) {
     return {
