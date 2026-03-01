@@ -1,7 +1,9 @@
 // ============================================================
-// Component — Variant Bulk Editor
+// Component — Variant Bulk Editor (Redesigned)
 // ============================================================
-// Spreadsheet-like table for batch editing variant price + stock.
+// Mobile-first card layout with large, tap-friendly inputs.
+// - Mobile: stacked cards per variant (easy to edit price/stock)
+// - Desktop: compact table view
 // Tracks dirty state per row, saves all changes in one action.
 // ============================================================
 
@@ -165,7 +167,7 @@ export function VariantBulkEditor({
 
   return (
     <div className="space-y-3">
-      {/* Toolbar */}
+      {/* ── Toolbar (appears when edits exist) ──────────── */}
       {dirtyCount > 0 && (
         <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5">
           <span className="text-sm font-medium text-emerald-800">
@@ -199,8 +201,132 @@ export function VariantBulkEditor({
         </div>
       )}
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-stone-200">
+      {/* ── Mobile: Card Layout ────────────────────────── */}
+      <div className="space-y-2 md:hidden">
+        {variants.map((v) => {
+          const state = editState[v.id];
+          if (!state) return null;
+
+          const colorHex = v.color ? (COLOR_HEX[v.color] ?? null) : null;
+          const isLight = LIGHT_COLORS.has(v.color ?? "");
+          const dirty = isDirty(v.id);
+
+          return (
+            <div
+              key={v.id}
+              className={`rounded-xl border p-3 transition-colors ${
+                dirty
+                  ? "border-amber-300 bg-amber-50/60"
+                  : "border-stone-200 bg-white"
+              }`}
+            >
+              {/* Row 1: Variant label + delete */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-stone-900">
+                    {v.size}
+                  </span>
+                  {v.color ? (
+                    <span className="flex items-center gap-1.5 text-sm text-stone-600">
+                      <span className="text-stone-300">·</span>
+                      {isOption2Color && colorHex ? (
+                        <span
+                          className={`w-3 h-3 rounded-full shrink-0 ${isLight ? "border border-stone-300" : ""}`}
+                          style={{ backgroundColor: colorHex }}
+                        />
+                      ) : null}
+                      {v.color}
+                    </span>
+                  ) : null}
+                  {state.sku && (
+                    <span className="text-[10px] text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">
+                      {state.sku}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleDelete(v.id)}
+                  disabled={isPending}
+                  title="Delete option"
+                  className="w-8 h-8 rounded-lg text-stone-300 hover:text-red-500 hover:bg-red-50
+                    transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Row 2: Price + Stock side by side — big tap targets */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1 block">
+                    Price
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-medium text-sm pointer-events-none">
+                      R
+                    </span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min="0.01"
+                      max="999999"
+                      value={state.priceInRands}
+                      onChange={(e) => handleChange(v.id, "priceInRands", e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      disabled={isPending}
+                      className={`w-full pl-8 pr-3 py-2.5 text-base font-semibold rounded-xl border transition-colors
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400
+                        disabled:opacity-50
+                        ${dirty ? "border-amber-300 bg-amber-50" : "border-stone-200 bg-stone-50"}`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1 block">
+                    Stock
+                  </label>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    step="1"
+                    min="0"
+                    max="999999"
+                    value={state.stock}
+                    onChange={(e) => handleChange(v.id, "stock", e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    disabled={isPending}
+                    className={`w-full px-3 py-2.5 text-base font-semibold rounded-xl border transition-colors
+                      focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400
+                      disabled:opacity-50
+                      ${dirty ? "border-amber-300 bg-amber-50" : "border-stone-200 bg-stone-50"}
+                      ${parseInt(state.stock) === 0 ? "text-red-600" : ""}`}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Mobile summary */}
+        <div className="flex items-center justify-between px-3 py-2 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-500 font-medium">
+          <span>{variants.length} option{variants.length !== 1 ? "s" : ""}</span>
+          <span>
+            {(() => {
+              const prices = variants.map((v) => v.priceInCents);
+              const min = Math.min(...prices);
+              const max = Math.max(...prices);
+              return min === max ? formatZAR(min) : `${formatZAR(min)} – ${formatZAR(max)}`;
+            })()}
+          </span>
+          <span>{variants.reduce((sum, v) => sum + v.stock, 0).toLocaleString()} stock</span>
+        </div>
+      </div>
+
+      {/* ── Desktop: Table Layout ──────────────────────── */}
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-stone-200">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-stone-50 border-b border-stone-200">
@@ -210,13 +336,13 @@ export function VariantBulkEditor({
               <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider">
                 {option2Label}
               </th>
-              <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider w-32">
+              <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider w-36">
                 Price (R)
               </th>
-              <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider w-24">
+              <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider w-28">
                 Stock
               </th>
-              <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider w-28">
+              <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider w-32">
                 SKU
               </th>
               <th className="px-3 py-2.5 w-10" />
@@ -238,12 +364,9 @@ export function VariantBulkEditor({
                     dirty ? "bg-amber-50/60" : idx % 2 === 0 ? "bg-white" : "bg-stone-50/30"
                   }`}
                 >
-                  {/* Option1 (Size) — read-only */}
                   <td className="px-3 py-2">
                     <span className="font-semibold text-stone-900">{v.size}</span>
                   </td>
-
-                  {/* Option2 (Color) — read-only */}
                   <td className="px-3 py-2">
                     {v.color ? (
                       <div className="flex items-center gap-1.5">
@@ -259,36 +382,36 @@ export function VariantBulkEditor({
                       <span className="text-stone-400">—</span>
                     )}
                   </td>
-
-                  {/* Price — editable */}
                   <td className="px-3 py-1.5">
                     <div className="relative">
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-stone-400 text-xs">R</span>
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm font-medium pointer-events-none">R</span>
                       <input
                         type="number"
+                        inputMode="decimal"
                         step="0.01"
                         min="0.01"
                         max="999999"
                         value={state.priceInRands}
                         onChange={(e) => handleChange(v.id, "priceInRands", e.target.value)}
+                        onFocus={(e) => e.target.select()}
                         disabled={isPending}
-                        className={`w-full pl-6 pr-2 py-1.5 text-sm rounded-lg border transition-colors
+                        className={`w-full pl-7 pr-2 py-1.5 text-sm rounded-lg border transition-colors
                           focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400
                           disabled:opacity-50
                           ${dirty ? "border-amber-300 bg-amber-50" : "border-stone-200 bg-white"}`}
                       />
                     </div>
                   </td>
-
-                  {/* Stock — editable */}
                   <td className="px-3 py-1.5">
                     <input
                       type="number"
+                      inputMode="numeric"
                       step="1"
                       min="0"
                       max="999999"
                       value={state.stock}
                       onChange={(e) => handleChange(v.id, "stock", e.target.value)}
+                      onFocus={(e) => e.target.select()}
                       disabled={isPending}
                       className={`w-full px-2 py-1.5 text-sm rounded-lg border transition-colors
                         focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400
@@ -297,8 +420,6 @@ export function VariantBulkEditor({
                         ${parseInt(state.stock) === 0 ? "text-red-600 font-medium" : ""}`}
                     />
                   </td>
-
-                  {/* SKU — editable */}
                   <td className="px-3 py-1.5">
                     <input
                       type="text"
@@ -313,8 +434,6 @@ export function VariantBulkEditor({
                         ${dirty ? "border-amber-300 bg-amber-50" : "border-stone-200 bg-white"}`}
                     />
                   </td>
-
-                  {/* Delete */}
                   <td className="px-3 py-1.5 text-center">
                     <button
                       onClick={() => handleDelete(v.id)}
@@ -332,8 +451,6 @@ export function VariantBulkEditor({
               );
             })}
           </tbody>
-
-          {/* Summary footer */}
           <tfoot>
             <tr className="bg-stone-50 border-t border-stone-200">
               <td colSpan={2} className="px-3 py-2 text-xs font-medium text-stone-500">
@@ -344,9 +461,7 @@ export function VariantBulkEditor({
                   const prices = variants.map((v) => v.priceInCents);
                   const min = Math.min(...prices);
                   const max = Math.max(...prices);
-                  return min === max
-                    ? formatZAR(min)
-                    : `${formatZAR(min)} – ${formatZAR(max)}`;
+                  return min === max ? formatZAR(min) : `${formatZAR(min)} – ${formatZAR(max)}`;
                 })()}
               </td>
               <td className="px-3 py-2 text-xs font-medium text-stone-500">

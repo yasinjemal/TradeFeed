@@ -322,9 +322,9 @@ export function SmartVariantCreator({
       )}
 
       {/* ── Price & Stock ───────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         <div>
-          <label className="text-sm font-medium text-stone-700 mb-1.5 block">
+          <label className="text-xs sm:text-sm font-medium text-stone-700 mb-1.5 block">
             Wholesale Price
           </label>
           <div className="relative">
@@ -333,6 +333,7 @@ export function SmartVariantCreator({
             </span>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               min="0.01"
               value={price}
@@ -340,13 +341,14 @@ export function SmartVariantCreator({
                 setPrice(e.target.value);
                 setResult(null);
               }}
-              className="w-full rounded-xl border-2 border-stone-200 pl-8 pr-3 py-2.5 text-sm font-medium
+              onFocus={(e) => e.target.select()}
+              className="w-full rounded-xl border-2 border-stone-200 pl-8 pr-3 py-2.5 text-base sm:text-sm font-medium
                 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
             />
           </div>
         </div>
         <div>
-          <label className="text-sm font-medium text-stone-700 mb-1.5 block">
+          <label className="text-xs sm:text-sm font-medium text-stone-700 mb-1.5 block">
             Retail Price <span className="text-stone-400 font-normal text-xs">(optional)</span>
           </label>
           <div className="relative">
@@ -355,6 +357,7 @@ export function SmartVariantCreator({
             </span>
             <input
               type="number"
+              inputMode="decimal"
               step="0.01"
               min="0.01"
               value={retailPrice}
@@ -362,18 +365,20 @@ export function SmartVariantCreator({
                 setRetailPrice(e.target.value);
                 setResult(null);
               }}
+              onFocus={(e) => e.target.select()}
               placeholder="—"
-              className="w-full rounded-xl border-2 border-stone-200 pl-8 pr-3 py-2.5 text-sm font-medium
+              className="w-full rounded-xl border-2 border-stone-200 pl-8 pr-3 py-2.5 text-base sm:text-sm font-medium
                 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
             />
           </div>
         </div>
-        <div>
-          <label className="text-sm font-medium text-stone-700 mb-1.5 block">
+        <div className="col-span-2 sm:col-span-1">
+          <label className="text-xs sm:text-sm font-medium text-stone-700 mb-1.5 block">
             Stock per option
           </label>
           <input
             type="number"
+            inputMode="numeric"
             min="0"
             step="1"
             value={stock}
@@ -381,7 +386,8 @@ export function SmartVariantCreator({
               setStock(e.target.value);
               setResult(null);
             }}
-            className="w-full rounded-xl border-2 border-stone-200 px-3 py-2.5 text-sm font-medium
+            onFocus={(e) => e.target.select()}
+            className="w-full rounded-xl border-2 border-stone-200 px-3 py-2.5 text-base sm:text-sm font-medium
               focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
           />
         </div>
