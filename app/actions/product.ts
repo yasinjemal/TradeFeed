@@ -42,9 +42,9 @@ export type ProductActionDeps = {
   createProduct: typeof createProduct;
   updateProduct: typeof updateProduct;
   deleteProduct: typeof deleteProduct;
-  createVariant: typeof createVariant;
+  createVariant: (productId: string, shopId: string, input: Parameters<typeof createVariant>[2], productName?: string) => ReturnType<typeof createVariant>;
   deleteVariant: typeof deleteVariant;
-  batchCreateVariants: typeof batchCreateVariants;
+  batchCreateVariants: (productId: string, shopId: string, variants: Parameters<typeof batchCreateVariants>[2], productName?: string) => ReturnType<typeof batchCreateVariants>;
   revalidatePath: typeof revalidatePath;
   redirect: typeof redirect;
   checkProductLimit: (
@@ -174,7 +174,7 @@ export async function createProductAction(
         stock: (inlineStock && inlineStock.trim() !== "") ? inlineStock.trim() : "0",
       });
       if (variantInput.success) {
-        await deps.createVariant(product.id, access.shopId, variantInput.data);
+        await deps.createVariant(product.id, access.shopId, variantInput.data, parsed.data.name);
       }
       // If variant validation fails, we still created the product — seller can add variants manually
     }
@@ -315,7 +315,18 @@ export async function addVariantAction(
       };
     }
 
-    const variant = await deps.createVariant(productId, access.shopId, parsed.data);
+    // Fetch product name for auto-SKU generation (when SKU not manually provided)
+    let productName: string | undefined;
+    if (!parsed.data.sku) {
+      const { db } = await import("@/lib/db");
+      const product = await db.product.findFirst({
+        where: { id: productId, shopId: access.shopId },
+        select: { name: true },
+      });
+      productName = product?.name;
+    }
+
+    const variant = await deps.createVariant(productId, access.shopId, parsed.data, productName);
     if (!variant) {
       return { success: false, error: "Product not found or access denied." };
     }
@@ -389,6 +400,13 @@ export async function batchCreateVariantsAction(
     const access = await resolveShopAccess(shopSlug, deps);
     if (!access) return { success: false, error: "Access denied." };
 
+    // Fetch product name for auto-SKU generation
+    const { db } = await import("@/lib/db");
+    const product = await db.product.findFirst({
+      where: { id: productId, shopId: access.shopId },
+      select: { name: true },
+    });
+
     // Generate all size × color combinations
     const colorsToUse: (string | null)[] =
       colors.length > 0 ? colors : [null];
@@ -405,7 +423,8 @@ export async function batchCreateVariantsAction(
     const result = await deps.batchCreateVariants(
       productId,
       access.shopId,
-      variants
+      variants,
+      product?.name,
     );
     if (!result) return { success: false, error: "Product not found." };
 

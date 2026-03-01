@@ -12,6 +12,7 @@
 
 import { db } from "@/lib/db";
 import type { VariantCreateInput, VariantUpdateInput } from "@/lib/validation/product";
+import { generateSku } from "@/lib/utils/sku";
 
 // ── Price Denormalization ──────────────────────────────────
 // After every variant create/update/delete, recalculate the
@@ -69,12 +70,19 @@ async function verifyProductOwnership(
 export async function createVariant(
   productId: string,
   shopId: string,
-  input: VariantCreateInput
+  input: VariantCreateInput,
+  productName?: string
 ) {
   // Verify product belongs to this shop
   const isOwner = await verifyProductOwnership(productId, shopId);
   if (!isOwner) {
     return null;
+  }
+
+  // Auto-generate SKU if not provided and we have a product name
+  let sku = input.sku || null;
+  if (!sku && productName) {
+    sku = generateSku(productName, input.size, input.color);
   }
 
   const variant = await db.productVariant.create({
@@ -85,7 +93,7 @@ export async function createVariant(
       priceInCents: input.priceInRands, // Already converted to cents by Zod transform
       retailPriceCents: input.retailPriceInRands ?? null, // Optional retail price in cents
       stock: input.stock,
-      sku: input.sku || null,
+      sku,
     },
   });
 
@@ -181,7 +189,8 @@ export async function deleteVariant(variantId: string, shopId: string) {
 export async function batchCreateVariants(
   productId: string,
   shopId: string,
-  variants: { size: string; color: string | null; priceInCents: number; stock: number; retailPriceCents?: number | null }[]
+  variants: { size: string; color: string | null; priceInCents: number; stock: number; retailPriceCents?: number | null }[],
+  productName?: string
 ) {
   const isOwner = await verifyProductOwnership(productId, shopId);
   if (!isOwner) return null;
@@ -194,6 +203,8 @@ export async function batchCreateVariants(
       priceInCents: v.priceInCents,
       retailPriceCents: v.retailPriceCents ?? null,
       stock: v.stock,
+      // Auto-generate SKU from product name + variant options
+      ...(productName ? { sku: generateSku(productName, v.size, v.color) } : {}),
     })),
     skipDuplicates: true,
   });
