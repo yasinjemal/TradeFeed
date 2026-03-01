@@ -77,6 +77,8 @@ export default async function RootLayout({
     >
       <html lang={locale}>
         <head>
+          {/* Google Merchant Center verification */}
+          <meta name="google-site-verification" content="t7VN3FQbd8ShLmh9D_6FGqAgNepY9Dm5CwUZLagBhXs" />
           {/* Site-wide JSON-LD: Organization + WebSite (sitelinks search box) */}
           {generateSiteJsonLd().map((schema, i) => (
             <script
