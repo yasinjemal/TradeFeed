@@ -73,7 +73,6 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
   const [buyerNote, setBuyerNote] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [showDelivery, setShowDelivery] = useState(false);
-  const [orderType, setOrderType] = useState<"wholesale" | "retail">("wholesale");
   const [delivery, setDelivery] = useState<DeliveryAddress>({
     address: "",
     city: "",
@@ -172,7 +171,8 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       }
 
       // 4. Open WhatsApp with structured message (includes order number)
-      const checkoutNumber = orderType === "retail" && retailWhatsappNumber
+      const hasRetailItems = items.some((i) => i.orderType === "retail");
+      const checkoutNumber = hasRetailItems && retailWhatsappNumber
         ? retailWhatsappNumber
         : whatsappNumber;
       const url = buildWhatsAppCheckoutUrl(
@@ -202,7 +202,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       clearCart();
       onClose();
     });
-  }, [items, isPending, shopId, shopSlug, whatsappNumber, retailWhatsappNumber, orderType, clearCart, onClose, showDelivery, delivery]);
+  }, [items, isPending, shopId, shopSlug, whatsappNumber, retailWhatsappNumber, clearCart, onClose, showDelivery, delivery]);
 
   const handleClearCart = useCallback(() => {
     if (!confirm("Remove all items from your cart?")) return;
@@ -274,7 +274,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
           ) : (
             items.map((item) => (
               <div
-                key={item.variantId}
+                key={`${item.variantId}__${item.orderType ?? "wholesale"}`}
                 className="flex gap-3 p-3 rounded-xl bg-stone-50 border border-stone-100"
               >
                 {/* Thumbnail */}
@@ -301,7 +301,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                   <h3 className="font-semibold text-stone-900 text-sm truncate">
                     {item.productName}
                   </h3>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="inline-flex items-center px-2 py-0.5 rounded bg-stone-200 text-stone-700 text-xs font-medium">
                       {item.option1Label ?? "Size"}: {item.size}
                     </span>
@@ -310,19 +310,28 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                         {item.option2Label ?? "Color"}: {item.color}
                       </span>
                     )}
+                    {item.orderType === "retail" ? (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-semibold">
+                        🛍️ Retail
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-semibold">
+                        🏭 Wholesale
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center justify-between mt-2.5">
                     {/* Quantity Stepper */}
                     <div className="flex items-center bg-white rounded-lg border border-stone-200 overflow-hidden">
                       <button
                         onClick={() =>
-                          updateQuantity(item.variantId, item.quantity - 1)
+                          updateQuantity(item.variantId, item.quantity - 1, item.orderType)
                         }
-                        aria-label={item.quantity <= (item.minWholesaleQty ?? 1) ? `Remove ${item.productName}` : `Decrease quantity of ${item.productName}`}
-                        title={item.quantity <= (item.minWholesaleQty ?? 1) ? "Remove from cart" : "Decrease quantity"}
+                        aria-label={item.quantity <= (item.orderType === "retail" ? 1 : (item.minWholesaleQty ?? 1)) ? `Remove ${item.productName}` : `Decrease quantity of ${item.productName}`}
+                        title={item.quantity <= (item.orderType === "retail" ? 1 : (item.minWholesaleQty ?? 1)) ? "Remove from cart" : "Decrease quantity"}
                         className="w-8 h-8 flex items-center justify-center text-stone-500 hover:bg-stone-50 transition-colors"
                       >
-                        {item.quantity <= (item.minWholesaleQty ?? 1) ? (
+                        {item.quantity <= (item.orderType === "retail" ? 1 : (item.minWholesaleQty ?? 1)) ? (
                           <svg className="w-3 h-3 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                           </svg>
@@ -339,7 +348,8 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                         onClick={() =>
                           updateQuantity(
                             item.variantId,
-                            Math.min(item.quantity + 1, item.maxStock)
+                            Math.min(item.quantity + 1, item.maxStock),
+                            item.orderType
                           )
                         }
                         disabled={item.quantity >= item.maxStock}
@@ -357,14 +367,14 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                       {formatZAR(item.priceInCents * item.quantity)}
                     </span>
                   </div>
-                  {(item.minWholesaleQty ?? 1) > 1 && (
-                    <p className="text-[10px] text-amber-600 mt-1">Min. {item.minWholesaleQty} units</p>
+                  {item.orderType !== "retail" && (item.minWholesaleQty ?? 1) > 1 && (
+                    <p className="text-[10px] text-amber-600 mt-1">Wholesale min. {item.minWholesaleQty} units</p>
                   )}
                 </div>
 
                 {/* Remove Button */}
                 <button
-                  onClick={() => removeItem(item.variantId)}
+                  onClick={() => removeItem(item.variantId, item.orderType)}
                   className="self-start w-8 h-8 flex items-center justify-center rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
                   aria-label={`Remove ${item.productName} from cart`}
                   title="Remove item"
@@ -564,32 +574,6 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
               </span>
             </label>
 
-            {retailWhatsappNumber && (
-              <div className="flex rounded-xl border border-stone-200 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setOrderType("wholesale")}
-                  className={`flex-1 py-2.5 text-xs font-semibold transition-colors ${
-                    orderType === "wholesale"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-stone-50 text-stone-600 hover:bg-stone-100"
-                  }`}
-                >
-                  🏭 Wholesale
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setOrderType("retail")}
-                  className={`flex-1 py-2.5 text-xs font-semibold transition-colors ${
-                    orderType === "retail"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-stone-50 text-stone-600 hover:bg-stone-100"
-                  }`}
-                >
-                  🛍️ Retail
-                </button>
-              </div>
-            )}
             <button
               onClick={handleCheckout}
               disabled={isPending}

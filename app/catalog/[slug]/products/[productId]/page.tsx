@@ -170,7 +170,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               </span>
               {product.minWholesaleQty > 1 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-700 px-2.5 py-1">
-                  📦 Min. {product.minWholesaleQty} units
+                  📦 Wholesale min. {product.minWholesaleQty} units
                 </span>
               )}
             </div>
@@ -190,6 +190,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 option2Label={option2Label}
                 quickOrderHref={waLink}
                 minWholesaleQty={product.minWholesaleQty}
+                hasRetailOption={!!shop.retailWhatsappNumber}
                 variants={product.variants.map((v) => ({ id: v.id, size: v.size, color: v.color, priceInCents: v.priceInCents, retailPriceCents: v.retailPriceCents, stock: v.stock }))}
               />
             ) : (

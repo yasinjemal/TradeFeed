@@ -56,7 +56,11 @@ function loadCart(shopSlug: string): CartItem[] {
         "productName" in item &&
         "priceInCents" in item &&
         "quantity" in item
-    );
+    ).map((item) => ({
+      ...item,
+      // Migrate old cart items that don't have orderType
+      orderType: item.orderType ?? "wholesale",
+    }));
   } catch {
     return [];
   }
@@ -109,28 +113,38 @@ export function CartProvider({
     }
   }, [items, shopSlug, isHydrated]);
 
+  /**
+   * Unique key for a cart item — same variant can exist as wholesale AND retail.
+   */
+  function cartKey(variantId: string, orderType: string = "wholesale"): string {
+    return `${variantId}__${orderType}`;
+  }
+
   const addItem = useCallback(
     (newItem: Omit<CartItem, "quantity">, quantity = 1) => {
-      const minQty = newItem.minWholesaleQty ?? 1;
+      const isRetail = newItem.orderType === "retail";
+      const minQty = isRetail ? 1 : (newItem.minWholesaleQty ?? 1);
+      const key = cartKey(newItem.variantId, newItem.orderType);
+
       setItems((prev) => {
         const existing = prev.find(
-          (item) => item.variantId === newItem.variantId
+          (item) => cartKey(item.variantId, item.orderType) === key
         );
 
         if (existing) {
-          // Increment quantity, cap at maxStock, floor at minWholesaleQty
+          // Increment quantity, cap at maxStock, floor at minimum
           const newQty = Math.min(
             existing.quantity + quantity,
             existing.maxStock
           );
           return prev.map((item) =>
-            item.variantId === newItem.variantId
+            cartKey(item.variantId, item.orderType) === key
               ? { ...item, quantity: Math.max(newQty, minQty) }
               : item
           );
         }
 
-        // Add new item: start at minWholesaleQty, cap at maxStock
+        // Add new item: start at minimum, cap at maxStock
         const startQty = Math.max(quantity, minQty);
         return [
           ...prev,
@@ -141,21 +155,35 @@ export function CartProvider({
     []
   );
 
-  const removeItem = useCallback((variantId: string) => {
-    setItems((prev) => prev.filter((item) => item.variantId !== variantId));
+  const removeItem = useCallback((variantId: string, orderType?: string) => {
+    setItems((prev) => {
+      if (orderType) {
+        const key = cartKey(variantId, orderType);
+        return prev.filter((item) => cartKey(item.variantId, item.orderType) !== key);
+      }
+      // Backward compat: remove by variantId only
+      return prev.filter((item) => item.variantId !== variantId);
+    });
   }, []);
 
-  const updateQuantity = useCallback((variantId: string, quantity: number) => {
+  const updateQuantity = useCallback((variantId: string, quantity: number, orderType?: string) => {
     setItems((prev) => {
-      const item = prev.find((i) => i.variantId === variantId);
+      const item = orderType
+        ? prev.find((i) => cartKey(i.variantId, i.orderType) === cartKey(variantId, orderType))
+        : prev.find((i) => i.variantId === variantId);
       if (!item) return prev;
-      const minQty = item.minWholesaleQty ?? 1;
+
+      const isRetail = item.orderType === "retail";
+      const minQty = isRetail ? 1 : (item.minWholesaleQty ?? 1);
+
       // If quantity drops below minimum, remove the item entirely
       if (quantity < minQty) {
-        return prev.filter((i) => i.variantId !== variantId);
+        const key = cartKey(item.variantId, item.orderType);
+        return prev.filter((i) => cartKey(i.variantId, i.orderType) !== key);
       }
+      const key = cartKey(item.variantId, item.orderType);
       return prev.map((i) =>
-        i.variantId === variantId
+        cartKey(i.variantId, i.orderType) === key
           ? { ...i, quantity: Math.min(quantity, i.maxStock) }
           : i
       );

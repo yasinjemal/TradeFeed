@@ -12,7 +12,7 @@
 
 /**
  * A single item in the cart.
- * Keyed by variantId — each option combo is a separate line item.
+ * Keyed by variantId + orderType — same variant can exist as both wholesale and retail.
  */
 export interface CartItem {
   variantId: string;
@@ -23,10 +23,11 @@ export interface CartItem {
   color: string | null;      // option2 value (kept as "color" for DB compat)
   option1Label: string;      // e.g. "Size", "Storage", "Weight"
   option2Label: string;      // e.g. "Color", "Shade", "Flavor"
-  priceInCents: number;
+  priceInCents: number;      // Wholesale or retail price depending on orderType
   quantity: number;
-  maxStock: number; // Prevents over-ordering
-  minWholesaleQty: number; // Minimum wholesale order quantity (default 1)
+  maxStock: number;          // Prevents over-ordering
+  minWholesaleQty: number;   // Minimum wholesale order quantity (default 1)
+  orderType: "wholesale" | "retail"; // Whether this item is ordered at wholesale or retail pricing
 }
 
 /**
@@ -45,9 +46,9 @@ export interface CartContextValue {
   /** Add an item or increment quantity if already in cart */
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   /** Remove an item entirely */
-  removeItem: (variantId: string) => void;
+  removeItem: (variantId: string, orderType?: string) => void;
   /** Update quantity for a specific item */
-  updateQuantity: (variantId: string, quantity: number) => void;
+  updateQuantity: (variantId: string, quantity: number, orderType?: string) => void;
   /** Clear all items */
   clearCart: () => void;
   /** Total number of items (sum of quantities) */

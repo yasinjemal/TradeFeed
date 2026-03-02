@@ -39,6 +39,7 @@ interface AddToCartProps {
   option2Label?: string;
   quickOrderHref?: string;
   minWholesaleQty?: number;
+  hasRetailOption?: boolean; // Shop has retail WhatsApp number
 }
 
 export function AddToCart({
@@ -50,13 +51,22 @@ export function AddToCart({
   option2Label = "Color",
   quickOrderHref,
   minWholesaleQty = 1,
+  hasRetailOption = false,
 }: AddToCartProps) {
   const { addItem } = useCart();
 
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [orderType, setOrderType] = useState<"wholesale" | "retail">("wholesale");
   const [quantity, setQuantity] = useState(minWholesaleQty);
   const [justAdded, setJustAdded] = useState(false);
+
+  // Show retail toggle only when shop supports retail AND variants have retail prices
+  const hasAnyRetailPrice = variants.some((v) => v.retailPriceCents !== null && v.retailPriceCents > 0);
+  const showRetailToggle = hasRetailOption && hasAnyRetailPrice;
+
+  // Effective minimum based on order type
+  const effectiveMinQty = orderType === "retail" ? 1 : minWholesaleQty;
 
   // ── Derived data ─────────────────────────────────────────
   const uniqueSizes = Array.from(new Set(variants.map((v) => v.size)));
@@ -93,7 +103,7 @@ export function AddToCart({
     (size: string) => {
       setSelectedSize(size);
       setSelectedColor(null);
-      setQuantity(minWholesaleQty);
+      setQuantity(effectiveMinQty);
 
       // Auto-select color if only one option
       const colorsForSize = Array.from(
@@ -108,16 +118,28 @@ export function AddToCart({
         setSelectedColor(colorsForSize[0]);
       }
     },
-    [variants]
+    [variants, effectiveMinQty]
   );
 
   const handleColorSelect = useCallback((color: string) => {
     setSelectedColor(color);
-    setQuantity(minWholesaleQty);
+    setQuantity(effectiveMinQty);
+  }, [effectiveMinQty]);
+
+  // Reset quantity when order type changes
+  const handleOrderTypeChange = useCallback((type: "wholesale" | "retail") => {
+    setOrderType(type);
+    const newMin = type === "retail" ? 1 : minWholesaleQty;
+    setQuantity((prev) => Math.max(newMin, prev <= newMin ? newMin : prev));
   }, [minWholesaleQty]);
 
   const handleAdd = useCallback(() => {
     if (!selectedVariant || !canAdd) return;
+
+    const isRetail = orderType === "retail";
+    const unitPrice = isRetail && selectedVariant.retailPriceCents
+      ? selectedVariant.retailPriceCents
+      : selectedVariant.priceInCents;
 
     addItem({
       variantId: selectedVariant.id,
@@ -128,14 +150,15 @@ export function AddToCart({
       color: selectedVariant.color,
       option1Label,
       option2Label,
-      priceInCents: selectedVariant.priceInCents,
+      priceInCents: unitPrice,
       maxStock: selectedVariant.stock,
       minWholesaleQty,
+      orderType,
     }, quantity);
 
     // Show toast
     toast.success(`${productName} added to cart`, {
-      description: `${quantity}× ${selectedVariant.size}${selectedVariant.color ? " / " + selectedVariant.color : ""} — ${formatZAR(selectedVariant.priceInCents * quantity)}`,
+      description: `${quantity}× ${selectedVariant.size}${selectedVariant.color ? " / " + selectedVariant.color : ""} — ${formatZAR(unitPrice * quantity)}${isRetail ? " (retail)" : ""}`,
       duration: 2500,
     });
 
@@ -144,8 +167,8 @@ export function AddToCart({
     setTimeout(() => setJustAdded(false), 1500);
 
     // Reset for next add
-    setQuantity(minWholesaleQty);
-  }, [selectedVariant, canAdd, addItem, productId, productName, option1Label, option2Label, quantity, minWholesaleQty]);
+    setQuantity(effectiveMinQty);
+  }, [selectedVariant, canAdd, addItem, productId, productName, option1Label, option2Label, quantity, effectiveMinQty, orderType]);
 
   // ── Check if a size has any stock ────────────────────────
   const sizeHasStock = (size: string): boolean =>
@@ -219,17 +242,59 @@ export function AddToCart({
       {/* ── Selected variant info + quantity ─────────────── */}
       {selectedVariant && selectedVariant.stock > 0 && (
         <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+          {/* ── Wholesale / Retail Toggle ─── */}
+          {showRetailToggle && (
+            <div className="mb-4">
+              <div className="flex rounded-xl bg-white border border-stone-200 p-0.5">
+                <button
+                  onClick={() => handleOrderTypeChange("wholesale")}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                    orderType === "wholesale"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "text-stone-500 hover:text-stone-700"
+                  }`}
+                >
+                  🏭 Wholesale
+                </button>
+                <button
+                  onClick={() => handleOrderTypeChange("retail")}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                    orderType === "retail"
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "text-stone-500 hover:text-stone-700"
+                  }`}
+                >
+                  🛍️ Retail
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Price + Stock */}
           <div className="flex items-center justify-between mb-4">
             <div>
-              <span className="text-2xl font-bold text-stone-900">
-                {formatZAR(selectedVariant.priceInCents)}
-              </span>
-              <span className="text-xs text-stone-500 ml-1">each</span>
-              {selectedVariant.retailPriceCents && (
-                <div className="text-xs text-stone-400 mt-0.5">
-                  Retail: <span className="font-semibold text-stone-500">{formatZAR(selectedVariant.retailPriceCents)}</span>
-                </div>
+              {orderType === "retail" && selectedVariant.retailPriceCents ? (
+                <>
+                  <span className="text-2xl font-bold text-stone-900">
+                    {formatZAR(selectedVariant.retailPriceCents)}
+                  </span>
+                  <span className="text-xs text-stone-500 ml-1">each</span>
+                  <div className="text-xs text-stone-400 mt-0.5">
+                    Wholesale: <span className="font-semibold text-stone-500">{formatZAR(selectedVariant.priceInCents)}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl font-bold text-stone-900">
+                    {formatZAR(selectedVariant.priceInCents)}
+                  </span>
+                  <span className="text-xs text-stone-500 ml-1">each</span>
+                  {selectedVariant.retailPriceCents && (
+                    <div className="text-xs text-stone-400 mt-0.5">
+                      Retail: <span className="font-semibold text-stone-500">{formatZAR(selectedVariant.retailPriceCents)}</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
             <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
@@ -245,8 +310,8 @@ export function AddToCart({
             </span>
             <div className="flex items-center bg-white rounded-xl border border-stone-200 overflow-hidden">
               <button
-                onClick={() => setQuantity((q) => Math.max(minWholesaleQty, q - 1))}
-                disabled={quantity <= minWholesaleQty}
+                onClick={() => setQuantity((q) => Math.max(effectiveMinQty, q - 1))}
+                disabled={quantity <= effectiveMinQty}
                 className="w-10 h-10 flex items-center justify-center text-stone-600 hover:bg-stone-50 transition-colors disabled:text-stone-300 disabled:cursor-not-allowed"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -268,15 +333,20 @@ export function AddToCart({
             </div>
             {quantity > 1 && (
               <span className="text-sm text-stone-500 font-medium">
-                = {formatZAR(selectedVariant.priceInCents * quantity)}
+                = {formatZAR((orderType === "retail" && selectedVariant.retailPriceCents ? selectedVariant.retailPriceCents : selectedVariant.priceInCents) * quantity)}
               </span>
             )}
           </div>
 
-          {/* MOQ notice */}
-          {minWholesaleQty > 1 && (
+          {/* MOQ notice — only for wholesale */}
+          {orderType === "wholesale" && minWholesaleQty > 1 && (
             <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 mb-4 flex items-center gap-1.5">
-              <span>📦</span> Min. order: <span className="font-bold">{minWholesaleQty} units</span>
+              <span>📦</span> Wholesale min. order: <span className="font-bold">{minWholesaleQty} units</span>
+            </p>
+          )}
+          {orderType === "retail" && (
+            <p className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 mb-4 flex items-center gap-1.5">
+              <span>🛍️</span> Retail — order from <span className="font-bold">1 unit</span>
             </p>
           )}
 
@@ -302,7 +372,7 @@ export function AddToCart({
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                   </svg>
-                  Add to Cart — {formatZAR(selectedVariant.priceInCents * quantity)}
+                  Add to Cart — {formatZAR((orderType === "retail" && selectedVariant.retailPriceCents ? selectedVariant.retailPriceCents : selectedVariant.priceInCents) * quantity)}
                 </span>
               )}
             </button>
@@ -354,7 +424,7 @@ export function AddToCart({
               >
                 {justAdded
                   ? "Added to Cart"
-                  : `Add to Cart — ${formatZAR(selectedVariant.priceInCents * quantity)}`}
+                  : `Add to Cart — ${formatZAR((orderType === "retail" && selectedVariant.retailPriceCents ? selectedVariant.retailPriceCents : selectedVariant.priceInCents) * quantity)}`}
               </button>
             </div>
           </div>

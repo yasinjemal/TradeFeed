@@ -16,6 +16,7 @@ const items: CartItem[] = [
     quantity: 2,
     maxStock: 10,
     minWholesaleQty: 1,
+    orderType: "wholesale",
   },
 ];
 
