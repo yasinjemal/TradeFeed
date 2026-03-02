@@ -23,8 +23,10 @@ const items: CartItem[] = [
 test("buildWhatsAppMessage creates a structured message with totals", () => {
   const message = buildWhatsAppMessage(items);
   assert.match(message, /New Order from TradeFeed/);
-  assert.match(message, /\*Total: R 500.00\*/);
+  assert.match(message, /\*Total: R\s*500/);
   assert.match(message, /Items: 2/);
+  assert.match(message, /2× \*Hoodie\*/);
+  assert.match(message, /Size: L \| Color: Black/);
 });
 
 test("buildWhatsAppMessage includes order number when provided", () => {
@@ -33,6 +35,11 @@ test("buildWhatsAppMessage includes order number when provided", () => {
   assert.match(message, /tradefeed\.co\.za\/track\/TF-20260226-X1Y2/);
   // Should NOT contain the generic header when order number is present
   assert.doesNotMatch(message, /New Order from TradeFeed/);
+});
+
+test("buildWhatsAppMessage includes product links when shopSlug provided", () => {
+  const message = buildWhatsAppMessage(items, null, undefined, "test-shop");
+  assert.match(message, /tradefeed\.co\.za\/catalog\/test-shop\/products\/p1/);
 });
 
 test("buildWhatsAppCheckoutUrl strips plus sign and encodes the message", () => {

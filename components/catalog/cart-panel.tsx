@@ -134,7 +134,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
 
     startTransition(async () => {
       // 1. Build WhatsApp message (needed for order record + URL)
-      const whatsappMessage = buildWhatsAppMessage(items, deliveryData);
+      const whatsappMessage = buildWhatsAppMessage(items, deliveryData, undefined, shopSlug);
 
       // 2. Map cart items to order input format
       const orderItems = items.map((item) => ({
@@ -180,6 +180,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         items,
         deliveryData,
         result.orderNumber,
+        shopSlug,
       );
       window.open(url, "_blank", "noopener,noreferrer");
 

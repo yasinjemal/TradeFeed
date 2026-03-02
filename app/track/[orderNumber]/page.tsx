@@ -20,10 +20,30 @@ interface TrackingPageProps {
 
 export async function generateMetadata({ params }: TrackingPageProps): Promise<Metadata> {
   const { orderNumber } = await params;
+  const decoded = decodeURIComponent(orderNumber);
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
+
   return {
-    title: `Track Order ${decodeURIComponent(orderNumber)} | TradeFeed`,
-    description: `Track the status of your TradeFeed order ${decodeURIComponent(orderNumber)}.`,
+    title: `Track Order ${decoded} | TradeFeed`,
+    description: `Track the status of your TradeFeed order ${decoded}. View real-time updates on your order.`,
     robots: { index: false, follow: false },
+    openGraph: {
+      title: `📦 Track Order ${decoded}`,
+      description: `Track the status of your TradeFeed order. View delivery updates and order details in real time.`,
+      type: "website",
+      siteName: "TradeFeed",
+      images: [{
+        url: `${baseUrl}/api/og?type=marketplace&title=${encodeURIComponent(`📦 Order ${decoded}`)}&subtitle=${encodeURIComponent("Tap to track your order status")}`,
+        width: 1200,
+        height: 630,
+        alt: `Track Order ${decoded}`,
+      }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `📦 Track Order ${decoded} | TradeFeed`,
+      description: `Track the status of your TradeFeed order. View delivery updates and order details in real time.`,
+    },
   };
 }
 

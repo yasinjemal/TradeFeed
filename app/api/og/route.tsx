@@ -351,12 +351,20 @@ function generateMarketplaceOG(params: URLSearchParams) {
   const productCount = params.get("productCount") || "1,000+";
   const sellerCount = params.get("sellerCount") || "";
 
-  const title = category
-    ? `${category} — TradeFeed Marketplace`
-    : "TradeFeed Marketplace";
-  const subtitle = category
-    ? `Browse ${productCount} ${category.toLowerCase()} products from SA sellers`
-    : `Browse ${productCount} products from South Africa's top sellers`;
+  // Allow direct title/subtitle overrides (used by tracking page, etc.)
+  const titleOverride = params.get("title");
+  const subtitleOverride = params.get("subtitle");
+
+  const title = titleOverride
+    ? titleOverride
+    : category
+      ? `${category} — TradeFeed Marketplace`
+      : "TradeFeed Marketplace";
+  const subtitle = subtitleOverride
+    ? subtitleOverride
+    : category
+      ? `Browse ${productCount} ${category.toLowerCase()} products from SA sellers`
+      : `Browse ${productCount} products from South Africa's top sellers`;
 
   return new ImageResponse(
     (
