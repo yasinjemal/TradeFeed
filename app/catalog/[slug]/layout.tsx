@@ -46,33 +46,45 @@ export async function generateMetadata({
     return { title: "Shop Not Found — TradeFeed" };
   }
 
-  const ogUrl = new URL("/api/og", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
-  ogUrl.searchParams.set("type", "shop");
-  ogUrl.searchParams.set("name", shop.name);
-  ogUrl.searchParams.set("description", shop.description || `Browse ${shop.name}'s catalog on TradeFeed`);
-  if (shop.city) ogUrl.searchParams.set("city", shop.city);
-  ogUrl.searchParams.set("productCount", String(shop._count.products));
-  if (shop.isVerified) ogUrl.searchParams.set("verified", "true");
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
+
+  const ogFallbackUrl = new URL("/api/og", baseUrl);
+  ogFallbackUrl.searchParams.set("type", "shop");
+  ogFallbackUrl.searchParams.set("name", shop.name);
+  ogFallbackUrl.searchParams.set("description", shop.description || `Browse ${shop.name}'s catalog on TradeFeed`);
+  if (shop.city) ogFallbackUrl.searchParams.set("city", shop.city);
+  ogFallbackUrl.searchParams.set("productCount", String(shop._count.products));
+  if (shop.isVerified) ogFallbackUrl.searchParams.set("verified", "true");
+
+  // Use shop banner or logo as primary OG image for WhatsApp previews
+  // Fall back to generated branded card
+  const shopImageUrl = shop.bannerUrl || shop.logoUrl;
+  const ogImages = shopImageUrl
+    ? [
+        { url: shopImageUrl, width: 1200, height: 630, alt: shop.name },
+        { url: ogFallbackUrl.toString(), width: 1200, height: 630, alt: `${shop.name} — TradeFeed` },
+      ]
+    : [{ url: ogFallbackUrl.toString(), width: 1200, height: 630, alt: shop.name }];
 
   return {
     title: `${shop.name} — TradeFeed`,
     description:
       shop.description || `Browse ${shop.name}'s catalog on TradeFeed`,
     alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za"}/catalog/${slug}`,
+      canonical: `${baseUrl}/catalog/${slug}`,
     },
     openGraph: {
       title: `${shop.name} — TradeFeed`,
       description:
         shop.description || `Browse ${shop.name}'s catalog on TradeFeed`,
       type: "website",
-      images: [{ url: ogUrl.toString(), width: 1200, height: 630, alt: shop.name }],
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title: `${shop.name} — TradeFeed`,
       description: shop.description || `Browse ${shop.name}'s catalog on TradeFeed`,
-      images: [ogUrl.toString()],
+      images: shopImageUrl ? [shopImageUrl] : [ogFallbackUrl.toString()],
     },
   };
 }

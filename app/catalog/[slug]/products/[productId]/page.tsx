@@ -32,25 +32,38 @@ export async function generateMetadata({
 
   const prices = product.variants.map((v) => v.priceInCents);
   const minPrice = prices.length > 0 ? formatZAR(Math.min(...prices)) : "";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
-  const ogUrl = new URL("/api/og", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
-  ogUrl.searchParams.set("type", "product");
-  ogUrl.searchParams.set("name", product.name);
-  ogUrl.searchParams.set("shopName", shop.name);
-  if (minPrice) ogUrl.searchParams.set("price", `From ${minPrice}`);
-  if (product.images[0]?.url) ogUrl.searchParams.set("image", product.images[0].url);
+  // Use actual product photo for OG image (WhatsApp shows real photos much better)
+  // Fall back to dynamically generated branded card when no photo exists
+  const productImageUrl = product.images[0]?.url;
+  const ogFallbackUrl = new URL("/api/og", baseUrl);
+  ogFallbackUrl.searchParams.set("type", "product");
+  ogFallbackUrl.searchParams.set("name", product.name);
+  ogFallbackUrl.searchParams.set("shopName", shop.name);
+  if (minPrice) ogFallbackUrl.searchParams.set("price", `From ${minPrice}`);
+  if (productImageUrl) ogFallbackUrl.searchParams.set("image", productImageUrl);
+
+  // Primary: real photo (renders instantly, WhatsApp/social always shows it)
+  // Secondary: generated branded card (for platforms that use multiple images)
+  const ogImages = productImageUrl
+    ? [
+        { url: productImageUrl, width: 800, height: 800, alt: product.name },
+        { url: ogFallbackUrl.toString(), width: 1200, height: 630, alt: `${product.name} — ${shop.name}` },
+      ]
+    : [{ url: ogFallbackUrl.toString(), width: 1200, height: 630, alt: product.name }];
 
   return {
     title: `${product.name} - ${shop.name}`,
     description: product.description || `${product.name} from ${minPrice} at ${shop.name}`,
     alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za"}/catalog/${slug}/products/${productId}`,
+      canonical: `${baseUrl}/catalog/${slug}/products/${productId}`,
     },
     openGraph: {
       title: `${product.name} - ${shop.name}`,
       description: product.description || `${product.name} from ${minPrice}`,
       type: "article",
-      images: [{ url: ogUrl.toString(), width: 1200, height: 630, alt: product.name }],
+      images: ogImages,
     },
     other: {
       "product:price:amount": minPrice ? `${Math.min(...prices) / 100}` : "",
@@ -63,7 +76,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `${product.name} - ${shop.name}`,
       description: product.description || `${product.name} from ${minPrice}`,
-      images: [ogUrl.toString()],
+      images: productImageUrl ? [productImageUrl] : [ogFallbackUrl.toString()],
     },
   };
 }
