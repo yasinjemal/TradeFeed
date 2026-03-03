@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useTransition } from "react";
+import { useState, useEffect, useCallback, useTransition, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useUser, UserButton } from "@clerk/nextjs";
@@ -70,6 +70,12 @@ export function MarketplaceShell({
   const { isSignedIn } = useUser();
   const [search, setSearch] = useState(currentFilters.search ?? "");
   const [filterOpen, setFilterOpen] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync local input when URL-driven search changes (e.g. back/forward nav)
+  useEffect(() => {
+    setSearch(currentFilters.search ?? "");
+  }, [currentFilters.search]);
 
   // Track marketplace page view on mount
   useEffect(() => {
@@ -100,11 +106,27 @@ export function MarketplaceShell({
     [router, searchParams, startTransition]
   );
 
-  // Handle search submit
+  // Handle search submit (Enter key / button)
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     updateFilters({ search: search.trim() || undefined });
   };
+
+  // Debounced auto-search on typing (400ms delay, min 2 chars)
+  const handleSearchInput = useCallback(
+    (value: string) => {
+      setSearch(value);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        const trimmed = value.trim();
+        if (trimmed.length >= 2 || trimmed.length === 0) {
+          updateFilters({ search: trimmed || undefined });
+        }
+      }, 400);
+    },
+    [updateFilters]
+  );
 
   // Count active filters
   const activeFilterCount = [
@@ -146,7 +168,7 @@ export function MarketplaceShell({
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => handleSearchInput(e.target.value)}
                 placeholder="Search products, shops, categories..."
                 className="w-full rounded-xl bg-stone-900 border border-stone-800 pl-10 pr-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all"
               />
@@ -241,7 +263,7 @@ export function MarketplaceShell({
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => handleSearchInput(e.target.value)}
                 placeholder="Search products, shops..."
                 className="w-full rounded-xl bg-stone-900 border border-stone-800 pl-10 pr-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-emerald-500/50 transition-all"
               />
@@ -416,7 +438,7 @@ export function MarketplaceShell({
       {/* ── Product Grid ────────────────────────────────── */}
       <section className="px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto">
-          {products.length === 0 ? (
+          {products.length === 0 && !isPending ? (
             /* Empty State */
             <div className="flex flex-col items-center py-20 text-center">
               <IllustrationSearchNotFound className="w-44 h-44 mb-4" />
@@ -437,14 +459,30 @@ export function MarketplaceShell({
             </div>
           ) : (
             <>
-              {/* Loading overlay */}
-              <div className={`transition-opacity duration-200 ${isPending ? "opacity-50" : "opacity-100"}`}>
+              {/* Loading overlay with skeleton shimmer */}
+              <div className={`transition-opacity duration-300 ${isPending ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                   {products.map((product, idx) => (
                     <MarketplaceProductCard key={`${product.id}-${idx}`} product={product} />
                   ))}
                 </div>
               </div>
+
+              {/* Searching indicator */}
+              {isPending && products.length === 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="rounded-2xl bg-stone-900 border border-stone-800/50 overflow-hidden">
+                      <div className="aspect-square bg-stone-800 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+                      <div className="p-3 space-y-2">
+                        <div className="h-4 w-3/4 rounded bg-stone-800 animate-pulse" style={{ animationDelay: `${i * 80 + 40}ms` }} />
+                        <div className="h-3 w-1/2 rounded bg-stone-800/60 animate-pulse" style={{ animationDelay: `${i * 80 + 80}ms` }} />
+                        <div className="h-5 w-1/3 rounded bg-stone-800 animate-pulse" style={{ animationDelay: `${i * 80 + 120}ms` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Pagination */}
               {totalPages > 1 && (

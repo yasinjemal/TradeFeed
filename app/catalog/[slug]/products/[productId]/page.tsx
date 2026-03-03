@@ -162,26 +162,36 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           </div>
 
           <div className="rounded-2xl border border-stone-100 bg-stone-50 px-4 py-3">
+            {/* Wholesale price — primary */}
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl">{formatZAR(minPrice)}</span>
               {minPrice !== maxPrice && <span className="text-base font-medium text-stone-400">- {formatZAR(maxPrice)}</span>}
               <span className="ml-auto text-xs text-stone-400">per unit</span>
             </div>
+
+            {/* Dual pricing callout — show when retail prices exist */}
             {minRetailPrice && (
-              <div className="mt-1 flex items-baseline gap-1.5 text-sm text-stone-500">
-                <span className="text-xs text-stone-400">Retail:</span>
-                <span className="font-semibold">{formatZAR(minRetailPrice)}</span>
-                {maxRetailPrice && minRetailPrice !== maxRetailPrice && (
-                  <span className="text-stone-400">- {formatZAR(maxRetailPrice)}</span>
-                )}
+              <div className="mt-2 flex flex-col gap-1.5 rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2">
+                <div className="flex items-center gap-2 text-xs font-semibold text-stone-600">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5">🏭 Wholesale</span>
+                  <span>{formatZAR(minPrice)}{minPrice !== maxPrice ? ` - ${formatZAR(maxPrice)}` : ""}</span>
+                  {product.minWholesaleQty > 1 && <span className="text-stone-400">· min. {product.minWholesaleQty} units</span>}
+                </div>
+                <div className="flex items-center gap-2 text-xs font-semibold text-stone-600">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-700 px-2 py-0.5">🛍️ Retail</span>
+                  <span>{formatZAR(minRetailPrice)}{maxRetailPrice && minRetailPrice !== maxRetailPrice ? ` - ${formatZAR(maxRetailPrice)}` : ""}</span>
+                  <span className="text-stone-400">· from 1 unit</span>
+                </div>
+                <p className="text-[10px] text-stone-400 mt-0.5">Choose wholesale or retail when adding to cart ↓</p>
               </div>
             )}
+
             <div className="mt-2 flex items-center gap-2 text-xs font-medium">
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 ${totalStock > 0 ? "bg-emerald-100 text-emerald-700" : "bg-stone-200 text-stone-600"}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${totalStock > 0 ? "bg-emerald-500" : "bg-stone-500"}`} />
                 {totalStock > 0 ? `${totalStock} in stock` : "Out of stock"}
               </span>
-              {product.minWholesaleQty > 1 && (
+              {product.minWholesaleQty > 1 && !minRetailPrice && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-700 px-2.5 py-1">
                   📦 Wholesale min. {product.minWholesaleQty} units
                 </span>
@@ -203,7 +213,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 option2Label={option2Label}
                 quickOrderHref={waLink}
                 minWholesaleQty={product.minWholesaleQty}
-                hasRetailOption={!!shop.retailWhatsappNumber}
                 variants={product.variants.map((v) => ({ id: v.id, size: v.size, color: v.color, priceInCents: v.priceInCents, retailPriceCents: v.retailPriceCents, stock: v.stock }))}
               />
             ) : (

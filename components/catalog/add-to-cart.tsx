@@ -39,7 +39,6 @@ interface AddToCartProps {
   option2Label?: string;
   quickOrderHref?: string;
   minWholesaleQty?: number;
-  hasRetailOption?: boolean; // Shop has retail WhatsApp number
 }
 
 export function AddToCart({
@@ -51,7 +50,6 @@ export function AddToCart({
   option2Label = "Color",
   quickOrderHref,
   minWholesaleQty = 1,
-  hasRetailOption = false,
 }: AddToCartProps) {
   const { addItem } = useCart();
 
@@ -61,9 +59,10 @@ export function AddToCart({
   const [quantity, setQuantity] = useState(minWholesaleQty);
   const [justAdded, setJustAdded] = useState(false);
 
-  // Show retail toggle only when shop supports retail AND variants have retail prices
+  // Show retail toggle when any variant has a retail price set
+  // (retail availability is driven by product data, not shop config)
   const hasAnyRetailPrice = variants.some((v) => v.retailPriceCents !== null && v.retailPriceCents > 0);
-  const showRetailToggle = hasRetailOption && hasAnyRetailPrice;
+  const showRetailToggle = hasAnyRetailPrice;
 
   // Effective minimum based on order type
   const effectiveMinQty = orderType === "retail" ? 1 : minWholesaleQty;

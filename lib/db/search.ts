@@ -36,6 +36,8 @@ function sanitizeSearchQuery(raw: string): string {
 /**
  * Search products using PostgreSQL full-text search with relevance ranking.
  * Falls back to trigram similarity if tsquery yields no results.
+ * Gracefully returns [] on any DB error (missing column/extension)
+ * so marketplace always renders — ILIKE fallback in the caller still works.
  *
  * Returns product IDs sorted by relevance (highest first).
  */
@@ -46,36 +48,43 @@ export async function searchProductIds(
   const sanitized = sanitizeSearchQuery(query);
   if (sanitized.length === 0) return [];
 
-  // Phase 1: tsvector full-text search with ranking
-  const ftsResults = await db.$queryRawUnsafe<SearchHit[]>(
-    `
-    SELECT id, ts_rank("search_vector", to_tsquery('english', $1)) AS rank
-    FROM "Product"
-    WHERE "search_vector" @@ to_tsquery('english', $1)
-      AND "isActive" = true
-    ORDER BY rank DESC
-    LIMIT $2
-    `,
-    sanitized,
-    limit
-  );
+  try {
+    // Phase 1: tsvector full-text search with ranking
+    const ftsResults = await db.$queryRawUnsafe<SearchHit[]>(
+      `
+      SELECT id, ts_rank("search_vector", to_tsquery('english', $1)) AS rank
+      FROM "Product"
+      WHERE "search_vector" @@ to_tsquery('english', $1)
+        AND "isActive" = true
+      ORDER BY rank DESC
+      LIMIT $2
+      `,
+      sanitized,
+      limit
+    );
 
-  if (ftsResults.length > 0) return ftsResults;
+    if (ftsResults.length > 0) return ftsResults;
 
-  // Phase 2: Fuzzy fallback via pg_trgm similarity
-  const trimmed = query.trim();
-  const fuzzyResults = await db.$queryRawUnsafe<SearchHit[]>(
-    `
-    SELECT id, similarity("name", $1) AS rank
-    FROM "Product"
-    WHERE similarity("name", $1) > 0.15
-      AND "isActive" = true
-    ORDER BY rank DESC
-    LIMIT $2
-    `,
-    trimmed,
-    limit
-  );
+    // Phase 2: Fuzzy fallback via pg_trgm similarity
+    const trimmed = query.trim();
+    const fuzzyResults = await db.$queryRawUnsafe<SearchHit[]>(
+      `
+      SELECT id, similarity("name", $1) AS rank
+      FROM "Product"
+      WHERE similarity("name", $1) > 0.15
+        AND "isActive" = true
+      ORDER BY rank DESC
+      LIMIT $2
+      `,
+      trimmed,
+      limit
+    );
 
-  return fuzzyResults;
+    return fuzzyResults;
+  } catch (error) {
+    // If FTS / pg_trgm columns/extensions aren't available, return []
+    // so the caller falls back to Prisma ILIKE search gracefully.
+    console.error("[search] FTS query failed, falling back to ILIKE:", error);
+    return [];
+  }
 }
