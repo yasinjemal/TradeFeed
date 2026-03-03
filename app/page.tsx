@@ -12,6 +12,50 @@ import {
 } from "@/components/landing/animated-stats";
 import { MobileNav } from "@/components/landing/mobile-nav";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
+import { generateFaqJsonLd } from "@/lib/seo/json-ld";
+import type { Metadata } from "next";
+
+// ============================================================
+// Landing Page SEO — targeted for "wholesale marketplace South Africa"
+// ============================================================
+export const metadata: Metadata = {
+  title: "TradeFeed | South Africa's Wholesale & Retail Marketplace — Sell on WhatsApp",
+  description:
+    "South Africa's #1 WhatsApp marketplace for wholesale and retail sellers. Create your free online shop, list products, and get structured orders via WhatsApp. Trusted by sellers in Johannesburg, Cape Town, Durban and all 9 provinces.",
+  keywords: [
+    "wholesale clothing Johannesburg",
+    "wholesale marketplace South Africa",
+    "buy wholesale South Africa",
+    "bulk buy clothing SA",
+    "sell on WhatsApp South Africa",
+    "WhatsApp catalog South Africa",
+    "online shop South Africa free",
+    "Jeppe wholesale clothing",
+    "wholesale suppliers Johannesburg",
+    "SA marketplace",
+    "sell online South Africa",
+    "create online store South Africa",
+    "township business online",
+    "reseller South Africa",
+    "bulk clothing South Africa",
+  ],
+  alternates: {
+    canonical: "https://tradefeed.co.za",
+  },
+};
+
+// ── FAQ data (used for both UI rendering + JSON-LD schema) ──
+const FAQ_ITEMS = [
+  { q: "Do my customers need to download an app?", a: "No! Your customers just tap your catalog link — it opens in their phone browser. No app download, no sign-up, no registration. They browse products, add to cart, and order via WhatsApp. Works on any smartphone." },
+  { q: "Can I update stock and prices easily?", a: "Yes. Log into your dashboard from any device, edit any product, change prices, add new sizes or colors, upload new photos, or mark items as sold out. Changes appear on your catalog link instantly." },
+  { q: "Is my WhatsApp number safe?", a: "Absolutely. Your WhatsApp number is only used to receive orders. When a customer taps the order button, it opens their WhatsApp with a pre-filled message. We never share your number with third parties, and it's protected by our POPIA-compliant privacy policy." },
+  { q: "How much does it cost?", a: "Free to start with up to 10 products — forever. When you're ready to scale with unlimited products, promoted listings, and advanced features, upgrade to Pro for R199/month via PayFast. No hidden fees. Cancel anytime." },
+  { q: "How is this different from posting in WhatsApp groups?", a: "WhatsApp posts get buried in 10 minutes. With TradeFeed, your products live on a permanent, searchable, shareable catalog page. Customers can browse anytime, filter by category, sort by price, and send you organized orders with exact sizes, colors, and quantities — no back-and-forth." },
+  { q: "Who is TradeFeed for?", a: "Clothing sellers, beauty product sellers, electronics resellers, food vendors, township traders — anyone who sells on WhatsApp and is tired of the back-and-forth. Whether you sell from home, a stall, or a shop — if your customers are on WhatsApp, TradeFeed is for you." },
+  { q: "Can I use this if I'm not tech-savvy?", a: "If you can post a photo on WhatsApp, you can use TradeFeed. Upload a photo, type a name and price, hit save. That's it. No coding, no design skills needed. We even have a bulk import if you have a spreadsheet of products." },
+  { q: "Do you support PayFast for payments?", a: "Yes! Subscription payments are processed securely through PayFast — South Africa's most trusted payment gateway. Pay with card, EFT, or any PayFast-supported method. We also use PayFast for promoted listing purchases." },
+  { q: "Can buyers track their orders?", a: "Yes. Every order gets a unique tracking number (e.g. TF-20260224-0042). Sellers update the order status from their dashboard (Pending → Confirmed → Shipped → Delivered), and buyers can enquire via WhatsApp using their order number." },
+];
 
 // ============================================================
 // TradeFeed Landing Page — Industry-Grade Conversion Machine
@@ -835,18 +879,19 @@ export default async function HomePage() {
               <p className="mt-3 text-stone-400 text-sm">Everything you need to know before getting started.</p>
             </div>
           </ScrollReveal>
+          {/* FAQ JSON-LD for Google rich results */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(
+                generateFaqJsonLd(
+                  FAQ_ITEMS.map((f) => ({ question: f.q, answer: f.a }))
+                )
+              ),
+            }}
+          />
           <div className="space-y-3">
-            {[
-              { q: "Do my customers need to download an app?", a: "No! Your customers just tap your catalog link — it opens in their phone browser. No app download, no sign-up, no registration. They browse products, add to cart, and order via WhatsApp. Works on any smartphone." },
-              { q: "Can I update stock and prices easily?", a: "Yes. Log into your dashboard from any device, edit any product, change prices, add new sizes or colors, upload new photos, or mark items as sold out. Changes appear on your catalog link instantly." },
-              { q: "Is my WhatsApp number safe?", a: "Absolutely. Your WhatsApp number is only used to receive orders. When a customer taps the order button, it opens their WhatsApp with a pre-filled message. We never share your number with third parties, and it's protected by our POPIA-compliant privacy policy." },
-              { q: "How much does it cost?", a: "Free to start with up to 10 products — forever. When you're ready to scale with unlimited products, promoted listings, and advanced features, upgrade to Pro for R199/month via PayFast. No hidden fees. Cancel anytime." },
-              { q: "How is this different from posting in WhatsApp groups?", a: "WhatsApp posts get buried in 10 minutes. With TradeFeed, your products live on a permanent, searchable, shareable catalog page. Customers can browse anytime, filter by category, sort by price, and send you organized orders with exact sizes, colors, and quantities — no back-and-forth." },
-              { q: "Who is TradeFeed for?", a: "Clothing sellers, beauty product sellers, electronics resellers, food vendors, township traders — anyone who sells on WhatsApp and is tired of the back-and-forth. Whether you sell from home, a stall, or a shop — if your customers are on WhatsApp, TradeFeed is for you." },
-              { q: "Can I use this if I'm not tech-savvy?", a: "If you can post a photo on WhatsApp, you can use TradeFeed. Upload a photo, type a name and price, hit save. That's it. No coding, no design skills needed. We even have a bulk import if you have a spreadsheet of products." },
-              { q: "Do you support PayFast for payments?", a: "Yes! Subscription payments are processed securely through PayFast — South Africa's most trusted payment gateway. Pay with card, EFT, or any PayFast-supported method. We also use PayFast for promoted listing purchases." },
-              { q: "Can buyers track their orders?", a: "Yes. Every order gets a unique tracking number (e.g. TF-20260224-0042). Sellers update the order status from their dashboard (Pending → Confirmed → Shipped → Delivered), and buyers can enquire via WhatsApp using their order number." },
-            ].map((faq, i) => (
+            {FAQ_ITEMS.map((faq, i) => (
               <ScrollReveal key={faq.q} delay={i * 50}>
                 <FaqItem question={faq.q} answer={faq.a} />
               </ScrollReveal>

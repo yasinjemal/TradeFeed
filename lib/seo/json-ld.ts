@@ -326,6 +326,28 @@ export function generateProductJsonLd(
 }
 
 /**
+ * JSON-LD for the landing page FAQ section.
+ * Schema: FAQPage — enables Google rich results with expandable Q&A.
+ * REF: https://developers.google.com/search/docs/appearance/structured-data/faqpage
+ */
+export function generateFaqJsonLd(
+  faqs: { question: string; answer: string }[]
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
+/**
  * JSON-LD for the marketplace discovery page.
  * Schema: ItemList (product grid) + BreadcrumbList + WebPage
  *

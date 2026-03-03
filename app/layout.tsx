@@ -69,6 +69,14 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "https://tradefeed.co.za",
+    languages: {
+      "en": "https://tradefeed.co.za",
+      "zu": "https://tradefeed.co.za",
+      "xh": "https://tradefeed.co.za",
+      "af": "https://tradefeed.co.za",
+      "st": "https://tradefeed.co.za",
+      "x-default": "https://tradefeed.co.za",
+    },
   },
 };
 
