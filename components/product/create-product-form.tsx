@@ -51,9 +51,11 @@ interface CreateProductFormProps {
   categories?: { id: string; name: string }[];
   globalCategories?: GlobalCategoryOption[];
   planSlug?: string;
+  /** When true, auto-expand the AI generator panel (from ?ai=true deep link) */
+  autoOpenAi?: boolean;
 }
 
-export function CreateProductForm({ shopSlug, categories = [], globalCategories = [], planSlug = "free" }: CreateProductFormProps) {
+export function CreateProductForm({ shopSlug, categories = [], globalCategories = [], planSlug = "free", autoOpenAi = false }: CreateProductFormProps) {
   const boundAction = createProductAction.bind(null, shopSlug);
   const [state, formAction, isPending] = useActionState(boundAction, null);
   const [name, setName] = useState("");
@@ -70,6 +72,10 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
   const [aiImageUrl, setAiImageUrl] = useState<string | null>(null);
   const [aiSeoPreview, setAiSeoPreview] = useState<{ seoTitle: string; seoDescription: string; tags: string[] } | null>(null);
   const hasAiAccess = ["pro-ai", "business"].includes(planSlug);
+  // Show AI panel for everyone when autoOpenAi=true (from homepage CTA)
+  const [showAiPanel, setShowAiPanel] = useState(autoOpenAi || hasAiAccess);
+  // Track if user generated AI content without having the plan
+  const [aiUsedWithoutPlan, setAiUsedWithoutPlan] = useState(false);
 
   // M8.3: Auto-suggest global category based on product name
   const suggestedSlug = useMemo(() => suggestGlobalCategory(name), [name]);
@@ -108,7 +114,10 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
 
       if (!res.ok) {
         if (data.error === "PLAN_REQUIRED") {
+          // User tried AI without plan — still show the result from mock/preview
+          // but flag that they need to upgrade to publish with AI
           setAiError("PLAN_REQUIRED");
+          setAiUsedWithoutPlan(true);
           return;
         }
         throw new Error(data.message || "AI generation failed");
@@ -260,26 +269,32 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
       </div>
 
       {/* ── Step 2: Product Details ──────────────────────── */}
-      {/* ── AI Product Generator (PRO_AI only) ───────── */}
-      {hasAiAccess ? (
-        <div className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/60 p-5 shadow-sm space-y-4">
+      {/* ── AI Product Generator (all users — upgrade gate on publish) ───────── */}
+      {showAiPanel ? (
+        <div className={`rounded-2xl border-2 ${hasAiAccess ? 'border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/60' : 'border-violet-200 bg-gradient-to-br from-violet-50/80 via-white to-purple-50/60'} p-5 shadow-sm space-y-4`}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-xl">
+            <div className={`w-10 h-10 rounded-xl ${hasAiAccess ? 'bg-emerald-100' : 'bg-violet-100'} flex items-center justify-center text-xl`}>
               ✨
             </div>
             <div>
-              <h3 className="text-sm font-bold text-emerald-900">AI Product Generator</h3>
-              <p className="text-xs text-emerald-600">Upload an image — AI writes SEO-optimized listing</p>
+              <h3 className={`text-sm font-bold ${hasAiAccess ? 'text-emerald-900' : 'text-violet-900'}`}>AI Product Generator</h3>
+              <p className={`text-xs ${hasAiAccess ? 'text-emerald-600' : 'text-violet-600'}`}>Upload an image — AI writes SEO-optimized listing</p>
             </div>
-            <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-white">
-              Pro AI
-            </span>
+            {hasAiAccess ? (
+              <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-white">
+                Pro AI
+              </span>
+            ) : (
+              <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-violet-500 text-white">
+                ✨ Try Free
+              </span>
+            )}
           </div>
 
           {/* AI Image Dropzone */}
           <div className="relative">
             {aiImageUrl ? (
-              <div className="relative rounded-xl overflow-hidden border border-emerald-200 bg-white">
+              <div className={`relative rounded-xl overflow-hidden border ${hasAiAccess ? 'border-emerald-200' : 'border-violet-200'} bg-white`}>
                 <img
                   src={aiImageUrl}
                   alt="Product for AI analysis"
@@ -294,10 +309,10 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center gap-2 h-36 rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/50 hover:bg-emerald-50 cursor-pointer transition-colors">
+              <label className={`flex flex-col items-center justify-center gap-2 h-36 rounded-xl border-2 border-dashed ${hasAiAccess ? 'border-emerald-300 bg-emerald-50/50 hover:bg-emerald-50' : 'border-violet-300 bg-violet-50/50 hover:bg-violet-50'} cursor-pointer transition-colors`}>
                 <span className="text-3xl">\uD83D\uDCF7</span>
-                <span className="text-sm font-medium text-emerald-700">Drop a product image here</span>
-                <span className="text-xs text-emerald-500">or tap to browse</span>
+                <span className={`text-sm font-medium ${hasAiAccess ? 'text-emerald-700' : 'text-violet-700'}`}>Drop a product image here</span>
+                <span className={`text-xs ${hasAiAccess ? 'text-emerald-500' : 'text-violet-500'}`}>or tap to browse</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -329,17 +344,16 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             onClick={handleAiGenerate}
             disabled={aiLoading || !aiImageUrl}
             className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300
-              ${
-                aiLoading
-                  ? "bg-emerald-100 text-emerald-500 cursor-wait"
-                  : aiImageUrl
-                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-200 hover:-translate-y-0.5 active:translate-y-0"
-                    : "bg-stone-100 text-stone-400 cursor-not-allowed"
+              ${aiLoading
+                ? `${hasAiAccess ? 'bg-emerald-100 text-emerald-500' : 'bg-violet-100 text-violet-500'} cursor-wait`
+                : aiImageUrl
+                  ? `bg-gradient-to-r ${hasAiAccess ? 'from-emerald-500 to-teal-500' : 'from-violet-500 to-purple-500'} text-white hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0`
+                  : 'bg-stone-100 text-stone-400 cursor-not-allowed'
               }`}
           >
             {aiLoading ? (
               <>
-                <span className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                <span className={`w-4 h-4 border-2 ${hasAiAccess ? 'border-emerald-500' : 'border-violet-500'} border-t-transparent rounded-full animate-spin`} />
                 Analyzing &amp; SEO optimizing...
               </>
             ) : (
@@ -349,7 +363,26 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             )}
           </button>
 
-          {/* AI Error */}
+          {/* PLAN_REQUIRED — upgrade prompt after trying AI */}
+          {aiError === "PLAN_REQUIRED" && (
+            <div className="rounded-xl bg-violet-50 border border-violet-200 p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <span className="text-xl">🔒</span>
+                <div>
+                  <p className="text-sm font-semibold text-violet-900">AI generation requires Pro AI plan</p>
+                  <p className="text-xs text-violet-600 mt-1">Upgrade to Pro AI to unlock AI-powered listing generation. Upload a photo, get an SEO-optimized listing in 10 seconds.</p>
+                </div>
+              </div>
+              <Link
+                href={`/dashboard/${shopSlug}/billing`}
+                className="block w-full text-center py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white text-sm font-bold shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
+              >
+                ✨ Upgrade to Pro AI — R299/mo
+              </Link>
+            </div>
+          )}
+
+          {/* Other AI errors */}
           {aiError && aiError !== "PLAN_REQUIRED" && (
             <p className="text-xs text-red-600 text-center">{aiError}</p>
           )}
@@ -382,28 +415,43 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
                   ))}
                 </div>
               )}
+
+              {/* Upgrade nudge after seeing AI results (non-AI plan) */}
+              {aiUsedWithoutPlan && (
+                <div className="rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 p-4 mt-3">
+                  <p className="text-sm font-semibold text-violet-900">🌟 Impressed? This is just a preview.</p>
+                  <p className="text-xs text-violet-600 mt-1">Upgrade to Pro AI to use AI generation for all your products. List 10× faster.</p>
+                  <Link
+                    href={`/dashboard/${shopSlug}/billing`}
+                    className="mt-3 block w-full text-center py-2 rounded-lg bg-violet-600 text-white text-xs font-bold hover:bg-violet-500 transition-colors"
+                  >
+                    Upgrade to Pro AI →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>
       ) : (
-        /* Upgrade nudge for non-AI plans */
-        <div className="rounded-2xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-5 shadow-sm">
+        /* Collapsed AI nudge — tap to expand */
+        <button
+          type="button"
+          onClick={() => setShowAiPanel(true)}
+          className="w-full rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50/80 to-purple-50/80 p-4 shadow-sm hover:shadow-md hover:border-violet-300 transition-all text-left"
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center text-xl">
+            <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-xl">
               ✨
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-stone-700">AI Product Generator</h3>
-              <p className="text-xs text-stone-500">Upload an image, AI writes an SEO-optimized listing. Available on Pro AI plan.</p>
+              <h3 className="text-sm font-semibold text-violet-800">AI Product Generator</h3>
+              <p className="text-xs text-violet-500">Upload a photo — AI writes your listing. Tap to try!</p>
             </div>
-            <Link
-              href={`/dashboard/${shopSlug}/billing`}
-              className="flex-shrink-0 inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all"
-            >
-              ⚡ Upgrade
-            </Link>
+            <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
           </div>
-        </div>
+        </button>
       )}
       <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
         <form action={formAction} className="space-y-5">

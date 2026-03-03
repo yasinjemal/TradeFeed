@@ -13,10 +13,13 @@ import Link from "next/link";
 
 interface NewProductPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ ai?: string }>;
 }
 
-export default async function NewProductPage({ params }: NewProductPageProps) {
+export default async function NewProductPage({ params, searchParams }: NewProductPageProps) {
   const { slug } = await params;
+  const { ai } = await searchParams;
+  const autoOpenAi = ai === "true";
 
   // Auth
   let access: Awaited<ReturnType<typeof requireShopAccess>>;
@@ -56,6 +59,7 @@ export default async function NewProductPage({ params }: NewProductPageProps) {
         categories={categories.map((c) => ({ id: c.id, name: c.name }))}
         globalCategories={globalCategories}
         planSlug={planSlug}
+        autoOpenAi={autoOpenAi}
       />
     </div>
   );

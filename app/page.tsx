@@ -120,6 +120,13 @@ export default async function HomePage() {
       : "Create Your Shop"
     : "Get Your Catalog Link";
 
+  // ── AI CTA — deep-links to product creation with AI pre-opened ──
+  const aiCtaHref = clerkId
+    ? dashboardSlug
+      ? `/dashboard/${dashboardSlug}/products/new?ai=true`
+      : "/create-shop?ai=true"
+    : "/sign-up?redirect_url=/dashboard&ai=true";
+
   // ── Live platform stats (cached) + admin check (parallel) ──
   const [{ shopCount, productCount, orderCount }, adminClerkId] = await Promise.all([
     getPlatformStats(),
@@ -754,7 +761,7 @@ export default async function HomePage() {
                 </div>
                 <div className="mb-6">
                   <h3 className="text-lg font-bold text-stone-100">Pro AI</h3>
-                  <p className="text-sm text-violet-400/80 mt-1">For power sellers</p>
+                  <p className="text-sm text-violet-400/80 mt-1">The AI selling machine</p>
                 </div>
                 <div className="mb-2">
                   <span className="text-4xl font-extrabold text-stone-100">R299</span>
@@ -766,18 +773,18 @@ export default async function HomePage() {
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
-                    { text: "Unlimited products", highlight: false },
+                    { text: "🤖 AI auto title from photo", highlight: true },
+                    { text: "🤖 AI product description", highlight: true },
+                    { text: "🤖 AI category suggestion", highlight: true },
+                    { text: "🤖 AI SEO tags & meta", highlight: true },
                     { text: "Everything in Pro", highlight: false },
-                    { text: "AI product generator", highlight: true },
-                    { text: "WhatsApp checkout", highlight: false },
+                    { text: "Unlimited products", highlight: false },
                     { text: "Advanced analytics", highlight: false },
                     { text: "Priority support", highlight: false },
-                    { text: "Promoted listings", highlight: false },
-                    { text: "Custom branding (coming soon)", highlight: true },
                   ].map((f) => (
                     <li key={f.text} className="flex items-start gap-3 text-sm text-stone-200">
                       <svg className="w-5 h-5 text-violet-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                      <span>{f.text}{f.highlight && <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 font-medium">NEW</span>}</span>
+                      <span>{f.text}{f.highlight && <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 font-medium">AI</span>}</span>
                     </li>
                   ))}
                 </ul>
@@ -788,6 +795,61 @@ export default async function HomePage() {
             </ScrollReveal>
           </div>
           <p className="text-center text-xs text-stone-600 mt-8">Payments processed securely by PayFast 🇿🇦 · Cancel anytime · VAT inclusive</p>
+
+          {/* AI Feature Comparison */}
+          <ScrollReveal>
+            <div className="mt-16 max-w-3xl mx-auto">
+              <h3 className="text-center text-lg font-bold text-stone-200 mb-6">AI Feature Comparison</h3>
+              <div className="rounded-2xl border border-stone-800/60 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-stone-800/60">
+                      <th className="text-left px-5 py-3 text-stone-400 font-medium">Feature</th>
+                      <th className="text-center px-4 py-3 text-stone-400 font-medium">Free</th>
+                      <th className="text-center px-4 py-3 text-stone-400 font-medium">Pro</th>
+                      <th className="text-center px-4 py-3 text-violet-400 font-bold">Pro AI</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-800/40">
+                    {[
+                      { feature: "AI Auto Title from Photo", free: false, pro: false, proAi: true },
+                      { feature: "AI Product Description", free: false, pro: false, proAi: true },
+                      { feature: "AI Category Suggestion", free: false, pro: false, proAi: true },
+                      { feature: "AI SEO Tags & Meta", free: false, pro: false, proAi: true },
+                      { feature: "WhatsApp Checkout", free: true, pro: true, proAi: true },
+                      { feature: "Products", free: "10", pro: "∞", proAi: "∞" },
+                      { feature: "Marketplace Listing", free: true, pro: true, proAi: true },
+                      { feature: "Promoted Listings", free: false, pro: true, proAi: true },
+                      { feature: "Revenue Dashboard", free: false, pro: true, proAi: true },
+                    ].map((row) => (
+                      <tr key={row.feature} className={typeof row.free === "boolean" && !row.free && !row.pro && row.proAi ? "bg-violet-500/[0.04]" : ""}>
+                        <td className="px-5 py-3 text-stone-300 font-medium">{row.feature}</td>
+                        {[row.free, row.pro, row.proAi].map((val, i) => (
+                          <td key={i} className="text-center px-4 py-3">
+                            {val === true ? (
+                              <span className="text-emerald-400">✅</span>
+                            ) : val === false ? (
+                              <span className="text-stone-600">—</span>
+                            ) : (
+                              <span className="text-stone-300 font-semibold">{val}</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="text-center mt-6">
+                <Link
+                  href={aiCtaHref}
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white font-semibold text-sm shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                >
+                  ✨ Try AI Now — Free
+                </Link>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
