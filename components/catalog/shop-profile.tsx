@@ -112,7 +112,7 @@ const FRAME_STYLES: Record<LuxuryTier, {
 };
 
 export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   const hasLocation = shop.latitude !== null && shop.longitude !== null;
   const hasAddress = shop.address || shop.city;
@@ -238,11 +238,11 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="absolute top-3 left-3 p-1.5 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/30 transition-colors"
+          className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/30 transition-colors px-2.5 py-1.5"
           aria-label={expanded ? "Collapse profile" : "Expand profile"}
         >
           <svg
-            className={`w-4 h-4 text-white/80 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+            className={`w-3.5 h-3.5 text-white/90 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2.5}
@@ -250,6 +250,9 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
+          {!expanded && (
+            <span className="text-[11px] font-medium text-white/90">ℹ️ About this seller</span>
+          )}
         </button>
       </div>
 

@@ -13,6 +13,7 @@ import { RestockAlert } from "@/components/catalog/restock-alert";
 import { RecentlyViewedTracker } from "@/lib/recently-viewed/recently-viewed";
 import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
 import { ProductReviews } from "@/components/reviews/product-reviews";
+import { WhatsAppCTAProductSetter } from "@/components/catalog/whatsapp-cta-product-setter";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -123,6 +124,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   return (
     <div className="mx-auto w-full max-w-3xl">
+      <WhatsAppCTAProductSetter productName={product.name} />
       <RecentlyViewedTracker
         shopSlug={slug}
         productId={product.id}

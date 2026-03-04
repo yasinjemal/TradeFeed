@@ -21,6 +21,7 @@ import { CartProvider } from "@/lib/cart/cart-context";
 import { WishlistProvider } from "@/lib/wishlist/wishlist-context";
 import { WishlistButton } from "@/components/catalog/wishlist-button";
 import { StickyWhatsAppCTA } from "@/components/catalog/sticky-whatsapp-cta";
+import { WhatsAppCTAProvider } from "@/components/catalog/whatsapp-cta-context";
 import { generateShopJsonLd } from "@/lib/seo/json-ld";
 import { ShareCatalog } from "@/components/catalog/share-catalog";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -107,6 +108,7 @@ export default async function CatalogLayout({
 
   return (
     <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined}>
+    <WhatsAppCTAProvider>
     <WishlistProvider shopSlug={slug} shopId={shop.id}>
       {/* JSON-LD Structured Data for SEO */}
       {generateShopJsonLd(shop).map((schema, i) => (
@@ -275,6 +277,7 @@ export default async function CatalogLayout({
         <StickyWhatsAppCTA whatsappNumber={shop.whatsappNumber} shopName={shop.name} />
       </CatalogAppShell>
     </WishlistProvider>
+    </WhatsAppCTAProvider>
     </CartProvider>
   );
 }

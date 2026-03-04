@@ -18,6 +18,7 @@ import {
   getCatalogCombos,
 } from "@/lib/db/catalog";
 import { getSellerTierData } from "@/lib/db/shops";
+import { getShopDrops } from "@/lib/db/drops";
 import { trackEvent } from "@/lib/db/analytics";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -39,10 +40,11 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   const shop = await getCatalogShop(slug);
   if (!shop) return notFound();
 
-  const [products, combos, tierData] = await Promise.all([
+  const [products, combos, tierData, recentDrops] = await Promise.all([
     getCatalogProducts(shop.id),
     getCatalogCombos(shop.id),
     getSellerTierData(shop.id, shop),
+    getShopDrops(slug, 1),
   ]);
 
   // ── Track page view (fire-and-forget — don't block render) ──
@@ -113,6 +115,24 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
         shopId={shop.id}
         categories={categories}
       />
+
+      {/* ── Latest Stock Drop Banner ──────────────────── */}
+      {recentDrops.length > 0 && recentDrops[0] && (
+        <Link
+          href={`/catalog/${slug}/drops/${recentDrops[0].id}`}
+          className="flex items-center gap-3 rounded-2xl border border-orange-200/60 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 px-4 py-3.5 transition-all hover:shadow-md hover:border-orange-300 group"
+        >
+          <span className="text-2xl flex-shrink-0">🔥</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-orange-700 uppercase tracking-wide">Latest Drop</p>
+            <p className="text-sm font-semibold text-stone-800 truncate">{recentDrops[0].title}</p>
+            <p className="text-[11px] text-stone-500">{recentDrops[0]._count.items} product{recentDrops[0]._count.items !== 1 ? "s" : ""}</p>
+          </div>
+          <svg className="w-5 h-5 text-stone-400 flex-shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </Link>
+      )}
 
       {/* ── Combo Deals ─────────────────────────────── */}
       <ComboSection combos={combos} shopSlug={slug} />
