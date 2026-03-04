@@ -837,7 +837,7 @@ export default async function HomePage() {
                       { feature: "Promoted Listings", free: false, pro: true, proAi: true },
                       { feature: "Revenue Dashboard", free: false, pro: true, proAi: true },
                     ].map((row) => (
-                      <tr key={row.feature} className={row.feature.startsWith("AI") && row.proAi === true ? "bg-violet-500/[0.04]" : "">
+                      <tr key={row.feature} className={row.feature.startsWith("AI") && row.proAi === true ? "bg-violet-500/[0.04]" : undefined}>
                         <td className="px-5 py-3 text-stone-300 font-medium">{row.feature}</td>
                         {[row.free, row.pro, row.proAi].map((val, i) => (
                           <td key={i} className="text-center px-4 py-3">
