@@ -394,8 +394,8 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
               {hasHours && hasTodayHours && (
                 <>
                   <span className="text-stone-300">·</span>
-                  <span className={isOpenNow ? "text-emerald-600 font-semibold" : "text-red-500 font-medium"}>
-                    {isOpenNow ? "🟢 Open" : "🔴 Closed"}
+                  <span className="text-emerald-600 font-semibold">
+                    {isOpenNow ? "🟢 Open now" : "💬 Orders anytime"}
                   </span>
                 </>
               )}
@@ -565,7 +565,7 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
                       </span>
                       <span className={
                         dayHour === "Closed"
-                          ? "text-red-500 text-xs"
+                          ? "text-stone-400 text-xs"
                           : isToday
                             ? luxuryTier === "elite" || luxuryTier === "pro"
                               ? "text-amber-800"

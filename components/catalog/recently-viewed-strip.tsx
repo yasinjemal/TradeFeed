@@ -3,6 +3,7 @@
 // ============================================================
 // Horizontal scrollable strip of recently viewed products.
 // Shows on the catalog page below the product grid.
+// Falls back to "Popular from this seller" for new visitors.
 // ============================================================
 
 "use client";
@@ -12,15 +13,25 @@ import Image from "next/image";
 import { useRecentlyViewed } from "@/lib/recently-viewed/recently-viewed";
 import { formatZAR } from "@/types";
 
+interface FallbackProduct {
+  productId: string;
+  productName: string;
+  imageUrl: string | null;
+  priceInCents: number;
+}
+
 interface RecentlyViewedStripProps {
   shopSlug: string;
   /** Exclude this product ID (e.g. on product detail, hide the current one) */
   excludeProductId?: string;
+  /** Products to show when user has no recently-viewed history */
+  fallbackProducts?: FallbackProduct[];
 }
 
 export function RecentlyViewedStrip({
   shopSlug,
   excludeProductId,
+  fallbackProducts,
 }: RecentlyViewedStripProps) {
   const { items } = useRecentlyViewed(shopSlug);
 
@@ -29,22 +40,35 @@ export function RecentlyViewedStrip({
     .filter((i) => i.productId !== excludeProductId)
     .slice(0, 8);
 
-  if (displayed.length === 0) return null;
+  // Use fallback for new visitors with no browsing history
+  const useFallback = displayed.length === 0 && fallbackProducts && fallbackProducts.length > 0;
+  const productsToShow = useFallback ? fallbackProducts! : displayed;
+
+  if (productsToShow.length === 0) return null;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5">
-          <svg className="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Recently Viewed
+          {useFallback ? (
+            <>
+              <span className="text-base">🔥</span>
+              Popular from this seller
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Recently Viewed
+            </>
+          )}
         </h3>
       </div>
 
       {/* Horizontal scroll */}
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
-        {displayed.map((item) => (
+        {productsToShow.map((item) => (
           <Link
             key={item.productId}
             href={`/catalog/${shopSlug}/products/${item.productId}`}

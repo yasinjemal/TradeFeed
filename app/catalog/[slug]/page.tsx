@@ -93,15 +93,20 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
     ).values()
   );
 
+  // ── Fallback products for new visitors (when recently-viewed is empty)
+  const fallbackProducts = products.slice(0, 8).map((p) => ({
+    productId: p.id,
+    productName: p.name,
+    imageUrl: p.images[0]?.url ?? null,
+    priceInCents:
+      p.variants.length > 0
+        ? Math.min(...p.variants.map((v) => v.priceInCents))
+        : 0,
+  }));
+
   return (
     <div className="space-y-5">
-      {/* ── Shop Profile (collapsible trust section) ───── */}
-      <ShopProfile shop={shop} tierBadge={tierData.tier} />
-
-      {/* ── Combo Deals ─────────────────────────────── */}
-      <ComboSection combos={combos} shopSlug={slug} />
-
-      {/* ── Search, Filter & Product Grid ─────────────── */}
+      {/* ── Search, Filter & Product Grid (PRODUCTS FIRST) ── */}
       <CatalogSearchFilter
         products={products}
         shopSlug={slug}
@@ -109,26 +114,68 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
         categories={categories}
       />
 
-      {/* ── Recently Viewed ──────────────────────────────── */}
-      <RecentlyViewedStrip shopSlug={slug} />
+      {/* ── Combo Deals ─────────────────────────────── */}
+      <ComboSection combos={combos} shopSlug={slug} />
 
-      {/* ── Marketplace Cross-Link ────────────────────── */}
-      <div className="bg-gradient-to-r from-stone-50 to-emerald-50/30 rounded-2xl border border-stone-200/50 p-6 text-center">
-        <p className="text-stone-500 text-sm mb-1">
-          Want to see products from other sellers?
-        </p>
+      {/* ── Shop Profile (collapsible trust section) ───── */}
+      <ShopProfile shop={shop} tierBadge={tierData.tier} />
+
+      {/* ── Recently Viewed / Popular from Seller ────────── */}
+      <RecentlyViewedStrip shopSlug={slug} fallbackProducts={fallbackProducts} />
+
+      {/* ── Start Your Own Shop — Viral CTA ───────────── */}
+      <div className="rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border border-emerald-200/60 p-6 text-center space-y-4">
+        <div className="text-3xl">🚀</div>
+        <h3 className="text-lg font-bold text-stone-900">
+          Start Your Own Shop Like This
+        </h3>
+        <div className="flex flex-col gap-2.5 text-sm text-stone-600 max-w-xs mx-auto text-left">
+          <div className="flex items-center gap-2.5">
+            <span className="text-emerald-500 font-bold">1.</span> Upload your products
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span className="text-emerald-500 font-bold">2.</span> Share your catalog link
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span className="text-emerald-500 font-bold">3.</span> Receive orders on WhatsApp
+          </div>
+        </div>
+        <Link
+          href="/create-shop"
+          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-emerald-200 transition-all hover:bg-emerald-700 hover:shadow-lg active:scale-[0.98]"
+        >
+          Create your shop in 2 minutes →
+        </Link>
+      </div>
+
+      {/* ── AI Feature Advertising ────────────────────── */}
+      <div className="rounded-2xl bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 border border-violet-200/60 p-6 text-center space-y-4">
+        <div className="text-3xl">⚡</div>
+        <h3 className="text-lg font-bold text-stone-900">
+          Add Products in Seconds with AI
+        </h3>
+        <div className="flex flex-col gap-2.5 text-sm text-stone-600 max-w-xs mx-auto text-left">
+          <div className="flex items-center gap-2">📸 Upload a photo</div>
+          <div className="flex items-center gap-2">✨ AI writes the title &amp; description</div>
+          <div className="flex items-center gap-2">🏷️ AI suggests category &amp; price</div>
+          <div className="flex items-center gap-2">🚀 List products 10× faster</div>
+        </div>
+        <Link
+          href="/create-shop"
+          className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-violet-200 transition-all hover:bg-violet-700 hover:shadow-lg active:scale-[0.98]"
+        >
+          Try it free →
+        </Link>
+      </div>
+
+      {/* ── Marketplace Browse ─────────────────────────── */}
+      <div className="text-center py-2">
         <Link
           href="/marketplace"
-          className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-semibold text-sm transition-colors group"
+          className="inline-flex items-center gap-1.5 text-sm text-stone-400 hover:text-emerald-600 transition-colors group"
         >
-          Browse more on TradeFeed Marketplace
-          <svg
-            className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
+          Browse TradeFeed Marketplace
+          <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </Link>

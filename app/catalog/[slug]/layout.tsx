@@ -20,6 +20,7 @@ import Link from "next/link";
 import { CartProvider } from "@/lib/cart/cart-context";
 import { WishlistProvider } from "@/lib/wishlist/wishlist-context";
 import { WishlistButton } from "@/components/catalog/wishlist-button";
+import { StickyWhatsAppCTA } from "@/components/catalog/sticky-whatsapp-cta";
 import { generateShopJsonLd } from "@/lib/seo/json-ld";
 import { ShareCatalog } from "@/components/catalog/share-catalog";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -271,6 +272,7 @@ export default async function CatalogLayout({
         </div>
 
         <WishlistButton shopSlug={slug} />
+        <StickyWhatsAppCTA whatsappNumber={shop.whatsappNumber} shopName={shop.name} />
       </CatalogAppShell>
     </WishlistProvider>
     </CartProvider>

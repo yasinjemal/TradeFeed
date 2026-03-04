@@ -590,9 +590,20 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
               {isPending ? "Placing Order…" : "Send Order on WhatsApp"}
             </button>
 
-            <p className="text-[10px] text-stone-400 text-center">
-              Opens WhatsApp with your order details
-            </p>
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center gap-2 text-xs text-stone-500">
+                <span className="text-emerald-500">✔</span>
+                <span>Order sent directly to seller on WhatsApp</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-stone-500">
+                <span className="text-emerald-500">✔</span>
+                <span>Confirm delivery &amp; payment with seller</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-stone-500">
+                <span className="text-emerald-500">✔</span>
+                <span>No account required</span>
+              </div>
+            </div>
           </div>
         )}
       </div>
