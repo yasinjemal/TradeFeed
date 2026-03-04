@@ -66,7 +66,7 @@ export async function getAdminShops(options?: {
   search?: string;
   page?: number;
   limit?: number;
-  filter?: "all" | "verified" | "unverified" | "inactive";
+  filter?: "all" | "verified" | "unverified" | "inactive" | "no-products";
 }) {
   const { search, page = 1, limit = 20, filter = "all" } = options || {};
 
@@ -85,6 +85,7 @@ export async function getAdminShops(options?: {
   if (filter === "verified") where.isVerified = true;
   if (filter === "unverified") where.isVerified = false;
   if (filter === "inactive") where.isActive = false;
+  if (filter === "no-products") where.products = { none: {} };
 
   const [shops, total] = await Promise.all([
     db.shop.findMany({
@@ -102,10 +103,17 @@ export async function getAdminShops(options?: {
         isFeaturedShop: true,
         logoUrl: true,
         createdAt: true,
+        aiGenerationsUsed: true,
+        referredBy: true,
         _count: {
           select: {
             products: true,
           },
+        },
+        products: {
+          select: { createdAt: true },
+          orderBy: { createdAt: "desc" as const },
+          take: 1,
         },
         subscription: {
           select: {

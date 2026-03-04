@@ -24,6 +24,9 @@ import { createShop } from "@/lib/db/shops";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { cookies } from "next/headers";
+import { sendEmail } from "@/lib/email/resend";
+import { welcomeEmailHtml, welcomeEmailText } from "@/lib/email/templates/welcome";
+import { SITE_URL } from "@/lib/config/site";
 
 /**
  * Server action result type.
@@ -127,7 +130,28 @@ export async function createShopAction(
       // Non-fatal — shop is still created
     });
 
-    // 6. Redirect to the shop dashboard
+    // 6. Send welcome email (fire-and-forget — don't block redirect)
+    const sellerName = user.firstName || shop.name;
+    const ownerEmail = user.email;
+    if (ownerEmail) {
+      const emailData = {
+        shopName: shop.name,
+        sellerName,
+        catalogUrl: `${SITE_URL}/catalog/${shop.slug}`,
+        dashboardUrl: `${SITE_URL}/dashboard/${shop.slug}`,
+      };
+      sendEmail({
+        to: ownerEmail,
+        subject: `Welcome to TradeFeed — ${shop.name} is live! 🎉`,
+        html: welcomeEmailHtml(emailData),
+        text: welcomeEmailText(emailData),
+      }).catch((err: unknown) => {
+        console.error("[createShopAction] Welcome email failed:", err);
+        // Non-fatal — shop is still created
+      });
+    }
+
+    // 7. Redirect to the shop dashboard
     // redirect() throws internally — Next.js handles this
     redirect(`/dashboard/${shop.slug}`);
   } catch (error: unknown) {

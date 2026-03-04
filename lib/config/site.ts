@@ -37,3 +37,9 @@ export const SITE_DOMAIN = SITE_URL.replace(/^https?:\/\//, "").replace(
  * Email addresses should use the root domain, not www.
  */
 export const EMAIL_DOMAIN = "tradefeed.co.za";
+
+/**
+ * Support email address for seller help.
+ * Used in dashboard help widget, welcome emails, etc.
+ */
+export const SUPPORT_EMAIL = "support@tradefeed.co.za";

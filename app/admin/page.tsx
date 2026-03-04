@@ -16,7 +16,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const params = await searchParams;
   const search = params.search || "";
   const page = parseInt(params.page || "1", 10);
-  const filter = (params.filter || "all") as "all" | "verified" | "unverified" | "inactive";
+  const filter = (params.filter || "all") as "all" | "verified" | "unverified" | "inactive" | "no-products";
 
   const [stats, shopData] = await Promise.all([
     getAdminStats(),

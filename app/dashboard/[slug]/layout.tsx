@@ -139,6 +139,23 @@ export default async function DashboardLayout({
       {/* ── Page Content ────────────────────────────────── */}
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8">{children}</main>
 
+      {/* ── Floating Help Button ────────────────────────── */}
+      <a
+        href="mailto:support@tradefeed.co.za?subject=Help with my TradeFeed shop"
+        className="fixed bottom-6 left-4 z-50 md:bottom-6 md:left-6
+          group flex items-center gap-2
+          h-11 px-4 rounded-full
+          bg-white border border-stone-200 shadow-lg shadow-stone-200/50
+          text-stone-600 hover:text-emerald-600 hover:border-emerald-200 hover:shadow-emerald-100/50
+          transition-all duration-200"
+        aria-label="Get help"
+      >
+        <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+        </svg>
+        <span className="text-xs font-medium">Need help?</span>
+      </a>
+
       {/* ── Floating Add Product Button (mobile) ────────── */}
       <a
         href={`/dashboard/${slug}/products/new`}

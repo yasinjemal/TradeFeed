@@ -35,7 +35,10 @@ interface AdminShop {
   isFeaturedShop: boolean;
   logoUrl: string | null;
   createdAt: Date;
+  aiGenerationsUsed: number;
+  referredBy: string | null;
   _count: { products: number };
+  products: { createdAt: Date }[];
   subscription: {
     status: string;
     plan: { name: string; slug: string };
@@ -63,6 +66,7 @@ const FILTERS = [
   { key: "unverified", label: "Unverified" },
   { key: "verified", label: "Verified" },
   { key: "inactive", label: "Inactive" },
+  { key: "no-products", label: "No Products" },
 ] as const;
 
 export function AdminShopList({
@@ -188,6 +192,11 @@ export function AdminShopList({
             const owner = shop.users[0]?.user;
             const planName = shop.subscription?.plan.name || "No plan";
             const planSlug = shop.subscription?.plan.slug || "";
+            const lastProduct = shop.products[0]?.createdAt;
+            const daysSinceJoin = Math.floor(
+              (Date.now() - new Date(shop.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+            );
+            const isGhost = shop._count.products === 0 && daysSinceJoin >= 3;
 
             return (
               <div
@@ -256,14 +265,39 @@ export function AdminShopList({
                         <span>📍 {shop.city}{shop.province ? `, ${shop.province}` : ""}</span>
                       )}
                       <span>{shop._count.products} products</span>
+                      {shop.aiGenerationsUsed > 0 && (
+                        <span className="text-violet-400">🤖 {shop.aiGenerationsUsed} AI</span>
+                      )}
+                      {lastProduct && (
+                        <span className="text-stone-600">
+                          Last product {new Date(lastProduct).toLocaleDateString("en-ZA")}
+                        </span>
+                      )}
+                      {shop.referredBy && (
+                        <span className="text-blue-400">🔗 ref: {shop.referredBy}</span>
+                      )}
                       {owner && (
                         <span className="text-stone-600">
                           Owner: {owner.firstName || ""} {owner.lastName || ""} ({owner.email})
                         </span>
                       )}
+                      <a
+                        href={`https://wa.me/${shop.whatsappNumber.replace("+", "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-emerald-500 hover:text-emerald-400 transition-colors"
+                      >
+                        📱 {shop.whatsappNumber}
+                      </a>
                       <span className="text-stone-600">
                         Joined {new Date(shop.createdAt).toLocaleDateString("en-ZA")}
+                        {daysSinceJoin > 0 && ` (${daysSinceJoin}d ago)`}
                       </span>
+                      {isGhost && (
+                        <span className="text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full text-[10px] font-medium">
+                          ⚠ No activity
+                        </span>
+                      )}
                     </div>
                   </div>
 

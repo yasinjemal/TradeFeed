@@ -74,8 +74,8 @@ export function welcomeEmailHtml(data: WelcomeEmailData): string {
 
     <!-- Footer -->
     <div style="text-align: center; margin-top: 24px; color: #a8a29e; font-size: 12px;">
-      <p>Need help? Reply to this email or visit our support page.</p>
-      <p style="margin-top: 4px;">TradeFeed — Structured catalogs for SA wholesalers</p>
+      <p>Need help getting started? Just reply to this email — we'll help you personally.</p>
+      <p style="margin-top: 4px;">TradeFeed — AI-powered catalogs for SA wholesalers</p>
     </div>
   </div>
 </body>
@@ -103,7 +103,7 @@ export function welcomeEmailText(data: WelcomeEmailData): string {
     "",
     `Go to dashboard: ${data.dashboardUrl}`,
     "",
-    `Need help? Reply to this email or visit our support page.`,
+    `Need help getting started? Just reply to this email — we'll help you personally.`,
     "",
     `— TradeFeed`,
   ].join("\n");
