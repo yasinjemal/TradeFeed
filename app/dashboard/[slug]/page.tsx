@@ -119,6 +119,83 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}
+      {/* Activation Checklist — TOP for new sellers           */}
+      {/* ═══════════════════════════════════════════════════ */}
+      {stats.productCount < 5 && (() => {
+        const steps = [
+          { id: 'product', label: 'Add your first product', done: stats.productCount >= 1, href: `products/new?ai=true`, emoji: '📦' },
+          { id: 'ai', label: 'Try AI listing (upload a photo)', done: aiAccess.creditsUsed >= 1, href: `products/new?ai=true`, emoji: '✨' },
+          { id: 'five', label: 'List 5 products', done: stats.productCount >= 5, href: `products/new`, emoji: '🎯' },
+          { id: 'profile', label: 'Complete your shop profile', done: profilePct >= 80, href: `settings`, emoji: '🏪' },
+          { id: 'share', label: 'Share catalog on WhatsApp', done: false, href: null, emoji: '📲' },
+        ];
+        const doneCount = steps.filter(s => s.done).length;
+        return (
+          <div className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 p-5 sm:p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-stone-900 flex items-center gap-2">
+                <span className="text-lg">🚀</span> Get Your Shop Ready
+              </h3>
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2.5 py-1 rounded-full">
+                {doneCount}/{steps.length} done
+              </span>
+            </div>
+            <div className="h-2.5 rounded-full bg-white/80 overflow-hidden mb-4 shadow-inner">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-500"
+                style={{ width: `${(doneCount / steps.length) * 100}%` }}
+              />
+            </div>
+            <div className="space-y-2.5">
+              {steps.map((step) => (
+                <div key={step.id} className={`flex items-center gap-3 p-2.5 rounded-xl transition-all ${
+                  step.done ? 'bg-emerald-50/50' : 'bg-white/60 hover:bg-white'
+                }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    step.done ? 'bg-emerald-100 text-emerald-600' : 'bg-stone-100 text-stone-400'
+                  }`}>
+                    {step.done ? (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    ) : (
+                      <span className="text-sm">{step.emoji}</span>
+                    )}
+                  </div>
+                  {step.href ? (
+                    <Link
+                      href={`/dashboard/${slug}/${step.href}`}
+                      className={`text-sm font-medium transition-colors flex-1 ${
+                        step.done
+                          ? 'text-stone-400 line-through'
+                          : 'text-stone-700 hover:text-emerald-700'
+                      }`}
+                    >
+                      {step.label}
+                      {!step.done && <span className="text-emerald-600 ml-1">→</span>}
+                    </Link>
+                  ) : (
+                    <span className={`text-sm font-medium flex-1 ${
+                      step.done ? 'text-stone-400 line-through' : 'text-stone-700'
+                    }`}>
+                      {step.label}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+            {doneCount < 3 && (
+              <div className="mt-4 pt-3 border-t border-emerald-100">
+                <p className="text-xs text-emerald-700 font-medium">
+                  💡 Most sellers finish in under 5 minutes and start getting orders the same day!
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* ═══════════════════════════════════════════════════ */}
       {/* Seller Tier Badge                                   */}
       {/* ═══════════════════════════════════════════════════ */}
       <div className={`rounded-2xl border ${tierData.tier.borderColor} ${tierData.tier.bgColor} p-4 sm:p-5`}>
@@ -661,79 +738,8 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}
-      {/* Activation Checklist — only for new sellers          */}
+      {/* (Checklist moved to top of page)                    */}
       {/* ═══════════════════════════════════════════════════ */}
-      {stats.productCount < 5 && (() => {
-        const steps = [
-          { id: 'product', label: 'Add your first product', done: stats.productCount >= 1, href: `new?ai=true`, emoji: '📦' },
-          { id: 'ai', label: 'Try AI listing (upload a photo)', done: aiAccess.creditsUsed >= 1, href: `products/new?ai=true`, emoji: '✨' },
-          { id: 'five', label: 'List 5 products', done: stats.productCount >= 5, href: `products/new`, emoji: '🎯' },
-          { id: 'profile', label: 'Complete your shop profile', done: profilePct >= 80, href: `settings`, emoji: '🏪' },
-          { id: 'share', label: 'Share catalog on WhatsApp', done: false, href: null, emoji: '📲' },
-        ];
-        const doneCount = steps.filter(s => s.done).length;
-        return (
-          <div className="rounded-2xl border-2 border-stone-200 bg-white p-5 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-stone-900 flex items-center gap-2">
-                <span className="text-lg">🚀</span> Seller Activation Checklist
-              </h3>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-                {doneCount}/{steps.length} done
-              </span>
-            </div>
-            <div className="h-2 rounded-full bg-stone-100 overflow-hidden mb-4">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-500"
-                style={{ width: `${(doneCount / steps.length) * 100}%` }}
-              />
-            </div>
-            <div className="space-y-2">
-              {steps.map((step) => (
-                <div key={step.id} className="flex items-center gap-3">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    step.done ? 'bg-emerald-100 text-emerald-600' : 'bg-stone-100 text-stone-400'
-                  }`}>
-                    {step.done ? (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                      </svg>
-                    ) : (
-                      <span className="text-sm">{step.emoji}</span>
-                    )}
-                  </div>
-                  {step.href ? (
-                    <Link
-                      href={`/dashboard/${slug}/${step.href}`}
-                      className={`text-sm font-medium transition-colors ${
-                        step.done
-                          ? 'text-stone-400 line-through'
-                          : 'text-stone-700 hover:text-emerald-700'
-                      }`}
-                    >
-                      {step.label}
-                      {!step.done && <span className="text-emerald-600 ml-1">→</span>}
-                    </Link>
-                  ) : (
-                    <span className={`text-sm font-medium ${
-                      step.done ? 'text-stone-400 line-through' : 'text-stone-700'
-                    }`}>
-                      {step.label}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-            {doneCount < 3 && (
-              <div className="mt-4 pt-3 border-t border-stone-100">
-                <p className="text-xs text-stone-500">
-                  💡 Complete these steps to start getting orders. Most sellers finish in under 5 minutes!
-                </p>
-              </div>
-            )}
-          </div>
-        );
-      })()}
     </div>
   );
 }

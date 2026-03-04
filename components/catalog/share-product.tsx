@@ -23,7 +23,7 @@ export function ShareProduct({
 }: ShareProductProps) {
   const [copied, setCopied] = useState(false);
 
-  const shareText = `Check out *${productName}* from ${price} at ${shopName}! 🛍️\n\n${productUrl}`;
+  const shareText = `Check out *${productName}* from ${price} at ${shopName}! 🛍️\n\n${productUrl}\n\nvia TradeFeed — Create your free shop at tradefeed.co.za`;
   const waShareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 
   const copyLink = async () => {

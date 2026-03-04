@@ -90,6 +90,31 @@ const getPlatformStats = unstable_cache(
   { revalidate: 300 } // 5 minutes
 );
 
+// Cache featured sellers for 10 minutes — real social proof on the homepage
+const getHomepageSellers = unstable_cache(
+  async () => {
+    const shops = await db.shop.findMany({
+      where: {
+        isActive: true,
+        products: { some: { isActive: true } },
+      },
+      select: {
+        name: true,
+        slug: true,
+        logoUrl: true,
+        city: true,
+        isVerified: true,
+        _count: { select: { products: { where: { isActive: true } } } },
+      },
+      orderBy: [{ isFeaturedShop: "desc" }, { isVerified: "desc" }, { createdAt: "asc" }],
+      take: 6,
+    });
+    return shops;
+  },
+  ["homepage-sellers"],
+  { revalidate: 600 } // 10 minutes
+);
+
 export default async function HomePage() {
   // ── Auth-aware CTA ────────────────────────────────────
   const { userId: clerkId } = await auth();
@@ -127,10 +152,11 @@ export default async function HomePage() {
       : "/create-shop?ai=true"
     : "/sign-up?redirect_url=/dashboard&ai=true";
 
-  // ── Live platform stats (cached) + admin check (parallel) ──
-  const [{ shopCount, productCount, orderCount }, adminClerkId] = await Promise.all([
+  // ── Live platform stats (cached) + admin check + sellers (parallel) ──
+  const [{ shopCount, productCount, orderCount }, adminClerkId, featuredSellers] = await Promise.all([
     getPlatformStats(),
     isAdmin(),
+    getHomepageSellers(),
   ]);
   const userIsAdmin = !!adminClerkId;
 
@@ -532,6 +558,69 @@ export default async function HomePage() {
           </div>
         </ScrollReveal>
       </section>
+
+      {/* ─────────────────────────────────────────────────────
+          SECTION 4b — FEATURED SELLERS (real social proof)
+      ───────────────────────────────────────────────────── */}
+      {featuredSellers.length > 0 && (
+        <section className="px-5 pb-24">
+          <ScrollReveal>
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-10">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full mb-4">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live sellers
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Sellers Already Growing on TradeFeed</h2>
+                <p className="mt-2 text-stone-400 text-sm">Real businesses using AI-powered catalogs to sell on WhatsApp</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                {featuredSellers.map((seller) => (
+                  <Link
+                    key={seller.slug}
+                    href={`/catalog/${seller.slug}`}
+                    className="group rounded-2xl border border-stone-800 bg-stone-900/60 p-4 hover:border-emerald-500/30 hover:bg-stone-900 transition-all hover:shadow-lg hover:shadow-emerald-500/5"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
+                        {seller.logoUrl ? (
+                          <Image src={seller.logoUrl} alt={seller.name} width={40} height={40} className="w-10 h-10 rounded-xl object-cover" />
+                        ) : (
+                          <span className="text-white font-bold text-sm">{seller.name.charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-semibold text-stone-200 truncate group-hover:text-emerald-400 transition-colors">{seller.name}</p>
+                          {seller.isVerified && (
+                            <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500" title="Verified">
+                              <svg className="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-stone-500">
+                          {seller.city && `📍 ${seller.city} · `}{seller._count.products} products
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-stone-500 group-hover:text-emerald-400 transition-colors">Browse catalog →</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <div className="text-center mt-8">
+                <Link
+                  href={ctaHref}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold hover:shadow-xl hover:shadow-emerald-500/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  Join These Sellers — It&apos;s Free →
+                </Link>
+              </div>
+            </div>
+          </ScrollReveal>
+        </section>
+      )}
 
       {/* ─────────────────────────────────────────────────────
           SECTION 5 — BEFORE / AFTER
