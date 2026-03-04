@@ -87,6 +87,32 @@ function extractFieldErrors(
 }
 
 /**
+ * Helper: Extract a user-friendly error message from unknown errors.
+ * Handles Prisma errors, generic Error objects, and unknown throws.
+ */
+function extractActionError(error: unknown): string {
+  if (error instanceof Error) {
+    // Prisma known request errors (e.g. foreign key violation, unique constraint)
+    if ("code" in error && typeof (error as Record<string, unknown>).code === "string") {
+      const code = (error as Record<string, unknown>).code as string;
+      if (code === "P2002") return "A product with these details already exists.";
+      if (code === "P2003") return "Invalid category or reference. Please try again.";
+      if (code === "P2025") return "Record not found. Please refresh and try again.";
+      // Connection / timeout
+      if (code === "P1001" || code === "P1002" || code === "P1008" || code === "P1017") {
+        return "Database connection issue. Please try again in a moment.";
+      }
+      return `Database error (${code}). Please try again.`;
+    }
+    // Generic errors — show message but cap length
+    return error.message.length > 200
+      ? error.message.slice(0, 200) + "…"
+      : error.message;
+  }
+  return "Something went wrong. Please try again.";
+}
+
+/**
  * Helper: Resolve shopId from slug and verify user has access.
  *
  * MULTI-TENANT: This is the gatekeeper. Every product action must:
@@ -140,10 +166,10 @@ export async function createProductAction(
       };
     }
 
-    // 2. Extract and validate
+    // 2. Extract and validate — use ?? "" to guard against null FormData values
     const rawInput = {
-      name: formData.get("name") as string,
-      description: formData.get("description") as string,
+      name: (formData.get("name") as string) ?? "",
+      description: (formData.get("description") as string) ?? "",
       categoryId: (formData.get("categoryId") as string) || "",
       globalCategoryId: (formData.get("globalCategoryId") as string) || "",
       option1Label: (formData.get("option1Label") as string) || "Size",
@@ -168,14 +194,19 @@ export async function createProductAction(
     const inlinePrice = formData.get("priceInRands") as string;
     const inlineStock = formData.get("stock") as string;
     if (inlinePrice && inlinePrice.trim() !== "") {
-      const { variantCreateSchema } = await import("@/lib/validation/product");
-      const variantInput = variantCreateSchema.safeParse({
-        size: "Default",
-        priceInRands: inlinePrice.trim(),
-        stock: (inlineStock && inlineStock.trim() !== "") ? inlineStock.trim() : "0",
-      });
-      if (variantInput.success) {
-        await deps.createVariant(product.id, access.shopId, variantInput.data, parsed.data.name);
+      try {
+        const { variantCreateSchema } = await import("@/lib/validation/product");
+        const variantInput = variantCreateSchema.safeParse({
+          size: "Default",
+          priceInRands: inlinePrice.trim(),
+          stock: (inlineStock && inlineStock.trim() !== "") ? inlineStock.trim() : "0",
+        });
+        if (variantInput.success) {
+          await deps.createVariant(product.id, access.shopId, variantInput.data, parsed.data.name);
+        }
+      } catch (variantError) {
+        // Variant creation failed but product was created — don't block the seller
+        console.error("[createProductAction] Variant creation failed (product still created):", variantError);
       }
       // If variant validation fails, we still created the product — seller can add variants manually
     }
@@ -188,8 +219,11 @@ export async function createProductAction(
     if (error instanceof Error && "digest" in error) {
       throw error;
     }
-    console.error("[createProductAction] Error:", error);
-    return { success: false, error: "Something went wrong. Please try again." };
+
+    // Surface a useful error message instead of hiding behind generic text
+    const message = extractActionError(error);
+    console.error("[createProductAction] Error:", message, error);
+    return { success: false, error: message };
   }
 }
 
@@ -210,8 +244,8 @@ export async function updateProductAction(
     }
 
     const rawInput = {
-      name: formData.get("name") as string,
-      description: formData.get("description") as string,
+      name: (formData.get("name") as string) ?? "",
+      description: (formData.get("description") as string) ?? "",
       categoryId: (formData.get("categoryId") as string) || "",
       globalCategoryId: (formData.get("globalCategoryId") as string) || "",
       option1Label: (formData.get("option1Label") as string) || undefined,
@@ -240,8 +274,9 @@ export async function updateProductAction(
 
     return { success: true };
   } catch (error: unknown) {
-    console.error("[updateProductAction] Error:", error);
-    return { success: false, error: "Something went wrong. Please try again." };
+    const message = extractActionError(error);
+    console.error("[updateProductAction] Error:", message, error);
+    return { success: false, error: message };
   }
 }
 
@@ -270,8 +305,9 @@ export async function deleteProductAction(
     if (error instanceof Error && "digest" in error) {
       throw error;
     }
-    console.error("[deleteProductAction] Error:", error);
-    return { success: false, error: "Something went wrong. Please try again." };
+    const message = extractActionError(error);
+    console.error("[deleteProductAction] Error:", message, error);
+    return { success: false, error: message };
   }
 }
 
@@ -346,8 +382,9 @@ export async function addVariantAction(
         error: "A variant with these options already exists.",
       };
     }
-    console.error("[addVariantAction] Error:", error);
-    return { success: false, error: "Something went wrong. Please try again." };
+    const message = extractActionError(error);
+    console.error("[addVariantAction] Error:", message, error);
+    return { success: false, error: message };
   }
 }
 
@@ -374,8 +411,9 @@ export async function deleteVariantAction(
     deps.revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
     return { success: true };
   } catch (error: unknown) {
-    console.error("[deleteVariantAction] Error:", error);
-    return { success: false, error: "Something went wrong. Please try again." };
+    const message = extractActionError(error);
+    console.error("[deleteVariantAction] Error:", message, error);
+    return { success: false, error: message };
   }
 }
 
@@ -482,8 +520,9 @@ export async function updateVariantAction(
     deps.revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
     return { success: true };
   } catch (error: unknown) {
-    console.error("[updateVariantAction] Error:", error);
-    return { success: false, error: "Something went wrong. Please try again." };
+    const message = extractActionError(error);
+    console.error("[updateVariantAction] Error:", message, error);
+    return { success: false, error: message };
   }
 }
 
@@ -549,7 +588,8 @@ export async function bulkUpdateVariantsAction(
       ...(errors.length > 0 && { errors, error: `${errors.length} variant(s) failed to update.` }),
     };
   } catch (error: unknown) {
-    console.error("[bulkUpdateVariantsAction] Error:", error);
-    return { success: false, error: "Something went wrong. Please try again." };
+    const message = extractActionError(error);
+    console.error("[bulkUpdateVariantsAction] Error:", message, error);
+    return { success: false, error: message };
   }
 }
