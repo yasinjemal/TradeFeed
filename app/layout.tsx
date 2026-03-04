@@ -7,6 +7,8 @@ import { CookieConsent } from "@/components/cookie-consent";
 import { GlobalBottomNav } from "@/components/ui/global-bottom-nav";
 import { Toaster } from "sonner";
 import { generateSiteJsonLd } from "@/lib/seo/json-ld";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -116,11 +118,11 @@ export default async function RootLayout({
           <meta name="apple-mobile-web-app-title" content="TradeFeed" />
           {/* Google Analytics 4 — in <head> for Google Merchant Center verification */}
           <Script
-            src="https://www.googletagmanager.com/gtag/js?id=G-TL499XE6KR"
+            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || "G-TL499XE6KR"}`}
             strategy="afterInteractive"
           />
           <Script id="ga4-init" strategy="afterInteractive">
-            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TL499XE6KR');`}
+            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${process.env.NEXT_PUBLIC_GA_ID || "G-TL499XE6KR"}');`}
           </Script>
         </head>
         <body>
@@ -154,6 +156,8 @@ export default async function RootLayout({
           <Script id="sw-register" strategy="afterInteractive">
             {`if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`}
           </Script>
+          <SpeedInsights />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>

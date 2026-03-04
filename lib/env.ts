@@ -32,6 +32,7 @@ const envSchema = z.object({
   ADMIN_USER_IDS: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
+  NEXT_PUBLIC_GA_ID: z.string().optional(),
   CRON_SECRET: z.string().optional(),
 
   // PayFast — required in production, optional in dev
