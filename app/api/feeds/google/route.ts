@@ -67,7 +67,7 @@ export async function GET() {
   const items = products
     .filter((p) => p.variants.length > 0)
     .map((p) => {
-      const v = p.variants[0];
+      const v = p.variants[0]!;
       const price = (v.priceInCents / 100).toFixed(2);
       const imageUrl = p.images[0]?.url || `${APP_URL}/icon.svg`;
       const link = `${APP_URL}/catalog/${p.shop.slug}/products/${p.id}`;
