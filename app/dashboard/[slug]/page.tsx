@@ -665,7 +665,19 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       {/* ═══════════════════════════════════════════════════ */}
       {/* Quick Actions Grid                                  */}
       {/* ═══════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+        <Link
+          href={`/dashboard/${slug}/drops/new`}
+          className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-orange-50 hover:shadow-lg hover:shadow-rose-200/50 hover:border-rose-300 transition-all group min-h-[100px]"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-rose-100 group-hover:bg-rose-200 flex items-center justify-center transition-colors group-hover:scale-110 text-xl">
+            🔥
+          </div>
+          <span className="text-sm font-bold text-rose-700 group-hover:text-rose-900 transition-colors text-center">
+            New Drop
+          </span>
+        </Link>
+
         <Link
           href={`/dashboard/${slug}/products/new?ai=true`}
           className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 hover:shadow-lg hover:shadow-violet-200/50 hover:border-violet-300 transition-all group min-h-[100px]"

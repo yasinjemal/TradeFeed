@@ -71,6 +71,7 @@ model Shop {
   orders      Order[]                         // Orders placed at this shop
   reviews     Review[]                        // Reviews for this shop's products
   gallery     ShopGalleryItem[]               // Shop profile images & videos
+  drops       Drop[]                          // Stock drop announcements
 
   @@index([slug])
   @@index([isActive])
@@ -784,6 +785,61 @@ model ComboImage {
   createdAt DateTime @default(now())
 
   @@index([comboId])
+}
+
+// ============================================================
+// STOCK DROP: Announce new arrivals / fresh stock
+// Sellers select products, get auto-generated marketing text,
+// and share to WhatsApp groups / Facebook in one tap.
+// ============================================================
+model Drop {
+  id          String     @id @default(cuid())
+  title       String                          // e.g. "🔥 New Jeans Just Landed!"
+  message     String                          // Auto-generated or custom marketing message
+  status      DropStatus @default(DRAFT)      // DRAFT → PUBLISHED → ARCHIVED
+
+  publishedAt DateTime?                       // When seller hit "Share"
+  expiresAt   DateTime?                       // Optional expiry (auto-archive)
+  isActive    Boolean    @default(true)       // Soft-delete
+
+  shopId      String
+  shop        Shop       @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  items       DropItem[]                      // Products in this drop
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([shopId])
+  @@index([shopId, status])
+  @@index([shopId, isActive])
+}
+
+enum DropStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ============================================================
+// DROP ITEM: Products included in a stock drop
+// Snapshot fields preserved even if original product is deleted.
+// ============================================================
+model DropItem {
+  id            String @id @default(cuid())
+
+  dropId        String
+  drop          Drop   @relation(fields: [dropId], references: [id], onDelete: Cascade)
+
+  // Reference to actual product (nullable — may be deleted later)
+  productId     String?
+
+  // Snapshot fields (preserved even if product deleted)
+  productName   String                         // e.g. "Slim Fit Jeans"
+  priceSnapshot Int                            // Price in ZAR cents at time of drop
+  imageUrl      String?                        // Primary product image URL snapshot
+
+  @@index([dropId])
 }
 
 // ============================================================
