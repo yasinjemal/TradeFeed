@@ -378,22 +378,38 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             )}
           </button>
 
-          {/* CREDITS_EXHAUSTED — all 5 free tries used */}
+          {/* CREDITS_EXHAUSTED — all 5 free tries used — CELEBRATORY, not blocking */}
           {aiError === "CREDITS_EXHAUSTED" && (
-            <div className="rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 p-4 space-y-3">
-              <div className="flex items-start gap-3">
-                <span className="text-xl">🎯</span>
-                <div>
-                  <p className="text-sm font-semibold text-violet-900">You&apos;ve used all 5 free AI generations!</p>
-                  <p className="text-xs text-violet-600 mt-1">You saw how fast AI creates listings. Upgrade to Pro AI for <strong>unlimited</strong> AI generations and list 10× faster.</p>
+            <div className="rounded-xl bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 border-2 border-violet-200 p-5 space-y-4">
+              <div className="text-center">
+                <div className="text-4xl mb-2">🎉</div>
+                <h4 className="text-lg font-bold text-violet-900">You&apos;ve created 5 AI-powered listings!</h4>
+                <p className="text-sm text-violet-600 mt-2 max-w-sm mx-auto">
+                  That&apos;s amazing progress! You saw how fast AI creates listings.
+                  Upgrade to Pro AI to keep creating listings instantly.
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-3 py-2">
+                <div className="flex items-center gap-1.5">
+                  {[1,2,3,4,5].map((i) => (
+                    <div key={i} className="w-6 h-6 rounded-full bg-violet-500 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    </div>
+                  ))}
                 </div>
+                <span className="text-xs font-bold text-violet-700">5/5 used</span>
               </div>
               <Link
                 href={`/dashboard/${shopSlug}/billing`}
-                className="block w-full text-center py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white text-sm font-bold shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                className="block w-full text-center py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white text-sm font-bold shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
               >
-                🚀 Upgrade to Pro AI — Unlimited AI — R299/mo
+                🚀 Upgrade to Pro AI — Unlimited AI Listings
               </Link>
+              <p className="text-[11px] text-center text-violet-500">
+                You can still create listings manually below ↓
+              </p>
             </div>
           )}
 

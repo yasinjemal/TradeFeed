@@ -14,6 +14,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getShopBySlug, getDashboardStats, getSellerTierData, getSellerHealthMetrics } from "@/lib/db/shops";
 import { computeSellerHealth } from "@/lib/intelligence";
+import { checkAiAccess, FREE_AI_CREDITS } from "@/lib/db/ai";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -28,10 +29,11 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const shop = await getShopBySlug(slug);
   if (!shop) notFound();
 
-  const [stats, tierData, healthMetrics] = await Promise.all([
+  const [stats, tierData, healthMetrics, aiAccess] = await Promise.all([
     getDashboardStats(shop.id),
     getSellerTierData(shop.id, shop),
     getSellerHealthMetrics(shop.id),
+    checkAiAccess(shop.id),
   ]);
   const health = computeSellerHealth(healthMetrics);
 
@@ -157,6 +159,71 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               </div>
             ) : (
               <p className="text-[11px] text-stone-500 mt-0.5">{tierData.tier.description}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* AI Credits — Activation lever                        */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <div className={`rounded-2xl border ${aiAccess.hasUnlimitedAi ? 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50' : 'border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50'} p-4 sm:p-5`}>
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 rounded-xl ${aiAccess.hasUnlimitedAi ? 'bg-emerald-100' : 'bg-violet-100'} flex items-center justify-center text-2xl flex-shrink-0`}>
+            ✨
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className={`font-bold text-sm ${aiAccess.hasUnlimitedAi ? 'text-emerald-900' : 'text-violet-900'}`}>
+                AI Listing Credits
+              </h3>
+              {aiAccess.hasUnlimitedAi ? (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold">
+                  ∞ UNLIMITED
+                </span>
+              ) : (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500 text-white font-bold">
+                  {aiAccess.creditsUsed} / {FREE_AI_CREDITS} used
+                </span>
+              )}
+            </div>
+            {aiAccess.hasUnlimitedAi ? (
+              <p className="text-[11px] text-emerald-600 mt-1">
+                Upload a photo → AI generates SEO-optimized listings instantly
+              </p>
+            ) : (
+              <>
+                <div className="mt-2 h-2 rounded-full bg-white/80 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      aiAccess.creditsRemaining === 0 ? 'bg-red-400' : aiAccess.creditsRemaining <= 2 ? 'bg-amber-400' : 'bg-violet-500'
+                    }`}
+                    style={{ width: `${(aiAccess.creditsUsed / FREE_AI_CREDITS) * 100}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-1.5">
+                  <p className="text-[11px] text-violet-600">
+                    {aiAccess.creditsRemaining > 0
+                      ? `${aiAccess.creditsRemaining} free AI generation${aiAccess.creditsRemaining === 1 ? '' : 's'} remaining`
+                      : 'All free credits used — upgrade for unlimited AI'}
+                  </p>
+                  {aiAccess.creditsRemaining === 0 ? (
+                    <Link
+                      href={`/dashboard/${slug}/billing`}
+                      className="text-[11px] font-bold text-violet-700 hover:text-violet-900 transition-colors"
+                    >
+                      Upgrade →
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/dashboard/${slug}/products/new?ai=true`}
+                      className="text-[11px] font-bold text-violet-700 hover:text-violet-900 transition-colors"
+                    >
+                      Use AI →
+                    </Link>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -521,7 +588,19 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       {/* ═══════════════════════════════════════════════════ */}
       {/* Quick Actions Grid                                  */}
       {/* ═══════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <Link
+          href={`/dashboard/${slug}/products/new?ai=true`}
+          className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 hover:shadow-lg hover:shadow-violet-200/50 hover:border-violet-300 transition-all group min-h-[100px]"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-violet-100 group-hover:bg-violet-200 flex items-center justify-center transition-colors group-hover:scale-110 text-xl">
+            ✨
+          </div>
+          <span className="text-sm font-bold text-violet-700 group-hover:text-violet-900 transition-colors text-center">
+            AI Listing
+          </span>
+        </Link>
+
         <Link
           href={`/dashboard/${slug}/products/new`}
           className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-stone-200/80 bg-white hover:shadow-lg hover:shadow-stone-200/50 hover:border-emerald-200 transition-all group min-h-[100px]"
@@ -582,45 +661,79 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}
-      {/* Tips / Getting Started — only for new sellers       */}
+      {/* Activation Checklist — only for new sellers          */}
       {/* ═══════════════════════════════════════════════════ */}
-      {stats.productCount < 3 && (
-        <details className="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-stone-50 to-white overflow-hidden group/tips">
-          <summary className="p-5 sm:p-6 cursor-pointer list-none flex items-center justify-between hover:bg-stone-50/50 transition-colors">
-            <h3 className="font-semibold text-stone-900 flex items-center gap-2">
-              <span className="text-lg">💡</span> Getting Started Tips
-            </h3>
-            <svg className="w-4 h-4 text-stone-400 transition-transform group-open/tips:rotate-180" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-            </svg>
-          </summary>
-          <div className="px-5 sm:px-6 pb-5 sm:pb-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-white border border-stone-100">
-              <span className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-              <div>
-                <p className="text-sm font-medium text-stone-800">Add 5+ products</p>
-                <p className="text-[11px] text-stone-500 mt-0.5">Buyers trust shops with more variety</p>
-              </div>
+      {stats.productCount < 5 && (() => {
+        const steps = [
+          { id: 'product', label: 'Add your first product', done: stats.productCount >= 1, href: `new?ai=true`, emoji: '📦' },
+          { id: 'ai', label: 'Try AI listing (upload a photo)', done: aiAccess.creditsUsed >= 1, href: `products/new?ai=true`, emoji: '✨' },
+          { id: 'five', label: 'List 5 products', done: stats.productCount >= 5, href: `products/new`, emoji: '🎯' },
+          { id: 'profile', label: 'Complete your shop profile', done: profilePct >= 80, href: `settings`, emoji: '🏪' },
+          { id: 'share', label: 'Share catalog on WhatsApp', done: false, href: null, emoji: '📲' },
+        ];
+        const doneCount = steps.filter(s => s.done).length;
+        return (
+          <div className="rounded-2xl border-2 border-stone-200 bg-white p-5 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-stone-900 flex items-center gap-2">
+                <span className="text-lg">🚀</span> Seller Activation Checklist
+              </h3>
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                {doneCount}/{steps.length} done
+              </span>
             </div>
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-white border border-stone-100">
-              <span className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-              <div>
-                <p className="text-sm font-medium text-stone-800">Upload clear photos</p>
-                <p className="text-[11px] text-stone-500 mt-0.5">Good images double your enquiries</p>
-              </div>
+            <div className="h-2 rounded-full bg-stone-100 overflow-hidden mb-4">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-500"
+                style={{ width: `${(doneCount / steps.length) * 100}%` }}
+              />
             </div>
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-white border border-stone-100">
-              <span className="w-7 h-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
-              <div>
-                <p className="text-sm font-medium text-stone-800">Share on WhatsApp</p>
-                <p className="text-[11px] text-stone-500 mt-0.5">Post your catalog link in groups</p>
-              </div>
+            <div className="space-y-2">
+              {steps.map((step) => (
+                <div key={step.id} className="flex items-center gap-3">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    step.done ? 'bg-emerald-100 text-emerald-600' : 'bg-stone-100 text-stone-400'
+                  }`}>
+                    {step.done ? (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    ) : (
+                      <span className="text-sm">{step.emoji}</span>
+                    )}
+                  </div>
+                  {step.href ? (
+                    <Link
+                      href={`/dashboard/${slug}/${step.href}`}
+                      className={`text-sm font-medium transition-colors ${
+                        step.done
+                          ? 'text-stone-400 line-through'
+                          : 'text-stone-700 hover:text-emerald-700'
+                      }`}
+                    >
+                      {step.label}
+                      {!step.done && <span className="text-emerald-600 ml-1">→</span>}
+                    </Link>
+                  ) : (
+                    <span className={`text-sm font-medium ${
+                      step.done ? 'text-stone-400 line-through' : 'text-stone-700'
+                    }`}>
+                      {step.label}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
+            {doneCount < 3 && (
+              <div className="mt-4 pt-3 border-t border-stone-100">
+                <p className="text-xs text-stone-500">
+                  💡 Complete these steps to start getting orders. Most sellers finish in under 5 minutes!
+                </p>
+              </div>
+            )}
           </div>
-          </div>
-        </details>
-      )}
+        );
+      })()}
     </div>
   );
 }

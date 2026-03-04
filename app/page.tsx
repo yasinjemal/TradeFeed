@@ -19,9 +19,9 @@ import type { Metadata } from "next";
 // Landing Page SEO — targeted for "wholesale marketplace South Africa"
 // ============================================================
 export const metadata: Metadata = {
-  title: "TradeFeed | South Africa's Wholesale & Retail Marketplace — Sell on WhatsApp",
+  title: "TradeFeed | Sell Your Stock Faster With AI — WhatsApp Wholesale Marketplace South Africa",
   description:
-    "South Africa's #1 WhatsApp marketplace for wholesale and retail sellers. Create your free online shop, list products, and get structured orders via WhatsApp. Trusted by sellers in Johannesburg, Cape Town, Durban and all 9 provinces.",
+    "Upload a product photo and AI creates the listing in 10 seconds. Share your catalog link on WhatsApp and sell faster. 5 free AI listings every month. South Africa's #1 wholesale marketplace.",
   keywords: [
     "wholesale clothing Johannesburg",
     "wholesale marketplace South Africa",
@@ -244,22 +244,22 @@ export default async function HomePage() {
 
           <ScrollReveal delay={100}>
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
-              South Africa&apos;s{" "}
+              Sell Your Stock{" "}
               <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-400">
-                Online Marketplace
+                Faster With AI
               </span>
-              <br className="hidden sm:block" />
-              for Sellers &amp; Buyers
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
             <p className="mt-6 text-lg sm:text-xl text-stone-400 max-w-2xl mx-auto leading-relaxed">
-              Create your online shop in South Africa for free. List products, share your catalog link,
-              and receive clean, structured orders via WhatsApp — no app download needed. The easiest way
-              to sell online in South Africa.
+              Upload a photo. AI generates the listing.
+              Share your catalog link and sell faster on WhatsApp — no app download needed.
             </p>
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium">
+              <span className="text-base">✨</span> 5 FREE AI listings every month — no credit card needed
+            </div>
           </ScrollReveal>
 
           {/* Inline social proof */}
@@ -290,31 +290,31 @@ export default async function HomePage() {
           <ScrollReveal delay={300}>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href={ctaHref}
-                className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:from-emerald-500 hover:to-emerald-400 transition-all shadow-2xl shadow-emerald-600/25 hover:shadow-emerald-500/35 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto"
+                href={aiCtaHref}
+                className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white hover:from-violet-500 hover:to-purple-400 transition-all shadow-2xl shadow-violet-600/25 hover:shadow-violet-500/35 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto"
               >
-                {ctaLabel}
+                ✨ Try AI Free
                 <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
               </Link>
               <Link
-                href="#how-it-works"
+                href="/marketplace"
                 className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl border border-stone-700/80 text-stone-300 hover:text-white hover:border-stone-600 hover:bg-white/[0.03] transition-all w-full sm:w-auto"
               >
-                See How It Works ↓
+                Browse Marketplace →
               </Link>
             </div>
             <p className="mt-5 text-xs text-stone-600 flex items-center justify-center gap-4 flex-wrap">
               <span className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                No credit card
+                <svg className="w-3.5 h-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                5 free AI listings
               </span>
               <span className="flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                Setup in 5 min
+                Photo → listing in 10 sec
               </span>
               <span className="flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                10 products free
+                Share &amp; sell on WhatsApp
               </span>
             </p>
           </ScrollReveal>
@@ -605,7 +605,7 @@ export default async function HomePage() {
           <div className="grid sm:grid-cols-3 gap-8 relative">
             <div className="hidden sm:block absolute top-10 left-[16%] right-[16%] h-px bg-gradient-to-r from-emerald-500/40 via-emerald-500/20 to-emerald-500/40" style={{ zIndex: 0 }} />
             {[
-              { step: "1", title: "Upload Your Products", desc: "Add photos, prices, sizes, and colors. Drag-and-drop images — we compress and host them on a blazing-fast CDN. Or bulk import from CSV.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>, gradient: "from-emerald-600 to-emerald-500" },
+              { step: "1", title: "Snap a Photo → AI Lists It", desc: "Upload a product photo and AI generates the title, description, category & SEO tags in 10 seconds. 5 free AI listings every month — no typing needed.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>, gradient: "from-violet-600 to-purple-500" },
               { step: "2", title: "Share Your Catalog Link", desc: "Get your unique URL. Drop it in WhatsApp groups, status, Instagram bio, TikTok — anywhere your customers hang out.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.95 9.318" /></svg>, gradient: "from-blue-600 to-blue-500" },
               { step: "3", title: "Receive Structured Orders", desc: "Customers browse, select options & quantities, and send you a clean structured order on WhatsApp. With order tracking built in.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>, gradient: "from-purple-600 to-purple-500" },
             ].map((item, i) => (
@@ -991,18 +991,18 @@ export default async function HomePage() {
               🚀 Join {shopCount > 0 ? `${shopCount}+` : ""} South African sellers
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-              Ready to start{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">selling online?</span>
+              Ready to{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-400">sell faster with AI?</span>
             </h2>
-            <p className="mt-5 text-stone-400 text-lg max-w-lg mx-auto">Create your online shop in South Africa for free. List products in minutes and start receiving orders via WhatsApp today.</p>
+            <p className="mt-5 text-stone-400 text-lg max-w-lg mx-auto">Upload a photo, AI creates the listing, share on WhatsApp. Your first 5 AI listings are free — start selling in under 3 minutes.</p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href={ctaHref} className="group inline-flex items-center justify-center px-10 py-4 text-base font-semibold rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:from-emerald-500 hover:to-emerald-400 transition-all shadow-2xl shadow-emerald-600/25 hover:shadow-emerald-500/35 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto">
-                {ctaLabel}
+              <Link href={aiCtaHref} className="group inline-flex items-center justify-center px-10 py-4 text-base font-semibold rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white hover:from-violet-500 hover:to-purple-400 transition-all shadow-2xl shadow-violet-600/25 hover:shadow-violet-500/35 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto">
+                ✨ Try AI Free
                 <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
               </Link>
               <Link href="/marketplace" className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-stone-400 hover:text-emerald-400 transition-colors">Browse Marketplace →</Link>
             </div>
-            <p className="mt-5 text-xs text-stone-600">Free tier · No credit card · Set up in under 5 minutes · Cancel anytime</p>
+            <p className="mt-5 text-xs text-stone-600">5 free AI listings · No credit card · Set up in under 3 minutes · Cancel anytime</p>
           </ScrollReveal>
         </div>
       </section>
