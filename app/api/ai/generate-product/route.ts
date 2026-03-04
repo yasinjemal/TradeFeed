@@ -19,7 +19,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireShopAccess } from "@/lib/auth";
-import { checkAiAccess } from "@/lib/db/ai";
+import { checkAiAccess, trackAiGeneration, FREE_AI_CREDITS } from "@/lib/db/ai";
 import { aiGenerateRequestSchema, aiProductResponseSchema } from "@/lib/validation/ai-product";
 import type { AiProductResponse } from "@/lib/validation/ai-product";
 
@@ -46,14 +46,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Check plan — AI is a paid feature
-    const { hasAccess, planSlug } = await checkAiAccess(access.shopId);
-    if (!hasAccess) {
+    // 3. Check plan + credits — free users get 5 AI tries
+    const { canGenerate, hasUnlimitedAi, creditsRemaining, planSlug } = await checkAiAccess(access.shopId);
+    if (!canGenerate) {
       return NextResponse.json(
         {
-          error: "PLAN_REQUIRED",
-          message: "AI product generation requires a Pro AI plan. Upgrade to unlock this feature.",
+          error: "CREDITS_EXHAUSTED",
+          message: `You've used all ${FREE_AI_CREDITS} free AI generations. Upgrade to Pro AI for unlimited.`,
           currentPlan: planSlug,
+          creditsUsed: FREE_AI_CREDITS,
+          creditsRemaining: 0,
         },
         { status: 403 }
       );
@@ -164,10 +166,18 @@ Return ONLY valid JSON:
       };
     }
 
-    // 5. Return structured response (no auto-save)
+    // 5. Track usage + return structured response (no auto-save)
+    await trackAiGeneration(access.shopId);
+    const newCreditsRemaining = hasUnlimitedAi ? Infinity : creditsRemaining - 1;
+
     return NextResponse.json({
       success: true,
       data: aiResult,
+      credits: {
+        remaining: newCreditsRemaining === Infinity ? null : newCreditsRemaining,
+        unlimited: hasUnlimitedAi,
+        total: hasUnlimitedAi ? null : FREE_AI_CREDITS,
+      },
     });
   } catch (error) {
     console.error("[AI Generate Product] Error:", error);

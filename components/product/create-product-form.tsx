@@ -75,8 +75,8 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
   // Show AI panel for everyone when autoOpenAi=true (from homepage CTA)
   const [showAiPanel, setShowAiPanel] = useState(autoOpenAi || hasAiAccess);
   // Track if user generated AI content without having the plan
-  const [aiUsedWithoutPlan, setAiUsedWithoutPlan] = useState(false);
-
+  const [aiUsedWithoutPlan, setAiUsedWithoutPlan] = useState(false);  // AI credits tracking (null = unlimited / unknown yet)
+  const [aiCreditsRemaining, setAiCreditsRemaining] = useState<number | null>(null);
   // M8.3: Auto-suggest global category based on product name
   const suggestedSlug = useMemo(() => suggestGlobalCategory(name), [name]);
 
@@ -120,7 +120,20 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
           setAiUsedWithoutPlan(true);
           return;
         }
+        if (data.error === "CREDITS_EXHAUSTED") {
+          setAiError("CREDITS_EXHAUSTED");
+          setAiCreditsRemaining(0);
+          return;
+        }
         throw new Error(data.message || "AI generation failed");
+      }
+
+      // Track remaining credits from API response
+      if (data.credits) {
+        setAiCreditsRemaining(data.credits.unlimited ? null : data.credits.remaining);
+        if (!data.credits.unlimited) {
+          setAiUsedWithoutPlan(true);
+        }
       }
 
       // Prefill form fields with SEO-optimized content
@@ -282,11 +295,13 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             </div>
             {hasAiAccess ? (
               <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-white">
-                Pro AI
+                ∞ Unlimited
               </span>
             ) : (
               <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-violet-500 text-white">
-                ✨ Try Free
+                {aiCreditsRemaining !== null
+                  ? `${aiCreditsRemaining}/5 left`
+                  : "5 Free tries"}
               </span>
             )}
           </div>
@@ -363,7 +378,26 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             )}
           </button>
 
-          {/* PLAN_REQUIRED — upgrade prompt after trying AI */}
+          {/* CREDITS_EXHAUSTED — all 5 free tries used */}
+          {aiError === "CREDITS_EXHAUSTED" && (
+            <div className="rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <span className="text-xl">🎯</span>
+                <div>
+                  <p className="text-sm font-semibold text-violet-900">You&apos;ve used all 5 free AI generations!</p>
+                  <p className="text-xs text-violet-600 mt-1">You saw how fast AI creates listings. Upgrade to Pro AI for <strong>unlimited</strong> AI generations and list 10× faster.</p>
+                </div>
+              </div>
+              <Link
+                href={`/dashboard/${shopSlug}/billing`}
+                className="block w-full text-center py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white text-sm font-bold shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
+              >
+                🚀 Upgrade to Pro AI — Unlimited AI — R299/mo
+              </Link>
+            </div>
+          )}
+
+          {/* PLAN_REQUIRED — legacy fallback */}
           {aiError === "PLAN_REQUIRED" && (
             <div className="rounded-xl bg-violet-50 border border-violet-200 p-4 space-y-3">
               <div className="flex items-start gap-3">
@@ -383,7 +417,7 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
           )}
 
           {/* Other AI errors */}
-          {aiError && aiError !== "PLAN_REQUIRED" && (
+          {aiError && aiError !== "PLAN_REQUIRED" && aiError !== "CREDITS_EXHAUSTED" && (
             <p className="text-xs text-red-600 text-center">{aiError}</p>
           )}
 
@@ -419,8 +453,12 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
               {/* Upgrade nudge after seeing AI results (non-AI plan) */}
               {aiUsedWithoutPlan && (
                 <div className="rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 p-4 mt-3">
-                  <p className="text-sm font-semibold text-violet-900">🌟 Impressed? This is just a preview.</p>
-                  <p className="text-xs text-violet-600 mt-1">Upgrade to Pro AI to use AI generation for all your products. List 10× faster.</p>
+                  <p className="text-sm font-semibold text-violet-900">
+                    {aiCreditsRemaining !== null && aiCreditsRemaining > 0
+                      ? `🌟 ${aiCreditsRemaining} free AI generation${aiCreditsRemaining === 1 ? "" : "s"} remaining`
+                      : "🌟 Impressed? Imagine unlimited AI listings."}
+                  </p>
+                  <p className="text-xs text-violet-600 mt-1">Upgrade to Pro AI for unlimited AI generations + premium features. List 10× faster.</p>
                   <Link
                     href={`/dashboard/${shopSlug}/billing`}
                     className="mt-3 block w-full text-center py-2 rounded-lg bg-violet-600 text-white text-xs font-bold hover:bg-violet-500 transition-colors"

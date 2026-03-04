@@ -54,6 +54,9 @@ model Shop {
   referralCode  String?  @unique              // Auto-generated referral code (e.g. "TF-ABC123")
   referredBy    String?                       // Slug of the shop that referred this seller
 
+  // ── AI Credits ───────────────────────────────────────
+  aiGenerationsUsed Int @default(0)            // Number of AI product generations used (free tier gets 5)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

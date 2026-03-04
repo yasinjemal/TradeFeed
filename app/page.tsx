@@ -699,12 +699,26 @@ export default async function HomePage() {
                   <span className="text-stone-500 text-sm ml-1">/forever</span>
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
-                  {["Up to 10 products", "WhatsApp checkout", "Public catalog page", "Basic analytics", "Order tracking", "Category management", "Product variants", "Image CDN hosting"].map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm text-stone-300">
-                      <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                      {f}
-                    </li>
-                  ))}
+                  {[
+                    { text: "✨ 5 free AI generations", highlight: true },
+                    "Up to 10 products",
+                    "WhatsApp checkout",
+                    "Public catalog page",
+                    "Basic analytics",
+                    "Order tracking",
+                    "Category management",
+                    "Product variants",
+                    "Image CDN hosting",
+                  ].map((f) => {
+                    const text = typeof f === "string" ? f : f.text;
+                    const highlight = typeof f !== "string" && f.highlight;
+                    return (
+                      <li key={text} className={`flex items-start gap-3 text-sm ${highlight ? "text-violet-300" : "text-stone-300"}`}>
+                        <svg className={`w-5 h-5 ${highlight ? "text-violet-400" : "text-emerald-500"} flex-shrink-0 mt-0.5`} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                        {text}
+                      </li>
+                    );
+                  })}
                 </ul>
                 <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl border border-stone-700 text-stone-300 font-semibold text-sm hover:bg-white/[0.03] hover:border-stone-600 transition-all">
                   Get Started Free
@@ -812,17 +826,18 @@ export default async function HomePage() {
                   </thead>
                   <tbody className="divide-y divide-stone-800/40">
                     {[
-                      { feature: "AI Auto Title from Photo", free: false, pro: false, proAi: true },
-                      { feature: "AI Product Description", free: false, pro: false, proAi: true },
-                      { feature: "AI Category Suggestion", free: false, pro: false, proAi: true },
-                      { feature: "AI SEO Tags & Meta", free: false, pro: false, proAi: true },
+                      { feature: "AI Auto Title from Photo", free: "5 free", pro: "5 free", proAi: true },
+                      { feature: "AI Product Description", free: "5 free", pro: "5 free", proAi: true },
+                      { feature: "AI Category Suggestion", free: "5 free", pro: "5 free", proAi: true },
+                      { feature: "AI SEO Tags & Meta", free: "5 free", pro: "5 free", proAi: true },
+                      { feature: "AI Generations", free: "5", pro: "5", proAi: "∞ Unlimited" },
                       { feature: "WhatsApp Checkout", free: true, pro: true, proAi: true },
                       { feature: "Products", free: "10", pro: "∞", proAi: "∞" },
                       { feature: "Marketplace Listing", free: true, pro: true, proAi: true },
                       { feature: "Promoted Listings", free: false, pro: true, proAi: true },
                       { feature: "Revenue Dashboard", free: false, pro: true, proAi: true },
                     ].map((row) => (
-                      <tr key={row.feature} className={typeof row.free === "boolean" && !row.free && !row.pro && row.proAi ? "bg-violet-500/[0.04]" : ""}>
+                      <tr key={row.feature} className={row.feature.startsWith("AI") && row.proAi === true ? "bg-violet-500/[0.04]" : "">
                         <td className="px-5 py-3 text-stone-300 font-medium">{row.feature}</td>
                         {[row.free, row.pro, row.proAi].map((val, i) => (
                           <td key={i} className="text-center px-4 py-3">
@@ -845,7 +860,7 @@ export default async function HomePage() {
                   href={aiCtaHref}
                   className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white font-semibold text-sm shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
                 >
-                  ✨ Try AI Now — Free
+                  ✨ Try AI Now — 5 Free Generations
                 </Link>
               </div>
             </div>
