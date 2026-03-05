@@ -208,6 +208,12 @@ model Product {
   minPriceCents Int     @default(0)            // Cheapest active variant price
   maxPriceCents Int     @default(0)            // Most expensive active variant price
 
+  // ── Full-Text Search ─────────────────────────────────
+  // PostgreSQL tsvector column managed by DB trigger (auto-updates on name/description change).
+  // Declared as Unsupported so `prisma db push` does NOT drop it.
+  // The column + trigger + GIN index are created in migration 20260226120000.
+  search_vector Unsupported("tsvector")?       // @ignore — managed by DB trigger
+
   // Relations
   images      ProductImage[]                  // Product images (URLs only)
   variants    ProductVariant[]                // Product variants with stock
