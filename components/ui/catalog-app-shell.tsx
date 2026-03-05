@@ -12,8 +12,8 @@ export function CatalogAppShell({
   bottomNav,
 }: CatalogAppShellProps) {
   return (
-    <div className="h-[100dvh] bg-white text-stone-900 flex flex-col">
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-stone-200/60">
+    <div className="h-[100dvh] bg-stone-50 text-stone-900 flex flex-col">
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-2xl border-b border-stone-100 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
         {header}
       </header>
 

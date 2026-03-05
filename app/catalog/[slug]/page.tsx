@@ -120,15 +120,15 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
       {recentDrops.length > 0 && recentDrops[0] && (
         <Link
           href={`/catalog/${slug}/drops/${recentDrops[0].id}`}
-          className="flex items-center gap-3 rounded-2xl border border-orange-200/60 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 px-4 py-3.5 transition-all hover:shadow-md hover:border-orange-300 group"
+          className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 px-4 py-3.5 shadow-md shadow-orange-200/40 transition-all hover:shadow-lg hover:shadow-orange-200/50 hover:scale-[1.01] active:scale-[0.99] group"
         >
-          <span className="text-2xl flex-shrink-0">🔥</span>
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm text-lg">🔥</span>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-orange-700 uppercase tracking-wide">Latest Drop</p>
-            <p className="text-sm font-semibold text-stone-800 truncate">{recentDrops[0].title}</p>
-            <p className="text-[11px] text-stone-500">{recentDrops[0]._count.items} product{recentDrops[0]._count.items !== 1 ? "s" : ""}</p>
+            <p className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Latest Drop</p>
+            <p className="text-sm font-bold text-white truncate">{recentDrops[0].title}</p>
+            <p className="text-[11px] text-white/70">{recentDrops[0]._count.items} product{recentDrops[0]._count.items !== 1 ? "s" : ""}</p>
           </div>
-          <svg className="w-5 h-5 text-stone-400 flex-shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg className="w-5 h-5 text-white/70 flex-shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </Link>
@@ -143,57 +143,134 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
       {/* ── Recently Viewed / Popular from Seller ────────── */}
       <RecentlyViewedStrip shopSlug={slug} fallbackProducts={fallbackProducts} />
 
-      {/* ── Start Your Own Shop — Viral CTA ───────────── */}
-      <div className="rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border border-emerald-200/60 p-6 text-center space-y-4">
-        <div className="text-3xl">🚀</div>
-        <h3 className="text-lg font-bold text-stone-900">
-          Start Your Own Shop Like This
-        </h3>
-        <div className="flex flex-col gap-2.5 text-sm text-stone-600 max-w-xs mx-auto text-left">
-          <div className="flex items-center gap-2.5">
-            <span className="text-emerald-500 font-bold">1.</span> Upload your products
-          </div>
-          <div className="flex items-center gap-2.5">
-            <span className="text-emerald-500 font-bold">2.</span> Share your catalog link
-          </div>
-          <div className="flex items-center gap-2.5">
-            <span className="text-emerald-500 font-bold">3.</span> Receive orders on WhatsApp
+      {/* ── Start Your Own Shop — Premium Viral CTA ──────── */}
+      <div className="group relative overflow-hidden rounded-[20px] bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 animate-gradient-shift p-[1px]">
+        <div className="relative overflow-hidden rounded-[19px] bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 px-6 py-8 sm:py-10">
+          {/* Background decoration */}
+          <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+          <div className="pointer-events-none absolute -left-6 -bottom-10 h-32 w-32 rounded-full bg-teal-400/20 blur-2xl" />
+          <div className="pointer-events-none absolute right-12 bottom-4 h-20 w-20 rounded-full bg-emerald-300/15 blur-xl animate-float-slow" />
+
+          <div className="relative z-10 flex flex-col items-center text-center space-y-5">
+            {/* Icon */}
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm ring-1 ring-white/30 shadow-lg">
+              <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.016A3.001 3.001 0 0 0 21 9.349m-18 0V6.999c0-.621.504-1.125 1.125-1.125h15.75c.621 0 1.125.504 1.125 1.125V9.35" />
+              </svg>
+            </div>
+
+            {/* Heading */}
+            <div className="space-y-2">
+              <h3 className="text-xl font-extrabold text-white tracking-tight sm:text-2xl">
+                Start Your Own Shop
+              </h3>
+              <p className="text-sm text-emerald-100/90 max-w-[280px] mx-auto leading-relaxed">
+                Join thousands of sellers. Set up in minutes, sell on WhatsApp.
+              </p>
+            </div>
+
+            {/* Steps */}
+            <div className="stagger-children flex flex-col gap-3 w-full max-w-[260px]">
+              {[
+                { num: "1", text: "Upload your products", icon: "📸" },
+                { num: "2", text: "Share your catalog link", icon: "🔗" },
+                { num: "3", text: "Get orders on WhatsApp", icon: "💰" },
+              ].map((step) => (
+                <div key={step.num} className="flex items-center gap-3 rounded-xl bg-white/10 backdrop-blur-sm px-4 py-2.5 ring-1 ring-white/10">
+                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/20 text-sm font-bold text-white">
+                    {step.icon}
+                  </span>
+                  <span className="text-sm font-medium text-white/95">{step.text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <Link
+              href="/create-shop"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-bold text-emerald-700 shadow-xl shadow-emerald-900/20 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-900/30 hover:scale-[1.03] active:scale-[0.98]"
+            >
+              Create your free shop
+              <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+
+            <p className="text-[11px] text-emerald-200/70 font-medium">Free forever · No credit card needed</p>
           </div>
         </div>
-        <Link
-          href="/create-shop"
-          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-emerald-200 transition-all hover:bg-emerald-700 hover:shadow-lg active:scale-[0.98]"
-        >
-          Create your shop in 2 minutes →
-        </Link>
       </div>
 
-      {/* ── AI Feature Advertising ────────────────────── */}
-      <div className="rounded-2xl bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 border border-violet-200/60 p-6 text-center space-y-4">
-        <div className="text-3xl">⚡</div>
-        <h3 className="text-lg font-bold text-stone-900">
-          Add Products in Seconds with AI
-        </h3>
-        <div className="flex flex-col gap-2.5 text-sm text-stone-600 max-w-xs mx-auto text-left">
-          <div className="flex items-center gap-2">📸 Upload a photo</div>
-          <div className="flex items-center gap-2">✨ AI writes the title &amp; description</div>
-          <div className="flex items-center gap-2">🏷️ AI suggests category &amp; price</div>
-          <div className="flex items-center gap-2">🚀 List products 10× faster</div>
+      {/* ── AI Feature — Sleek Showcase ───────────────────── */}
+      <div className="group relative overflow-hidden rounded-[20px] bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 animate-gradient-shift p-[1px]">
+        <div className="relative overflow-hidden rounded-[19px] bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 px-6 py-8 sm:py-10">
+          {/* Background decoration */}
+          <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-fuchsia-400/20 blur-3xl" />
+          <div className="pointer-events-none absolute -left-8 -bottom-8 h-36 w-36 rounded-full bg-violet-300/15 blur-2xl" />
+          <div className="pointer-events-none absolute left-1/2 top-1/4 h-24 w-24 rounded-full bg-purple-300/10 blur-xl animate-float-slow" />
+
+          <div className="relative z-10 flex flex-col items-center text-center space-y-5">
+            {/* Icon */}
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm ring-1 ring-white/30 shadow-lg">
+              <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+              </svg>
+            </div>
+
+            {/* Heading */}
+            <div className="space-y-2">
+              <h3 className="text-xl font-extrabold text-white tracking-tight sm:text-2xl">
+                AI-Powered Selling
+              </h3>
+              <p className="text-sm text-purple-100/90 max-w-[280px] mx-auto leading-relaxed">
+                Snap a photo. AI does the rest. List products 10× faster.
+              </p>
+            </div>
+
+            {/* Feature pills */}
+            <div className="stagger-children flex flex-col gap-3 w-full max-w-[280px]">
+              {[
+                { icon: "📸", text: "Upload a photo", desc: "Just point & shoot" },
+                { icon: "✨", text: "AI writes everything", desc: "Title, description, SEO" },
+                { icon: "🏷️", text: "Auto-categorize & price", desc: "Smart suggestions" },
+              ].map((feat) => (
+                <div key={feat.text} className="flex items-center gap-3 rounded-xl bg-white/10 backdrop-blur-sm px-4 py-3 ring-1 ring-white/10">
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/15 text-lg">
+                    {feat.icon}
+                  </span>
+                  <div className="text-left min-w-0">
+                    <p className="text-sm font-semibold text-white">{feat.text}</p>
+                    <p className="text-[11px] text-purple-200/80">{feat.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <Link
+              href="/create-shop"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-bold text-purple-700 shadow-xl shadow-purple-900/20 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-900/30 hover:scale-[1.03] active:scale-[0.98]"
+            >
+              Try it free
+              <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+
+            <p className="text-[11px] text-purple-200/70 font-medium">5 free AI credits included</p>
+          </div>
         </div>
-        <Link
-          href="/create-shop"
-          className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-violet-200 transition-all hover:bg-violet-700 hover:shadow-lg active:scale-[0.98]"
-        >
-          Try it free →
-        </Link>
       </div>
 
-      {/* ── Marketplace Browse ─────────────────────────── */}
-      <div className="text-center py-2">
+      {/* ── Marketplace Browse ─────────────────────────────── */}
+      <div className="flex justify-center py-1">
         <Link
           href="/marketplace"
-          className="inline-flex items-center gap-1.5 text-sm text-stone-400 hover:text-emerald-600 transition-colors group"
+          className="group inline-flex items-center gap-2 rounded-full bg-stone-50 px-5 py-2.5 text-sm font-semibold text-stone-500 ring-1 ring-stone-200/60 transition-all duration-300 hover:bg-emerald-50 hover:text-emerald-700 hover:ring-emerald-200 hover:shadow-md hover:shadow-emerald-100/50"
         >
+          <svg className="w-4 h-4 text-stone-400 group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35m0 0A7.125 7.125 0 1 0 6.575 6.575a7.125 7.125 0 0 0 10.075 10.075Z" />
+          </svg>
           Browse TradeFeed Marketplace
           <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />

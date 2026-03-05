@@ -114,7 +114,7 @@ export function CatalogSearchFilter({
         {/* Search Input */}
         <div className="relative flex-1">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
@@ -130,8 +130,8 @@ export function CatalogSearchFilter({
             type="text"
             value={inputValue}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search products, sizes, colors..."
-            className="w-full rounded-xl border border-stone-200 bg-white pl-10 pr-4 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all"
+            placeholder="Search products..."
+            className="w-full rounded-xl bg-stone-50 pl-10 pr-4 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 ring-1 ring-stone-200/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-emerald-400/40 focus:shadow-md focus:shadow-emerald-100/30 transition-all duration-200"
           />
           {inputValue && (
             <button
@@ -150,7 +150,7 @@ export function CatalogSearchFilter({
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
-          className="rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700 focus:outline-none focus:border-emerald-400 cursor-pointer"
+          className="rounded-xl bg-stone-50 px-3 py-2.5 text-sm text-stone-700 ring-1 ring-stone-200/60 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 cursor-pointer transition-all"
         >
           <option value="newest">Newest</option>
           <option value="price-low">Price: Low → High</option>
@@ -161,14 +161,14 @@ export function CatalogSearchFilter({
 
       {/* ── Category Pills ───────────────────────────────── */}
       {categories.length > 0 && (
-        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           <button
             type="button"
             onClick={() => setSelectedCategory(null)}
-            className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+            className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
               selectedCategory === null
-                ? "bg-stone-900 text-white shadow-sm"
-                : "bg-white border border-stone-200 text-stone-600 hover:border-stone-300"
+                ? "bg-stone-900 text-white shadow-md shadow-stone-300/30"
+                : "bg-white text-stone-500 ring-1 ring-stone-200/80 hover:ring-stone-300 hover:text-stone-700"
             }`}
           >
             All
@@ -182,10 +182,10 @@ export function CatalogSearchFilter({
                   selectedCategory === cat.id ? null : cat.id,
                 )
               }
-              className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+              className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
                 selectedCategory === cat.id
-                  ? "bg-emerald-600 text-white shadow-sm"
-                  : "bg-white border border-stone-200 text-stone-600 hover:border-emerald-300 hover:bg-emerald-50"
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-200/50"
+                  : "bg-white text-stone-500 ring-1 ring-stone-200/80 hover:ring-emerald-200 hover:bg-emerald-50/50 hover:text-emerald-700"
               }`}
             >
               {cat.name}
@@ -284,8 +284,9 @@ function ProductCard({
       href={`/catalog/${shopSlug}/products/${product.id}`}
       className="group block"
     >
-      <div className="overflow-hidden rounded-3xl bg-white shadow-sm shadow-stone-200/70 ring-1 ring-stone-200/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-stone-300/50 active:scale-[0.99]">
-        <div className="relative aspect-[4/5] bg-stone-100 overflow-hidden">
+      <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-stone-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:ring-stone-200/80 active:scale-[0.99]">
+        {/* ── Image Container ────────────────────────── */}
+        <div className="relative aspect-[4/5] overflow-hidden bg-stone-50">
           <div className="absolute inset-0 shimmer" />
           {primaryImage ? (
             <Image
@@ -295,7 +296,7 @@ function ProductCard({
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               placeholder="blur"
               blurDataURL={SHIMMER_LIGHT}
-              className="relative object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              className="relative object-cover transition-transform duration-700 ease-out will-change-transform group-hover:scale-[1.06]"
             />
           ) : (
             <div className="relative w-full h-full flex flex-col items-center justify-center gap-2 text-stone-300 bg-gradient-to-br from-stone-50 to-stone-100">
@@ -316,7 +317,8 @@ function ProductCard({
             </div>
           )}
 
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+          {/* Vignette overlay */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
 
           {/* Wishlist Heart */}
           <div className="absolute left-2.5 top-2.5 z-10">
@@ -328,37 +330,40 @@ function ProductCard({
             />
           </div>
 
+          {/* Sold Out overlay */}
           {totalStock === 0 && (
-            <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center">
-              <span className="bg-stone-900 text-white text-[11px] font-semibold px-3.5 py-1.5 rounded-full tracking-wide uppercase">
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+              <span className="bg-stone-900/90 text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase">
                 Sold Out
               </span>
             </div>
           )}
 
+          {/* Color swatches */}
           {colors.length > 1 && (
-            <div className="absolute right-2.5 top-2.5 flex gap-1 rounded-full bg-white/85 px-1.5 py-1 backdrop-blur-sm shadow-sm">
+            <div className="absolute right-2 top-2.5 flex gap-[3px] rounded-full bg-white/90 px-1.5 py-1 backdrop-blur-md ring-1 ring-black/5">
               {colors.slice(0, 4).map((color) => (
                 <span
                   key={color}
-                  className="w-3.5 h-3.5 rounded-full border border-white shadow-sm"
+                  className="w-3 h-3 rounded-full ring-1 ring-white shadow-sm"
                   style={{ backgroundColor: colorToHex(color) }}
                   title={color}
                 />
               ))}
               {colors.length > 4 && (
-                <span className="w-3.5 h-3.5 rounded-full bg-stone-200 border border-white shadow-sm flex items-center justify-center text-[7px] font-bold text-stone-500">
+                <span className="w-3 h-3 rounded-full bg-stone-200 ring-1 ring-white flex items-center justify-center text-[6px] font-bold text-stone-500">
                   +{colors.length - 4}
                 </span>
               )}
             </div>
           )}
 
-          <div className="absolute bottom-3 left-3 flex flex-col gap-1">
-            <span className="rounded-full bg-white/95 px-3 py-1.5 text-sm font-extrabold tracking-tight text-stone-900 shadow-sm backdrop-blur-sm">
+          {/* Price badge */}
+          <div className="absolute bottom-2.5 left-2.5 flex flex-col gap-1">
+            <span className="rounded-lg bg-white/95 px-2.5 py-1 text-[13px] font-extrabold tracking-tight text-stone-900 shadow-sm backdrop-blur-md ring-1 ring-black/5">
               {formatZAR(minPrice)}
               {minPrice !== maxPrice && (
-                <span className="text-stone-400 font-normal"> +</span>
+                <span className="text-stone-400 font-normal text-[11px]"> +</span>
               )}
             </span>
             {(() => {
@@ -366,7 +371,7 @@ function ProductCard({
               if (rp.length === 0) return null;
               const minRp = Math.min(...rp);
               return (
-                <span className="rounded-full bg-emerald-50/95 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 shadow-sm backdrop-blur-sm">
+                <span className="rounded-lg bg-emerald-500/90 px-2 py-0.5 text-[9px] font-bold text-white shadow-sm backdrop-blur-md">
                   Retail {formatZAR(minRp)}+
                 </span>
               );
@@ -374,30 +379,33 @@ function ProductCard({
           </div>
         </div>
 
-        <div className="space-y-2 p-3.5 sm:p-4">
+        {/* ── Info Section ───────────────────────────── */}
+        <div className="space-y-1.5 p-3 sm:p-3.5">
           {product.category && (
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600">
+            <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-600/80">
               {product.category.name}
             </span>
           )}
-          <h3 className="line-clamp-2 text-[14px] font-semibold leading-snug text-stone-900 transition-colors group-hover:text-emerald-700 sm:text-[15px]">
+          <h3 className="line-clamp-2 text-[13px] font-bold leading-snug text-stone-800 transition-colors duration-200 group-hover:text-emerald-700 sm:text-[14px]">
             {product.name}
           </h3>
-          <div className="flex flex-wrap gap-1.5 pt-0.5">
-            {sizes.slice(0, 5).map((size) => (
-              <span
-                key={size}
-                className="inline-flex items-center rounded-md bg-stone-50 px-2 py-1 text-[10px] font-medium text-stone-500"
-              >
-                {size}
-              </span>
-            ))}
-            {sizes.length > 5 && (
-              <span className="inline-flex items-center rounded-md bg-stone-50 px-2 py-1 text-[10px] font-medium text-stone-400">
-                +{sizes.length - 5}
-              </span>
-            )}
-          </div>
+          {sizes.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-0.5">
+              {sizes.slice(0, 4).map((size) => (
+                <span
+                  key={size}
+                  className="inline-flex items-center rounded-md bg-stone-50 px-1.5 py-0.5 text-[9px] font-semibold text-stone-500 ring-1 ring-stone-100"
+                >
+                  {size}
+                </span>
+              ))}
+              {sizes.length > 4 && (
+                <span className="inline-flex items-center rounded-md bg-stone-50 px-1.5 py-0.5 text-[9px] font-semibold text-stone-400 ring-1 ring-stone-100">
+                  +{sizes.length - 4}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Link>

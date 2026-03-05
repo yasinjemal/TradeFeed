@@ -230,45 +230,53 @@ export default async function CatalogLayout({
         }
         bottomNav={<BottomNav shopSlug={slug} />}
       >
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-3 py-4 sm:px-4">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-3 py-4 sm:px-4">
           {children}
 
-          <footer className="rounded-2xl bg-stone-50 px-4 py-5 text-center space-y-3">
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-stone-500">
-              {shop.isVerified && (
-                <span className="inline-flex items-center gap-1 font-medium text-emerald-600">
-                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Verified
-                </span>
-              )}
-              <span>{shop._count.products} products</span>
-              {shop.city && <span>📍 {shop.city}</span>}
-            </div>
+          <footer className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-stone-50 via-stone-50 to-stone-100 px-5 py-6 text-center space-y-4">
+            {/* Subtle deco */}
+            <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-100/40 blur-2xl" />
+            <div className="pointer-events-none absolute -left-8 -bottom-8 h-24 w-24 rounded-full bg-teal-100/30 blur-2xl" />
 
-            {/* ── Viral Growth Badge — turns buyers into sellers ── */}
-            <Link
-              href="/create-shop"
-              className="mx-auto flex items-center justify-center gap-2 w-fit px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-100/50 transition-all group"
-            >
-              <div className="flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016A3.001 3.001 0 0021 9.349m-18 0V6.999c0-.621.504-1.125 1.125-1.125h15.75c.621 0 1.125.504 1.125 1.125V9.35" />
-                </svg>
-                <span className="text-xs font-bold text-emerald-700">Powered by TradeFeed</span>
+            <div className="relative z-10 space-y-4">
+              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-stone-500">
+                {shop.isVerified && (
+                  <span className="inline-flex items-center gap-1 font-semibold text-emerald-600">
+                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Verified
+                  </span>
+                )}
+                <span>{shop._count.products} products</span>
+                {shop.city && <span>📍 {shop.city}</span>}
               </div>
-              <span className="text-[10px] text-emerald-600 group-hover:text-emerald-700 transition-colors">
-                Create your free shop →
-              </span>
-            </Link>
 
-            <div className="flex items-center justify-center gap-4 text-[10px] text-stone-400">
-              <Link href="/" className="font-semibold text-stone-500 transition-colors hover:text-emerald-600">
-                TradeFeed
+              {/* ── Viral Growth Badge — turns buyers into sellers ── */}
+              <Link
+                href="/create-shop"
+                className="mx-auto flex items-center justify-center gap-2.5 w-fit px-5 py-3 rounded-xl bg-white ring-1 ring-stone-200/60 shadow-sm hover:ring-emerald-200 hover:shadow-md hover:shadow-emerald-100/50 transition-all duration-300 group"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shadow-sm shadow-emerald-200/50">
+                  <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016A3.001 3.001 0 0021 9.349m-18 0V6.999c0-.621.504-1.125 1.125-1.125h15.75c.621 0 1.125.504 1.125 1.125V9.35" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-stone-800">Powered by TradeFeed</p>
+                  <p className="text-[10px] text-stone-500 group-hover:text-emerald-600 transition-colors">
+                    Create your free shop →
+                  </p>
+                </div>
               </Link>
-              <Link href="/privacy" className="transition-colors hover:text-emerald-600">Privacy</Link>
-              <Link href="/terms" className="transition-colors hover:text-emerald-600">Terms</Link>
+
+              <div className="flex items-center justify-center gap-4 text-[10px] text-stone-400">
+                <Link href="/" className="font-semibold text-stone-500 transition-colors hover:text-emerald-600">
+                  TradeFeed
+                </Link>
+                <Link href="/privacy" className="transition-colors hover:text-emerald-600">Privacy</Link>
+                <Link href="/terms" className="transition-colors hover:text-emerald-600">Terms</Link>
+              </div>
             </div>
           </footer>
         </div>
