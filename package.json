@@ -12,10 +12,12 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push",
+    "db:push": "prisma db push && npx tsx scripts/db-health-check.ts",
+    "db:push:unsafe": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "npx tsx prisma/seed.ts",
+    "db:health": "npx tsx scripts/db-health-check.ts",
     "migrate:images": "npx tsx scripts/migrate-images.ts",
     "seed:plans": "npx tsx scripts/seed-plans.ts",
     "seed:categories": "npx tsx scripts/seed-global-categories.ts"
