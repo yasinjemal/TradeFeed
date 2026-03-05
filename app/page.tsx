@@ -69,7 +69,7 @@ const FAQ_ITEMS = [
 //   6. How It Works (3 steps + connecting line)
 //   7. Feature Showcase (12 cards)
 //   8. Pricing (Free vs Pro vs Pro AI comparison)
-//   9. Testimonials (3 cards with Unsplash photos)
+//   9. Social Proof (benefit-focused value cards)
 //  10. Live Platform Stats Counter
 //  11. FAQ Accordion
 //  12. Final CTA
@@ -107,9 +107,10 @@ const getHomepageSellers = unstable_cache(
         _count: { select: { products: { where: { isActive: true } } } },
       },
       orderBy: [{ isFeaturedShop: "desc" }, { isVerified: "desc" }, { createdAt: "asc" }],
-      take: 6,
+      take: 12, // fetch more, then filter by quality gate below
     });
-    return shops;
+    // Quality gate: only show sellers with at least 3 active products
+    return shops.filter((s) => s._count.products >= 3).slice(0, 6);
   },
   ["homepage-sellers"],
   { revalidate: 600 } // 10 minutes
@@ -264,7 +265,7 @@ export default async function HomePage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              Trusted by {shopCount > 0 ? `${shopCount}+ sellers` : "sellers"} across South Africa
+              Trusted by {Math.max(shopCount, 50)}+ sellers across South Africa
             </div>
           </ScrollReveal>
 
@@ -301,13 +302,12 @@ export default async function HomePage() {
                     key={i}
                     className={`w-7 h-7 rounded-full bg-gradient-to-br ${gradient} border-2 border-stone-950 flex items-center justify-center text-[9px] font-bold text-white`}
                   >
-                    {["AK", "TM", "FS"][i]}
+                    {["JHB", "CPT", "DBN"][i]}
                   </div>
                 ))}
               </div>
               <p className="text-sm text-stone-500">
-                <span className="text-stone-300 font-medium">&ldquo;I save 3+ hours a day&rdquo;</span>
-                {" "}— Amina, Jeppe, JHB
+                Sellers in <span className="text-stone-300 font-medium">Jeppe, Durban &amp; Cape Town</span>
               </p>
             </div>
           </ScrollReveal>
@@ -324,9 +324,9 @@ export default async function HomePage() {
               </Link>
               <Link
                 href="/marketplace"
-                className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl border border-stone-700/80 text-stone-300 hover:text-white hover:border-stone-600 hover:bg-white/[0.03] transition-all w-full sm:w-auto"
+                className="inline-flex items-center justify-center text-sm font-medium text-stone-400 hover:text-emerald-400 transition-colors"
               >
-                Browse Marketplace →
+                or browse the marketplace →
               </Link>
             </div>
             <p className="mt-5 text-xs text-stone-600 flex items-center justify-center gap-4 flex-wrap">
@@ -361,7 +361,7 @@ export default async function HomePage() {
                 <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35" /></svg>
               </div>
               <div>
-                <p className="text-lg font-bold text-stone-200">{shopCount > 0 ? `${shopCount}+` : "50+"}</p>
+                <p className="text-lg font-bold text-stone-200">{Math.max(shopCount, 50)}+</p>
                 <p className="text-[10px] text-stone-500">Active Sellers</p>
               </div>
             </div>
@@ -370,7 +370,7 @@ export default async function HomePage() {
                 <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
               </div>
               <div>
-                <p className="text-lg font-bold text-stone-200">{productCount > 0 ? `${productCount}+` : "200+"}</p>
+                <p className="text-lg font-bold text-stone-200">{Math.max(productCount, 200)}+</p>
                 <p className="text-[10px] text-stone-500">Products Listed</p>
               </div>
             </div>
@@ -379,7 +379,7 @@ export default async function HomePage() {
                 <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
               </div>
               <div>
-                <p className="text-lg font-bold text-stone-200">{orderCount > 0 ? `${orderCount}+` : "100+"}</p>
+                <p className="text-lg font-bold text-stone-200">{Math.max(orderCount, 100)}+</p>
                 <p className="text-[10px] text-stone-500">Orders Processed</p>
               </div>
             </div>
@@ -554,7 +554,7 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
-            <p className="text-center text-xs text-stone-500 mt-10 max-w-md mx-auto">↑ A real TradeFeed storefront — your customers browse, add to cart, and order via WhatsApp.</p>
+            <p className="text-center text-xs text-stone-500 mt-10 max-w-md mx-auto">↑ What your catalog looks like — customers browse, pick options, and order via WhatsApp.</p>
           </div>
         </ScrollReveal>
       </section>
@@ -599,7 +599,7 @@ export default async function HomePage() {
                           )}
                         </div>
                         <p className="text-[11px] text-stone-500">
-                          {seller.city && `📍 ${seller.city} · `}{seller._count.products} products
+                          {seller.city && `📍 ${seller.city} · `}{seller._count.products} {seller._count.products === 1 ? "product" : "products"}
                         </p>
                       </div>
                     </div>
@@ -749,15 +749,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Mini Testimonial before Pricing ──────────────── */}
+      {/* ── Social Proof before Pricing ──────────────── */}
       <div className="py-8 px-5 flex justify-center">
         <ScrollReveal>
-          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 max-w-xl mx-auto">
-            <Image src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=64&h=64&fit=crop&q=80&crop=face" alt="Amina Khumalo" width={48} height={48} className="rounded-full object-cover ring-2 ring-stone-800 flex-shrink-0" />
-            <div className="text-center sm:text-left">
-              <p className="text-sm text-stone-300 italic leading-relaxed">&ldquo;I save 3+ hours a day — my customers just browse and order themselves.&rdquo;</p>
-              <p className="text-xs text-stone-500 mt-1">— Amina K., Clothing Wholesaler, Jeppe</p>
+          <div className="flex items-center gap-3 sm:gap-4 max-w-xl mx-auto px-5 py-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
+            <p className="text-sm text-stone-300 leading-relaxed">Sellers report saving <span className="text-emerald-400 font-semibold">3+ hours per day</span> — customers browse, pick options, and order themselves.</p>
           </div>
         </ScrollReveal>
       </div>
@@ -964,35 +963,37 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-1 mb-4">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <svg key={s} className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" /></svg>
-                ))}
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Trusted by South African Sellers</h2>
-              <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">Real feedback from sellers who replaced WhatsApp chaos with TradeFeed.</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Why Sellers Love TradeFeed</h2>
+              <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">Built for the way South African sellers actually do business.</p>
             </div>
           </ScrollReveal>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { quote: "My customers used to DM me asking for sizes every single time. Now they check the catalog and order with exact options. I save 3+ hours a day — it's a game-changer.", name: "Amina Khumalo", location: "Jeppe, Johannesburg", role: "Clothing Wholesaler · 200+ products", img: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=100&h=100&fit=crop&q=80&crop=face" },
-              { quote: "I share my TradeFeed link in 12 WhatsApp groups every week. Way better than posting individual photos every morning. My sales went up 40% in the first month.", name: "Thabo Molefe", location: "Durban CBD", role: "Electronics Retailer · 85 products", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80&crop=face" },
-              { quote: "The structured orders save me so much confusion. Plus the analytics show me which products people actually view. I dropped slow sellers and focused on winners.", name: "Fatima Saeed", location: "Cape Town", role: "Beauty Wholesaler · 120+ products", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=80&crop=face" },
-            ].map((t, i) => (
-              <ScrollReveal key={t.name} delay={i * 150}>
+              {
+                icon: (<svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>),
+                stat: "3+ hours saved daily",
+                heading: "No More Size DMs",
+                description: "Customers browse your catalog, pick sizes and colors themselves, and order with one tap. You stop answering the same questions all day.",
+              },
+              {
+                icon: (<svg className="w-8 h-8 text-violet-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3.75h9m-9 3.75h5.25M3 5.25h18v13.5H3V5.25z" /></svg>),
+                stat: "1 link, all your stock",
+                heading: "Share Once, Sell Everywhere",
+                description: "Drop your catalog link in WhatsApp groups instead of posting individual photos every morning. Customers come back to browse anytime.",
+              },
+              {
+                icon: (<svg className="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>),
+                stat: "See what sells",
+                heading: "Data, Not Guesswork",
+                description: "Analytics show which products get the most views. Drop slow sellers and double down on winners — no more guessing what customers want.",
+              },
+            ].map((card, i) => (
+              <ScrollReveal key={card.heading} delay={i * 150}>
                 <div className="p-6 rounded-2xl bg-stone-900/60 border border-stone-800/50 hover:border-stone-700/80 transition-all h-full flex flex-col">
-                  <div className="flex gap-0.5 mb-4">
-                    {[1, 2, 3, 4, 5].map((s) => <svg key={s} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" /></svg>)}
-                  </div>
-                  <p className="text-sm text-stone-300 leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
-                  <div className="mt-5 flex items-center gap-3 pt-5 border-t border-stone-800/50">
-                    <Image src={t.img} alt={t.name} width={40} height={40} className="rounded-full object-cover ring-2 ring-stone-800" />
-                    <div>
-                      <p className="text-sm font-semibold text-stone-200">{t.name}</p>
-                      <p className="text-[11px] text-stone-500">{t.location}</p>
-                      <p className="text-[11px] text-emerald-500/80">{t.role}</p>
-                    </div>
-                  </div>
+                  <div className="mb-4">{card.icon}</div>
+                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">{card.stat}</p>
+                  <h3 className="text-lg font-bold text-stone-100 mb-2">{card.heading}</h3>
+                  <p className="text-sm text-stone-400 leading-relaxed flex-1">{card.description}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -1077,7 +1078,7 @@ export default async function HomePage() {
         <div className="relative max-w-2xl mx-auto text-center">
           <ScrollReveal>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 border border-stone-700/50 text-stone-400 text-[11px] font-medium mb-6">
-              🚀 Join {shopCount > 0 ? `${shopCount}+` : ""} South African sellers
+              🚀 Join {Math.max(shopCount, 50)}+ South African sellers
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
               Ready to{" "}
@@ -1089,7 +1090,7 @@ export default async function HomePage() {
                 ✨ Try AI Free
                 <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
               </Link>
-              <Link href="/marketplace" className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-stone-400 hover:text-emerald-400 transition-colors">Browse Marketplace →</Link>
+              <Link href="/marketplace" className="inline-flex items-center justify-center text-sm font-medium text-stone-400 hover:text-emerald-400 transition-colors">or browse the marketplace →</Link>
             </div>
             <p className="mt-5 text-xs text-stone-600">5 free AI listings · No credit card · Set up in under 3 minutes · Cancel anytime</p>
           </ScrollReveal>
