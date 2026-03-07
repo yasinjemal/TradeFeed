@@ -20,6 +20,7 @@ import {
   deactivateShopAction,
   reactivateShopAction,
   toggleFeaturedShopAction,
+  adminSetShopPlanAction,
 } from "@/app/actions/admin";
 
 interface AdminShop {
@@ -67,6 +68,12 @@ const FILTERS = [
   { key: "verified", label: "Verified" },
   { key: "inactive", label: "Inactive" },
   { key: "no-products", label: "No Products" },
+] as const;
+
+const PLAN_OPTIONS = [
+  { slug: "free", label: "Free" },
+  { slug: "pro", label: "Pro" },
+  { slug: "pro-ai", label: "Pro AI" },
 ] as const;
 
 export function AdminShopList({
@@ -358,6 +365,35 @@ export function AdminShopList({
                         Reactivate
                       </button>
                     )}
+
+                    {/* Plan change dropdown */}
+                    <select
+                      value={planSlug || "free"}
+                      onChange={(e) => {
+                        const newPlan = e.target.value;
+                        if (newPlan !== (planSlug || "free")) {
+                          if (confirm(`Change ${shop.name} to ${PLAN_OPTIONS.find(p => p.slug === newPlan)?.label}?`)) {
+                            startTransition(async () => {
+                              const result = await adminSetShopPlanAction(shop.id, newPlan);
+                              if (result.success) {
+                                setToast({ type: "success", message: result.message || "Plan updated" });
+                              } else {
+                                setToast({ type: "error", message: result.error || "Failed" });
+                              }
+                              setTimeout(() => setToast(null), 3000);
+                            });
+                          }
+                        }
+                      }}
+                      disabled={isPending}
+                      className="px-2 py-1.5 text-xs font-medium rounded-lg bg-stone-800 border border-stone-700 text-stone-300 hover:border-violet-700 transition-all disabled:opacity-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                    >
+                      {PLAN_OPTIONS.map((p) => (
+                        <option key={p.slug} value={p.slug}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
 
                     {/* View catalog */}
                     <a

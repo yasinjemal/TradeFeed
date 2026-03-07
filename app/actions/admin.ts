@@ -29,6 +29,7 @@ import {
   reorderPaymentMethods,
   approveUpgradeRequest,
   rejectUpgradeRequest,
+  adminSetShopPlan,
 } from "@/lib/db/manual-payments";
 import { revalidatePath } from "next/cache";
 
@@ -560,6 +561,44 @@ export async function rejectUpgradeAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to reject upgrade.",
+    };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Admin Direct Plan Change
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Directly set a shop's plan (Pro, Pro AI, or Free) without
+ * requiring the seller to submit an upgrade request.
+ */
+export async function adminSetShopPlanAction(
+  shopId: string,
+  planSlug: string,
+): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const result = await adminSetShopPlan(shopId, planSlug);
+    await logAdminAction({
+      adminId: admin.id, adminEmail: admin.email,
+      action: "SHOP_PLAN_CHANGE", entityType: "shop",
+      entityId: shopId,
+      entityName: `${result.shop.name} → ${result.plan.name}`,
+      details: { newPlan: planSlug },
+    });
+    revalidatePath("/admin");
+    revalidatePath("/admin/upgrade-requests");
+    revalidatePath(`/dashboard/${result.shop.slug}/billing`);
+    revalidatePath(`/dashboard/${result.shop.slug}`);
+    return {
+      success: true,
+      message: `${result.shop.name} is now on ${result.plan.name}.`,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to change plan.",
     };
   }
 }

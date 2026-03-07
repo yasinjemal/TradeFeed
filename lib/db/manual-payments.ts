@@ -182,3 +182,60 @@ export async function rejectUpgradeRequest(
     },
   });
 }
+
+// ══════════════════════════════════════════════════════════════
+// Admin Direct Plan Change (no upgrade request needed)
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Directly set a shop's plan — admin bypasses the upgrade request flow.
+ * Creates a subscription if the shop doesn't have one yet.
+ */
+export async function adminSetShopPlan(
+  shopId: string,
+  planSlug: string,
+) {
+  const targetPlan = await db.plan.findUnique({
+    where: { slug: planSlug },
+  });
+
+  if (!targetPlan) {
+    throw new Error(`Plan not found: ${planSlug}`);
+  }
+
+  const now = new Date();
+  const periodEnd = new Date();
+  periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+  // Upsert — create subscription if it doesn't exist, update if it does
+  return db.subscription.upsert({
+    where: { shopId },
+    create: {
+      id: `sub_${shopId}_${Date.now()}`,
+      shopId,
+      planId: targetPlan.id,
+      status: "ACTIVE",
+      currentPeriodStart: now,
+      currentPeriodEnd: periodEnd,
+      upgradeStatus: "NONE",
+    },
+    update: {
+      planId: targetPlan.id,
+      status: "ACTIVE",
+      currentPeriodStart: now,
+      currentPeriodEnd: periodEnd,
+      // Clear any pending upgrade request
+      upgradeStatus: "NONE",
+      requestedPlanSlug: null,
+      manualPaymentMethod: null,
+      paymentReference: null,
+      proofOfPaymentUrl: null,
+      adminNote: null,
+      approvedAt: null,
+    },
+    include: {
+      shop: { select: { name: true, slug: true } },
+      plan: { select: { name: true, slug: true } },
+    },
+  });
+}
