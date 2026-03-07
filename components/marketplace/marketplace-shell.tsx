@@ -11,6 +11,7 @@ import { useState, useEffect, useCallback, useTransition, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useUser, UserButton } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import type {
   MarketplaceProduct,
@@ -68,6 +69,8 @@ export function MarketplaceShell({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const { isSignedIn } = useUser();
+  const t = useTranslations("marketplace");
+  const tNav = useTranslations("nav");
   const [search, setSearch] = useState(currentFilters.search ?? "");
   const [filterOpen, setFilterOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -169,7 +172,7 @@ export function MarketplaceShell({
                 type="text"
                 value={search}
                 onChange={(e) => handleSearchInput(e.target.value)}
-                placeholder="Search products, shops, categories..."
+                placeholder={t("searchPlaceholder")}
                 className="w-full rounded-xl bg-stone-900 border border-stone-800 pl-10 pr-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all"
               />
               {search && (
@@ -264,7 +267,7 @@ export function MarketplaceShell({
                 type="text"
                 value={search}
                 onChange={(e) => handleSearchInput(e.target.value)}
-                placeholder="Search products, shops..."
+                placeholder={t("searchPlaceholder")}
                 className="w-full rounded-xl bg-stone-900 border border-stone-800 pl-10 pr-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-emerald-500/50 transition-all"
               />
             </div>
@@ -442,7 +445,7 @@ export function MarketplaceShell({
             /* Empty State */
             <div className="flex flex-col items-center py-20 text-center">
               <IllustrationSearchNotFound className="w-44 h-44 mb-4" />
-              <h3 className="text-lg font-bold text-stone-300 mb-1">No products found</h3>
+              <h3 className="text-lg font-bold text-stone-300 mb-1">{t("noResults")}</h3>
               <p className="text-sm text-stone-500 max-w-sm mb-4">
                 Try adjusting your filters, search for something else, or browse all products.
               </p>

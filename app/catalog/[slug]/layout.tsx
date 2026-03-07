@@ -26,6 +26,7 @@ import { generateShopJsonLd } from "@/lib/seo/json-ld";
 import { ShareCatalog } from "@/components/catalog/share-catalog";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CatalogAppShell } from "@/components/ui/catalog-app-shell";
+import { OfflineBanner } from "@/components/catalog/offline-banner";
 
 interface CatalogLayoutProps {
   children: React.ReactNode;
@@ -118,6 +119,10 @@ export default async function CatalogLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
       ))}
+
+      {/* Offline connectivity banner */}
+      <OfflineBanner />
+
       <CatalogAppShell
         header={
           <div className={`px-3 py-2.5 sm:px-4 sm:py-3 ${

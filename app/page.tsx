@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth/admin";
 import { unstable_cache } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import {
   AnimatedCounter,
   ScrollReveal,
@@ -117,6 +118,12 @@ const getHomepageSellers = unstable_cache(
 );
 
 export default async function HomePage() {
+  // ── i18n ──────────────────────────────────────────────
+  const tNav = await getTranslations("nav");
+  const tLanding = await getTranslations("landing");
+  const tCommon = await getTranslations("common");
+  const tFooter = await getTranslations("footer");
+
   // ── Auth-aware CTA ────────────────────────────────────
   const { userId: clerkId } = await auth();
   let dashboardSlug: string | null = null;
@@ -175,10 +182,10 @@ export default async function HomePage() {
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-1">
             {[
-              { label: "Features", href: "#features" },
-              { label: "Pricing", href: "#pricing" },
-              { label: "FAQ", href: "#faq" },
-              { label: "Marketplace", href: "/marketplace" },
+              { label: tNav("features"), href: "#features" },
+              { label: tNav("pricing"), href: "#pricing" },
+              { label: tNav("faq"), href: "#faq" },
+              { label: tNav("marketplace"), href: "/marketplace" },
             ].map((link) => (
               <Link
                 key={link.label}
@@ -220,7 +227,7 @@ export default async function HomePage() {
                   href="/sign-in"
                   className="hidden sm:inline-flex px-4 py-2 text-sm text-stone-400 hover:text-white transition-colors"
                 >
-                  Sign In
+                  {tCommon("signIn")}
                 </Link>
                 <Link
                   href="/sign-up"
@@ -1204,9 +1211,9 @@ export default async function HomePage() {
               <p className="text-xs text-stone-500 leading-relaxed">South Africa&apos;s online marketplace for sellers and buyers. Create your online shop, list products, and sell via WhatsApp. 🇿🇦</p>
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-stone-300 uppercase tracking-wider mb-4">Product</h4>
+              <h4 className="text-xs font-semibold text-stone-300 uppercase tracking-wider mb-4">{tFooter("product")}</h4>
               <ul className="space-y-2.5">
-                {[{ label: "Features", href: "#features" }, { label: "Pricing", href: "#pricing" }, { label: "Marketplace", href: "/marketplace" }, { label: "FAQ", href: "#faq" }].map((l) => (
+                {[{ label: tNav("features"), href: "#features" }, { label: tNav("pricing"), href: "#pricing" }, { label: tNav("marketplace"), href: "/marketplace" }, { label: tNav("faq"), href: "#faq" }].map((l) => (
                   <li key={l.label}><Link href={l.href} className="text-sm text-stone-500 hover:text-stone-300 transition-colors">{l.label}</Link></li>
                 ))}
               </ul>
@@ -1220,9 +1227,9 @@ export default async function HomePage() {
               </ul>
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-stone-300 uppercase tracking-wider mb-4">Legal</h4>
+              <h4 className="text-xs font-semibold text-stone-300 uppercase tracking-wider mb-4">{tFooter("legal")}</h4>
               <ul className="space-y-2.5">
-                {[{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }].map((l) => (
+                {[{ label: tFooter("privacy"), href: "/privacy" }, { label: tFooter("terms"), href: "/terms" }].map((l) => (
                   <li key={l.label}><Link href={l.href} className="text-sm text-stone-500 hover:text-stone-300 transition-colors">{l.label}</Link></li>
                 ))}
               </ul>

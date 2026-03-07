@@ -4,6 +4,12 @@
 // Generates a sitemap listing all active shops, products,
 // marketplace pages, and category pages for search engine crawlers.
 //
+// SITEMAP INDEX:
+//   When total URLs exceed MAX_URLS_PER_SITEMAP (10,000),
+//   Next.js automatically splits into multiple sitemaps with
+//   the generateSitemaps() convention. Each sitemap chunk
+//   stays under the 50,000 URL / 50 MB Google limit.
+//
 // URLS:
 //   - / (home)
 //   - /marketplace (marketplace hub)
@@ -17,10 +23,35 @@ import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const MAX_URLS_PER_SITEMAP = 10_000;
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // ── Static pages ──────────────────────────────────────
-  const staticPages: MetadataRoute.Sitemap = [
+// ── Sitemap Index — split into chunks when needed ───────────
+
+/**
+ * Next.js calls this to determine how many sitemap files to generate.
+ * Returns [{ id: 0 }, { id: 1 }, ...] — one per chunk.
+ * If total URLs < MAX_URLS_PER_SITEMAP, returns a single chunk.
+ */
+export async function generateSitemaps() {
+  const productCount = await db.product.count({
+    where: { isActive: true, shop: { isActive: true } },
+  });
+  // Static + categories + shops contribute ~200 URLs at most for now.
+  // Products are the main scaling dimension.
+  const estimatedTotal = productCount + 200;
+  const chunks = Math.max(1, Math.ceil(estimatedTotal / MAX_URLS_PER_SITEMAP));
+  return Array.from({ length: chunks }, (_, i) => ({ id: i }));
+}
+
+// ── Per-chunk sitemap ───────────────────────────────────────
+
+export default async function sitemap({
+  id,
+}: {
+  id: number;
+}): Promise<MetadataRoute.Sitemap> {
+  // ── Static pages (only in first chunk) ─────────────────
+  const staticPages: MetadataRoute.Sitemap = id === 0 ? [
     {
       url: APP_URL,
       lastModified: new Date(),
@@ -45,23 +76,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.3,
     },
-  ];
+  ] : [];
 
-  // ── Marketplace category pages ────────────────────────
+  // ── Marketplace category pages (only in first chunk) ───
   // Run all DB queries in parallel for speed (avoids Vercel timeout at scale)
   const [globalCategories, subCategories, shops, products] = await Promise.all([
-    db.globalCategory.findMany({
-      where: { parentId: null },
-      select: { slug: true, updatedAt: true },
-    }),
-    db.globalCategory.findMany({
-      where: { parentId: { not: null } },
-      select: { slug: true, updatedAt: true },
-    }),
-    db.shop.findMany({
-      where: { isActive: true },
-      select: { slug: true, updatedAt: true },
-    }),
+    id === 0
+      ? db.globalCategory.findMany({
+          where: { parentId: null },
+          select: { slug: true, updatedAt: true },
+        })
+      : Promise.resolve([]),
+    id === 0
+      ? db.globalCategory.findMany({
+          where: { parentId: { not: null } },
+          select: { slug: true, updatedAt: true },
+        })
+      : Promise.resolve([]),
+    id === 0
+      ? db.shop.findMany({
+          where: { isActive: true },
+          select: { slug: true, updatedAt: true },
+        })
+      : Promise.resolve([]),
+    // Products are paginated across chunks
     db.product.findMany({
       where: { isActive: true, shop: { isActive: true } },
       select: {
@@ -69,7 +107,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         updatedAt: true,
         shop: { select: { slug: true } },
       },
-      take: 5000,
+      skip: id * MAX_URLS_PER_SITEMAP,
+      take: MAX_URLS_PER_SITEMAP,
+      orderBy: { id: "asc" },
     }),
   ]);
 

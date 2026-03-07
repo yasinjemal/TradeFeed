@@ -32,6 +32,7 @@ export const revalidate = 60;
 import { CatalogSearchFilter } from "@/components/catalog/catalog-search-filter";
 import { ComboSection } from "@/components/catalog/combo-section";
 import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
+import { CatalogCacheManager } from "@/components/catalog/catalog-cache-manager";
 
 interface CatalogPageProps {
   params: Promise<{ slug: string }>;
@@ -147,6 +148,39 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
         ? Math.min(...p.variants.map((v) => v.priceInCents))
         : 0,
   }));
+
+  // ── Map to offline-cache shapes for IndexedDB ──────────
+  const cachedShop = {
+    id: shop.id,
+    slug,
+    name: shop.name,
+    description: shop.description ?? null,
+    logoUrl: shop.logoUrl ?? null,
+    bannerUrl: shop.bannerUrl ?? null,
+    whatsappNumber: shop.whatsappNumber,
+    cachedAt: Date.now(),
+  };
+
+  const cachedProducts = products.map((p) => {
+    const prices = p.variants.map((v) => v.priceInCents);
+    return {
+      id: p.id,
+      shopId: shop.id,
+      name: p.name,
+      description: p.description ?? null,
+      imageUrl: p.images[0]?.url ?? null,
+      minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
+      maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
+      variants: p.variants.map((v) => ({
+        id: v.id,
+        size: v.size,
+        color: v.color ?? null,
+        priceInCents: v.priceInCents,
+        stock: v.stock,
+      })),
+      cachedAt: Date.now(),
+    };
+  });
 
   return (
     <div className="space-y-5">
@@ -367,6 +401,9 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
           </svg>
         </Link>
       </div>
+
+      {/* ── Offline Cache Manager (silent — renders nothing) ── */}
+      <CatalogCacheManager shop={cachedShop} products={cachedProducts} />
     </div>
   );
 }
