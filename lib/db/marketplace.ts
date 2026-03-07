@@ -57,6 +57,7 @@ export interface MarketplaceFilters {
 
 export interface MarketplaceProduct {
   id: string;
+  slug: string | null;
   name: string;
   description: string | null;
   imageUrl: string | null;
@@ -356,6 +357,7 @@ export async function getMarketplaceProducts(
       where,
       select: {
         id: true,
+        slug: true,
         name: true,
         description: true,
         createdAt: true,
@@ -404,6 +406,7 @@ export async function getMarketplaceProducts(
 
     return {
       id: p.id,
+      slug: p.slug,
       name: p.name,
       description: p.description,
       imageUrl: p.images[0]?.url ?? null,
@@ -481,6 +484,7 @@ export async function getPromotedProducts(
       product: {
         select: {
           id: true,
+          slug: true,
           name: true,
           description: true,
           createdAt: true,
@@ -530,6 +534,7 @@ export async function getPromotedProducts(
 
     return {
       id: p.id,
+      slug: p.slug,
       name: p.name,
       description: p.description,
       imageUrl: p.images[0]?.url ?? null,
@@ -666,6 +671,7 @@ export async function getTrendingProducts(
     },
     select: {
       id: true,
+      slug: true,
       name: true,
       description: true,
       createdAt: true,
@@ -713,6 +719,7 @@ export async function getTrendingProducts(
 
       return {
         id: p.id,
+        slug: p.slug,
         name: p.name,
         description: p.description,
         imageUrl: p.images[0]?.url ?? null,

@@ -8,6 +8,7 @@ function makeProduct(
 ): MarketplaceProduct {
   return {
     id,
+    slug: `product-${id}`,
     name: `Product ${id}`,
     description: null,
     imageUrl: null,

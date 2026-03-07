@@ -130,6 +130,7 @@ export async function getCatalogProducts(shopId: string) {
     },
     select: {
       id: true,
+      slug: true,
       name: true,
       description: true,
       category: {
@@ -166,6 +167,7 @@ export async function getCatalogProducts(shopId: string) {
 
 /**
  * Get a single product for the public catalog detail page.
+ * Accepts either a product slug (SEO-friendly) or a product ID (backward compat).
  *
  * WHAT: Full product with all active variants.
  * WHY: Buyer needs to see every size/color option and pick what to order.
@@ -173,50 +175,52 @@ export async function getCatalogProducts(shopId: string) {
  * MULTI-TENANT: Scoped by shopId — prevents accessing products via ID guessing.
  * PUBLIC: No auth, but product must be active.
  */
-export async function getCatalogProduct(productId: string, shopId: string) {
+export async function getCatalogProduct(slugOrId: string, shopId: string) {
+  const productSelect = {
+    id: true as const,
+    slug: true as const,
+    name: true as const,
+    description: true as const,
+    option1Label: true as const,
+    option2Label: true as const,
+    minWholesaleQty: true as const,
+    category: {
+      select: { id: true, name: true, slug: true },
+    },
+    images: {
+      select: { id: true, url: true, altText: true, position: true },
+      orderBy: { position: "asc" as const },
+    },
+    variants: {
+      where: { isActive: true },
+      select: {
+        id: true,
+        size: true,
+        color: true,
+        priceInCents: true,
+        retailPriceCents: true,
+        stock: true,
+        sku: true,
+      },
+      orderBy: [
+        { priceInCents: "asc" },
+        { size: "asc" },
+        { color: "asc" },
+      ] as { priceInCents?: "asc" | "desc"; size?: "asc" | "desc"; color?: "asc" | "desc" }[],
+    },
+  };
+
+  // Try slug first (preferred — SEO-friendly URLs)
+  const bySlug = await db.product.findFirst({
+    where: { slug: slugOrId, shopId, isActive: true },
+    select: productSelect,
+  });
+  if (bySlug) return bySlug;
+
+  // Fallback to ID lookup (backward compatibility for old/bookmarked URLs)
   return db.product.findFirst({
-    where: {
-      id: productId,
-      shopId,
-      isActive: true,
-    },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      option1Label: true,
-      option2Label: true,
-      minWholesaleQty: true,
-      category: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-      images: {
-        select: {
-          id: true,
-          url: true,
-          altText: true,
-          position: true,
-        },
-        orderBy: { position: "asc" },
-      },
-      variants: {
-        where: { isActive: true },
-        select: {
-          id: true,
-          size: true,
-          color: true,
-          priceInCents: true,
-          retailPriceCents: true,
-          stock: true,
-          sku: true,
-        },
-        orderBy: [{ priceInCents: "asc" }, { size: "asc" }, { color: "asc" }],
-      },
-    },
+    where: { id: slugOrId, shopId, isActive: true },
+    select: productSelect,
   });
 }
 

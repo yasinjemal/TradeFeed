@@ -11,6 +11,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { generateUniqueProductSlug } from "@/lib/utils/product-slug";
 import type { ProductCreateInput, ProductUpdateInput } from "@/lib/validation/product";
 
 /**
@@ -26,9 +27,12 @@ export async function createProduct(
   input: ProductCreateInput,
   shopId: string
 ) {
+  const slug = await generateUniqueProductSlug(input.name, shopId);
+
   return db.product.create({
     data: {
       name: input.name,
+      slug,
       description: input.description || null,
       isActive: input.isActive,
       shopId,
@@ -126,10 +130,16 @@ export async function updateProduct(
     return null; // Product not found or doesn't belong to this shop
   }
 
+  // Regenerate slug if name changed
+  const slugUpdate = input.name !== undefined
+    ? { slug: await generateUniqueProductSlug(input.name, shopId, productId) }
+    : {};
+
   return db.product.update({
     where: { id: productId },
     data: {
       ...(input.name !== undefined && { name: input.name }),
+      ...slugUpdate,
       ...(input.description !== undefined && {
         description: input.description || null,
       }),

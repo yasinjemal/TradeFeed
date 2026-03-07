@@ -57,6 +57,7 @@ export async function GET() {
       },
       select: {
         id: true,
+        slug: true,
         name: true,
         description: true,
         shop: {
@@ -97,7 +98,7 @@ export async function GET() {
     for (const product of products) {
       if (product.variants.length === 0 || product.images.length === 0) continue;
 
-      const productUrl = `${APP_URL}/catalog/${product.shop.slug}/products/${product.id}`;
+      const productUrl = `${APP_URL}/catalog/${product.shop.slug}/products/${product.slug ?? product.id}`;
       const primaryImage = product.images[0]?.url ?? "";
       const additionalImages = product.images
         .slice(1, 5)

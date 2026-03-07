@@ -143,6 +143,7 @@ export function generateProductJsonLd(
   shop: { name: string; slug: string },
   product: {
     id: string;
+    slug?: string | null;
     name: string;
     description: string | null;
     images: { url: string }[];
@@ -172,7 +173,7 @@ export function generateProductJsonLd(
   const minPrice = activePrices.length > 0 ? Math.min(...activePrices) / 100 : 0;
   const maxPrice = activePrices.length > 0 ? Math.max(...activePrices) / 100 : 0;
   const totalStock = activeVariants.reduce((sum, v) => sum + v.stock, 0);
-  const productUrl = `${APP_URL}/catalog/${shop.slug}/products/${product.id}`;
+  const productUrl = `${APP_URL}/catalog/${shop.slug}/products/${product.slug ?? product.id}`;
 
   // 6-month validity for price
   const priceValidUntil = new Date();
@@ -317,7 +318,7 @@ export function generateProductJsonLd(
         "@type": "ListItem",
         position: 3,
         name: product.name,
-        item: `${APP_URL}/catalog/${shop.slug}/products/${product.id}`,
+        item: `${APP_URL}/catalog/${shop.slug}/products/${product.slug ?? product.id}`,
       },
     ],
   };
@@ -357,6 +358,7 @@ export function generateFaqJsonLd(
 export function generateMarketplaceJsonLd(
   products: {
     id: string;
+    slug?: string | null;
     name: string;
     shopSlug: string;
     image: string | null;
@@ -382,7 +384,7 @@ export function generateMarketplaceJsonLd(
     itemListElement: products.map((product, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      url: `${APP_URL}/catalog/${product.shopSlug}/products/${product.id}`,
+      url: `${APP_URL}/catalog/${product.shopSlug}/products/${product.slug ?? product.id}`,
       name: product.name,
       ...(product.image && { image: product.image }),
     })),

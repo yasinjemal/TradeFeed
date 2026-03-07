@@ -39,8 +39,9 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
 
   return (
     <Link
-      href={`/catalog/${product.shop.slug}/products/${product.id}`}
+      href={`/catalog/${product.shop.slug}/products/${product.slug ?? product.id}`}
       onClick={handleClick}
+      aria-label={`${product.name} from ${product.shop.name}`}
       className="group block"
     >
       <div className="bg-stone-900 rounded-2xl border border-stone-800/50 overflow-hidden transition-all duration-300 hover:border-stone-700 hover:shadow-xl hover:shadow-emerald-500/5 hover:-translate-y-1 active:scale-[0.98]">

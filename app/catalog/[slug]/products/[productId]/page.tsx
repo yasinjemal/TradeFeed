@@ -58,7 +58,7 @@ export async function generateMetadata({
     title: `${product.name} - ${shop.name}`,
     description: product.description || `${product.name} from ${minPrice} at ${shop.name}`,
     alternates: {
-      canonical: `${baseUrl}/catalog/${slug}/products/${productId}`,
+      canonical: `${baseUrl}/catalog/${slug}/products/${product.slug ?? productId}`,
     },
     openGraph: {
       title: `${product.name} - ${shop.name}`,

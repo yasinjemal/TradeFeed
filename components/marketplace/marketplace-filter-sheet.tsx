@@ -113,10 +113,11 @@ export function MarketplaceFilterSheet({
       <div
         className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Panel */}
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-stone-950 border-l border-stone-800 shadow-2xl animate-in slide-in-from-right duration-300">
+      <div role="dialog" aria-label="Filter products" className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-stone-950 border-l border-stone-800 shadow-2xl animate-in slide-in-from-right duration-300">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-stone-800">
@@ -124,6 +125,7 @@ export function MarketplaceFilterSheet({
             <button
               type="button"
               onClick={onClose}
+              aria-label="Close filters"
               className="w-8 h-8 rounded-lg bg-stone-900 flex items-center justify-center text-stone-400 hover:text-white transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -219,6 +221,9 @@ export function MarketplaceFilterSheet({
               <button
                 type="button"
                 onClick={() => setVerifiedOnly(!verifiedOnly)}
+                role="switch"
+                aria-checked={verifiedOnly}
+                aria-label="Show verified sellers only"
                 className="flex items-center gap-3 w-full"
               >
                 <div

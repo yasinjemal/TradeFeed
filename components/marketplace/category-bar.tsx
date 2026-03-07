@@ -26,12 +26,16 @@ export function CategoryBar({
 
   if (categories.length === 0) return null;
 
+  // Hide categories that have no products — keeps the UI clean
+  const nonEmptyCategories = categories.filter((c) => c.productCount > 0);
+  if (nonEmptyCategories.length === 0) return null;
+
   // Show first 5 categories on mobile when collapsed, all when expanded
   const MOBILE_COLLAPSED_COUNT = 5;
-  const hasMore = categories.length > MOBILE_COLLAPSED_COUNT;
+  const hasMore = nonEmptyCategories.length > MOBILE_COLLAPSED_COUNT;
   const visibleCategories = expanded
-    ? categories
-    : categories.slice(0, MOBILE_COLLAPSED_COUNT);
+    ? nonEmptyCategories
+    : nonEmptyCategories.slice(0, MOBILE_COLLAPSED_COUNT);
 
   return (
     <section className="px-4 sm:px-6 pb-2">
@@ -119,7 +123,7 @@ export function CategoryBar({
                   />
                 </svg>
                 <span className="text-[11px] font-semibold">
-                  {expanded ? "Less" : `+${categories.length - MOBILE_COLLAPSED_COUNT}`}
+                  {expanded ? "Less" : `+${nonEmptyCategories.length - MOBILE_COLLAPSED_COUNT}`}
                 </span>
               </button>
             )}
@@ -140,7 +144,7 @@ export function CategoryBar({
             🛍️ All Products
           </button>
 
-          {categories.map((cat) => (
+          {nonEmptyCategories.map((cat) => (
             <button
               key={cat.id}
               type="button"

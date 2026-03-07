@@ -182,6 +182,7 @@ export function MarketplaceShell({
                     setSearch("");
                     updateFilters({ search: undefined });
                   }}
+                  aria-label="Clear search"
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-stone-700 flex items-center justify-center text-stone-400 hover:bg-stone-600 transition-colors"
                 >
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -382,6 +383,7 @@ export function MarketplaceShell({
             <select
               value={currentFilters.sortBy}
               onChange={(e) => updateFilters({ sort: e.target.value })}
+              aria-label="Sort products"
               className="rounded-xl bg-stone-900 border border-stone-800 px-3 py-2 text-sm text-stone-300 focus:outline-none focus:border-emerald-500/50 cursor-pointer"
             >
               <option value="newest">Newest</option>
@@ -528,6 +530,7 @@ export function MarketplaceShell({
             <div className="flex items-center gap-6 text-xs text-stone-500">
               <Link href="/privacy" className="hover:text-stone-300 transition-colors">Privacy</Link>
               <Link href="/terms" className="hover:text-stone-300 transition-colors">Terms</Link>
+              <Link href="/contact" className="hover:text-stone-300 transition-colors">Contact</Link>
               {isSignedIn ? (
                 <Link href="/dashboard" className="hover:text-emerald-400 transition-colors">Dashboard</Link>
               ) : (
@@ -569,6 +572,7 @@ function FilterTag({
       <button
         type="button"
         onClick={onRemove}
+        aria-label={`Remove ${label} filter`}
         className="w-3.5 h-3.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/40 flex items-center justify-center transition-colors"
       >
         <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">

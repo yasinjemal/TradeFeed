@@ -76,6 +76,12 @@ export default async function sitemap({
       changeFrequency: "monthly",
       priority: 0.3,
     },
+    {
+      url: `${APP_URL}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
   ] : [];
 
   // ── Marketplace category pages (only in first chunk) ───
@@ -104,6 +110,7 @@ export default async function sitemap({
       where: { isActive: true, shop: { isActive: true } },
       select: {
         id: true,
+        slug: true,
         updatedAt: true,
         shop: { select: { slug: true } },
       },
@@ -137,7 +144,7 @@ export default async function sitemap({
 
   // ── Product detail pages ──────────────────────────────
   const productPages: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${APP_URL}/catalog/${product.shop.slug}/products/${product.id}`,
+    url: `${APP_URL}/catalog/${product.shop.slug}/products/${product.slug ?? product.id}`,
     lastModified: product.updatedAt,
     changeFrequency: "daily" as const,
     priority: 0.6,

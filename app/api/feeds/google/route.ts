@@ -41,6 +41,7 @@ export async function GET() {
     },
     select: {
       id: true,
+      slug: true,
       name: true,
       description: true,
       images: { select: { url: true }, take: 1 },
@@ -70,7 +71,7 @@ export async function GET() {
       const v = p.variants[0]!;
       const price = (v.priceInCents / 100).toFixed(2);
       const imageUrl = p.images[0]?.url || `${APP_URL}/icon.svg`;
-      const link = `${APP_URL}/catalog/${p.shop.slug}/products/${p.id}`;
+      const link = `${APP_URL}/catalog/${p.shop.slug}/products/${p.slug ?? p.id}`;
       const availability = v.stock > 0 ? "in_stock" : "out_of_stock";
       const category = p.category?.name || "Apparel & Accessories";
 

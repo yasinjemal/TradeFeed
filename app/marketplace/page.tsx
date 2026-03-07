@@ -138,6 +138,7 @@ export default async function MarketplacePage({
   const jsonLd = generateMarketplaceJsonLd(
     interleavedProducts.slice(0, 20).map((p) => ({
       id: p.id,
+      slug: p.slug,
       name: p.name,
       shopSlug: p.shop.slug,
       image: p.imageUrl,

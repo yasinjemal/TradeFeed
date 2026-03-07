@@ -15,6 +15,7 @@ import { WishlistHeart } from "./wishlist-heart";
 
 interface CatalogProduct {
   id: string;
+  slug?: string | null;
   name: string;
   description: string | null;
   category: { id: string; name: string; slug: string } | null;
@@ -281,7 +282,7 @@ function ProductCard({
 
   return (
     <Link
-      href={`/catalog/${shopSlug}/products/${product.id}`}
+      href={`/catalog/${shopSlug}/products/${product.slug ?? product.id}`}
       className="group block"
     >
       <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-stone-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:ring-stone-200/80 active:scale-[0.99]">

@@ -171,6 +171,7 @@ model Category {
 model Product {
   id          String  @id @default(cuid())
   name        String                          // e.g. "Floral Summer Dress"
+  slug        String?                         // SEO-friendly URL slug (unique per shop)
   description String?                         // Product description
   isActive    Boolean @default(true)          // Controls visibility on public catalog
 
@@ -226,6 +227,7 @@ model Product {
   @@index([shopId, isActive])
   @@index([categoryId])
   @@index([globalCategoryId])
+  @@unique([shopId, slug])
 }
 
 // ============================================================

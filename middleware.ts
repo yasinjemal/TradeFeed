@@ -27,6 +27,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/merchant-feed",              // Google Merchant Center product feed
   "/privacy",                       // Privacy policy (POPIA)
   "/terms",                         // Terms of service
+  "/contact",                       // Contact / help center
   "/sitemap.xml",                   // SEO sitemap
   "/robots.txt",                    // SEO robots
 ]);
