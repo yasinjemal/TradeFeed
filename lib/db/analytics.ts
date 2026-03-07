@@ -124,30 +124,38 @@ export async function getAnalyticsOverview(shopId: string, days: number = 30) {
 /**
  * Get daily event counts for charting (sparkline/bar chart).
  * Returns an array of { date, views, clicks } for the last N days.
+ * Uses SQL aggregation to avoid fetching all rows into memory.
  */
 export async function getDailyAnalytics(shopId: string, days: number = 30) {
   const { from } = getDateRange(days);
 
-  // Fetch all events in range — group in JS (Prisma doesn't support date_trunc easily)
-  const events = await db.analyticsEvent.findMany({
+  // Use Prisma groupBy with raw date_trunc for efficient SQL aggregation
+  const events = await db.analyticsEvent.groupBy({
+    by: ["type"],
     where: {
       shopId,
       createdAt: { gte: from },
     },
-    select: {
-      type: true,
-      createdAt: true,
-    },
-    orderBy: { createdAt: "asc" },
+    _count: { id: true },
   });
 
-  // Build a map of date → counts
+  // Also fetch daily breakdown using raw SQL for date grouping
+  const dailyRows = await db.$queryRaw<
+    { day: string; type: string; count: bigint }[]
+  >`
+    SELECT DATE("createdAt") as day, "type", COUNT(*) as count
+    FROM "AnalyticsEvent"
+    WHERE "shopId" = ${shopId} AND "createdAt" >= ${from}
+    GROUP BY DATE("createdAt"), "type"
+    ORDER BY day ASC
+  `;
+
+  // Build a map of date → counts, pre-populated with zeros
   const dailyMap = new Map<
     string,
     { views: number; productViews: number; clicks: number; checkouts: number }
   >();
 
-  // Pre-populate all dates so chart has no gaps
   for (let i = 0; i < days; i++) {
     const d = new Date();
     d.setDate(d.getDate() - (days - 1 - i));
@@ -155,23 +163,26 @@ export async function getDailyAnalytics(shopId: string, days: number = 30) {
     dailyMap.set(key, { views: 0, productViews: 0, clicks: 0, checkouts: 0 });
   }
 
-  for (const event of events) {
-    const key = event.createdAt.toISOString().split("T")[0]!;
+  for (const row of dailyRows) {
+    const key = typeof row.day === "string"
+      ? row.day.split("T")[0]!
+      : new Date(row.day).toISOString().split("T")[0]!;
     const entry = dailyMap.get(key);
     if (!entry) continue;
+    const count = Number(row.count);
 
-    switch (event.type) {
+    switch (row.type) {
       case "PAGE_VIEW":
-        entry.views++;
+        entry.views += count;
         break;
       case "PRODUCT_VIEW":
-        entry.productViews++;
+        entry.productViews += count;
         break;
       case "WHATSAPP_CLICK":
-        entry.clicks++;
+        entry.clicks += count;
         break;
       case "WHATSAPP_CHECKOUT":
-        entry.checkouts++;
+        entry.checkouts += count;
         break;
     }
   }

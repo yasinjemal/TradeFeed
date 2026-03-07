@@ -520,10 +520,13 @@ model Order {
 
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?                          // Soft-delete — null means active
 
   @@index([shopId, status])
   @@index([shopId, createdAt])
   @@index([orderNumber])
+  @@index([buyerPhone])                              // For "track my order" lookups
+  @@index([deletedAt])                               // Filter out soft-deleted orders
 }
 
 // ============================================================
@@ -550,6 +553,7 @@ model OrderItem {
   quantity        Int                               // How many ordered
 
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt                // Track amendments (partial fulfilment)
 
   @@index([orderId])
   @@index([productId])

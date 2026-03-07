@@ -20,6 +20,8 @@ import {
 } from "@/lib/db/orders";
 import { requireShopAccess } from "@/lib/auth";
 import { notifyNewOrder, checkAndNotifyLowStock } from "@/lib/notifications";
+import { reportError } from "@/lib/telemetry";
+import { checkoutSchema } from "@/lib/validation/checkout";
 import type { OrderStatus } from "@prisma/client";
 
 type ActionResult = {
@@ -53,9 +55,32 @@ export async function checkoutAction(
   marketingConsent?: boolean,
 ): Promise<ActionResult> {
   try {
+    // 0. Validate & sanitize all inputs
+    const parsed = checkoutSchema.safeParse({
+      shopId,
+      shopSlug,
+      items,
+      whatsappMessage,
+      buyerName,
+      buyerPhone,
+      buyerNote,
+      deliveryAddress,
+      deliveryCity,
+      deliveryProvince,
+      deliveryPostalCode,
+      marketingConsent,
+    });
+
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message ?? "Invalid input";
+      return { success: false, error: firstError };
+    }
+
+    const input = parsed.data;
+
     // 1. Validate stock
     const stockCheck = await validateStock(
-      items.map((i) => ({
+      input.items.map((i) => ({
         variantId: i.variantId,
         productName: i.productName,
         quantity: i.quantity,
@@ -75,31 +100,31 @@ export async function checkoutAction(
       };
     }
 
-    // 2. Create order
+    // 2. Create order (prices are re-verified server-side in createOrder)
     const order = await createOrder({
-      shopId,
-      items,
-      buyerName,
-      buyerPhone,
-      buyerNote,
-      deliveryAddress,
-      deliveryCity,
-      deliveryProvince,
-      deliveryPostalCode,
-      whatsappMessage,
-      marketingConsent: marketingConsent ?? false,
+      shopId: input.shopId,
+      items: input.items,
+      buyerName: input.buyerName || undefined,
+      buyerPhone: input.buyerPhone || undefined,
+      buyerNote: input.buyerNote || undefined,
+      deliveryAddress: input.deliveryAddress || undefined,
+      deliveryCity: input.deliveryCity || undefined,
+      deliveryProvince: input.deliveryProvince || undefined,
+      deliveryPostalCode: input.deliveryPostalCode || undefined,
+      whatsappMessage: input.whatsappMessage,
+      marketingConsent: input.marketingConsent ?? false,
     });
 
     // 3. Fire-and-forget notifications (don't block checkout)
     notifyNewOrder({
       orderNumber: order.orderNumber,
-      shopId,
-      buyerName: buyerName ?? null,
-      buyerPhone: buyerPhone ?? null,
-      deliveryAddress: deliveryAddress ?? null,
-      deliveryCity: deliveryCity ?? null,
-      deliveryProvince: deliveryProvince ?? null,
-      deliveryPostalCode: deliveryPostalCode ?? null,
+      shopId: input.shopId,
+      buyerName: input.buyerName ?? null,
+      buyerPhone: input.buyerPhone ?? null,
+      deliveryAddress: input.deliveryAddress ?? null,
+      deliveryCity: input.deliveryCity ?? null,
+      deliveryProvince: input.deliveryProvince ?? null,
+      deliveryPostalCode: input.deliveryPostalCode ?? null,
       totalCents: order.totalCents,
       itemCount: order.itemCount,
       items: order.items.map((i) => ({
@@ -114,16 +139,16 @@ export async function checkoutAction(
     }).catch(() => {});
 
     checkAndNotifyLowStock(
-      shopId,
-      items.map((i) => i.variantId),
+      input.shopId,
+      input.items.map((i) => i.variantId),
     ).catch(() => {});
 
     // 4. Revalidate the catalog (stock counts changed)
-    revalidatePath(`/catalog/${shopSlug}`);
+    revalidatePath(`/catalog/${input.shopSlug}`);
 
     return { success: true, orderNumber: order.orderNumber, trackingUrl: `/track/${encodeURIComponent(order.orderNumber)}` };
   } catch (error) {
-    console.error("[checkoutAction] Error:", error);
+    await reportError("checkoutAction", error, { shopId, itemCount: items?.length });
     return { success: false, error: "Failed to place order. Please try again." };
   }
 }
@@ -177,7 +202,7 @@ export async function updateOrderStatusAction(
 
     return { success: true };
   } catch (error) {
-    console.error("[updateOrderStatusAction] Error:", error);
+    await reportError("updateOrderStatusAction", error, { shopSlug, orderId, newStatus });
     return {
       success: false,
       error: "Failed to update order. Please try again.",

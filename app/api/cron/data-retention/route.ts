@@ -87,6 +87,16 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // ── Phase 3: Purge old analytics events (90+ days) ──
+    const analyticsCutoff = new Date(now);
+    analyticsCutoff.setDate(analyticsCutoff.getDate() - 90);
+
+    const analyticsResult = await db.analyticsEvent.deleteMany({
+      where: {
+        createdAt: { lt: analyticsCutoff },
+      },
+    });
+
     const summary = {
       status: "ok",
       timestamp: now.toISOString(),
@@ -99,6 +109,10 @@ export async function GET(request: NextRequest) {
         cutoffDate: deepCutoff.toISOString(),
         ordersAffected: deepResult.count,
         fields: ["buyerNote", "deliveryAddress", "deliveryCity", "deliveryProvince", "deliveryPostalCode"],
+      },
+      analyticsPurged: {
+        cutoffDate: analyticsCutoff.toISOString(),
+        eventsDeleted: analyticsResult.count,
       },
     };
 

@@ -48,10 +48,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // ── Marketplace category pages ────────────────────────
-  const globalCategories = await db.globalCategory.findMany({
-    where: { parentId: null }, // Top-level categories only — subcategories are filtered via parent
-    select: { slug: true, updatedAt: true },
-  });
+  // Run all DB queries in parallel for speed (avoids Vercel timeout at scale)
+  const [globalCategories, subCategories, shops, products] = await Promise.all([
+    db.globalCategory.findMany({
+      where: { parentId: null },
+      select: { slug: true, updatedAt: true },
+    }),
+    db.globalCategory.findMany({
+      where: { parentId: { not: null } },
+      select: { slug: true, updatedAt: true },
+    }),
+    db.shop.findMany({
+      where: { isActive: true },
+      select: { slug: true, updatedAt: true },
+    }),
+    db.product.findMany({
+      where: { isActive: true, shop: { isActive: true } },
+      select: {
+        id: true,
+        updatedAt: true,
+        shop: { select: { slug: true } },
+      },
+      take: 5000,
+    }),
+  ]);
 
   const categoryPages: MetadataRoute.Sitemap = globalCategories.map((cat) => ({
     url: `${APP_URL}/marketplace?category=${cat.slug}`,
@@ -59,12 +79,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "daily" as const,
     priority: 0.8,
   }));
-
-  // Also include subcategories
-  const subCategories = await db.globalCategory.findMany({
-    where: { parentId: { not: null } },
-    select: { slug: true, updatedAt: true },
-  });
 
   const subCategoryPages: MetadataRoute.Sitemap = subCategories.map((cat) => ({
     url: `${APP_URL}/marketplace?category=${cat.slug}`,
@@ -74,14 +88,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // ── Shop catalog pages ────────────────────────────────
-  const shops = await db.shop.findMany({
-    where: { isActive: true },
-    select: {
-      slug: true,
-      updatedAt: true,
-    },
-  });
-
   const shopPages: MetadataRoute.Sitemap = shops.map((shop) => ({
     url: `${APP_URL}/catalog/${shop.slug}`,
     lastModified: shop.updatedAt,
@@ -90,19 +96,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // ── Product detail pages ──────────────────────────────
-  const products = await db.product.findMany({
-    where: {
-      isActive: true,
-      shop: { isActive: true },
-    },
-    select: {
-      id: true,
-      updatedAt: true,
-      shop: { select: { slug: true } },
-    },
-    take: 5000, // Cap for performance — most sitemaps max at 50k URLs
-  });
-
   const productPages: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${APP_URL}/catalog/${product.shop.slug}/products/${product.id}`,
     lastModified: product.updatedAt,

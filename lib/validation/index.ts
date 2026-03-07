@@ -9,5 +9,11 @@
 // Phase 2 — Shop schemas
 export { shopCreateSchema, type ShopCreateInput } from "./shop";
 
-// Future:
-// export { productCreateSchema } from "./product";
+// Checkout validation
+export { checkoutSchema, checkoutItemSchema, type CheckoutInput } from "./checkout";
+
+// Shop settings
+export { shopSettingsSchema, type ShopSettingsInput, SA_PROVINCES } from "./shop-settings";
+
+// Product schemas
+export { productSchema } from "./product";

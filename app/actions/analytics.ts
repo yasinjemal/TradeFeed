@@ -10,7 +10,11 @@
 
 "use server";
 
+import { z } from "zod";
 import { trackEvent } from "@/lib/db/analytics";
+
+const shopIdSchema = z.string().min(1).max(100);
+const productIdSchema = z.string().min(1).max(100).optional();
 
 /**
  * Track a WhatsApp enquiry button click on a product page.
@@ -19,11 +23,14 @@ export async function trackWhatsAppClickAction(
   shopId: string,
   productId?: string,
 ): Promise<void> {
-  // Fire-and-forget — don't block the UI
+  const parsedShop = shopIdSchema.safeParse(shopId);
+  const parsedProduct = productIdSchema.safeParse(productId);
+  if (!parsedShop.success) return;
+
   void trackEvent({
     type: "WHATSAPP_CLICK",
-    shopId,
-    productId,
+    shopId: parsedShop.data,
+    productId: parsedProduct.success ? parsedProduct.data : undefined,
   });
 }
 
@@ -33,8 +40,11 @@ export async function trackWhatsAppClickAction(
 export async function trackWhatsAppCheckoutAction(
   shopId: string,
 ): Promise<void> {
+  const parsedShop = shopIdSchema.safeParse(shopId);
+  if (!parsedShop.success) return;
+
   void trackEvent({
     type: "WHATSAPP_CHECKOUT",
-    shopId,
+    shopId: parsedShop.data,
   });
 }

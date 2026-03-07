@@ -231,7 +231,7 @@
       "pending": "Ilindile",
       "confirmed": "Iqinisekisiwe",
       "shipped": "Ithunyelwe",
-      "delivered": "Ithunyelwe",
+      "delivered": "Itholakele",
       "cancelled": "Ikhanseliwe"
     }
   },

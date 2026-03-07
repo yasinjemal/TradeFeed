@@ -107,13 +107,31 @@ export async function validateStock(
 /**
  * Create an order with line items in a single transaction.
  * Also decrements stock for each variant ordered.
+ * Prices are re-fetched from the DB to prevent client-side tampering.
  */
 export async function createOrder(input: CreateOrderInput) {
-  const totalCents = input.items.reduce(
+  // Re-fetch actual prices from DB to prevent price manipulation
+  const variantIds = input.items.map((i) => i.variantId);
+  const variants = await db.productVariant.findMany({
+    where: { id: { in: variantIds }, isActive: true },
+    select: { id: true, priceInCents: true },
+  });
+  const priceMap = new Map(variants.map((v) => [v.id, v.priceInCents]));
+
+  // Build items with verified prices
+  const verifiedItems = input.items.map((item) => {
+    const dbPrice = priceMap.get(item.variantId);
+    if (dbPrice === undefined) {
+      throw new Error(`Variant not found or inactive: ${item.variantId}`);
+    }
+    return { ...item, priceInCents: dbPrice };
+  });
+
+  const totalCents = verifiedItems.reduce(
     (sum, item) => sum + item.priceInCents * item.quantity,
     0,
   );
-  const itemCount = input.items.reduce(
+  const itemCount = verifiedItems.reduce(
     (sum, item) => sum + item.quantity,
     0,
   );
@@ -150,7 +168,7 @@ export async function createOrder(input: CreateOrderInput) {
         whatsappMessage: input.whatsappMessage,
         marketingConsent: input.marketingConsent ?? false,
         items: {
-          create: input.items.map((item) => ({
+          create: verifiedItems.map((item) => ({
             productId: item.productId,
             variantId: item.variantId,
             productName: item.productName,
@@ -167,7 +185,7 @@ export async function createOrder(input: CreateOrderInput) {
     });
 
     // 2. Decrement stock for each variant
-    for (const item of input.items) {
+    for (const item of verifiedItems) {
       await tx.productVariant.update({
         where: { id: item.variantId },
         data: { stock: { decrement: item.quantity } },
@@ -199,6 +217,7 @@ export async function listOrders(
   return db.order.findMany({
     where: {
       shopId,
+      deletedAt: null,
       ...(status ? { status } : {}),
     },
     include: {
@@ -214,7 +233,7 @@ export async function listOrders(
 
 export async function getOrder(orderId: string, shopId: string) {
   return db.order.findFirst({
-    where: { id: orderId, shopId },
+    where: { id: orderId, shopId, deletedAt: null },
     include: { items: true },
   });
 }
@@ -237,14 +256,14 @@ export async function updateOrderStatus(
 export async function getOrderStats(shopId: string) {
   const [total, pending, confirmed, shipped, delivered, cancelled, revenue] =
     await Promise.all([
-      db.order.count({ where: { shopId } }),
-      db.order.count({ where: { shopId, status: "PENDING" } }),
-      db.order.count({ where: { shopId, status: "CONFIRMED" } }),
-      db.order.count({ where: { shopId, status: "SHIPPED" } }),
-      db.order.count({ where: { shopId, status: "DELIVERED" } }),
-      db.order.count({ where: { shopId, status: "CANCELLED" } }),
+      db.order.count({ where: { shopId, deletedAt: null } }),
+      db.order.count({ where: { shopId, deletedAt: null, status: "PENDING" } }),
+      db.order.count({ where: { shopId, deletedAt: null, status: "CONFIRMED" } }),
+      db.order.count({ where: { shopId, deletedAt: null, status: "SHIPPED" } }),
+      db.order.count({ where: { shopId, deletedAt: null, status: "DELIVERED" } }),
+      db.order.count({ where: { shopId, deletedAt: null, status: "CANCELLED" } }),
       db.order.aggregate({
-        where: { shopId, status: { not: "CANCELLED" } },
+        where: { shopId, deletedAt: null, status: { not: "CANCELLED" } },
         _sum: { totalCents: true },
       }),
     ]);

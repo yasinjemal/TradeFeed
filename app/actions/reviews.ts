@@ -12,6 +12,8 @@ import { z } from "zod";
 import { requireShopAccess } from "@/lib/auth";
 import { createReview, deleteReview } from "@/lib/db/reviews";
 import { notifyNewReview } from "@/lib/notifications";
+import { reportError } from "@/lib/telemetry";
+import { db } from "@/lib/db";
 
 type ActionResult = {
   success: boolean;
@@ -57,6 +59,15 @@ export async function submitReviewAction(
       return { success: false, error: "Please fix the errors.", fieldErrors };
     }
 
+    // Verify product belongs to this shop
+    const product = await db.product.findFirst({
+      where: { id: productId, shopId, isActive: true },
+      select: { id: true },
+    });
+    if (!product) {
+      return { success: false, error: "Product not found in this shop." };
+    }
+
     const review = await createReview({
       shopId,
       productId,
@@ -77,7 +88,7 @@ export async function submitReviewAction(
 
     return { success: true };
   } catch (error) {
-    console.error("[submitReviewAction] Error:", error);
+    await reportError("submitReviewAction", error, { shopId, productId });
     return { success: false, error: "Failed to submit review." };
   }
 }
@@ -96,7 +107,7 @@ export async function deleteReviewAction(
     revalidatePath(`/dashboard/${shopSlug}/reviews`);
     return { success: true };
   } catch (error) {
-    console.error("[deleteReviewAction] Error:", error);
+    await reportError("deleteReviewAction", error, { shopSlug, reviewId });
     return { success: false, error: "Failed to delete review." };
   }
 }
