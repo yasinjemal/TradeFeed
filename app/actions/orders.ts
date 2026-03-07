@@ -22,6 +22,7 @@ import { requireShopAccess } from "@/lib/auth";
 import { notifyNewOrder, checkAndNotifyLowStock } from "@/lib/notifications";
 import { reportError } from "@/lib/telemetry";
 import { checkoutSchema } from "@/lib/validation/checkout";
+import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
 import type { OrderStatus } from "@prisma/client";
 
 type ActionResult = {
@@ -55,6 +56,13 @@ export async function checkoutAction(
   marketingConsent?: boolean,
 ): Promise<ActionResult> {
   try {
+    // Rate limit: 10 checkouts/min per IP
+    const ip = await getActionClientIp();
+    const rl = await checkRateLimit("checkout", ip);
+    if (!rl.allowed) {
+      return { success: false, error: "Too many checkout attempts. Please wait a moment." };
+    }
+
     // 0. Validate & sanitize all inputs
     const parsed = checkoutSchema.safeParse({
       shopId,

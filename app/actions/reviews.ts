@@ -14,6 +14,7 @@ import { createReview, deleteReview } from "@/lib/db/reviews";
 import { notifyNewReview } from "@/lib/notifications";
 import { reportError } from "@/lib/telemetry";
 import { db } from "@/lib/db";
+import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
 
 type ActionResult = {
   success: boolean;
@@ -40,6 +41,13 @@ export async function submitReviewAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
+    // Rate limit: 3 reviews/min per IP
+    const ip = await getActionClientIp();
+    const rl = await checkRateLimit("review", ip);
+    if (!rl.allowed) {
+      return { success: false, error: "Too many review submissions. Please wait a moment." };
+    }
+
     const rawInput = {
       rating: parseInt(formData.get("rating") as string, 10),
       title: formData.get("title") as string,

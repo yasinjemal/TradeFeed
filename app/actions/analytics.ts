@@ -12,6 +12,7 @@
 
 import { z } from "zod";
 import { trackEvent } from "@/lib/db/analytics";
+import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
 
 const shopIdSchema = z.string().min(1).max(100);
 const productIdSchema = z.string().min(1).max(100).optional();
@@ -23,6 +24,11 @@ export async function trackWhatsAppClickAction(
   shopId: string,
   productId?: string,
 ): Promise<void> {
+  // Rate limit: 100 analytics events/min per IP
+  const ip = await getActionClientIp();
+  const rl = await checkRateLimit("analytics", ip);
+  if (!rl.allowed) return; // silently drop — don't error for analytics
+
   const parsedShop = shopIdSchema.safeParse(shopId);
   const parsedProduct = productIdSchema.safeParse(productId);
   if (!parsedShop.success) return;
@@ -40,6 +46,11 @@ export async function trackWhatsAppClickAction(
 export async function trackWhatsAppCheckoutAction(
   shopId: string,
 ): Promise<void> {
+  // Rate limit: shares the analytics bucket (100/min per IP)
+  const ip = await getActionClientIp();
+  const rl = await checkRateLimit("analytics", ip);
+  if (!rl.allowed) return;
+
   const parsedShop = shopIdSchema.safeParse(shopId);
   if (!parsedShop.success) return;
 

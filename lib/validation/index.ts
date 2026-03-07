@@ -16,4 +16,13 @@ export { checkoutSchema, checkoutItemSchema, type CheckoutInput } from "./checko
 export { shopSettingsSchema, type ShopSettingsInput, SA_PROVINCES } from "./shop-settings";
 
 // Product schemas
-export { productSchema } from "./product";
+export {
+  productCreateSchema,
+  type ProductCreateInput,
+  productUpdateSchema,
+  type ProductUpdateInput,
+  variantCreateSchema,
+  type VariantCreateInput,
+  variantUpdateSchema,
+  type VariantUpdateInput,
+} from "./product";

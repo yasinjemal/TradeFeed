@@ -40,6 +40,10 @@ const envSchema = z.object({
   PAYFAST_MERCHANT_KEY: z.string().optional(),
   PAYFAST_PASSPHRASE: z.string().optional(),
 
+  // Upstash Redis — used for distributed rate limiting on Vercel
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+
   // Node
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });

@@ -8,7 +8,7 @@
 
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { rateLimit, getRateLimitKey } from "@/lib/rate-limit";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit-upstash";
 import { reportRateLimitEvent } from "@/lib/telemetry";
 
 // Routes that DON'T require authentication
@@ -41,31 +41,31 @@ const isWebhookRoute = createRouteMatcher(["/api/webhooks/(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   // Skip rate limiting for Uploadthing (server callbacks) and webhooks
+  const ip = getClientIp(request);
+
   if (isCatalogRoute(request) || isMarketplaceRoute(request)) {
-    const key = getRateLimitKey(request, "catalog");
-    const result = rateLimit(key, 60, 60_000); // 60 req/min
+    const result = await checkRateLimit("catalog", ip);
     if (!result.allowed) {
-      reportRateLimitEvent("catalog", key, 60);
+      reportRateLimitEvent("catalog", ip, 60);
       return new NextResponse("Too many requests. Please try again later.", {
         status: 429,
         headers: {
-          "Retry-After": String(Math.ceil((result.resetAt - Date.now()) / 1000)),
+          "Retry-After": String(result.retryAfterSeconds),
           "X-RateLimit-Limit": "60",
           "X-RateLimit-Remaining": "0",
         },
       });
     }
   } else if (isApiRoute(request) && !isUploadthingRoute(request) && !isWebhookRoute(request)) {
-    const key = getRateLimitKey(request, "api");
-    const result = rateLimit(key, 30, 60_000); // 30 req/min
+    const result = await checkRateLimit("api", ip);
     if (!result.allowed) {
-      reportRateLimitEvent("api", key, 30);
+      reportRateLimitEvent("api", ip, 30);
       return NextResponse.json(
         { error: "Rate limit exceeded" },
         {
           status: 429,
           headers: {
-            "Retry-After": String(Math.ceil((result.resetAt - Date.now()) / 1000)),
+            "Retry-After": String(result.retryAfterSeconds),
           },
         },
       );
