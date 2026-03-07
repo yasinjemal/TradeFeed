@@ -553,7 +553,7 @@ model OrderItem {
   quantity        Int                               // How many ordered
 
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt                // Track amendments (partial fulfilment)
+  updatedAt       DateTime @default(now()) @updatedAt // Track amendments (partial fulfilment)
 
   @@index([orderId])
   @@index([productId])
