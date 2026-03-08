@@ -129,9 +129,6 @@ export function ShopSettingsForm({
   const boundAction = updateShopSettingsAction.bind(null, shopSlug);
   const [state, formAction, isPending] = useActionState(boundAction, null);
 
-  // ── Expandable section state ────────────────────────────
-  const [openSection, setOpenSection] = useState<string | null>("basic");
-
   // ── Location state ──────────────────────────────────────
   const [lat, setLat] = useState(initialData.latitude?.toString() ?? "");
   const [lng, setLng] = useState(initialData.longitude?.toString() ?? "");
@@ -214,10 +211,6 @@ export function ShopSettingsForm({
   }, [state?.success]);
 
   // ── Helpers ─────────────────────────────────────────────
-  const toggleSection = (key: string) => {
-    setOpenSection((prev) => (prev === key ? null : key));
-  };
-
   const updateHour = (day: DayKey, value: string) => {
     setHours((prev) => ({ ...prev, [day]: value }));
     setActivePreset(null);
@@ -270,7 +263,7 @@ export function ShopSettingsForm({
     setLng(preset.lng.toString());
   };
 
-  // ── Section component ───────────────────────────────────
+  // ── Section component (always visible, scroll-targetable) ──
   const Section = ({
     id,
     icon,
@@ -288,42 +281,29 @@ export function ShopSettingsForm({
     badge?: React.ReactNode;
     children: React.ReactNode;
   }) => {
-    const isOpen = openSection === id;
     return (
-      <section className="rounded-2xl border border-stone-200/80 bg-white overflow-hidden transition-all duration-300 hover:border-stone-300/80 hover:shadow-sm">
-        <button
-          type="button"
-          onClick={() => toggleSection(id)}
-          className="w-full flex items-center gap-4 p-5 sm:p-6 text-left group"
-        >
-          <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center text-lg flex-shrink-0 transition-transform duration-300 ${isOpen ? "scale-110" : "group-hover:scale-105"}`}>
-            {icon}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-stone-900">{title}</h2>
-              {badge}
-            </div>
-            <p className="text-sm text-stone-500 mt-0.5">{subtitle}</p>
-          </div>
-          <svg
-            className={`w-5 h-5 text-stone-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-          </svg>
-        </button>
+      <section id={`section-${id}`} className="scroll-mt-28">
+        <div className="relative rounded-2xl border border-stone-200/60 bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 group/card">
+          {/* Left accent stripe */}
+          <div className={`absolute top-0 left-0 w-1 h-full ${iconBg} opacity-80 rounded-l-2xl`} />
 
-        <div
-          className={`transition-all duration-300 ease-in-out overflow-hidden ${
-            isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-          }`}
-        >
-          <div className="px-5 sm:px-6 pb-6 pt-0 space-y-5 border-t border-stone-100">
-            <div className="pt-5">{children}</div>
+          {/* Header */}
+          <div className="flex items-center gap-4 px-6 pt-6 pb-3 pl-8">
+            <div className={`w-11 h-11 rounded-xl ${iconBg} flex items-center justify-center text-lg flex-shrink-0 shadow-sm group-hover/card:scale-105 transition-transform duration-300`}>
+              {icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2.5">
+                <h2 className="font-semibold text-stone-800 text-[17px] tracking-tight">{title}</h2>
+                {badge}
+              </div>
+              <p className="text-[13px] text-stone-400 mt-0.5">{subtitle}</p>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="px-6 pb-6 pt-2 pl-8 space-y-5">
+            {children}
           </div>
         </div>
       </section>
@@ -331,7 +311,7 @@ export function ShopSettingsForm({
   };
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-4">
+    <form ref={formRef} action={formAction} className="space-y-6">
       {/* Hidden fields for serialized data */}
       <input type="hidden" name="businessHours" value={JSON.stringify(hours)} />
       <input type="hidden" name="latitude" value={lat} />
@@ -1109,16 +1089,16 @@ export function ShopSettingsForm({
       </Section>
 
       {/* ── Floating Save Bar ────────────────────────────── */}
-      <div className="sticky bottom-4 z-40">
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-stone-200/80 shadow-xl shadow-stone-200/30 px-5 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm text-stone-500 min-w-0">
-            <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
-            <span className="truncate">Make changes above, then save</span>
+      <div className="sticky bottom-6 z-40">
+        <div className="bg-white/90 backdrop-blur-2xl rounded-2xl border border-stone-200/60 shadow-2xl shadow-stone-900/[0.08] px-6 py-4 flex items-center justify-between gap-4 ring-1 ring-stone-900/[0.03]">
+          <div className="flex items-center gap-3 text-sm text-stone-500 min-w-0">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+            <span className="truncate font-medium">Ready to save your changes</span>
           </div>
           <Button
             type="submit"
             disabled={isPending}
-            className="rounded-xl px-6 sm:px-8 h-11 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold shadow-lg shadow-emerald-200/50 hover:shadow-emerald-300/50 transition-all active:scale-[0.98] flex-shrink-0"
+            className="rounded-2xl px-8 sm:px-10 h-12 bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 hover:from-emerald-600 hover:via-emerald-600 hover:to-teal-600 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-300 active:scale-[0.97] flex-shrink-0"
           >
             {isPending ? (
               <span className="flex items-center gap-2">
