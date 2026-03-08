@@ -50,8 +50,11 @@ export default async function sitemap({
 }: {
   id: number;
 }): Promise<MetadataRoute.Sitemap> {
+  // Next.js may pass id as a string from the route segment — coerce safely
+  const chunkId = Number(id) || 0;
+
   // ── Static pages (only in first chunk) ─────────────────
-  const staticPages: MetadataRoute.Sitemap = id === 0 ? [
+  const staticPages: MetadataRoute.Sitemap = chunkId === 0 ? [
     {
       url: APP_URL,
       lastModified: new Date(),
@@ -87,19 +90,19 @@ export default async function sitemap({
   // ── Marketplace category pages (only in first chunk) ───
   // Run all DB queries in parallel for speed (avoids Vercel timeout at scale)
   const [globalCategories, subCategories, shops, products] = await Promise.all([
-    id === 0
+    chunkId === 0
       ? db.globalCategory.findMany({
           where: { parentId: null },
           select: { slug: true, updatedAt: true },
         })
       : Promise.resolve([]),
-    id === 0
+    chunkId === 0
       ? db.globalCategory.findMany({
           where: { parentId: { not: null } },
           select: { slug: true, updatedAt: true },
         })
       : Promise.resolve([]),
-    id === 0
+    chunkId === 0
       ? db.shop.findMany({
           where: { isActive: true },
           select: { slug: true, updatedAt: true },
@@ -114,7 +117,7 @@ export default async function sitemap({
         updatedAt: true,
         shop: { select: { slug: true } },
       },
-      skip: id * MAX_URLS_PER_SITEMAP,
+      skip: chunkId * MAX_URLS_PER_SITEMAP,
       take: MAX_URLS_PER_SITEMAP,
       orderBy: { id: "asc" },
     }),
