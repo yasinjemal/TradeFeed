@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 const SUPPORT_EMAIL = "support@tradefeed.co.za";
-const SUPPORT_WHATSAPP = "27601234567"; // Replace with actual support number
+const SUPPORT_WHATSAPP = "27835034502";
 
 const HELP_TOPICS = [
   {
