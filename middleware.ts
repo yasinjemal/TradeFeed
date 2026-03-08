@@ -9,7 +9,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit-upstash";
-import { reportRateLimitEvent } from "@/lib/telemetry";
 
 // Routes that DON'T require authentication
 const isPublicRoute = createRouteMatcher([
@@ -41,41 +40,46 @@ const isUploadthingRoute = createRouteMatcher(["/api/uploadthing(.*)"]);
 const isWebhookRoute = createRouteMatcher(["/api/webhooks/(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
-  // Skip rate limiting for Uploadthing (server callbacks) and webhooks
-  const ip = getClientIp(request);
+  try {
+    // Skip rate limiting for Uploadthing (server callbacks) and webhooks
+    const ip = getClientIp(request);
 
-  if (isCatalogRoute(request) || isMarketplaceRoute(request)) {
-    const result = await checkRateLimit("catalog", ip);
-    if (!result.allowed) {
-      reportRateLimitEvent("catalog", ip, 60);
-      return new NextResponse("Too many requests. Please try again later.", {
-        status: 429,
-        headers: {
-          "Retry-After": String(result.retryAfterSeconds),
-          "X-RateLimit-Limit": "60",
-          "X-RateLimit-Remaining": "0",
-        },
-      });
-    }
-  } else if (isApiRoute(request) && !isUploadthingRoute(request) && !isWebhookRoute(request)) {
-    const result = await checkRateLimit("api", ip);
-    if (!result.allowed) {
-      reportRateLimitEvent("api", ip, 30);
-      return NextResponse.json(
-        { error: "Rate limit exceeded" },
-        {
+    if (isCatalogRoute(request) || isMarketplaceRoute(request)) {
+      const result = await checkRateLimit("catalog", ip);
+      if (!result.allowed) {
+        console.warn("[middleware] rate_limit catalog", { ip, limit: 60 });
+        return new NextResponse("Too many requests. Please try again later.", {
           status: 429,
           headers: {
             "Retry-After": String(result.retryAfterSeconds),
+            "X-RateLimit-Limit": "60",
+            "X-RateLimit-Remaining": "0",
           },
-        },
-      );
+        });
+      }
+    } else if (isApiRoute(request) && !isUploadthingRoute(request) && !isWebhookRoute(request)) {
+      const result = await checkRateLimit("api", ip);
+      if (!result.allowed) {
+        console.warn("[middleware] rate_limit api", { ip, limit: 30 });
+        return NextResponse.json(
+          { error: "Rate limit exceeded" },
+          {
+            status: 429,
+            headers: {
+              "Retry-After": String(result.retryAfterSeconds),
+            },
+          },
+        );
+      }
     }
-  }
 
-  // Auth protection
-  if (!isPublicRoute(request)) {
-    await auth.protect();
+    // Auth protection
+    if (!isPublicRoute(request)) {
+      await auth.protect();
+    }
+  } catch (err) {
+    // Fail open — never block legitimate users because middleware crashed
+    console.error("[middleware] invocation error, failing open", err);
   }
 
   // ── Security headers (CSP is handled by Clerk's contentSecurityPolicy option) ──
