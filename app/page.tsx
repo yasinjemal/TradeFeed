@@ -20,25 +20,47 @@ import type { Metadata } from "next";
 // Landing Page SEO — targeted for "wholesale marketplace South Africa"
 // ============================================================
 export const metadata: Metadata = {
-  title: "TradeFeed | Sell Your Stock Faster With AI — WhatsApp Wholesale Marketplace South Africa",
+  title: "Sell Online South Africa — Create Your Free Shop in 2 Minutes | TradeFeed",
   description:
-    "Upload a product photo and AI creates the listing in 10 seconds. Share your catalog link on WhatsApp and sell faster. 5 free AI listings every month. South Africa's #1 wholesale marketplace.",
+    "Upload a photo, AI creates the listing in 10 seconds. Share your catalog link on WhatsApp and sell faster. Free forever — no app download, no coding needed. South Africa's #1 marketplace for wholesale clothing, fashion, shoes & more. Join 100+ sellers in Johannesburg, Durban, Cape Town & all 9 provinces.",
   keywords: [
+    // Primary high-volume
+    "sell online South Africa",
+    "how to sell online in South Africa",
+    "create online shop free South Africa",
+    "start online business South Africa",
+    "sell on WhatsApp South Africa",
+    // Wholesale (money keywords)
     "wholesale clothing Johannesburg",
     "wholesale marketplace South Africa",
     "buy wholesale South Africa",
+    "cheap wholesale clothing South Africa",
     "bulk buy clothing SA",
-    "sell on WhatsApp South Africa",
-    "WhatsApp catalog South Africa",
-    "online shop South Africa free",
-    "Jeppe wholesale clothing",
+    "Jeppe Street wholesale",
     "wholesale suppliers Johannesburg",
-    "SA marketplace",
-    "sell online South Africa",
-    "create online store South Africa",
-    "township business online",
+    // Product-specific
+    "sell clothes online South Africa",
+    "buy clothes online South Africa",
+    "sell shoes online South Africa",
+    "fashion wholesale SA",
+    // Intent-based
+    "online shop South Africa free",
+    "WhatsApp catalog South Africa",
+    "WhatsApp business South Africa",
+    "AI product listing",
+    // Reseller / hustle
     "reseller South Africa",
-    "bulk clothing South Africa",
+    "side hustle South Africa",
+    "sell from home South Africa",
+    "township business online",
+    "small business South Africa",
+    // City-specific
+    "sell online Johannesburg",
+    "sell online Cape Town",
+    "sell online Durban",
+    "wholesale Pretoria",
+    "wholesale Durban",
+    "wholesale Cape Town",
   ],
   alternates: {
     canonical: "https://tradefeed.co.za",
@@ -280,18 +302,18 @@ export default async function HomePage() {
 
           <ScrollReveal delay={100}>
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
-              Sell Your Stock{" "}
+              Sell Online in{" "}
               <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-400">
-                Faster With AI
+                South Africa
               </span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
             <p className="mt-6 text-lg sm:text-xl text-stone-400 max-w-2xl mx-auto leading-relaxed">
-              Upload a photo. AI generates the listing.
-              Share your catalog link and sell faster on WhatsApp — no app download needed.
+              Create your free online shop in 2 minutes. Upload a photo — AI writes the listing.
+              Share your WhatsApp catalog link and start selling today.
             </p>
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium">
               <span className="text-base">✨</span> 5 FREE AI listings every month — no credit card needed
@@ -1091,7 +1113,7 @@ export default async function HomePage() {
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
               Ready to{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-400">sell faster with AI?</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-400">sell online in South Africa?</span>
             </h2>
             <p className="mt-5 text-stone-400 text-lg max-w-lg mx-auto">Upload a photo, AI creates the listing, share on WhatsApp. Your first 5 AI listings are free — start selling in under 3 minutes.</p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">

@@ -16,39 +16,67 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://tradefeed.co.za"),
   title: {
     default:
-      "TradeFeed | Online Marketplace South Africa — Sell Online & Create Your Shop",
+      "TradeFeed — South Africa's Online Marketplace | Sell & Buy Wholesale, Retail & Fashion",
     template: "%s | TradeFeed — SA Online Marketplace",
   },
   description:
-    "TradeFeed is South Africa's online marketplace where sellers create their own online shop for free, list products, and receive structured orders via WhatsApp. Join hundreds of sellers across all 9 provinces — start selling online in South Africa today.",
+    "South Africa's fastest-growing online marketplace. Create your free online shop, list products with AI, and get orders via WhatsApp. Buy wholesale clothing, shoes, bags & more from verified SA sellers in Johannesburg, Durban, Cape Town & all 9 provinces. Start selling online today — no app needed.",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
   },
   keywords: [
+    // Core marketplace terms
     "online marketplace South Africa",
     "sell online South Africa",
-    "create online shop South Africa",
-    "South African marketplace",
-    "sell products online SA",
-    "create online store South Africa",
-    "WhatsApp catalog",
-    "WhatsApp selling",
     "buy online South Africa",
     "SA marketplace",
-    "online shop South Africa free",
     "ecommerce South Africa",
+    // Shop creation (high intent)
+    "create online shop South Africa free",
+    "create online store South Africa",
+    "start online business South Africa",
+    "how to sell online in South Africa",
+    "free online shop South Africa",
+    // WhatsApp selling (unique to TradeFeed)
+    "sell on WhatsApp South Africa",
+    "WhatsApp catalog South Africa",
+    "WhatsApp business South Africa",
+    "WhatsApp selling",
+    "WhatsApp shop",
+    // Wholesale (huge SA market)
     "wholesale South Africa",
-    "sell on WhatsApp",
-    "SA online store",
+    "wholesale clothing South Africa",
+    "cheap wholesale clothing South Africa",
+    "buy wholesale South Africa",
+    "wholesale suppliers South Africa",
+    "bulk buy clothing SA",
+    // City-specific wholesale (Jeppe, Durban, Cape Town)
+    "wholesale clothing Johannesburg",
+    "Jeppe Street wholesale",
+    "wholesale Durban",
+    "wholesale Cape Town",
+    "wholesale Pretoria",
+    // Product categories (what buyers search)
+    "buy clothes online South Africa",
+    "sell clothes online South Africa",
+    "buy shoes online South Africa",
+    "buy bags wholesale South Africa",
+    "fashion wholesale SA",
+    // Small business / reseller
+    "reseller South Africa",
+    "township business online",
+    "sell from home South Africa",
+    "side hustle South Africa",
+    "small business marketplace South Africa",
   ],
   openGraph: {
     type: "website",
     siteName: "TradeFeed",
     title:
-      "TradeFeed | Online Marketplace South Africa — Sell Online & Create Your Shop",
+      "TradeFeed — South Africa's Online Marketplace | Sell & Buy Wholesale, Retail & Fashion",
     description:
-      "South Africa's online marketplace for sellers and buyers. Create your online shop for free, list products, and get orders via WhatsApp. Start selling online in South Africa today.",
+      "Create your free online shop in 2 minutes. List products with AI, share on WhatsApp, get orders. Buy wholesale clothing, shoes & fashion from verified SA sellers.",
     url: "https://tradefeed.co.za",
     images: [
       {
@@ -63,9 +91,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title:
-      "TradeFeed | Online Marketplace South Africa — Sell Online & Create Your Shop",
+      "TradeFeed — South Africa's Online Marketplace | Sell & Buy Wholesale",
     description:
-      "South Africa's online marketplace. Create your online shop for free, list products, and get orders via WhatsApp. Start selling online today.",
+      "Create your free online shop. List products with AI. Sell on WhatsApp. Buy wholesale clothing, shoes & fashion from SA sellers.",
     images: [
       "/api/og?title=Online+Marketplace+South+Africa&subtitle=Sell+Online+%E2%80%A2+Create+Your+Shop+%E2%80%A2+Free+to+Start",
     ],

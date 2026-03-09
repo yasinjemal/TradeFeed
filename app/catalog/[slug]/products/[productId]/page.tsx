@@ -54,15 +54,28 @@ export async function generateMetadata({
       ]
     : [{ url: ogFallbackUrl.toString(), width: 1200, height: 630, alt: product.name }];
 
+  const categoryTag = product.category?.name ? ` — ${product.category.name}` : "";
+
   return {
-    title: `${product.name} - ${shop.name}`,
-    description: product.description || `${product.name} from ${minPrice} at ${shop.name}`,
+    title: `${product.name}${categoryTag} | Buy Online at ${shop.name} — TradeFeed SA`,
+    description: product.description
+      ? `${product.description.slice(0, 140)}. From ${minPrice} at ${shop.name}. Order via WhatsApp. Free online marketplace South Africa.`
+      : `Buy ${product.name} from ${minPrice} at ${shop.name} on TradeFeed. South Africa's online marketplace. Order via WhatsApp — no app needed.`,
+    keywords: [
+      product.name.toLowerCase(),
+      `buy ${product.name.toLowerCase()} online`,
+      `buy ${product.name.toLowerCase()} South Africa`,
+      ...(product.category?.name ? [product.category.name.toLowerCase(), `${product.category.name.toLowerCase()} South Africa`] : []),
+      shop.name.toLowerCase(),
+      "buy online South Africa",
+      "TradeFeed",
+    ],
     alternates: {
       canonical: `${baseUrl}/catalog/${slug}/products/${product.slug ?? productId}`,
     },
     openGraph: {
-      title: `${product.name} - ${shop.name}`,
-      description: product.description || `${product.name} from ${minPrice}`,
+      title: `${product.name} from ${minPrice} | ${shop.name} — TradeFeed`,
+      description: product.description || `Buy ${product.name} from ${minPrice} at ${shop.name}. Order on WhatsApp.`,
       type: "article",
       images: ogImages,
     },
@@ -75,8 +88,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.name} - ${shop.name}`,
-      description: product.description || `${product.name} from ${minPrice}`,
+      title: `${product.name} from ${minPrice} | ${shop.name}`,
+      description: product.description || `Buy ${product.name} from ${minPrice}. Order via WhatsApp on TradeFeed.`,
       images: productImageUrl ? [productImageUrl] : [ogFallbackUrl.toString()],
     },
   };

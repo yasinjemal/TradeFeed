@@ -29,6 +29,7 @@ import { IllustrationRocket } from "@/components/ui/illustrations";
 
 // ISR: revalidate catalog pages every 60 seconds for near-real-time updates
 export const revalidate = 60;
+import type { Metadata } from "next";
 import { CatalogSearchFilter } from "@/components/catalog/catalog-search-filter";
 import { ComboSection } from "@/components/catalog/combo-section";
 import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
@@ -36,6 +37,61 @@ import { CatalogCacheManager } from "@/components/catalog/catalog-cache-manager"
 
 interface CatalogPageProps {
   params: Promise<{ slug: string }>;
+}
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+export async function generateMetadata({ params }: CatalogPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const shop = await getCatalogShop(slug);
+  if (!shop) return { title: "Shop Not Found — TradeFeed" };
+
+  const location = [shop.city, shop.province].filter(Boolean).join(", ");
+  const locationTag = location ? ` in ${location}` : " South Africa";
+  const productCount = shop._count?.products ?? 0;
+  const productLabel = productCount === 1 ? "1 product" : `${productCount}+ products`;
+
+  const title = `${shop.name}${locationTag} — ${productLabel} | TradeFeed Marketplace`;
+  const description = shop.description
+    ? `${shop.description.slice(0, 130)}. Browse ${productLabel} and order via WhatsApp on TradeFeed.`
+    : `Shop ${shop.name}${locationTag}. Browse ${productLabel}, order directly on WhatsApp. Free online marketplace South Africa.`;
+
+  const images = shop.bannerUrl
+    ? [{ url: shop.bannerUrl, width: 1200, height: 630, alt: shop.name }]
+    : shop.logoUrl
+      ? [{ url: shop.logoUrl, width: 512, height: 512, alt: shop.name }]
+      : [];
+
+  return {
+    title,
+    description,
+    keywords: [
+      shop.name.toLowerCase(),
+      `${shop.name.toLowerCase()} shop`,
+      ...(shop.city ? [`buy online ${shop.city.toLowerCase()}`, `${shop.city.toLowerCase()} shops`] : []),
+      "buy online South Africa",
+      "WhatsApp shop",
+      "online marketplace South Africa",
+      "TradeFeed",
+    ],
+    openGraph: {
+      title,
+      description,
+      url: `${APP_URL}/catalog/${shop.slug}`,
+      siteName: "TradeFeed",
+      type: "website",
+      ...(images.length > 0 && { images }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${shop.name} — ${productLabel} | TradeFeed`,
+      description,
+      ...(images.length > 0 && { images: [images[0]!.url] }),
+    },
+    alternates: {
+      canonical: `${APP_URL}/catalog/${shop.slug}`,
+    },
+  };
 }
 
 export default async function CatalogPage({ params }: CatalogPageProps) {

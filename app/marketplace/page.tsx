@@ -53,12 +53,12 @@ export async function generateMetadata({
   }
 
   const title = categoryName
-    ? `${categoryName} — TradeFeed Marketplace`
-    : "Marketplace — Browse SA's Best Products | TradeFeed";
+    ? `Buy ${categoryName} Online South Africa — Wholesale & Retail | TradeFeed Marketplace`
+    : "Buy Online South Africa — Wholesale Clothing, Shoes, Fashion & More | TradeFeed Marketplace";
 
   const description = categoryName
-    ? `Shop ${categoryName.toLowerCase()} from South Africa's top sellers on TradeFeed. Wholesale & retail prices. Order via WhatsApp.`
-    : "Discover products from South Africa's top sellers. Browse thousands of products across all categories. Wholesale & retail prices.";
+    ? `Shop ${categoryName.toLowerCase()} from verified South African sellers on TradeFeed. Wholesale & retail prices. Free delivery options. Order via WhatsApp. Browse ${categoryName.toLowerCase()} from Johannesburg, Durban, Cape Town & more.`
+    : "Browse thousands of products from South Africa's top sellers. Wholesale clothing, shoes, bags, electronics & more. Compare prices, order via WhatsApp. Verified sellers across all 9 provinces.";
 
   // Build OG image URL
   const ogUrl = new URL("/api/og", APP_URL);
@@ -73,11 +73,22 @@ export async function generateMetadata({
     title,
     description,
     keywords: [
+      "buy online South Africa",
       "TradeFeed marketplace",
-      "South Africa wholesale",
+      "wholesale South Africa",
       "SA marketplace",
       "buy wholesale online SA",
-      ...(categoryName ? [categoryName.toLowerCase(), `buy ${categoryName.toLowerCase()} SA`] : []),
+      "cheap clothes South Africa",
+      "buy shoes online South Africa",
+      "fashion South Africa",
+      "online shopping South Africa",
+      ...(categoryName ? [
+        categoryName.toLowerCase(),
+        `buy ${categoryName.toLowerCase()} South Africa`,
+        `${categoryName.toLowerCase()} wholesale`,
+        `cheap ${categoryName.toLowerCase()} South Africa`,
+        `${categoryName.toLowerCase()} online South Africa`,
+      ] : []),
     ],
     alternates: { canonical: canonicalUrl },
     openGraph: {
