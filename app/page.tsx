@@ -208,6 +208,7 @@ export default async function HomePage() {
               { label: tNav("pricing"), href: "#pricing" },
               { label: tNav("faq"), href: "#faq" },
               { label: tNav("marketplace"), href: "/marketplace" },
+              { label: "Import Catalogue", href: "/import-whatsapp-catalogue" },
             ].map((link) => (
               <Link
                 key={link.label}
