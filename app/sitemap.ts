@@ -21,6 +21,11 @@
 
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
+import {
+  getAllProvinceSlugs,
+  getAllCityParams,
+  SA_PROVINCES,
+} from "@/lib/marketplace/locations";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const MAX_URLS_PER_SITEMAP = 10_000;
@@ -68,6 +73,12 @@ export default async function sitemap({
       priority: 0.9,
     },
     {
+      url: `${APP_URL}/import-whatsapp-catalogue`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
       url: `${APP_URL}/privacy`,
       lastModified: new Date(),
       changeFrequency: "monthly",
@@ -86,6 +97,25 @@ export default async function sitemap({
       priority: 0.4,
     },
   ] : [];
+
+  // ── Province & city location pages (only in first chunk) ─
+  const provincePages: MetadataRoute.Sitemap = chunkId === 0
+    ? getAllProvinceSlugs().map((slug) => ({
+        url: `${APP_URL}/marketplace/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.85,
+      }))
+    : [];
+
+  const cityPages: MetadataRoute.Sitemap = chunkId === 0
+    ? getAllCityParams().map(({ province, city }) => ({
+        url: `${APP_URL}/marketplace/${province}/${city}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.8,
+      }))
+    : [];
 
   // ── Marketplace category pages (only in first chunk) ───
   // Run all DB queries in parallel for speed (avoids Vercel timeout at scale)
@@ -130,6 +160,17 @@ export default async function sitemap({
     priority: 0.8,
   }));
 
+  // ── Clean URL category path pages (/marketplace/category/[slug]) ──
+  const categoryPathPages: MetadataRoute.Sitemap = [
+    ...globalCategories,
+    ...subCategories,
+  ].map((cat) => ({
+    url: `${APP_URL}/marketplace/category/${cat.slug}`,
+    lastModified: cat.updatedAt,
+    changeFrequency: "daily" as const,
+    priority: 0.8,
+  }));
+
   const subCategoryPages: MetadataRoute.Sitemap = subCategories.map((cat) => ({
     url: `${APP_URL}/marketplace?category=${cat.slug}`,
     lastModified: cat.updatedAt,
@@ -153,5 +194,14 @@ export default async function sitemap({
     priority: 0.6,
   }));
 
-  return [...staticPages, ...categoryPages, ...subCategoryPages, ...shopPages, ...productPages];
+  return [
+    ...staticPages,
+    ...provincePages,
+    ...cityPages,
+    ...categoryPages,
+    ...categoryPathPages,
+    ...subCategoryPages,
+    ...shopPages,
+    ...productPages,
+  ];
 }

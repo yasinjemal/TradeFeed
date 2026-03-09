@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   getMarketplaceProducts,
   getPromotedProducts,
@@ -10,6 +11,7 @@ import {
 import { MarketplaceShell } from "@/components/marketplace/marketplace-shell";
 import { generateMarketplaceJsonLd } from "@/lib/seo/json-ld";
 import { expirePromotedListings } from "@/lib/db/promotions";
+import { SA_PROVINCES } from "@/lib/marketplace/locations";
 
 // ============================================================
 // /marketplace — Public Discovery Page
@@ -182,6 +184,66 @@ export default async function MarketplacePage({
         promotedProducts={promoted}
         currentFilters={filters}
       />
+
+      {/* ── Internal linking for SEO ─────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 py-16 border-t border-stone-800/30">
+        <div className="grid md:grid-cols-2 gap-12">
+          {/* Browse by Province */}
+          <div>
+            <h2 className="text-lg font-bold text-stone-200 mb-4">
+              Browse Suppliers by Province
+            </h2>
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-2">
+              {SA_PROVINCES.map((p) => (
+                <li key={p.slug}>
+                  <Link
+                    href={`/marketplace/${p.slug}`}
+                    className="text-sm text-stone-400 hover:text-emerald-400 transition-colors"
+                  >
+                    Suppliers in {p.name} →
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Browse by Category */}
+          <div>
+            <h2 className="text-lg font-bold text-stone-200 mb-4">
+              Browse by Category
+            </h2>
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-2">
+              {categories
+                .filter((c) => !c.parentId)
+                .slice(0, 12)
+                .map((c) => (
+                  <li key={c.slug}>
+                    <Link
+                      href={`/marketplace/category/${c.slug}`}
+                      className="text-sm text-stone-400 hover:text-emerald-400 transition-colors"
+                    >
+                      {c.name} →
+                    </Link>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* WhatsApp Import CTA */}
+        <div className="mt-10 pt-8 border-t border-stone-800/30 text-center">
+          <p className="text-sm text-stone-500">
+            Already selling on WhatsApp?{" "}
+            <Link
+              href="/import-whatsapp-catalogue"
+              className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2"
+            >
+              Import your WhatsApp catalogue
+            </Link>{" "}
+            and get your own online shop in 30 seconds.
+          </p>
+        </div>
+      </section>
     </>
   );
 }

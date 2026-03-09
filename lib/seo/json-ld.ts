@@ -349,6 +349,122 @@ export function generateFaqJsonLd(
 }
 
 /**
+ * JSON-LD for location-based SEO landing pages.
+ * Schema: BreadcrumbList + WebPage — helps Google associate
+ * the page with a geographic area so we surface for
+ * "suppliers in {city}" / "wholesale {province}" queries.
+ */
+export function generateLocationPageJsonLd(opts: {
+  provinceName: string;
+  provinceSlug: string;
+  cityName?: string;
+  citySlug?: string;
+}) {
+  const { provinceName, provinceSlug, cityName, citySlug } = opts;
+  const isCity = Boolean(cityName && citySlug);
+
+  const pageUrl = isCity
+    ? `${APP_URL}/marketplace/${provinceSlug}/${citySlug}`
+    : `${APP_URL}/marketplace/${provinceSlug}`;
+
+  const pageName = isCity
+    ? `Suppliers in ${cityName}, ${provinceName}`
+    : `Suppliers in ${provinceName}`;
+
+  const breadcrumbItems = [
+    { "@type": "ListItem" as const, position: 1, name: "TradeFeed", item: APP_URL },
+    { "@type": "ListItem" as const, position: 2, name: "Marketplace", item: `${APP_URL}/marketplace` },
+    { "@type": "ListItem" as const, position: 3, name: provinceName, item: `${APP_URL}/marketplace/${provinceSlug}` },
+    ...(isCity
+      ? [{ "@type": "ListItem" as const, position: 4, name: cityName!, item: pageUrl }]
+      : []),
+  ];
+
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems,
+  };
+
+  const webPage: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: pageName,
+    description: isCity
+      ? `Browse wholesale & retail products from sellers in ${cityName}, ${provinceName}. Order via WhatsApp on TradeFeed.`
+      : `Discover top sellers and wholesale products in ${provinceName}, South Africa on TradeFeed.`,
+    url: pageUrl,
+    isPartOf: { "@type": "WebSite", name: "TradeFeed", url: APP_URL },
+    about: {
+      "@type": "Place",
+      name: isCity ? `${cityName}, ${provinceName}` : provinceName,
+      address: {
+        "@type": "PostalAddress",
+        ...(isCity && { addressLocality: cityName }),
+        addressRegion: provinceName,
+        addressCountry: "ZA",
+      },
+    },
+  };
+
+  return [breadcrumb, webPage];
+}
+
+/**
+ * JSON-LD for category SEO landing pages.
+ * Schema: BreadcrumbList + WebPage + ItemList placeholder.
+ */
+export function generateCategoryPageJsonLd(opts: {
+  categoryName: string;
+  categorySlug: string;
+  parentCategoryName?: string;
+  parentCategorySlug?: string;
+  productCount?: number;
+}) {
+  const { categoryName, categorySlug, parentCategoryName, parentCategorySlug, productCount } = opts;
+
+  const pageUrl = `${APP_URL}/marketplace/category/${categorySlug}`;
+
+  const breadcrumbItems = [
+    { "@type": "ListItem" as const, position: 1, name: "TradeFeed", item: APP_URL },
+    { "@type": "ListItem" as const, position: 2, name: "Marketplace", item: `${APP_URL}/marketplace` },
+    ...(parentCategoryName && parentCategorySlug
+      ? [{ "@type": "ListItem" as const, position: 3, name: parentCategoryName, item: `${APP_URL}/marketplace/category/${parentCategorySlug}` }]
+      : []),
+    {
+      "@type": "ListItem" as const,
+      position: parentCategoryName ? 4 : 3,
+      name: categoryName,
+      item: pageUrl,
+    },
+  ];
+
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems,
+  };
+
+  const webPage: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: `${categoryName} Suppliers South Africa`,
+    description: `Shop ${categoryName.toLowerCase()} from verified South African sellers. Wholesale & retail prices. Order via WhatsApp on TradeFeed.`,
+    url: pageUrl,
+    isPartOf: { "@type": "WebSite", name: "TradeFeed", url: APP_URL },
+    ...(productCount !== undefined && {
+      mainEntity: {
+        "@type": "ItemList",
+        name: categoryName,
+        numberOfItems: productCount,
+      },
+    }),
+  };
+
+  return [breadcrumb, webPage];
+}
+
+/**
  * JSON-LD for the marketplace discovery page.
  * Schema: ItemList (product grid) + BreadcrumbList + WebPage
  *

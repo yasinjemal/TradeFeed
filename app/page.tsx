@@ -1206,6 +1206,9 @@ export default async function HomePage() {
                   <Link href="/marketplace" className="px-4 py-2 rounded-lg bg-stone-800/60 border border-stone-700/50 text-sm text-stone-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
                     Browse Marketplace →
                   </Link>
+                  <Link href="/import-whatsapp-catalogue" className="px-4 py-2 rounded-lg bg-stone-800/60 border border-stone-700/50 text-sm text-stone-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                    Import WhatsApp Catalogue →
+                  </Link>
                   <Link href={clerkId ? "/create-shop" : "/sign-up"} className="px-4 py-2 rounded-lg bg-stone-800/60 border border-stone-700/50 text-sm text-stone-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
                     Create Online Shop →
                   </Link>
@@ -1215,6 +1218,20 @@ export default async function HomePage() {
                   <Link href="#how-it-works" className="px-4 py-2 rounded-lg bg-stone-800/60 border border-stone-700/50 text-sm text-stone-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
                     How It Works →
                   </Link>
+                </div>
+                {/* Province links for geographic SEO */}
+                <div className="mt-6">
+                  <h4 className="text-sm font-semibold text-stone-400 mb-3">Browse by Province</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {["gauteng", "western-cape", "kwazulu-natal", "eastern-cape", "free-state", "limpopo", "mpumalanga", "north-west", "northern-cape"].map((slug) => {
+                      const name = slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+                      return (
+                        <Link key={slug} href={`/marketplace/${slug}`} className="px-3 py-1.5 rounded-md bg-stone-800/40 border border-stone-800/50 text-xs text-stone-500 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                          {name}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1245,7 +1262,7 @@ export default async function HomePage() {
             <div>
               <h4 className="text-xs font-semibold text-stone-300 uppercase tracking-wider mb-4">For Sellers</h4>
               <ul className="space-y-2.5">
-                {[{ label: "Create a Shop", href: clerkId ? "/create-shop" : "/sign-up" }, { label: "Sign In", href: "/sign-in" }, { label: "How It Works", href: "#how-it-works" }].map((l) => (
+                {[{ label: "Create a Shop", href: clerkId ? "/create-shop" : "/sign-up" }, { label: "Import WhatsApp Catalogue", href: "/import-whatsapp-catalogue" }, { label: "Sign In", href: "/sign-in" }, { label: "How It Works", href: "#how-it-works" }].map((l) => (
                   <li key={l.label}><Link href={l.href} className="text-sm text-stone-500 hover:text-stone-300 transition-colors">{l.label}</Link></li>
                 ))}
               </ul>

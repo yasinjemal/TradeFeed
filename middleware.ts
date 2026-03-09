@@ -24,6 +24,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/health",                    // Health check (uptime monitoring)
   "/api/cron/(.*)",                  // Vercel Cron jobs (server-to-server)
   "/api/merchant-feed",              // Google Merchant Center product feed
+  "/import-whatsapp-catalogue",      // WhatsApp import SEO landing page
   "/privacy",                       // Privacy policy (POPIA)
   "/terms",                         // Terms of service
   "/contact",                       // Contact / help center
