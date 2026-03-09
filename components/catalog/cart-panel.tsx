@@ -133,75 +133,80 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       showDelivery && delivery.address.trim() ? delivery : null;
 
     startTransition(async () => {
-      // 1. Build WhatsApp message (needed for order record + URL)
-      const whatsappMessage = buildWhatsAppMessage(items, deliveryData, undefined, shopSlug);
+      try {
+        // 1. Build WhatsApp message (needed for order record + URL)
+        const whatsappMessage = buildWhatsAppMessage(items, deliveryData, undefined, shopSlug);
 
-      // 2. Map cart items to order input format
-      const orderItems = items.map((item) => ({
-        productId: item.productId,
-        variantId: item.variantId,
-        productName: item.productName,
-        option1Label: item.option1Label || "Size",
-        option1Value: item.size,
-        option2Label: item.option2Label || "Color",
-        option2Value: item.color,
-        priceInCents: item.priceInCents,
-        quantity: item.quantity,
-      }));
+        // 2. Map cart items to order input format
+        const orderItems = items.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          productName: item.productName,
+          option1Label: item.option1Label || "Size",
+          option1Value: item.size,
+          option2Label: item.option2Label || "Color",
+          option2Value: item.color,
+          priceInCents: item.priceInCents,
+          quantity: item.quantity,
+        }));
 
-      // 3. Create order (validates stock + saves to DB)
-      const result = await checkoutAction(
-        shopId,
-        shopSlug,
-        orderItems,
-        whatsappMessage,
-        buyerName.trim() || undefined,
-        buyerPhone.trim() || undefined,
-        buyerNote.trim() || undefined, // buyerNote
-        deliveryData?.address || undefined,
-        deliveryData?.city || undefined,
-        deliveryData?.province || undefined,
-        deliveryData?.postalCode || undefined,
-        marketingConsent,
-      );
+        // 3. Create order (validates stock + saves to DB)
+        const result = await checkoutAction(
+          shopId,
+          shopSlug,
+          orderItems,
+          whatsappMessage,
+          buyerName.trim() || undefined,
+          buyerPhone.trim() || undefined,
+          buyerNote.trim() || undefined, // buyerNote
+          deliveryData?.address || undefined,
+          deliveryData?.city || undefined,
+          deliveryData?.province || undefined,
+          deliveryData?.postalCode || undefined,
+          marketingConsent,
+        );
 
-      if (!result.success) {
-        setCheckoutError(result.error ?? "Failed to place order.");
-        return;
+        if (!result.success) {
+          setCheckoutError(result.error ?? "Failed to place order.");
+          return;
+        }
+
+        // 4. Open WhatsApp with structured message (includes order number)
+        const hasRetailItems = items.some((i) => i.orderType === "retail");
+        const checkoutNumber = hasRetailItems && retailWhatsappNumber
+          ? retailWhatsappNumber
+          : whatsappNumber;
+        const url = buildWhatsAppCheckoutUrl(
+          checkoutNumber,
+          items,
+          deliveryData,
+          result.orderNumber,
+          shopSlug,
+        );
+        window.open(url, "_blank", "noopener,noreferrer");
+
+        // 5. Track checkout event (fire-and-forget)
+        void trackWhatsAppCheckoutAction(shopId);
+
+        // 6. Show tracking notification
+        if (result.orderNumber) {
+          toast.success("Order placed!", {
+            description: `Order ${result.orderNumber} — Track your order anytime.`,
+            action: result.trackingUrl ? {
+              label: "Track Order",
+              onClick: () => window.open(result.trackingUrl!, "_self"),
+            } : undefined,
+            duration: 10000,
+          });
+        }
+
+        // 7. Clear cart after opening WhatsApp
+        clearCart();
+        onClose();
+      } catch {
+        // Network error, server action transport failure, etc.
+        setCheckoutError("Connection issue — please check your internet and try again.");
       }
-
-      // 4. Open WhatsApp with structured message (includes order number)
-      const hasRetailItems = items.some((i) => i.orderType === "retail");
-      const checkoutNumber = hasRetailItems && retailWhatsappNumber
-        ? retailWhatsappNumber
-        : whatsappNumber;
-      const url = buildWhatsAppCheckoutUrl(
-        checkoutNumber,
-        items,
-        deliveryData,
-        result.orderNumber,
-        shopSlug,
-      );
-      window.open(url, "_blank", "noopener,noreferrer");
-
-      // 5. Track checkout event (fire-and-forget)
-      void trackWhatsAppCheckoutAction(shopId);
-
-      // 6. Show tracking notification
-      if (result.orderNumber) {
-        toast.success("Order placed!", {
-          description: `Order ${result.orderNumber} — Track your order anytime.`,
-          action: result.trackingUrl ? {
-            label: "Track Order",
-            onClick: () => window.open(result.trackingUrl!, "_self"),
-          } : undefined,
-          duration: 10000,
-        });
-      }
-
-      // 7. Clear cart after opening WhatsApp
-      clearCart();
-      onClose();
     });
   }, [items, isPending, shopId, shopSlug, whatsappNumber, retailWhatsappNumber, clearCart, onClose, showDelivery, delivery]);
 

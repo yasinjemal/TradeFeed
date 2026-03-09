@@ -109,7 +109,7 @@ export async function checkoutAction(
     }
 
     // 2. Create order (prices are re-verified server-side in createOrder)
-    const order = await createOrder({
+    const orderResult = await createOrder({
       shopId: input.shopId,
       items: input.items,
       buyerName: input.buyerName || undefined,
@@ -122,6 +122,12 @@ export async function checkoutAction(
       whatsappMessage: input.whatsappMessage,
       marketingConsent: input.marketingConsent ?? false,
     });
+
+    if (!orderResult.success) {
+      return { success: false, error: orderResult.error };
+    }
+
+    const order = orderResult.order;
 
     // 3. Fire-and-forget notifications (don't block checkout)
     notifyNewOrder({
@@ -156,8 +162,15 @@ export async function checkoutAction(
 
     return { success: true, orderNumber: order.orderNumber, trackingUrl: `/track/${encodeURIComponent(order.orderNumber)}` };
   } catch (error) {
-    await reportError("checkoutAction", error, { shopId, itemCount: items?.length });
-    return { success: false, error: "Failed to place order. Please try again." };
+    // Fire-and-forget — never let reportError block the error response
+    reportError("checkoutAction", error, { shopId, itemCount: items?.length }).catch(() => {});
+
+    // Surface a more specific message when possible
+    const message =
+      error instanceof Error && error.message.includes("connect")
+        ? "Connection issue — please try again in a moment."
+        : "Failed to place order. Please try again.";
+    return { success: false, error: message };
   }
 }
 

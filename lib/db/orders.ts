@@ -12,7 +12,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
-import type { OrderStatus } from "@prisma/client";
+import type { OrderStatus, Order, OrderItem } from "@prisma/client";
 
 // ── Order Number Generator ──────────────────────────────────
 
@@ -104,28 +104,47 @@ export async function validateStock(
 
 // ── Create Order ────────────────────────────────────────────
 
+export type CreateOrderResult =
+  | { success: true; order: Order & { items: OrderItem[] } }
+  | { success: false; error: string };
+
 /**
  * Create an order with line items in a single transaction.
  * Also decrements stock for each variant ordered.
  * Prices are re-fetched from the DB to prevent client-side tampering.
+ *
+ * Returns a result object instead of throwing so callers get
+ * actionable error messages (e.g. "variant no longer available").
  */
-export async function createOrder(input: CreateOrderInput) {
-  // Re-fetch actual prices from DB to prevent price manipulation
+export async function createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
+  // Re-fetch actual prices + stock inside a single read to minimise
+  // the race window between validation and creation.
   const variantIds = input.items.map((i) => i.variantId);
   const variants = await db.productVariant.findMany({
     where: { id: { in: variantIds }, isActive: true },
-    select: { id: true, priceInCents: true },
+    select: { id: true, priceInCents: true, stock: true },
   });
-  const priceMap = new Map(variants.map((v) => [v.id, v.priceInCents]));
+  const variantMap = new Map(variants.map((v) => [v.id, v]));
 
-  // Build items with verified prices
+  // Validate every variant is still available + has sufficient stock
+  const errors: string[] = [];
   const verifiedItems = input.items.map((item) => {
-    const dbPrice = priceMap.get(item.variantId);
-    if (dbPrice === undefined) {
-      throw new Error(`Variant not found or inactive: ${item.variantId}`);
+    const dbVariant = variantMap.get(item.variantId);
+    if (!dbVariant) {
+      errors.push(`"${item.productName}" is no longer available.`);
+      return { ...item, priceInCents: 0 };
     }
-    return { ...item, priceInCents: dbPrice };
+    if (dbVariant.stock < item.quantity) {
+      errors.push(
+        `"${item.productName}": only ${dbVariant.stock} left (you requested ${item.quantity}).`,
+      );
+    }
+    return { ...item, priceInCents: dbVariant.priceInCents };
   });
+
+  if (errors.length > 0) {
+    return { success: false, error: errors.join(" ") };
+  }
 
   const totalCents = verifiedItems.reduce(
     (sum, item) => sum + item.priceInCents * item.quantity,
@@ -195,7 +214,7 @@ export async function createOrder(input: CreateOrderInput) {
     return created;
   });
 
-  return order;
+  return { success: true, order };
 }
 
 // ── List Orders ─────────────────────────────────────────────
