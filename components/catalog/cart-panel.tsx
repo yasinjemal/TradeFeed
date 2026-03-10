@@ -166,7 +166,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       );
 
       if (!result.success) {
-        setCheckoutError(result.error ?? "Failed to place order.");
+        setCheckoutError(result.error ?? "Failed to place order. Please try again.");
         return;
       }
 
@@ -203,7 +203,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       clearCart();
       onClose();
     });
-  }, [items, isPending, shopId, shopSlug, whatsappNumber, retailWhatsappNumber, clearCart, onClose, showDelivery, delivery]);
+  }, [items, isPending, shopId, shopSlug, whatsappNumber, retailWhatsappNumber, clearCart, onClose, showDelivery, delivery, buyerName, buyerPhone, buyerNote, marketingConsent]);
 
   const handleClearCart = useCallback(() => {
     if (!confirm("Remove all items from your cart?")) return;
@@ -408,7 +408,18 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                 </svg>
-                <span>{checkoutError}</span>
+                <span>
+                  {checkoutError}
+                  {(checkoutError.includes("no longer available") || checkoutError.includes("unavailable")) && (
+                    <span className="block mt-1 text-red-600"> Please remove the unavailable item from your cart and try again.</span>
+                  )}
+                  {(checkoutError.includes("out of stock") || (checkoutError.includes("only") && checkoutError.includes("left"))) && (
+                    <span className="block mt-1 text-red-600"> Please refresh the page to see updated stock levels.</span>
+                  )}
+                  {checkoutError.includes("Too many checkout") && (
+                    <span className="block mt-1 text-red-600"> Please wait a moment before trying again.</span>
+                  )}
+                </span>
               </div>
             )}
 
