@@ -80,6 +80,7 @@ export async function checkoutAction(
     });
 
     if (!parsed.success) {
+      console.error("[checkoutAction] Zod validation failed:", JSON.stringify(parsed.error.issues, null, 2));
       const firstError = parsed.error.issues[0]?.message ?? "Invalid input";
       return { success: false, error: firstError };
     }
@@ -156,6 +157,7 @@ export async function checkoutAction(
 
     return { success: true, orderNumber: order.orderNumber, trackingUrl: `/track/${encodeURIComponent(order.orderNumber)}` };
   } catch (error) {
+    console.error("[checkoutAction] Unexpected error:", error instanceof Error ? error.message : error);
     await reportError("checkoutAction", error, { shopId, itemCount: items?.length });
     return { success: false, error: "Failed to place order. Please try again." };
   }

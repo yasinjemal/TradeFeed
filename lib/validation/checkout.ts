@@ -35,7 +35,7 @@ export const checkoutSchema = z.object({
   shopId: z.string().min(1, "Shop ID required"),
   shopSlug: z.string().min(1, "Shop slug required").max(200),
   items: z.array(checkoutItemSchema).min(1, "Cart is empty").max(100, "Too many items"),
-  whatsappMessage: z.string().max(10000, "Message too long"),
+  whatsappMessage: z.string().max(10000, "Message too long").optional().or(z.literal("")),
   buyerName: z
     .string()
     .trim()
