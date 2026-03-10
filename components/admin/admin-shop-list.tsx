@@ -126,6 +126,8 @@ export function AdminShopList({
     });
   }
 
+  const now = Date.now();
+
   return (
     <div className="space-y-4">
       {/* ── Toast ─────────────────────────────────────────── */}
@@ -201,7 +203,7 @@ export function AdminShopList({
             const planSlug = shop.subscription?.plan.slug || "";
             const lastProduct = shop.products[0]?.createdAt;
             const daysSinceJoin = Math.floor(
-              (Date.now() - new Date(shop.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+              (now - new Date(shop.createdAt).getTime()) / (1000 * 60 * 60 * 24)
             );
             const isGhost = shop._count.products === 0 && daysSinceJoin >= 3;
 
