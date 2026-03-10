@@ -97,14 +97,15 @@ export async function checkoutAction(
 
     if (!stockCheck.valid) {
       const outOfStock = stockCheck.errors
-        .map(
-          (e) =>
-            `${e.productName}: only ${e.available} left (you requested ${e.requested})`,
+        .map((e) =>
+          e.unavailable
+            ? `"${e.productName}" is no longer available`
+            : `${e.productName}: only ${e.available} left (you requested ${e.requested})`,
         )
         .join("; ");
       return {
         success: false,
-        error: `Some items are out of stock: ${outOfStock}`,
+        error: `Some items cannot be ordered: ${outOfStock}`,
       };
     }
 
@@ -156,8 +157,18 @@ export async function checkoutAction(
 
     return { success: true, orderNumber: order.orderNumber, trackingUrl: `/track/${encodeURIComponent(order.orderNumber)}` };
   } catch (error) {
+    // Log for debugging — no PII (buyer name/phone/message are excluded)
+    console.error("[checkoutAction] failed", {
+      shopId,
+      shopSlug,
+      itemCount: items?.length ?? 0,
+    });
     await reportError("checkoutAction", error, { shopId, itemCount: items?.length });
-    return { success: false, error: "Failed to place order. Please try again." };
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : "Failed to place order. Please try again.";
+    return { success: false, error: message };
   }
 }
 

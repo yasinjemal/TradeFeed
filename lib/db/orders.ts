@@ -58,7 +58,7 @@ export interface CreateOrderInput {
 
 export interface StockValidationResult {
   valid: boolean;
-  errors: { variantId: string; productName: string; requested: number; available: number }[];
+  errors: { variantId: string; productName: string; requested: number; available: number; unavailable?: boolean }[];
 }
 
 // ── Stock Validation ────────────────────────────────────────
@@ -83,11 +83,13 @@ export async function validateStock(
   for (const item of items) {
     const available = stockMap.get(item.variantId);
     if (available === undefined) {
+      // Variant not found or inactive — treat as permanently unavailable
       errors.push({
         variantId: item.variantId,
         productName: item.productName,
         requested: item.quantity,
         available: 0,
+        unavailable: true,
       });
     } else if (available < item.quantity) {
       errors.push({
@@ -122,7 +124,7 @@ export async function createOrder(input: CreateOrderInput) {
   const verifiedItems = input.items.map((item) => {
     const dbPrice = priceMap.get(item.variantId);
     if (dbPrice === undefined) {
-      throw new Error(`Variant not found or inactive: ${item.variantId}`);
+      throw new Error(`"${item.productName}" is no longer available. Please remove it from your cart and try again.`);
     }
     return { ...item, priceInCents: dbPrice };
   });
