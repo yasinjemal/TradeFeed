@@ -29,6 +29,7 @@ import { IllustrationSearchNotFound } from "@/components/ui/illustrations";
 import {
   trackMarketplaceViewAction,
   trackPromotedImpressionsAction,
+  loadMoreProducts,
 } from "@/app/actions/marketplace";
 import { buildMarketplaceSearchParams } from "@/lib/marketplace/search-params";
 
@@ -74,6 +75,58 @@ export function MarketplaceShell({
   const [search, setSearch] = useState(currentFilters.search ?? "");
   const [filterOpen, setFilterOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Infinite scroll state ───────────────────────────────
+  const [allProducts, setAllProducts] = useState(products);
+  const [nextPage, setNextPage] = useState(currentPage + 1);
+  const [hasMore, setHasMore] = useState(currentPage < totalPages);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Reset accumulated products when server data changes (filter/search/sort)
+  useEffect(() => {
+    setAllProducts(products);
+    setNextPage(currentPage + 1);
+    setHasMore(currentPage < totalPages);
+  }, [products, currentPage, totalPages]);
+
+  // IntersectionObserver to trigger loading more products
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isLoadingMore && hasMore) {
+          setIsLoadingMore(true);
+          loadMoreProducts({
+            category: currentFilters.category,
+            search: currentFilters.search,
+            sortBy: currentFilters.sortBy,
+            province: currentFilters.province,
+            minPrice: currentFilters.minPrice,
+            maxPrice: currentFilters.maxPrice,
+            verifiedOnly: currentFilters.verifiedOnly,
+            page: nextPage,
+            pageSize: currentFilters.pageSize,
+          }).then((result) => {
+            if (result.products.length > 0) {
+              setAllProducts((prev) => [...prev, ...result.products]);
+            }
+            setHasMore(result.hasMore);
+            setNextPage(result.nextPage);
+            setIsLoadingMore(false);
+          }).catch(() => {
+            setIsLoadingMore(false);
+          });
+        }
+      },
+      { rootMargin: "600px" } // Start loading 600px before reaching bottom
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, nextPage, currentFilters]);
 
   // Sync local input when URL-driven search changes (e.g. back/forward nav)
   useEffect(() => {
@@ -443,7 +496,7 @@ export function MarketplaceShell({
       {/* ── Product Grid ────────────────────────────────── */}
       <section className="px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto">
-          {products.length === 0 && !isPending ? (
+          {allProducts.length === 0 && !isPending ? (
             /* Empty State */
             <div className="flex flex-col items-center py-20 text-center">
               <IllustrationSearchNotFound className="w-44 h-44 mb-4" />
@@ -467,14 +520,14 @@ export function MarketplaceShell({
               {/* Loading overlay with skeleton shimmer */}
               <div className={`transition-opacity duration-300 ${isPending ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                  {products.map((product, idx) => (
+                  {allProducts.map((product, idx) => (
                     <MarketplaceProductCard key={`${product.id}-${idx}`} product={product} />
                   ))}
                 </div>
               </div>
 
               {/* Searching indicator */}
-              {isPending && products.length === 0 && (
+              {isPending && allProducts.length === 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} className="rounded-2xl bg-stone-900 border border-stone-800/50 overflow-hidden">
@@ -489,31 +542,27 @@ export function MarketplaceShell({
                 </div>
               )}
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-8">
-                  {currentPage > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => updateFilters({ page: String(currentPage - 1) })}
-                      className="px-4 py-2.5 rounded-xl bg-stone-900 border border-stone-800 text-sm text-stone-300 hover:border-stone-700 transition-all"
-                    >
-                      ← Previous
-                    </button>
-                  )}
-                  <span className="text-sm text-stone-500 px-3">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  {currentPage < totalPages && (
-                    <button
-                      type="button"
-                      onClick={() => updateFilters({ page: String(currentPage + 1) })}
-                      className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-all"
-                    >
-                      Next Page →
-                    </button>
+              {/* Infinite scroll sentinel + loading indicator */}
+              {hasMore && (
+                <div ref={sentinelRef} className="flex items-center justify-center py-10">
+                  {isLoadingMore && (
+                    <div className="flex items-center gap-3 text-sm text-stone-500">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                      Loading more products…
+                    </div>
                   )}
                 </div>
+              )}
+
+              {/* End of results */}
+              {!hasMore && allProducts.length > 0 && totalProducts > currentFilters.pageSize && (
+                <p className="text-center text-sm text-stone-600 py-8">
+                  You&apos;ve seen all {totalProducts.toLocaleString()} products ✓
+                </p>
               )}
             </>
           )}
