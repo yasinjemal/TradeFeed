@@ -113,22 +113,24 @@ export async function checkRateLimit(
   identifier: string,
 ): Promise<RateLimitResult> {
   const cfg = LIMITER_CONFIG[name];
-  const upstash = getUpstashLimiter(name);
 
-  // ── Upstash path (production) ─────────────────────────────
-  if (upstash) {
-    try {
+  try {
+    const upstash = getUpstashLimiter(name);
+
+    // ── Upstash path (production) ─────────────────────────────
+    if (upstash) {
       const { success, remaining, reset } = await upstash.limit(identifier);
       const resetAt = reset; // epoch ms
       const retryAfter = success ? 0 : Math.ceil((resetAt - Date.now()) / 1000);
       return { allowed: success, remaining, resetAt, retryAfterSeconds: Math.max(retryAfter, 0) };
-    } catch {
-      // If Redis is down, fail open — don't block legitimate users
-      return { allowed: true, remaining: cfg.limit, resetAt: Date.now() + cfg.windowSeconds * 1000, retryAfterSeconds: 0 };
     }
+  } catch (err) {
+    // If Redis is down or misconfigured, fail open — don't block legitimate users
+    console.warn(`[rate-limit] Redis error for "${name}", failing open:`, err instanceof Error ? err.message : err);
+    return { allowed: true, remaining: cfg.limit, resetAt: Date.now() + cfg.windowSeconds * 1000, retryAfterSeconds: 0 };
   }
 
-  // ── In-memory fallback (local dev) ────────────────────────
+  // ── In-memory fallback (local dev / Redis unavailable) ────
   return inMemoryLimit(`${name}:${identifier}`, cfg.limit, cfg.windowSeconds * 1000);
 }
 
