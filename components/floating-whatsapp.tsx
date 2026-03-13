@@ -24,8 +24,8 @@ export function FloatingWhatsApp() {
     return () => clearTimeout(t);
   }, []);
 
-  // Hide on dashboard & admin pages — sellers have their own support
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
+  // Hide on dashboard, admin, and catalog pages
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin") || pathname.startsWith("/catalog")) {
     return null;
   }
 
