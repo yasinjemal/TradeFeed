@@ -35,21 +35,17 @@ export const checkoutSchema = z.object({
   shopId: z.string().min(1, "Shop ID required"),
   shopSlug: z.string().min(1, "Shop slug required").max(200),
   items: z.array(checkoutItemSchema).min(1, "Cart is empty").max(100, "Too many items"),
-  whatsappMessage: z.string().max(10000, "Message too long"),
+  whatsappMessage: z.string().max(10000, "Message too long").optional().or(z.literal("")),
   buyerName: z
     .string()
     .trim()
     .max(100, "Name too long")
     .optional()
     .or(z.literal("")),
-  buyerPhone: z
-    .string()
-    .transform(normalizePhone)
-    .pipe(
-      z.string().regex(saPhoneRegex, "Enter a valid SA phone number (e.g. +27821234567 or 0821234567)")
-    )
-    .optional()
-    .or(z.literal("")),
+  buyerPhone: z.preprocess(
+    (val) => (val === undefined || val === "" ? undefined : normalizePhone(String(val))),
+    z.string().regex(saPhoneRegex, "Enter a valid SA phone number (e.g. +27821234567 or 0821234567)").optional()
+  ),
   buyerNote: z
     .string()
     .trim()

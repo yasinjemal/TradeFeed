@@ -55,6 +55,56 @@ export async function checkoutAction(
   deliveryPostalCode?: string,
   marketingConsent?: boolean,
 ): Promise<ActionResult> {
+  // Retry wrapper for transient DB connection failures (Neon cold starts)
+  const MAX_RETRIES = 2;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const result = await _attemptCheckout(
+      shopId, shopSlug, items, whatsappMessage,
+      buyerName, buyerPhone, buyerNote,
+      deliveryAddress, deliveryCity, deliveryProvince, deliveryPostalCode,
+      marketingConsent,
+    );
+
+    // If it succeeded or was a business-logic error (not a DB connection error), return
+    if (result.success || !result._retryable) {
+      return result;
+    }
+
+    // Transient DB error — retry after a short delay
+    if (attempt < MAX_RETRIES) {
+      console.warn(`[checkoutAction] Retrying after transient error (attempt ${attempt + 1}/${MAX_RETRIES})`);
+      await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+    }
+  }
+
+  return { success: false, error: "Connection issue — please try again in a moment." };
+}
+
+// ── Internal helper (not exported — called by retry wrapper) ──
+
+type InternalResult = ActionResult & { _retryable?: boolean };
+
+function isTransientDbError(error: unknown): boolean {
+  if (!error) return false;
+  const msg = error instanceof Error ? error.message : String(error);
+  return /connect|timeout|ECONNRESET|ECONNREFUSED|socket|EPIPE|fetch failed|terminated|Can't reach database/i.test(msg);
+}
+
+async function _attemptCheckout(
+  shopId: string,
+  shopSlug: string,
+  items: CreateOrderInput["items"],
+  whatsappMessage: string,
+  buyerName?: string,
+  buyerPhone?: string,
+  buyerNote?: string,
+  deliveryAddress?: string,
+  deliveryCity?: string,
+  deliveryProvince?: string,
+  deliveryPostalCode?: string,
+  marketingConsent?: boolean,
+): Promise<InternalResult> {
   try {
     // Rate limit: 10 checkouts/min per IP
     const ip = await getActionClientIp();
@@ -80,6 +130,7 @@ export async function checkoutAction(
     });
 
     if (!parsed.success) {
+      console.error("[checkoutAction] Zod validation failed:", JSON.stringify(parsed.error.issues, null, 2));
       const firstError = parsed.error.issues[0]?.message ?? "Invalid input";
       return { success: false, error: firstError };
     }
@@ -162,15 +213,19 @@ export async function checkoutAction(
 
     return { success: true, orderNumber: order.orderNumber, trackingUrl: `/track/${encodeURIComponent(order.orderNumber)}` };
   } catch (error) {
+    // Log for debugging (shows in Vercel function logs)
+    console.error("[checkoutAction] Unexpected error:", error instanceof Error ? error.message : error);
+
     // Fire-and-forget — never let reportError block the error response
     reportError("checkoutAction", error, { shopId, itemCount: items?.length }).catch(() => {});
 
+    const retryable = isTransientDbError(error);
+
     // Surface a more specific message when possible
-    const message =
-      error instanceof Error && error.message.includes("connect")
-        ? "Connection issue — please try again in a moment."
-        : "Failed to place order. Please try again.";
-    return { success: false, error: message };
+    const message = retryable
+      ? "Connection issue — please try again in a moment."
+      : "Failed to place order. Please try again.";
+    return { success: false, error: message, _retryable: retryable };
   }
 }
 
