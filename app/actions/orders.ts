@@ -106,12 +106,15 @@ async function _attemptCheckout(
   marketingConsent?: boolean,
 ): Promise<InternalResult> {
   try {
+    console.log("[checkoutAction] ▶ START", { shopId, shopSlug, itemCount: items?.length });
+
     // Rate limit: 10 checkouts/min per IP
     const ip = await getActionClientIp();
     const rl = await checkRateLimit("checkout", ip);
     if (!rl.allowed) {
       return { success: false, error: "Too many checkout attempts. Please wait a moment." };
     }
+    console.log("[checkoutAction] ✓ rate-limit passed");
 
     // 0. Validate & sanitize all inputs
     const parsed = checkoutSchema.safeParse({
@@ -136,6 +139,7 @@ async function _attemptCheckout(
     }
 
     const input = parsed.data;
+    console.log("[checkoutAction] ✓ zod validated", { itemCount: input.items.length });
 
     // 1. Validate stock
     const stockCheck = await validateStock(
@@ -158,6 +162,7 @@ async function _attemptCheckout(
         error: `Some items are out of stock: ${outOfStock}`,
       };
     }
+    console.log("[checkoutAction] ✓ stock validated");
 
     // 2. Create order (prices are re-verified server-side in createOrder)
     const orderResult = await createOrder({
@@ -175,10 +180,12 @@ async function _attemptCheckout(
     });
 
     if (!orderResult.success) {
+      console.error("[checkoutAction] ✗ createOrder failed:", orderResult.error);
       return { success: false, error: orderResult.error };
     }
 
     const order = orderResult.order;
+    console.log("[checkoutAction] ✓ order created", order.orderNumber);
 
     // 3. Fire-and-forget notifications (don't block checkout)
     notifyNewOrder({
@@ -214,17 +221,21 @@ async function _attemptCheckout(
     return { success: true, orderNumber: order.orderNumber, trackingUrl: `/track/${encodeURIComponent(order.orderNumber)}` };
   } catch (error) {
     // Log for debugging (shows in Vercel function logs)
-    console.error("[checkoutAction] Unexpected error:", error instanceof Error ? error.message : error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errStack = error instanceof Error ? error.stack : undefined;
+    console.error("[checkoutAction] Unexpected error:", errMsg);
+    if (errStack) console.error("[checkoutAction] Stack:", errStack);
 
     // Fire-and-forget — never let reportError block the error response
     reportError("checkoutAction", error, { shopId, itemCount: items?.length }).catch(() => {});
 
     const retryable = isTransientDbError(error);
 
-    // Surface a more specific message when possible
+    // Include a truncated real error so we can debug in production
+    const detail = errMsg.length > 120 ? errMsg.slice(0, 120) + "…" : errMsg;
     const message = retryable
-      ? "Connection issue — please try again in a moment."
-      : "Failed to place order. Please try again.";
+      ? `Connection issue — please try again in a moment. (${detail})`
+      : `Order failed: ${detail}`;
     return { success: false, error: message, _retryable: retryable };
   }
 }
