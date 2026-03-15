@@ -279,6 +279,30 @@ export async function markOrderPaid(orderId: string) {
   });
 }
 
+/**
+ * Fetch order with shop details for webhook processing.
+ * No shopId scoping — webhook is server-to-server.
+ */
+export async function getOrderForWebhook(orderId: string) {
+  return db.order.findUnique({
+    where: { id: orderId },
+    select: {
+      id: true,
+      orderNumber: true,
+      shopId: true,
+      totalCents: true,
+      buyerPhone: true,
+      shop: {
+        select: {
+          name: true,
+          slug: true,
+          whatsappNumber: true,
+        },
+      },
+    },
+  });
+}
+
 // ── Mark payment link requested (seller sent link to buyer) ──
 
 export async function markPaymentRequested(orderId: string, shopId: string) {

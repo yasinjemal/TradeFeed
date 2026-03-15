@@ -25,7 +25,8 @@ import { upgradeSubscription, cancelSubscription } from "@/lib/db/subscriptions"
 import { parsePromotionPaymentId, calculatePromotionPrice } from "@/lib/config/promotions";
 import { createPromotedListing } from "@/lib/db/promotions";
 import { reportError } from "@/lib/telemetry";
-import { markOrderPaid } from "@/lib/db/orders";
+import { markOrderPaid, getOrderForWebhook } from "@/lib/db/orders";
+import { createTransactionFee } from "@/lib/db/transaction-fees";
 
 export async function POST(request: Request) {
   try {
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
 
     // ── Route: Order payment ────────────────────────────
     if (paymentId.startsWith("order_")) {
-      return handleOrderPayment(paymentId, paymentStatus);
+      return handleOrderPayment(paymentId, paymentStatus, body);
     }
 
     // ── Route: Subscription payment ─────────────────────
@@ -149,6 +150,7 @@ async function handlePromotionPayment(
 async function handleOrderPayment(
   paymentId: string,
   paymentStatus: string | undefined,
+  body: Record<string, string>,
 ) {
   const orderId = paymentId.replace("order_", "");
 
@@ -158,8 +160,46 @@ async function handleOrderPayment(
   }
 
   try {
+    // 1. Mark order as paid
     await markOrderPaid(orderId);
     console.log(`[PayFast ITN] Order marked paid: ${orderId}`);
+
+    // 2. Capture transaction fee
+    try {
+      const order = await getOrderForWebhook(orderId);
+      if (order) {
+        await createTransactionFee({
+          orderId: order.id,
+          shopId: order.shopId,
+          orderAmountCents: order.totalCents,
+          payfastPaymentId: body["pf_payment_id"],
+        });
+        console.log(`[PayFast ITN] Transaction fee captured for order ${orderId}`);
+
+        // 3. Notify seller via WhatsApp
+        try {
+          const { sendOrderStatusUpdate } = await import("@/lib/whatsapp/business-api");
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tradefeed.co.za";
+          if (order.shop.whatsappNumber) {
+            await sendOrderStatusUpdate(
+              order.shop.whatsappNumber,
+              order.orderNumber,
+              order.shop.name,
+              "PAID",
+              `${appUrl}/dashboard/${order.shop.slug}/orders`,
+            );
+            console.log(`[PayFast ITN] Seller notified: ${order.shop.slug}`);
+          }
+        } catch (notifyErr) {
+          // Don't fail the webhook if notification fails
+          console.error("[PayFast ITN] Seller notification failed:", notifyErr);
+        }
+      }
+    } catch (feeErr) {
+      // Don't fail the webhook if fee capture fails — order is already paid
+      console.error("[PayFast ITN] Transaction fee capture failed:", feeErr);
+      await reportError("payfast-itn-transaction-fee", feeErr, { orderId });
+    }
   } catch (err) {
     await reportError("payfast-itn-order-payment", err, { orderId });
     return NextResponse.json(

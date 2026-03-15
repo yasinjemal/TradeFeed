@@ -61,17 +61,36 @@ export async function getShopSubscription(shopId: string) {
 }
 
 /**
+ * Check if a shop has an active Pro trial.
+ * Returns trial info including days remaining.
+ */
+export function isTrialActive(subscription: { trialEndsAt: Date | null; plan: { slug: string } } | null) {
+  if (!subscription?.trialEndsAt) return { active: false, daysLeft: 0 } as const;
+  // Only applies to free-plan shops (paid plans don't need trial)
+  if (subscription.plan.slug !== "free") return { active: false, daysLeft: 0 } as const;
+  const now = new Date();
+  if (subscription.trialEndsAt <= now) return { active: false, daysLeft: 0 } as const;
+  const daysLeft = Math.ceil((subscription.trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return { active: true, daysLeft } as const;
+}
+
+/**
  * Create a Free subscription for a new shop.
  * Called during shop creation.
  */
 export async function createFreeSubscription(shopId: string) {
   const freePlan = await getFreePlan();
 
+  // New shops get a 14-day Pro trial
+  const trialEndsAt = new Date();
+  trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+
   return db.subscription.create({
     data: {
       shopId,
       planId: freePlan.id,
       status: "ACTIVE",
+      trialEndsAt,
     },
   });
 }
@@ -142,14 +161,18 @@ export async function checkProductLimit(shopId: string) {
   const limit = subscription?.plan.productLimit ?? 10;
   const planName = subscription?.plan.name ?? "Free";
 
-  // 0 means unlimited
-  const allowed = limit === 0 || productCount < limit;
+  // Check for active trial — trial gives unlimited products
+  const trial = isTrialActive(subscription);
+
+  // 0 means unlimited, or active trial means unlimited
+  const unlimited = limit === 0 || trial.active;
+  const allowed = unlimited || productCount < limit;
 
   return {
     allowed,
     current: productCount,
     limit,
-    unlimited: limit === 0,
-    planName,
+    unlimited,
+    planName: trial.active ? `${planName} (Trial)` : planName,
   };
 }

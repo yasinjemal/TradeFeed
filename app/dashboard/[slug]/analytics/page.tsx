@@ -16,7 +16,9 @@ import {
   getTopProducts,
   getUniqueVisitors,
 } from "@/lib/db/analytics";
+import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { AnalyticsDashboard } from "@/components/analytics/analytics-dashboard";
+import { ProFeatureGate } from "@/components/billing/pro-feature-gate";
 
 interface AnalyticsPageProps {
   params: Promise<{ slug: string }>;
@@ -40,12 +42,15 @@ export default async function AnalyticsPage({
 
   const days = query.days === "7" ? 7 : 30;
 
-  const [overview, daily, topProducts, uniqueVisitors] = await Promise.all([
+  const [overview, daily, topProducts, uniqueVisitors, subscription] = await Promise.all([
     getAnalyticsOverview(access.shopId, days),
     getDailyAnalytics(access.shopId, days),
     getTopProducts(access.shopId, days),
     getUniqueVisitors(access.shopId, days),
+    getShopSubscription(access.shopId),
   ]);
+
+  const isPro = (!!subscription?.plan.slug && subscription.plan.slug !== "free") || isTrialActive(subscription).active;
 
   return (
     <div className="space-y-6">
@@ -58,14 +63,21 @@ export default async function AnalyticsPage({
       </div>
 
       {/* ── Client Component (handles period toggle + charts) */}
-      <AnalyticsDashboard
-        overview={overview}
-        daily={daily}
-        topProducts={topProducts}
-        uniqueVisitors={uniqueVisitors}
-        currentDays={days}
+      <ProFeatureGate
+        hasAccess={isPro}
+        feature="Advanced Analytics"
+        description="Get detailed insights on views, clicks, conversions, and top products. Upgrade to Pro to unlock."
         shopSlug={slug}
-      />
+      >
+        <AnalyticsDashboard
+          overview={overview}
+          daily={daily}
+          topProducts={topProducts}
+          uniqueVisitors={uniqueVisitors}
+          currentDays={days}
+          shopSlug={slug}
+        />
+      </ProFeatureGate>
     </div>
   );
 }

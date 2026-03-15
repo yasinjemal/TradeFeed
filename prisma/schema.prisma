@@ -73,6 +73,7 @@ model Shop {
   gallery     ShopGalleryItem[]               // Shop profile images & videos
   drops       Drop[]                          // Stock drop announcements
   sellerPreferences SellerPreferences?         // AI memory / seller context for personalized AI output
+  transactionFees TransactionFee[]             // Platform fees from buyer payments
 
   @@index([slug])
   @@index([isActive])
@@ -352,6 +353,9 @@ model Subscription {
   currentPeriodStart DateTime @default(now())
   currentPeriodEnd   DateTime?                   // null = no expiry (free plan)
 
+  // ── Pro Trial ─────────────────────────────────────────
+  trialEndsAt     DateTime?                      // If set & in future, user gets Pro features
+
   // ── Manual Upgrade Request ────────────────────────────
   upgradeStatus       UpgradeStatus @default(NONE)
   requestedPlanSlug   String?                    // e.g. "pro-ai"
@@ -524,6 +528,7 @@ model Order {
 
   // Relations
   items           OrderItem[]
+  transactionFee  TransactionFee?
 
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -572,6 +577,32 @@ enum OrderStatus {
   SHIPPED                                           // Order dispatched / ready for collection
   DELIVERED                                         // Buyer received order
   CANCELLED                                         // Order cancelled by buyer or seller
+}
+
+// ============================================================
+// TRANSACTION FEE: Platform fee captured on buyer payment
+// Created by ITN webhook when order payment completes.
+// Revenue stream: R5–R10 flat fee per completed order.
+// ============================================================
+model TransactionFee {
+  id              String   @id @default(cuid())
+
+  orderId         String   @unique                  // One fee per order
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  shopId          String                            // Denormalised for revenue queries
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  orderAmountCents Int                              // Original order total (for % calc)
+  feeCents        Int                               // Platform fee charged (e.g. 750 = R7.50)
+  feeType         String   @default("flat")         // "flat" or "percentage" (future)
+
+  payfastPaymentId String?                          // PayFast pf_payment_id for reconciliation
+
+  createdAt       DateTime @default(now())
+
+  @@index([shopId, createdAt])
+  @@index([createdAt])
 }
 
 // ============================================================

@@ -12,7 +12,9 @@ import {
   getTopProductsByRevenue,
   getRevenueByStatus,
 } from "@/lib/db/revenue";
+import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { RevenueDashboard } from "@/components/revenue/revenue-dashboard";
+import { ProFeatureGate } from "@/components/billing/pro-feature-gate";
 
 interface RevenuePageProps {
   params: Promise<{ slug: string }>;
@@ -28,12 +30,15 @@ export default async function RevenuePage({ params, searchParams }: RevenuePageP
 
   const days = query.days === "7" ? 7 : query.days === "90" ? 90 : 30;
 
-  const [overview, daily, topProducts, byStatus] = await Promise.all([
+  const [overview, daily, topProducts, byStatus, subscription] = await Promise.all([
     getRevenueOverview(access.shopId, days),
     getDailyRevenue(access.shopId, days),
     getTopProductsByRevenue(access.shopId, days),
     getRevenueByStatus(access.shopId),
+    getShopSubscription(access.shopId),
   ]);
+
+  const isPro = (!!subscription?.plan.slug && subscription.plan.slug !== "free") || isTrialActive(subscription).active;
 
   return (
     <div className="space-y-6">
@@ -45,14 +50,21 @@ export default async function RevenuePage({ params, searchParams }: RevenuePageP
         </p>
       </div>
 
-      <RevenueDashboard
-        overview={overview}
-        daily={daily}
-        topProducts={topProducts}
-        byStatus={byStatus}
-        days={days}
+      <ProFeatureGate
+        hasAccess={isPro}
+        feature="Revenue Insights"
+        description="Track daily revenue trends, top-selling products, and export reports. Upgrade to Pro to unlock."
         shopSlug={slug}
-      />
+      >
+        <RevenueDashboard
+          overview={overview}
+          daily={daily}
+          topProducts={topProducts}
+          byStatus={byStatus}
+          days={days}
+          shopSlug={slug}
+        />
+      </ProFeatureGate>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { IllustrationEmptyBox } from "@/components/ui/illustrations";
 import { ListingQualityScore, computeQualityProps } from "@/components/product/listing-quality-score";
+import { ProductUsageMeter } from "@/components/billing/product-usage-meter";
 
 interface ProductsPageProps {
   params: Promise<{ slug: string }>;
@@ -111,6 +112,18 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           </Link>
         </div>
       </div>
+
+      {/* ── Product Usage Meter (compact) ───────────────── */}
+      {!limit.unlimited && (
+        <ProductUsageMeter
+          current={limit.current}
+          limit={limit.limit}
+          unlimited={limit.unlimited}
+          planName={limit.planName}
+          shopSlug={slug}
+          compact
+        />
+      )}
 
       {/* ── Empty State ─────────────────────────────────── */}
       {products.length === 0 && (

@@ -16,12 +16,15 @@ import { getShopBySlug, getDashboardStats, getSellerTierData, getSellerHealthMet
 import { getOrderStats } from "@/lib/db/orders";
 import { computeSellerHealth } from "@/lib/intelligence";
 import { checkAiAccess, FREE_AI_CREDITS } from "@/lib/db/ai";
+import { checkProductLimit, getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { CopyButton } from "@/components/ui/copy-button";
 import { SellerHealthCard } from "@/components/dashboard/seller-health-card";
 import { CatalogQrShare } from "@/components/dashboard/catalog-qr-share";
 import { TrendingProductsWidget } from "@/components/dashboard/trending-products";
+import { ProductUsageMeter } from "@/components/billing/product-usage-meter";
+import { TrialBanner } from "@/components/billing/trial-banner";
 
 interface DashboardPageProps {
   params: Promise<{ slug: string }>;
@@ -32,14 +35,17 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const shop = await getShopBySlug(slug);
   if (!shop) notFound();
 
-  const [stats, tierData, healthMetrics, aiAccess, orderStats] = await Promise.all([
+  const [stats, tierData, healthMetrics, aiAccess, orderStats, productLimit, subscription] = await Promise.all([
     getDashboardStats(shop.id),
     getSellerTierData(shop.id, shop),
     getSellerHealthMetrics(shop.id),
     checkAiAccess(shop.id),
     getOrderStats(shop.id),
+    checkProductLimit(shop.id),
+    getShopSubscription(shop.id),
   ]);
   const health = computeSellerHealth(healthMetrics);
+  const trial = isTrialActive(subscription);
 
   // Profile completeness
   const profileChecks = [
@@ -121,6 +127,13 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           </Link>
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Pro Trial Banner — countdown to conversion           */}
+      {/* ═══════════════════════════════════════════════════ */}
+      {trial.active && (
+        <TrialBanner daysLeft={trial.daysLeft} shopSlug={slug} />
+      )}
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* Activation Checklist — TOP for new sellers           */}
@@ -226,6 +239,19 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             </svg>
           </div>
         </Link>
+      )}
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Product Usage Meter — conversion lever               */}
+      {/* ═══════════════════════════════════════════════════ */}
+      {!productLimit.unlimited && (
+        <ProductUsageMeter
+          current={productLimit.current}
+          limit={productLimit.limit}
+          unlimited={productLimit.unlimited}
+          planName={productLimit.planName}
+          shopSlug={slug}
+        />
       )}
 
       {/* ═══════════════════════════════════════════════════ */}

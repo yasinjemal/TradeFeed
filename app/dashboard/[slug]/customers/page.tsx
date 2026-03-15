@@ -10,10 +10,12 @@
 
 import { db } from "@/lib/db";
 import { getShopBySlug } from "@/lib/db/shops";
+import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import type { Metadata } from "next";
 import { IllustrationNoCustomers } from "@/components/ui/illustrations";
+import { ProFeatureGate } from "@/components/billing/pro-feature-gate";
 
 interface CustomersPageProps {
   params: Promise<{ slug: string }>;
@@ -29,7 +31,7 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
   if (!shop) notFound();
 
   // Aggregate customers from orders (group by buyerPhone)
-  const [customerData, restockAlerts] = await Promise.all([
+  const [customerData, restockAlerts, subscription] = await Promise.all([
     db.order.findMany({
       where: { shopId: shop.id, buyerPhone: { not: null } },
       select: {
@@ -51,6 +53,7 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
       },
       orderBy: { createdAt: "desc" },
     }),
+    getShopSubscription(shop.id),
   ]);
 
   // Group orders by phone
@@ -96,6 +99,7 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
   const totalCustomers = customers.length;
   const repeatBuyers = customers.filter((c) => c.orderCount > 1).length;
   const consentedCustomers = customers.filter((c) => c.marketingConsent).length;
+  const isPro = (!!subscription?.plan.slug && subscription.plan.slug !== "free") || isTrialActive(subscription).active;
 
   return (
     <div className="space-y-6">
@@ -109,6 +113,12 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
         </p>
       </div>
 
+      <ProFeatureGate
+        hasAccess={isPro}
+        feature="Customer CRM"
+        description="See your repeat buyers, total spent, and contact customers directly. Upgrade to Pro to unlock."
+        shopSlug={slug}
+      >
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-xl border border-stone-200 bg-white p-4">
@@ -238,6 +248,7 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
           </div>
         </div>
       )}
+      </ProFeatureGate>
     </div>
   );
 }

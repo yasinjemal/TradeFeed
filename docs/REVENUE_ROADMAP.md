@@ -1,0 +1,178 @@
+# TradeFeed Revenue Roadmap
+
+> **Goal:** R90K+/mo revenue at 500 sellers. Build order: highest revenue-per-engineering-hour first.
+>
+> **Started:** 2026-03-15 | **Owner:** Engineering
+
+---
+
+## Status Key
+
+| Icon | Meaning |
+|------|---------|
+| ⬜ | Not started |
+| 🔵 | In progress |
+| ✅ | Complete |
+| 🔴 | Blocked (see notes) |
+
+---
+
+## Feature 1: Complete Buyer Payment Flow
+
+> **Revenue:** R75,000/mo at 500 sellers × 20 orders × R7.50 avg fee
+> **Effort:** ~1 week | **Status:** ✅ Complete
+
+### What Exists
+- [x] PayFast integration (subscription + promotion payments working)
+- [x] ITN webhook routes `order_*` payments (`app/api/webhooks/payfast/route.ts`)
+- [x] Order model with `paymentStatus` field (PENDING/PAID/FAILED)
+- [x] Order creation from WhatsApp checkout
+- [x] Payment request generation UI (partial)
+
+### Implemented
+- [x] Buyer payment page (`/pay/{orderNumber}`) — shows order summary + PayFast checkout
+- [x] ITN webhook handler for `order_*` prefix → marks order PAID + creates TransactionFee
+- [x] `TransactionFee` model — R7.50 flat fee per completed order
+- [x] Seller WhatsApp notification on payment confirmed
+- [x] Payment link copy + "Send to buyer" WhatsApp button in orders dashboard
+- [x] Enhanced paid status display in order list
+
+---
+
+## Feature 2: Seller Activation Funnel + Pro Trial
+
+> **Revenue:** R14,925/mo (15% free-to-Pro conversion at 500 sellers)
+> **Effort:** ~3-4 days | **Status:** ✅ Complete
+
+### Implemented
+- [x] `ProductUsageMeter` component — shows X/10 with progress bar (green/amber/red)
+- [x] Usage meter on dashboard overview (for Free plan users)
+- [x] Usage meter on products list page (compact mode)
+- [x] Soft gate at 80% capacity — amber warning + upgrade CTA on new product page
+- [x] Hard gate at 100% — red blocker with "Upgrade to Pro" + "Back to Products" actions
+- [x] `ProFeatureGate` component — blur overlay with lock icon + upgrade CTA
+- [x] Analytics dashboard blurred for Free users
+- [x] Revenue dashboard blurred for Free users
+- [x] Customer CRM blurred for Free users
+- [x] 14-day Pro trial for new signups (`trialEndsAt` on Subscription model)
+- [x] `TrialBanner` component — countdown with urgency (green → amber → red)
+- [x] Trial banner on dashboard overview
+- [x] Trial respects product limits (unlimited during trial)
+- [x] Trial respects Pro gates (analytics/revenue/CRM unlocked during trial)
+- [x] `UpgradeGate` component (soft + hard modes)
+- [x] `isTrialActive()` utility for trial state checks
+
+---
+
+## Feature 3: WhatsApp Follow-up Sequences
+
+> **Revenue:** Indirect (retention × LTV multiplier)
+> **Effort:** ~3-5 days | **Status:** ⬜ Not Started
+
+### Tasks
+- [ ] Message template system (DB model for templates + variables)
+- [ ] Sequence scheduler (Day 1, 3, 7, 14 post-signup)
+- [ ] Day 1: Welcome + catalog link
+- [ ] Day 3 (no products): "Add your first product" + wizard link
+- [ ] Day 7 (no orders): "Share your catalog in WhatsApp groups"
+- [ ] Day 14 (inactive): "Your shop hasn't been updated"
+- [ ] Monthly: Activity summary (views, clicks, orders)
+- [ ] Opt-out mechanism (POPIA compliance)
+
+---
+
+## Feature 4: In-App Checkout
+
+> **Revenue:** R75,000+/mo (captures full GMV data for investors)
+> **Effort:** ~3-4 weeks | **Status:** ⬜ Not Started
+
+### Tasks
+- [ ] Payment gateway selection (Ozow vs Yoco vs PayFast direct)
+- [ ] Buyer checkout page (address + payment method)
+- [ ] Payment processing + confirmation
+- [ ] Receipt generation (PDF/WhatsApp)
+- [ ] "X sold" counter on product cards (social proof)
+- [ ] Revenue dashboard for sellers (real numbers, not estimates)
+- [ ] GMV tracking for platform analytics
+
+---
+
+## Feature 5: B2B Wholesale Mode
+
+> **Revenue:** R50,000+/mo (10-50x order values vs consumer)
+> **Effort:** ~2 weeks | **Status:** ⬜ Not Started
+
+### Tasks
+- [ ] Product flag: `wholesaleOnly` boolean
+- [ ] Buyer registration flow (business name, VAT number, certificate upload)
+- [ ] Admin verification for wholesale buyers
+- [ ] Tiered pricing visibility (wholesale price hidden from non-verified)
+- [ ] Minimum order quantity enforcement in cart
+- [ ] RFQ (Request For Quote) flow → WhatsApp message to seller
+- [ ] Bulk discount tiers (10+ units = 5% off, 50+ = 10%)
+
+---
+
+## Feature 6: Storefront Themes (Pro Perk)
+
+> **Revenue:** Pro conversion lift (visible differentiation)
+> **Effort:** ~3-4 days | **Status:** ⬜ Not Started
+
+### Tasks
+- [ ] Theme model (name, primary color, accent color, layout, font)
+- [ ] 5 preset themes: Classic, Modern, Bold, Minimal, Vibrant
+- [ ] Theme picker in shop settings (Pro only, Free shows locked previews)
+- [ ] Catalog page renders with selected theme CSS variables
+- [ ] Preview mode before applying
+
+---
+
+## Feature 7: AI Sales Assistant
+
+> **Revenue:** R24,950/mo (50 sellers × R499/mo premium)
+> **Effort:** ~3-4 weeks | **Status:** ⬜ Not Started
+
+### Tasks
+- [ ] Meta Business API inbound webhook setup
+- [ ] Product knowledge base per seller (vectorized product data)
+- [ ] GPT-4o-mini response generation (product info, pricing, stock, payment link)
+- [ ] Conversation context management (multi-turn)
+- [ ] Seller dashboard: view AI conversations, override/correct
+- [ ] Auto-create orders from AI conversations
+- [ ] New pricing tier: "Business" at R499/mo
+
+---
+
+## Feature 8: Logistics Integration
+
+> **Revenue:** R225,000/mo (R15 markup × 30 shipments × 500 sellers)
+> **Effort:** ~4-6 weeks | **Status:** ⬜ Not Started
+
+### Tasks
+- [ ] Carrier selection (Pargo, PostNet, The Courier Guy)
+- [ ] API integration for rate quotes
+- [ ] Shipping label generation (PDF)
+- [ ] Tracking number injection into order timeline
+- [ ] Buyer tracking page with carrier updates
+- [ ] Estimated delivery cost at checkout
+- [ ] Seller shipping settings (default carrier, pickup address)
+
+---
+
+## Revenue Projection
+
+| Month | Features Live | Sellers | Est. Monthly Revenue |
+|-------|--------------|---------|---------------------|
+| 1 | Payment flow + Activation funnel | 100 | R15,000 |
+| 2 | + WhatsApp sequences + Themes | 250 | R40,000 |
+| 3 | + In-app checkout + B2B mode | 500 | R120,000 |
+| 6 | + AI assistant + Logistics | 1,500 | R400,000 |
+| 12 | Full platform maturity | 5,000 | R1,500,000 |
+
+---
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-03-15 | Roadmap created. Feature 1 (Buyer Payment Flow) started. |

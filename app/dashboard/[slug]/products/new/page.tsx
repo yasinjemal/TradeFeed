@@ -8,10 +8,11 @@ import { QuickSellForm } from "@/components/product/quick-sell-form";
 import { getCategories } from "@/lib/db/categories";
 import { getGlobalCategoryTree } from "@/lib/db/global-categories";
 import { getShopBySlug } from "@/lib/db/shops";
-import { getShopSubscription } from "@/lib/db/subscriptions";
+import { getShopSubscription, checkProductLimit } from "@/lib/db/subscriptions";
 import { requireShopAccess } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { UpgradeGate } from "@/components/billing/upgrade-gate";
 
 interface NewProductPageProps {
   params: Promise<{ slug: string }>;
@@ -37,13 +38,37 @@ export default async function NewProductPage({ params, searchParams }: NewProduc
   const shop = await getShopBySlug(slug);
   if (!shop) return notFound();
 
-  const [categories, globalCategories, subscription] = await Promise.all([
+  const [categories, globalCategories, subscription, productLimit] = await Promise.all([
     getCategories(shop.id),
     getGlobalCategoryTree(),
     getShopSubscription(shop.id),
+    checkProductLimit(shop.id),
   ]);
 
   const planSlug = subscription?.plan.slug ?? "free";
+
+  // Hard gate: block product creation if limit reached
+  if (!productLimit.unlimited && !productLimit.allowed) {
+    return (
+      <div className="space-y-6">
+        <Link
+          href={`/dashboard/${slug}/products`}
+          className="text-sm text-stone-500 hover:text-stone-800 transition-colors inline-flex items-center gap-1 group"
+        >
+          <span className="group-hover:-translate-x-0.5 transition-transform">←</span> Products
+        </Link>
+        <UpgradeGate
+          current={productLimit.current}
+          limit={productLimit.limit}
+          shopSlug={slug}
+          mode="hard"
+        />
+      </div>
+    );
+  }
+
+  // Soft gate threshold: 80% of limit
+  const showSoftGate = !productLimit.unlimited && productLimit.current >= Math.floor(productLimit.limit * 0.8);
 
   return (
     <div className="space-y-6">
@@ -57,6 +82,15 @@ export default async function NewProductPage({ params, searchParams }: NewProduc
         </span>{" "}
         Products
       </Link>
+
+      {showSoftGate && (
+        <UpgradeGate
+          current={productLimit.current}
+          limit={productLimit.limit}
+          shopSlug={slug}
+          mode="soft"
+        />
+      )}
 
       {useQuickSell ? (
         <QuickSellForm shopSlug={slug} />
