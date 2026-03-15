@@ -516,7 +516,8 @@ model Order {
   shopId          String
   shop            Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-  // Buyer info (captured at checkout — no account needed)
+  // Buyer info (captured at checkout — account optional)
+  buyerClerkId    String?                           // Clerk userId if buyer was signed in at checkout
   buyerName       String?                           // Optional buyer name
   buyerPhone      String?                           // WhatsApp number used for order (PII — POPIA)
   buyerNote       String?                           // Optional note from buyer
@@ -563,6 +564,7 @@ model Order {
   @@index([shopId, status])
   @@index([shopId, createdAt])
   @@index([orderNumber])
+  @@index([buyerClerkId])                            // For buyer order history lookups
   @@index([buyerPhone])                              // For "track my order" lookups
   @@index([deletedAt])                               // Filter out soft-deleted orders
 }

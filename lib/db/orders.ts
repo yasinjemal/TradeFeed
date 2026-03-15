@@ -59,6 +59,7 @@ export interface CreateOrderInput {
   shippingCostCents?: number;
   courierName?: string;
   estimatedDelivery?: Date;
+  buyerClerkId?: string;
 }
 
 export interface StockValidationResult {
@@ -180,6 +181,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
       data: {
         orderNumber,
         shopId: input.shopId,
+        buyerClerkId: input.buyerClerkId,
         buyerName: input.buyerName,
         buyerPhone: input.buyerPhone,
         buyerNote: input.buyerNote,
@@ -363,4 +365,31 @@ export async function getProductSoldCount(productId: string): Promise<number> {
     _sum: { quantity: true },
   });
   return result._sum.quantity ?? 0;
+}
+
+// ── Buyer Order History ─────────────────────────────────────
+
+/**
+ * List all orders placed by a buyer (by Clerk userId).
+ * Includes shop name + item details for display.
+ * Excludes soft-deleted orders.
+ */
+export async function getBuyerOrders(buyerClerkId: string) {
+  return db.order.findMany({
+    where: {
+      buyerClerkId,
+      deletedAt: null,
+    },
+    include: {
+      items: true,
+      shop: {
+        select: {
+          name: true,
+          slug: true,
+          logoUrl: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 }

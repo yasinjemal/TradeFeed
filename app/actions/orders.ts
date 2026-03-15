@@ -21,6 +21,7 @@ import {
   type CreateOrderInput,
 } from "@/lib/db/orders";
 import { requireShopAccess } from "@/lib/auth";
+import { auth } from "@clerk/nextjs/server";
 import { notifyNewOrder, checkAndNotifyLowStock } from "@/lib/notifications";
 import { reportError } from "@/lib/telemetry";
 import { checkoutSchema } from "@/lib/validation/checkout";
@@ -177,9 +178,13 @@ async function _attemptCheckout(
     }
 
     // 2. Create order (prices are re-verified server-side in createOrder)
+    // Attach buyer identity if signed in (optional — buyers can be guests)
+    const { userId: buyerClerkId } = await auth();
+
     const orderResult = await createOrder({
       shopId: input.shopId,
       items: input.items,
+      buyerClerkId: buyerClerkId ?? undefined,
       buyerName: input.buyerName || undefined,
       buyerPhone: input.buyerPhone || undefined,
       buyerNote: input.buyerNote || undefined,

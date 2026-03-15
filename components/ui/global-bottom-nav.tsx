@@ -62,9 +62,9 @@ export function GlobalBottomNav() {
     isSignedIn
       ? {
           key: "orders",
-          href: "/track",
+          href: "/orders",
           label: "Orders",
-          isActive: pathname.startsWith("/track"),
+          isActive: pathname.startsWith("/orders") || pathname.startsWith("/track"),
           icon: (
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.9} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75A2.25 2.25 0 0 1 6 4.5h12a2.25 2.25 0 0 1 2.25 2.25v10.5A2.25 2.25 0 0 1 18 19.5H6a2.25 2.25 0 0 1-2.25-2.25V6.75Z" />

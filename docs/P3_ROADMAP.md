@@ -157,15 +157,21 @@
 - Env vars: `WHATSAPP_BUSINESS_PHONE_ID`, `WHATSAPP_ACCESS_TOKEN`
 - **High effort: 1–2 days** (Meta verification + template approval + implementation)
 
-### 4.2 ⬜ Buyer Account & Order History
+### 4.2 ✅ Buyer Account & Order History
 
-**Current:** Buyers browse as guests. Wishlist + recently viewed use localStorage.
-**Goal:** Optional Clerk sign-in for buyers to see order history, saved addresses, persistent wishlist.
+**Current:** ~~Buyers browse as guests. Wishlist + recently viewed use localStorage.~~
+**Goal:** Optional Clerk sign-in for buyers to see order history, persistent wishlist.
 
-- Schema: Add `buyerClerkId` to `Order` model
-- New page: `/orders` — buyer's order list
-- Sync localStorage wishlist to DB on sign-in
-- Estimated effort: **4–6 hours**
+**Implementation (complete):**
+- Added `buyerClerkId String?` to Order model + index
+- Checkout auto-attaches Clerk userId when buyer is signed in
+- Created `/orders` page — shows full order history for signed-in buyers, sign-in CTA for guests
+- Created `BuyerOrderList` component with filter tabs, expandable order cards, shop links
+- Added `getBuyerOrders()` to data access layer (includes shop info + items)
+- Updated bottom nav "Orders" link → `/orders` for signed-in users
+- Added `/orders` to middleware public routes (optional auth)
+- Wishlist: added DB merge on mount — signed-in users get cross-device sync via `getWishlistItemsAction`
+- Wishlist: localStorage items synced to DB on mount for logged-in users
 
 ### 4.3 ✅ Product Search (Full-Text)
 

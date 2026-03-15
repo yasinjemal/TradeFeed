@@ -25,6 +25,7 @@ import type { WishlistContextValue, WishlistItem } from "./types";
 import {
   addToWishlistAction,
   removeFromWishlistAction,
+  getWishlistItemsAction,
 } from "@/app/actions/wishlist";
 
 const WishlistContext = createContext<WishlistContextValue | null>(null);
@@ -85,6 +86,43 @@ export function WishlistProvider({ children, shopSlug, shopId }: WishlistProvide
   useEffect(() => {
     setItems(loadWishlist(shopSlug));
   }, [shopSlug]);
+
+  // Merge DB wishlist items on mount (signed-in users get cross-device sync)
+  useEffect(() => {
+    if (!shopId) return;
+    let cancelled = false;
+    getWishlistItemsAction(shopId).then((result) => {
+      if (cancelled || !result.success) return;
+      const dbProductIds = new Set(result.productIds);
+      if (dbProductIds.size === 0) return;
+      setItems((prev) => {
+        // Sync localStorage items to DB (fire-and-forget)
+        for (const item of prev) {
+          if (!dbProductIds.has(item.productId)) {
+            void addToWishlistAction({
+              productId: item.productId,
+              shopId: shopId!,
+              productName: item.productName,
+              imageUrl: item.imageUrl,
+            });
+          }
+        }
+        // Add DB-only items to local state (items that exist in DB but not localStorage)
+        const localIds = new Set(prev.map((i) => i.productId));
+        const newFromDb = result.productIds
+          .filter((id) => !localIds.has(id))
+          .map((productId) => ({
+            productId,
+            productName: "",
+            imageUrl: null,
+            priceInCents: 0,
+            addedAt: Date.now(),
+          }));
+        return newFromDb.length > 0 ? [...prev, ...newFromDb] : prev;
+      });
+    });
+    return () => { cancelled = true; };
+  }, [shopId]);
 
   // Persist to localStorage on change
   useEffect(() => {
