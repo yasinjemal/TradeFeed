@@ -639,7 +639,7 @@ export async function saveBulkDiscountTiersAction(
   tiers: { minQuantity: number; discountPercent: number }[]
 ): Promise<ActionResult> {
   try {
-    const access = await resolveShopAccess(shopSlug);
+    const access = await resolveShopAccess(shopSlug, defaultDeps);
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }
