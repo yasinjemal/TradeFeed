@@ -178,7 +178,7 @@ async function handleOrderPayment(
 
         // 3. Notify seller via WhatsApp
         try {
-          const { sendOrderStatusUpdate } = await import("@/lib/whatsapp/business-api");
+          const { sendOrderStatusUpdate, sendTextMessage } = await import("@/lib/whatsapp/business-api");
           const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tradefeed.co.za";
           if (order.shop.whatsappNumber) {
             await sendOrderStatusUpdate(
@@ -190,9 +190,22 @@ async function handleOrderPayment(
             );
             console.log(`[PayFast ITN] Seller notified: ${order.shop.slug}`);
           }
+
+          // 4. Notify buyer via WhatsApp (payment confirmation)
+          if (order.buyerPhone) {
+            const trackUrl = `${appUrl}/track/${encodeURIComponent(order.orderNumber)}`;
+            await sendTextMessage(
+              order.buyerPhone,
+              `✅ *Payment Received — ${order.orderNumber}*\n\n` +
+              `Your payment to *${order.shop.name}* has been confirmed.\n\n` +
+              `Track your order:\n${trackUrl}\n\n` +
+              `The seller will prepare your order shortly.`,
+            );
+            console.log(`[PayFast ITN] Buyer notified: ${order.orderNumber}`);
+          }
         } catch (notifyErr) {
           // Don't fail the webhook if notification fails
-          console.error("[PayFast ITN] Seller notification failed:", notifyErr);
+          console.error("[PayFast ITN] Notification failed:", notifyErr);
         }
       }
     } catch (feeErr) {

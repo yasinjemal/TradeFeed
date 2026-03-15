@@ -47,6 +47,14 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         <StatCard label="Pro Subs" value={stats.proSubscriptions} color="rose" />
       </div>
 
+      {/* GMV & Revenue Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <GmvCard label="Total GMV" valueCents={stats.gmvCents} sub={`${stats.gmvOrders} orders`} />
+        <GmvCard label="Paid Revenue" valueCents={stats.paidRevenueCents} sub={`${stats.paidOrders} paid orders`} accent />
+        <GmvCard label="Platform Fees" valueCents={stats.platformFeeCents} sub={`${stats.platformFeeCount} transactions`} accent />
+        <GmvCard label="Total Orders" valueCents={0} sub={`${stats.totalOrders.toLocaleString()} orders placed`} count={stats.totalOrders} />
+      </div>
+
       {/* ═══════════════════════════════════════════════════ */}
       {/* Shop Management                                     */}
       {/* ═══════════════════════════════════════════════════ */}
@@ -89,6 +97,35 @@ function StatCard({
         {label}
       </p>
       <p className="text-2xl font-bold">{value.toLocaleString()}</p>
+    </div>
+  );
+}
+
+// ── GMV Card ───────────────────────────────────────────────
+function GmvCard({
+  label,
+  valueCents,
+  sub,
+  accent,
+  count,
+}: {
+  label: string;
+  valueCents: number;
+  sub?: string;
+  accent?: boolean;
+  count?: number;
+}) {
+  const formatted = count !== undefined
+    ? count.toLocaleString()
+    : valueCents >= 100_000_00
+      ? `R${(valueCents / 100_00).toFixed(0)}k`
+      : `R${(valueCents / 100).toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return (
+    <div className={`rounded-xl border p-4 ${accent ? "bg-emerald-950/50 border-emerald-900/50" : "bg-stone-900 border-stone-800"}`}>
+      <p className="text-[11px] uppercase tracking-wider text-stone-500 mb-1">{label}</p>
+      <p className={`text-2xl font-bold ${accent ? "text-emerald-400" : "text-stone-200"}`}>{formatted}</p>
+      {sub && <p className="text-[11px] text-stone-500 mt-1">{sub}</p>}
     </div>
   );
 }

@@ -189,3 +189,25 @@ export async function sendTextMessage(
     text: { body: text },
   });
 }
+
+/**
+ * Send buyer a payment link for their order.
+ * Combines order confirmation + payment CTA in one message.
+ */
+export async function sendBuyerPaymentLink(
+  buyerPhone: string,
+  orderNumber: string,
+  shopName: string,
+  totalFormatted: string,
+  paymentUrl: string,
+): Promise<SendMessageResult> {
+  const text =
+    `🛒 *Order Confirmed — ${orderNumber}*\n\n` +
+    `Thank you for your order from *${shopName}*!\n\n` +
+    `💰 Total: *${totalFormatted}*\n\n` +
+    `Pay securely here:\n${paymentUrl}\n\n` +
+    `Track your order anytime:\n${paymentUrl.replace("/pay/", "/track/")}\n\n` +
+    `Questions? Reply to this message.`;
+
+  return sendTextMessage(buyerPhone, text);
+}

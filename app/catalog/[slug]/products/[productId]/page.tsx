@@ -1,6 +1,7 @@
 ﻿import { getCatalogProduct, getCatalogShop } from "@/lib/db/catalog";
 import { trackEvent } from "@/lib/db/analytics";
 import { getProductReviews, getReviewAggregation } from "@/lib/db/reviews";
+import { getProductSoldCount } from "@/lib/db/orders";
 import { formatZAR } from "@/types";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -112,9 +113,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const maxRetailPrice = retailPrices.length > 0 ? Math.max(...retailPrices) : null;
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
 
-  const [reviews, reviewAgg] = await Promise.all([
+  const [reviews, reviewAgg, soldCount] = await Promise.all([
     getProductReviews(productId),
     getReviewAggregation(productId),
+    getProductSoldCount(productId),
   ]);
 
   const uniqueSizes = Array.from(new Set(product.variants.map((v) => v.size)));
@@ -161,6 +163,14 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <div>
             {product.category && <span className="mb-2 inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">{product.category.name}</span>}
             <h1 className="text-xl font-bold leading-tight text-stone-900 sm:text-2xl">{product.name}</h1>
+            {soldCount > 0 && (
+              <p className="mt-1.5 inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
+                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                </svg>
+                {soldCount >= 100 ? "100+" : soldCount} sold
+              </p>
+            )}
             <div className="mt-3">
               <ShareProduct
                 productName={product.name}

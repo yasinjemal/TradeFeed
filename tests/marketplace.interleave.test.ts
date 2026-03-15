@@ -30,6 +30,7 @@ function makeProduct(
     avgRating: null,
     reviewCount: 0,
     sellerTier: null,
+    soldCount: 0,
     createdAt: new Date(),
   };
 }

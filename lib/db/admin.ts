@@ -30,6 +30,10 @@ export async function getAdminStats() {
     totalProducts,
     totalUsers,
     proSubscriptions,
+    gmvAll,
+    paidRevenue,
+    totalTransactionFees,
+    totalOrders,
   ] = await Promise.all([
     db.shop.count(),
     db.shop.count({ where: { isActive: true } }),
@@ -42,6 +46,25 @@ export async function getAdminStats() {
         plan: { slug: { not: "free" } },
       },
     }),
+    // GMV: total value of all non-cancelled orders
+    db.order.aggregate({
+      where: { status: { not: "CANCELLED" } },
+      _sum: { totalCents: true },
+      _count: true,
+    }),
+    // Paid revenue: orders with confirmed payment
+    db.order.aggregate({
+      where: { paidAt: { not: null }, status: { not: "CANCELLED" } },
+      _sum: { totalCents: true },
+      _count: true,
+    }),
+    // Platform transaction fees collected
+    db.transactionFee.aggregate({
+      _sum: { feeCents: true },
+      _count: true,
+    }),
+    // Total orders
+    db.order.count(),
   ]);
 
   return {
@@ -51,6 +74,13 @@ export async function getAdminStats() {
     totalProducts,
     totalUsers,
     proSubscriptions,
+    gmvCents: gmvAll._sum.totalCents ?? 0,
+    gmvOrders: gmvAll._count,
+    paidRevenueCents: paidRevenue._sum.totalCents ?? 0,
+    paidOrders: paidRevenue._count,
+    platformFeeCents: totalTransactionFees._sum.feeCents ?? 0,
+    platformFeeCount: totalTransactionFees._count,
+    totalOrders,
   };
 }
 

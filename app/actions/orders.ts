@@ -25,7 +25,7 @@ import { notifyNewOrder, checkAndNotifyLowStock } from "@/lib/notifications";
 import { reportError } from "@/lib/telemetry";
 import { checkoutSchema } from "@/lib/validation/checkout";
 import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
-import { sendOrderConfirmation, sendOrderStatusUpdate as sendStatusWhatsApp } from "@/lib/whatsapp/business-api";
+import { sendOrderConfirmation, sendOrderStatusUpdate as sendStatusWhatsApp, sendBuyerPaymentLink } from "@/lib/whatsapp/business-api";
 import { formatZAR } from "@/types";
 import type { OrderStatus } from "@prisma/client";
 
@@ -218,20 +218,21 @@ async function _attemptCheckout(
       input.items.map((i) => i.variantId),
     ).catch(() => {});
 
-    // 3b. Send WhatsApp order confirmation (fire-and-forget)
+    // 3b. Send WhatsApp order confirmation + payment link (fire-and-forget)
     if (input.buyerPhone) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tradefeed.co.za";
       const { db: prismaDb } = await import("@/lib/db");
       prismaDb.shop.findUnique({ where: { id: input.shopId }, select: { name: true } })
         .then((shop) => {
           if (!shop) return;
-          const trackingUrl = `/track/${encodeURIComponent(order.orderNumber)}`;
-          return sendOrderConfirmation(
+          const paymentUrl = `${appUrl}/pay/${encodeURIComponent(order.orderNumber)}`;
+          // Send combined confirmation + payment link
+          return sendBuyerPaymentLink(
             input.buyerPhone!,
             order.orderNumber,
             shop.name,
             formatZAR(order.totalCents),
-            order.itemCount,
-            trackingUrl,
+            paymentUrl,
           );
         })
         .catch(() => {});

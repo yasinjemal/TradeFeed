@@ -18,6 +18,11 @@ export interface RevenueOverview {
   previousPeriodRevenueCents: number;
   previousPeriodOrders: number;
   growthPercent: number;
+  /** Revenue from orders with paidAt set (real money received) */
+  paidRevenueCents: number;
+  paidOrders: number;
+  periodPaidRevenueCents: number;
+  periodPaidOrders: number;
 }
 
 export async function getRevenueOverview(
@@ -28,7 +33,7 @@ export async function getRevenueOverview(
   const periodStart = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
   const previousPeriodStart = new Date(periodStart.getTime() - days * 24 * 60 * 60 * 1000);
 
-  const [allTime, period, previousPeriod] = await Promise.all([
+  const [allTime, period, previousPeriod, paidAllTime, paidPeriod] = await Promise.all([
     // All-time revenue (non-cancelled orders)
     db.order.aggregate({
       where: { shopId, status: { not: "CANCELLED" } },
@@ -51,6 +56,23 @@ export async function getRevenueOverview(
         shopId,
         status: { not: "CANCELLED" },
         createdAt: { gte: previousPeriodStart, lt: periodStart },
+      },
+      _sum: { totalCents: true },
+      _count: true,
+    }),
+    // Paid all-time (confirmed revenue)
+    db.order.aggregate({
+      where: { shopId, paidAt: { not: null }, status: { not: "CANCELLED" } },
+      _sum: { totalCents: true },
+      _count: true,
+    }),
+    // Paid current period
+    db.order.aggregate({
+      where: {
+        shopId,
+        paidAt: { not: null },
+        status: { not: "CANCELLED" },
+        createdAt: { gte: periodStart },
       },
       _sum: { totalCents: true },
       _count: true,
@@ -80,6 +102,10 @@ export async function getRevenueOverview(
     previousPeriodRevenueCents,
     previousPeriodOrders,
     growthPercent: Math.round(growthPercent * 10) / 10,
+    paidRevenueCents: paidAllTime._sum.totalCents ?? 0,
+    paidOrders: paidAllTime._count,
+    periodPaidRevenueCents: paidPeriod._sum.totalCents ?? 0,
+    periodPaidOrders: paidPeriod._count,
   };
 }
 

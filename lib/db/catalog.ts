@@ -117,7 +117,7 @@ export async function getCatalogShop(slug: string) {
  * PERFORMANCE: Includes only first image (list view thumbnail).
  */
 export async function getCatalogProducts(shopId: string) {
-  return db.product.findMany({
+  const products = await db.product.findMany({
     where: {
       shopId,
       isActive: true,
@@ -163,6 +163,25 @@ export async function getCatalogProducts(shopId: string) {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  // Batch-enrich with sold counts
+  if (products.length === 0) return products.map((p) => ({ ...p, soldCount: 0 }));
+
+  const productIds = products.map((p) => p.id);
+  const soldStats = await db.orderItem.groupBy({
+    by: ["productId"],
+    where: {
+      productId: { in: productIds },
+      order: { status: { not: "CANCELLED" } },
+    },
+    _sum: { quantity: true },
+  });
+  const soldMap = new Map(soldStats.map((s) => [s.productId, s._sum.quantity ?? 0]));
+
+  return products.map((p) => ({
+    ...p,
+    soldCount: soldMap.get(p.id) ?? 0,
+  }));
 }
 
 /**

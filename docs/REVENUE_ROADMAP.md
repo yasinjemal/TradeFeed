@@ -89,16 +89,21 @@
 ## Feature 4: In-App Checkout
 
 > **Revenue:** R75,000+/mo (captures full GMV data for investors)
-> **Effort:** ~3-4 weeks | **Status:** ⬜ Not Started
+> **Effort:** ~3-4 weeks | **Status:** ✅ Complete (Phase 1)
 
-### Tasks
-- [ ] Payment gateway selection (Ozow vs Yoco vs PayFast direct)
-- [ ] Buyer checkout page (address + payment method)
-- [ ] Payment processing + confirmation
+### Implemented
+- [x] PayFast direct integration (already proven — subscriptions, promotions, orders)
+- [x] Auto-send payment link to buyer via WhatsApp on order creation (`sendBuyerPaymentLink`)
+- [x] Buyer payment confirmation WhatsApp on successful payment (webhook)
+- [x] "X sold" counter on marketplace product cards, catalog product cards, product detail page
+- [x] Sold count aggregation via `enrichWithSoldCounts()` batch query (no N+1)
+- [x] Revenue dashboard with **paid** vs **total** revenue distinction (green accent cards)
+- [x] Platform GMV tracking on admin dashboard (Total GMV, Paid Revenue, Platform Fees, Total Orders)
+
+### Remaining (Phase 2)
+- [ ] In-app payment form (Ozow/Yoco for card-on-page instead of redirect)
 - [ ] Receipt generation (PDF/WhatsApp)
-- [ ] "X sold" counter on product cards (social proof)
-- [ ] Revenue dashboard for sellers (real numbers, not estimates)
-- [ ] GMV tracking for platform analytics
+- [ ] Cart reservation (lock stock during checkout, release on timeout)
 
 ---
 

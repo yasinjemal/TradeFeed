@@ -339,3 +339,19 @@ export async function getOrderStats(shopId: string) {
     revenueCents: revenue._sum.totalCents ?? 0,
   };
 }
+
+// ── Product Sold Count ──────────────────────────────────────
+
+/**
+ * Get total units sold for a single product (non-cancelled orders).
+ */
+export async function getProductSoldCount(productId: string): Promise<number> {
+  const result = await db.orderItem.aggregate({
+    where: {
+      productId,
+      order: { status: { not: "CANCELLED" } },
+    },
+    _sum: { quantity: true },
+  });
+  return result._sum.quantity ?? 0;
+}

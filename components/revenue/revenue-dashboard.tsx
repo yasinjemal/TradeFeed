@@ -222,6 +222,17 @@ export function RevenueDashboard({
           trend={overview.growthPercent >= 0 ? "up" : "down"}
         />
         <StatCard
+          label={`Paid Revenue (${days}d)`}
+          value={formatRands(overview.periodPaidRevenueCents)}
+          sub={
+            overview.periodPaidOrders > 0
+              ? `${overview.periodPaidOrders} paid orders`
+              : "No payments yet"
+          }
+          trend="up"
+          accent
+        />
+        <StatCard
           label={`Orders (${days}d)`}
           value={String(overview.periodOrders)}
           sub={
@@ -231,13 +242,10 @@ export function RevenueDashboard({
           }
         />
         <StatCard
-          label="All-Time Revenue"
-          value={formatCompact(overview.totalRevenueCents)}
-          sub={`${overview.totalOrders} orders`}
-        />
-        <StatCard
-          label="Avg Order Value"
-          value={formatRands(overview.averageOrderCents)}
+          label="All-Time Paid"
+          value={formatCompact(overview.paidRevenueCents)}
+          sub={`${overview.paidOrders} paid of ${overview.totalOrders} total`}
+          accent
         />
       </div>
 
@@ -407,16 +415,18 @@ function StatCard({
   value,
   sub,
   trend,
+  accent,
 }: {
   label: string;
   value: string;
   sub?: string;
   trend?: "up" | "down";
+  accent?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white p-5">
+    <div className={`rounded-2xl border p-5 ${accent ? "border-emerald-200 bg-emerald-50/50" : "border-stone-200 bg-white"}`}>
       <p className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</p>
-      <p className="text-2xl font-bold text-stone-900 mt-1">{value}</p>
+      <p className={`text-2xl font-bold mt-1 ${accent ? "text-emerald-700" : "text-stone-900"}`}>{value}</p>
       {sub && (
         <p
           className={`text-xs mt-1 ${

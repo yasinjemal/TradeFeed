@@ -92,6 +92,8 @@ export interface MarketplaceProduct {
   reviewCount: number;
   /** Seller reputation tier (null for "new" sellers) */
   sellerTier: { key: string; label: string; emoji: string } | null;
+  /** Total units sold (non-cancelled orders) */
+  soldCount: number;
   createdAt: Date;
 }
 
@@ -245,6 +247,36 @@ async function enrichWithSellerTiers(
       sellerTier: tier.key !== "new" ? { key: tier.key, label: tier.label, emoji: tier.emoji } : null,
     };
   });
+}
+
+/**
+ * Batch-enrich an array of MarketplaceProduct with sold counts.
+ * Uses a single groupBy on OrderItem for non-cancelled orders.
+ */
+async function enrichWithSoldCounts(
+  products: MarketplaceProduct[]
+): Promise<MarketplaceProduct[]> {
+  if (products.length === 0) return products;
+
+  const productIds = products.map((p) => p.id);
+
+  const soldStats = await db.orderItem.groupBy({
+    by: ["productId"],
+    where: {
+      productId: { in: productIds },
+      order: { status: { not: "CANCELLED" } },
+    },
+    _sum: { quantity: true },
+  });
+
+  const soldMap = new Map(
+    soldStats.map((s) => [s.productId, s._sum.quantity ?? 0])
+  );
+
+  return products.map((p) => ({
+    ...p,
+    soldCount: soldMap.get(p.id) ?? 0,
+  }));
 }
 
 /**
@@ -439,6 +471,7 @@ export async function getMarketplaceProducts(
       avgRating: null,
       reviewCount: 0,
       sellerTier: null,
+      soldCount: 0,
       createdAt: p.createdAt,
     };
   });
@@ -464,6 +497,9 @@ export async function getMarketplaceProducts(
 
   // Batch-enrich with seller tier badges
   products = await enrichWithSellerTiers(products);
+
+  // Batch-enrich with sold counts
+  products = await enrichWithSoldCounts(products);
 
   // Post-enrichment sort for top_rated
   if (sortBy === "top_rated") {
@@ -578,11 +614,13 @@ export async function getPromotedProducts(
       avgRating: null,
       reviewCount: 0,
       sellerTier: null,
+      soldCount: 0,
       createdAt: p.createdAt,
     };
   });
 
-  return enrichWithReviewStats(products);
+  let enriched = await enrichWithReviewStats(products);
+  return enrichWithSoldCounts(enriched);
 }
 
 /**
@@ -760,11 +798,13 @@ export async function getTrendingProducts(
         avgRating: null,
         reviewCount: 0,
         sellerTier: null,
+        soldCount: 0,
         createdAt: p.createdAt,
       };
     });
 
-  return enrichWithReviewStats(trendingProducts);
+  let enrichedTrending = await enrichWithReviewStats(trendingProducts);
+  return enrichWithSoldCounts(enrichedTrending);
 }
 
 /**
@@ -843,11 +883,13 @@ export async function getNewArrivals(
       avgRating: null,
       reviewCount: 0,
       sellerTier: null,
+      soldCount: 0,
       createdAt: p.createdAt,
     };
   });
 
-  return enrichWithReviewStats(mapped);
+  let enrichedMapped = await enrichWithReviewStats(mapped);
+  return enrichWithSoldCounts(enrichedMapped);
 }
 
 /**
