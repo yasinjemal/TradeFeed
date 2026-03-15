@@ -289,7 +289,7 @@ function ProductCard({
         {/* ── Image Container ────────────────────────── */}
         <div className="relative aspect-[4/5] overflow-hidden bg-stone-50">
           <div className="absolute inset-0 shimmer" />
-          {primaryImage ? (
+          {primaryImage?.url ? (
             <Image
               src={primaryImage.url}
               alt={primaryImage.altText || product.name}

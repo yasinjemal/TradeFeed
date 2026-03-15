@@ -10,8 +10,8 @@ import { countUnmappedProducts } from "@/lib/db/global-categories";
 import { checkProductLimit } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
-import { EmptyState } from "@/components/ui/empty-state";
 import { IllustrationEmptyBox } from "@/components/ui/illustrations";
+import { ListingQualityScore, computeQualityProps } from "@/components/product/listing-quality-score";
 
 interface ProductsPageProps {
   params: Promise<{ slug: string }>;
@@ -114,13 +114,69 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
 
       {/* ── Empty State ─────────────────────────────────── */}
       {products.length === 0 && (
-        <div className="rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50/50">
-          <EmptyState
-            illustration={<IllustrationEmptyBox className="w-40 h-40" />}
-            heading="No products yet"
-            description="Add your first product to start building your catalog. Buyers will see them on your public page."
-            action={{ label: "Add Your First Product", href: `/dashboard/${slug}/products/new` }}
-          />
+        <div className="rounded-2xl border-2 border-dashed border-emerald-200 bg-gradient-to-br from-emerald-50/30 to-teal-50/30 p-6 sm:p-10">
+          <div className="max-w-md mx-auto text-center">
+            <IllustrationEmptyBox className="w-32 h-32 mx-auto mb-4 opacity-80" />
+            <h2 className="text-xl font-bold text-stone-900 mb-2">
+              Create your first product in 60 seconds
+            </h2>
+            <p className="text-sm text-stone-500 mb-6">
+              Upload a photo and let AI do the rest — or type it in manually. Buyers will see your products immediately.
+            </p>
+
+            {/* What a great listing looks like */}
+            <div className="rounded-xl border border-stone-200 bg-white p-3 mb-5 max-w-xs mx-auto text-left">
+              <div className="flex gap-3 items-center">
+                <div className="w-14 h-14 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl">👕</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-stone-800 truncate">Premium Cotton T-Shirt</p>
+                  <p className="text-[10px] text-emerald-600 font-bold">R149.99</p>
+                  <p className="text-[10px] text-stone-400">50 in stock · 📸 3 photos</p>
+                </div>
+              </div>
+              <p className="text-[9px] text-stone-400 mt-2 text-center">↑ This is what a great listing looks like</p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href={`/dashboard/${slug}/products/new?wizard=true`}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
+              >
+                🚀 Guided Setup
+              </Link>
+              <Link
+                href={`/dashboard/${slug}/products/new?ai=true`}
+                className="inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-5 py-3 text-sm font-medium text-emerald-700 hover:bg-emerald-100 transition"
+              >
+                ✨ Create with AI
+              </Link>
+              <Link
+                href={`/dashboard/${slug}/products/new?quick=true`}
+                className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white px-5 py-3 text-sm font-medium text-stone-700 hover:bg-stone-50 transition"
+              >
+                ⚡ Quick Sell
+              </Link>
+            </div>
+            <div className="flex items-center justify-center gap-3 mt-3">
+              <Link
+                href={`/dashboard/${slug}/products/new`}
+                className="inline-flex items-center gap-2 text-xs text-stone-500 hover:text-stone-700 transition"
+              >
+                📝 Manual Entry
+              </Link>
+              <Link
+                href={`/dashboard/${slug}/products/import`}
+                className="inline-flex items-center gap-2 text-xs text-stone-500 hover:text-stone-700 transition"
+              >
+                📦 Bulk Import
+              </Link>
+            </div>
+            <p className="text-xs text-stone-400 mt-4">
+              💡 Most sellers list their first product in under 60 seconds with AI
+            </p>
+          </div>
         </div>
       )}
 
@@ -135,6 +191,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
               (sum, v) => sum + v.stock,
               0,
             );
+            const qualityProps = computeQualityProps(product);
 
             return (
               <Link
@@ -155,8 +212,11 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
                       />
                     </div>
                   ) : (
-                    <div className="aspect-square bg-stone-50 flex items-center justify-center">
+                    <div className="aspect-square bg-stone-50 flex flex-col items-center justify-center gap-2 relative">
                       <span className="text-4xl opacity-40">📷</span>
+                      <span className="text-[10px] font-medium text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                        Add photo
+                      </span>
                     </div>
                   )}
 
@@ -189,6 +249,20 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
                       </span>
                     </div>
 
+                    {/* Stock Status Badges */}
+                    {totalStock === 0 && (
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-50 border border-red-100">
+                        <span className="text-xs">🚫</span>
+                        <span className="text-[10px] font-semibold text-red-600">Sold out — add stock to sell</span>
+                      </div>
+                    )}
+                    {totalStock > 0 && totalStock <= 5 && (
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-50 border border-amber-100">
+                        <span className="text-xs">⚠️</span>
+                        <span className="text-[10px] font-semibold text-amber-600">Low stock: {totalStock} left</span>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between pt-1 border-t border-stone-100">
                       <span className="text-base sm:text-sm font-bold text-emerald-600">
                         {prices.length === 0
@@ -201,13 +275,16 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
                         <span className="hidden sm:inline">{product.variants.length} var · </span>
                         <span
                           className={
-                            totalStock === 0 ? "text-red-500 font-medium" : ""
+                            totalStock === 0 ? "text-red-500 font-medium" : totalStock <= 5 ? "text-amber-500 font-medium" : ""
                           }
                         >
                           {totalStock} stock
                         </span>
                       </span>
                     </div>
+
+                    {/* Quality Score Mini Bar */}
+                    <ListingQualityScore {...qualityProps} compact />
                   </div>
                 </div>
               </Link>

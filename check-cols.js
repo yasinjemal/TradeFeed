@@ -1,4 +1,4 @@
-const { PrismaClient } = require('./node_modules/@prisma/client');
+import { PrismaClient } from './node_modules/@prisma/client/index.js';
 const p = new PrismaClient();
 
 async function check() {

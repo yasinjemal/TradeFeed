@@ -511,6 +511,10 @@ model Order {
   totalCents      Int                               // Total order value in ZAR cents
   itemCount       Int                               // Total quantity of items
 
+  // Payment (PayFast order payment link)
+  paymentRequestedAt DateTime?                      // When seller generated/sent payment link to buyer
+  paidAt          DateTime?                         // When buyer completed payment (set by PayFast ITN)
+
   // WhatsApp tracking
   whatsappSent    Boolean      @default(true)       // Whether WA message was opened
   whatsappMessage String?                           // Snapshot of the order message sent

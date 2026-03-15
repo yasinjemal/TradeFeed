@@ -9,6 +9,7 @@
 // 2. We validate the signature
 // 3. Check m_payment_id prefix:
 //    - "promo_..." → promotion payment → create PromotedListing
+//    - "order_..." → buyer order payment → mark order as paid
 //    - anything else → subscription payment → activate subscription
 // 4. If cancelled → cancel subscription (promotions are one-time, no cancel)
 //
@@ -24,6 +25,7 @@ import { upgradeSubscription, cancelSubscription } from "@/lib/db/subscriptions"
 import { parsePromotionPaymentId, calculatePromotionPrice } from "@/lib/config/promotions";
 import { createPromotedListing } from "@/lib/db/promotions";
 import { reportError } from "@/lib/telemetry";
+import { markOrderPaid } from "@/lib/db/orders";
 
 export async function POST(request: Request) {
   try {
@@ -65,6 +67,11 @@ export async function POST(request: Request) {
 
     if (promoData) {
       return handlePromotionPayment(promoData, paymentStatus, body);
+    }
+
+    // ── Route: Order payment ────────────────────────────
+    if (paymentId.startsWith("order_")) {
+      return handleOrderPayment(paymentId, paymentStatus);
     }
 
     // ── Route: Subscription payment ─────────────────────
@@ -130,6 +137,33 @@ async function handlePromotionPayment(
     });
     return NextResponse.json(
       { error: "Failed to create promotion" },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.json({ received: true });
+}
+
+// ── Order Payment Handler ────────────────────────────────────
+
+async function handleOrderPayment(
+  paymentId: string,
+  paymentStatus: string | undefined,
+) {
+  const orderId = paymentId.replace("order_", "");
+
+  if (paymentStatus !== "COMPLETE") {
+    console.log(`[PayFast ITN] Order payment not complete: ${paymentStatus} (${orderId})`);
+    return NextResponse.json({ received: true });
+  }
+
+  try {
+    await markOrderPaid(orderId);
+    console.log(`[PayFast ITN] Order marked paid: ${orderId}`);
+  } catch (err) {
+    await reportError("payfast-itn-order-payment", err, { orderId });
+    return NextResponse.json(
+      { error: "Failed to mark order as paid" },
       { status: 500 },
     );
   }

@@ -13,12 +13,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getShopBySlug, getDashboardStats, getSellerTierData, getSellerHealthMetrics } from "@/lib/db/shops";
+import { getOrderStats } from "@/lib/db/orders";
 import { computeSellerHealth } from "@/lib/intelligence";
 import { checkAiAccess, FREE_AI_CREDITS } from "@/lib/db/ai";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { CopyButton } from "@/components/ui/copy-button";
 import { SellerHealthCard } from "@/components/dashboard/seller-health-card";
+import { CatalogQrShare } from "@/components/dashboard/catalog-qr-share";
 import { TrendingProductsWidget } from "@/components/dashboard/trending-products";
 
 interface DashboardPageProps {
@@ -30,11 +32,12 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const shop = await getShopBySlug(slug);
   if (!shop) notFound();
 
-  const [stats, tierData, healthMetrics, aiAccess] = await Promise.all([
+  const [stats, tierData, healthMetrics, aiAccess, orderStats] = await Promise.all([
     getDashboardStats(shop.id),
     getSellerTierData(shop.id, shop),
     getSellerHealthMetrics(shop.id),
     checkAiAccess(shop.id),
+    getOrderStats(shop.id),
   ]);
   const health = computeSellerHealth(healthMetrics);
 
@@ -379,6 +382,34 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       </div>
 
       {/* ═══════════════════════════════════════════════════ */}
+      {/* Revenue from orders — tie to completed orders       */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <Link
+        href={`/dashboard/${slug}/orders`}
+        className="block rounded-2xl border border-stone-200 bg-white p-5 hover:shadow-lg hover:shadow-stone-200/50 hover:border-emerald-200 transition-all group"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-semibold text-stone-900 text-sm">Revenue from orders</h3>
+              <p className="text-xs text-stone-500 mt-0.5">
+                Total from {orderStats.total} order{orderStats.total !== 1 ? "s" : ""} (excl. cancelled)
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-xl font-bold text-stone-900">{formatZAR(orderStats.revenueCents)}</p>
+            <span className="text-xs text-emerald-600 font-medium group-hover:underline">View orders →</span>
+          </div>
+        </div>
+      </Link>
+
+      {/* ═══════════════════════════════════════════════════ */}
       {/* Share Catalog — PROMINENT (growth lever #1)         */}
       {/* ═══════════════════════════════════════════════════ */}
       <div className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-r from-emerald-50/80 to-teal-50/80 p-4 sm:p-5">
@@ -391,9 +422,12 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             </div>
             <div className="min-w-0">
               <h3 className="font-semibold text-stone-900 text-sm">Share your catalog</h3>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 <span className="font-mono text-xs text-stone-600 truncate">tradefeed.co.za{catalogUrl}</span>
                 <CopyButton text={`https://tradefeed.co.za${catalogUrl}`} />
+                <span className="text-[10px] text-stone-400">or short link:</span>
+                <span className="font-mono text-xs text-stone-600">tradefeed.co.za/s/{slug}</span>
+                <CopyButton text={`https://tradefeed.co.za/s/${slug}`} />
               </div>
             </div>
           </div>
@@ -411,8 +445,8 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             Share on WhatsApp
           </a>
         </div>
-        {/* WhatsApp Status share — 1-tap broadcast */}
-        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-emerald-200/50">
+        {/* WhatsApp Status + QR code for offline sharing */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 pt-2 border-t border-emerald-200/50">
           <span className="text-xs text-stone-500">📢</span>
           <a
             href={`https://wa.me/?text=${encodeURIComponent(
@@ -424,7 +458,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           >
             Post to WhatsApp Status →
           </a>
-          <span className="text-[10px] text-stone-400 hidden sm:inline">Broadcast your catalog to all contacts</span>
+          <span className="text-stone-300">|</span>
+          <CatalogQrShare catalogPath={catalogUrl} shopName={shop.name} />
+          <span className="text-[10px] text-stone-400 hidden sm:inline">Print or show at your stall</span>
         </div>
       </div>
 

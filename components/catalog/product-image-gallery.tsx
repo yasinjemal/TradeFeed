@@ -29,11 +29,17 @@ interface ProductImageGalleryProps {
   soldOut?: boolean;
 }
 
+/** Filter to images with a valid URL so we never pass null/empty to Next/Image */
+function validImages(images: GalleryImage[]): GalleryImage[] {
+  return images.filter((img) => img.url && img.url.trim());
+}
+
 export function ProductImageGallery({
   images,
   productName,
   soldOut = false,
 }: ProductImageGalleryProps) {
+  const imagesWithUrl = validImages(images);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const touchStartX = useRef(0);
@@ -50,14 +56,14 @@ export function ProductImageGallery({
   );
 
   const goNext = useCallback(() => {
-    if (images.length <= 1) return;
-    goTo((activeIndex + 1) % images.length);
-  }, [activeIndex, images.length, goTo]);
+    if (imagesWithUrl.length <= 1) return;
+    goTo((activeIndex + 1) % imagesWithUrl.length);
+  }, [activeIndex, imagesWithUrl.length, goTo]);
 
   const goPrev = useCallback(() => {
-    if (images.length <= 1) return;
-    goTo((activeIndex - 1 + images.length) % images.length);
-  }, [activeIndex, images.length, goTo]);
+    if (imagesWithUrl.length <= 1) return;
+    goTo((activeIndex - 1 + imagesWithUrl.length) % imagesWithUrl.length);
+  }, [activeIndex, imagesWithUrl.length, goTo]);
 
   // ── Touch handlers for swipe ────────────────────────────
   const handleTouchStart = (e: TouchEvent) => {
@@ -83,31 +89,33 @@ export function ProductImageGallery({
     else if (e.key === "ArrowLeft") goPrev();
   };
 
-  // ── No images ───────────────────────────────────────────
-  if (images.length === 0) {
-    return (
-      <div className="relative aspect-square bg-stone-100 overflow-hidden rounded-t-3xl">
-        <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-stone-300 bg-gradient-to-br from-stone-50 to-stone-100">
-          <svg
-            className="w-16 h-16"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={0.75}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
-            />
-          </svg>
-          <span className="text-sm font-medium">No image available</span>
-        </div>
+  // ── No images or no valid image URLs ─────────────────────
+  const placeholderBlock = (
+    <div className="relative aspect-square bg-stone-100 overflow-hidden rounded-t-3xl">
+      <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-stone-300 bg-gradient-to-br from-stone-50 to-stone-100">
+        <svg
+          className="w-16 h-16"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={0.75}
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
+          />
+        </svg>
+        <span className="text-sm font-medium">No image available</span>
       </div>
-    );
+    </div>
+  );
+
+  if (imagesWithUrl.length === 0) {
+    return placeholderBlock;
   }
 
-  const currentImage = images[activeIndex];
+  const currentImage = imagesWithUrl[activeIndex];
 
   return (
     <div className="relative" onKeyDown={handleKeyDown} tabIndex={0}>
@@ -120,7 +128,7 @@ export function ProductImageGallery({
       >
         <div className="absolute inset-0 shimmer" />
 
-        {currentImage && (
+        {currentImage?.url ? (
           <Image
             key={currentImage.id}
             src={currentImage.url}
@@ -134,10 +142,17 @@ export function ProductImageGallery({
               isTransitioning ? "opacity-0" : "opacity-100"
             }`}
           />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-stone-400 bg-stone-50">
+            <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+            </svg>
+            <span className="text-xs">No image</span>
+          </div>
         )}
 
         {/* ── Prev / Next arrows (desktop) ─────────────── */}
-        {images.length > 1 && (
+        {imagesWithUrl.length > 1 && (
           <>
             <button
               type="button"
@@ -189,16 +204,16 @@ export function ProductImageGallery({
         )}
 
         {/* ── Image counter badge ──────────────────────── */}
-        {images.length > 1 && (
+        {imagesWithUrl.length > 1 && (
           <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 text-white text-xs font-medium">
-            {activeIndex + 1} / {images.length}
+            {activeIndex + 1} / {imagesWithUrl.length}
           </div>
         )}
 
         {/* ── Gallery dots ─────────────────────────────── */}
-        {images.length > 1 && (
+        {imagesWithUrl.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 backdrop-blur-sm rounded-full px-2.5 py-1.5">
-            {images.map((_, i) => (
+            {imagesWithUrl.map((_, i) => (
               <button
                 key={i}
                 type="button"
@@ -228,9 +243,9 @@ export function ProductImageGallery({
       </div>
 
       {/* ── Thumbnail strip ────────────────────────────── */}
-      {images.length > 1 && (
+      {imagesWithUrl.length > 1 && (
         <div className="flex gap-2 p-3 bg-stone-50/50 overflow-x-auto scrollbar-hide">
-          {images.map((img, i) => (
+          {imagesWithUrl.map((img, i) => (
             <button
               key={img.id}
               type="button"

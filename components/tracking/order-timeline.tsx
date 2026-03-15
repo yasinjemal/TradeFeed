@@ -11,6 +11,10 @@ interface OrderTimelineProps {
   currentStatus: string;
   createdAt: string;
   updatedAt: string;
+  /** When seller sent payment link to buyer */
+  paymentRequestedAt?: string | null;
+  /** When buyer completed payment (PayFast ITN) */
+  paidAt?: string | null;
 }
 
 const STEPS = [
@@ -78,7 +82,13 @@ function formatRelative(dateStr: string): string {
   return date.toLocaleDateString("en-ZA", { day: "numeric", month: "short" });
 }
 
-export function OrderTimeline({ currentStatus, createdAt, updatedAt }: OrderTimelineProps) {
+export function OrderTimeline({
+  currentStatus,
+  createdAt,
+  updatedAt,
+  paymentRequestedAt,
+  paidAt,
+}: OrderTimelineProps) {
   // Handle cancelled separately
   if (currentStatus === "CANCELLED") {
     return (
@@ -99,9 +109,49 @@ export function OrderTimeline({ currentStatus, createdAt, updatedAt }: OrderTime
   }
 
   const currentIndex = STATUS_ORDER[currentStatus] ?? 0;
+  const paymentDone = !!paidAt;
+  const paymentRequested = !!paymentRequestedAt && !paidAt;
 
   return (
     <div className="space-y-0">
+      {/* Payment status row (between Order Placed and Confirmed) */}
+      {(paymentRequested || paymentDone) && (
+        <div className="flex gap-4 mb-2">
+          <div className="flex flex-col items-center">
+            <div
+              className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
+                paymentDone
+                  ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
+                  : "bg-amber-500/20 border-amber-500 text-amber-400"
+              }`}
+            >
+              {paymentDone ? (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5h6" />
+                </svg>
+              )}
+            </div>
+            <div className="w-0.5 flex-1 min-h-[24px] bg-stone-800" />
+          </div>
+          <div className="pb-4">
+            <p className="font-semibold text-sm text-stone-200">
+              {paymentDone ? "Payment received" : "Payment link sent"}
+            </p>
+            <p className="text-xs text-stone-500 mt-0.5">
+              {paymentDone && paidAt
+                ? `Paid ${formatRelative(paidAt)}`
+                : paymentRequestedAt
+                ? `Link sent ${formatRelative(paymentRequestedAt)}`
+                : ""}
+            </p>
+          </div>
+        </div>
+      )}
+
       {STEPS.map((step, i) => {
         const stepIndex = STATUS_ORDER[step.key] ?? 0;
         const isCompleted = stepIndex < currentIndex;

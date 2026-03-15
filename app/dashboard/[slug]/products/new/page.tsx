@@ -3,6 +3,8 @@
 // ============================================================
 
 import { CreateProductForm } from "@/components/product/create-product-form";
+import { ProductWizard } from "@/components/product/product-wizard";
+import { QuickSellForm } from "@/components/product/quick-sell-form";
 import { getCategories } from "@/lib/db/categories";
 import { getGlobalCategoryTree } from "@/lib/db/global-categories";
 import { getShopBySlug } from "@/lib/db/shops";
@@ -13,13 +15,15 @@ import Link from "next/link";
 
 interface NewProductPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ ai?: string }>;
+  searchParams: Promise<{ ai?: string; wizard?: string; quick?: string }>;
 }
 
 export default async function NewProductPage({ params, searchParams }: NewProductPageProps) {
   const { slug } = await params;
-  const { ai } = await searchParams;
+  const { ai, wizard, quick } = await searchParams;
   const autoOpenAi = ai === "true";
+  const useWizard = wizard === "true";
+  const useQuickSell = quick === "true";
 
   // Auth
   let access: Awaited<ReturnType<typeof requireShopAccess>>;
@@ -54,13 +58,23 @@ export default async function NewProductPage({ params, searchParams }: NewProduc
         Products
       </Link>
 
-      <CreateProductForm
-        shopSlug={slug}
-        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
-        globalCategories={globalCategories}
-        planSlug={planSlug}
-        autoOpenAi={autoOpenAi}
-      />
+      {useQuickSell ? (
+        <QuickSellForm shopSlug={slug} />
+      ) : useWizard ? (
+        <ProductWizard
+          shopSlug={slug}
+          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          globalCategories={globalCategories}
+        />
+      ) : (
+        <CreateProductForm
+          shopSlug={slug}
+          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          globalCategories={globalCategories}
+          planSlug={planSlug}
+          autoOpenAi={autoOpenAi}
+        />
+      )}
     </div>
   );
 }

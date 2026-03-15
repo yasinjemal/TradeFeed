@@ -170,6 +170,64 @@ export function buildPromotionCheckoutUrl(params: PromotionCheckoutParams): stri
   return `${baseUrl}?${queryString}`;
 }
 
+// ── Order Payment (One-Time, Buyer-Facing) ───────────────────
+
+interface OrderPaymentParams {
+  /** Format: "order_{orderId}" */
+  orderId: string;
+  orderNumber: string;
+  shopSlug: string;
+  amountInCents: number;
+  buyerEmail?: string;
+  buyerName?: string;
+}
+
+/**
+ * Build a PayFast checkout URL for a buyer order payment.
+ *
+ * Key difference from promotion:
+ * - m_payment_id starts with "order_" so the webhook routes correctly
+ * - Return URL points to /track/{orderNumber}
+ * - Buyer-facing (no seller dashboard URLs)
+ */
+export function buildOrderPaymentUrl(params: OrderPaymentParams): string {
+  const config = getConfig();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+  const amountInRands = (params.amountInCents / 100).toFixed(2);
+
+  const data: Record<string, string> = {
+    merchant_id: config.merchantId,
+    merchant_key: config.merchantKey,
+    return_url: `${appUrl}/track/${encodeURIComponent(params.orderNumber)}?payment=success`,
+    cancel_url: `${appUrl}/track/${encodeURIComponent(params.orderNumber)}?payment=cancelled`,
+    notify_url: `${appUrl}/api/webhooks/payfast`,
+    m_payment_id: `order_${params.orderId}`,
+    amount: amountInRands,
+    item_name: `Order ${params.orderNumber} — TradeFeed`,
+    item_description: `Payment for order ${params.orderNumber}`,
+  };
+
+  if (params.buyerEmail) data["email_address"] = params.buyerEmail;
+  if (params.buyerName) {
+    const parts = params.buyerName.trim().split(/\s+/);
+    data["name_first"] = parts[0] ?? "";
+    if (parts.length > 1) data["name_last"] = parts.slice(1).join(" ");
+  }
+
+  const filteredData = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== ""),
+  );
+
+  const signature = generateSignature(filteredData, config.passphrase);
+  filteredData["signature"] = signature;
+
+  const baseUrl = config.sandbox ? PAYFAST_SANDBOX_URL : PAYFAST_LIVE_URL;
+  const queryString = new URLSearchParams(filteredData).toString();
+
+  return `${baseUrl}?${queryString}`;
+}
+
 /**
  * Generate a PayFast MD5 signature.
  *

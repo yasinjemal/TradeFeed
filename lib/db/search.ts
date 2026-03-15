@@ -63,7 +63,10 @@ export async function searchProductIds(
       limit
     );
 
-    if (ftsResults.length > 0) return ftsResults;
+    if (ftsResults.length > 0) {
+      console.log(`[search] query="${query}" method=fts results=${ftsResults.length}`);
+      return ftsResults;
+    }
 
     // Phase 2: Fuzzy fallback via pg_trgm similarity
     const trimmed = query.trim();
@@ -79,6 +82,12 @@ export async function searchProductIds(
       trimmed,
       limit
     );
+
+    if (fuzzyResults.length > 0) {
+      console.log(`[search] query="${query}" method=fuzzy results=${fuzzyResults.length}`);
+    } else {
+      console.log(`[search] query="${query}" method=none results=0`);
+    }
 
     return fuzzyResults;
   } catch (error) {

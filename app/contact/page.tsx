@@ -76,8 +76,11 @@ export default function ContactPage() {
             Contact &amp; Help
           </h1>
           <p className="text-stone-500 text-sm mt-2">
-            Get help with your shop, orders, or account. We typically respond
-            within a few hours.
+            Get help with your shop, orders, or account.
+          </p>
+          <p className="text-xs text-stone-500 mt-1 flex items-center gap-1.5">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
+            We aim to respond within 24 hours on business days (Mon–Fri). WhatsApp often gets a same-day reply.
           </p>
         </div>
       </div>

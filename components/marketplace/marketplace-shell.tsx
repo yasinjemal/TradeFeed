@@ -25,6 +25,7 @@ import { FeaturedShopCard } from "./featured-shop-card";
 import { CategoryBar } from "./category-bar";
 import { MarketplaceFilterSheet } from "./marketplace-filter-sheet";
 import { BackToTop } from "@/components/ui/back-to-top";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { IllustrationSearchNotFound } from "@/components/ui/illustrations";
 import {
   trackMarketplaceViewAction,
@@ -358,6 +359,9 @@ export function MarketplaceShell({
           </form>
 
           <div className="flex items-center gap-3">
+            <div className="hidden sm:block">
+              <LanguageSwitcher />
+            </div>
             {isSignedIn ? (
               <>
                 <Link

@@ -7,6 +7,7 @@
 
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { MarketplaceProduct } from "@/lib/db/marketplace";
@@ -28,6 +29,8 @@ const formatZAR = (cents: number) =>
   }).format(cents / 100);
 
 export function MarketplaceProductCard({ product, compact = false }: MarketplaceProductCardProps) {
+  const [imgError, setImgError] = useState(false);
+
   const handleClick = () => {
     // Track marketplace click
     trackMarketplaceClickAction(product.shop.id, product.id);
@@ -47,7 +50,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
       <div className="bg-stone-900 rounded-2xl border border-stone-800/50 overflow-hidden transition-all duration-300 hover:border-stone-700 hover:shadow-xl hover:shadow-emerald-500/5 hover:-translate-y-1 active:scale-[0.98]">
         {/* Image */}
         <div className={`relative ${compact ? "aspect-square" : "aspect-[3/4]"} bg-stone-800 overflow-hidden`}>
-          {product.imageUrl ? (
+          {product.imageUrl && !imgError ? (
             <Image
               src={product.imageUrl}
               alt={product.name}
@@ -56,6 +59,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
               placeholder="blur"
               blurDataURL={SHIMMER_DARK}
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+              onError={() => setImgError(true)}
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-stone-600">
@@ -84,6 +88,15 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
                   <path fillRule="evenodd" d="M16.403 12.652a3 3 0 010-5.304 3 3 0 00-3.75-3.751 3 3 0 00-5.305 0 3 3 0 00-3.751 3.75 3 3 0 000 5.305 3 3 0 003.75 3.751 3 3 0 005.305 0 3 3 0 003.751-3.75zm-2.546-4.46a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
                 </svg>
                 Verified
+              </span>
+            </div>
+          )}
+
+          {/* Seller tier badge — image overlay for visibility */}
+          {product.sellerTier && (
+            <div className="absolute top-2 right-2">
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-stone-950/80 backdrop-blur-sm text-[9px] font-bold text-stone-100 border border-stone-700/50">
+                {product.sellerTier.emoji} {product.sellerTier.label}
               </span>
             </div>
           )}
@@ -165,11 +178,6 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
               {product.shop.subscription?.status === "ACTIVE" && product.shop.subscription.plan.slug !== "free" && (
                 <span className="inline-flex items-center px-1 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30 text-[8px] font-bold text-amber-400 uppercase tracking-wider flex-shrink-0">
                   PRO
-                </span>
-              )}
-              {product.sellerTier && (
-                <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-stone-800 border border-stone-700/50 text-[8px] font-semibold text-stone-300 flex-shrink-0">
-                  {product.sellerTier.emoji} {product.sellerTier.label}
                 </span>
               )}
               {product.shop.city && (

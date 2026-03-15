@@ -23,6 +23,7 @@ import { WishlistButton } from "@/components/catalog/wishlist-button";
 import { WhatsAppCTAProvider } from "@/components/catalog/whatsapp-cta-context";
 import { generateShopJsonLd } from "@/lib/seo/json-ld";
 import { ShareCatalog } from "@/components/catalog/share-catalog";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CatalogAppShell } from "@/components/ui/catalog-app-shell";
 import { OfflineBanner } from "@/components/catalog/offline-banner";
@@ -222,6 +223,7 @@ export default async function CatalogLayout({
               </Link>
 
               <div className="flex flex-shrink-0 items-center gap-1">
+                <LanguageSwitcher />
                 <ShareCatalog
                   shopName={shop.name}
                   shopSlug={slug}

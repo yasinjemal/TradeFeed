@@ -61,7 +61,7 @@ export async function generateMetadata({
 
   const description = categoryName
     ? `Shop ${categoryName.toLowerCase()} from verified South African sellers on TradeFeed. Wholesale & retail prices. Free delivery options. Order via WhatsApp. Browse ${categoryName.toLowerCase()} from Johannesburg, Durban, Cape Town & more.`
-    : "Browse thousands of products from South Africa's top sellers. Wholesale clothing, shoes, bags, electronics & more. Compare prices, order via WhatsApp. Verified sellers across all 9 provinces.";
+    : "Browse thousands of products from verified South African fashion sellers. Wholesale & retail clothing, shoes, bags & accessories. Compare prices, order via WhatsApp. Sellers in all 9 provinces.";
 
   // Build OG image URL
   const ogUrl = new URL("/api/og", APP_URL);

@@ -15,6 +15,7 @@ const DB_VERSION = 1;
 const PRODUCTS_STORE = "products";
 const SHOPS_STORE = "shops";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const MAX_PRODUCTS_PER_SHOP = 200;
 
 export interface CachedProduct {
   id: string;
@@ -73,7 +74,9 @@ export async function cacheProducts(products: CachedProduct[]): Promise<void> {
     const store = tx.objectStore(PRODUCTS_STORE);
     const now = Date.now();
 
-    for (const product of products) {
+    // Cap at MAX_PRODUCTS_PER_SHOP to prevent unbounded growth
+    const toCache = products.slice(0, MAX_PRODUCTS_PER_SHOP);
+    for (const product of toCache) {
       store.put({ ...product, cachedAt: now });
     }
 

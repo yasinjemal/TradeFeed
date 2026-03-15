@@ -16,6 +16,8 @@ import {
   validateStock,
   createOrder,
   updateOrderStatus,
+  getOrder,
+  markPaymentRequested,
   type CreateOrderInput,
 } from "@/lib/db/orders";
 import { requireShopAccess } from "@/lib/auth";
@@ -23,6 +25,8 @@ import { notifyNewOrder, checkAndNotifyLowStock } from "@/lib/notifications";
 import { reportError } from "@/lib/telemetry";
 import { checkoutSchema } from "@/lib/validation/checkout";
 import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
+import { sendOrderConfirmation, sendOrderStatusUpdate as sendStatusWhatsApp } from "@/lib/whatsapp/business-api";
+import { formatZAR } from "@/types";
 import type { OrderStatus } from "@prisma/client";
 
 type ActionResult = {
@@ -30,6 +34,12 @@ type ActionResult = {
   error?: string;
   orderNumber?: string;
   trackingUrl?: string;
+};
+
+type PaymentLinkResult = {
+  success: boolean;
+  error?: string;
+  paymentUrl?: string;
 };
 
 // ── Checkout Action (Buyer) ─────────────────────────────────
@@ -208,6 +218,25 @@ async function _attemptCheckout(
       input.items.map((i) => i.variantId),
     ).catch(() => {});
 
+    // 3b. Send WhatsApp order confirmation (fire-and-forget)
+    if (input.buyerPhone) {
+      const { db: prismaDb } = await import("@/lib/db");
+      prismaDb.shop.findUnique({ where: { id: input.shopId }, select: { name: true } })
+        .then((shop) => {
+          if (!shop) return;
+          const trackingUrl = `/track/${encodeURIComponent(order.orderNumber)}`;
+          return sendOrderConfirmation(
+            input.buyerPhone!,
+            order.orderNumber,
+            shop.name,
+            formatZAR(order.totalCents),
+            order.itemCount,
+            trackingUrl,
+          );
+        })
+        .catch(() => {});
+    }
+
     // 4. Revalidate the catalog (stock counts changed)
     revalidatePath(`/catalog/${input.shopSlug}`);
 
@@ -271,7 +300,25 @@ export async function updateOrderStatusAction(
     // 4. Update
     await updateOrderStatus(orderId, access.shopId, newStatus);
 
-    // 5. Revalidate
+    // 5. Send WhatsApp status update to buyer (fire-and-forget)
+    if (order.buyerPhone) {
+      const { db: prismaDb } = await import("@/lib/db");
+      prismaDb.shop.findUnique({ where: { id: access.shopId }, select: { name: true } })
+        .then((shop) => {
+          if (!shop) return;
+          const trackingUrl = `/track/${encodeURIComponent(order.orderNumber)}`;
+          return sendStatusWhatsApp(
+            order.buyerPhone!,
+            order.orderNumber,
+            shop.name,
+            newStatus,
+            trackingUrl,
+          );
+        })
+        .catch(() => {});
+    }
+
+    // 6. Revalidate
     revalidatePath(`/dashboard/${shopSlug}/orders`);
 
     return { success: true };
@@ -280,6 +327,60 @@ export async function updateOrderStatusAction(
     return {
       success: false,
       error: "Failed to update order. Please try again.",
+    };
+  }
+}
+
+// ── Create Order Payment Link (Seller) ──────────────────────
+
+/**
+ * Generate a PayFast payment link for an order. Buyer can pay via this URL.
+ * Marks the order as "payment requested" so the tracking timeline shows it.
+ */
+export async function createOrderPaymentLinkAction(
+  shopSlug: string,
+  orderId: string,
+): Promise<PaymentLinkResult> {
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access) {
+      return { success: false, error: "Shop not found or access denied." };
+    }
+
+    const order = await getOrder(orderId, access.shopId);
+    if (!order) {
+      return { success: false, error: "Order not found." };
+    }
+
+    if (order.status === "CANCELLED") {
+      return { success: false, error: "Cannot create payment link for a cancelled order." };
+    }
+
+    const { buildOrderPaymentUrl } = await import("@/lib/payfast");
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tradefeed.co.za";
+    const buyerEmail = ""; // PayFast allows empty; buyer enters at checkout
+    const buyerName = order.buyerName ?? undefined;
+
+    const paymentUrl = buildOrderPaymentUrl({
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      shopSlug,
+      amountInCents: order.totalCents,
+      buyerEmail,
+      buyerName,
+    });
+
+    await markPaymentRequested(orderId, access.shopId);
+
+    revalidatePath(`/dashboard/${shopSlug}/orders`);
+
+    return { success: true, paymentUrl };
+  } catch (error) {
+    await reportError("createOrderPaymentLinkAction", error, { shopSlug, orderId });
+    return {
+      success: false,
+      error: "Failed to create payment link. Please try again.",
     };
   }
 }

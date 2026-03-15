@@ -43,6 +43,8 @@ export async function getOrderByNumber(orderNumber: string) {
     id: order.id,
     orderNumber: order.orderNumber,
     status: order.status,
+    paymentRequestedAt: order.paymentRequestedAt,
+    paidAt: order.paidAt,
     buyerName: order.buyerName,
     buyerPhone: maskedPhone,
     buyerNote: order.buyerNote,

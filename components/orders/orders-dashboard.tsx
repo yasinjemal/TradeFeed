@@ -12,7 +12,7 @@
 
 import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { updateOrderStatusAction } from "@/app/actions/orders";
+import { updateOrderStatusAction, createOrderPaymentLinkAction } from "@/app/actions/orders";
 import type { OrderStatus } from "@prisma/client";
 import { ExportButtons } from "@/components/export/export-buttons";
 import { IllustrationNoOrders } from "@/components/ui/illustrations";
@@ -41,6 +41,8 @@ interface Order {
   id: string;
   orderNumber: string;
   status: OrderStatus;
+  paymentRequestedAt?: string | null;
+  paidAt?: string | null;
   buyerName: string | null;
   buyerPhone: string | null;
   buyerNote: string | null;
@@ -365,6 +367,8 @@ function OrderCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [paymentLinkPending, setPaymentLinkPending] = useState(false);
+  const [paymentLinkMessage, setPaymentLinkMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -388,6 +392,29 @@ function OrderCard({
         router.refresh();
       }
     });
+  }
+
+  async function handleGetPaymentLink() {
+    setError(null);
+    setPaymentLinkMessage(null);
+    setPaymentLinkPending(true);
+    try {
+      const result = await createOrderPaymentLinkAction(shopSlug, order.id);
+      if (!result.success || !result.paymentUrl) {
+        setError(result.error ?? "Failed to create payment link.");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(result.paymentUrl);
+        setPaymentLinkMessage("Link copied! Send it to your buyer via WhatsApp.");
+      } catch {
+        setPaymentLinkMessage("Link created. Open in new tab to send to buyer.");
+      }
+      window.open(result.paymentUrl, "_blank");
+      router.refresh();
+    } finally {
+      setPaymentLinkPending(false);
+    }
   }
 
   return (
@@ -479,6 +506,35 @@ function OrderCard({
             </div>
           )}
 
+          {/* Payment link (for non-cancelled orders, show until paid) */}
+          {order.status !== "CANCELLED" && !order.paidAt && (
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleGetPaymentLink}
+                disabled={paymentLinkPending}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition-colors disabled:opacity-50"
+              >
+                {paymentLinkPending ? (
+                  "Creating link..."
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5h6" />
+                    </svg>
+                    Get payment link
+                  </>
+                )}
+              </button>
+              {order.paymentRequestedAt && (
+                <span className="text-xs text-stone-500">Payment link sent</span>
+              )}
+            </div>
+          )}
+          {order.paidAt && (
+            <p className="text-xs text-emerald-600 font-medium">✓ Paid</p>
+          )}
+
           {/* Status Actions */}
           {actions.length > 0 && (
             <div className="flex gap-2 pt-1">
@@ -500,6 +556,13 @@ function OrderCard({
                 </button>
               ))}
             </div>
+          )}
+
+          {/* Payment link success message */}
+          {paymentLinkMessage && (
+            <p className="text-xs text-emerald-600 bg-emerald-50 rounded-lg px-3 py-2">
+              {paymentLinkMessage}
+            </p>
           )}
 
           {/* Error */}

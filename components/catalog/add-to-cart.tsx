@@ -16,7 +16,8 @@
 
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/cart/cart-context";
 import { formatZAR } from "@/types";
 import { toast } from "sonner";
@@ -50,6 +51,7 @@ export function AddToCart({
   minWholesaleQty = 1,
 }: AddToCartProps) {
   const { addItem } = useCart();
+  const t = useTranslations("catalog");
 
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -96,41 +98,38 @@ export function AddToCart({
   const canAdd = selectedVariant !== undefined && selectedVariant.stock > 0 && quantity > 0;
 
   // ── Handlers ─────────────────────────────────────────────
-  const handleSizeSelect = useCallback(
-    (size: string) => {
-      setSelectedSize(size);
-      setSelectedColor(null);
-      setQuantity(effectiveMinQty);
+  const handleSizeSelect = (size: string) => {
+    setSelectedSize(size);
+    setSelectedColor(null);
+    setQuantity(effectiveMinQty);
 
-      // Auto-select color if only one option
-      const colorsForSize = Array.from(
-        new Set(
-          variants
-            .filter((v) => v.size === size && v.stock > 0)
-            .map((v) => v.color)
-            .filter(Boolean)
-        )
-      );
-      if (colorsForSize.length === 1 && colorsForSize[0]) {
-        setSelectedColor(colorsForSize[0]);
-      }
-    },
-    [variants, effectiveMinQty]
-  );
+    // Auto-select color if only one option
+    const colorsForSize = Array.from(
+      new Set(
+        variants
+          .filter((v) => v.size === size && v.stock > 0)
+          .map((v) => v.color)
+          .filter(Boolean)
+      )
+    );
+    if (colorsForSize.length === 1 && colorsForSize[0]) {
+      setSelectedColor(colorsForSize[0]);
+    }
+  };
 
-  const handleColorSelect = useCallback((color: string) => {
+  const handleColorSelect = (color: string) => {
     setSelectedColor(color);
     setQuantity(effectiveMinQty);
-  }, [effectiveMinQty]);
+  };
 
   // Reset quantity when order type changes
-  const handleOrderTypeChange = useCallback((type: "wholesale" | "retail") => {
+  const handleOrderTypeChange = (type: "wholesale" | "retail") => {
     setOrderType(type);
     const newMin = type === "retail" ? 1 : minWholesaleQty;
     setQuantity((prev) => Math.max(newMin, prev <= newMin ? newMin : prev));
-  }, [minWholesaleQty]);
+  };
 
-  const handleAdd = useCallback(() => {
+  const handleAdd = () => {
     if (!selectedVariant || !canAdd) return;
 
     const isRetail = orderType === "retail";
@@ -165,7 +164,7 @@ export function AddToCart({
 
     // Reset for next add
     setQuantity(effectiveMinQty);
-  }, [selectedVariant, canAdd, addItem, productId, productName, option1Label, option2Label, quantity, effectiveMinQty, orderType]);
+  };
 
   // ── Check if a size has any stock ────────────────────────
   const sizeHasStock = (size: string): boolean =>
@@ -296,7 +295,7 @@ export function AddToCart({
             </div>
             <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              {selectedVariant.stock} in stock
+              {t("inStock", { count: selectedVariant.stock })}
             </span>
           </div>
 

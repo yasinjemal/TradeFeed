@@ -10,6 +10,7 @@
 
 import { useState, useEffect } from "react";
 import { useWhatsAppCTA } from "./whatsapp-cta-context";
+import { useCart } from "@/lib/cart/cart-context";
 
 interface StickyWhatsAppCTAProps {
   whatsappNumber: string;
@@ -22,6 +23,7 @@ export function StickyWhatsAppCTA({
 }: StickyWhatsAppCTAProps) {
   const [visible, setVisible] = useState(false);
   const { productName } = useWhatsAppCTA();
+  const { totalItems } = useCart();
 
   // Delay appearance so it doesn't compete with initial page load
   useEffect(() => {
@@ -45,7 +47,9 @@ export function StickyWhatsAppCTA({
       href={`https://wa.me/${waNumber}?text=${message}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-24 right-4 z-40 flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-300/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 animate-in slide-in-from-bottom-4"
+      className={`fixed right-4 z-40 flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-300/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 animate-in slide-in-from-bottom-4 ${
+        totalItems > 0 ? "bottom-[5.5rem]" : "bottom-6"
+      }`}
       aria-label="Order via WhatsApp"
     >
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

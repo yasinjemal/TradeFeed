@@ -35,6 +35,10 @@ type ActionResult = {
   error?: string;
   fieldErrors?: Record<string, string[]>;
   productId?: string;
+  /** True when this was the shop's first product (for post-publish share prompt) */
+  isFirstProduct?: boolean;
+  /** Non-blocking warning (e.g. "saved as draft because price missing") */
+  warning?: string;
 };
 
 export type ProductActionDeps = {
@@ -187,19 +191,40 @@ export async function createProductAction(
       };
     }
 
+    // 2b. Product count before create (for first-product share prompt)
+    const { db } = await import("@/lib/db");
+    const countBefore = await db.product.count({
+      where: { shopId: access.shopId, isActive: true },
+    });
+
     // 3. Create product via data access layer
     const product = await deps.createProduct(parsed.data, access.shopId);
 
     // 3b. Auto-create default variant if inline price was provided
     const inlinePrice = formData.get("priceInRands") as string;
     const inlineStock = formData.get("stock") as string;
+
+    // P3 FIX: Reject active products without a price — prevents "No pricing" listings
+    if (parsed.data.isActive && (!inlinePrice || inlinePrice.trim() === "")) {
+      // Product was created — flip to draft so it doesn't show "No pricing" to buyers
+      await deps.updateProduct(product.id, access.shopId, { isActive: false });
+      deps.revalidatePath(`/dashboard/${shopSlug}/products`);
+      return {
+        success: true,
+        productId: product.id,
+        isFirstProduct: countBefore === 0,
+        warning: "Price is required to publish. Your product was saved as a draft — add a price to go live.",
+      };
+    }
+
     if (inlinePrice && inlinePrice.trim() !== "") {
       try {
         const { variantCreateSchema } = await import("@/lib/validation/product");
+        // P1 FIX: Default stock to "1" instead of "0" — prevents instant "sold out"
         const variantInput = variantCreateSchema.safeParse({
           size: "Default",
           priceInRands: inlinePrice.trim(),
-          stock: (inlineStock && inlineStock.trim() !== "") ? inlineStock.trim() : "0",
+          stock: (inlineStock && inlineStock.trim() !== "") ? inlineStock.trim() : "1",
         });
         if (variantInput.success) {
           await deps.createVariant(product.id, access.shopId, variantInput.data, parsed.data.name);
@@ -213,7 +238,11 @@ export async function createProductAction(
 
     // 4. Revalidate and return success (show success screen in form)
     deps.revalidatePath(`/dashboard/${shopSlug}/products`);
-    return { success: true, productId: product.id };
+    return {
+      success: true,
+      productId: product.id,
+      isFirstProduct: countBefore === 0,
+    };
   } catch (error: unknown) {
     // Re-throw redirect
     if (error instanceof Error && "digest" in error) {

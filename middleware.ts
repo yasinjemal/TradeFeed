@@ -16,6 +16,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",                   // Clerk sign-in
   "/sign-up(.*)",                   // Clerk sign-up
   "/catalog/(.*)",                  // Public storefront (buyer-facing)
+  "/s/(.*)",                        // Vanity short link → redirects to catalog
   "/marketplace(.*)",               // Public marketplace (discovery)
   "/track(.*)",                     // Public order tracking (buyer-facing)
   "/api/webhooks/(.*)",             // Clerk webhooks (server-to-server)

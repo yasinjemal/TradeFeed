@@ -206,6 +206,8 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   }));
 
   // ── Map to offline-cache shapes for IndexedDB ──────────
+  // NOTE: cachedAt is set client-side by the cache manager to avoid
+  // impure Date.now() calls during server render.
   const cachedShop = {
     id: shop.id,
     slug,
@@ -214,7 +216,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
     logoUrl: shop.logoUrl ?? null,
     bannerUrl: shop.bannerUrl ?? null,
     whatsappNumber: shop.whatsappNumber,
-    cachedAt: Date.now(),
+    cachedAt: 0,
   };
 
   const cachedProducts = products.map((p) => {
@@ -234,7 +236,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
         priceInCents: v.priceInCents,
         stock: v.stock,
       })),
-      cachedAt: Date.now(),
+      cachedAt: 0,
     };
   });
 

@@ -88,6 +88,7 @@ export function AdminShopList({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState(currentSearch);
+  const [renderTimestamp] = useState(() => Date.now());
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // ── Navigation helpers ──────────────────────────────────
@@ -200,8 +201,10 @@ export function AdminShopList({
             const planName = shop.subscription?.plan.name || "No plan";
             const planSlug = shop.subscription?.plan.slug || "";
             const lastProduct = shop.products[0]?.createdAt;
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const createdMs = new Date(shop.createdAt).getTime();
             const daysSinceJoin = Math.floor(
-              (Date.now() - new Date(shop.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+              (renderTimestamp - createdMs) / msPerDay
             );
             const isGhost = shop._count.products === 0 && daysSinceJoin >= 3;
 

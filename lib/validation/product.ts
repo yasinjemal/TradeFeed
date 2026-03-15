@@ -15,6 +15,11 @@
 
 import { z } from "zod";
 
+/** Strip HTML/script tags to prevent XSS in user-provided text */
+function stripHtml(str: string): string {
+  return str.replace(/<[^>]*>/g, "");
+}
+
 /**
  * Schema for creating a new product.
  *
@@ -28,13 +33,18 @@ export const productCreateSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, "Product name must be at least 2 characters")
-    .max(200, "Product name must be under 200 characters"),
+    .transform(stripHtml)
+    .pipe(
+      z.string()
+        .min(2, "Product name must be at least 2 characters")
+        .max(200, "Product name must be under 200 characters")
+    ),
 
   description: z
     .string()
     .trim()
-    .max(2000, "Description must be under 2000 characters")
+    .transform(stripHtml)
+    .pipe(z.string().max(2000, "Description must be under 2000 characters"))
     .optional()
     .or(z.literal("")),
 
@@ -88,14 +98,19 @@ export const productUpdateSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, "Product name must be at least 2 characters")
-    .max(200, "Product name must be under 200 characters")
+    .transform(stripHtml)
+    .pipe(
+      z.string()
+        .min(2, "Product name must be at least 2 characters")
+        .max(200, "Product name must be under 200 characters")
+    )
     .optional(),
 
   description: z
     .string()
     .trim()
-    .max(2000, "Description must be under 2000 characters")
+    .transform(stripHtml)
+    .pipe(z.string().max(2000, "Description must be under 2000 characters"))
     .optional()
     .or(z.literal("")),
 

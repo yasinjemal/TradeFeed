@@ -254,6 +254,8 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
             currentStatus={order.status}
             createdAt={order.createdAt.toISOString()}
             updatedAt={order.updatedAt.toISOString()}
+            paymentRequestedAt={order.paymentRequestedAt?.toISOString() ?? null}
+            paidAt={order.paidAt?.toISOString() ?? null}
           />
         </div>
 

@@ -20,6 +20,8 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ImageUpload } from "@/components/product/image-upload";
 import { EditProductForm } from "@/components/product/edit-product-form";
+import { ListingQualityScore, computeQualityProps } from "@/components/product/listing-quality-score";
+import { FirstListingChecklist } from "@/components/product/first-listing-checklist";
 import { SmartVariantCreator } from "@/components/product/smart-variant-creator";
 import { VariantGrid } from "@/components/product/variant-grid";
 import { VariantBulkEditor } from "@/components/product/variant-bulk-editor";
@@ -224,6 +226,17 @@ export default async function ProductDetailPage({
               </Link>
             </div>
           </div>
+
+          {/* Listing Quality Score */}
+          <ListingQualityScore {...computeQualityProps(product)} />
+
+          {/* First Listing Checklist */}
+          <FirstListingChecklist
+            hasPhoto={product.images.length > 0}
+            hasPrice={prices.length > 0 && minPrice !== null && minPrice > 0}
+            hasStock={totalStock > 0}
+            isPublished={product.isActive}
+          />
 
           {/* Edit Product */}
           <EditProductForm

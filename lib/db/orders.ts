@@ -270,6 +270,24 @@ export async function updateOrderStatus(
   });
 }
 
+// ── Mark Order Paid (webhook — no shopId scoping) ───────────
+
+export async function markOrderPaid(orderId: string) {
+  return db.order.update({
+    where: { id: orderId },
+    data: { paidAt: new Date(), status: "CONFIRMED" },
+  });
+}
+
+// ── Mark payment link requested (seller sent link to buyer) ──
+
+export async function markPaymentRequested(orderId: string, shopId: string) {
+  return db.order.update({
+    where: { id: orderId, shopId },
+    data: { paymentRequestedAt: new Date() },
+  });
+}
+
 // ── Order Stats ─────────────────────────────────────────────
 
 export async function getOrderStats(shopId: string) {

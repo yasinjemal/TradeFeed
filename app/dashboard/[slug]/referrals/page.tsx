@@ -19,13 +19,12 @@ interface ReferralPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Reward tiers for referral milestones
-const REWARD_TIERS = [
-  { count: 1, reward: "1 free month", emoji: "🎁", description: "Your first referral earns 1 month free Pro" },
-  { count: 3, reward: "2 free months", emoji: "🚀", description: "Refer 3 sellers for 2 months free Pro" },
-  { count: 5, reward: "Ambassador badge", emoji: "🏆", description: "Become a TradeFeed Ambassador" },
-  { count: 10, reward: "Lifetime perk", emoji: "👑", description: "Permanent discount on Pro plan" },
-];
+// Single reward tier — aligned with backend (lib/db/referrals.ts): 1 free month per referred shop that upgrades
+const REWARD = {
+  reward: "1 free month of Pro",
+  emoji: "🎁",
+  description: "When a seller you referred upgrades to Pro, we add 1 free month to your Pro subscription.",
+};
 
 export default async function ReferralPage({ params }: ReferralPageProps) {
   const { slug } = await params;
@@ -35,7 +34,9 @@ export default async function ReferralPage({ params }: ReferralPageProps) {
   // Generate referral code if not yet set
   let referralCode = (shop as { referralCode?: string | null }).referralCode;
   if (!referralCode) {
-    const code = `TF-${shop.slug.slice(0, 3).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const { randomBytes } = await import("crypto");
+    const suffix = randomBytes(3).toString("hex").slice(0, 4).toUpperCase();
+    const code = `TF-${shop.slug.slice(0, 3).toUpperCase()}${suffix}`;
     await db.shop.update({
       where: { id: shop.id },
       data: { referralCode: code },
@@ -92,10 +93,6 @@ export default async function ReferralPage({ params }: ReferralPageProps) {
     count: l._count.id,
   }));
 
-  // Current tier progress
-  const currentTier = REWARD_TIERS.filter((t) => referralCount >= t.count).pop();
-  const nextTier = REWARD_TIERS.find((t) => referralCount < t.count);
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -129,48 +126,19 @@ export default async function ReferralPage({ params }: ReferralPageProps) {
         shopSlug={slug}
       />
 
-      {/* Reward Tiers (A5.4.1) */}
-      <div className="rounded-xl border border-stone-200 bg-white p-5 space-y-4">
-        <h2 className="font-semibold text-stone-800">🎯 Reward Milestones</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {REWARD_TIERS.map((tier) => {
-            const unlocked = referralCount >= tier.count;
-            return (
-              <div
-                key={tier.count}
-                className={`rounded-xl border p-3.5 text-center transition-all ${
-                  unlocked
-                    ? "border-emerald-200 bg-emerald-50"
-                    : "border-stone-200 bg-stone-50 opacity-60"
-                }`}
-              >
-                <p className="text-2xl">{tier.emoji}</p>
-                <p className={`text-xs font-bold mt-1 ${unlocked ? "text-emerald-700" : "text-stone-500"}`}>
-                  {tier.count} referral{tier.count > 1 ? "s" : ""}
-                </p>
-                <p className={`text-[11px] mt-0.5 ${unlocked ? "text-emerald-600" : "text-stone-400"}`}>
-                  {tier.reward}
-                </p>
-                {unlocked && (
-                  <span className="mt-1.5 inline-block text-[10px] font-semibold text-emerald-700 bg-emerald-100 rounded-full px-2 py-0.5">
-                    ✓ Unlocked
-                  </span>
-                )}
-              </div>
-            );
-          })}
+      {/* Reward — aligned with backend: 1 free month per referred shop that upgrades */}
+      <div className="rounded-xl border border-stone-200 bg-white p-5 space-y-3">
+        <h2 className="font-semibold text-stone-800">🎯 Your reward</h2>
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-start gap-3">
+          <span className="text-2xl">{REWARD.emoji}</span>
+          <div>
+            <p className="font-medium text-emerald-800">{REWARD.reward}</p>
+            <p className="text-sm text-stone-600 mt-0.5">{REWARD.description}</p>
+            <p className="text-xs text-stone-500 mt-2">
+              You have <strong>{referralCount}</strong> direct referral{referralCount !== 1 ? "s" : ""}. Each one who upgrades to Pro earns you 1 extra month.
+            </p>
+          </div>
         </div>
-        {nextTier && (
-          <p className="text-xs text-stone-500 text-center">
-            {nextTier.count - referralCount} more referral{nextTier.count - referralCount > 1 ? "s" : ""} to unlock{" "}
-            <span className="font-medium text-stone-700">{nextTier.reward}</span>
-          </p>
-        )}
-        {currentTier && !nextTier && (
-          <p className="text-xs text-emerald-600 text-center font-medium">
-            🎉 You&apos;ve unlocked all reward tiers! Amazing work.
-          </p>
-        )}
       </div>
 
       {/* Leaderboard (A5.4.2) */}
@@ -260,7 +228,7 @@ export default async function ReferralPage({ params }: ReferralPageProps) {
           {[
             { step: "1", title: "Share your invite link", desc: "Send your referral link to other sellers via WhatsApp" },
             { step: "2", title: "They sign up & create a shop", desc: "When they create a shop using your link, they're linked to you" },
-            { step: "3", title: "Earn rewards at each milestone", desc: "1 referral = 1 free month, 3 = 2 months, 5 = Ambassador badge 🏆" },
+            { step: "3", title: "Earn 1 free month when they upgrade", desc: "When a referred seller upgrades to Pro, we add 1 free month to your Pro subscription." },
           ].map((item) => (
             <div key={item.step} className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">

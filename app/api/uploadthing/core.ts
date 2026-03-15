@@ -9,6 +9,7 @@
 // ============================================================
 
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { auth } from "@clerk/nextjs/server";
 
 const f = createUploadthing();
 
@@ -32,21 +33,14 @@ export const ourFileRouter = {
    * - Max 8 images per upload batch
    * - Max 4MB each (already compressed client-side)
    * - JPEG/PNG/WebP only
-   *
-   * AUTH: Dashboard pages are already protected by Clerk middleware.
-   * We don't call auth() here because the uploadthing POST endpoint
-   * is invoked by the client SDK outside of Clerk's middleware context.
    */
   productImageUploader: f({
     image: { maxFileSize: "4MB", maxFileCount: 8 },
   })
     .middleware(async () => {
-      // Dashboard pages are Clerk-protected, so any upload request
-      // reaching this point is already from an authenticated user.
-      // We return a static userId — the image save action verifies
-      // shop access separately.
-      console.log("[UploadThing] Middleware running — accepting upload");
-      return { userId: "authenticated-via-dashboard" };
+      const { userId } = await auth();
+      if (!userId) throw new Error("Unauthorized");
+      return { userId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // ufsUrl is v7.4+, fall back to url for older versions
@@ -68,8 +62,9 @@ export const ourFileRouter = {
     video: { maxFileSize: "16MB", maxFileCount: 2 },
   })
     .middleware(async () => {
-      console.log("[UploadThing] Gallery upload middleware — accepting");
-      return { userId: "authenticated-via-dashboard" };
+      const { userId } = await auth();
+      if (!userId) throw new Error("Unauthorized");
+      return { userId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       const fileUrl = file.ufsUrl ?? file.url;
@@ -87,8 +82,9 @@ export const ourFileRouter = {
     image: { maxFileSize: "4MB", maxFileCount: 1 },
   })
     .middleware(async () => {
-      console.log("[UploadThing] Logo upload middleware — accepting");
-      return { userId: "authenticated-via-dashboard" };
+      const { userId } = await auth();
+      if (!userId) throw new Error("Unauthorized");
+      return { userId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       const fileUrl = file.ufsUrl ?? file.url;
@@ -106,8 +102,9 @@ export const ourFileRouter = {
     image: { maxFileSize: "4MB", maxFileCount: 1 },
   })
     .middleware(async () => {
-      console.log("[UploadThing] Banner upload middleware — accepting");
-      return { userId: "authenticated-via-dashboard" };
+      const { userId } = await auth();
+      if (!userId) throw new Error("Unauthorized");
+      return { userId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       const fileUrl = file.ufsUrl ?? file.url;

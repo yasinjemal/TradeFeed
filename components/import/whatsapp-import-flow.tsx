@@ -87,36 +87,6 @@ export function WhatsAppImportFlow({ shopSlug, shopName }: Props) {
 
   // ── Step 1: Handle file selection ──────────────────────────
 
-  const handleFiles = useCallback(
-    async (files: FileList | File[]) => {
-      const fileArray = Array.from(files).filter((f) =>
-        f.type.startsWith("image/")
-      );
-
-      if (fileArray.length === 0) return;
-
-      // Cap at 10 items total
-      const remaining = 10 - items.length;
-      const toAdd = fileArray.slice(0, remaining);
-
-      const newItems: ImportItem[] = toAdd.map((file) => ({
-        id: generateId(),
-        file,
-        previewUrl: URL.createObjectURL(file),
-        status: "pending" as const,
-        editedPrice: "",
-      }));
-
-      setItems((prev) => [...prev, ...newItems]);
-
-      // Start AI analysis for each
-      for (const item of newItems) {
-        analyzeImage(item);
-      }
-    },
-    [items.length]
-  );
-
   const analyzeImage = async (item: ImportItem) => {
     setItems((prev) =>
       prev.map((i) =>
@@ -171,6 +141,33 @@ export function WhatsAppImportFlow({ shopSlug, shopName }: Props) {
             : i
         )
       );
+    }
+  };
+
+  const handleFiles = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files).filter((f) =>
+      f.type.startsWith("image/")
+    );
+
+    if (fileArray.length === 0) return;
+
+    // Cap at 10 items total
+    const remaining = 10 - items.length;
+    const toAdd = fileArray.slice(0, remaining);
+
+    const newItems: ImportItem[] = toAdd.map((file) => ({
+      id: generateId(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+      status: "pending" as const,
+      editedPrice: "",
+    }));
+
+    setItems((prev) => [...prev, ...newItems]);
+
+    // Start AI analysis for each
+    for (const item of newItems) {
+      analyzeImage(item);
     }
   };
 
@@ -314,7 +311,8 @@ export function WhatsAppImportFlow({ shopSlug, shopName }: Props) {
       e.stopPropagation();
       if (e.dataTransfer.files) handleFiles(e.dataTransfer.files);
     },
-    [handleFiles]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [items.length]
   );
 
   // ── Render: Done phase ─────────────────────────────────────
@@ -509,7 +507,7 @@ export function WhatsAppImportFlow({ shopSlug, shopName }: Props) {
               <div className="flex gap-4">
                 {/* Preview */}
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-stone-100 flex-shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  { }
                   <img
                     src={item.previewUrl}
                     alt=""
