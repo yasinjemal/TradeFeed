@@ -67,17 +67,22 @@
 ## Feature 3: WhatsApp Follow-up Sequences
 
 > **Revenue:** Indirect (retention × LTV multiplier)
-> **Effort:** ~3-5 days | **Status:** ⬜ Not Started
+> **Effort:** ~3-5 days | **Status:** ✅ Complete
 
-### Tasks
-- [ ] Message template system (DB model for templates + variables)
-- [ ] Sequence scheduler (Day 1, 3, 7, 14 post-signup)
-- [ ] Day 1: Welcome + catalog link
-- [ ] Day 3 (no products): "Add your first product" + wizard link
-- [ ] Day 7 (no orders): "Share your catalog in WhatsApp groups"
-- [ ] Day 14 (inactive): "Your shop hasn't been updated"
-- [ ] Monthly: Activity summary (views, clicks, orders)
-- [ ] Opt-out mechanism (POPIA compliance)
+### Implemented
+- [x] `SellerMessage` model — audit trail for all outbound WhatsApp messages (dedup, retry, POPIA)
+- [x] `SellerSequenceState` model — tracks sequence progress per seller (Day 0/3/7/14/monthly)
+- [x] Sequence engine (`lib/whatsapp/seller-sequences.ts`) — idempotent, one message per run per seller
+- [x] Day 0: Welcome + catalog link + dashboard link (sent at shop creation)
+- [x] Day 3: "Add your first product" with AI listing link (if 0 products)
+- [x] Day 7: "Share your catalog" with link (if has products but no orders)
+- [x] Day 14: "Your shop needs attention" with activity stats (if inactive 14+ days)
+- [x] Monthly: Activity summary (views, WhatsApp clicks, orders, revenue) + contextual tip
+- [x] Cron API route (`/api/cron/seller-sequences`) — daily at 09:00 SAST via Vercel Cron
+- [x] Welcome message sent immediately on shop creation (`createShopAction`)
+- [x] Opt-out toggle in notification settings page (`WhatsAppSequenceToggle`)
+- [x] Opt-out API route (`/api/seller-sequences/opt-out`) — respects `requireShopAccess`
+- [x] "Reply STOP" in every message (POPIA compliance)
 
 ---
 

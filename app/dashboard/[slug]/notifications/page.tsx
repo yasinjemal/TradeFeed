@@ -9,6 +9,8 @@ import { requireShopAccess } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { getNotificationPrefs, getLowStockVariants } from "@/lib/db/notifications";
 import { NotificationSettings } from "@/components/notifications/notification-settings";
+import { WhatsAppSequenceToggle } from "@/components/notifications/whatsapp-sequence-toggle";
+import { db } from "@/lib/db";
 
 interface NotificationsPageProps {
   params: Promise<{ slug: string }>;
@@ -20,9 +22,10 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
   const access = await requireShopAccess(slug);
   if (!access) notFound();
 
-  const [prefs, lowStockVariants] = await Promise.all([
+  const [prefs, lowStockVariants, sequenceState] = await Promise.all([
     getNotificationPrefs(access.shopId),
     getLowStockVariants(access.shopId),
+    db.sellerSequenceState.findUnique({ where: { shopId: access.shopId }, select: { optedOut: true } }),
   ]);
 
   const formattedVariants = lowStockVariants.map((v) => ({
@@ -50,6 +53,11 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
         prefs={prefs}
         lowStockVariants={formattedVariants}
         shopSlug={slug}
+      />
+
+      <WhatsAppSequenceToggle
+        shopSlug={slug}
+        optedOut={sequenceState?.optedOut ?? false}
       />
     </div>
   );

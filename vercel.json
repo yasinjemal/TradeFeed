@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/data-retention",
       "schedule": "0 3 1 * *"
+    },
+    {
+      "path": "/api/cron/seller-sequences",
+      "schedule": "0 7 * * *"
     }
   ]
 }

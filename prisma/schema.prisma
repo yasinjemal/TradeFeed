@@ -74,6 +74,8 @@ model Shop {
   drops       Drop[]                          // Stock drop announcements
   sellerPreferences SellerPreferences?         // AI memory / seller context for personalized AI output
   transactionFees TransactionFee[]             // Platform fees from buyer payments
+  sellerMessages  SellerMessage[]              // WhatsApp follow-up message log
+  sequenceState   SellerSequenceState?         // Follow-up sequence progress tracker
 
   @@index([slug])
   @@index([isActive])
@@ -943,6 +945,56 @@ model SellerPreferences {
 
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+
+  @@index([shopId])
+}
+
+// ============================================================
+// SELLER MESSAGE LOG: Audit trail for all outbound messages
+// Tracks every WhatsApp message sent to sellers for dedup,
+// retry logic, and POPIA compliance.
+// ============================================================
+model SellerMessage {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  messageType String                          // e.g. "welcome", "nudge_first_product", "weekly_summary"
+  channel     String   @default("whatsapp")   // "whatsapp" | "email"
+  recipientPhone String                       // Normalized phone number
+  status      String   @default("sent")       // "sent" | "failed" | "skipped"
+  errorMessage String?                        // Error detail if failed
+
+  sentAt      DateTime @default(now())
+
+  @@unique([shopId, messageType, sentAt])     // Prevent exact duplicates
+  @@index([shopId])
+  @@index([messageType])
+  @@index([sentAt])
+}
+
+// ============================================================
+// SELLER SEQUENCE STATE: Tracks where each seller is in the
+// onboarding follow-up sequence (Day 1, 3, 7, 14, monthly).
+// One-to-one with Shop. Reset when seller completes activation.
+// ============================================================
+model SellerSequenceState {
+  id              String   @id @default(cuid())
+  shopId          String   @unique
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // Which steps have been sent
+  welcomeSentAt         DateTime?             // Day 0: Welcome + catalog link
+  nudgeProductSentAt    DateTime?             // Day 3: "Add your first product"
+  nudgeShareSentAt      DateTime?             // Day 7: "Share your catalog"
+  nudgeInactiveSentAt   DateTime?             // Day 14: "Your shop hasn't been updated"
+  lastMonthlySentAt     DateTime?             // Last monthly summary sent
+
+  // Opt-out
+  optedOut        Boolean  @default(false)    // Seller opted out of follow-ups
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([shopId])
 }

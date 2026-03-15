@@ -130,6 +130,12 @@ export async function createShopAction(
       // Non-fatal — shop is still created
     });
 
+    // 5b. Send welcome WhatsApp message (fire-and-forget)
+    const { sendWelcomeSequence } = await import("@/lib/whatsapp/seller-sequences");
+    sendWelcomeSequence(shop.id).catch((err: unknown) => {
+      console.error("[createShopAction] Welcome WhatsApp failed:", err);
+    });
+
     // 6. Send welcome email (fire-and-forget — don't block redirect)
     const sellerName = user.firstName || shop.name;
     const ownerEmail = user.email;
