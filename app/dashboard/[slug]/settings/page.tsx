@@ -8,6 +8,7 @@
 import { getShopBySlug } from "@/lib/db/shops";
 import { getShopGallery } from "@/lib/db/gallery";
 import { getSellerPreferences } from "@/lib/db/seller-preferences";
+import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { requireShopAccess } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { ShopSettingsForm } from "@/components/shop/shop-settings-form";
@@ -15,6 +16,7 @@ import { ShopGalleryUpload } from "@/components/shop/shop-gallery-upload";
 import { SellerPreferencesForm } from "@/components/shop/seller-preferences-form";
 import { DeleteShopButton } from "@/components/shop/delete-shop-button";
 import { SettingsSidebar } from "@/components/shop/settings-sidebar";
+import { ThemePicker } from "@/components/shop/theme-picker";
 import Link from "next/link";
 
 interface SettingsPageProps {
@@ -37,6 +39,10 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
   const galleryItems = await getShopGallery(shop.id);
   const sellerPrefs = await getSellerPreferences(shop.id);
+  const subscription = await getShopSubscription(shop.id);
+  const isPro =
+    (!!subscription?.plan.slug && subscription.plan.slug !== "free") ||
+    isTrialActive(subscription).active;
 
   // Calculate profile completeness
   const checks = [
@@ -172,6 +178,29 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
               whatsappGroupLink: shop.whatsappGroupLink,
             }}
           />
+
+          {/* ── Storefront Theme ───────────────────────── */}
+          <div id="section-theme" className="scroll-mt-28 relative rounded-2xl border border-stone-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-violet-200 rounded-l-2xl" />
+            <div className="pl-2">
+              <div className="flex items-center gap-2 mb-1">
+                <span>🎨</span>
+                <h3 className="text-lg font-bold text-stone-900">Storefront Theme</h3>
+                {!isPro && <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Pro</span>}
+              </div>
+              <p className="text-sm text-stone-500 mb-5">Customize your catalog&apos;s colors, fonts, and visual style.</p>
+              <ThemePicker
+                shopSlug={slug}
+                isPro={isPro}
+                currentTheme={{
+                  themePreset: shop.themePreset,
+                  themePrimary: shop.themePrimary,
+                  themeAccent: shop.themeAccent,
+                  themeFont: shop.themeFont,
+                }}
+              />
+            </div>
+          </div>
 
           {/* ── AI Preferences ─────────────────────────── */}
           <SellerPreferencesForm

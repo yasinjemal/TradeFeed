@@ -200,11 +200,12 @@ export function AddToCart({
                 disabled={!inStock}
                 className={`min-w-[2.75rem] px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   isSelected
-                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-200 scale-105"
+                    ? "text-white shadow-md scale-105"
                     : inStock
                     ? "bg-stone-100 text-stone-700 hover:bg-stone-200 active:scale-95"
                     : "bg-stone-50 text-stone-300 line-through cursor-not-allowed"
                 }`}
+                style={isSelected ? { backgroundColor: "var(--shop-primary, #059669)" } : undefined}
               >
                 {size}
               </button>
@@ -228,9 +229,10 @@ export function AddToCart({
                   onClick={() => handleColorSelect(color!)}
                   className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                     isSelected
-                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-200"
+                      ? "text-white shadow-md"
                       : "bg-stone-50 border border-stone-200 text-stone-700 hover:border-stone-300 active:scale-95"
                   }`}
+                  style={isSelected ? { backgroundColor: "var(--shop-primary, #059669)" } : undefined}
                 >
                   <span
                     className={`w-3 h-3 rounded-full ${
@@ -257,9 +259,10 @@ export function AddToCart({
                   onClick={() => handleOrderTypeChange("wholesale")}
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all duration-200 ${
                     orderType === "wholesale"
-                      ? "bg-emerald-600 text-white shadow-sm"
+                      ? "text-white shadow-sm"
                       : "text-stone-500 hover:text-stone-700"
                   }`}
+                  style={orderType === "wholesale" ? { backgroundColor: "var(--shop-primary, #059669)" } : undefined}
                 >
                   🏭 Wholesale
                 </button>
@@ -389,8 +392,9 @@ export function AddToCart({
               className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.98] ${
                 justAdded
                   ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
-                  : "bg-stone-900 text-white hover:bg-stone-800 shadow-md hover:shadow-lg"
+                  : "text-white shadow-md hover:shadow-lg hover:brightness-110"
               }`}
+              style={!justAdded ? { backgroundColor: "var(--shop-primary, #1c1917)" } : undefined}
             >
               {justAdded ? (
                 <span className="inline-flex items-center gap-2">
@@ -437,8 +441,9 @@ export function AddToCart({
                 className={`min-h-[48px] flex-1 rounded-xl px-3 text-sm font-semibold transition-all duration-300 active:scale-[0.99] ${
                   justAdded
                     ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200"
-                    : "bg-stone-900 text-white shadow-md"
+                    : "text-white shadow-md hover:brightness-110"
                 }`}
+                style={!justAdded ? { backgroundColor: "var(--shop-primary, #1c1917)" } : undefined}
               >
                 {justAdded
                   ? "Added to Cart"

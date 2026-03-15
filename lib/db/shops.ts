@@ -161,6 +161,29 @@ export async function updateShopSettings(
 }
 
 /**
+ * Update shop storefront theme (Pro only).
+ */
+export async function updateShopTheme(
+  shopId: string,
+  theme: {
+    themePreset: string | null;
+    themePrimary: string | null;
+    themeAccent: string | null;
+    themeFont: string | null;
+  },
+) {
+  return db.shop.update({
+    where: { id: shopId },
+    data: {
+      themePreset: theme.themePreset,
+      themePrimary: theme.themePrimary,
+      themeAccent: theme.themeAccent,
+      themeFont: theme.themeFont,
+    },
+  });
+}
+
+/**
  * Get a shop by ID — scoped to a specific user.
  *
  * WHAT: Fetches a shop only if the given user has access to it.

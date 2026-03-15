@@ -5,9 +5,11 @@
 "use server";
 
 import { shopSettingsSchema } from "@/lib/validation/shop-settings";
-import { updateShopSettings, getShopBySlug } from "@/lib/db/shops";
+import { updateShopSettings, getShopBySlug, updateShopTheme } from "@/lib/db/shops";
+import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { requireShopAccess } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { THEME_PRESETS, THEME_FONTS } from "@/lib/config/themes";
 
 type ActionResult = {
   success: boolean;
@@ -90,6 +92,67 @@ export async function updateShopSettingsAction(
     return { success: true };
   } catch (error: unknown) {
     console.error("[updateShopSettingsAction] Error:", error);
+    return { success: false, error: "Something went wrong. Please try again." };
+  }
+}
+
+// ============================================================
+// Theme Update Action (Pro only)
+// ============================================================
+
+const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
+const validPresetIds = new Set(THEME_PRESETS.map((t) => t.id));
+const validFontIds = new Set(Object.keys(THEME_FONTS));
+
+export async function updateShopThemeAction(
+  shopSlug: string,
+  theme: {
+    themePreset: string | null;
+    themePrimary: string | null;
+    themeAccent: string | null;
+    themeFont: string | null;
+  },
+): Promise<ActionResult> {
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access || (access.role !== "OWNER" && access.role !== "MANAGER")) {
+      return { success: false, error: "Access denied." };
+    }
+
+    const shop = await getShopBySlug(shopSlug);
+    if (!shop) return { success: false, error: "Shop not found." };
+
+    // Pro check
+    const subscription = await getShopSubscription(shop.id);
+    const isPro =
+      (!!subscription?.plan.slug && subscription.plan.slug !== "free") ||
+      isTrialActive(subscription).active;
+    if (!isPro) {
+      return { success: false, error: "Storefront themes require a Pro plan." };
+    }
+
+    // Validate inputs
+    if (theme.themePreset && !validPresetIds.has(theme.themePreset)) {
+      return { success: false, error: "Invalid theme preset." };
+    }
+    if (theme.themePrimary && !HEX_COLOR_REGEX.test(theme.themePrimary)) {
+      return { success: false, error: "Invalid primary color." };
+    }
+    if (theme.themeAccent && !HEX_COLOR_REGEX.test(theme.themeAccent)) {
+      return { success: false, error: "Invalid accent color." };
+    }
+    if (theme.themeFont && !validFontIds.has(theme.themeFont)) {
+      return { success: false, error: "Invalid font." };
+    }
+
+    await updateShopTheme(shop.id, theme);
+
+    revalidatePath(`/dashboard/${shopSlug}/settings`);
+    revalidatePath(`/catalog/${shopSlug}`);
+
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("[updateShopThemeAction] Error:", error);
     return { success: false, error: "Something went wrong. Please try again." };
   }
 }

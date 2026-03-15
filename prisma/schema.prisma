@@ -57,6 +57,12 @@ model Shop {
   // ── AI Credits ───────────────────────────────────────
   aiGenerationsUsed Int @default(0)            // Number of AI product generations used (free tier gets 5)
 
+  // ── Storefront Theme ─────────────────────────────────
+  themePreset     String?                      // Preset theme name: "classic" | "modern" | "bold" | "minimal" | "vibrant"
+  themePrimary    String?                      // Primary color hex (e.g. "#10b981")
+  themeAccent     String?                      // Accent color hex (e.g. "#f59e0b")
+  themeFont       String?                      // Font family: "inter" | "playfair" | "poppins" | "space-grotesk" | "dm-sans"
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -52,6 +52,11 @@ export async function getCatalogShop(slug: string) {
       tiktok: true,
       website: true,
       whatsappGroupLink: true,
+      // Theme
+      themePreset: true,
+      themePrimary: true,
+      themeAccent: true,
+      themeFont: true,
       // Trust
       createdAt: true,
       // Subscription (for Pro badge)

@@ -126,14 +126,16 @@
 ## Feature 6: Storefront Themes (Pro Perk)
 
 > **Revenue:** Pro conversion lift (visible differentiation)
-> **Effort:** ~3-4 days | **Status:** ⬜ Not Started
+> **Effort:** ~3-4 days | **Status:** ✅ Complete
 
 ### Tasks
-- [ ] Theme model (name, primary color, accent color, layout, font)
-- [ ] 5 preset themes: Classic, Modern, Bold, Minimal, Vibrant
-- [ ] Theme picker in shop settings (Pro only, Free shows locked previews)
-- [ ] Catalog page renders with selected theme CSS variables
-- [ ] Preview mode before applying
+- [x] Theme model (themePreset, themePrimary, themeAccent, themeFont on Shop)
+- [x] 5 preset themes: Classic, Modern, Bold, Minimal, Vibrant
+- [x] Theme picker in shop settings (Pro only, Free shows locked preview with upgrade CTA)
+- [x] Catalog page renders with selected theme CSS variables (font, primary color, accent)
+- [x] Live preview in theme picker before applying
+- [x] Add-to-cart buttons, size/color selectors themed via CSS vars
+- [x] Google Fonts loaded dynamically for custom theme fonts
 
 ---
 

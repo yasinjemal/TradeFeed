@@ -13,6 +13,7 @@
 
 import { getCatalogShop } from "@/lib/db/catalog";
 import { getSellerTierData } from "@/lib/db/shops";
+import { buildThemeCssVars } from "@/lib/config/themes";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import type { Metadata } from "next";
@@ -107,10 +108,23 @@ export default async function CatalogLayout({
   // Determine premium status for luxury styling
   const isPro = shop.subscription?.status === "ACTIVE" && shop.subscription.plan.slug !== "free";
 
+  // Build storefront theme CSS variables (Pro feature)
+  const themeCssVars = isPro ? buildThemeCssVars(shop) : {};
+  const hasTheme = Object.keys(themeCssVars).length > 0;
+  const themeFont = hasTheme ? themeCssVars["--shop-font"] : undefined;
+
   return (
     <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined}>
     <WhatsAppCTAProvider>
     <WishlistProvider shopSlug={slug} shopId={shop.id}>
+      {/* Google Fonts for custom theme fonts */}
+      {themeFont && !themeFont.includes("Inter") && (
+        // eslint-disable-next-line @next/next/no-page-custom-font
+        <link
+          rel="stylesheet"
+          href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(themeFont.split("'")[1] ?? "Inter")}:wght@400;500;600;700;800&display=swap`}
+        />
+      )}
       {/* JSON-LD Structured Data for SEO */}
       {generateShopJsonLd(shop).map((schema, i) => (
         <script
@@ -125,9 +139,10 @@ export default async function CatalogLayout({
 
       <CatalogAppShell
         header={
-          <div className={`px-3 py-2.5 sm:px-4 sm:py-3 ${
-            isPro && shop.isVerified && (tierData.tier.key === "top" || tierData.tier.key === "established")
-              ? "bg-gradient-to-r from-amber-50/50 via-white to-amber-50/50"
+          <div
+            className={`px-3 py-2.5 sm:px-4 sm:py-3 ${
+              isPro && shop.isVerified && (tierData.tier.key === "top" || tierData.tier.key === "established")
+                ? "bg-gradient-to-r from-amber-50/50 via-white to-amber-50/50"
               : isPro || tierData.tier.key === "top"
                 ? "bg-gradient-to-r from-amber-50/30 via-white to-amber-50/30"
                 : ""
@@ -236,7 +251,10 @@ export default async function CatalogLayout({
         }
         bottomNav={<BottomNav shopSlug={slug} />}
       >
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-3 py-4 sm:px-4">
+        <div
+          className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-3 py-4 sm:px-4"
+          style={hasTheme ? { ...themeCssVars, fontFamily: themeFont } as React.CSSProperties : undefined}
+        >
           {children}
 
           <footer className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-stone-50 via-stone-50 to-stone-100 px-5 py-6 text-center space-y-4">
