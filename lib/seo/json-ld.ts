@@ -54,7 +54,7 @@ export function generateSiteJsonLd() {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${APP_URL}/marketplace?q={search_term_string}`,
+        urlTemplate: `${APP_URL}/marketplace?search={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },

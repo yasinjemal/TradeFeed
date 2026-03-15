@@ -327,6 +327,7 @@ export async function getMarketplaceProducts(
 
   // ── Build ORDER BY ──────────────────────────────────────
   let orderBy: Prisma.ProductOrderByWithRelationInput;
+  let trendingOrder: string[] | null = null;
   switch (sortBy) {
     case "newest":
       orderBy = { createdAt: "desc" };
@@ -338,11 +339,30 @@ export async function getMarketplaceProducts(
       orderBy = { maxPriceCents: "desc" };
       break;
     case "trending":
-    case "popular":
+    case "popular": {
+      // Pre-fetch product IDs ranked by analytics event count (last 7 days)
+      const daysAgo = new Date();
+      daysAgo.setDate(daysAgo.getDate() - 7);
+      const ranked = await db.analyticsEvent.groupBy({
+        by: ["productId"],
+        where: {
+          productId: { not: null },
+          type: { in: ["PRODUCT_VIEW", "WHATSAPP_CLICK", "MARKETPLACE_CLICK"] },
+          createdAt: { gte: daysAgo },
+        },
+        _count: { id: true },
+        orderBy: { _count: { id: "desc" } },
+        take: pageSize * 3,
+      });
+      trendingOrder = ranked
+        .map((e) => e.productId)
+        .filter((id): id is string => id !== null);
+      // Still fetch by newest, then re-sort post-query
+      orderBy = { createdAt: "desc" };
+      break;
+    }
     case "top_rated":
       // top_rated is sorted post-query after enriching with reviews
-      // trending handled by getTrendingProducts() for true trending
-      // fallback to newest for the main grid
       orderBy = { createdAt: "desc" };
       break;
     default:
@@ -426,6 +446,14 @@ export async function getMarketplaceProducts(
   // When searching with full-text, re-sort by relevance ranking
   if (searchProductOrder && searchProductOrder.length > 0) {
     const orderMap = new Map(searchProductOrder.map((id, i) => [id, i]));
+    products.sort(
+      (a, b) => (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
+    );
+  }
+
+  // Re-sort by trending/popular analytics ranking
+  if (trendingOrder && trendingOrder.length > 0) {
+    const orderMap = new Map(trendingOrder.map((id, i) => [id, i]));
     products.sort(
       (a, b) => (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
     );
@@ -737,6 +765,89 @@ export async function getTrendingProducts(
     });
 
   return enrichWithReviewStats(trendingProducts);
+}
+
+/**
+ * M9.2 — Get new arrivals (last 7 days).
+ *
+ * Returns recently listed products sorted by creation date.
+ * Only includes active products from active shops.
+ */
+export async function getNewArrivals(
+  limit: number = 8
+): Promise<MarketplaceProduct[]> {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const products = await db.product.findMany({
+    where: {
+      isActive: true,
+      createdAt: { gte: sevenDaysAgo },
+      shop: { isActive: true },
+      variants: { some: { isActive: true } },
+    },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      createdAt: true,
+      globalCategory: {
+        select: { name: true, slug: true },
+      },
+      shop: {
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+          city: true,
+          province: true,
+          isVerified: true,
+          logoUrl: true,
+          subscription: {
+            select: {
+              status: true,
+              plan: { select: { slug: true, name: true } },
+            },
+          },
+        },
+      },
+      images: {
+        where: { position: 0 },
+        select: { url: true },
+        take: 1,
+      },
+      variants: {
+        where: { isActive: true },
+        select: { priceInCents: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  const mapped: MarketplaceProduct[] = products.map((p) => {
+    const prices = p.variants.map((v) => v.priceInCents);
+    return {
+      id: p.id,
+      slug: p.slug,
+      name: p.name,
+      description: p.description,
+      imageUrl: p.images[0]?.url ?? null,
+      minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
+      maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
+      variantCount: p.variants.length,
+      shop: p.shop,
+      globalCategory: p.globalCategory,
+      promotion: null,
+      avgRating: null,
+      reviewCount: 0,
+      sellerTier: null,
+      createdAt: p.createdAt,
+    };
+  });
+
+  return enrichWithReviewStats(mapped);
 }
 
 /**

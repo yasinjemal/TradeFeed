@@ -185,6 +185,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
               targetAudience: sellerPrefs.targetAudience,
               languagePreference: sellerPrefs.languagePreference,
               aiToneNotes: sellerPrefs.aiToneNotes,
+              autoReplyEnabled: sellerPrefs.autoReplyEnabled,
             } : null}
           />
 

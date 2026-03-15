@@ -38,6 +38,7 @@ describe("generateAutoReply", () => {
       intent: "availability",
       confidence: 0.85,
       entities: { size: "XL" },
+      originalMessage: "Do you have XL?",
     };
     const reply = generateAutoReply(intent, SHOP);
     assert.equal(reply.intent, "availability");
@@ -50,6 +51,7 @@ describe("generateAutoReply", () => {
       intent: "availability",
       confidence: 0.85,
       entities: { color: "red" },
+      originalMessage: "Do you have red?",
     };
     const reply = generateAutoReply(intent, SHOP);
     assert.ok(reply.message.includes("red"));
@@ -69,6 +71,7 @@ describe("generateAutoReply", () => {
       intent: "delivery",
       confidence: 0.8,
       entities: {},
+      originalMessage: "Do you deliver?",
     };
     const reply = generateAutoReply(intent, SHOP);
     assert.ok(reply.message.includes("Let us know your city"));
@@ -87,6 +90,7 @@ describe("generateAutoReply", () => {
       intent: "order_status",
       confidence: 0.8,
       entities: {},
+      originalMessage: "Where is my order?",
     };
     const reply = generateAutoReply(intent, SHOP);
     assert.ok(reply.message.includes("order number"));
@@ -120,13 +124,13 @@ describe("generateAutoReply", () => {
 
   it("keeps all messages WhatsApp-friendly (under 1024 chars)", () => {
     const intents: IntentResult[] = [
-      { intent: "greeting", confidence: 0.9, entities: {} },
-      { intent: "price_inquiry", confidence: 0.9, entities: {} },
-      { intent: "availability", confidence: 0.9, entities: { size: "XXL", color: "navy blue" } },
-      { intent: "delivery", confidence: 0.9, entities: { city: "Johannesburg" } },
-      { intent: "order_status", confidence: 0.9, entities: { orderNumber: "TF-20260315-ZZZZ" } },
-      { intent: "product_info", confidence: 0.9, entities: {} },
-      { intent: "thanks", confidence: 0.9, entities: {} },
+      { intent: "greeting", confidence: 0.9, entities: {}, originalMessage: "Hi" },
+      { intent: "price_inquiry", confidence: 0.9, entities: {}, originalMessage: "How much?" },
+      { intent: "availability", confidence: 0.9, entities: { size: "XXL", color: "navy blue" }, originalMessage: "Is XXL navy blue available?" },
+      { intent: "delivery", confidence: 0.9, entities: { city: "Johannesburg" }, originalMessage: "Deliver to JHB?" },
+      { intent: "order_status", confidence: 0.9, entities: { orderNumber: "TF-20260315-ZZZZ" }, originalMessage: "Where is TF-20260315-ZZZZ?" },
+      { intent: "product_info", confidence: 0.9, entities: {}, originalMessage: "Tell me more" },
+      { intent: "thanks", confidence: 0.9, entities: {}, originalMessage: "Thanks!" },
     ];
 
     for (const intent of intents) {

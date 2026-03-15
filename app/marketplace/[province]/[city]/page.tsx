@@ -6,6 +6,7 @@ import {
   getPromotedProducts,
   getGlobalCategories,
   getTrendingProducts,
+  getNewArrivals,
   getFeaturedShops,
   interleavePromotedProducts,
 } from "@/lib/db/marketplace";
@@ -118,12 +119,13 @@ export default async function CityPage({ params, searchParams }: Props) {
 
   await expirePromotedListings();
 
-  const [productsResult, promoted, categories, trending, featuredShops] =
+  const [productsResult, promoted, categories, trending, newArrivals, featuredShops] =
     await Promise.all([
       getMarketplaceProducts(filters),
       getPromotedProducts(12),
       getGlobalCategories(),
       getTrendingProducts(12),
+      getNewArrivals(8),
       getFeaturedShops(8),
     ]);
 
@@ -218,6 +220,7 @@ export default async function CityPage({ params, searchParams }: Props) {
         currentPage={productsResult.page}
         categories={categories}
         trendingProducts={trending}
+        newArrivals={newArrivals}
         featuredShops={featuredShops}
         promotedProducts={promoted}
         currentFilters={filters}

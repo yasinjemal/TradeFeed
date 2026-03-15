@@ -74,7 +74,7 @@ function TrendingRow({
           {item.productName}
         </p>
         <p className="text-[11px] text-stone-400 mt-0.5">
-          {item.orderCount} order{item.orderCount !== 1 ? "s" : ""}
+          {item.orderCount} order{item.orderCount !== 1 ? "s" : ""} · R{Math.round(item.totalRevenueCents / 100).toLocaleString()} revenue
         </p>
       </div>
 

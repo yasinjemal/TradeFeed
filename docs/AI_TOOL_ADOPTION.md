@@ -4,7 +4,7 @@
 > Covers: Promptfoo, The Agency, OpenViking, MiroFish, Impeccable.
 >
 > **Created:** 2026-03-13
-> **Last updated:** 2026-03-13 (Phase A+B+C+D+E started)
+> **Last updated:** 2026-03-14 (Phase A+B+C+D+E complete, Marketplace Discovery improvements shipped)
 > **Owner:** Yasin
 
 ---

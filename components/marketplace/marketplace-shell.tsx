@@ -40,6 +40,7 @@ interface MarketplaceShellProps {
   currentPage: number;
   categories: CategoryWithCount[];
   trendingProducts: MarketplaceProduct[];
+  newArrivals: MarketplaceProduct[];
   featuredShops: FeaturedShop[];
   promotedProducts: MarketplaceProduct[];
   currentFilters: {
@@ -62,6 +63,7 @@ export function MarketplaceShell({
   currentPage,
   categories,
   trendingProducts,
+  newArrivals,
   featuredShops,
   promotedProducts,
   currentFilters,
@@ -75,6 +77,13 @@ export function MarketplaceShell({
   const [search, setSearch] = useState(currentFilters.search ?? "");
   const [filterOpen, setFilterOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autocompleteRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [suggestions, setSuggestions] = useState<{
+    products: { name: string; slug: string }[];
+    categories: { name: string; slug: string }[];
+  }>({ products: [], categories: [] });
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsBoxRef = useRef<HTMLDivElement>(null);
 
   // ── Infinite scroll state ───────────────────────────────
   const [allProducts, setAllProducts] = useState(products);
@@ -180,9 +189,62 @@ export function MarketplaceShell({
           updateFilters({ search: trimmed || undefined });
         }
       }, 400);
+
+      // Autocomplete suggestions
+      if (autocompleteRef.current) clearTimeout(autocompleteRef.current);
+      const trimmedForAc = value.trim();
+      if (trimmedForAc.length < 2) {
+        setSuggestions({ products: [], categories: [] });
+        setShowSuggestions(false);
+        return;
+      }
+      autocompleteRef.current = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/search/autocomplete?q=${encodeURIComponent(trimmedForAc)}`);
+          if (res.ok) {
+            const data = await res.json();
+            setSuggestions(data);
+            setShowSuggestions(data.products.length > 0 || data.categories.length > 0);
+          }
+        } catch {
+          // Silently fail — autocomplete is non-critical
+        }
+      }, 200);
     },
     [updateFilters]
   );
+
+  // Select a suggestion
+  const selectSuggestion = useCallback(
+    (name: string) => {
+      setSearch(name);
+      setShowSuggestions(false);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      updateFilters({ search: name });
+    },
+    [updateFilters]
+  );
+
+  const selectCategorySuggestion = useCallback(
+    (slug: string) => {
+      setShowSuggestions(false);
+      setSearch("");
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      updateFilters({ category: slug, search: undefined });
+    },
+    [updateFilters]
+  );
+
+  // Close suggestions on click outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (suggestionsBoxRef.current && !suggestionsBoxRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Count active filters
   const activeFilterCount = [
@@ -211,7 +273,7 @@ export function MarketplaceShell({
 
           {/* Desktop search */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
+            <div className="relative w-full" ref={suggestionsBoxRef}>
               <svg
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500"
                 fill="none"
@@ -225,6 +287,10 @@ export function MarketplaceShell({
                 type="text"
                 value={search}
                 onChange={(e) => handleSearchInput(e.target.value)}
+                onFocus={() => {
+                  if (suggestions.products.length > 0 || suggestions.categories.length > 0)
+                    setShowSuggestions(true);
+                }}
                 placeholder={t("searchPlaceholder")}
                 className="w-full rounded-xl bg-stone-900 border border-stone-800 pl-10 pr-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all"
               />
@@ -233,6 +299,8 @@ export function MarketplaceShell({
                   type="button"
                   onClick={() => {
                     setSearch("");
+                    setSuggestions({ products: [], categories: [] });
+                    setShowSuggestions(false);
                     updateFilters({ search: undefined });
                   }}
                   aria-label="Clear search"
@@ -242,6 +310,49 @@ export function MarketplaceShell({
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
+              )}
+
+              {/* Autocomplete dropdown */}
+              {showSuggestions && (
+                <div className="absolute top-full left-0 right-0 mt-1.5 rounded-xl bg-stone-900 border border-stone-700/80 shadow-2xl overflow-hidden z-50">
+                  {suggestions.categories.length > 0 && (
+                    <div className="px-3 pt-2.5 pb-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 px-1">Categories</p>
+                      {suggestions.categories.map((c) => (
+                        <button
+                          key={c.slug}
+                          type="button"
+                          onMouseDown={() => selectCategorySuggestion(c.slug)}
+                          className="w-full text-left px-2 py-1.5 text-sm text-emerald-400 hover:bg-stone-800 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <svg className="w-3.5 h-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6z" />
+                          </svg>
+                          {c.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {suggestions.products.length > 0 && (
+                    <div className="px-3 pt-2 pb-2">
+                      {suggestions.categories.length > 0 && <div className="border-t border-stone-800 mb-2" />}
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 px-1 mb-1">Products</p>
+                      {suggestions.products.map((p) => (
+                        <button
+                          key={p.slug}
+                          type="button"
+                          onMouseDown={() => selectSuggestion(p.name)}
+                          className="w-full text-left px-2 py-1.5 text-sm text-stone-200 hover:bg-stone-800 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <svg className="w-3.5 h-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                          </svg>
+                          {p.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </form>
@@ -385,6 +496,25 @@ export function MarketplaceShell({
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {trendingProducts.slice(0, 6).map((product) => (
                 <MarketplaceProductCard key={`trending-${product.id}`} product={product} compact />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── New Arrivals (only on default view, no search) ── */}
+      {newArrivals.length > 0 && !hasFiltersOrSearch && (
+        <section className="px-4 sm:px-6 pt-4 pb-2">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg">✨</span>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400">
+                Just Listed
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {newArrivals.slice(0, 6).map((product) => (
+                <MarketplaceProductCard key={`new-${product.id}`} product={product} compact />
               ))}
             </div>
           </div>

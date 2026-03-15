@@ -42,6 +42,23 @@ const isWebhookRoute = createRouteMatcher(["/api/webhooks/(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   try {
+    // ── Category canonical redirect ─────────────────────
+    // Redirect /marketplace?category=slug to /marketplace/category/slug
+    // to avoid duplicate content in search engines.
+    const url = request.nextUrl;
+    if (url.pathname === "/marketplace" && url.searchParams.has("category")) {
+      const cat = url.searchParams.get("category")!;
+      const otherParams = new URLSearchParams(url.searchParams);
+      otherParams.delete("category");
+      // Only redirect when category is the sole filter (preserve search/sort/etc.)
+      if (otherParams.size === 0) {
+        return NextResponse.redirect(
+          new URL(`/marketplace/category/${encodeURIComponent(cat)}`, request.url),
+          301,
+        );
+      }
+    }
+
     // Skip rate limiting for Uploadthing (server callbacks) and webhooks
     const ip = getClientIp(request);
 

@@ -59,6 +59,7 @@ export interface SellerPreferencesData {
   targetAudience: string | null;
   languagePreference: string;
   aiToneNotes: string | null;
+  autoReplyEnabled: boolean;
 }
 
 interface SellerPreferencesFormProps {
@@ -108,6 +109,25 @@ export function SellerPreferencesForm({ shopSlug, initialData }: SellerPreferenc
 
         {/* Content */}
         <form action={formAction} className="px-6 pb-6 pt-2 pl-8 space-y-5">
+          {/* WhatsApp Auto-Reply Toggle */}
+          <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50/50 px-4 py-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-medium text-stone-700">WhatsApp Auto-Reply</p>
+              <p className="text-[11px] text-stone-400 mt-0.5">
+                AI will auto-respond to buyer messages on WhatsApp
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                name="autoReplyEnabled"
+                defaultChecked={d?.autoReplyEnabled ?? false}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-stone-200 peer-focus:ring-2 peer-focus:ring-indigo-400/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500" />
+            </label>
+          </div>
+
           {/* Brand Tone */}
           <div className="space-y-2">
             <Label htmlFor="brandTone" className="text-[13px] font-medium text-stone-600">
