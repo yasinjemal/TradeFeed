@@ -165,7 +165,7 @@ export function AddToCart({
 
     // Reset for next add
     setQuantity(effectiveMinQty);
-  }, [selectedVariant, canAdd, addItem, productId, productName, option1Label, option2Label, quantity, effectiveMinQty, orderType]);
+  }, [selectedVariant, canAdd, addItem, productId, productName, imageUrl, option1Label, option2Label, quantity, effectiveMinQty, orderType]);
 
   // ── Check if a size has any stock ────────────────────────
   const sizeHasStock = (size: string): boolean =>
