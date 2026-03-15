@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { detectIntent, shouldAutoReply } from "@/lib/whatsapp/intent-detection";
 import { generateAutoReply } from "@/lib/whatsapp/auto-reply";
+import { generateAIReply } from "@/lib/whatsapp/ai-sales";
 import { sendTextMessage } from "@/lib/whatsapp/business-api";
 import { db } from "@/lib/db";
 
@@ -126,10 +127,12 @@ export async function POST(request: NextRequest) {
 
 // ── Auto-Reply Handler ────────────────────────────────────
 
+/** Plan slugs that include AI sales assistant */
+const AI_SALES_PLANS = ["pro-ai", "business"];
+
 /**
  * Detect buyer intent and send an auto-reply if applicable.
- * Looks up the shop by matching the buyer's phone to recent orders,
- * checks that auto-reply is enabled in seller preferences.
+ * Uses AI (GPT-4o-mini) for pro-ai/business plans, template replies otherwise.
  */
 async function handleAutoReply(
   buyerPhone: string,
@@ -158,6 +161,9 @@ async function handleAutoReply(
             name: true,
             slug: true,
             sellerPreferences: { select: { autoReplyEnabled: true } },
+            subscription: {
+              select: { status: true, plan: { select: { slug: true } } },
+            },
           },
         },
       },
@@ -174,16 +180,44 @@ async function handleAutoReply(
       return;
     }
 
-    const reply = generateAutoReply(intent, {
-      shopName: recentOrder.shop.name,
-      catalogUrl: `https://tradefeed.co.za/catalog/${recentOrder.shop.slug}`,
-    });
+    // Try AI reply for pro-ai/business plans
+    const planSlug = recentOrder.shop.subscription?.plan?.slug;
+    const hasAI =
+      recentOrder.shop.subscription?.status === "ACTIVE" &&
+      !!planSlug &&
+      AI_SALES_PLANS.includes(planSlug);
 
-    if (!reply.shouldSend) return;
+    let replyText: string | null = null;
 
-    const result = await sendTextMessage(buyerPhone, reply.message);
-    console.log("[whatsapp-webhook] Auto-reply sent:", {
-      intent: reply.intent,
+    if (hasAI) {
+      const aiResult = await generateAIReply(
+        recentOrder.shopId,
+        recentOrder.shop.name,
+        recentOrder.shop.slug,
+        buyerPhone,
+        messageText,
+        intent.intent,
+      );
+      if (aiResult) {
+        replyText = aiResult.reply;
+        console.log("[whatsapp-webhook] AI reply generated for shop:", recentOrder.shop.slug);
+      }
+    }
+
+    // Fall back to template reply
+    if (!replyText) {
+      const reply = generateAutoReply(intent, {
+        shopName: recentOrder.shop.name,
+        catalogUrl: `https://tradefeed.co.za/catalog/${recentOrder.shop.slug}`,
+      });
+      if (!reply.shouldSend) return;
+      replyText = reply.message;
+    }
+
+    const result = await sendTextMessage(buyerPhone, replyText);
+    console.log("[whatsapp-webhook] Reply sent:", {
+      intent: intent.intent,
+      ai: hasAI,
       success: result.success,
       messageId: result.messageId,
     });

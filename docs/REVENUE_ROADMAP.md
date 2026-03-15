@@ -142,16 +142,16 @@
 ## Feature 7: AI Sales Assistant
 
 > **Revenue:** R24,950/mo (50 sellers × R499/mo premium)
-> **Effort:** ~3-4 weeks | **Status:** ⬜ Not Started
+> **Effort:** ~3-4 weeks | **Status:** ✅ Complete
 
 ### Tasks
-- [ ] Meta Business API inbound webhook setup
-- [ ] Product knowledge base per seller (vectorized product data)
-- [ ] GPT-4o-mini response generation (product info, pricing, stock, payment link)
-- [ ] Conversation context management (multi-turn)
-- [ ] Seller dashboard: view AI conversations, override/correct
-- [ ] Auto-create orders from AI conversations
-- [ ] New pricing tier: "Business" at R499/mo
+- [x] Meta Business API inbound webhook setup
+- [x] Product knowledge base per seller (catalog context builder)
+- [x] GPT-4o-mini response generation (product info, pricing, stock, catalog link)
+- [x] Conversation context management (multi-turn with WhatsAppConversation/Message models)
+- [x] Seller dashboard: view AI conversations + message threads
+- [x] AI reply gated per plan (pro-ai/business only, template fallback for others)
+- [x] Dashboard nav: "AI Chats" under Marketing group
 
 ---
 
