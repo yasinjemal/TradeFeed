@@ -12,7 +12,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
-import type { OrderStatus, Order, OrderItem } from "@prisma/client";
+import type { OrderStatus, Order, OrderItem, ShippingMethod } from "@prisma/client";
 
 // ── Order Number Generator ──────────────────────────────────
 
@@ -54,6 +54,11 @@ export interface CreateOrderInput {
   deliveryPostalCode?: string;
   whatsappMessage?: string;
   marketingConsent?: boolean;
+  // Shipping fields
+  shippingMethod?: ShippingMethod;
+  shippingCostCents?: number;
+  courierName?: string;
+  estimatedDelivery?: Date;
 }
 
 export interface StockValidationResult {
@@ -182,10 +187,14 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
         deliveryCity: input.deliveryCity,
         deliveryProvince: input.deliveryProvince,
         deliveryPostalCode: input.deliveryPostalCode,
-        totalCents,
+        totalCents: totalCents + (input.shippingCostCents ?? 0),
         itemCount,
         whatsappMessage: input.whatsappMessage,
         marketingConsent: input.marketingConsent ?? false,
+        shippingMethod: input.shippingMethod ?? "SELLER_ARRANGED",
+        shippingCostCents: input.shippingCostCents ?? 0,
+        courierName: input.courierName,
+        estimatedDelivery: input.estimatedDelivery,
         items: {
           create: verifiedItems.map((item) => ({
             productId: item.productId,

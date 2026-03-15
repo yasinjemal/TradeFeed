@@ -38,6 +38,7 @@ model Shop {
   address     String?                         // Street address (e.g. "Shop 42, Marble Tower")
   city        String?                         // City (e.g. "Johannesburg")
   province    String?                         // Province (e.g. "Gauteng")
+  postalCode  String?                         // Postal code (e.g. "2001")
   latitude    Float?                          // GPS latitude for map pin
   longitude   Float?                          // GPS longitude for map pin
 
@@ -540,6 +541,16 @@ model Order {
   // POPIA consent
   marketingConsent Boolean     @default(false)       // Buyer opted in to receive WhatsApp updates
 
+  // ── Shipping / Logistics ─────────────────────────────
+  shippingMethod   ShippingMethod @default(SELLER_ARRANGED) // How the order is shipped
+  courierName      String?                           // e.g. "The Courier Guy", "Pargo", "PostNet"
+  trackingNumber   String?                           // Waybill / tracking number from carrier
+  trackingUrl      String?                           // External carrier tracking URL
+  shippingCostCents Int        @default(0)           // Shipping cost in ZAR cents (paid by buyer)
+  estimatedDelivery DateTime?                        // Estimated delivery date
+  shippedAt        DateTime?                         // When the order was dispatched
+  deliveredAt      DateTime?                         // When the order was delivered
+
   // Relations
   items           OrderItem[]
   transactionFee  TransactionFee?
@@ -591,6 +602,12 @@ enum OrderStatus {
   SHIPPED                                           // Order dispatched / ready for collection
   DELIVERED                                         // Buyer received order
   CANCELLED                                         // Order cancelled by buyer or seller
+}
+
+enum ShippingMethod {
+  SELLER_ARRANGED                                   // Seller handles shipping themselves
+  COLLECTION                                        // Buyer collects from seller
+  PLATFORM_COURIER                                  // Platform-managed courier (Pargo, PostNet, TCG)
 }
 
 // ============================================================

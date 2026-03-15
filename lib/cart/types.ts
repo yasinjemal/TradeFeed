@@ -63,4 +63,8 @@ export interface CartContextValue {
   shopSlug: string;
   /** Shop ID for analytics tracking */
   shopId: string;
+  /** Shop province for shipping rate calculation */
+  shopProvince?: string;
+  /** Shop city for shipping rate calculation */
+  shopCity?: string;
 }

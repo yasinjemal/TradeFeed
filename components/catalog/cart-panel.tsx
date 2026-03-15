@@ -34,6 +34,7 @@ import {
 import { formatZAR } from "@/types";
 import { trackWhatsAppCheckoutAction } from "@/app/actions/analytics";
 import { checkoutAction } from "@/app/actions/orders";
+import { formatShippingCost, type ShippingRate } from "@/lib/shipping/rates";
 import { toast } from "sonner";
 
 const SA_PROVINCES = [
@@ -66,6 +67,8 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
     retailWhatsappNumber,
     shopId,
     shopSlug,
+    shopProvince,
+    shopCity,
   } = useCart();
 
   const [isPending, startTransition] = useTransition();
@@ -82,8 +85,57 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
     postalCode: "",
   });
 
+  // Shipping rate state
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<string | null>(null); // "carrier|service" or "collection"
+  const [loadingRates, setLoadingRates] = useState(false);
+
+  // Derive selected rate object
+  const selectedShippingRate = selectedShipping && selectedShipping !== "collection"
+    ? shippingRates.find((r) => `${r.carrier}|${r.service}` === selectedShipping) ?? null
+    : null;
+
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Fetch shipping rates when buyer selects a province
+  useEffect(() => {
+    if (!showDelivery || !delivery.province || !shopProvince) {
+      setShippingRates([]);
+      setSelectedShipping(null);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingRates(true);
+
+    const params = new URLSearchParams({
+      originProvince: shopProvince,
+      destinationProvince: delivery.province,
+      ...(shopCity ? { originCity: shopCity } : {}),
+      ...(delivery.city ? { destinationCity: delivery.city } : {}),
+    });
+
+    fetch(`/api/shipping/rates?${params}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        setShippingRates(data.rates ?? []);
+        // Auto-select cheapest
+        if (data.rates?.length > 0) {
+          const cheapest = data.rates[0];
+          setSelectedShipping(`${cheapest.carrier}|${cheapest.service}`);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setShippingRates([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingRates(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [showDelivery, delivery.province, delivery.city, shopProvince, shopCity]);
 
   // Close on Escape + focus trap
   useEffect(() => {
@@ -166,6 +218,14 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
           deliveryData?.province || undefined,
           deliveryData?.postalCode || undefined,
           marketingConsent,
+          // Shipping params
+          selectedShipping === "collection"
+            ? "COLLECTION"
+            : selectedShippingRate
+              ? "PLATFORM_COURIER"
+              : "SELLER_ARRANGED",
+          selectedShippingRate?.priceCents ?? 0,
+          selectedShippingRate?.carrier ?? undefined,
         );
 
         if (!result.success) {
@@ -552,13 +612,86 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
               </div>
             )}
 
+            {/* ── Shipping Options (after province selected) ── */}
+            {showDelivery && delivery.province && shopProvince && (
+              <div className="space-y-2 p-3 bg-blue-50/50 rounded-xl border border-blue-100 animate-in slide-in-from-top-2 duration-200">
+                <p className="text-xs font-medium text-stone-600 flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.079-.504 1.042-1.125a4.5 4.5 0 00-4.042-4.125H9.75M8.25 11.25h4.875c.621 0 1.163.461 1.204 1.08A61.87 61.87 0 0115 12.75M3.75 18.75V4.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121.75 4.5v10.5" />
+                  </svg>
+                  Shipping Options
+                </p>
+                {loadingRates ? (
+                  <div className="text-xs text-stone-400 py-2 text-center">Loading rates…</div>
+                ) : shippingRates.length === 0 ? (
+                  <div className="text-xs text-stone-500 py-1">
+                    Seller arranges delivery — discuss shipping via WhatsApp
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {/* Collection option — always available */}
+                    <label className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition-all ${
+                      selectedShipping === "collection" ? "border-blue-400 bg-blue-50" : "border-stone-200 bg-white hover:border-stone-300"
+                    }`}>
+                      <input
+                        type="radio"
+                        name="shipping"
+                        value="collection"
+                        checked={selectedShipping === "collection"}
+                        onChange={() => setSelectedShipping("collection")}
+                        className="h-3.5 w-3.5 text-blue-600 border-stone-300"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-medium text-stone-800">Collect from seller</span>
+                      </div>
+                      <span className="text-xs font-bold text-emerald-600">Free</span>
+                    </label>
+
+                    {shippingRates.slice(0, 4).map((rate) => {
+                      const key = `${rate.carrier}|${rate.service}`;
+                      return (
+                        <label key={key} className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition-all ${
+                          selectedShipping === key ? "border-blue-400 bg-blue-50" : "border-stone-200 bg-white hover:border-stone-300"
+                        }`}>
+                          <input
+                            type="radio"
+                            name="shipping"
+                            value={key}
+                            checked={selectedShipping === key}
+                            onChange={() => setSelectedShipping(key)}
+                            className="h-3.5 w-3.5 text-blue-600 border-stone-300"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs font-medium text-stone-800">{rate.carrier} — {rate.service}</span>
+                            <span className="block text-[10px] text-stone-400">{rate.estimatedDays} days</span>
+                          </div>
+                          <span className="text-xs font-bold text-stone-700">{formatShippingCost(rate.priceCents)}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Order Summary */}
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm text-stone-500">{t("orderTotal")}</span>
-                <div className="text-xl font-bold text-stone-900">
-                  {formatZAR(totalPriceInCents)}
-                </div>
+                {selectedShippingRate && selectedShipping !== "collection" ? (
+                  <>
+                    <div className="text-xs text-stone-400">
+                      Items: {formatZAR(totalPriceInCents)} + Shipping: {formatShippingCost(selectedShippingRate.priceCents)}
+                    </div>
+                    <div className="text-xl font-bold text-stone-900">
+                      {formatZAR(totalPriceInCents + selectedShippingRate.priceCents)}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-xl font-bold text-stone-900">
+                    {formatZAR(totalPriceInCents)}
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleClearCart}

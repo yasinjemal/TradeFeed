@@ -27,7 +27,7 @@ import { checkoutSchema } from "@/lib/validation/checkout";
 import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
 import { sendOrderConfirmation, sendOrderStatusUpdate as sendStatusWhatsApp, sendBuyerPaymentLink } from "@/lib/whatsapp/business-api";
 import { formatZAR } from "@/types";
-import type { OrderStatus } from "@prisma/client";
+import type { OrderStatus, ShippingMethod } from "@prisma/client";
 
 type ActionResult = {
   success: boolean;
@@ -64,6 +64,9 @@ export async function checkoutAction(
   deliveryProvince?: string,
   deliveryPostalCode?: string,
   marketingConsent?: boolean,
+  shippingMethod?: "SELLER_ARRANGED" | "COLLECTION" | "PLATFORM_COURIER",
+  shippingCostCents?: number,
+  courierName?: string,
 ): Promise<ActionResult> {
   // Retry wrapper for transient DB connection failures (Neon cold starts)
   const MAX_RETRIES = 2;
@@ -74,6 +77,7 @@ export async function checkoutAction(
       buyerName, buyerPhone, buyerNote,
       deliveryAddress, deliveryCity, deliveryProvince, deliveryPostalCode,
       marketingConsent,
+      shippingMethod, shippingCostCents, courierName,
     );
 
     // If it succeeded or was a business-logic error (not a DB connection error), return
@@ -114,6 +118,9 @@ async function _attemptCheckout(
   deliveryProvince?: string,
   deliveryPostalCode?: string,
   marketingConsent?: boolean,
+  shippingMethod?: "SELLER_ARRANGED" | "COLLECTION" | "PLATFORM_COURIER",
+  shippingCostCents?: number,
+  courierName?: string,
 ): Promise<InternalResult> {
   try {
     // Rate limit: 10 checkouts/min per IP
@@ -182,6 +189,9 @@ async function _attemptCheckout(
       deliveryPostalCode: input.deliveryPostalCode || undefined,
       whatsappMessage: input.whatsappMessage,
       marketingConsent: input.marketingConsent ?? false,
+      shippingMethod: shippingMethod as CreateOrderInput["shippingMethod"],
+      shippingCostCents: shippingCostCents ?? 0,
+      courierName,
     });
 
     if (!orderResult.success) {
@@ -301,6 +311,17 @@ export async function updateOrderStatusAction(
     // 4. Update
     await updateOrderStatus(orderId, access.shopId, newStatus);
 
+    // 4b. Set timestamps for shipping states
+    if (newStatus === "SHIPPED" || newStatus === "DELIVERED") {
+      const { db: prismaDb } = await import("@/lib/db");
+      await prismaDb.order.update({
+        where: { id: orderId, shopId: access.shopId },
+        data: newStatus === "SHIPPED"
+          ? { shippedAt: new Date() }
+          : { deliveredAt: new Date() },
+      });
+    }
+
     // 5. Send WhatsApp status update to buyer (fire-and-forget)
     if (order.buyerPhone) {
       const { db: prismaDb } = await import("@/lib/db");
@@ -382,6 +403,98 @@ export async function createOrderPaymentLinkAction(
     return {
       success: false,
       error: "Failed to create payment link. Please try again.",
+    };
+  }
+}
+
+// ── Ship Order with Tracking Info (Seller) ──────────────────
+
+type ShipOrderResult = {
+  success: boolean;
+  error?: string;
+};
+
+/**
+ * Mark an order as shipped with optional tracking details.
+ * Combines status update + shipping metadata in one action.
+ */
+export async function shipOrderAction(
+  shopSlug: string,
+  orderId: string,
+  courierName?: string,
+  trackingNumber?: string,
+): Promise<ShipOrderResult> {
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access) {
+      return { success: false, error: "Shop not found or access denied." };
+    }
+
+    const order = await getOrder(orderId, access.shopId);
+    if (!order) {
+      return { success: false, error: "Order not found." };
+    }
+
+    if (order.status !== "CONFIRMED") {
+      return {
+        success: false,
+        error: `Cannot ship an order in ${order.status} status. Confirm first.`,
+      };
+    }
+
+    // Sanitize inputs
+    const sanitizedCourier = courierName?.trim().slice(0, 100) || null;
+    const sanitizedTracking = trackingNumber?.trim().slice(0, 100) || null;
+
+    // Build tracking URL for known carriers
+    let trackingUrl: string | null = null;
+    if (sanitizedTracking) {
+      const carrierLower = sanitizedCourier?.toLowerCase() ?? "";
+      if (carrierLower.includes("courier guy")) {
+        trackingUrl = `https://www.thecourierguy.co.za/tracking?waybill=${encodeURIComponent(sanitizedTracking)}`;
+      } else if (carrierLower.includes("pargo")) {
+        trackingUrl = `https://tracking.pargo.co.za/${encodeURIComponent(sanitizedTracking)}`;
+      } else if (carrierLower.includes("aramex")) {
+        trackingUrl = `https://www.aramex.com/track/results?ShipmentNumber=${encodeURIComponent(sanitizedTracking)}`;
+      }
+    }
+
+    const { db: prismaDb } = await import("@/lib/db");
+    await prismaDb.order.update({
+      where: { id: orderId, shopId: access.shopId },
+      data: {
+        status: "SHIPPED",
+        courierName: sanitizedCourier,
+        trackingNumber: sanitizedTracking,
+        trackingUrl,
+        shippedAt: new Date(),
+      },
+    });
+
+    // Send WhatsApp notification with tracking info (fire-and-forget)
+    if (order.buyerPhone) {
+      prismaDb.shop.findUnique({ where: { id: access.shopId }, select: { name: true } })
+        .then((shop) => {
+          if (!shop) return;
+          const appTrackingUrl = `/track/${encodeURIComponent(order.orderNumber)}`;
+          return sendStatusWhatsApp(
+            order.buyerPhone!,
+            order.orderNumber,
+            shop.name,
+            "SHIPPED",
+            appTrackingUrl,
+          );
+        })
+        .catch(() => {});
+    }
+
+    revalidatePath(`/dashboard/${shopSlug}/orders`);
+    return { success: true };
+  } catch (error) {
+    await reportError("shipOrderAction", error, { shopSlug, orderId });
+    return {
+      success: false,
+      error: "Failed to ship order. Please try again.",
     };
   }
 }

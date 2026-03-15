@@ -91,7 +91,7 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
 
   // Format helpers
   const formatRand = (cents: number) => `R ${(cents / 100).toFixed(2)}`;
-  const formatDate = (date: Date) =>
+  const formatDate = (date: Date | string) =>
     new Date(date).toLocaleDateString("en-ZA", {
       day: "numeric",
       month: "long",
@@ -259,6 +259,65 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
           />
         </div>
 
+        {/* ── Shipping Info ──────────────────────────────── */}
+        {(order.courierName || order.trackingNumber) && (order.status === "SHIPPED" || order.status === "DELIVERED") && (
+          <div className="rounded-2xl bg-blue-500/5 border border-blue-500/15 p-6">
+            <h2 className="text-sm font-semibold text-stone-300 mb-4 flex items-center gap-2">
+              <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+              </svg>
+              Shipping Details
+            </h2>
+            <div className="space-y-2">
+              {order.courierName && (
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs text-stone-500 w-20">Courier</span>
+                  <span className="text-sm font-medium text-stone-200">{order.courierName}</span>
+                </div>
+              )}
+              {order.trackingNumber && (
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs text-stone-500 w-20">Tracking #</span>
+                  <span className="text-sm font-mono text-stone-200">{order.trackingNumber}</span>
+                </div>
+              )}
+              {order.shippedAt && (
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs text-stone-500 w-20">Shipped</span>
+                  <span className="text-sm text-stone-300">{formatDate(order.shippedAt)}</span>
+                </div>
+              )}
+              {order.deliveredAt && (
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs text-stone-500 w-20">Delivered</span>
+                  <span className="text-sm text-stone-300">{formatDate(order.deliveredAt)}</span>
+                </div>
+              )}
+              {order.estimatedDelivery && !order.deliveredAt && (
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs text-stone-500 w-20">ETA</span>
+                  <span className="text-sm text-stone-300">{formatDate(order.estimatedDelivery)}</span>
+                </div>
+              )}
+              {order.trackingUrl && (
+                <div className="mt-3">
+                  <a
+                    href={order.trackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                    Track with {order.courierName ?? "Carrier"}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ── Order Items ─────────────────────────────────── */}
         <div className="rounded-2xl bg-stone-900/60 border border-stone-800/50 overflow-hidden">
           <div className="px-6 py-4 border-b border-stone-800/50">
@@ -301,10 +360,18 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
               </div>
             ))}
           </div>
-          {/* Total + Reorder */}
-          <div className="px-6 py-4 border-t border-stone-700/50 bg-stone-900/80 flex items-center justify-between">
-            <span className="text-sm font-medium text-stone-400">Order Total</span>
-            <span className="text-lg font-extrabold text-emerald-400">{formatRand(order.totalCents)}</span>
+          {/* Total + Shipping Breakdown + Reorder */}
+          <div className="px-6 py-4 border-t border-stone-700/50 bg-stone-900/80 space-y-1">
+            {order.shippingCostCents > 0 && (
+              <div className="flex items-center justify-between text-xs text-stone-500">
+                <span>Shipping ({order.shippingMethod === "COLLECTION" ? "Collection" : order.courierName ?? "Courier"})</span>
+                <span>{formatRand(order.shippingCostCents)}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-stone-400">Order Total</span>
+              <span className="text-lg font-extrabold text-emerald-400">{formatRand(order.totalCents)}</span>
+            </div>
           </div>
           {(order.status === "DELIVERED" || order.status === "CANCELLED") && (
             <div className="px-6 py-3 border-t border-stone-800/30 bg-stone-900/40">

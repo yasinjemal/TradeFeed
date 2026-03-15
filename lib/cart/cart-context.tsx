@@ -88,6 +88,8 @@ interface CartProviderProps {
   shopId: string;
   whatsappNumber: string;
   retailWhatsappNumber?: string;
+  shopProvince?: string;
+  shopCity?: string;
 }
 
 export function CartProvider({
@@ -96,6 +98,8 @@ export function CartProvider({
   shopId,
   whatsappNumber,
   retailWhatsappNumber,
+  shopProvince,
+  shopCity,
 }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -217,6 +221,8 @@ export function CartProvider({
       retailWhatsappNumber,
       shopSlug,
       shopId,
+      shopProvince,
+      shopCity,
     }),
     [
       items,
@@ -230,6 +236,8 @@ export function CartProvider({
       retailWhatsappNumber,
       shopSlug,
       shopId,
+      shopProvince,
+      shopCity,
     ]
   );
 

@@ -12,7 +12,7 @@
 
 import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { updateOrderStatusAction, createOrderPaymentLinkAction } from "@/app/actions/orders";
+import { updateOrderStatusAction, createOrderPaymentLinkAction, shipOrderAction } from "@/app/actions/orders";
 import type { OrderStatus } from "@prisma/client";
 import { ExportButtons } from "@/components/export/export-buttons";
 import { IllustrationNoOrders } from "@/components/ui/illustrations";
@@ -54,6 +54,15 @@ interface Order {
   itemCount: number;
   items: OrderItem[];
   createdAt: string;
+  // Shipping fields
+  shippingMethod?: string | null;
+  shippingCostCents?: number | null;
+  courierName?: string | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  shippedAt?: string | null;
+  deliveredAt?: string | null;
+  estimatedDelivery?: string | null;
 }
 
 interface OrderStats {
@@ -370,6 +379,9 @@ function OrderCard({
   const [paymentLinkPending, setPaymentLinkPending] = useState(false);
   const [paymentLinkMessage, setPaymentLinkMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showShipForm, setShowShipForm] = useState(false);
+  const [shipCourier, setShipCourier] = useState("");
+  const [shipTracking, setShipTracking] = useState("");
   const router = useRouter();
 
   const config = STATUS_CONFIG[order.status];
@@ -417,6 +429,19 @@ function OrderCard({
     } finally {
       setPaymentLinkPending(false);
     }
+  }
+
+  function handleShipOrder() {
+    setError(null);
+    startTransition(async () => {
+      const result = await shipOrderAction(shopSlug, order.id, shipCourier || undefined, shipTracking || undefined);
+      if (!result.success) {
+        setError(result.error ?? "Failed to ship order.");
+      } else {
+        setShowShipForm(false);
+        router.refresh();
+      }
+    });
   }
 
   // Build WhatsApp payment message
@@ -568,26 +593,102 @@ function OrderCard({
             </div>
           )}
 
+          {/* Shipping / Tracking Info */}
+          {(order.status === "SHIPPED" || order.status === "DELIVERED") && order.courierName && (
+            <div className="text-xs text-stone-600 bg-blue-50 border border-blue-100 rounded-lg p-3 space-y-1">
+              <div className="font-medium text-blue-800">📦 Shipping Details</div>
+              <div>Courier: <span className="font-medium">{order.courierName}</span></div>
+              {order.trackingNumber && <div>Tracking: <span className="font-mono">{order.trackingNumber}</span></div>}
+              {order.shippedAt && <div>Shipped: {new Date(order.shippedAt).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>}
+              {order.deliveredAt && <div>Delivered: {new Date(order.deliveredAt).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>}
+              {order.estimatedDelivery && !order.deliveredAt && <div>ETA: {new Date(order.estimatedDelivery).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</div>}
+              {order.trackingUrl && (
+                <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-600 hover:underline font-medium mt-1">
+                  Track package →
+                </a>
+              )}
+            </div>
+          )}
+          {order.shippingCostCents != null && order.shippingCostCents > 0 && (
+            <div className="text-xs text-stone-500">
+              Shipping cost: R{(order.shippingCostCents / 100).toFixed(2)}
+              {order.shippingMethod === "COLLECTION" && " (Collection)"}
+              {order.shippingMethod === "PLATFORM_COURIER" && " (Platform courier)"}
+            </div>
+          )}
+
           {/* Status Actions */}
           {actions.length > 0 && (
-            <div className="flex gap-2 pt-1">
-              {actions.map((action) => (
-                <button
-                  key={action.status}
-                  onClick={() => handleStatusChange(action.status)}
-                  disabled={isPending}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-                    ${
-                      action.status === "CANCELLED"
-                        ? "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
-                        : "bg-emerald-600 text-white hover:bg-emerald-700"
-                    }
-                    ${isPending ? "opacity-50 cursor-not-allowed" : ""}
-                  `}
-                >
-                  {isPending ? "Updating..." : action.label}
-                </button>
-              ))}
+            <div className="space-y-2 pt-1">
+              {/* Ship form for CONFIRMED orders instead of plain "Mark Shipped" */}
+              {order.status === "CONFIRMED" && (
+                <>
+                  {!showShipForm ? (
+                    <button
+                      onClick={() => setShowShipForm(true)}
+                      disabled={isPending}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      📦 Ship Order
+                    </button>
+                  ) : (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+                      <div className="text-sm font-medium text-blue-800">Shipping Details</div>
+                      <input
+                        type="text"
+                        placeholder="Courier name (e.g. The Courier Guy)"
+                        value={shipCourier}
+                        onChange={(e) => setShipCourier(e.target.value)}
+                        className="w-full px-3 py-1.5 text-sm border border-blue-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Tracking number (optional)"
+                        value={shipTracking}
+                        onChange={(e) => setShipTracking(e.target.value)}
+                        className="w-full px-3 py-1.5 text-sm border border-blue-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleShipOrder}
+                          disabled={isPending}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          {isPending ? "Shipping..." : "Confirm Shipment"}
+                        </button>
+                        <button
+                          onClick={() => setShowShipForm(false)}
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+              {/* Other action buttons (Cancel, etc.) — skip "Mark Shipped" which is replaced by ship form */}
+              <div className="flex gap-2">
+                {actions
+                  .filter((action) => !(order.status === "CONFIRMED" && action.status === "SHIPPED"))
+                  .map((action) => (
+                  <button
+                    key={action.status}
+                    onClick={() => handleStatusChange(action.status)}
+                    disabled={isPending}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+                      ${
+                        action.status === "CANCELLED"
+                          ? "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
+                          : "bg-emerald-600 text-white hover:bg-emerald-700"
+                      }
+                      ${isPending ? "opacity-50 cursor-not-allowed" : ""}
+                    `}
+                  >
+                    {isPending ? "Updating..." : action.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

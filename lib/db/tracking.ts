@@ -56,6 +56,15 @@ export async function getOrderByNumber(orderNumber: string) {
     itemCount: order.itemCount,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
+    // Shipping info
+    shippingMethod: order.shippingMethod,
+    shippingCostCents: order.shippingCostCents,
+    courierName: order.courierName,
+    trackingNumber: order.trackingNumber,
+    trackingUrl: order.trackingUrl,
+    shippedAt: order.shippedAt,
+    deliveredAt: order.deliveredAt,
+    estimatedDelivery: order.estimatedDelivery,
     items: order.items.map((item) => ({
       id: item.id,
       productName: item.productName,

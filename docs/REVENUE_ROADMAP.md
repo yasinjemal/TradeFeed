@@ -158,16 +158,16 @@
 ## Feature 8: Logistics Integration
 
 > **Revenue:** R225,000/mo (R15 markup × 30 shipments × 500 sellers)
-> **Effort:** ~4-6 weeks | **Status:** ⬜ Not Started
+> **Effort:** ~4-6 weeks | **Status:** ✅ Complete
 
 ### Tasks
-- [ ] Carrier selection (Pargo, PostNet, The Courier Guy)
-- [ ] API integration for rate quotes
-- [ ] Shipping label generation (PDF)
-- [ ] Tracking number injection into order timeline
-- [ ] Buyer tracking page with carrier updates
-- [ ] Estimated delivery cost at checkout
-- [ ] Seller shipping settings (default carrier, pickup address)
+- [x] Carrier selection (Pargo, PostNet, The Courier Guy, Aramex)
+- [x] API integration for rate quotes
+- [ ] Shipping label generation (PDF) — deferred to Phase 3
+- [x] Tracking number injection into order timeline
+- [x] Buyer tracking page with carrier updates
+- [x] Estimated delivery cost at checkout
+- [ ] Seller shipping settings (default carrier, pickup address) — deferred to Phase 3
 
 ---
 
