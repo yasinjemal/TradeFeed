@@ -72,6 +72,7 @@ model Shop {
   reviews     Review[]                        // Reviews for this shop's products
   gallery     ShopGalleryItem[]               // Shop profile images & videos
   drops       Drop[]                          // Stock drop announcements
+  sellerPreferences SellerPreferences?         // AI memory / seller context for personalized AI output
 
   @@index([slug])
   @@index([isActive])
@@ -874,4 +875,39 @@ model AdminAuditLog {
   @@index([entityType, entityId])
   @@index([action])
   @@index([createdAt])
+}
+
+// ============================================================
+// SELLER PREFERENCES: AI memory per seller (replaces OpenViking)
+// Stores seller context to personalize AI-generated product
+// listings, WhatsApp auto-replies, and marketing content.
+// One-to-one with Shop. All fields optional — derived from
+// seller behavior when not explicitly set.
+// ============================================================
+model SellerPreferences {
+  id                  String   @id @default(cuid())
+  shopId              String   @unique              // One-to-one with Shop
+  shop                Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // ── Brand Voice ────────────────────────────────────
+  brandTone           String?                       // e.g. "professional", "casual", "youthful", "luxury"
+  brandDescription    String?                       // Short brand story for AI context (max 500 chars)
+
+  // ── Product Defaults ───────────────────────────────
+  defaultCategory     String?                       // Preferred default category for new products
+  preferredTags       String[]                      // Tags the seller commonly uses
+  priceRange          String?                       // e.g. "budget", "mid-range", "premium"
+  targetAudience      String?                       // e.g. "young women 18-25", "families", "professionals"
+
+  // ── Language & Locale ──────────────────────────────
+  languagePreference  String   @default("en")       // Preferred listing language (en, zu, xh, af, st)
+
+  // ── AI Behavior ────────────────────────────────────
+  aiToneNotes         String?                       // Free-text notes for AI personality tuning
+  autoReplyEnabled    Boolean  @default(false)      // Whether WhatsApp auto-reply is active
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([shopId])
 }

@@ -7,10 +7,12 @@
 
 import { getShopBySlug } from "@/lib/db/shops";
 import { getShopGallery } from "@/lib/db/gallery";
+import { getSellerPreferences } from "@/lib/db/seller-preferences";
 import { requireShopAccess } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { ShopSettingsForm } from "@/components/shop/shop-settings-form";
 import { ShopGalleryUpload } from "@/components/shop/shop-gallery-upload";
+import { SellerPreferencesForm } from "@/components/shop/seller-preferences-form";
 import { DeleteShopButton } from "@/components/shop/delete-shop-button";
 import { SettingsSidebar } from "@/components/shop/settings-sidebar";
 import Link from "next/link";
@@ -34,6 +36,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
   if (!shop) return notFound();
 
   const galleryItems = await getShopGallery(shop.id);
+  const sellerPrefs = await getSellerPreferences(shop.id);
 
   // Calculate profile completeness
   const checks = [
@@ -168,6 +171,21 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
               website: shop.website,
               whatsappGroupLink: shop.whatsappGroupLink,
             }}
+          />
+
+          {/* ── AI Preferences ─────────────────────────── */}
+          <SellerPreferencesForm
+            shopSlug={slug}
+            initialData={sellerPrefs ? {
+              brandTone: sellerPrefs.brandTone,
+              brandDescription: sellerPrefs.brandDescription,
+              defaultCategory: sellerPrefs.defaultCategory,
+              preferredTags: sellerPrefs.preferredTags,
+              priceRange: sellerPrefs.priceRange,
+              targetAudience: sellerPrefs.targetAudience,
+              languagePreference: sellerPrefs.languagePreference,
+              aiToneNotes: sellerPrefs.aiToneNotes,
+            } : null}
           />
 
           {/* ── Gallery ────────────────────────────────── */}

@@ -4,7 +4,7 @@
 // Handles incoming webhooks from the WhatsApp Cloud API:
 // - Webhook verification (GET)
 // - Message status updates (POST)
-// - Incoming messages from buyers (POST)
+// - Incoming messages from buyers (POST) with auto-reply
 //
 // SETUP:
 // 1. Set WHATSAPP_VERIFY_TOKEN in .env (any random string)
@@ -14,6 +14,10 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
+import { detectIntent, shouldAutoReply } from "@/lib/whatsapp/intent-detection";
+import { generateAutoReply } from "@/lib/whatsapp/auto-reply";
+import { sendTextMessage } from "@/lib/whatsapp/business-api";
+import { db } from "@/lib/db";
 
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 
@@ -99,6 +103,15 @@ export async function POST(request: NextRequest) {
               text: message.text?.body,
               timestamp: message.timestamp,
             });
+
+            // Auto-reply for text messages
+            if (message.type === "text" && message.text?.body) {
+              await handleAutoReply(
+                message.from,
+                message.text.body,
+                value.metadata.phone_number_id
+              );
+            }
           }
         }
       }
@@ -108,5 +121,74 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[whatsapp-webhook] Error processing webhook:", error);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
+}
+
+// ── Auto-Reply Handler ────────────────────────────────────
+
+/**
+ * Detect buyer intent and send an auto-reply if applicable.
+ * Looks up the shop by matching the buyer's phone to recent orders,
+ * checks that auto-reply is enabled in seller preferences.
+ */
+async function handleAutoReply(
+  buyerPhone: string,
+  messageText: string,
+  _phoneNumberId: string
+) {
+  try {
+    const intent = detectIntent(messageText);
+
+    if (!shouldAutoReply(intent)) {
+      console.log("[whatsapp-webhook] No auto-reply for intent:", intent.intent);
+      return;
+    }
+
+    // Find the shop this buyer most recently ordered from
+    const recentOrder = await db.order.findFirst({
+      where: {
+        buyerPhone: { contains: buyerPhone.slice(-9) }, // match last 9 digits
+        deletedAt: null,
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        shopId: true,
+        shop: {
+          select: {
+            name: true,
+            slug: true,
+            sellerPreferences: { select: { autoReplyEnabled: true } },
+          },
+        },
+      },
+    });
+
+    if (!recentOrder) {
+      console.log("[whatsapp-webhook] No shop found for buyer:", buyerPhone);
+      return;
+    }
+
+    // Check if seller has auto-reply enabled
+    if (!recentOrder.shop.sellerPreferences?.autoReplyEnabled) {
+      console.log("[whatsapp-webhook] Auto-reply disabled for shop:", recentOrder.shop.slug);
+      return;
+    }
+
+    const reply = generateAutoReply(intent, {
+      shopName: recentOrder.shop.name,
+      catalogUrl: `https://tradefeed.co.za/catalog/${recentOrder.shop.slug}`,
+    });
+
+    if (!reply.shouldSend) return;
+
+    const result = await sendTextMessage(buyerPhone, reply.message);
+    console.log("[whatsapp-webhook] Auto-reply sent:", {
+      intent: reply.intent,
+      success: result.success,
+      messageId: result.messageId,
+    });
+  } catch (error) {
+    // Non-fatal — don't crash the webhook handler
+    console.error("[whatsapp-webhook] Auto-reply error:", error);
   }
 }

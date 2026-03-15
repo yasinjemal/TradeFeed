@@ -19,6 +19,7 @@ import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { CopyButton } from "@/components/ui/copy-button";
 import { SellerHealthCard } from "@/components/dashboard/seller-health-card";
+import { TrendingProductsWidget } from "@/components/dashboard/trending-products";
 
 interface DashboardPageProps {
   params: Promise<{ slug: string }>;
@@ -690,6 +691,11 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           </div>
         )}
       </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Trending Products (AI Intelligence)                 */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <TrendingProductsWidget shopId={shop.id} shopSlug={slug} />
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* Quick Actions Grid                                  */}

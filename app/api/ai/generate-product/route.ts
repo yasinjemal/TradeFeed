@@ -20,7 +20,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireShopAccess } from "@/lib/auth";
 import { checkAiAccess, trackAiGeneration, FREE_AI_CREDITS } from "@/lib/db/ai";
-import { aiGenerateRequestSchema, aiProductResponseSchema } from "@/lib/validation/ai-product";
+import { getSellerPreferences, buildSellerAIContext } from "@/lib/db/seller-preferences";
+import { aiGenerateRequestSchema, aiProductResponseSchema, applyAISafety } from "@/lib/validation/ai-product";
 import type { AiProductResponse } from "@/lib/validation/ai-product";
 
 export async function POST(req: NextRequest) {
@@ -61,7 +62,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4. Call AI provider
+    // 4. Load seller preferences for personalized AI output
+    const sellerPrefs = await getSellerPreferences(access.shopId);
+    const sellerContext = buildSellerAIContext(sellerPrefs);
+
+    // 5. Call AI provider
     let aiResult: AiProductResponse;
 
     if (process.env.OPENAI_API_KEY) {
@@ -115,7 +120,7 @@ Return ONLY valid JSON:
   "shortCaption": "WhatsApp caption with emoji + CTA (under 160 chars)",
   "seoTitle": "Google search title under 60 chars with Buy Online or SA keyword",
   "seoDescription": "Google meta description 120-155 chars with benefit + feature + CTA"
-}`,
+}` + sellerContext,
           },
           {
             role: "user",
@@ -166,13 +171,19 @@ Return ONLY valid JSON:
       };
     }
 
-    // 5. Track usage + return structured response (no auto-save)
+    // 6. Apply AI safety layer (sanitize → moderate → limit tags)
+    const { data: safeResult, flags } = applyAISafety(aiResult);
+    if (flags.length > 0) {
+      console.warn("[AI] Content moderation flags:", flags);
+    }
+
+    // 7. Track usage + return structured response (no auto-save)
     await trackAiGeneration(access.shopId);
     const newCreditsRemaining = hasUnlimitedAi ? Infinity : creditsRemaining - 1;
 
     return NextResponse.json({
       success: true,
-      data: aiResult,
+      data: safeResult,
       credits: {
         remaining: newCreditsRemaining === Infinity ? null : newCreditsRemaining,
         unlimited: hasUnlimitedAi,

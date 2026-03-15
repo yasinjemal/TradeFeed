@@ -20,7 +20,9 @@
     "db:health": "npx tsx scripts/db-health-check.ts",
     "migrate:images": "npx tsx scripts/migrate-images.ts",
     "seed:plans": "npx tsx scripts/seed-plans.ts",
-    "seed:categories": "npx tsx scripts/seed-global-categories.ts"
+    "seed:categories": "npx tsx scripts/seed-global-categories.ts",
+    "ai:eval": "promptfoo eval",
+    "ai:eval:view": "promptfoo view"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.38.2",
@@ -60,6 +62,7 @@
     "eslint": "^9.39.3",
     "eslint-config-next": "^16.1.6",
     "postcss": "^8.5.6",
+    "promptfoo": "^0.120.19",
     "shadcn": "^3.8.5",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",

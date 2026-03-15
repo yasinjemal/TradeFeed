@@ -55,5 +55,11 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: AI Eval (Promptfoo)
+        if: env.OPENAI_API_KEY != ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: npx promptfoo eval --no-progress-bar
+
       - name: Build
         run: npm run build

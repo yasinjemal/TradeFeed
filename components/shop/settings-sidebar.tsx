@@ -16,6 +16,7 @@ const SECTIONS = [
   { id: "location", label: "Location", icon: "📍" },
   { id: "hours", label: "Business Hours", icon: "🕐" },
   { id: "social", label: "Social & Links", icon: "🔗" },
+  { id: "ai", label: "AI Preferences", icon: "🤖" },
   { id: "gallery", label: "Gallery", icon: "🎨" },
 ] as const;
 

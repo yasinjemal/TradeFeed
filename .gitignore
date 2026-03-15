@@ -30,6 +30,9 @@ yarn-error.log*
 .env
 .env*.local
 
+# Promptfoo eval cache
+.promptfoo/
+
 # Vercel
 .vercel
 

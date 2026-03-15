@@ -1,0 +1,277 @@
+# ============================================================
+# Promptfoo — AI Product Generator Evaluation Config
+# ============================================================
+# Tests the GPT-4o-mini Vision prompt used by TradeFeed's
+# AI product listing generator at POST /api/ai/generate-product
+#
+# Run:   npx promptfoo eval
+# View:  npx promptfoo view
+# CI:    npx promptfoo eval --no-cache --output results.json
+# ============================================================
+
+description: "TradeFeed AI Product Generator — SEO Quality Eval"
+
+prompts:
+  - id: product-generator
+    label: "GPT-4o-mini SEO Product Generator"
+    raw: |
+      [
+        {
+          "role": "system",
+          "content": "You are an SEO-specialist product listing expert for TradeFeed, a South African online marketplace.\nYour job: generate product listings that rank well on Google Shopping AND Google Search in South Africa.\n\nSEO RULES:\n- Product NAME: Use a Google Merchant Center-friendly title format.\n  Pattern: \"[Brand if visible] [Product Type] [Key Feature] — [Material/Color/Size Range]\"\n  Example: \"Premium Oversized Hoodie — Fleece Lined, Unisex, S-XXL\"\n  Keep 5-80 characters. Front-load the most important keyword.\n\n- Product DESCRIPTION: Write 100-350 characters. Structure it as:\n  Line 1: What it is + primary selling point.\n  Line 2: Key features (material, fit, size range, technical specs).\n  Line 3: Who it's for or use case.\n  Naturally include relevant search terms South African buyers would use.\n  Avoid keyword stuffing — write for humans first, Google second.\n\n- SEO TITLE (seoTitle): Optimized for Google search results. Under 60 characters.\n  Include the product type + \"Buy Online\" or \"South Africa\" or price-related term.\n  Example: \"Oversized Fleece Hoodie — Buy Online | TradeFeed SA\"\n\n- SEO DESCRIPTION (seoDescription): Meta description for Google. 120-155 characters.\n  Include a benefit, a feature, and a call-to-action.\n  Example: \"Shop premium fleece-lined hoodies in S-XXL. Free catalog browsing, order via WhatsApp. Available now on TradeFeed.\"\n\n- TAGS: 5-8 search-relevant keywords buyers would type. Mix broad + specific.\n  Include \"buy [product] online South Africa\" variations and material/style terms.\n\n- SHORT CAPTION: WhatsApp-ready with emoji (under 160 chars). Include a call-to-action.\n\nReturn ONLY valid JSON:\n{\n  \"name\": \"SEO-optimized product name (5-80 chars)\",\n  \"description\": \"Keyword-rich, structured product description (100-350 chars)\",\n  \"category\": \"Best-fitting category from: T-Shirts, Hoodies, Jackets, Jeans, Dresses, Sneakers, Phones, Earbuds, Chargers, Skincare, Fragrance, Snacks, Beverages, Home Decor, Accessories, Other\",\n  \"tags\": [\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\", \"tag6\"],\n  \"shortCaption\": \"WhatsApp caption with emoji + CTA (under 160 chars)\",\n  \"seoTitle\": \"Google search title under 60 chars with Buy Online or SA keyword\",\n  \"seoDescription\": \"Google meta description 120-155 chars with benefit + feature + CTA\"\n}"
+        },
+        {
+          "role": "user",
+          "content": "Analyze this product and generate a complete, SEO-optimized product listing for the South African market: {{product}}"
+        }
+      ]
+
+providers:
+  - id: openai:chat:gpt-4o-mini
+    config:
+      temperature: 0.6
+      max_tokens: 1200
+      response_format:
+        type: json_object
+
+defaultTest:
+  assert:
+    # Must return valid JSON
+    - type: is-json
+
+    # Must contain all required fields
+    - type: javascript
+      value: |
+        const data = JSON.parse(output);
+        const required = ['name', 'description', 'category', 'tags', 'shortCaption', 'seoTitle', 'seoDescription'];
+        const missing = required.filter(f => !data[f]);
+        return missing.length === 0 ? { pass: true, score: 1 } : { pass: false, score: 0, reason: `Missing fields: ${missing.join(', ')}` };
+
+    # Name: 5-80 chars
+    - type: javascript
+      value: |
+        const data = JSON.parse(output);
+        const len = data.name?.length || 0;
+        return len >= 5 && len <= 80
+          ? { pass: true, score: 1 }
+          : { pass: false, score: 0, reason: `Name length ${len} — must be 5-80 chars` };
+
+    # SEO Title: under 70 chars (schema limit)
+    - type: javascript
+      value: |
+        const data = JSON.parse(output);
+        const len = data.seoTitle?.length || 0;
+        return len > 0 && len <= 70
+          ? { pass: true, score: 1 }
+          : { pass: false, score: 0, reason: `SEO title length ${len} — must be 1-70 chars` };
+
+    # SEO Description: under 160 chars (schema limit)
+    - type: javascript
+      value: |
+        const data = JSON.parse(output);
+        const len = data.seoDescription?.length || 0;
+        return len > 0 && len <= 160
+          ? { pass: true, score: 1 }
+          : { pass: false, score: 0, reason: `SEO description length ${len} — must be 1-160 chars` };
+
+    # Tags: array of 3-10 items
+    - type: javascript
+      value: |
+        const data = JSON.parse(output);
+        const tags = data.tags;
+        if (!Array.isArray(tags)) return { pass: false, score: 0, reason: 'Tags must be an array' };
+        if (tags.length < 3 || tags.length > 10) return { pass: false, score: 0, reason: `Tag count ${tags.length} — must be 3-10` };
+        const longTags = tags.filter(t => t.length > 50);
+        if (longTags.length > 0) return { pass: false, score: 0, reason: `Tags over 50 chars: ${longTags.join(', ')}` };
+        return { pass: true, score: 1 };
+
+    # Category: must be from allowed list
+    - type: javascript
+      value: |
+        const data = JSON.parse(output);
+        const allowed = ['T-Shirts', 'Hoodies', 'Jackets', 'Jeans', 'Dresses', 'Sneakers', 'Phones', 'Earbuds', 'Chargers', 'Skincare', 'Fragrance', 'Snacks', 'Beverages', 'Home Decor', 'Accessories', 'Other'];
+        return allowed.includes(data.category)
+          ? { pass: true, score: 1 }
+          : { pass: false, score: 0.5, reason: `Category "${data.category}" not in allowed list` };
+
+    # Short caption: under 160 chars with emoji
+    - type: javascript
+      value: |
+        const data = JSON.parse(output);
+        const caption = data.shortCaption || '';
+        if (caption.length > 160) return { pass: false, score: 0, reason: `Caption ${caption.length} chars — must be under 160` };
+        const hasEmoji = /[\u{1F300}-\u{1F9FF}]/u.test(caption);
+        return hasEmoji
+          ? { pass: true, score: 1 }
+          : { pass: false, score: 0.5, reason: 'Caption missing emoji' };
+
+    # Description: 50-2000 chars (relaxed from prompt's 100-350 to match Zod schema)
+    - type: javascript
+      value: |
+        const data = JSON.parse(output);
+        const len = data.description?.length || 0;
+        return len >= 50 && len <= 2000
+          ? { pass: true, score: 1 }
+          : { pass: false, score: 0, reason: `Description length ${len} — must be 50-2000 chars` };
+
+tests:
+  # ── Apparel ────────────────────────────────────────────
+  - vars:
+      product: "Men's white Nike sneakers, brand new in box, size 8-12 available"
+    assert:
+      - type: contains
+        value: "sneaker"
+        transform: output.toLowerCase()
+
+  - vars:
+      product: "Women's floral summer dress, lightweight cotton, bright colors, knee-length"
+    assert:
+      - type: contains
+        value: "dress"
+        transform: output.toLowerCase()
+
+  - vars:
+      product: "Black oversized hoodie with front pocket, fleece lined, unisex sizes S to 3XL"
+    assert:
+      - type: contains
+        value: "hoodie"
+        transform: output.toLowerCase()
+
+  - vars:
+      product: "Men's slim fit blue jeans, stretch denim, waist 28-38"
+    assert:
+      - type: contains
+        value: "jeans"
+        transform: output.toLowerCase()
+
+  - vars:
+      product: "Kids school uniform polo shirt, white cotton, ages 6-12"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          const text = (data.name + ' ' + data.description).toLowerCase();
+          return text.includes('polo') || text.includes('shirt') || text.includes('uniform')
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0, reason: 'Missing polo/shirt/uniform keyword' };
+
+  # ── Electronics ────────────────────────────────────────
+  - vars:
+      product: "Samsung Galaxy A15 smartphone, 128GB, dual SIM, brand new sealed"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          return data.category === 'Phones'
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0.5, reason: `Expected Phones, got ${data.category}` };
+
+  - vars:
+      product: "Wireless Bluetooth earbuds with charging case, noise cancelling, 24hr battery"
+    assert:
+      - type: contains
+        value: "earbuds"
+        transform: output.toLowerCase()
+
+  - vars:
+      product: "Fast USB-C charger 65W, compatible with Samsung and iPhone, wall adapter"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          return data.category === 'Chargers'
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0.5, reason: `Expected Chargers, got ${data.category}` };
+
+  # ── Beauty & Skincare ──────────────────────────────────
+  - vars:
+      product: "Ordinary Niacinamide serum 30ml, pore minimizing, for oily skin"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          return data.category === 'Skincare'
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0.5, reason: `Expected Skincare, got ${data.category}` };
+
+  - vars:
+      product: "Hugo Boss Bottled Intense perfume for men, 100ml EDP"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          return data.category === 'Fragrance'
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0.5, reason: `Expected Fragrance, got ${data.category}` };
+
+  # ── Food & Beverages ───────────────────────────────────
+  - vars:
+      product: "Biltong mixed pack 500g, droewors and sliced biltong, South African made"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          const text = (data.name + ' ' + data.description + ' ' + data.tags.join(' ')).toLowerCase();
+          return text.includes('biltong') || text.includes('south africa')
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0, reason: 'Missing biltong or South Africa keyword' };
+
+  - vars:
+      product: "Rooibos tea gift set, 6 flavors, organic, proudly South African"
+    assert:
+      - type: contains
+        value: "rooibos"
+        transform: output.toLowerCase()
+
+  # ── Home & Accessories ─────────────────────────────────
+  - vars:
+      product: "Handmade Zulu beaded necklace, traditional design, multicolor"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          return data.category === 'Accessories' || data.category === 'Home Decor'
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0.5, reason: `Expected Accessories/Home Decor, got ${data.category}` };
+
+  - vars:
+      product: "LED desk lamp with wireless phone charger, 3 color temperatures, USB powered"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          return data.category === 'Home Decor' || data.category === 'Accessories' || data.category === 'Chargers'
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0.5, reason: `Category ${data.category} seems off for a desk lamp` };
+
+  - vars:
+      product: "Stainless steel water bottle 750ml, insulated, keeps cold 24hrs, gym use"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          const text = (data.name + ' ' + data.description).toLowerCase();
+          return text.includes('water') || text.includes('bottle')
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0, reason: 'Missing water/bottle keyword' };
+
+  # ── Edge Cases ─────────────────────────────────────────
+  - vars:
+      product: "Mystery box R99, random items, surprise gift"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          return data.name.length >= 5
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0, reason: 'AI should generate a proper name even for vague products' };
+
+  - vars:
+      product: "Bundle: 2x T-shirts + 1 hoodie + 1 cap, street style combo deal"
+    assert:
+      - type: javascript
+        value: |
+          const data = JSON.parse(output);
+          return data.tags.length >= 3
+            ? { pass: true, score: 1 }
+            : { pass: false, score: 0, reason: `Only ${data.tags.length} tags for a bundle product` };

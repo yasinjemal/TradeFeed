@@ -6,6 +6,18 @@
 // Never validate inline. Always use .parse() or .safeParse().
 // ============================================================
 
+// AI Product Generation
+export {
+  aiProductResponseSchema,
+  aiGenerateRequestSchema,
+  sanitizeAIOutput,
+  moderateContent,
+  limitTags,
+  applyAISafety,
+  type AiProductResponse,
+  type AiGenerateRequest,
+} from "./ai-product";
+
 // Phase 2 — Shop schemas
 export { shopCreateSchema, type ShopCreateInput } from "./shop";
 

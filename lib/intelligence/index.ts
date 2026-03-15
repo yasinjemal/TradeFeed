@@ -15,3 +15,5 @@ export type {
   SellerSuggestion,
 } from "./seller-metrics";
 export { generateSuggestions } from "./seller-suggestions";
+export { computeTrendingProducts } from "./trending";
+export type { ProductOrderCount, TrendingProduct } from "./trending";
