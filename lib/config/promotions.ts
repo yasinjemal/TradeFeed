@@ -179,3 +179,35 @@ export function parsePromotionPaymentId(paymentId: string): {
     weeks,
   };
 }
+
+// ── Shop Boost (Featured Listing) ────────────────────────────
+
+export const SHOP_BOOST_PRICE_PER_WEEK_CENTS = 19900; // R199/week
+
+export const SHOP_BOOST_DURATIONS = [
+  { weeks: 1, label: "1 week", discount: 0 },
+  { weeks: 2, label: "2 weeks", discount: 0.05 },
+  { weeks: 4, label: "4 weeks", discount: 0.15 },
+] as const;
+
+export function calculateShopBoostPrice(weeks: number): number {
+  const duration = SHOP_BOOST_DURATIONS.find((d) => d.weeks === weeks);
+  const discount = duration?.discount ?? 0;
+  return Math.round(SHOP_BOOST_PRICE_PER_WEEK_CENTS * weeks * (1 - discount));
+}
+
+export function buildShopBoostPaymentId(shopId: string, weeks: number): string {
+  return `shopboost_${shopId}_${weeks}`;
+}
+
+export function parseShopBoostPaymentId(paymentId: string): {
+  shopId: string;
+  weeks: number;
+} | null {
+  if (!paymentId.startsWith("shopboost_")) return null;
+  const parts = paymentId.split("_");
+  if (parts.length < 3) return null;
+  const weeks = parseInt(parts[2]!, 10);
+  if (isNaN(weeks) || weeks <= 0) return null;
+  return { shopId: parts[1]!, weeks };
+}

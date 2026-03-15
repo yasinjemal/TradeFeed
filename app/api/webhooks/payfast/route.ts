@@ -22,8 +22,9 @@
 import { NextResponse } from "next/server";
 import { validatePayFastITN } from "@/lib/payfast";
 import { upgradeSubscription, cancelSubscription } from "@/lib/db/subscriptions";
-import { parsePromotionPaymentId, calculatePromotionPrice } from "@/lib/config/promotions";
+import { parsePromotionPaymentId, calculatePromotionPrice, parseShopBoostPaymentId, calculateShopBoostPrice } from "@/lib/config/promotions";
 import { createPromotedListing } from "@/lib/db/promotions";
+import { activateShopBoost } from "@/lib/db/shops";
 import { reportError } from "@/lib/telemetry";
 import { markOrderPaid, getOrderForWebhook } from "@/lib/db/orders";
 import { createTransactionFee } from "@/lib/db/transaction-fees";
@@ -68,6 +69,12 @@ export async function POST(request: Request) {
 
     if (promoData) {
       return handlePromotionPayment(promoData, paymentStatus, body);
+    }
+
+    // ── Route: Shop Boost payment ────────────────────────
+    const boostData = parseShopBoostPaymentId(paymentId);
+    if (boostData) {
+      return handleShopBoostPayment(boostData, paymentStatus, body);
     }
 
     // ── Route: Order payment ────────────────────────────
@@ -140,6 +147,46 @@ async function handlePromotionPayment(
       { error: "Failed to create promotion" },
       { status: 500 },
     );
+  }
+
+  return NextResponse.json({ received: true });
+}
+
+// ── Shop Boost Payment Handler ───────────────────────────────
+
+async function handleShopBoostPayment(
+  boostData: { shopId: string; weeks: number },
+  paymentStatus: string | undefined,
+  body: Record<string, string>,
+) {
+  if (paymentStatus !== "COMPLETE") {
+    console.log(`[PayFast ITN] Shop boost payment not complete: ${paymentStatus}`);
+    return NextResponse.json({ received: true });
+  }
+
+  const expectedAmount = calculateShopBoostPrice(boostData.weeks);
+  const receivedAmountCents = Math.round(parseFloat(body["amount_gross"] ?? "0") * 100);
+
+  if (Math.abs(receivedAmountCents - expectedAmount) > 100) {
+    await reportError(
+      "payfast-itn-shopboost-amount-mismatch",
+      new Error("Shop boost amount mismatch"),
+      { expectedAmount, receivedAmountCents, paymentId: body["m_payment_id"] }
+    );
+    return NextResponse.json({ error: "Amount mismatch" }, { status: 400 });
+  }
+
+  try {
+    await activateShopBoost(boostData.shopId, boostData.weeks);
+    console.log(
+      `[PayFast ITN] Shop boost activated: ${boostData.shopId} (${boostData.weeks}wk)`
+    );
+  } catch (err) {
+    await reportError("payfast-itn-activate-shopboost", err, {
+      shopId: boostData.shopId,
+      weeks: boostData.weeks,
+    });
+    return NextResponse.json({ error: "Failed to activate shop boost" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

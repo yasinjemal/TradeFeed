@@ -8,8 +8,9 @@
 "use server";
 
 import { requireShopAccess } from "@/lib/auth";
-import { buildPayFastCheckoutUrl } from "@/lib/payfast";
+import { buildPayFastCheckoutUrl, buildShopBoostCheckoutUrl } from "@/lib/payfast";
 import { getPlans, getShopSubscription, cancelSubscription } from "@/lib/db/subscriptions";
+import { buildShopBoostPaymentId, calculateShopBoostPrice, SHOP_BOOST_DURATIONS } from "@/lib/config/promotions";
 import { db } from "@/lib/db";
 
 interface BillingActionResult {
@@ -82,5 +83,46 @@ export async function cancelSubscriptionAction(
   } catch (error) {
     console.error("[cancelSubscription]", error);
     return { success: false, error: "Failed to cancel subscription." };
+  }
+}
+
+/**
+ * Purchase a shop boost (featured listing on marketplace).
+ */
+export async function purchaseShopBoostAction(
+  shopSlug: string,
+  weeks: number,
+): Promise<BillingActionResult> {
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access) return { success: false, error: "Access denied." };
+
+    // Validate duration
+    const validDuration = SHOP_BOOST_DURATIONS.find((d) => d.weeks === weeks);
+    if (!validDuration) return { success: false, error: "Invalid boost duration." };
+
+    const amountInCents = calculateShopBoostPrice(weeks);
+    const paymentId = buildShopBoostPaymentId(access.shopId, weeks);
+
+    const user = await db.user.findUnique({
+      where: { id: access.userId },
+      select: { email: true, firstName: true, lastName: true },
+    });
+    if (!user) return { success: false, error: "User not found." };
+
+    const checkoutUrl = buildShopBoostCheckoutUrl({
+      paymentId,
+      shopSlug,
+      amountInCents,
+      weeks,
+      buyerEmail: user.email,
+      buyerFirstName: user.firstName ?? undefined,
+      buyerLastName: user.lastName ?? undefined,
+    });
+
+    return { success: true, checkoutUrl };
+  } catch (error) {
+    console.error("[purchaseShopBoost]", error);
+    return { success: false, error: "Failed to create boost checkout." };
   }
 }

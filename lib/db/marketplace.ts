@@ -910,12 +910,13 @@ export async function getFeaturedShops(
 ): Promise<FeaturedShop[]> {
   const now = new Date();
 
-  // Get shops that are either admin-featured or have a spotlight promotion
+  // Get shops that are admin-featured, have a spotlight promotion, or have active paid boost
   const shops = await db.shop.findMany({
     where: {
       isActive: true,
       OR: [
         { isFeaturedShop: true },
+        { featuredUntil: { gt: now } },
         {
           promotedListings: {
             some: {

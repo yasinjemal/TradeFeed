@@ -33,6 +33,7 @@ model Shop {
   isActive    Boolean  @default(true)         // Soft-disable without deleting
   isVerified  Boolean  @default(false)        // Admin-verified seller badge
   isFeaturedShop Boolean @default(false)      // Admin-featured on marketplace
+  featuredUntil DateTime?                     // Self-service paid boost expiry (null = not boosted)
 
   // ── Location ─────────────────────────────────────────
   address     String?                         // Street address (e.g. "Shop 42, Marble Tower")

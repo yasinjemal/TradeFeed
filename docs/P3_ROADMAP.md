@@ -283,14 +283,17 @@
 - File: `lib/db/shops.ts` (referral tracking)
 - Estimated effort: **3–4 hours**
 
-### 6.3 ⬜ Featured Listings (Paid Boost)
+### 6.3 ✅ Featured Listings (Paid Boost)
 
-**Current:** Marketplace shows shops sorted by default order.
+**Current:** Admin-only `isFeaturedShop` toggle + SPOTLIGHT product promotions.
 **Goal:** Sellers can pay to feature their shop at the top of marketplace.
 
-- Add `isFeatured` + `featuredUntil` to Shop model
-- Marketplace page: featured shops section above organic results
-- Payment flow via existing PayFast integration
+- Added `featuredUntil DateTime?` to Shop model
+- Self-service boost purchase via PayFast (R199/week, 5% off 2wk, 15% off 4wk)
+- Dashboard page: `/dashboard/[slug]/boost` with status, pricing, purchase flow
+- PayFast webhook handler for `shopboost_*` payment IDs
+- `getFeaturedShops()` updated to include time-limited paid boosts
+- Boost extends from current expiry if already active
 - Estimated effort: **4–6 hours**
 
 ---

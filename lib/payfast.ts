@@ -170,6 +170,52 @@ export function buildPromotionCheckoutUrl(params: PromotionCheckoutParams): stri
   return `${baseUrl}?${queryString}`;
 }
 
+// ── Shop Boost Payment (One-Time) ────────────────────────────
+
+interface ShopBoostCheckoutParams {
+  paymentId: string;
+  shopSlug: string;
+  amountInCents: number;
+  weeks: number;
+  buyerEmail: string;
+  buyerFirstName?: string;
+  buyerLastName?: string;
+}
+
+export function buildShopBoostCheckoutUrl(params: ShopBoostCheckoutParams): string {
+  const config = getConfig();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+  const amountInRands = (params.amountInCents / 100).toFixed(2);
+
+  const data: Record<string, string> = {
+    merchant_id: config.merchantId,
+    merchant_key: config.merchantKey,
+    return_url: `${appUrl}/dashboard/${params.shopSlug}/boost?status=success`,
+    cancel_url: `${appUrl}/dashboard/${params.shopSlug}/boost?status=cancelled`,
+    notify_url: `${appUrl}/api/webhooks/payfast`,
+    name_first: params.buyerFirstName ?? "",
+    name_last: params.buyerLastName ?? "",
+    email_address: params.buyerEmail,
+    m_payment_id: params.paymentId,
+    amount: amountInRands,
+    item_name: `TradeFeed Shop Boost — ${params.weeks} week${params.weeks > 1 ? "s" : ""}`,
+    item_description: "Featured placement on TradeFeed Marketplace",
+  };
+
+  const filteredData = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== ""),
+  );
+
+  const signature = generateSignature(filteredData, config.passphrase);
+  filteredData["signature"] = signature;
+
+  const baseUrl = config.sandbox ? PAYFAST_SANDBOX_URL : PAYFAST_LIVE_URL;
+  const queryString = new URLSearchParams(filteredData).toString();
+
+  return `${baseUrl}?${queryString}`;
+}
+
 // ── Order Payment (One-Time, Buyer-Facing) ───────────────────
 
 interface OrderPaymentParams {

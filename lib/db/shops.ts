@@ -523,3 +523,51 @@ export async function getSellerTierData(
     metrics,
   };
 }
+
+/**
+ * Activate a paid shop boost (featured listing).
+ * Extends featuredUntil from now (or current expiry if still active).
+ */
+export async function activateShopBoost(shopId: string, weeks: number) {
+  const shop = await db.shop.findUnique({
+    where: { id: shopId },
+    select: { featuredUntil: true },
+  });
+
+  // If already boosted, extend from current expiry; otherwise from now
+  const baseDate =
+    shop?.featuredUntil && shop.featuredUntil > new Date()
+      ? shop.featuredUntil
+      : new Date();
+
+  const featuredUntil = new Date(baseDate.getTime() + weeks * 7 * 24 * 60 * 60 * 1000);
+
+  return db.shop.update({
+    where: { id: shopId },
+    data: { featuredUntil },
+  });
+}
+
+/**
+ * Get shop boost status (for dashboard display).
+ */
+export async function getShopBoostStatus(shopId: string) {
+  const shop = await db.shop.findUnique({
+    where: { id: shopId },
+    select: { featuredUntil: true, isFeaturedShop: true },
+  });
+  if (!shop) return null;
+
+  const now = new Date();
+  const isBoosted = !!shop.featuredUntil && shop.featuredUntil > now;
+  const daysRemaining = isBoosted
+    ? Math.ceil((shop.featuredUntil!.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  return {
+    isBoosted,
+    isAdminFeatured: shop.isFeaturedShop,
+    featuredUntil: shop.featuredUntil,
+    daysRemaining,
+  };
+}
