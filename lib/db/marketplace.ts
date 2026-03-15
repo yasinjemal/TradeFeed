@@ -53,6 +53,8 @@ export interface MarketplaceFilters {
   page?: number;
   /** Results per page */
   pageSize?: number;
+  /** Include wholesale-only products (default: false — excluded for retail viewers) */
+  includeWholesaleOnly?: boolean;
 }
 
 export interface MarketplaceProduct {
@@ -300,11 +302,13 @@ export async function getMarketplaceProducts(
     sortBy = "newest",
     page = 1,
     pageSize = 24,
+    includeWholesaleOnly = false,
   } = filters;
 
   // ── Build WHERE clause ──────────────────────────────────
   const where: Prisma.ProductWhereInput = {
     isActive: true,
+    ...(!includeWholesaleOnly && { wholesaleOnly: false }),
     shop: {
       isActive: true,
       ...(province && { province }),
@@ -538,6 +542,7 @@ export async function getPromotedProducts(
       startsAt: { lte: now },
       product: {
         isActive: true,
+        wholesaleOnly: false,
         shop: { isActive: true },
         variants: { some: { isActive: true } },
       },
@@ -732,6 +737,7 @@ export async function getTrendingProducts(
     where: {
       id: { in: productIds },
       isActive: true,
+      wholesaleOnly: false,
       shop: { isActive: true },
       variants: { some: { isActive: true } },
     },
@@ -822,6 +828,7 @@ export async function getNewArrivals(
   const products = await db.product.findMany({
     where: {
       isActive: true,
+      wholesaleOnly: false,
       createdAt: { gte: sevenDaysAgo },
       shop: { isActive: true },
       variants: { some: { isActive: true } },

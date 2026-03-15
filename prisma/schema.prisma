@@ -207,6 +207,11 @@ model Product {
   // Default 1 = no minimum. Enforced in cart + shown to buyers.
   minWholesaleQty Int   @default(1)            // Minimum units per wholesale order
 
+  // ── Wholesale-Only Flag ──────────────────────────────
+  // When true, product is hidden from retail buyers and only visible
+  // to verified wholesale buyers. Retail pricing is ignored.
+  wholesaleOnly Boolean @default(false)        // Only show to verified wholesale buyers
+
   // ── Denormalized Price Range ─────────────────────────
   // Computed from active variants. Updated on variant create/update/delete.
   // Enables efficient price sorting on marketplace queries.
@@ -223,6 +228,7 @@ model Product {
   images      ProductImage[]                  // Product images (URLs only)
   variants    ProductVariant[]                // Product variants with stock
   promotedListings PromotedListing[]          // Marketplace promotions for this product
+  bulkDiscountTiers BulkDiscountTier[]        // Volume discount breakpoints
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -997,4 +1003,61 @@ model SellerSequenceState {
   updatedAt       DateTime @updatedAt
 
   @@index([shopId])
+}
+
+// ============================================================
+// WHOLESALE BUYER: B2B buyer registration + verification
+// Anonymous buyers can register as wholesale buyers by providing
+// business details. Admin verification required before they can
+// see wholesale pricing and place wholesale orders.
+// Identified by phone number (WhatsApp) — no Clerk auth required.
+// ============================================================
+model WholesaleBuyer {
+  id              String   @id @default(cuid())
+  phone           String   @unique             // WhatsApp number (primary identifier)
+  businessName    String                       // Registered business name
+  contactName     String                       // Contact person name
+  email           String?                      // Business email (optional)
+  vatNumber       String?                      // SA VAT number (optional)
+  registrationNumber String?                   // CIPC registration number
+  city            String?                      // Business city
+  province        String?                      // Business province
+
+  // ── Verification ─────────────────────────────────────
+  status          WholesaleBuyerStatus @default(PENDING)
+  verifiedAt      DateTime?                    // When admin approved
+  rejectedReason  String?                      // Why application was rejected
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([phone])
+  @@index([status])
+}
+
+enum WholesaleBuyerStatus {
+  PENDING                                      // Awaiting admin verification
+  VERIFIED                                     // Approved — can see wholesale prices
+  REJECTED                                     // Application denied
+}
+
+// ============================================================
+// BULK DISCOUNT TIER: Volume-based discount tiers per product
+// Sellers set breakpoints where unit price drops.
+// e.g. 10+ units = 5% off, 50+ = 10% off, 100+ = 15% off
+// Applied automatically in cart based on quantity.
+// ============================================================
+model BulkDiscountTier {
+  id              String   @id @default(cuid())
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  minQuantity     Int                          // Minimum units to qualify (e.g. 10)
+  discountPercent Float                        // Discount percentage (e.g. 5.0 = 5%)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([productId, minQuantity])           // One tier per quantity breakpoint
+  @@index([productId])
 }

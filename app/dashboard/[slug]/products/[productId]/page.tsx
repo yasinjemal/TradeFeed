@@ -27,6 +27,7 @@ import { VariantGrid } from "@/components/product/variant-grid";
 import { VariantBulkEditor } from "@/components/product/variant-bulk-editor";
 import { AddVariantForm } from "@/components/product/add-variant-form";
 import { DeleteProductButton } from "@/components/product/delete-product-button";
+import { BulkDiscountTierEditor } from "@/components/product/bulk-discount-tier-editor";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -251,9 +252,20 @@ export default async function ProductDetailPage({
               option1Label,
               option2Label,
               minWholesaleQty: product.minWholesaleQty,
+              wholesaleOnly: product.wholesaleOnly,
             }}
             categories={categories.map((c) => ({ id: c.id, name: c.name }))}
             globalCategories={globalCategories}
+          />
+
+          {/* Bulk Discount Tiers */}
+          <BulkDiscountTierEditor
+            shopSlug={slug}
+            productId={product.id}
+            initialTiers={(product.bulkDiscountTiers ?? []).map((t) => ({
+              minQuantity: t.minQuantity,
+              discountPercent: t.discountPercent,
+            }))}
           />
         </div>
       </div>

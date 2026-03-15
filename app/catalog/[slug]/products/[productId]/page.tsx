@@ -133,6 +133,20 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   );
   const waLink = `https://wa.me/${shop.whatsappNumber.replace("+", "")}?text=${waMessage}`;
 
+  // Wholesale RFQ message — structured for bulk inquiries
+  const wholesaleRfqMessage = encodeURIComponent(
+    `🏭 *Wholesale Inquiry — ${product.name}*\n\n` +
+      `I'd like to request a wholesale quote.\n\n` +
+      `📦 Product: ${product.name}\n` +
+      `💰 Listed price: ${formatZAR(minPrice)}/unit\n` +
+      (product.minWholesaleQty > 1 ? `📊 Min. order: ${product.minWholesaleQty} units\n` : "") +
+      (product.bulkDiscountTiers && product.bulkDiscountTiers.length > 0
+        ? `🎯 Volume tiers: ${product.bulkDiscountTiers.map((t) => `${t.minQuantity}+ → ${t.discountPercent}% off`).join(", ")}\n`
+        : "") +
+      `\nPlease share:\n• Bulk pricing for larger quantities\n• Lead times & availability\n• Delivery options\n\nThank you!`
+  );
+  const wholesaleRfqLink = `https://wa.me/${shop.whatsappNumber.replace("+", "")}?text=${wholesaleRfqMessage}`;
+
   return (
     <div className="mx-auto w-full max-w-3xl">
       <RecentlyViewedTracker
@@ -160,6 +174,22 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
       <div className="mt-4 rounded-3xl bg-white p-5 shadow-sm shadow-stone-200/60 ring-1 ring-stone-200/60 sm:p-6">
         <div className="space-y-6">
+          {/* Wholesale-only banner */}
+          {product.wholesaleOnly && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
+              <span className="text-xl mt-0.5">🏭</span>
+              <div>
+                <p className="text-sm font-bold text-amber-900">Wholesale Only</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  This product is available exclusively to verified wholesale buyers.{" "}
+                  <Link href="/marketplace/wholesale-register" className="font-semibold underline hover:text-amber-900">
+                    Register as a wholesale buyer →
+                  </Link>
+                </p>
+              </div>
+            </div>
+          )}
+
           <div>
             {product.category && <span className="mb-2 inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">{product.category.name}</span>}
             <h1 className="text-xl font-bold leading-tight text-stone-900 sm:text-2xl">{product.name}</h1>
@@ -219,6 +249,23 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
           </div>
 
+          {/* Bulk Discount Tiers */}
+          {product.bulkDiscountTiers && product.bulkDiscountTiers.length > 0 && (
+            <div className="rounded-xl border border-amber-100 bg-amber-50/60 px-4 py-3">
+              <p className="text-xs font-semibold text-amber-800 mb-2">📦 Volume Discounts</p>
+              <div className="flex flex-wrap gap-2">
+                {product.bulkDiscountTiers.map((tier) => (
+                  <span
+                    key={tier.minQuantity}
+                    className="inline-flex items-center gap-1 rounded-full bg-white border border-amber-200 px-2.5 py-1 text-xs font-medium text-amber-700"
+                  >
+                    {tier.minQuantity}+ units → {tier.discountPercent}% off
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {product.description && <p className="text-sm leading-relaxed text-stone-600">{product.description}</p>}
 
           <div className="border-t border-stone-100" />
@@ -232,6 +279,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 option1Label={option1Label}
                 option2Label={option2Label}
                 minWholesaleQty={product.minWholesaleQty}
+                bulkDiscountTiers={product.bulkDiscountTiers}
                 variants={product.variants.map((v) => ({ id: v.id, size: v.size, color: v.color, priceInCents: v.priceInCents, retailPriceCents: v.retailPriceCents, stock: v.stock }))}
               />
             ) : (
@@ -243,6 +291,23 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 <div className="w-full border-t border-stone-100 pt-3">
                   <RestockAlert productId={product.id} productName={product.name} shopId={shop.id} />
                 </div>
+              </div>
+            )}
+
+            {/* Wholesale RFQ button — show for wholesale-only products or products with bulk tiers */}
+            {(product.wholesaleOnly || (product.bulkDiscountTiers && product.bulkDiscountTiers.length > 0) || product.minWholesaleQty > 1) && (
+              <div className="mt-4 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4">
+                <p className="text-sm font-bold text-amber-900 mb-1">📋 Need a custom wholesale quote?</p>
+                <p className="text-xs text-amber-700 mb-3">Get personalized pricing for large orders, custom packaging, or recurring supply.</p>
+                <a
+                  href={wholesaleRfqLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+                  Request Wholesale Quote
+                </a>
               </div>
             )}
           </div>

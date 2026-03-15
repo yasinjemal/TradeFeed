@@ -179,6 +179,7 @@ export async function createProductAction(
       option1Label: (formData.get("option1Label") as string) || "Size",
       option2Label: (formData.get("option2Label") as string) || "Color",
       minWholesaleQty: parseInt((formData.get("minWholesaleQty") as string) || "1", 10) || 1,
+      wholesaleOnly: formData.get("wholesaleOnly") === "on",
       isActive: formData.get("isActive") === "on",
     };
 
@@ -280,6 +281,7 @@ export async function updateProductAction(
       option1Label: (formData.get("option1Label") as string) || undefined,
       option2Label: (formData.get("option2Label") as string) || undefined,
       minWholesaleQty: parseInt((formData.get("minWholesaleQty") as string) || "1", 10) || 1,
+      wholesaleOnly: formData.get("wholesaleOnly") === "on",
       isActive: formData.get("isActive") === "on",
     };
 
@@ -619,6 +621,74 @@ export async function bulkUpdateVariantsAction(
   } catch (error: unknown) {
     const message = extractActionError(error);
     console.error("[bulkUpdateVariantsAction] Error:", message, error);
+    return { success: false, error: message };
+  }
+}
+
+// ============================================================
+// Bulk Discount Tiers
+// ============================================================
+
+/**
+ * Save bulk discount tiers for a product.
+ * Replaces ALL existing tiers with the new set.
+ */
+export async function saveBulkDiscountTiersAction(
+  shopSlug: string,
+  productId: string,
+  tiers: { minQuantity: number; discountPercent: number }[]
+): Promise<ActionResult> {
+  try {
+    const access = await resolveShopAccess(shopSlug);
+    if (!access) {
+      return { success: false, error: "Shop not found or access denied." };
+    }
+
+    // Validate tiers
+    for (const tier of tiers) {
+      if (tier.minQuantity < 2) {
+        return { success: false, error: "Minimum quantity must be at least 2." };
+      }
+      if (tier.discountPercent <= 0 || tier.discountPercent > 50) {
+        return { success: false, error: "Discount must be between 0.1% and 50%." };
+      }
+    }
+
+    // Check for duplicate quantities
+    const quantities = tiers.map((t) => t.minQuantity);
+    if (new Set(quantities).size !== quantities.length) {
+      return { success: false, error: "Each quantity tier must be unique." };
+    }
+
+    // Verify product belongs to this shop
+    const { db } = await import("@/lib/db");
+    const product = await db.product.findFirst({
+      where: { id: productId, shopId: access.shopId },
+      select: { id: true },
+    });
+    if (!product) {
+      return { success: false, error: "Product not found." };
+    }
+
+    // Delete existing tiers and create new ones in a transaction
+    await db.$transaction([
+      db.bulkDiscountTier.deleteMany({ where: { productId } }),
+      ...tiers.map((tier) =>
+        db.bulkDiscountTier.create({
+          data: {
+            productId,
+            minQuantity: tier.minQuantity,
+            discountPercent: tier.discountPercent,
+          },
+        })
+      ),
+    ]);
+
+    revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
+    return { success: true };
+  } catch (error: unknown) {
+    const message = extractActionError(error);
+    console.error("[saveBulkDiscountTiersAction] Error:", message, error);
     return { success: false, error: message };
   }
 }

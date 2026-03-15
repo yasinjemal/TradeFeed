@@ -110,16 +110,16 @@
 ## Feature 5: B2B Wholesale Mode
 
 > **Revenue:** R50,000+/mo (10-50x order values vs consumer)
-> **Effort:** ~2 weeks | **Status:** ⬜ Not Started
+> **Effort:** ~2 weeks | **Status:** ✅ Complete
 
 ### Tasks
-- [ ] Product flag: `wholesaleOnly` boolean
-- [ ] Buyer registration flow (business name, VAT number, certificate upload)
-- [ ] Admin verification for wholesale buyers
-- [ ] Tiered pricing visibility (wholesale price hidden from non-verified)
-- [ ] Minimum order quantity enforcement in cart
-- [ ] RFQ (Request For Quote) flow → WhatsApp message to seller
-- [ ] Bulk discount tiers (10+ units = 5% off, 50+ = 10%)
+- [x] Product flag: `wholesaleOnly` boolean (schema + create/edit forms + amber toggle)
+- [x] Buyer registration flow (business name, VAT, registration number, province, phone)
+- [x] Admin verification for wholesale buyers (approve/reject with reason, status tabs)
+- [x] Pricing visibility: wholesale-only products hidden from marketplace, banner on direct URL
+- [x] Minimum order quantity enforcement in cart (existing, enhanced with wholesale/retail toggle)
+- [x] RFQ (Request For Quote) flow → WhatsApp message to seller with structured quote request
+- [x] Bulk discount tiers (min qty + discount %, tier editor, auto-applied in cart, badges on product page)
 
 ---
 

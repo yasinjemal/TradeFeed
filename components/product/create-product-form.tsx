@@ -796,6 +796,28 @@ export function CreateProductForm({ shopSlug, categories = [], globalCategories 
             )}
           </div>
 
+          {/* ── Wholesale Only Toggle ───────────────────────── */}
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <div className="relative">
+              <input
+                type="checkbox"
+                id="wholesaleOnly"
+                name="wholesaleOnly"
+                defaultChecked={false}
+                disabled={isPending}
+                className="sr-only peer"
+              />
+              <div className="w-10 h-6 rounded-full bg-stone-200 peer-checked:bg-amber-500 transition-colors" />
+              <div className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow peer-checked:translate-x-4 transition-transform" />
+            </div>
+            <span className="text-sm font-medium text-stone-700 group-hover:text-stone-900">
+              🏭 Wholesale Only
+            </span>
+          </label>
+          <p className="text-[10px] text-stone-400 -mt-1">
+            When enabled, this product is only visible to verified wholesale buyers.
+          </p>
+
           {/* Active Toggle */}
           <label className="flex items-center gap-3 cursor-pointer group">
             <div className="relative">

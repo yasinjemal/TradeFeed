@@ -83,6 +83,8 @@ export const productCreateSchema = z.object({
     .max(99999, "Minimum order too high")
     .default(1),
 
+  wholesaleOnly: z.boolean().default(false),
+
   isActive: z.boolean().default(true),
 });
 
@@ -148,6 +150,8 @@ export const productUpdateSchema = z.object({
     .min(1, "Minimum order must be at least 1")
     .max(99999, "Minimum order too high")
     .optional(),
+
+  wholesaleOnly: z.boolean().optional(),
 
   isActive: z.boolean().optional(),
 });

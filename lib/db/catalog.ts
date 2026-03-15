@@ -203,6 +203,7 @@ export async function getCatalogProduct(slugOrId: string, shopId: string) {
     option1Label: true as const,
     option2Label: true as const,
     minWholesaleQty: true as const,
+    wholesaleOnly: true as const,
     category: {
       select: { id: true, name: true, slug: true },
     },
@@ -222,10 +223,14 @@ export async function getCatalogProduct(slugOrId: string, shopId: string) {
         sku: true,
       },
       orderBy: [
-        { priceInCents: "asc" },
-        { size: "asc" },
-        { color: "asc" },
+        { priceInCents: "asc" as const },
+        { size: "asc" as const },
+        { color: "asc" as const },
       ] as { priceInCents?: "asc" | "desc"; size?: "asc" | "desc"; color?: "asc" | "desc" }[],
+    },
+    bulkDiscountTiers: {
+      select: { minQuantity: true, discountPercent: true },
+      orderBy: { minQuantity: "asc" as const },
     },
   };
 

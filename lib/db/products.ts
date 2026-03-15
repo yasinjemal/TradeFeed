@@ -41,6 +41,7 @@ export async function createProduct(
       option1Label: input.option1Label ?? "Size",
       option2Label: input.option2Label ?? "Color",
       minWholesaleQty: input.minWholesaleQty ?? 1,
+      wholesaleOnly: input.wholesaleOnly ?? false,
     },
     include: {
       variants: true,
@@ -102,6 +103,9 @@ export async function getProduct(productId: string, shopId: string) {
       },
       category: true,
       globalCategory: true,
+      bulkDiscountTiers: {
+        orderBy: { minQuantity: "asc" },
+      },
     },
   });
 }
@@ -153,6 +157,7 @@ export async function updateProduct(
       ...(input.option1Label !== undefined && { option1Label: input.option1Label }),
       ...(input.option2Label !== undefined && { option2Label: input.option2Label }),
       ...(input.minWholesaleQty !== undefined && { minWholesaleQty: input.minWholesaleQty }),
+      ...(input.wholesaleOnly !== undefined && { wholesaleOnly: input.wholesaleOnly }),
     },
     include: {
       variants: { orderBy: { createdAt: "asc" } },

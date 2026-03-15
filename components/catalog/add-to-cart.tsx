@@ -39,6 +39,7 @@ interface AddToCartProps {
   option1Label?: string;
   option2Label?: string;
   minWholesaleQty?: number;
+  bulkDiscountTiers?: { minQuantity: number; discountPercent: number }[];
 }
 
 export function AddToCart({
@@ -49,6 +50,7 @@ export function AddToCart({
   option1Label = "Size",
   option2Label = "Color",
   minWholesaleQty = 1,
+  bulkDiscountTiers = [],
 }: AddToCartProps) {
   const { addItem } = useCart();
   const t = useTranslations("catalog");
@@ -133,9 +135,18 @@ export function AddToCart({
     if (!selectedVariant || !canAdd) return;
 
     const isRetail = orderType === "retail";
-    const unitPrice = isRetail && selectedVariant.retailPriceCents
+    let unitPrice = isRetail && selectedVariant.retailPriceCents
       ? selectedVariant.retailPriceCents
       : selectedVariant.priceInCents;
+
+    // Apply bulk discount for wholesale orders
+    if (!isRetail && bulkDiscountTiers.length > 0) {
+      const sorted = [...bulkDiscountTiers].sort((a, b) => a.minQuantity - b.minQuantity);
+      const applied = sorted.filter((t) => quantity >= t.minQuantity).pop();
+      if (applied) {
+        unitPrice = Math.round(unitPrice * (1 - applied.discountPercent / 100));
+      }
+    }
 
     addItem({
       variantId: selectedVariant.id,
@@ -345,6 +356,31 @@ export function AddToCart({
               <span>🛍️</span> Retail — order from <span className="font-bold">1 unit</span>
             </p>
           )}
+
+          {/* Bulk discount indicator */}
+          {bulkDiscountTiers.length > 0 && orderType === "wholesale" && (() => {
+            const sorted = [...bulkDiscountTiers].sort((a, b) => a.minQuantity - b.minQuantity);
+            const applied = sorted.filter((t) => quantity >= t.minQuantity).pop();
+            const next = sorted.find((t) => quantity < t.minQuantity);
+            return (
+              <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs">
+                {applied ? (
+                  <p className="text-amber-800 font-semibold">
+                    🎉 {applied.discountPercent}% bulk discount applied!
+                    {next && (
+                      <span className="font-normal text-amber-600">
+                        {" "}· Add {next.minQuantity - quantity} more for {next.discountPercent}% off
+                      </span>
+                    )}
+                  </p>
+                ) : next ? (
+                  <p className="text-amber-700">
+                    📦 Order {next.minQuantity}+ units for {next.discountPercent}% off
+                  </p>
+                ) : null}
+              </div>
+            );
+          })()}
 
           <div className="hidden sm:block">
             <button

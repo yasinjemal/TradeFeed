@@ -33,6 +33,7 @@ interface EditProductFormProps {
     option1Label: string;
     option2Label: string;
     minWholesaleQty: number;
+    wholesaleOnly: boolean;
   };
   categories: Category[];
   globalCategories?: GlobalCategoryOption[];
@@ -199,6 +200,22 @@ export function EditProductForm({
             <p className="text-xs text-red-600">{state.fieldErrors.minWholesaleQty[0]}</p>
           )}
         </div>
+
+        {/* Wholesale Only Toggle */}
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <div className="relative">
+            <input
+              type="checkbox"
+              name="wholesaleOnly"
+              defaultChecked={product.wholesaleOnly}
+              disabled={isPending}
+              className="sr-only peer"
+            />
+            <div className="w-9 h-5 rounded-full bg-stone-200 peer-checked:bg-amber-500 transition-colors" />
+            <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4" />
+          </div>
+          <span className="text-sm text-stone-600">🏭 Wholesale Only</span>
+        </label>
 
         {/* Active Toggle */}
         <label className="flex items-center gap-3 cursor-pointer group">
