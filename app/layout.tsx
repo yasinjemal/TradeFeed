@@ -120,6 +120,7 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider
+      nonce={nonce}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       afterSignOutUrl="/"
