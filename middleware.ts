@@ -113,10 +113,13 @@ export default clerkMiddleware(async (auth, request) => {
     },
   });
 
-  // Build CSP header with nonce instead of 'unsafe-inline' for scripts
+  // Build CSP header with nonce for inline scripts + explicit host allowlists
+  // NOTE: 'strict-dynamic' was removed because Clerk injects its browser SDK
+  // via a <script src> tag that doesn't carry the nonce, and 'strict-dynamic'
+  // disables all host-based allowlists per CSP Level 3 spec.
   const csp = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com https://vercel.live https://*.clerk.accounts.dev https://*.tradefeed.co.za`,
+    `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://vercel.live https://*.clerk.accounts.dev https://*.tradefeed.co.za https://*.clerk.com`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: https://images.unsplash.com https://utfs.io https://*.ufs.sh https://vercel.live https://vercel.com https://img.clerk.com https://*.clerk.com`,
     `font-src 'self' data: https://vercel.live https://fonts.gstatic.com`,
