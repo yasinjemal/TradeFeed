@@ -343,24 +343,23 @@
 - Candidate indexes: `Product(shopId, isActive)`, `Order(shopId, createdAt)`
 - Estimated effort: **2–3 hours**
 
-### 7.4 ⬜ Automated E2E Tests
+### 7.4 ✅ Automated E2E Tests
 
-**Current:** No automated tests.
-**Goal:** Playwright E2E tests for critical buyer flows.
+**Implemented:** Playwright E2E suite with 28 tests across 7 spec files.
 
-- Flows: Landing → Marketplace → Catalog → Add to Cart → Checkout
-- Flows: Sign Up → Create Shop → Add Product
-- CI: GitHub Actions on PR
-- Estimated effort: **1–2 days**
+- Buyer flow: Marketplace → Catalog → Product → Cart drawer → WhatsApp checkout
+- Seller flow: Create Shop form validation, dashboard auth redirect, contact page
+- Smoke tests: Landing, Auth, API/Health, Static pages, Marketplace
+- CI: GitHub Actions `e2e` job runs Playwright after lint/build, uploads HTML report
 
-### 7.5 ⬜ Staging Environment
+### 7.5 ✅ Staging Environment
 
-**Current:** Deploy straight to production on `main`.
-**Goal:** Preview deployments on PRs (Vercel provides this by default).
+**Implemented:** Vercel preview deployments active by default on all PRs.
 
-- Enable Vercel preview deployments
-- Use separate Neon branch for staging DB
-- Estimated effort: **1–2 hours**
+- Every PR gets a unique preview URL at `*.vercel.app`
+- Preview builds use same env vars (override via Vercel dashboard per environment)
+- For Neon DB branching: create branch in Neon console, set `DATABASE_URL` in Vercel Preview env
+- E2E tests in CI run against the built app (see 7.4)
 
 ---
 
