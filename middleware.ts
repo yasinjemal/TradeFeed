@@ -102,8 +102,31 @@ export default clerkMiddleware(async (auth, request) => {
     console.error("[middleware] invocation error, failing open", err);
   }
 
-  // ── Security headers (CSP is handled by Clerk's contentSecurityPolicy option) ──
-  const response = NextResponse.next();
+  // ── Security headers ──────────────────────────────────────
+  // Generate CSP nonce for inline scripts (replaces 'unsafe-inline')
+  const nonce = crypto.randomUUID();
+
+  const response = NextResponse.next({
+    headers: {
+      // Pass nonce to layout.tsx via custom header
+      "x-nonce": nonce,
+    },
+  });
+
+  // Build CSP header with nonce instead of 'unsafe-inline' for scripts
+  const csp = [
+    `default-src 'self'`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com https://vercel.live https://*.clerk.accounts.dev`,
+    `style-src 'self' 'unsafe-inline'`,
+    `img-src 'self' data: blob: https://images.unsplash.com https://utfs.io https://*.ufs.sh https://vercel.live https://vercel.com https://img.clerk.com https://*.clerk.com`,
+    `font-src 'self' data: https://vercel.live`,
+    `media-src 'self' blob: https://utfs.io https://*.ufs.sh`,
+    `connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com https://vercel.live https://vercel.com wss://*.pusher.com https://*.clerk.accounts.dev https://*.clerk.com`,
+    `frame-src 'self' https://www.openstreetmap.org https://vercel.live https://*.clerk.accounts.dev`,
+    `worker-src 'self' blob:`,
+  ].join("; ");
+
+  response.headers.set("Content-Security-Policy", csp);
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
@@ -117,48 +140,6 @@ export default clerkMiddleware(async (auth, request) => {
 }, {
   signInUrl: "/sign-in",
   signUpUrl: "/sign-up",
-  // ── Clerk Automatic CSP ────────────────────────────────
-  // Clerk handles all its own domains + nonce generation automatically.
-  // We only list OUR extra domains here — they get merged with Clerk's.
-  contentSecurityPolicy: {
-    directives: {
-      "script-src": [
-        "'unsafe-inline'",
-        "https://www.googletagmanager.com",
-        "https://vercel.live",
-      ],
-      "style-src": ["'unsafe-inline'"],
-      "img-src": [
-        "data:",
-        "blob:",
-        "https://images.unsplash.com",
-        "https://utfs.io",
-        "https://*.ufs.sh",
-        "https://vercel.live",
-        "https://vercel.com",
-      ],
-      "font-src": ["data:", "https://vercel.live"],
-      "media-src": ["blob:", "https://utfs.io", "https://*.ufs.sh"],
-      "connect-src": [
-        "https://www.google-analytics.com",
-        "https://www.googletagmanager.com",
-        "https://utfs.io",
-        "https://*.ufs.sh",
-        "https://*.uploadthing.com",
-        "https://*.sentry.io",
-        "https://*.ingest.sentry.io",
-        "https://api.openai.com",
-        "https://vercel.live",
-        "https://vercel.com",
-        "wss://*.pusher.com",
-      ],
-      "frame-src": [
-        "https://www.openstreetmap.org",
-        "https://vercel.live",
-      ],
-      "worker-src": ["blob:"],
-    },
-  },
 });
 
 export const runtime = "edge";

@@ -76,15 +76,18 @@
 
 ## 2. Security & Compliance
 
-### 2.1 ⬜ CSP Nonce for Inline Scripts
+### 2.1 ✅ CSP Nonce for Inline Scripts
 
-**Current:** CSP uses `'unsafe-inline'` for scripts (required by GA4 snippet + SW registration).
+**Current:** CSP uses per-request nonces for inline scripts — `'unsafe-inline'` removed from `script-src`.
 **Goal:** Generate per-request nonces in middleware, inject into `<Script>` tags.
 
-- Middleware: Generate `crypto.randomUUID()` nonce, set in CSP header
-- Layout: Read nonce from headers, pass to `<Script nonce={nonce}>`
-- Remove `'unsafe-inline'` from `script-src`
-- Estimated effort: **2–3 hours**
+- ✅ Middleware generates `crypto.randomUUID()` nonce per request, sets as `x-nonce` header
+- ✅ Full CSP header built manually with `'nonce-{value}'` + `'strict-dynamic'` in `script-src`
+- ✅ Removed `'unsafe-inline'` from `script-src` (kept for `style-src` — required by React inline styles)
+- ✅ Layout reads nonce from `headers()`, passes to GA4 + SW `<Script nonce={nonce}>` tags
+- ✅ Removed Clerk `contentSecurityPolicy` option (CSP now fully managed in middleware)
+- ✅ Added Clerk domains (`*.clerk.accounts.dev`, `*.clerk.com`, `img.clerk.com`) to relevant directives
+- Files: `middleware.ts`, `app/layout.tsx`
 
 ### 2.2 ✅ POPIA Data Retention Automation
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { headers } from "next/headers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -114,6 +115,8 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const hdrs = await headers();
+  const nonce = hdrs.get("x-nonce") ?? undefined;
 
   return (
     <ClerkProvider
@@ -145,8 +148,9 @@ export default async function RootLayout({
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || "G-TL499XE6KR"}`}
             strategy="afterInteractive"
+            nonce={nonce}
           />
-          <Script id="ga4-init" strategy="afterInteractive">
+          <Script id="ga4-init" strategy="afterInteractive" nonce={nonce}>
             {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${process.env.NEXT_PUBLIC_GA_ID || "G-TL499XE6KR"}');`}
           </Script>
         </head>
@@ -179,7 +183,7 @@ export default async function RootLayout({
             <CookieConsent />
           </NextIntlClientProvider>
           {/* Register Service Worker for PWA */}
-          <Script id="sw-register" strategy="afterInteractive">
+          <Script id="sw-register" strategy="afterInteractive" nonce={nonce}>
             {`if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`}
           </Script>
           <SpeedInsights />
