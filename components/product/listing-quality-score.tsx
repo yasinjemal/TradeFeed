@@ -8,20 +8,16 @@
 
 "use client";
 
+import type { ListingQualityScoreProps } from "@/lib/utils/listing-quality";
+
+// Re-export for convenience — callers can import from either location
+export { computeQualityProps } from "@/lib/utils/listing-quality";
+export type { ListingQualityScoreProps } from "@/lib/utils/listing-quality";
+
 interface QualityItem {
   label: string;
   done: boolean;
   weight: number;
-}
-
-interface ListingQualityScoreProps {
-  hasImage: boolean;
-  hasPrice: boolean;
-  hasStock: boolean;
-  hasDescription: boolean;
-  hasCategory: boolean;
-  /** Compact mode for inline cards (hides checklist) */
-  compact?: boolean;
 }
 
 function getItems(props: ListingQualityScoreProps): QualityItem[] {
@@ -123,22 +119,3 @@ export function ListingQualityScore(props: ListingQualityScoreProps) {
   );
 }
 
-/**
- * Compute quality score from raw product data.
- * Used by server components to derive props.
- */
-export function computeQualityProps(product: {
-  images: { id: string }[];
-  variants: { priceInCents: number; stock: number }[];
-  description: string | null;
-  categoryId: string | null;
-  globalCategoryId: string | null;
-}): ListingQualityScoreProps {
-  const hasImage = product.images.length > 0;
-  const hasPrice = product.variants.some((v) => v.priceInCents > 0);
-  const hasStock = product.variants.some((v) => v.stock > 0);
-  const hasDescription = !!product.description && product.description.trim().length > 0;
-  const hasCategory = !!product.categoryId || !!product.globalCategoryId;
-
-  return { hasImage, hasPrice, hasStock, hasDescription, hasCategory };
-}

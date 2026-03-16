@@ -11,7 +11,8 @@ import { checkProductLimit } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { IllustrationEmptyBox } from "@/components/ui/illustrations";
-import { ListingQualityScore, computeQualityProps } from "@/components/product/listing-quality-score";
+import { ListingQualityScore } from "@/components/product/listing-quality-score";
+import { computeQualityProps } from "@/lib/utils/listing-quality";
 import { ProductUsageMeter } from "@/components/billing/product-usage-meter";
 
 interface ProductsPageProps {
