@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 
 export default function DashboardError({
@@ -9,6 +11,15 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+    console.error("[Dashboard Error]", {
+      message: error.message,
+      digest: error.digest,
+      stack: error.stack,
+    });
+  }, [error]);
+
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center">
@@ -21,8 +32,18 @@ export default function DashboardError({
         <p className="text-stone-500 text-sm mb-2">
           Something went wrong loading this page.
         </p>
-        <p className="text-xs text-stone-400 mb-8">
-          This could be a temporary issue. Please try again.
+        {error.message && (
+          <p className="text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-2 font-mono break-all">
+            {error.message}
+          </p>
+        )}
+        {error.digest && (
+          <p className="text-xs text-stone-400 mb-2">
+            Error ID: <code className="font-mono text-stone-500">{error.digest}</code>
+          </p>
+        )}
+        <p className="text-xs text-stone-400 mb-6">
+          Try refreshing, or go back to the dashboard.
         </p>
         <div className="flex items-center justify-center gap-3">
           <button
@@ -30,6 +51,12 @@ export default function DashboardError({
             className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition-all active:scale-[0.98]"
           >
             Retry
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-medium rounded-xl transition-all border border-stone-200"
+          >
+            Hard Refresh
           </button>
           <Link
             href="/"

@@ -32,7 +32,8 @@ export default async function DashboardLayout({
   let access: Awaited<ReturnType<typeof requireShopAccess>>;
   try {
     access = await requireShopAccess(slug);
-  } catch {
+  } catch (err) {
+    console.error("[DashboardLayout] Auth failed:", err);
     redirect("/sign-in");
   }
 
@@ -40,11 +41,17 @@ export default async function DashboardLayout({
     notFound();
   }
 
-  const [shop, userShops, adminId] = await Promise.all([
-    getShopBySlug(slug),
-    getShopsForUser(access.userId),
-    isAdmin(),
-  ]);
+  let shop, userShops, adminId;
+  try {
+    [shop, userShops, adminId] = await Promise.all([
+      getShopBySlug(slug),
+      getShopsForUser(access.userId),
+      isAdmin(),
+    ]);
+  } catch (err) {
+    console.error("[DashboardLayout] Data fetch failed:", err);
+    throw new Error(`Failed to load dashboard: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
   if (!shop) {
     notFound();
   }

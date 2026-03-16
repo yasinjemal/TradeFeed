@@ -42,23 +42,43 @@ export default async function ProductDetailPage({
   let access: Awaited<ReturnType<typeof requireShopAccess>>;
   try {
     access = await requireShopAccess(slug);
-  } catch {
+  } catch (err) {
+    console.error("[ProductDetail] Auth failed:", err);
     return notFound();
   }
   if (!access) return notFound();
 
-  const shop = await getShopBySlug(slug);
+  let shop;
+  try {
+    shop = await getShopBySlug(slug);
+  } catch (err) {
+    console.error("[ProductDetail] getShopBySlug failed:", err);
+    throw new Error(`Failed to load shop: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
   if (!shop) return notFound();
 
   // ── Fetch product ────────────────────────────────────────
-  const product = await getProduct(productId, shop.id);
+  let product;
+  try {
+    product = await getProduct(productId, shop.id);
+  } catch (err) {
+    console.error("[ProductDetail] getProduct failed:", err);
+    throw new Error(`Failed to load product: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
   if (!product) return notFound();
 
   // ── Fetch categories for edit form ──────────────────────
-  const [categories, globalCategories] = await Promise.all([
-    getCategories(shop.id),
-    getGlobalCategoryTree(),
-  ]);
+  let categories;
+  let globalCategories;
+  try {
+    [categories, globalCategories] = await Promise.all([
+      getCategories(shop.id),
+      getGlobalCategoryTree(),
+    ]);
+  } catch (err) {
+    console.error("[ProductDetail] getCategories failed:", err);
+    throw new Error(`Failed to load categories: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
 
   // ── Computed stats ───────────────────────────────────────
   const option1Label = product.option1Label ?? "Size";
