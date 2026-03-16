@@ -38,6 +38,7 @@ export default async function ProductDetailPage({
 }: ProductDetailPageProps) {
   const { slug, productId } = await params;
 
+  try {
   // ── Auth + Access ────────────────────────────────────────
   let access: Awaited<ReturnType<typeof requireShopAccess>>;
   try {
@@ -48,37 +49,18 @@ export default async function ProductDetailPage({
   }
   if (!access) return notFound();
 
-  let shop;
-  try {
-    shop = await getShopBySlug(slug);
-  } catch (err) {
-    console.error("[ProductDetail] getShopBySlug failed:", err);
-    throw new Error(`Failed to load shop: ${err instanceof Error ? err.message : "Unknown error"}`);
-  }
+  const shop = await getShopBySlug(slug);
   if (!shop) return notFound();
 
   // ── Fetch product ────────────────────────────────────────
-  let product;
-  try {
-    product = await getProduct(productId, shop.id);
-  } catch (err) {
-    console.error("[ProductDetail] getProduct failed:", err);
-    throw new Error(`Failed to load product: ${err instanceof Error ? err.message : "Unknown error"}`);
-  }
+  const product = await getProduct(productId, shop.id);
   if (!product) return notFound();
 
   // ── Fetch categories for edit form ──────────────────────
-  let categories;
-  let globalCategories;
-  try {
-    [categories, globalCategories] = await Promise.all([
-      getCategories(shop.id),
-      getGlobalCategoryTree(),
-    ]);
-  } catch (err) {
-    console.error("[ProductDetail] getCategories failed:", err);
-    throw new Error(`Failed to load categories: ${err instanceof Error ? err.message : "Unknown error"}`);
-  }
+  const [categories, globalCategories] = await Promise.all([
+    getCategories(shop.id),
+    getGlobalCategoryTree(),
+  ]);
 
   // ── Computed stats ───────────────────────────────────────
   const option1Label = product.option1Label ?? "Size";
@@ -361,4 +343,29 @@ export default async function ProductDetailPage({
       </details>
     </div>
   );
+
+  } catch (err) {
+    // Return error UI directly instead of throwing — Next.js sanitizes
+    // thrown error messages in production, making them useless for debugging.
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error("[ProductDetail] Render error:", err);
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <h2 className="text-xl font-bold text-red-600 mb-4">Product Page Error</h2>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+          <p className="text-sm font-mono text-red-700 break-all">{message}</p>
+          {stack && (
+            <details>
+              <summary className="text-xs text-stone-500 cursor-pointer">Stack trace</summary>
+              <pre className="text-xs text-stone-600 mt-2 overflow-x-auto whitespace-pre-wrap">{stack}</pre>
+            </details>
+          )}
+        </div>
+        <p className="text-xs text-stone-400 mt-4">
+          Product: {productId} · Shop: {slug}
+        </p>
+      </div>
+    );
+  }
 }
