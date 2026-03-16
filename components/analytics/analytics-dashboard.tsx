@@ -13,6 +13,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import type { PromotionStats, PromotionFunnelData } from "@/lib/db/promotions";
 
 interface OverviewData {
   totalPageViews: number;
@@ -45,6 +46,8 @@ interface AnalyticsDashboardProps {
   uniqueVisitors: number;
   currentDays: number;
   shopSlug: string;
+  promotionStats?: PromotionStats;
+  promotionFunnel?: PromotionFunnelData;
 }
 
 export function AnalyticsDashboard({
@@ -54,6 +57,8 @@ export function AnalyticsDashboard({
   uniqueVisitors,
   currentDays,
   shopSlug,
+  promotionStats,
+  promotionFunnel,
 }: AnalyticsDashboardProps) {
   const pathname = usePathname();
 
@@ -195,6 +200,78 @@ export function AnalyticsDashboard({
           </p>
         )}
       </div>
+
+      {/* ── Promotion Summary ────────────────────────────── */}
+      {promotionStats && promotionStats.totalImpressions > 0 && (
+        <div className="bg-white rounded-2xl border border-stone-200/60 p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-stone-800">
+              📣 Promotion Performance
+            </h2>
+            <Link
+              href={`/dashboard/${shopSlug}/promote`}
+              className="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+            >
+              Full analytics
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </Link>
+          </div>
+
+          {/* Promo stat row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="text-center p-3 bg-stone-50 rounded-xl">
+              <p className="text-lg font-bold text-stone-900">{promotionStats.activeCount}</p>
+              <p className="text-[10px] text-stone-500 uppercase tracking-wider">Active</p>
+            </div>
+            <div className="text-center p-3 bg-stone-50 rounded-xl">
+              <p className="text-lg font-bold text-stone-900">{promotionStats.totalImpressions.toLocaleString()}</p>
+              <p className="text-[10px] text-stone-500 uppercase tracking-wider">Impressions</p>
+            </div>
+            <div className="text-center p-3 bg-stone-50 rounded-xl">
+              <p className="text-lg font-bold text-stone-900">{promotionStats.totalClicks.toLocaleString()}</p>
+              <p className="text-[10px] text-stone-500 uppercase tracking-wider">Clicks</p>
+            </div>
+            <div className="text-center p-3 bg-stone-50 rounded-xl">
+              <p className="text-lg font-bold text-emerald-600">
+                {promotionStats.totalImpressions > 0
+                  ? ((promotionStats.totalClicks / promotionStats.totalImpressions) * 100).toFixed(1)
+                  : "0.0"}%
+              </p>
+              <p className="text-[10px] text-stone-500 uppercase tracking-wider">CTR</p>
+            </div>
+          </div>
+
+          {/* Mini conversion funnel */}
+          {promotionFunnel && promotionFunnel.impressions > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-stone-600">Conversion Funnel (30 days)</p>
+              <div className="space-y-1.5">
+                <FunnelBar label="Impressions" value={promotionFunnel.impressions} pct={100} color="bg-stone-300" />
+                <FunnelBar
+                  label="Clicks"
+                  value={promotionFunnel.clicks}
+                  pct={promotionFunnel.impressions > 0 ? (promotionFunnel.clicks / promotionFunnel.impressions) * 100 : 0}
+                  color="bg-blue-400"
+                />
+                <FunnelBar
+                  label="Product Views"
+                  value={promotionFunnel.productViews}
+                  pct={promotionFunnel.impressions > 0 ? (promotionFunnel.productViews / promotionFunnel.impressions) * 100 : 0}
+                  color="bg-purple-400"
+                />
+                <FunnelBar
+                  label="WhatsApp Orders"
+                  value={promotionFunnel.whatsappOrders}
+                  pct={promotionFunnel.impressions > 0 ? (promotionFunnel.whatsappOrders / promotionFunnel.impressions) * 100 : 0}
+                  color="bg-emerald-500"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -345,6 +422,26 @@ function EmptyChart({ shopSlug }: { shopSlug: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
         </svg>
       </Link>
+    </div>
+  );
+}
+
+function FunnelBar({ label, value, pct, color }: {
+  label: string; value: number; pct: number; color: string;
+}) {
+  const barWidth = Math.max(pct, 3);
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[10px] text-stone-500 w-24 text-right shrink-0">{label}</span>
+      <div className="flex-1 h-5 bg-stone-50 rounded overflow-hidden">
+        <div
+          className={`h-full ${color} rounded transition-all duration-500`}
+          style={{ width: `${barWidth}%` }}
+        />
+      </div>
+      <span className="text-[10px] font-semibold text-stone-700 w-14 text-right tabular-nums">
+        {value.toLocaleString()}
+      </span>
     </div>
   );
 }

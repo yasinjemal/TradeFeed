@@ -271,15 +271,16 @@
 
 ## 6. Revenue & Monetisation
 
-### 6.1 ⬜ Promotion Analytics Deep-Dive
+### 6.1 ✅ Promotion Analytics Deep-Dive
 
-**Current:** Basic promotion revenue stats on admin dashboard.
+**Current:** Comprehensive promotion analytics on promote dashboard (ROI, funnel, comparison, per-promotion charts).
 **Goal:** Per-promotion ROI tracking, click-through rates, conversion funnel.
 
-- Track: promotion view → product view → add to cart → checkout
-- File: `components/analytics/analytics-dashboard.tsx`
-- New tab: "Promotions" with funnel chart
-- Estimated effort: **4–6 hours**
+- ✅ Promote dashboard already has: ROI comparison, conversion funnel, per-promotion CTR charts
+- ✅ Added promotion summary section to main analytics dashboard (stat cards + funnel)
+- ✅ Analytics page fetches `getShopPromotionStats()` and `getPromotionFunnel()`
+- ✅ Summary links to full promote dashboard for deeper analysis
+- Files: `components/analytics/analytics-dashboard.tsx`, `app/dashboard/[slug]/analytics/page.tsx`
 
 ### 6.2 ⬜ Affiliate / Referral Rewards
 
