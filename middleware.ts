@@ -142,8 +142,6 @@ export default clerkMiddleware(async (auth, request) => {
   signUpUrl: "/sign-up",
 });
 
-export const runtime = "edge";
-
 export const config = {
   // Match all routes except static files and Next.js internals
   // NOTE: /api/uploadthing must NOT be excluded here — Clerk middleware

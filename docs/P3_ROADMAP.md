@@ -44,7 +44,7 @@
 **Current:** Middleware runs on Edge Runtime.
 **Goal:** Move to Edge Runtime for lower latency on Vercel (already compatible — Clerk middleware supports Edge).
 
-- ✅ `middleware.ts` has `export const runtime = "edge"`
+- ✅ `middleware.ts` runs on edge by default (Next.js 16+)
 - ✅ Upstash Redis (Edge-compatible) used for rate limiting
 
 ### 1.4 ✅ Image Placeholder Blur (Shimmer)
