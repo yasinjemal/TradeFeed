@@ -34,112 +34,142 @@
   },
   "landing": {
     "hero": {
-      "title": "Dihlahiswa Tsa Hao. Lenane Le Le Leng. Di-Odara tsa WhatsApp.",
-      "subtitle": "Laisha dihlahiswa tsa hao, arolelana ka lenane la hao, mme o fumane di-odara tse hlophisitsweng ka WhatsApp. E ahetswe barekisi ba SA.",
-      "cta": "Qala Ho Rekisa Mahala",
-      "ctaSecondary": "Sheba Mmaraka",
-      "trustedBy": "E tshepilwe ke barekisi ba SA"
+      "badge": "E tshepilwe ke barekisi ba {shopCount}+ ho pholletsa le Afrika Borwa",
+      "title": "Rekisa Inthaneteng",
+      "titleHighlight": "Afrika Borwa",
+      "subtitle": "Fetola kgwebo ya hao ya WhatsApp ya diaparo e be lenane la profeshenale. Laisha setshwantsho — AI e ngola lethathamo. Arolelana ka lenane la hao o fumane di-odara le boholo, mebala le bongata.",
+      "aiOffer": "Di-listing tse 5 tsa AI TSA MAHALA khoeli e nngwe le e nngwe — ha ho hlokahale karete ya mokitlane",
+      "cta": "✨ Leka AI Mahala",
+      "ctaSecondary": "kapa sheba mmaraka →",
+      "proofSellers": "Barekisi ba",
+      "proofCities": "Jeppe, Durban le Cape Town",
+      "benefitAi": "Di-listing tse 5 tsa AI tsa mahala",
+      "benefitSpeed": "Setshwantsho → lethathamo ka metsotswana e 10",
+      "benefitWhatsApp": "Arolelana o rekise ho WhatsApp"
+    },
+    "trustedBy": {
+      "title": "E tshepilwe ke barekisi ho pholletsa le Afrika Borwa",
+      "activeSellers": "Barekisi Ba Sebetsang",
+      "productsListed": "Dihlahiswa Tse Behilweng",
+      "ordersProcessed": "Di-odara Tse Setshenngweng",
+      "provinces": "Diprovense tsa SA",
+      "ordersViaChat": "Di-odara ka Chat"
+    },
+    "howItWorks": {
+      "badge": "Ho nka metsotso e ka tlase ho mehlano",
+      "title": "Theha Lebenkele La Hao Inthaneteng Ka Mehato E Meraro",
+      "subtitle": "Ha ho programming, ha ho ba moralo, ha ho di-platform tse theko e phahameng. Dihlahiswa tsa hao le nomoro ya WhatsApp feela.",
+      "step1Title": "Nka Setshwantsho → AI E A Se Beha",
+      "step1Desc": "Laisha setshwantsho sa sehlahiswa mme AI e hlahise sehlooho, tlhaloso, sehlopha le di-tag tsa SEO ka metsotswana e 10. Di-listing tse 5 tsa AI tsa mahala khoeli e nngwe le e nngwe.",
+      "step2Title": "Arolelana Ka Lenane La Hao",
+      "step2Desc": "Fumana URL ya hao e ikgethileng. E kenye dihlopheng tsa WhatsApp, boemo, Instagram bio, TikTok — hohle moo bareki ba hao ba leng teng.",
+      "step3Title": "Fumana Di-odara Tse Hlophisitsweng",
+      "step3Desc": "Bareki ba sheba, ba kgetha dikgetho le bongata, mme ba o romele odara e hlophisitsweng e hlwekileng ho WhatsApp. Le ho latela ha odara ho ahilweng."
     },
     "features": {
-      "title": "Tsohle Tseo O Di Hlokang Ho Rekisa Ka Bohlale",
-      "subtitle": "Fetola di-voice notes le ditshwantsho tse qhalanyeng tsa WhatsApp ka lenane la dihlahiswa la profeshenale.",
+      "title": "Tsohle Tseo O Di Hlokang Ho Rekisa Inthaneteng Afrika Borwa",
+      "subtitle": "E ahetswe ka mokhwa oo barekisi ba Afrika Borwa ba sebetsang ka teng ka nnete.",
       "whatsapp": {
-        "title": "Ho Lefa Ka WhatsApp Pele",
-        "description": "Bareki ba sheba lenane la hao mme ba romele di-odara tse hlophisitsweng ho WhatsApp ya hao — ha ho hlokahale ho laisha app."
+        "title": "Di-odara Tse Yang Ho WhatsApp",
+        "description": "Bareki ba kgetha boholo, mebala, le bongata — mme ba o romele odara e le nngwe e hlwekileng ho WhatsApp. Ha ho pherekano."
       },
       "mobile": {
         "title": "E Sebetsa Ho Fono Efe Kapa Efe",
-        "description": "Lenane la hao le laesha kapele ho fono efe kapa efe ya smartphone. E etsetswe bareki ba SA ba sebedisang data."
+        "description": "Ha ho app eo o lokelang ho e laisha. Bareki ba hao ba tobetsa lenane ba shebe. Le ho data e bonya ya mobile — e ntse e laesha kapele."
       },
       "variants": {
-        "title": "Mefuta Ya Dihlahiswa",
-        "description": "Eketsa boholo, mebala, le dikgetho tse ikgethileng. Latela setoko ka mofuta o mong le o mong."
+        "title": "Boholo, Mebala Le Dikgetho",
+        "description": "Bareki ba kgetha hantle seo ba se batlang — ha e sa le melaetsa ya \"ke boholo bofe?\". O beha dikgetho, ba a kgetha."
+      },
+      "tracking": {
+        "title": "Latela Odara E Nngwe Le E Nngwe",
+        "description": "Odara e nngwe le e nngwe e fumana nomoro ya ho latela. Ntjhafatsa boemo ha o ntse o tsamaya: E Emetseng → E Netefalitsweng → E Rometswe → E Fihlile."
       },
       "analytics": {
-        "title": "Tseba Dinomoro Tsa Hao",
-        "description": "Bona hore ke dihlahiswa dife tse fumanang ho bonwa, mme o latele tshebetso ya hao ya thekiso."
+        "title": "Bona Ya Shebang Dihlahiswa Tsa Hao",
+        "description": "Tseba hore ke dihlahiswa dife tse fumanang ho bonwa ho hongata, se tobetswang, le se fetolang di-odara tsa WhatsApp ka nnete."
+      },
+      "photos": {
+        "title": "Ditshwantsho Tse Laeshang Kapele",
+        "description": "Laisha ditshwantsho tsa dihlahiswa tsa hao — re di etsa hore di laeshe kapele ho fono efe kapa efe, le ho 3G."
       },
       "import": {
-        "title": "Ho Laisha Ho Hongata",
-        "description": "Laisha makgolo a dihlahiswa ka nako e le nngwe ka CSV."
+        "title": "Laisha Dihlahiswa Tsohle Ka Nako E Le Nngwe",
+        "description": "O na le spreadsheet e nang le dihlahiswa tse 100+? Di laisha kaofela ka metsotswana. Re tla etsa tsohle."
       },
       "marketplace": {
-        "title": "Ho Fumanwa Mmarakeng",
-        "description": "Fumanwa ke bareki ba batjha. Dihlahiswa tsa hao di hlaha mmarakeng wa TradeFeed le barekisi ba bang ba SA."
+        "title": "Fumanwa Ke Bareki Ba Batjha",
+        "description": "Dihlahiswa tsa hao di hlaha mmarakeng wa TradeFeed — dikete tsa bareki ba SA ba shebang letsatsi le leng le le leng. Ho bonwa ha mahala."
+      },
+      "notifications": {
+        "title": "O Se Ke Oa Latlheha Thekiso",
+        "description": "Fumana tsebiso hang ha o fumana odara, ha setoko se le tlase, kapa ha moreki a siya tlhahlobo."
+      },
+      "reviews": {
+        "title": "Ditlhahlobo Tsa Bareki Le Lintlha",
+        "description": "Lumella bareki ba thabileng ba o pake. Ditlhahlobo di aha tshepo mme di thuse bareki ba batjha."
+      },
+      "verified": {
+        "title": "Baeche Ya Morekisi Ea Netefalitsweng",
+        "description": "Bonts'a bareki hore o kgwebo ya nnete ka baeche e netefalitsweng. Tshepo = thekiso e ngata."
+      },
+      "revenue": {
+        "title": "Tseba Dinomoro Tsa Hao",
+        "description": "Bona chelete e kenang letsatsi le leng le le leng, dihlahiswa tse rekiswang haholo, le mekhoa ya kgolo. Tseba hantle se sebetsang."
       }
     },
     "pricing": {
-      "title": "Ditheko Tse Bonolo, Tse Hlakileng",
-      "subtitle": "Qala mahala. Ntlafatsa ha o se o lokile.",
+      "title": "Qala Mahala. Hodisa Lebenkele La Hao Ha O Se O Lokile.",
+      "subtitle": "Ha ho ditefiso tse patilweng, ha ho makgakga. Ntlafatsa feela ha kgwebo ya hao e hola.",
+      "badge": "Ditheko tse bonolo, tse hlakileng",
       "freePlan": {
         "name": "Mahala",
+        "subtitle": "E lokile ho qala",
         "price": "R0",
         "period": "ka ho sa feleng",
         "cta": "Qala Mahala",
         "features": [
+          "✨ Tlhahiso e 5 ya AI ya mahala",
           "Ho fihlela dihlahiswa tse 10",
-          "Leqephe la lenane la sechaba",
           "Ho lefa ka WhatsApp",
+          "Leqephe la lenane la sechaba",
           "Tlhahlobo ya motheo",
-          "Moralo wa mobile pele"
+          "Ho latela ha odara",
+          "Taolo ya sehlopha",
+          "Mefuta ya dihlahiswa",
+          "Ho boloka ditshwantsho ka CDN"
         ]
       },
       "proPlan": {
         "name": "Pro",
+        "subtitle": "Bakeng sa dikgwebo tse holang",
         "price": "R199",
         "period": "/ka khoeli",
-        "cta": "Fumana Pro",
+        "cta": "Ntlafatsa ho Pro →",
         "features": [
           "Dihlahiswa tse sa lekanyetswang",
-          "Ho laisha ho hongata ka CSV",
-          "Tlhahlobo e ntlafetseng",
+          "Tsohle tse Mahala",
+          "Tshehetsro ya WhatsApp — re romele molaetsa ka kotloloho",
           "Dipapatso tse kgodisitsweng",
-          "Tshehetsro ya pele",
-          "Letshwao la lebenkele le ikgethileng"
+          "Deshibhodi ya chelete e kenang",
+          "Laisha dihlahiswa tsohle ka nako e le nngwe",
+          "O se ke oa latlheha thekiso — ditsebiso tse potlakang",
+          "Ditlhahlobo tsa bareki le lintlha"
         ]
       }
     },
     "faq": {
       "title": "Dipotso Tse Botswang Kgafetsa",
-      "items": [
-        {
-          "q": "Ho odara ka WhatsApp ho sebetsa jwang?",
-          "a": "Bareki ba sheba lenane la hao inthaneteng, ba eketsa dintho karakeng ya bona, mme ba tobetsa 'Romela Odara ho WhatsApp'."
-        },
-        {
-          "q": "Na bareki ba ka ba hloka ho laisha app?",
-          "a": "Tjhe. Lenane la hao ke leqephe la webhe le sebetsang ho browser efe kapa efe ya mobile."
-        },
-        {
-          "q": "Na data ya ka e bolokehile?",
-          "a": "Ee. Data ya lebenkele le leng le le leng e arohantswe ka ho feletseng. Re latela POPIA."
-        },
-        {
-          "q": "Na nka e leka mahala?",
-          "a": "Ka nnete. Morero wa Mahala o o lumella ho beha dihlahiswa tse 10. Ha ho hlokahale karete ya mokitlane."
-        },
-        {
-          "q": "Le amohela mekgwa efe ya ho lefa?",
-          "a": "Re amohela ditefo ka PayFast — heke ya tefo e tshepehang ya Afrika Borwa."
-        },
-        {
-          "q": "Na nka laisha lethathamo la ka la dihlahiswa le seng le le teng?",
-          "a": "Ee! Barekisi ba Pro ba ka laisha faele ya CSV ho laisha makgolo a dihlahiswa ka nako e le nngwe."
-        },
-        {
-          "q": "Le ho kae?",
-          "a": "TradeFeed e ahilwe Afrika Borwa, bakeng sa Afrika Borwa."
-        },
-        {
-          "q": "Ke qala jwang?",
-          "a": "Ingodisa, theha lebenkele la hao, laisha sehlahiswa sa hao sa pele, mme o arolelane ka lenane la hao. Ho nka metsotso e ka tlase ho mehlano."
-        }
-      ]
+      "subtitle": "Tsohle tseo o hlokang ho di tseba pele o qala."
     },
     "cta": {
-      "title": "O Lokile Ho Rekisa Ka Bohlale?",
-      "subtitle": "Kopana le barekisi ba SA ba seng ba sebedisa TradeFeed ho laola dinane tsa bona.",
-      "button": "Theha Lenane La Hao La Mahala"
+      "title": "O Lokile",
+      "titleHighlight": "ho rekisa inthaneteng Afrika Borwa?",
+      "subtitle": "Laisha setshwantsho, AI e theha lethathamo, arolelana ho WhatsApp. Di-listing tsa hao tse 5 tsa pele tsa AI ke tsa mahala — qala ho rekisa ka metsotso e ka tlase ho meraro.",
+      "badge": "Kopana le barekisi ba {shopCount}+ ba Afrika Borwa",
+      "button": "✨ Leka AI Mahala",
+      "buttonSecondary": "kapa sheba mmaraka →",
+      "footer": "Di-listing tse 5 tsa AI tsa mahala · Ha ho karete ya mokitlane · Beha ka metsotso e ka tlase ho meraro · Hlakola neng kapa neng"
     }
   },
   "marketplace": {

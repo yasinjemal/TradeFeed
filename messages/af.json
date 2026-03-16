@@ -34,112 +34,142 @@
   },
   "landing": {
     "hero": {
-      "title": "Jou Produkte. Een Katalogus-Skakel. WhatsApp-Bestellings.",
-      "subtitle": "Laai jou produkte op, deel jou katalogus-skakel, en ontvang gestruktureerde bestellings via WhatsApp. Gebou vir SA groothandelaars en kleinhandelaars.",
-      "cta": "Begin Gratis Verkoop",
-      "ctaSecondary": "Blaai Markplek",
-      "trustedBy": "Vertrou deur SA groothandelaars"
+      "badge": "Vertrou deur {shopCount}+ verkopers regoor Suid-Afrika",
+      "title": "Verkoop Aanlyn in",
+      "titleHighlight": "Suid-Afrika",
+      "subtitle": "Verander jou WhatsApp-klerebesigheid in 'n professionele katalogus. Laai 'n foto op — KI skryf die lys. Deel jou skakel en kry bestellings met groottes, kleure en hoeveelhede.",
+      "aiOffer": "5 GRATIS KI-lyste elke maand — geen kredietkaart nodig nie",
+      "cta": "✨ Probeer KI Gratis",
+      "ctaSecondary": "of blaai deur die markplek →",
+      "proofSellers": "Verkopers in",
+      "proofCities": "Jeppe, Durban en Kaapstad",
+      "benefitAi": "5 gratis KI-lyste",
+      "benefitSpeed": "Foto → lys in 10 sek",
+      "benefitWhatsApp": "Deel en verkoop op WhatsApp"
+    },
+    "trustedBy": {
+      "title": "Vertrou deur verkopers regoor Suid-Afrika",
+      "activeSellers": "Aktiewe Verkopers",
+      "productsListed": "Produkte Gelys",
+      "ordersProcessed": "Bestellings Verwerk",
+      "provinces": "SA Provinsies",
+      "ordersViaChat": "Bestellings via Klets"
+    },
+    "howItWorks": {
+      "badge": "Neem minder as 5 minute",
+      "title": "Skep Jou Aanlynwinkel in Drie Stappe",
+      "subtitle": "Geen kodering, geen ontwerpers, geen duur platforms nie. Net jou produkte en 'n WhatsApp-nommer.",
+      "step1Title": "Neem 'n Foto → KI Lys Dit",
+      "step1Desc": "Laai 'n produkfoto op en KI genereer die titel, beskrywing, kategorie en SEO-etikette in 10 sekondes. 5 gratis KI-lyste elke maand.",
+      "step2Title": "Deel Jou Katalogus-Skakel",
+      "step2Desc": "Kry jou unieke URL. Sit dit in WhatsApp-groepe, status, Instagram-bio, TikTok — oral waar jou kliënte is.",
+      "step3Title": "Ontvang Gestruktureerde Bestellings",
+      "step3Desc": "Kliënte blaai, kies opsies en hoeveelhede, en stuur vir jou 'n skoon gestruktureerde bestelling op WhatsApp. Met bestelling-opsporing ingebou."
     },
     "features": {
-      "title": "Alles Wat Jy Nodig Het om Slimmer te Verkoop",
-      "subtitle": "Vervang stemnota's en verspreide WhatsApp-foto's met 'n professionele produkkatalogus.",
+      "title": "Alles Wat Jy Nodig Het om Aanlyn te Verkoop in Suid-Afrika",
+      "subtitle": "Spesifiek gebou vir hoe Suid-Afrikaanse verkopers werklik werk.",
       "whatsapp": {
-        "title": "WhatsApp-Eerste Betaling",
-        "description": "Kopers blaai deur jou katalogus en stuur gestruktureerde bestellings direk na jou WhatsApp — geen app-aflaai nodig nie."
+        "title": "Bestellings Direk na WhatsApp",
+        "description": "Kliënte kies groottes, kleure en hoeveelhede — stuur dan vir jou een skoon bestelling op WhatsApp. Geen verwarring nie."
       },
       "mobile": {
         "title": "Werk op Enige Foon",
-        "description": "Jou katalogus laai vinnig op enige slimfoon. Ontwerp vir Suid-Afrikaanse kopers op databegrooting."
+        "description": "Geen app om af te laai nie. Jou kliënte tik 'n skakel en blaai. Selfs op stadige mobiele data — dit laai nog steeds vinnig."
       },
       "variants": {
-        "title": "Produkvariante",
-        "description": "Voeg groottes, kleure en pasgemaakte opsies by. Volg voorraad per variant."
+        "title": "Groottes, Kleure en Opsies",
+        "description": "Kliënte kies presies wat hulle wil hê — geen \"watter grootte?\" boodskappe meer nie. Jy stel die opsies, hulle kies."
+      },
+      "tracking": {
+        "title": "Volg Elke Bestelling",
+        "description": "Elke bestelling kry 'n opsporingnommer. Werk status op soos jy gaan: Hangend → Bevestig → Gestuur → Afgelewer."
       },
       "analytics": {
-        "title": "Ken Jou Syfers",
-        "description": "Sien watter produkte besigtigings kry en volg jou verkoopprestasie."
+        "title": "Sien Wie Kyk na Jou Produkte",
+        "description": "Weet watter produkte die meeste besigtigings kry, wat geklik word, en wat werklik in WhatsApp-bestellings omskep."
+      },
+      "photos": {
+        "title": "Vinnig-Laai Foto's",
+        "description": "Laai jou produkfoto's op — ons maak hulle vinnig op enige foon, selfs op 3G."
       },
       "import": {
-        "title": "Grootmaat-Invoer",
-        "description": "Laai honderde produkte gelyktydig op via CSV. Hoef hulle nie een vir een by te voeg nie."
+        "title": "Laai Alle Produkte Gelyktydig Op",
+        "description": "Het jy 'n sigblad met 100+ produkte? Voer hulle almal in sekondes in. Ons sal alles vir jou skep."
       },
       "marketplace": {
-        "title": "Markplek Ontdekking",
-        "description": "Word deur nuwe kopers gevind. Jou produkte verskyn op die TradeFeed-markplek saam met ander SA-verkopers."
+        "title": "Word deur Nuwe Kopers Gevind",
+        "description": "Jou produkte verskyn op die TradeFeed-markplek — duisende SA-kopers blaai daagliks. Gratis blootstelling."
+      },
+      "notifications": {
+        "title": "Mis Nooit 'n Verkoop Nie",
+        "description": "Word onmiddellik in kennis gestel wanneer jy 'n bestelling ontvang, wanneer voorraad laag is, of wanneer 'n koper 'n resensie los."
+      },
+      "reviews": {
+        "title": "Koper-Resensies en -Graderings",
+        "description": "Laat gelukkige kliënte vir jou instaan. Resensies bou vertroue en help nuwe kopers jou produkte kies."
+      },
+      "verified": {
+        "title": "Geverifieerde Verkoper-Kenteken",
+        "description": "Wys kopers jy is 'n regte besigheid met 'n geverifieerde kenteken. Vertroue = meer verkope."
+      },
+      "revenue": {
+        "title": "Ken Jou Syfers",
+        "description": "Sien jou daaglikse inkomste, topverkopers en groeitendense. Weet presies wat werk."
       }
     },
     "pricing": {
-      "title": "Eenvoudige, Deursigtige Pryse",
-      "subtitle": "Begin gratis. Opgradeer wanneer jy gereed is.",
+      "title": "Begin Gratis. Skaal Jou Aanlynwinkel Wanneer Gereed.",
+      "subtitle": "Geen versteekte fooie, geen verrassings nie. Gradeer slegs op wanneer jou besigheid groei.",
+      "badge": "Eenvoudige, deursigtige pryse",
       "freePlan": {
         "name": "Gratis",
+        "subtitle": "Perfek om te begin",
         "price": "R0",
         "period": "vir altyd",
         "cta": "Begin Gratis",
         "features": [
+          "✨ 5 gratis KI-generasies",
           "Tot 10 produkte",
-          "Openbare katalogusblad",
           "WhatsApp-betaling",
+          "Openbare katalogusblad",
           "Basiese analise",
-          "Mobiel-eerste ontwerp"
+          "Bestelling-opsporing",
+          "Kategoriebestuur",
+          "Produkvariante",
+          "Beeld-CDN-berging"
         ]
       },
       "proPlan": {
         "name": "Pro",
+        "subtitle": "Vir groeiende besighede",
         "price": "R199",
         "period": "/maand",
-        "cta": "Gaan Pro",
+        "cta": "Opgradeer na Pro →",
         "features": [
           "Onbeperkte produkte",
-          "CSV grootmaat-invoer",
-          "Gevorderde analise",
+          "Alles in Gratis",
+          "WhatsApp-ondersteuning — stuur ons direk 'n boodskap",
           "Bevorderde aanbiedings",
-          "Prioriteit-ondersteuning",
-          "Pasgemaakte winkelhandelsmerk"
+          "Inkomste-kontroleskerm",
+          "Laai alle produkte gelyktydig op",
+          "Mis nooit 'n verkoop nie — kitskennisgewings",
+          "Koper-resensies en -graderings"
         ]
       }
     },
     "faq": {
       "title": "Gereelde Vrae",
-      "items": [
-        {
-          "q": "Hoe werk WhatsApp-bestelling?",
-          "a": "Kopers blaai deur jou katalogus aanlyn, voeg items by hul mandjie, en tik 'Stuur Bestelling op WhatsApp'. Dit open WhatsApp met 'n gestruktureerde boodskap."
-        },
-        {
-          "q": "Moet my kopers 'n app aflaai?",
-          "a": "Nee. Jou katalogus is 'n webblad wat in enige mobiele blaaier werk. Kopers maak net die skakel oop wat jy op WhatsApp deel."
-        },
-        {
-          "q": "Is my data veilig?",
-          "a": "Ja. Elke winkel se data is heeltemal geïsoleer. Geen ander verkoper kan jou produkte of kliënte-inligting sien nie. Ons voldoen aan POPIA."
-        },
-        {
-          "q": "Kan ek dit gratis probeer?",
-          "a": "Absoluut. Die Gratis-plan laat jou tot 10 produkte lys met volle WhatsApp-betaling. Geen kredietkaart nodig nie."
-        },
-        {
-          "q": "Watter betaalmetodes aanvaar julle?",
-          "a": "Ons aanvaar betalings via PayFast — Suid-Afrika se vertroude betaalpoort."
-        },
-        {
-          "q": "Kan ek my bestaande produklys invoer?",
-          "a": "Ja! Pro-plan verkopers kan 'n CSV-lêer oplaai om honderde produkte gelyktydig in te voer."
-        },
-        {
-          "q": "Waar is julle gebaseer?",
-          "a": "TradeFeed is in Suid-Afrika gebou, vir Suid-Afrika. Ons verstaan die Jeppe Street se hustle."
-        },
-        {
-          "q": "Hoe begin ek?",
-          "a": "Registreer, skep jou winkel, laai jou eerste produk op, en deel jou katalogus-skakel. Dit neem minder as 5 minute."
-        }
-      ]
+      "subtitle": "Alles wat jy moet weet voordat jy begin."
     },
     "cta": {
-      "title": "Gereed om Slimmer te Verkoop?",
-      "subtitle": "Sluit aan by SA groothandelaars wat reeds TradeFeed gebruik om hul katalogusse te bestuur.",
-      "button": "Skep Jou Gratis Katalogus"
+      "title": "Gereed om",
+      "titleHighlight": "aanlyn te verkoop in Suid-Afrika?",
+      "subtitle": "Laai 'n foto op, KI skep die lys, deel op WhatsApp. Jou eerste 5 KI-lyste is gratis — begin verkoop in minder as 3 minute.",
+      "badge": "Sluit aan by {shopCount}+ Suid-Afrikaanse verkopers",
+      "button": "✨ Probeer KI Gratis",
+      "buttonSecondary": "of blaai deur die markplek →",
+      "footer": "5 gratis KI-lyste · Geen kredietkaart · Stel op in minder as 3 minute · Kanselleer enige tyd"
     }
   },
   "marketplace": {

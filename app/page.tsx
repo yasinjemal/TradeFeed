@@ -301,27 +301,26 @@ export default async function HomePage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              Trusted by {Math.max(shopCount, 50)}+ sellers across South Africa
+              {tLanding("hero.badge", { shopCount: Math.max(shopCount, 50) })}
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={100}>
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
-              Sell Online in{" "}
+              {tLanding("hero.title")}{" "}
               <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-400">
-                South Africa
+                {tLanding("hero.titleHighlight")}
               </span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
             <p className="mt-6 text-lg sm:text-xl text-stone-400 max-w-2xl mx-auto leading-relaxed">
-              Turn your WhatsApp clothing business into a professional catalog.
-              Upload a photo — AI writes the listing. Share your link and get orders with sizes, colors &amp; quantities.
+              {tLanding("hero.subtitle")}
             </p>
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium">
-              <span className="text-base">✨</span> 5 FREE AI listings every month — no credit card needed
+              <span className="text-base">✨</span> {tLanding("hero.aiOffer")}
             </div>
           </ScrollReveal>
 
@@ -343,7 +342,7 @@ export default async function HomePage() {
                 ))}
               </div>
               <p className="text-sm text-stone-500">
-                Sellers in <span className="text-stone-300 font-medium">Jeppe, Durban &amp; Cape Town</span>
+                {tLanding("hero.proofSellers")} <span className="text-stone-300 font-medium">{tLanding("hero.proofCities")}</span>
               </p>
             </div>
           </ScrollReveal>
@@ -355,28 +354,28 @@ export default async function HomePage() {
                 href={aiCtaHref}
                 className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white hover:from-violet-500 hover:to-purple-400 transition-all shadow-2xl shadow-violet-600/25 hover:shadow-violet-500/35 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto"
               >
-                ✨ Try AI Free
+                {tLanding("hero.cta")}
                 <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
               </Link>
               <Link
                 href="/marketplace"
                 className="inline-flex items-center justify-center text-sm font-medium text-stone-400 hover:text-emerald-400 transition-colors"
               >
-                or browse the marketplace →
+                {tLanding("hero.ctaSecondary")}
               </Link>
             </div>
             <p className="mt-5 text-xs text-stone-600 flex items-center justify-center gap-4 flex-wrap">
               <span className="flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                5 free AI listings
+                {tLanding("hero.benefitAi")}
               </span>
               <span className="flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                Photo → listing in 10 sec
+                {tLanding("hero.benefitSpeed")}
               </span>
               <span className="flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                Share &amp; sell on WhatsApp
+                {tLanding("hero.benefitWhatsApp")}
               </span>
             </p>
           </ScrollReveal>
@@ -389,7 +388,7 @@ export default async function HomePage() {
       <section className="py-10 px-5 border-t border-stone-800/30">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-[11px] font-medium text-stone-600 uppercase tracking-widest mb-6">
-            Trusted by sellers across South Africa
+            {tLanding("trustedBy.title")}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
             <div className="flex items-center gap-2 text-stone-400">
@@ -398,7 +397,7 @@ export default async function HomePage() {
               </div>
               <div>
                 <p className="text-lg font-bold text-stone-200">{Math.max(shopCount, 50)}+</p>
-                <p className="text-[10px] text-stone-500">Active Sellers</p>
+                <p className="text-[10px] text-stone-500">{tLanding("trustedBy.activeSellers")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-stone-400">
@@ -407,7 +406,7 @@ export default async function HomePage() {
               </div>
               <div>
                 <p className="text-lg font-bold text-stone-200">{Math.max(productCount, 200)}+</p>
-                <p className="text-[10px] text-stone-500">Products Listed</p>
+                <p className="text-[10px] text-stone-500">{tLanding("trustedBy.productsListed")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-stone-400">
@@ -416,7 +415,7 @@ export default async function HomePage() {
               </div>
               <div>
                 <p className="text-lg font-bold text-stone-200">{Math.max(orderCount, 100)}+</p>
-                <p className="text-[10px] text-stone-500">Orders Processed</p>
+                <p className="text-[10px] text-stone-500">{tLanding("trustedBy.ordersProcessed")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-stone-400">
@@ -425,7 +424,7 @@ export default async function HomePage() {
               </div>
               <div>
                 <p className="text-lg font-bold text-stone-200">9</p>
-                <p className="text-[10px] text-stone-500">SA Provinces</p>
+                <p className="text-[10px] text-stone-500">{tLanding("trustedBy.provinces")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-stone-400">
@@ -434,7 +433,7 @@ export default async function HomePage() {
               </div>
               <div>
                 <p className="text-lg font-bold text-stone-200">WhatsApp</p>
-                <p className="text-[10px] text-stone-500">Orders via Chat</p>
+                <p className="text-[10px] text-stone-500">{tLanding("trustedBy.ordersViaChat")}</p>
               </div>
             </div>
           </div>
@@ -722,17 +721,17 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 border border-stone-700/50 text-stone-400 text-[11px] font-medium mb-4">⚡ Takes less than 5 minutes</div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Create Your Online Shop in Three Steps</h2>
-              <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">No coding, no designers, no expensive platforms. Just your products and a WhatsApp number.</p>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 border border-stone-700/50 text-stone-400 text-[11px] font-medium mb-4">⚡ {tLanding("howItWorks.badge")}</div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">{tLanding("howItWorks.title")}</h2>
+              <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">{tLanding("howItWorks.subtitle")}</p>
             </div>
           </ScrollReveal>
           <div className="grid sm:grid-cols-3 gap-8 relative">
             <div className="hidden sm:block absolute top-10 left-[16%] right-[16%] h-px bg-gradient-to-r from-emerald-500/40 via-emerald-500/20 to-emerald-500/40" style={{ zIndex: 0 }} />
             {[
-              { step: "1", title: "Snap a Photo → AI Lists It", desc: "Upload a product photo and AI generates the title, description, category & SEO tags in 10 seconds. 5 free AI listings every month — no typing needed.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>, gradient: "from-violet-600 to-purple-500" },
-              { step: "2", title: "Share Your Catalog Link", desc: "Get your unique URL. Drop it in WhatsApp groups, status, Instagram bio, TikTok — anywhere your customers hang out.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.95 9.318" /></svg>, gradient: "from-blue-600 to-blue-500" },
-              { step: "3", title: "Receive Structured Orders", desc: "Customers browse, select options & quantities, and send you a clean structured order on WhatsApp. With order tracking built in.", icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>, gradient: "from-purple-600 to-purple-500" },
+              { step: "1", title: tLanding("howItWorks.step1Title"), desc: tLanding("howItWorks.step1Desc"), icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>, gradient: "from-violet-600 to-purple-500" },
+              { step: "2", title: tLanding("howItWorks.step2Title"), desc: tLanding("howItWorks.step2Desc"), icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.95 9.318" /></svg>, gradient: "from-blue-600 to-blue-500" },
+              { step: "3", title: tLanding("howItWorks.step3Title"), desc: tLanding("howItWorks.step3Desc"), icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>, gradient: "from-purple-600 to-purple-500" },
             ].map((item, i) => (
               <ScrollReveal key={item.step} delay={i * 150}>
                 <div className="relative p-7 rounded-2xl bg-stone-900/60 border border-stone-800/60 hover:border-stone-700/80 transition-all text-center sm:text-left" style={{ zIndex: 1 }}>
@@ -754,24 +753,24 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Everything You Need to Sell Online in South Africa</h2>
-              <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">Built specifically for how South African sellers actually work.</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">{tLanding("features.title")}</h2>
+              <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">{tLanding("features.subtitle")}</p>
             </div>
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { title: "Orders Straight to WhatsApp", desc: "Customers pick sizes, colors, and quantities — then send you one clean order on WhatsApp. No confusion, no back-and-forth.", icon: "💬", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
-              { title: "Works on Any Phone", desc: "No app to download. Your customers tap a link and browse. Even on slow mobile data — it still loads fast.", icon: "📱", color: "from-blue-500/15 to-blue-600/5 border-blue-500/10" },
-              { title: "Sizes, Colors & Options", desc: "Customers pick exactly what they want — no more \"which size?\" messages. You set the options, they choose.", icon: "🎨", color: "from-purple-500/15 to-purple-600/5 border-purple-500/10" },
-              { title: "Track Every Order", desc: "Every order gets a tracking number. Update status as you go: Pending → Confirmed → Shipped → Delivered.", icon: "📦", color: "from-amber-500/15 to-amber-600/5 border-amber-500/10" },
-              { title: "See Who's Viewing Your Products", desc: "Know which products get the most views, what gets clicked, and what actually converts to WhatsApp orders.", icon: "📊", color: "from-pink-500/15 to-pink-600/5 border-pink-500/10" },
-              { title: "Fast-Loading Photos", desc: "Upload your product photos — we make them load fast on any phone, even on 3G. Crystal clear, every time.", icon: "🖼️", color: "from-orange-500/15 to-orange-600/5 border-orange-500/10" },
-              { title: "Upload All Products at Once", desc: "Got a spreadsheet with 100+ products? Import them all in seconds. We'll create everything for you.", icon: "📋", color: "from-cyan-500/15 to-cyan-600/5 border-cyan-500/10" },
-              { title: "Get Found by New Buyers", desc: "Your products appear on the TradeFeed marketplace — thousands of SA buyers browsing daily. Free exposure.", icon: "🏪", color: "from-indigo-500/15 to-indigo-600/5 border-indigo-500/10" },
-              { title: "Never Miss a Sale", desc: "Get notified instantly when you receive an order, when stock runs low, or when a buyer leaves a review.", icon: "🔔", color: "from-rose-500/15 to-rose-600/5 border-rose-500/10" },
-              { title: "Buyer Reviews & Ratings", desc: "Let happy customers vouch for you. Reviews build trust and help new buyers choose your products.", icon: "⭐", color: "from-yellow-500/15 to-yellow-600/5 border-yellow-500/10" },
-              { title: "Verified Seller Badge", desc: "Show buyers you're a legit business with a verified badge. Trust = more sales. It's that simple.", icon: "✅", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
-              { title: "Know Your Numbers", desc: "See your daily revenue, best-selling products, and growth trends. Know exactly what's working.", icon: "💰", color: "from-green-500/15 to-green-600/5 border-green-500/10" },
+              { title: tLanding("features.whatsapp.title"), desc: tLanding("features.whatsapp.description"), icon: "💬", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
+              { title: tLanding("features.mobile.title"), desc: tLanding("features.mobile.description"), icon: "📱", color: "from-blue-500/15 to-blue-600/5 border-blue-500/10" },
+              { title: tLanding("features.variants.title"), desc: tLanding("features.variants.description"), icon: "🎨", color: "from-purple-500/15 to-purple-600/5 border-purple-500/10" },
+              { title: tLanding("features.tracking.title"), desc: tLanding("features.tracking.description"), icon: "📦", color: "from-amber-500/15 to-amber-600/5 border-amber-500/10" },
+              { title: tLanding("features.analytics.title"), desc: tLanding("features.analytics.description"), icon: "📊", color: "from-pink-500/15 to-pink-600/5 border-pink-500/10" },
+              { title: tLanding("features.photos.title"), desc: tLanding("features.photos.description"), icon: "🖼️", color: "from-orange-500/15 to-orange-600/5 border-orange-500/10" },
+              { title: tLanding("features.import.title"), desc: tLanding("features.import.description"), icon: "📋", color: "from-cyan-500/15 to-cyan-600/5 border-cyan-500/10" },
+              { title: tLanding("features.marketplace.title"), desc: tLanding("features.marketplace.description"), icon: "🏪", color: "from-indigo-500/15 to-indigo-600/5 border-indigo-500/10" },
+              { title: tLanding("features.notifications.title"), desc: tLanding("features.notifications.description"), icon: "🔔", color: "from-rose-500/15 to-rose-600/5 border-rose-500/10" },
+              { title: tLanding("features.reviews.title"), desc: tLanding("features.reviews.description"), icon: "⭐", color: "from-yellow-500/15 to-yellow-600/5 border-yellow-500/10" },
+              { title: tLanding("features.verified.title"), desc: tLanding("features.verified.description"), icon: "✅", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
+              { title: tLanding("features.revenue.title"), desc: tLanding("features.revenue.description"), icon: "💰", color: "from-green-500/15 to-green-600/5 border-green-500/10" },
             ].map((feature, i) => (
               <ScrollReveal key={feature.title} delay={(i % 3) * 100}>
                 <div className={`p-5 rounded-xl bg-gradient-to-br ${feature.color} border hover:scale-[1.02] hover:shadow-lg transition-all duration-200 h-full`}>
@@ -804,9 +803,9 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium mb-4">💰 Simple, transparent pricing</div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Start Free. Scale Your Online Shop When Ready.</h2>
-              <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">No hidden fees, no surprises. Upgrade only when your business grows.</p>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium mb-4">💰 {tLanding("pricing.badge")}</div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">{tLanding("pricing.title")}</h2>
+              <p className="mt-3 text-stone-400 text-lg max-w-xl mx-auto">{tLanding("pricing.subtitle")}</p>
             </div>
           </ScrollReveal>
 
@@ -815,12 +814,12 @@ export default async function HomePage() {
             <ScrollReveal delay={0}>
               <div className="relative p-8 rounded-2xl bg-stone-900/60 border border-stone-800/60 hover:border-stone-700/80 transition-all h-full flex flex-col">
                 <div className="mb-6">
-                  <h3 className="text-lg font-bold text-stone-200">Free</h3>
-                  <p className="text-sm text-stone-500 mt-1">Perfect to get started</p>
+                  <h3 className="text-lg font-bold text-stone-200">{tLanding("pricing.freePlan.name")}</h3>
+                  <p className="text-sm text-stone-500 mt-1">{tLanding("pricing.freePlan.subtitle")}</p>
                 </div>
                 <div className="mb-8">
-                  <span className="text-4xl font-extrabold text-stone-100">R0</span>
-                  <span className="text-stone-500 text-sm ml-1">/forever</span>
+                  <span className="text-4xl font-extrabold text-stone-100">{tLanding("pricing.freePlan.price")}</span>
+                  <span className="text-stone-500 text-sm ml-1">/{tLanding("pricing.freePlan.period")}</span>
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
@@ -845,7 +844,7 @@ export default async function HomePage() {
                   })}
                 </ul>
                 <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl border border-stone-700 text-stone-300 font-semibold text-sm hover:bg-white/[0.03] hover:border-stone-600 transition-all">
-                  Get Started Free
+                  {tLanding("pricing.freePlan.cta")}
                 </Link>
               </div>
             </ScrollReveal>
@@ -857,12 +856,12 @@ export default async function HomePage() {
                   <div className="px-4 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-lg shadow-emerald-600/30">MOST POPULAR</div>
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-lg font-bold text-stone-100">Pro</h3>
-                  <p className="text-sm text-emerald-400/80 mt-1">For growing businesses</p>
+                  <h3 className="text-lg font-bold text-stone-100">{tLanding("pricing.proPlan.name")}</h3>
+                  <p className="text-sm text-emerald-400/80 mt-1">{tLanding("pricing.proPlan.subtitle")}</p>
                 </div>
                 <div className="mb-2">
-                  <span className="text-4xl font-extrabold text-stone-100">R199</span>
-                  <span className="text-stone-500 text-sm ml-1">/month</span>
+                  <span className="text-4xl font-extrabold text-stone-100">{tLanding("pricing.proPlan.price")}</span>
+                  <span className="text-stone-500 text-sm ml-1">{tLanding("pricing.proPlan.period")}</span>
                 </div>
                 <p className="text-sm text-emerald-400/70 mb-2">Less than R7/day — one sale covers it ☕</p>
                 <div className="mb-8 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/15">
@@ -886,7 +885,7 @@ export default async function HomePage() {
                   ))}
                 </ul>
                 <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all">
-                  Upgrade to Pro →
+                  {tLanding("pricing.proPlan.cta")}
                 </Link>
               </div>
             </ScrollReveal>
@@ -1098,8 +1097,8 @@ export default async function HomePage() {
         <div className="max-w-3xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-14">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Frequently Asked Questions</h2>
-              <p className="mt-3 text-stone-400 text-sm">Everything you need to know before getting started.</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">{tLanding("faq.title")}</h2>
+              <p className="mt-3 text-stone-400 text-sm">{tLanding("faq.subtitle")}</p>
             </div>
           </ScrollReveal>
           {/* FAQ JSON-LD for Google rich results */}
@@ -1134,21 +1133,21 @@ export default async function HomePage() {
         <div className="relative max-w-2xl mx-auto text-center">
           <ScrollReveal>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 border border-stone-700/50 text-stone-400 text-[11px] font-medium mb-6">
-              🚀 Join {Math.max(shopCount, 50)}+ South African sellers
+              🚀 {tLanding("cta.badge", { shopCount: Math.max(shopCount, 50) })}
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-              Ready to{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-400">sell online in South Africa?</span>
+              {tLanding("cta.title")}{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-400">{tLanding("cta.titleHighlight")}</span>
             </h2>
-            <p className="mt-5 text-stone-400 text-lg max-w-lg mx-auto">Upload a photo, AI creates the listing, share on WhatsApp. Your first 5 AI listings are free — start selling in under 3 minutes.</p>
+            <p className="mt-5 text-stone-400 text-lg max-w-lg mx-auto">{tLanding("cta.subtitle")}</p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href={aiCtaHref} className="group inline-flex items-center justify-center px-10 py-4 text-base font-semibold rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white hover:from-violet-500 hover:to-purple-400 transition-all shadow-2xl shadow-violet-600/25 hover:shadow-violet-500/35 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto">
-                ✨ Try AI Free
+                {tLanding("cta.button")}
                 <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
               </Link>
-              <Link href="/marketplace" className="inline-flex items-center justify-center text-sm font-medium text-stone-400 hover:text-emerald-400 transition-colors">or browse the marketplace →</Link>
+              <Link href="/marketplace" className="inline-flex items-center justify-center text-sm font-medium text-stone-400 hover:text-emerald-400 transition-colors">{tLanding("cta.buttonSecondary")}</Link>
             </div>
-            <p className="mt-5 text-xs text-stone-600">5 free AI listings · No credit card · Set up in under 3 minutes · Cancel anytime</p>
+            <p className="mt-5 text-xs text-stone-600">{tLanding("cta.footer")}</p>
           </ScrollReveal>
         </div>
       </section>

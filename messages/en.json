@@ -34,112 +34,142 @@
   },
   "landing": {
     "hero": {
-      "title": "Your Products. One Catalog Link. WhatsApp Orders.",
-      "subtitle": "Upload your products, share your catalog link, and receive structured orders via WhatsApp. Built for SA wholesalers & retailers.",
-      "cta": "Start Selling Free",
-      "ctaSecondary": "Browse Marketplace",
-      "trustedBy": "Trusted by SA wholesalers"
+      "badge": "Trusted by {shopCount}+ sellers across South Africa",
+      "title": "Sell Online in",
+      "titleHighlight": "South Africa",
+      "subtitle": "Turn your WhatsApp clothing business into a professional catalog. Upload a photo — AI writes the listing. Share your link and get orders with sizes, colors & quantities.",
+      "aiOffer": "5 FREE AI listings every month — no credit card needed",
+      "cta": "✨ Try AI Free",
+      "ctaSecondary": "or browse the marketplace →",
+      "proofSellers": "Sellers in",
+      "proofCities": "Jeppe, Durban & Cape Town",
+      "benefitAi": "5 free AI listings",
+      "benefitSpeed": "Photo → listing in 10 sec",
+      "benefitWhatsApp": "Share & sell on WhatsApp"
+    },
+    "trustedBy": {
+      "title": "Trusted by sellers across South Africa",
+      "activeSellers": "Active Sellers",
+      "productsListed": "Products Listed",
+      "ordersProcessed": "Orders Processed",
+      "provinces": "SA Provinces",
+      "ordersViaChat": "Orders via Chat"
+    },
+    "howItWorks": {
+      "badge": "Takes less than 5 minutes",
+      "title": "Create Your Online Shop in Three Steps",
+      "subtitle": "No coding, no designers, no expensive platforms. Just your products and a WhatsApp number.",
+      "step1Title": "Snap a Photo → AI Lists It",
+      "step1Desc": "Upload a product photo and AI generates the title, description, category & SEO tags in 10 seconds. 5 free AI listings every month — no typing needed.",
+      "step2Title": "Share Your Catalog Link",
+      "step2Desc": "Get your unique URL. Drop it in WhatsApp groups, status, Instagram bio, TikTok — anywhere your customers hang out.",
+      "step3Title": "Receive Structured Orders",
+      "step3Desc": "Customers browse, select options & quantities, and send you a clean structured order on WhatsApp. With order tracking built in."
     },
     "features": {
-      "title": "Everything You Need to Sell Smarter",
-      "subtitle": "Replace voice notes and scattered WhatsApp images with a professional product catalog.",
+      "title": "Everything You Need to Sell Online in South Africa",
+      "subtitle": "Built specifically for how South African sellers actually work.",
       "whatsapp": {
-        "title": "WhatsApp-First Checkout",
-        "description": "Buyers browse your catalog and send structured orders directly to your WhatsApp — no app download needed."
+        "title": "Orders Straight to WhatsApp",
+        "description": "Customers pick sizes, colors, and quantities — then send you one clean order on WhatsApp. No confusion, no back-and-forth."
       },
       "mobile": {
         "title": "Works on Any Phone",
-        "description": "Your catalog loads fast on any smartphone. Designed for mobile-first South African buyers on data budgets."
+        "description": "No app to download. Your customers tap a link and browse. Even on slow mobile data — it still loads fast."
       },
       "variants": {
-        "title": "Product Variants",
-        "description": "Add sizes, colours, and custom options. Track stock per variant. Show buyers exactly what's available."
+        "title": "Sizes, Colors & Options",
+        "description": "Customers pick exactly what they want — no more \"which size?\" messages. You set the options, they choose."
+      },
+      "tracking": {
+        "title": "Track Every Order",
+        "description": "Every order gets a tracking number. Update status as you go: Pending → Confirmed → Shipped → Delivered."
       },
       "analytics": {
-        "title": "Know Your Numbers",
-        "description": "See which products get views, which generate WhatsApp clicks, and track your sales performance."
+        "title": "See Who's Viewing Your Products",
+        "description": "Know which products get the most views, what gets clicked, and what actually converts to WhatsApp orders."
+      },
+      "photos": {
+        "title": "Fast-Loading Photos",
+        "description": "Upload your product photos — we make them load fast on any phone, even on 3G. Crystal clear, every time."
       },
       "import": {
-        "title": "Bulk Import",
-        "description": "Upload hundreds of products at once via CSV. No need to add them one by one."
+        "title": "Upload All Products at Once",
+        "description": "Got a spreadsheet with 100+ products? Import them all in seconds. We'll create everything for you."
       },
       "marketplace": {
-        "title": "Marketplace Discovery",
-        "description": "Get found by new buyers. Your products appear on the TradeFeed marketplace alongside other SA sellers."
+        "title": "Get Found by New Buyers",
+        "description": "Your products appear on the TradeFeed marketplace — thousands of SA buyers browsing daily. Free exposure."
+      },
+      "notifications": {
+        "title": "Never Miss a Sale",
+        "description": "Get notified instantly when you receive an order, when stock runs low, or when a buyer leaves a review."
+      },
+      "reviews": {
+        "title": "Buyer Reviews & Ratings",
+        "description": "Let happy customers vouch for you. Reviews build trust and help new buyers choose your products."
+      },
+      "verified": {
+        "title": "Verified Seller Badge",
+        "description": "Show buyers you're a legit business with a verified badge. Trust = more sales. It's that simple."
+      },
+      "revenue": {
+        "title": "Know Your Numbers",
+        "description": "See your daily revenue, best-selling products, and growth trends. Know exactly what's working."
       }
     },
     "pricing": {
-      "title": "Simple, Transparent Pricing",
-      "subtitle": "Start free. Upgrade when you're ready.",
+      "title": "Start Free. Scale Your Online Shop When Ready.",
+      "subtitle": "No hidden fees, no surprises. Upgrade only when your business grows.",
+      "badge": "Simple, transparent pricing",
       "freePlan": {
         "name": "Free",
+        "subtitle": "Perfect to get started",
         "price": "R0",
         "period": "forever",
-        "cta": "Start Free",
+        "cta": "Get Started Free",
         "features": [
+          "✨ 5 free AI generations",
           "Up to 10 products",
-          "Public catalog page",
           "WhatsApp checkout",
+          "Public catalog page",
           "Basic analytics",
-          "Mobile-first design"
+          "Order tracking",
+          "Category management",
+          "Product variants",
+          "Image CDN hosting"
         ]
       },
       "proPlan": {
         "name": "Pro",
+        "subtitle": "For growing businesses",
         "price": "R199",
         "period": "/month",
-        "cta": "Go Pro",
+        "cta": "Upgrade to Pro →",
         "features": [
           "Unlimited products",
-          "CSV bulk import",
-          "Advanced analytics",
+          "Everything in Free",
+          "WhatsApp support — message us directly",
           "Promoted listings",
-          "Priority support",
-          "Custom shop branding"
+          "Revenue dashboard",
+          "Upload all products at once",
+          "Never miss a sale — instant alerts",
+          "Buyer reviews & ratings"
         ]
       }
     },
     "faq": {
       "title": "Frequently Asked Questions",
-      "items": [
-        {
-          "q": "How does WhatsApp ordering work?",
-          "a": "Buyers browse your catalog online, add items to their cart, and tap 'Send Order on WhatsApp'. This opens WhatsApp with a structured message listing everything they want — sizes, colours, quantities, and totals."
-        },
-        {
-          "q": "Do my buyers need to download an app?",
-          "a": "No. Your catalog is a web page that works in any mobile browser. Buyers just open the link you share on WhatsApp."
-        },
-        {
-          "q": "Is my data safe?",
-          "a": "Yes. Every shop's data is completely isolated. No other seller can see your products, orders, or customer information. We comply with POPIA (South Africa's data protection law)."
-        },
-        {
-          "q": "Can I try it for free?",
-          "a": "Absolutely. The Free plan lets you list up to 10 products with full WhatsApp checkout. No credit card required."
-        },
-        {
-          "q": "What payment methods do you accept?",
-          "a": "We accept payments via PayFast — South Africa's trusted payment gateway. Pay with credit card, debit card, or EFT."
-        },
-        {
-          "q": "Can I import my existing product list?",
-          "a": "Yes! Pro plan sellers can upload a CSV file to bulk-import hundreds of products at once."
-        },
-        {
-          "q": "Where are you based?",
-          "a": "TradeFeed is built in South Africa, for South Africa. We understand the Jeppe Street hustle."
-        },
-        {
-          "q": "How do I get started?",
-          "a": "Sign up, create your shop, upload your first product, and share your catalog link. It takes less than 5 minutes."
-        }
-      ]
+      "subtitle": "Everything you need to know before getting started."
     },
     "cta": {
-      "title": "Ready to Sell Smarter?",
-      "subtitle": "Join SA wholesalers already using TradeFeed to manage their catalogs and get structured orders.",
-      "button": "Create Your Free Catalog"
+      "title": "Ready to",
+      "titleHighlight": "sell online in South Africa?",
+      "subtitle": "Upload a photo, AI creates the listing, share on WhatsApp. Your first 5 AI listings are free — start selling in under 3 minutes.",
+      "badge": "Join {shopCount}+ South African sellers",
+      "button": "✨ Try AI Free",
+      "buttonSecondary": "or browse the marketplace →",
+      "footer": "5 free AI listings · No credit card · Set up in under 3 minutes · Cancel anytime"
     }
   },
   "marketplace": {

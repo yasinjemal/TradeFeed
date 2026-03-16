@@ -19,15 +19,14 @@
 
 ## 1. Performance & Infrastructure
 
-### 1.1 ⬜ Upstash Redis Rate Limiter
+### 1.1 ✅ Upstash Redis Rate Limiter
 
-**Current:** In-memory sliding window rate limiter works single-instance but resets on every cold start (serverless).
+**Current:** Upstash Redis rate limiter in production, in-memory fallback for local dev.
 **Goal:** Swap to [Upstash Redis](https://upstash.com/) for persistent, multi-instance rate limiting.
 
-- File: `lib/rate-limit.ts`
-- Install: `@upstash/ratelimit`, `@upstash/redis`
-- Env vars: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
-- Estimated effort: **1–2 hours**
+- ✅ `lib/rate-limit-upstash.ts` with `@upstash/ratelimit` + `@upstash/redis`
+- ✅ Three named limiters: catalog (60/min), api (30/min), action (10/min)
+- ✅ Graceful in-memory fallback when Upstash env vars missing (local dev)
 
 ### 1.2 ✅ ISR / Static Generation for High-Traffic Pages
 
@@ -40,15 +39,13 @@
 - Invalidate on product create/update/delete via `revalidatePath()`
 - Estimated effort: **2–3 hours**
 
-### 1.3 ⬜ Edge Runtime for Middleware
+### 1.3 ✅ Edge Runtime for Middleware
 
-**Current:** Middleware runs on Node.js runtime.
+**Current:** Middleware runs on Edge Runtime.
 **Goal:** Move to Edge Runtime for lower latency on Vercel (already compatible — Clerk middleware supports Edge).
 
-- File: `middleware.ts` → add `export const runtime = "edge"`
-- Caveat: Rate limiter must move to Upstash first (no in-memory state on Edge)
-- Depends on: **1.1**
-- Estimated effort: **30 min** (after 1.1)
+- ✅ `middleware.ts` has `export const runtime = "edge"`
+- ✅ Upstash Redis (Edge-compatible) used for rate limiting
 
 ### 1.4 ✅ Image Placeholder Blur (Shimmer)
 
@@ -99,13 +96,15 @@
 - Log audit trail
 - Estimated effort: **2–3 hours**
 
-### 2.3 ⬜ Subresource Integrity (SRI) for External Scripts
+### 2.3 ✅ Subresource Integrity (SRI) for External Scripts
 
-**Current:** GA4 script loaded without integrity hash.
+**Current:** Only external script is Google Tag Manager (dynamically served, hash changes frequently).
 **Goal:** Add `integrity` attribute to external `<Script>` tags where possible.
 
-- Note: Google Tag Manager changes frequently — SRI may break. Evaluate feasibility.
-- Estimated effort: **1 hour** (research + decide)
+- ⚠️ SRI not feasible for GTM — Google serves different content per request/version
+- ✅ Mitigated via CSP nonce (P3 2.1): `'strict-dynamic'` + per-request nonces ensure only authorized scripts execute
+- ✅ GTM domain allowlisted in `script-src` CSP directive
+- No other external scripts in the app — SRI not applicable
 
 ---
 
@@ -208,15 +207,14 @@
 - Wire into `checkoutAction` (replace the `undefined // buyerNote`)
 - Estimated effort: **30 min**
 
-### 4.6 ⬜ Multi-Language Support (i18n)
+### 4.6 ✅ Multi-Language Support (i18n)
 
-**Current:** English only.
-**Goal:** Support Zulu, Afrikaans, Xhosa for broader SA market reach.
+**Implemented:** Landing page fully wired to `next-intl` with 5 SA languages (en, zu, af, xh, st).
 
-- Use `next-intl` or `next-i18next`
-- Start with landing page + catalog (buyer-facing only)
-- Language switcher in navbar
-- **High effort: 1–2 days** (translation + routing + component updates)
+- All major landing sections use `tLanding()` translation calls (hero, trusted-by, how-it-works, features, pricing, FAQ, CTA)
+- Translation files updated: `messages/{en,zu,af,xh,st}.json` with expanded landing keys
+- Language switcher already in navbar, cookie-based locale detection
+- 12 feature cards, pricing tiers, section headers all translatable
 
 ---
 
@@ -314,15 +312,17 @@
 
 ## 7. DevOps & Monitoring
 
-### 7.1 ⬜ Error Tracking (Sentry)
+### 7.1 ✅ Error Tracking (Sentry)
 
-**Current:** Errors logged to console only. Error boundaries catch but don't report.
+**Current:** Sentry fully integrated with client, server, and edge configs.
 **Goal:** Integrate Sentry for real-time error tracking + alerts.
 
-- Install: `@sentry/nextjs`
-- Config: `sentry.client.config.ts`, `sentry.server.config.ts`
-- Wire into `global-error.tsx` and `error.tsx`
-- Estimated effort: **1–2 hours**
+- ✅ `@sentry/nextjs` v10.40.0 installed, `withSentryConfig` wraps `next.config.mjs`
+- ✅ `instrumentation.ts` (server) + `instrumentation-client.ts` (client + replay) + `sentry.edge.config.ts`
+- ✅ Both `error.tsx` and `global-error.tsx` call `Sentry.captureException(error)`
+- ✅ Session Replay: 10% sessions, 100% on error
+- ✅ Traces: 20% in production, 100% in dev
+- ✅ `tunnelRoute: "/monitoring"` to bypass ad blockers
 
 ### 7.2 ✅ Uptime Monitoring
 

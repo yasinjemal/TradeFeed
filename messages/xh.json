@@ -34,112 +34,142 @@
   },
   "landing": {
     "hero": {
-      "title": "Iimveliso Zakho. Ikhonkco Elinye Lekhathalogi. Ii-Odela ze-WhatsApp.",
-      "subtitle": "Layisha iimveliso zakho, yabelana ngekhonkco lekhathalogi yakho, kwaye ufumane ii-odela ezicwangcisiweyo nge-WhatsApp. Yakhelwe abathengisi baseSA.",
-      "cta": "Qala Ukuthengisa Simahla",
-      "ctaSecondary": "Bhrawuza Imarike",
-      "trustedBy": "Ithenjwa ngabathengisi baseSA"
+      "badge": "Ithenjwa ngabathengisi abangu-{shopCount}+ kulo lonke uMzantsi Afrika",
+      "title": "Thengisa Kwi-Intanethi e",
+      "titleHighlight": "Mzantsi Afrika",
+      "subtitle": "Guqula ishishini lakho le-WhatsApp lempahla libe yikhathalogi yobungcali. Layisha ifoto — i-AI ibhale uluhlu. Yabelana ngekhonkco lakho ufumane ii-odela nobungakanani, imibala nemilinganiselo.",
+      "aiOffer": "Ii-listing ezi-5 ze-AI ZASIMAHLA nyanga nganye — akufuneki ikhadi letyala",
+      "cta": "✨ Zama i-AI Simahla",
+      "ctaSecondary": "okanye bhrawuza imarike →",
+      "proofSellers": "Abathengisi e",
+      "proofCities": "Jeppe, eThekwini naseKapa",
+      "benefitAi": "Ii-listing ezi-5 ze-AI zasimahla",
+      "benefitSpeed": "Ifoto → uluhlu ngemizuzwana eyi-10",
+      "benefitWhatsApp": "Yabelana uthengise ku-WhatsApp"
+    },
+    "trustedBy": {
+      "title": "Ithenjwa ngabathengisi kulo lonke uMzantsi Afrika",
+      "activeSellers": "Abathengisi Abasebenzayo",
+      "productsListed": "Iimveliso Ezifakiweyo",
+      "ordersProcessed": "Ii-odela Ezisetyhenzisweyo",
+      "provinces": "Amaphondo aseSA",
+      "ordersViaChat": "Ii-odela Ngoncoko"
+    },
+    "howItWorks": {
+      "badge": "Ithatha imizuzu engaphantsi kwesihlanu",
+      "title": "Yenza Ivenkile Yakho Kwi-Intanethi Ngamanyathelo Amathathu",
+      "subtitle": "Akukho ukuprograma, akukho abayili, akukho iiplatifomu ezibizayo. Iimveliso zakho kunye nenombolo ye-WhatsApp kuphela.",
+      "step1Title": "Thatha Ifoto → I-AI Iyalifaka",
+      "step1Desc": "Layisha ifoto yemveliso kwaye i-AI ivelise isihloko, inkcazo, udidi kunye neethegi ze-SEO ngemizuzwana eyi-10. Ii-listing ezi-5 ze-AI zasimahla nyanga nganye.",
+      "step2Title": "Yabelana Ngekhonkco Lekhathalogi Yakho",
+      "step2Desc": "Fumana i-URL yakho eyodwa. Yifake kumaqela e-WhatsApp, isimo, i-Instagram bio, i-TikTok — naphi apho abathengi bakho bakhoyo.",
+      "step3Title": "Fumana Ii-odela Ezicwangcisiweyo",
+      "step3Desc": "Abathengi babhrawuza, bakhethe iinketho nemilinganiselo, baze bakuthumele i-odela ecwangcisiweyo ecocekileyo ku-WhatsApp. Nokulandelela kwe-odela okwakhiweyo."
     },
     "features": {
-      "title": "Yonke Into Oyidingayo Ukuthengisa Ngobulumko",
-      "subtitle": "Tshintsha ii-voice notes neefoto ezithe saa ze-WhatsApp ngekhathalogi yeemveliso yobungcali.",
+      "title": "Yonke Into Oyidingayo Ukuthengisa Kwi-Intanethi eMzantsi Afrika",
+      "subtitle": "Yakhelwe ngokukhethekileyo indlela abathengisi baseMzantsi Afrika abasebenza ngayo ngokwenyani.",
       "whatsapp": {
-        "title": "Ukuhlawula Nge-WhatsApp Kuqala",
-        "description": "Abathengi babhrawuza ikhathalogi yakho kwaye bathumele ii-odela ezicwangcisiweyo ngqo ku-WhatsApp yakho."
+        "title": "Ii-odela Ngqo ku-WhatsApp",
+        "description": "Abathengi bakhetha ubungakanani, imibala, nemilinganiselo — baze bakuthumele i-odela enye ecocekileyo ku-WhatsApp. Akukho ukudideka."
       },
       "mobile": {
         "title": "Isebenza Kuyo Nayiphi Ifowuni",
-        "description": "Ikhathalogi yakho ilayisha ngokukhawuleza kuyo nayiphi i-smartphone. Iyilelwe abathengi baseSA abasebenzisa idatha."
+        "description": "Akukho i-app ekufuneka uyilayishe. Abathengi bakho bacofa ikhonkco baze babhrawuze. Nkqu nakwidatha emobileni ecotha — isalayisha ngokukhawuleza."
       },
       "variants": {
-        "title": "Iindidi Zeemveliso",
-        "description": "Yongeza ubungakanani, imibala, kunye neenketho ezizodwa. Landelela isitoko ngendidi nganye."
+        "title": "Ubungakanani, Imibala Neenketho",
+        "description": "Abathengi bakhetha kanye into abayifunayo — akusekho imiyalezo ethi \"bubungakanani buni?\". Wena ubeka iinketho, bona bakhetha."
+      },
+      "tracking": {
+        "title": "Landelela Yonke I-odela",
+        "description": "Yonke i-odela ifumana inombolo yokulandelela. Hlaziya isimo njengoko uhamba: Ilindile → Iqinisekisiwe → Ithunyelwe → Ifikile."
       },
       "analytics": {
-        "title": "Yazi Amanani Akho",
-        "description": "Bona ukuba zeziphi iimveliso ezifumana ukubukwa, kwaye ulandelele ukusebenza kwakho kokuthengisa."
+        "title": "Bona Obuka Iimveliso Zakho",
+        "description": "Yazi ukuba zeziphi iimveliso ezifumana ukubukwa okuninzi, okucofa, nokuvelisa ii-odela ze-WhatsApp ngokwenyani."
+      },
+      "photos": {
+        "title": "Iifoto Ezilayisha Ngokukhawuleza",
+        "description": "Layisha iifoto zeemveliso zakho — sizenza zilayishe ngokukhawuleza kuyo nayiphi ifowuni, nkqu naku-3G."
       },
       "import": {
-        "title": "Ukulayisha Okuninzi",
-        "description": "Layisha amakhulu eemveliso ngexesha elinye nge-CSV."
+        "title": "Layisha Zonke Iimveliso Ngexesha Elinye",
+        "description": "Uneshipredishithi eneemveliso eziyi-100+? Zilayishe zonke ngemizuzwana. Siza kwenza yonke into."
       },
       "marketplace": {
-        "title": "Ukufunyanwa Emarikeni",
-        "description": "Fumana abathengi abatsha. Iimveliso zakho zivela emarikeni ye-TradeFeed kunye nabanye abathengisi baseSA."
+        "title": "Fumana Abathengi Abatsha",
+        "description": "Iimveliso zakho zivela emarikeni ye-TradeFeed — amawaka abathengi baseSA abhrawuza yonke imihla. Ukuvezwa kwasimahla."
+      },
+      "notifications": {
+        "title": "Ungaphoswa Kukuthengisa",
+        "description": "Fumana isaziso ngokukhawuleza xa ufumana i-odela, xa isitoko siphantsi, okanye xa umthengi eshiya uhlalutyo."
+      },
+      "reviews": {
+        "title": "Izimvo Zabathengi Nokulinganisa",
+        "description": "Vumela abathengi abonwabileyo bakufakazele. Izimvo zakha ukuthembeka kwaye zincede abathengi abatsha."
+      },
+      "verified": {
+        "title": "Ibheji Yomthengisi Oqinisekisiweyo",
+        "description": "Bonisa abathengi ukuba ulishishini lokwenyani ngebheji eqinisekisiweyo. Ukuthembeka = ukuthengisa okungaphezulu."
+      },
+      "revenue": {
+        "title": "Yazi Amanani Akho",
+        "description": "Bona imali engenayo yosuku ngalunye, iimveliso ezithengisa kakhulu, kunye nezikhokelo zokukhula. Yazi kanye okusebenzayo."
       }
     },
     "pricing": {
-      "title": "Amaxabiso Alula, Acacileyo",
-      "subtitle": "Qala simahla. Phakamisa xa ukulungele.",
+      "title": "Qala Simahla. Khulisa Ivenkile Yakho Xa Ukulungele.",
+      "subtitle": "Akukho iintlawulo ezifihliweyo, akukho mmangaliso. Phakamisa kuphela xa ishishini lakho likhula.",
+      "badge": "Amaxabiso alula, acacileyo",
       "freePlan": {
         "name": "Simahla",
+        "subtitle": "Igqibelele ukuqala",
         "price": "R0",
         "period": "ngonaphakade",
         "cta": "Qala Simahla",
         "features": [
+          "✨ Ukukhiqiza okusi-5 kwe-AI kwasimahla",
           "Ukuya kutsho kwiimveliso eziyi-10",
-          "Iphepha lekhathalogi kawonke-wonke",
           "Ukuhlawula nge-WhatsApp",
+          "Iphepha lekhathalogi kawonke-wonke",
           "Uhlalutyo olusisiseko",
-          "Uyilo lwemobayile kuqala"
+          "Ukulandelela kwe-odela",
+          "Ukulawulwa kodidi",
+          "Iindidi zeemveliso",
+          "Ukugcinwa kwemifanekiso nge-CDN"
         ]
       },
       "proPlan": {
         "name": "Pro",
+        "subtitle": "Amashishini akhulayo",
         "price": "R199",
         "period": "/ngenyanga",
-        "cta": "Fumana i-Pro",
+        "cta": "Phakamisa ku-Pro →",
         "features": [
           "Iimveliso ezingenamdla",
-          "Ukulayisha okuninzi nge-CSV",
-          "Uhlalutyo oluphuculweyo",
+          "Yonke into kwiSimahla",
+          "Inkxaso ye-WhatsApp — sithumele umyalezo ngokuthe ngqo",
           "Iintengiso ezikhushulweyo",
-          "Inkxaso ebalulekileyo",
-          "Ibhrendi yevenkile ngokwezifiso"
+          "Ideshibhodi yemali engenayo",
+          "Layisha zonke iimveliso ngexesha elinye",
+          "Ungaphoswa kukuthengisa — izaziso ezikhawulezayo",
+          "Izimvo zabathengi nokulinganisa"
         ]
       }
     },
     "faq": {
       "title": "Imibuzo Ebuzwa Rhoqo",
-      "items": [
-        {
-          "q": "Ukuodela kwe-WhatsApp kusebenza njani?",
-          "a": "Abathengi babhrawuza ikhathalogi yakho kwi-intanethi, bongeze izinto enqwelweni yabo, baze bacofe 'Thumela I-Odela ku-WhatsApp'."
-        },
-        {
-          "q": "Ingaba abathengi bam kufuneka balayishe i-app?",
-          "a": "Hayi. Ikhathalogi yakho liphepha lewebhu elisebenza kuyo nayiphi ibhrawuza yemobayile."
-        },
-        {
-          "q": "Ingaba idatha yam ikhuselekile?",
-          "a": "Ewe. Idatha yevenkile nganye yahlulwe ngokupheleleyo. Sithobela i-POPIA."
-        },
-        {
-          "q": "Ndingayizama simahla?",
-          "a": "Ngokuqinisekileyo. Iplani Yasimahla ikuvumela ukufaka iimveliso eziyi-10. Akufuneki ikhadi letyala."
-        },
-        {
-          "q": "Namkela eziphi iindlela zokuhlawula?",
-          "a": "Samkela iintlawulo nge-PayFast — isango sokuhlawula esithembekileyo saseMzantsi Afrika."
-        },
-        {
-          "q": "Ndingayilayisha uluhlu lwam lweemveliso olukhoyo?",
-          "a": "Ewe! Abathengisi be-Pro bangalayisha ifayile ye-CSV ukulayisha amakhulu eemveliso ngexesha elinye."
-        },
-        {
-          "q": "Nikweyiphi indawo?",
-          "a": "I-TradeFeed yakhelwe eMzantsi Afrika, ngeMzantsi Afrika."
-        },
-        {
-          "q": "Ndiqala njani?",
-          "a": "Bhalisa, yenza ivenkile yakho, layisha imveliso yakho yokuqala, kwaye wabelane ngekhonkco lekhathalogi yakho. Ithatha imizuzu engaphantsi kwesihlanu."
-        }
-      ]
+      "subtitle": "Yonke into ekufuneka uyazi phambi kokuqala."
     },
     "cta": {
-      "title": "Ukulungele Ukuthengisa Ngobulumko?",
-      "subtitle": "Hlangana nabathengisi baseSA abasele besebenzisa i-TradeFeed ukulawula iikhathalogi zabo.",
-      "button": "Yenza Ikhathalogi Yakho Yasimahla"
+      "title": "Ukulungele",
+      "titleHighlight": "ukuthengisa kwi-intanethi eMzantsi Afrika?",
+      "subtitle": "Layisha ifoto, i-AI ivelise uluhlu, yabelana ku-WhatsApp. Ii-listing zakho zokuqala ezi-5 ze-AI zasimahla — qala ukuthengisa ngemizuzu engaphantsi kwemithathu.",
+      "badge": "Hlangana nabathengisi abangu-{shopCount}+ baseMzantsi Afrika",
+      "button": "✨ Zama i-AI Simahla",
+      "buttonSecondary": "okanye bhrawuza imarike →",
+      "footer": "Ii-listing ezi-5 ze-AI zasimahla · Akukho ikhadi letyala · Seta ngemizuzu engaphantsi kwemithathu · Rhoxisa nangaliphi ixesha"
     }
   },
   "marketplace": {
