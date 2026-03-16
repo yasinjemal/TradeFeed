@@ -6,6 +6,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { SHIMMER_DARK } from "@/lib/image-placeholder";
 import type { FeaturedShop } from "@/lib/db/marketplace";
 
 interface FeaturedShopCardProps {
@@ -23,6 +24,8 @@ export function FeaturedShopCard({ shop }: FeaturedShopCardProps) {
               alt={shop.name}
               width={40}
               height={40}
+              placeholder="blur"
+              blurDataURL={SHIMMER_DARK}
               className="w-10 h-10 rounded-full object-cover border-2 border-stone-700 group-hover:border-emerald-500/50 transition-colors"
             />
           ) : (

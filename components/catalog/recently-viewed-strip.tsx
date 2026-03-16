@@ -10,6 +10,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { SHIMMER_LIGHT } from "@/lib/image-placeholder";
 import { useRecentlyViewed } from "@/lib/recently-viewed/recently-viewed";
 import { formatZAR } from "@/types";
 
@@ -83,6 +84,8 @@ export function RecentlyViewedStrip({
                     alt={item.productName}
                     fill
                     sizes="120px"
+                    placeholder="blur"
+                    blurDataURL={SHIMMER_LIGHT}
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (

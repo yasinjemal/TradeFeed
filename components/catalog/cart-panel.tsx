@@ -23,6 +23,7 @@
 
 import { useEffect, useState, useTransition, useRef } from "react";
 import Image from "next/image";
+import { SHIMMER_LIGHT } from "@/lib/image-placeholder";
 import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/cart/cart-context";
 import { IllustrationEmptyCart } from "@/components/ui/illustrations";
@@ -353,6 +354,8 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                       alt={item.productName}
                       width={48}
                       height={48}
+                      placeholder="blur"
+                      blurDataURL={SHIMMER_LIGHT}
                       className="w-full h-full object-cover"
                     />
                   ) : (

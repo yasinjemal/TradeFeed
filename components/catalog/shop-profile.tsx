@@ -10,6 +10,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { SHIMMER_DARK } from "@/lib/image-placeholder";
 import type { BusinessHours, DayKey } from "@/lib/validation/shop-settings";
 import { DAY_LABELS, DAYS_OF_WEEK } from "@/lib/validation/shop-settings";
 
@@ -216,6 +217,8 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
             src={shop.bannerUrl}
             alt={`${shop.name} banner`}
             fill
+            placeholder="blur"
+            blurDataURL={SHIMMER_DARK}
             className="object-cover opacity-60"
             sizes="(max-width: 640px) 100vw, 640px"
           />
@@ -455,6 +458,8 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
                         alt={item.caption || "Shop gallery"}
                         fill
                         sizes="(max-width: 640px) 33vw, 25vw"
+                        placeholder="blur"
+                        blurDataURL={SHIMMER_DARK}
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     )}

@@ -50,14 +50,16 @@
 - Depends on: **1.1**
 - Estimated effort: **30 min** (after 1.1)
 
-### 1.4 ⬜ Image Placeholder Blur (blurDataURL)
+### 1.4 ✅ Image Placeholder Blur (Shimmer)
 
-**Current:** `next/image` uses default loading (grey box → image pop-in).
-**Goal:** Generate `blurDataURL` placeholders for product images to show a smooth blur-up effect.
+**Current:** ~~`next/image` uses default loading (grey box → image pop-in).~~
+**Goal:** Smooth loading experience for all buyer-facing images.
 
-- Use `plaiceholder` library or generate on upload via UploadThing callback
-- Store `blurHash` on `ProductImage` model
-- Pass `placeholder="blur"` + `blurDataURL` to `<Image>`
+**Implementation (complete):**
+- Uses animated SVG shimmer placeholders (`SHIMMER_LIGHT` / `SHIMMER_DARK`) from `lib/image-placeholder.ts`
+- Applied `placeholder="blur"` + `blurDataURL` to all 9 buyer-facing image components:
+  - Product gallery, catalog search cards, combo section, marketplace cards (existing)
+  - Recently-viewed strip, wishlist panel, cart panel, shop banner/gallery, featured shop cards (added)
 - Estimated effort: **3–4 hours** (schema migration + upload hook + component updates)
 
 ### 1.5 ✅ Service Worker Cache Strategy

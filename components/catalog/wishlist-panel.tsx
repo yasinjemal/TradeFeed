@@ -11,6 +11,7 @@ import { useEffect, useRef } from "react";
 import { useWishlist } from "@/lib/wishlist/wishlist-context";
 import Link from "next/link";
 import Image from "next/image";
+import { SHIMMER_LIGHT } from "@/lib/image-placeholder";
 import { formatZAR } from "@/types";
 import { IllustrationEmptyHeart } from "@/components/ui/illustrations";
 
@@ -138,6 +139,8 @@ export function WishlistPanel({ isOpen, onClose, shopSlug }: WishlistPanelProps)
                       alt={item.productName}
                       width={64}
                       height={64}
+                      placeholder="blur"
+                      blurDataURL={SHIMMER_LIGHT}
                       className="w-full h-full object-cover"
                     />
                   ) : (
