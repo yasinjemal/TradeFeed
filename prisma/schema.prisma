@@ -84,6 +84,8 @@ model Shop {
   transactionFees TransactionFee[]             // Platform fees from buyer payments
   sellerMessages  SellerMessage[]              // WhatsApp follow-up message log
   sequenceState   SellerSequenceState?         // Follow-up sequence progress tracker
+  referralRewardsGiven ReferralReward[] @relation("ReferrerRewards")  // Rewards earned by referring others
+  referralRewardReceived ReferralReward? @relation("ReferredRewards") // Reward triggered when this shop upgraded
 
   @@index([slug])
   @@index([isActive])
@@ -1116,4 +1118,25 @@ model BulkDiscountTier {
 
   @@unique([productId, minQuantity])           // One tier per quantity breakpoint
   @@index([productId])
+}
+
+// ============================================================
+// REFERRAL REWARD: Tracks when a referral reward was applied.
+// Ensures idempotency (one reward per referred shop).
+// ============================================================
+model ReferralReward {
+  id              String   @id @default(cuid())
+
+  referrerShopId  String                       // Shop that gets the reward
+  referrerShop    Shop     @relation("ReferrerRewards", fields: [referrerShopId], references: [id], onDelete: Cascade)
+
+  referredShopId  String   @unique             // Shop that triggered the reward (one reward per referred shop)
+  referredShop    Shop     @relation("ReferredRewards", fields: [referredShopId], references: [id], onDelete: Cascade)
+
+  rewardType      String   @default("FREE_MONTH") // "FREE_MONTH" | future: "DISCOUNT" etc.
+  daysExtended    Int      @default(30)         // How many days were added
+
+  createdAt       DateTime @default(now())
+
+  @@index([referrerShopId])
 }

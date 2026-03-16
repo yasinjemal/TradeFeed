@@ -282,15 +282,17 @@
 - ✅ Summary links to full promote dashboard for deeper analysis
 - Files: `components/analytics/analytics-dashboard.tsx`, `app/dashboard/[slug]/analytics/page.tsx`
 
-### 6.2 ⬜ Affiliate / Referral Rewards
+### 6.2 ✅ Affiliate / Referral Rewards
 
-**Current:** Referral program exists (schema + dashboard page) but no reward mechanism.
+**Current:** Referral program fully operational with auto-apply rewards.
 **Goal:** Auto-apply rewards (free month, discount) when referral converts.
 
-- Track referral signup → first paid subscription
-- Apply credit to referrer's billing
-- File: `lib/db/shops.ts` (referral tracking)
-- Estimated effort: **3–4 hours**
+- ✅ Added `ReferralReward` model (idempotent: unique on referredShopId)
+- ✅ `applyReferralReward()` now uses `$transaction` to atomically extend subscription + record reward
+- ✅ Idempotency guard prevents double-reward on webhook retry
+- ✅ `getReferralRewards()` + `getPendingReferrals()` data access functions
+- ✅ Dashboard shows "Months earned" stat, per-referral status badges ("+1 month earned" / "Pending upgrade")
+- Files: `prisma/schema.prisma`, `lib/db/referrals.ts`, `app/dashboard/[slug]/referrals/page.tsx`
 
 ### 6.3 ✅ Featured Listings (Paid Boost)
 

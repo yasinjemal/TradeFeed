@@ -12,6 +12,7 @@
 
 import { getShopBySlug } from "@/lib/db/shops";
 import { db } from "@/lib/db";
+import { getReferralRewards } from "@/lib/db/referrals";
 import { notFound } from "next/navigation";
 import { ReferralInvite } from "@/components/dashboard/referral-invite";
 
@@ -44,12 +45,12 @@ export default async function ReferralPage({ params }: ReferralPageProps) {
     referralCode = code;
   }
 
-  // Parallel queries: direct referrals, leaderboard, downstream
-  const [directReferrals, leaderboardRaw, downstreamShops] = await Promise.all([
+  // Parallel queries: direct referrals, leaderboard, downstream, rewards
+  const [directReferrals, leaderboardRaw, downstreamShops, rewards] = await Promise.all([
     // Direct referrals by this seller
     db.shop.findMany({
       where: { referredBy: shop.slug },
-      select: { name: true, slug: true, createdAt: true },
+      select: { id: true, name: true, slug: true, createdAt: true },
       orderBy: { createdAt: "desc" },
     }),
     // Top 10 referrers community-wide
@@ -75,9 +76,13 @@ export default async function ReferralPage({ params }: ReferralPageProps) {
       select: { name: true, slug: true, referredBy: true, createdAt: true },
       orderBy: { createdAt: "desc" },
     }),
+    // Rewards earned
+    getReferralRewards(shop.id),
   ]);
 
   const referralCount = directReferrals.length;
+  const rewardsEarned = rewards.length;
+  const rewardedShopIds = new Set(rewards.map((r) => r.referredShop.slug));
 
   // Resolve leaderboard shop names
   const leaderSlugs = leaderboardRaw.map((l) => l.referredBy).filter(Boolean) as string[];
@@ -110,10 +115,14 @@ export default async function ReferralPage({ params }: ReferralPageProps) {
           <p className="text-xs text-stone-500">Direct referrals</p>
         </div>
         <div className="rounded-xl border border-stone-200 bg-white p-4">
+          <p className="text-2xl font-bold text-amber-600">{rewardsEarned}</p>
+          <p className="text-xs text-stone-500">Months earned</p>
+        </div>
+        <div className="rounded-xl border border-stone-200 bg-white p-4">
           <p className="text-2xl font-bold text-blue-600">{downstreamShops.length}</p>
           <p className="text-xs text-stone-500">Downstream (2nd level)</p>
         </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-4 col-span-2">
+        <div className="rounded-xl border border-stone-200 bg-white p-4">
           <p className="text-lg font-bold text-stone-800 font-mono">{referralCode}</p>
           <p className="text-xs text-stone-500">Your referral code</p>
         </div>
@@ -206,17 +215,31 @@ export default async function ReferralPage({ params }: ReferralPageProps) {
             <h2 className="text-sm font-semibold text-stone-700">Your Referrals</h2>
           </div>
           <div className="divide-y divide-stone-50">
-            {directReferrals.map((ref) => (
-              <div key={ref.slug} className="flex items-center justify-between px-4 py-2.5">
-                <div>
-                  <p className="text-sm font-medium text-stone-700">{ref.name}</p>
-                  <p className="text-xs text-stone-400">@{ref.slug}</p>
+            {directReferrals.map((ref) => {
+              const wasRewarded = rewardedShopIds.has(ref.slug);
+              return (
+                <div key={ref.slug} className="flex items-center justify-between px-4 py-2.5">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-stone-700">{ref.name}</p>
+                      {wasRewarded ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700">
+                          +1 month earned
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700">
+                          Pending upgrade
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-stone-400">@{ref.slug}</p>
+                  </div>
+                  <span className="text-xs text-stone-400">
+                    {ref.createdAt.toLocaleDateString("en-ZA", { month: "short", day: "numeric", year: "numeric" })}
+                  </span>
                 </div>
-                <span className="text-xs text-stone-400">
-                  {ref.createdAt.toLocaleDateString("en-ZA", { month: "short", day: "numeric", year: "numeric" })}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
