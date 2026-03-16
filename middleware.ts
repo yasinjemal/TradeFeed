@@ -116,13 +116,13 @@ export default clerkMiddleware(async (auth, request) => {
   // Build CSP header with nonce instead of 'unsafe-inline' for scripts
   const csp = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com https://vercel.live https://*.clerk.accounts.dev`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com https://vercel.live https://*.clerk.accounts.dev https://*.tradefeed.co.za`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: https://images.unsplash.com https://utfs.io https://*.ufs.sh https://vercel.live https://vercel.com https://img.clerk.com https://*.clerk.com`,
     `font-src 'self' data: https://vercel.live https://fonts.gstatic.com`,
     `media-src 'self' blob: https://utfs.io https://*.ufs.sh`,
-    `connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com https://vercel.live https://vercel.com wss://*.pusher.com https://*.clerk.accounts.dev https://*.clerk.com`,
-    `frame-src 'self' https://www.openstreetmap.org https://vercel.live https://*.clerk.accounts.dev`,
+    `connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com https://vercel.live https://vercel.com wss://*.pusher.com https://*.clerk.accounts.dev https://*.clerk.com https://*.tradefeed.co.za`,
+    `frame-src 'self' https://www.openstreetmap.org https://vercel.live https://*.clerk.accounts.dev https://*.tradefeed.co.za`,
     `worker-src 'self' blob:`,
   ].join("; ");
 
