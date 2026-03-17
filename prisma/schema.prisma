@@ -986,6 +986,8 @@ model SellerPreferences {
   // ── AI Behavior ────────────────────────────────────
   aiToneNotes         String?                       // Free-text notes for AI personality tuning
   autoReplyEnabled    Boolean  @default(false)      // Whether WhatsApp auto-reply is active
+  autoReplyStartHour  Int      @default(8)          // Auto-reply active from (0-23, SAST)
+  autoReplyEndHour    Int      @default(22)         // Auto-reply active until (0-23, SAST)
   whatsappImportEnabled Boolean @default(true)       // Whether WhatsApp product import is active
 
   createdAt           DateTime @default(now())

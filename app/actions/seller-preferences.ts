@@ -19,6 +19,8 @@ const sellerPreferencesSchema = z.object({
   languagePreference: z.string().trim().max(10).optional().or(z.literal("")),
   aiToneNotes: z.string().trim().max(500).optional().or(z.literal("")),
   autoReplyEnabled: z.string().optional(),
+  autoReplyStartHour: z.coerce.number().int().min(0).max(23).optional(),
+  autoReplyEndHour: z.coerce.number().int().min(0).max(23).optional(),
   whatsappImportEnabled: z.string().optional(),
 });
 
@@ -52,6 +54,8 @@ export async function updateSellerPreferencesAction(
       languagePreference: formData.get("languagePreference") as string,
       aiToneNotes: formData.get("aiToneNotes") as string,
       autoReplyEnabled: formData.get("autoReplyEnabled") as string,
+      autoReplyStartHour: formData.get("autoReplyStartHour") as string,
+      autoReplyEndHour: formData.get("autoReplyEndHour") as string,
       whatsappImportEnabled: formData.get("whatsappImportEnabled") as string,
     };
 
@@ -78,6 +82,8 @@ export async function updateSellerPreferencesAction(
       languagePreference: parsed.data.languagePreference || "en",
       aiToneNotes: parsed.data.aiToneNotes || null,
       autoReplyEnabled: parsed.data.autoReplyEnabled === "on",
+      autoReplyStartHour: parsed.data.autoReplyStartHour ?? 8,
+      autoReplyEndHour: parsed.data.autoReplyEndHour ?? 22,
       whatsappImportEnabled: parsed.data.whatsappImportEnabled === "on",
     });
 

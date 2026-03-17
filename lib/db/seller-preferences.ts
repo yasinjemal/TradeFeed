@@ -40,6 +40,8 @@ export async function upsertSellerPreferences(
     languagePreference?: string;
     aiToneNotes?: string | null;
     autoReplyEnabled?: boolean;
+    autoReplyStartHour?: number;
+    autoReplyEndHour?: number;
     whatsappImportEnabled?: boolean;
   }
 ): Promise<SellerPreferences> {

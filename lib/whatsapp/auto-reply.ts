@@ -110,6 +110,17 @@ export function generateAutoReply(
           `Or tell us which product you're looking at and we'll share the details. 📸`,
       };
 
+    case "payment":
+      return {
+        intent: "payment",
+        shouldSend: true,
+        message:
+          `💳 *Payment at ${shopName}*\n\n` +
+          `We accept card payments, EFT, and SnapScan via PayFast.\n\n` +
+          `To pay, share your order number (starts with "TF-") and we'll send you a payment link.\n\n` +
+          `Or check your order here:\nhttps://tradefeed.co.za/track`,
+      };
+
     case "thanks":
       return {
         intent: "thanks",

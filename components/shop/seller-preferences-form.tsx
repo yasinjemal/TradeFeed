@@ -60,6 +60,8 @@ export interface SellerPreferencesData {
   languagePreference: string;
   aiToneNotes: string | null;
   autoReplyEnabled: boolean;
+  autoReplyStartHour: number;
+  autoReplyEndHour: number;
   whatsappImportEnabled: boolean;
 }
 
@@ -127,6 +129,29 @@ export function SellerPreferencesForm({ shopSlug, initialData }: SellerPreferenc
               />
               <div className="w-11 h-6 bg-stone-200 peer-focus:ring-2 peer-focus:ring-indigo-400/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500" />
             </label>
+          </div>
+
+          {/* Auto-Reply Hours */}
+          <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50/50 px-4 py-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-medium text-stone-700">Active Hours (SAST)</p>
+              <p className="text-[11px] text-stone-400 mt-0.5">
+                Bot replies only within these hours
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs">
+              <select name="autoReplyStartHour" defaultValue={d?.autoReplyStartHour ?? 8} className="rounded-md border border-stone-200 bg-white px-2 py-1.5 text-xs text-stone-700">
+                {Array.from({ length: 24 }, (_, h) => (
+                  <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>
+                ))}
+              </select>
+              <span className="text-stone-400">to</span>
+              <select name="autoReplyEndHour" defaultValue={d?.autoReplyEndHour ?? 22} className="rounded-md border border-stone-200 bg-white px-2 py-1.5 text-xs text-stone-700">
+                {Array.from({ length: 24 }, (_, h) => (
+                  <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* WhatsApp Product Import Toggle */}

@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { detectIntent, shouldAutoReply } from "@/lib/whatsapp/intent-detection";
 import { generateAutoReply } from "@/lib/whatsapp/auto-reply";
 import { generateAIReply } from "@/lib/whatsapp/ai-sales";
+import { generateOrderStatusReply, generateStockReply, generatePaymentReply } from "@/lib/whatsapp/order-reply";
 import { sendTextMessage } from "@/lib/whatsapp/business-api";
 import { processWhatsAppProductImport } from "@/lib/whatsapp/product-import";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
@@ -138,9 +139,13 @@ export async function POST(request: NextRequest) {
 /** Plan slugs that include AI sales assistant */
 const AI_SALES_PLANS = ["pro-ai", "business"];
 
+/** Intents that use smart data-driven replies (bypass generic templates) */
+const SMART_REPLY_INTENTS = new Set(["order_status", "availability", "payment"]);
+
 /**
  * Detect buyer intent and send an auto-reply if applicable.
- * Uses AI (GPT-4o-mini) for pro-ai/business plans, template replies otherwise.
+ * Uses smart data-driven replies for order/stock/payment intents,
+ * AI (GPT-4o-mini) for pro-ai/business plans, template replies otherwise.
  */
 async function handleAutoReply(
   buyerPhone: string,
@@ -168,7 +173,7 @@ async function handleAutoReply(
           select: {
             name: true,
             slug: true,
-            sellerPreferences: { select: { autoReplyEnabled: true } },
+            sellerPreferences: { select: { autoReplyEnabled: true, autoReplyStartHour: true, autoReplyEndHour: true } },
             subscription: {
               select: { status: true, plan: { select: { slug: true } } },
             },
@@ -188,31 +193,63 @@ async function handleAutoReply(
       return;
     }
 
-    // Try AI reply for pro-ai/business plans
-    const planSlug = recentOrder.shop.subscription?.plan?.slug;
-    const hasAI =
-      recentOrder.shop.subscription?.status === "ACTIVE" &&
-      !!planSlug &&
-      AI_SALES_PLANS.includes(planSlug);
+    // Check auto-reply hours (SAST = UTC+2)
+    const prefs = recentOrder.shop.sellerPreferences;
+    const startHour = prefs.autoReplyStartHour ?? 8;
+    const endHour = prefs.autoReplyEndHour ?? 22;
+    const nowSAST = new Date(Date.now() + 2 * 60 * 60 * 1000); // UTC+2
+    const currentHour = nowSAST.getUTCHours();
+    if (currentHour < startHour || currentHour >= endHour) {
+      console.log(`[whatsapp-webhook] Outside auto-reply hours (${startHour}-${endHour}, current: ${currentHour} SAST)`);
+      return;
+    }
 
     let replyText: string | null = null;
 
-    if (hasAI) {
-      const aiResult = await generateAIReply(
-        recentOrder.shopId,
-        recentOrder.shop.name,
-        recentOrder.shop.slug,
-        buyerPhone,
-        messageText,
-        intent.intent,
-      );
-      if (aiResult) {
-        replyText = aiResult.reply;
-        console.log("[whatsapp-webhook] AI reply generated for shop:", recentOrder.shop.slug);
+    // ── Smart replies: real data for order/stock/payment intents ──
+    if (SMART_REPLY_INTENTS.has(intent.intent)) {
+      try {
+        if (intent.intent === "order_status") {
+          replyText = await generateOrderStatusReply(intent, recentOrder.shop.name, buyerPhone);
+        } else if (intent.intent === "availability") {
+          replyText = await generateStockReply(intent, recentOrder.shopId, recentOrder.shop.name);
+        } else if (intent.intent === "payment") {
+          replyText = await generatePaymentReply(intent, recentOrder.shop.name);
+        }
+        if (replyText) {
+          console.log("[whatsapp-webhook] Smart reply generated:", intent.intent);
+        }
+      } catch (err) {
+        // Fall through to AI/template if smart reply fails
+        console.error("[whatsapp-webhook] Smart reply failed, falling back:", err);
       }
     }
 
-    // Fall back to template reply
+    // ── AI reply for pro-ai/business plans (if no smart reply) ──
+    if (!replyText) {
+      const planSlug = recentOrder.shop.subscription?.plan?.slug;
+      const hasAI =
+        recentOrder.shop.subscription?.status === "ACTIVE" &&
+        !!planSlug &&
+        AI_SALES_PLANS.includes(planSlug);
+
+      if (hasAI) {
+        const aiResult = await generateAIReply(
+          recentOrder.shopId,
+          recentOrder.shop.name,
+          recentOrder.shop.slug,
+          buyerPhone,
+          messageText,
+          intent.intent,
+        );
+        if (aiResult) {
+          replyText = aiResult.reply;
+          console.log("[whatsapp-webhook] AI reply generated for shop:", recentOrder.shop.slug);
+        }
+      }
+    }
+
+    // ── Fall back to template reply ──
     if (!replyText) {
       const reply = generateAutoReply(intent, {
         shopName: recentOrder.shop.name,
@@ -225,7 +262,6 @@ async function handleAutoReply(
     const result = await sendTextMessage(buyerPhone, replyText);
     console.log("[whatsapp-webhook] Reply sent:", {
       intent: intent.intent,
-      ai: hasAI,
       success: result.success,
       messageId: result.messageId,
     });

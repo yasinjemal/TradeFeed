@@ -24,6 +24,7 @@ export type BuyerIntent =
   | "availability"      // "Is this available?", "Do you have stock?"
   | "delivery"          // "Do you deliver?", "Delivery to Durban?"
   | "order_status"      // "Where is my order?", "Track my order"
+  | "payment"           // "How to pay?", "Payment link", "EFT details"
   | "product_info"      // "What sizes?", "What colors?"
   | "greeting"          // "Hi", "Hello", "Hey"
   | "thanks"            // "Thank you", "Thanks"
@@ -132,6 +133,23 @@ const INTENT_PATTERNS: IntentPattern[] = [
     },
   },
 
+
+  // ── Payment ───────────────────────────────────────
+  {
+    intent: "payment",
+    patterns: [
+      /\b(how\s*(to|do\s*i)\s*pay|payment\s*(link|method|option)|pay\s*(for|now)|make\s*payment)\b/i,
+      /\b(eft|bank\s*details|banking\s*details|account\s*(number|details)|snap\s*scan)\b/i,
+      /\b(can\s*i\s*pay|where\s*(to|do\s*i)\s*pay|pay\s*online)\b/i,
+    ],
+    confidence: 0.88,
+    entityExtractor: (msg: string) => {
+      const orderMatch = msg.match(/(TF-[\w-]+|order\s*#?\s*(\d{4,}))/i);
+      const entities: Record<string, string> = {};
+      if (orderMatch) entities.orderNumber = orderMatch[0];
+      return entities;
+    },
+  },
 
   // ── Greeting ──────────────────────────────────────
   {
