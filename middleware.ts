@@ -119,13 +119,13 @@ export default clerkMiddleware(async (auth, request) => {
   // disables all host-based allowlists per CSP Level 3 spec.
   const csp = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://vercel.live https://*.clerk.accounts.dev https://*.tradefeed.co.za https://*.clerk.com`,
+    `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://vercel.live https://*.clerk.accounts.dev https://*.tradefeed.co.za https://*.clerk.com https://challenges.cloudflare.com`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: https://images.unsplash.com https://utfs.io https://*.ufs.sh https://vercel.live https://vercel.com https://img.clerk.com https://*.clerk.com`,
     `font-src 'self' data: https://vercel.live https://fonts.gstatic.com`,
     `media-src 'self' blob: https://utfs.io https://*.ufs.sh`,
     `connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://utfs.io https://*.ufs.sh https://*.uploadthing.com https://*.sentry.io https://*.ingest.sentry.io https://api.openai.com https://vercel.live https://vercel.com wss://*.pusher.com https://*.clerk.accounts.dev https://*.clerk.com https://*.tradefeed.co.za`,
-    `frame-src 'self' https://www.openstreetmap.org https://vercel.live https://*.clerk.accounts.dev https://*.tradefeed.co.za`,
+    `frame-src 'self' https://www.openstreetmap.org https://vercel.live https://*.clerk.accounts.dev https://*.tradefeed.co.za https://challenges.cloudflare.com`,
     `worker-src 'self' blob:`,
   ].join("; ");
 
