@@ -12,7 +12,7 @@ import {
 import { MarketplaceShell } from "@/components/marketplace/marketplace-shell";
 import { generateMarketplaceJsonLd } from "@/lib/seo/json-ld";
 import { expirePromotedListings } from "@/lib/db/promotions";
-import { SA_PROVINCES } from "@/lib/marketplace/locations";
+import { SA_PROVINCES, POPULAR_CITIES } from "@/lib/marketplace/locations";
 
 // ============================================================
 // /marketplace — Public Discovery Page
@@ -190,13 +190,13 @@ export default async function MarketplacePage({
 
       {/* ── Internal linking for SEO ─────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 py-16 border-t border-stone-800/30">
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid md:grid-cols-3 gap-12">
           {/* Browse by Province */}
           <div>
             <h2 className="text-lg font-bold text-stone-200 mb-4">
               Browse Suppliers by Province
             </h2>
-            <ul className="grid grid-cols-2 gap-x-6 gap-y-2">
+            <ul className="grid grid-cols-1 gap-y-2">
               {SA_PROVINCES.map((p) => (
                 <li key={p.slug}>
                   <Link
@@ -210,12 +210,31 @@ export default async function MarketplacePage({
             </ul>
           </div>
 
+          {/* Popular Cities */}
+          <div>
+            <h2 className="text-lg font-bold text-stone-200 mb-4">
+              Popular Cities
+            </h2>
+            <ul className="grid grid-cols-1 gap-y-2">
+              {POPULAR_CITIES.map(({ province, city }) => (
+                <li key={`${province.slug}-${city.slug}`}>
+                  <Link
+                    href={`/marketplace/${province.slug}/${city.slug}`}
+                    className="text-sm text-stone-400 hover:text-emerald-400 transition-colors"
+                  >
+                    {city.name}, {province.name} →
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Browse by Category */}
           <div>
             <h2 className="text-lg font-bold text-stone-200 mb-4">
               Browse by Category
             </h2>
-            <ul className="grid grid-cols-2 gap-x-6 gap-y-2">
+            <ul className="grid grid-cols-1 gap-y-2">
               {categories
                 .filter((c) => !c.parentId)
                 .slice(0, 12)

@@ -107,7 +107,8 @@ export default async function CityPage({ params, searchParams }: Props) {
         | "price_asc"
         | "price_desc"
         | "popular"
-        | "top_rated") || "newest",
+        | "top_rated"
+        | "quality") || "quality",
     province: provinceName,
     city: cityName,
     minPrice: sp.minPrice ? parseInt(sp.minPrice, 10) : undefined,
@@ -155,6 +156,9 @@ export default async function CityPage({ params, searchParams }: Props) {
 
   // Sibling cities in same province (for internal linking)
   const siblingCities = province.cities.filter((c) => c.slug !== cSlug);
+
+  // Top-level categories for cross-linking to city+category pages
+  const topCategories = categories.slice(0, 12);
 
   return (
     <>
@@ -206,6 +210,25 @@ export default async function CityPage({ params, searchParams }: Props) {
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-stone-800/80 border border-stone-700/50 text-stone-400 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400 transition-all"
                 >
                   {c.name}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Category cross-links for city+category pages */}
+          {topCategories.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="text-xs text-stone-500 self-center mr-1">
+                Browse in {city.name}:
+              </span>
+              {topCategories.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/marketplace/${province.slug}/${city.slug}/${cat.slug}`}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-stone-800/80 border border-stone-700/50 text-stone-400 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400 transition-all"
+                >
+                  {cat.icon && <span>{cat.icon}</span>}
+                  {cat.name}
                 </Link>
               ))}
             </div>

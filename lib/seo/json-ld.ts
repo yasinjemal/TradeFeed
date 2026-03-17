@@ -465,6 +465,65 @@ export function generateCategoryPageJsonLd(opts: {
 }
 
 /**
+ * JSON-LD for city + category combo pages.
+ * Schema: BreadcrumbList + WebPage (Place + ItemList)
+ * Targets: "buy hoodies in Johannesburg" type searches.
+ */
+export function generateCityCategoryPageJsonLd(opts: {
+  provinceName: string;
+  provinceSlug: string;
+  cityName: string;
+  citySlug: string;
+  categoryName: string;
+  categorySlug: string;
+  productCount?: number;
+}) {
+  const { provinceName, provinceSlug, cityName, citySlug, categoryName, categorySlug, productCount } = opts;
+
+  const pageUrl = `${APP_URL}/marketplace/${provinceSlug}/${citySlug}/${categorySlug}`;
+
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem" as const, position: 1, name: "TradeFeed", item: APP_URL },
+      { "@type": "ListItem" as const, position: 2, name: "Marketplace", item: `${APP_URL}/marketplace` },
+      { "@type": "ListItem" as const, position: 3, name: provinceName, item: `${APP_URL}/marketplace/${provinceSlug}` },
+      { "@type": "ListItem" as const, position: 4, name: cityName, item: `${APP_URL}/marketplace/${provinceSlug}/${citySlug}` },
+      { "@type": "ListItem" as const, position: 5, name: categoryName, item: pageUrl },
+    ],
+  };
+
+  const webPage: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: `${categoryName} in ${cityName}, ${provinceName}`,
+    description: `Buy ${categoryName.toLowerCase()} from suppliers in ${cityName}, ${provinceName}. Wholesale & retail prices on TradeFeed.`,
+    url: pageUrl,
+    isPartOf: { "@type": "WebSite", name: "TradeFeed", url: APP_URL },
+    about: {
+      "@type": "Place",
+      name: `${cityName}, ${provinceName}`,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: cityName,
+        addressRegion: provinceName,
+        addressCountry: "ZA",
+      },
+    },
+    ...(productCount !== undefined && {
+      mainEntity: {
+        "@type": "ItemList",
+        name: `${categoryName} in ${cityName}`,
+        numberOfItems: productCount,
+      },
+    }),
+  };
+
+  return [breadcrumb, webPage];
+}
+
+/**
  * JSON-LD for the marketplace discovery page.
  * Schema: ItemList (product grid) + BreadcrumbList + WebPage
  *

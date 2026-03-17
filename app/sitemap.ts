@@ -42,8 +42,9 @@ export async function generateSitemaps() {
     where: { isActive: true, shop: { isActive: true } },
   });
   // Static + categories + shops contribute ~200 URLs at most for now.
+  // City+category combos add ~31 cities × ~41 categories ≈ 1,271 URLs.
   // Products are the main scaling dimension.
-  const estimatedTotal = productCount + 200;
+  const estimatedTotal = productCount + 1500;
   const chunks = Math.max(1, Math.ceil(estimatedTotal / MAX_URLS_PER_SITEMAP));
   return Array.from({ length: chunks }, (_, i) => ({ id: i }));
 }
@@ -117,6 +118,12 @@ export default async function sitemap({
       }))
     : [];
 
+  // ── City + Category combo pages (only in first chunk) ───
+  // These target "buy [category] in [city]" searches.
+  const allCityParams = chunkId === 0 ? getAllCityParams() : [];
+  const allCategorySlugs: string[] = [];
+  // We'll populate these after the DB query below.
+
   // ── Marketplace category pages (only in first chunk) ───
   // Run all DB queries in parallel for speed (avoids Vercel timeout at scale)
   const [globalCategories, subCategories, shops, products] = await Promise.all([
@@ -161,15 +168,25 @@ export default async function sitemap({
   }));
 
   // ── Clean URL category path pages (/marketplace/category/[slug]) ──
-  const categoryPathPages: MetadataRoute.Sitemap = [
-    ...globalCategories,
-    ...subCategories,
-  ].map((cat) => ({
+  const allCats = [...globalCategories, ...subCategories];
+  const categoryPathPages: MetadataRoute.Sitemap = allCats.map((cat) => ({
     url: `${APP_URL}/marketplace/category/${cat.slug}`,
     lastModified: cat.updatedAt,
     changeFrequency: "daily" as const,
     priority: 0.8,
   }));
+
+  // ── City + Category combo pages (/marketplace/[province]/[city]/[category]) ──
+  const cityCategoryPages: MetadataRoute.Sitemap = chunkId === 0
+    ? allCityParams.flatMap(({ province, city }) =>
+        allCats.map((cat) => ({
+          url: `${APP_URL}/marketplace/${province}/${city}/${cat.slug}`,
+          lastModified: cat.updatedAt,
+          changeFrequency: "weekly" as const,
+          priority: 0.7,
+        })),
+      )
+    : [];
 
   const subCategoryPages: MetadataRoute.Sitemap = subCategories.map((cat) => ({
     url: `${APP_URL}/marketplace?category=${cat.slug}`,
@@ -200,6 +217,7 @@ export default async function sitemap({
     ...cityPages,
     ...categoryPages,
     ...categoryPathPages,
+    ...cityCategoryPages,
     ...subCategoryPages,
     ...shopPages,
     ...productPages,

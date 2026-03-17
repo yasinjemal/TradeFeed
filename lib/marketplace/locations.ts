@@ -185,3 +185,22 @@ export function citySlugToDbValue(
   const result = getCity(provinceSlug, citySlug);
   return result?.city.name;
 }
+
+/** Top cities for marketplace "Popular Cities" section — 12 most searched */
+export const POPULAR_CITIES: { province: SAProvince; city: SACity }[] = [
+  "gauteng/johannesburg",
+  "western-cape/cape-town",
+  "kwazulu-natal/durban",
+  "gauteng/pretoria",
+  "eastern-cape/port-elizabeth",
+  "gauteng/soweto",
+  "gauteng/ekurhuleni",
+  "kwazulu-natal/pietermaritzburg",
+  "free-state/bloemfontein",
+  "mpumalanga/nelspruit",
+  "limpopo/polokwane",
+  "north-west/rustenburg",
+].map((key) => {
+  const [pSlug, cSlug] = key.split("/");
+  return getCity(pSlug!, cSlug!)!;
+}).filter(Boolean);

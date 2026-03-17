@@ -106,7 +106,8 @@ export default async function ProvincePage({ params, searchParams }: Props) {
         | "price_asc"
         | "price_desc"
         | "popular"
-        | "top_rated") || "newest",
+        | "top_rated"
+        | "quality") || "quality",
     province: provinceName,
     minPrice: sp.minPrice ? parseInt(sp.minPrice, 10) : undefined,
     maxPrice: sp.maxPrice ? parseInt(sp.maxPrice, 10) : undefined,
