@@ -144,7 +144,7 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
             </span>
           </div>
           <p className="text-[12px] text-stone-500 mt-1">
-            How well your shop is performing across 5 key areas.
+            How well your shop is performing across 5 key areas. Higher scores boost your marketplace ranking.
           </p>
         </div>
       </div>

@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/seller-sequences",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/ranking-computation",
+      "schedule": "0 2 * * *"
     }
   ]
 }

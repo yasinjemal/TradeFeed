@@ -28,7 +28,8 @@ export type MarketplaceSortBy =
   | "price_asc"
   | "price_desc"
   | "popular"
-  | "top_rated";
+  | "top_rated"
+  | "quality";
 
 export interface MarketplaceFilters {
   /** Global category slug (e.g. "hoodies-sweaters") */
@@ -299,7 +300,7 @@ export async function getMarketplaceProducts(
     city,
     verifiedOnly = false,
     search,
-    sortBy = "newest",
+    sortBy = "quality",
     page = 1,
     pageSize = 24,
     includeWholesaleOnly = false,
@@ -365,6 +366,9 @@ export async function getMarketplaceProducts(
   let orderBy: Prisma.ProductOrderByWithRelationInput;
   let trendingOrder: string[] | null = null;
   switch (sortBy) {
+    case "quality":
+      orderBy = { qualityScore: "desc" };
+      break;
     case "newest":
       orderBy = { createdAt: "desc" };
       break;

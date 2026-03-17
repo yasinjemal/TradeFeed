@@ -110,6 +110,20 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
               )}
             </span>
           </div>
+
+          {/* Ranking badges — bottom-right */}
+          <div className="absolute bottom-2 right-2 flex flex-col gap-1 items-end">
+            {(product.avgRating ?? 0) >= 4.5 && product.reviewCount >= 3 && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-500/90 text-white text-[9px] font-bold backdrop-blur-sm shadow-sm">
+                ⭐ Top Rated
+              </span>
+            )}
+            {product.soldCount >= 10 && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-500/90 text-white text-[9px] font-bold backdrop-blur-sm shadow-sm">
+                ⚡ Fast Seller
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Info */}

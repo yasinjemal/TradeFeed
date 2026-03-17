@@ -120,7 +120,7 @@ export default async function MarketplacePage({
   const filters = {
     category: params.category,
     search: params.search,
-    sortBy: (params.sort as "newest" | "trending" | "price_asc" | "price_desc" | "popular" | "top_rated") || "newest",
+    sortBy: (params.sort as "quality" | "newest" | "trending" | "price_asc" | "price_desc" | "popular" | "top_rated") || "quality",
     province: params.province,
     minPrice: params.minPrice ? parseInt(params.minPrice, 10) : undefined,
     maxPrice: params.maxPrice ? parseInt(params.maxPrice, 10) : undefined,

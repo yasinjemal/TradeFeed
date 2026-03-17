@@ -573,6 +573,7 @@ export function MarketplaceShell({
               aria-label="Sort products"
               className="rounded-xl bg-stone-900 border border-stone-800 px-3 py-2 text-sm text-stone-300 focus:outline-none focus:border-emerald-500/50 cursor-pointer"
             >
+              <option value="quality">Best Match</option>
               <option value="newest">Newest</option>
               <option value="trending">Trending</option>
               <option value="top_rated">Top Rated</option>

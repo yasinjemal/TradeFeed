@@ -17,3 +17,9 @@ export type {
 export { generateSuggestions } from "./seller-suggestions";
 export { computeTrendingProducts } from "./trending";
 export type { ProductOrderCount, TrendingProduct } from "./trending";
+export { computeProductQuality } from "./product-quality";
+export type {
+  ProductRankingMetrics,
+  ProductQualityBreakdown,
+  ProductQualityResult,
+} from "./product-quality";

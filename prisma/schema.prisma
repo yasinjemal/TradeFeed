@@ -59,6 +59,11 @@ model Shop {
   // ── AI Credits ───────────────────────────────────────
   aiGenerationsUsed Int @default(0)            // Number of AI product generations used (free tier gets 5)
 
+  // ── Ranking ──────────────────────────────────────────
+  // Seller health score (0–100). Computed daily by ranking cron.
+  // Based on completeness, inventory, reliability, activity, diversity.
+  healthScore     Float   @default(50.0)       // Default 50 — neutral baseline
+
   // ── Storefront Theme ─────────────────────────────────
   themePreset     String?                      // Preset theme name: "classic" | "modern" | "bold" | "minimal" | "vibrant"
   themePrimary    String?                      // Primary color hex (e.g. "#10b981")
@@ -233,6 +238,11 @@ model Product {
   minPriceCents Int     @default(0)            // Cheapest active variant price
   maxPriceCents Int     @default(0)            // Most expensive active variant price
 
+  // ── Ranking ──────────────────────────────────────────
+  // Marketplace quality score (0–100). Computed daily by ranking cron.
+  // f(views, orders, rating, freshness, seller_tier) with decay for stale products.
+  qualityScore  Float   @default(50.0)         // Default 50 — neutral baseline
+
   // ── Full-Text Search ─────────────────────────────────
   // PostgreSQL tsvector column managed by DB trigger (auto-updates on name/description change).
   // Declared as Unsupported so `prisma db push` does NOT drop it.
@@ -252,6 +262,7 @@ model Product {
   @@index([shopId, isActive])
   @@index([categoryId])
   @@index([globalCategoryId])
+  @@index([isActive, qualityScore])
   @@unique([shopId, slug])
 }
 
@@ -1198,4 +1209,33 @@ enum WhatsAppImportStatus {
   PENDING                                      // Received, not yet processed
   PROCESSED                                    // Successfully created product
   FAILED                                       // Processing failed
+}
+
+// ============================================================
+// RANKING FACTOR: Audit trail for marketplace quality scores
+// Records the breakdown of each product's quality score
+// every time it's computed. Enables debugging, tuning, and
+// historical analysis of ranking changes.
+// ============================================================
+model RankingFactor {
+  id          String   @id @default(cuid())
+
+  productId   String                           // Which product was scored
+  shopId      String                           // Denormalised for tenant queries
+
+  // Score breakdown (all 0–100 component scores)
+  viewScore       Float                        // Engagement signal: views in last 30d
+  orderScore      Float                        // Conversion signal: orders placed
+  ratingScore     Float                        // Quality signal: avg review rating × volume
+  freshnessScore  Float                        // Recency signal: how recently listed/updated
+  sellerTierScore Float                        // Trust signal: seller reputation tier points
+
+  // Final computed score
+  qualityScore    Float                        // Weighted sum (stored on Product too)
+
+  computedAt      DateTime @default(now())     // When this score was calculated
+
+  @@index([productId, computedAt])
+  @@index([shopId, computedAt])
+  @@index([computedAt])
 }
