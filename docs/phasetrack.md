@@ -14,7 +14,9 @@
 > 
 > **Feature 4: Seller Analytics Dashboard V2** — ✅ Complete
 >
-> **Next Up: Feature 5: Automated Order Reply Bot**
+> **Feature 5: Automated Order Reply Bot** — ✅ Complete
+>
+> **Next Up: Feature 6: Marketplace Ranking Algorithm**
 
 ---
 
@@ -247,7 +249,7 @@ Seller sends WhatsApp message (photo + "Red dress R250 size S-XL")
 | Field | Detail |
 |-------|--------|
 | **Feature Name** | Automated Order Reply Bot |
-| **Status** | ⏳ Planned |
+| **Status** | ✅ Complete |
 | **Problem** | Buyers message sellers on WhatsApp about order status, product availability, and pricing. Sellers must manually reply to each message, often while working. Response delays lose sales. |
 | **User Story** | As a seller, I want an AI bot that auto-replies to buyer WhatsApp messages about orders, products, and availability, so buyers get instant answers 24/7. |
 
