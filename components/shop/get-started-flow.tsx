@@ -3,8 +3,10 @@
 // ============================================================
 // 3 inline steps, no page navigation:
 //   Step 1: WhatsApp number + shop name → creates shop
-//   Step 2: Product photo + name + price → creates product
+//   Step 2: SNAP A PHOTO → AI generates listing → add price → publish
 //   Step 3: 🎉 Your shop is live! Share link
+//
+// The WOW moment: upload a photo → AI fills everything in seconds
 // ============================================================
 
 "use client";
@@ -75,11 +77,16 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
     }
   }, [shopState]);
 
-  // ── Step 2: Product creation ────────────────────────────
+  // ── Step 2: AI-Powered Product creation ──────────────
   const [productName, setProductName] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [uploadedImageData, setUploadedImageData] = useState<{ url: string; key: string; name: string } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiDone, setAiDone] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [productError, setProductError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -87,19 +94,75 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
   const { startUpload } = useUploadThing("productImageUploader", {
     onUploadError: (err) => {
       setProductError(err?.message || "Image upload failed.");
-      setIsPublishing(false);
+      setIsUploading(false);
     },
   });
 
+  // Upload image to CDN → then immediately trigger AI analysis
   const handleImageSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file || !file.type.startsWith("image/")) return;
-      setImageFile(file);
+
       setImagePreview(URL.createObjectURL(file));
       setProductError(null);
+      setAiDone(false);
+      setIsUploading(true);
+
+      try {
+        // 1. Compress + upload to CDN
+        const compressed = await compressImage(file);
+        const uploadResult = await startUpload([compressed]);
+
+        if (!uploadResult || uploadResult.length === 0) {
+          setProductError("Upload failed. Try again.");
+          setIsUploading(false);
+          return;
+        }
+
+        const serverData = uploadResult[0]?.serverData;
+        if (!serverData?.url) {
+          setProductError("Upload failed. Try again.");
+          setIsUploading(false);
+          return;
+        }
+        const imgData = {
+          url: serverData.url,
+          key: serverData.key,
+          name: serverData.name,
+        };
+        setUploadedImageUrl(imgData.url);
+        setUploadedImageData(imgData);
+        setIsUploading(false);
+
+        // 2. Automatically trigger AI analysis
+        setIsAnalyzing(true);
+        try {
+          const res = await fetch("/api/ai/generate-product", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ imageUrl: imgData.url, shopSlug }),
+          });
+          const data = await res.json();
+
+          if (res.ok && data.data) {
+            // AI magic — auto-fill fields
+            setProductName(data.data.name || "");
+            setDescription(data.data.description || "");
+            setAiDone(true);
+          }
+          // If AI fails (credits, error), silently degrade — user can type manually
+        } catch {
+          // AI failed — no problem, fields stay empty for manual input
+        } finally {
+          setIsAnalyzing(false);
+        }
+      } catch {
+        setProductError("Upload failed. Try again.");
+        setIsUploading(false);
+      }
     },
-    [],
+    [shopSlug, startUpload],
   );
 
   const handlePublishProduct = async () => {
@@ -126,21 +189,12 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
 
       setProductId(result.productId);
 
-      // Upload image if provided
-      if (imageFile) {
+      // Save the already-uploaded image to the product
+      if (uploadedImageData) {
         try {
-          const compressed = await compressImage(imageFile);
-          const uploadResult = await startUpload([compressed]);
-          if (uploadResult && uploadResult.length > 0) {
-            const images = uploadResult.map((r) => ({
-              url: r.serverData.url,
-              key: r.serverData.key,
-              name: r.serverData.name,
-            }));
-            await saveProductImagesAction(shopSlug, result.productId, images);
-          }
+          await saveProductImagesAction(shopSlug, result.productId, [uploadedImageData]);
         } catch {
-          // Image upload failed but product was created — continue
+          // Image save failed but product was created — continue
         }
       }
 
@@ -390,19 +444,52 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
         )}
 
         {/* ═══════════════════════════════════════════════════
-            STEP 2: Product Photo + Name + Price
+            STEP 2: SNAP → AI MAGIC → Price → Publish
             ═══════════════════════════════════════════════════ */}
         {step === 2 && (
           <div className="space-y-6">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Upload your{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
-                  first product
-                </span>
+                {!imagePreview ? (
+                  <>
+                    Snap a{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+                      photo
+                    </span>
+                  </>
+                ) : isUploading || isAnalyzing ? (
+                  <>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-400">
+                      AI
+                    </span>{" "}
+                    is working its magic...
+                  </>
+                ) : aiDone ? (
+                  <>
+                    ✨ Your listing is{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+                      ready
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Upload your{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+                      first product
+                    </span>
+                  </>
+                )}
               </h1>
               <p className="mt-2 text-stone-400 text-sm">
-                Take a photo, add a price — and you&apos;re live.
+                {!imagePreview
+                  ? "Take a product photo — AI creates your listing instantly."
+                  : isUploading
+                    ? "Uploading your photo..."
+                    : isAnalyzing
+                      ? "Analyzing your product with AI..."
+                      : aiDone
+                        ? "AI filled in the details. Just add your price!"
+                        : "Add a name and price to go live."}
               </p>
             </div>
 
@@ -412,13 +499,15 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
               </div>
             )}
 
-            {/* Photo upload */}
+            {/* Photo upload area */}
             <div
-              onClick={() => !isPublishing && fileInputRef.current?.click()}
-              className={`relative rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-300 overflow-hidden ${
-                imagePreview
-                  ? "border-emerald-500/50 bg-emerald-950/20"
-                  : "border-stone-700 bg-stone-800/30 hover:border-emerald-500/40 hover:bg-stone-800/50"
+              onClick={() => !isPublishing && !isUploading && !isAnalyzing && fileInputRef.current?.click()}
+              className={`relative rounded-2xl border-2 border-dashed transition-all duration-500 overflow-hidden ${
+                isUploading || isAnalyzing
+                  ? "border-violet-500/60 bg-violet-950/20 cursor-wait"
+                  : imagePreview
+                    ? "border-emerald-500/50 bg-emerald-950/20 cursor-pointer"
+                    : "border-stone-700 bg-stone-800/30 hover:border-emerald-500/40 hover:bg-stone-800/50 cursor-pointer"
               }`}
             >
               <input
@@ -428,7 +517,7 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
                 capture="environment"
                 className="hidden"
                 onChange={handleImageSelect}
-                disabled={isPublishing}
+                disabled={isPublishing || isUploading || isAnalyzing}
               />
 
               {imagePreview ? (
@@ -437,61 +526,132 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
                   <img
                     src={imagePreview}
                     alt="Product preview"
-                    className="w-full h-full object-contain p-2"
+                    className={`w-full h-full object-contain p-2 transition-all duration-700 ${
+                      isUploading || isAnalyzing ? "opacity-60 scale-[0.97]" : "opacity-100 scale-100"
+                    }`}
                   />
-                  <div className="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-stone-900/80 text-xs text-emerald-400">
-                    Tap to change
-                  </div>
+
+                  {/* AI analyzing overlay */}
+                  {(isUploading || isAnalyzing) && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-stone-950/40 backdrop-blur-[2px]">
+                      <div className="relative">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30 animate-pulse">
+                          <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-sm font-medium text-white">
+                        {isUploading ? "Uploading..." : "✨ AI is analyzing..."}
+                      </p>
+                      <div className="mt-2 flex gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* AI done badge */}
+                  {aiDone && !isAnalyzing && !isUploading && (
+                    <div className="absolute top-2 left-2 px-2.5 py-1 rounded-lg bg-violet-600/90 text-xs font-medium text-white flex items-center gap-1 animate-in fade-in slide-in-from-top-2">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                      </svg>
+                      AI generated
+                    </div>
+                  )}
+
+                  {!isUploading && !isAnalyzing && (
+                    <div className="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-stone-900/80 text-xs text-emerald-400">
+                      Tap to change
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 px-4">
-                  <div className="w-16 h-16 rounded-2xl bg-stone-800 border border-stone-700 flex items-center justify-center mb-4">
-                    <svg
-                      className="w-8 h-8 text-stone-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
-                      />
-                    </svg>
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500/20 to-emerald-500/20 border border-violet-500/30 flex items-center justify-center mb-4">
+                      <svg
+                        className="w-10 h-10 text-violet-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
+                        />
+                      </svg>
+                    </div>
+                    {/* Sparkle accent */}
+                    <div className="absolute -top-1 -right-1 w-6 h-6 text-violet-400">
+                      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                      </svg>
+                    </div>
                   </div>
-                  <p className="text-sm font-medium text-stone-300">
-                    Take a photo or upload
+                  <p className="text-base font-semibold text-stone-200">
+                    📸 Snap a photo
                   </p>
-                  <p className="text-xs text-stone-500 mt-1">
-                    Optional — you can add photos later
+                  <p className="text-sm text-violet-400 mt-1 font-medium">
+                    AI creates your listing in seconds
+                  </p>
+                  <p className="text-xs text-stone-500 mt-2">
+                    Take a photo or choose from gallery
                   </p>
                 </div>
               )}
             </div>
 
+            {/* AI-generated description preview */}
+            {aiDone && description && (
+              <div className="rounded-xl bg-violet-500/5 border border-violet-500/20 p-4 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                  </svg>
+                  <p className="text-xs font-medium text-violet-400">AI-generated description</p>
+                </div>
+                <p className="text-xs text-stone-400 leading-relaxed line-clamp-3">
+                  {description}
+                </p>
+              </div>
+            )}
+
             {/* Product name */}
             <div className="space-y-2">
               <label
                 htmlFor="productName"
-                className="text-sm font-medium text-stone-200"
+                className="text-sm font-medium text-stone-200 flex items-center gap-2"
               >
                 Product Name
+                {aiDone && productName && (
+                  <span className="text-[10px] font-medium text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded-full">
+                    ✨ AI
+                  </span>
+                )}
               </label>
               <input
                 id="productName"
                 type="text"
-                placeholder="e.g. Nike Air Max 90"
+                placeholder={isAnalyzing ? "AI is generating..." : "e.g. Nike Air Max 90"}
                 maxLength={200}
-                disabled={isPublishing}
+                disabled={isPublishing || isAnalyzing}
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-stone-800/60 border border-stone-700/60 text-stone-100 placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/50 transition-all disabled:opacity-50"
+                className={`w-full h-12 px-4 rounded-xl bg-stone-800/60 border text-stone-100 placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/50 transition-all disabled:opacity-50 ${
+                  aiDone && productName
+                    ? "border-violet-500/40 ring-1 ring-violet-500/20"
+                    : "border-stone-700/60"
+                }`}
               />
             </div>
 
