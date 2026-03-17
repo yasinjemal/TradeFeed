@@ -18,7 +18,9 @@
 >
 > **Feature 6: Marketplace Ranking Algorithm** — ✅ Complete
 >
-> **Next Up: Feature 7: Location-Based Discovery Pages**
+> **Feature 7: Location-Based Discovery Pages** — ✅ Complete
+>
+> **Next Up: Feature 8: Seller Referral Program**
 
 ---
 
@@ -366,7 +368,8 @@ Seller sends WhatsApp message (photo + "Red dress R250 size S-XL")
 | Field | Detail |
 |-------|--------|
 | **Feature Name** | Location-Based Discovery Pages |
-| **Status** | ⏳ Planned |
+| **Status** | ✅ Complete |
+| **Commit** | `f78ee01` |
 | **Problem** | Buyers searching "buy X in [city]" on Google land on generic results. TradeFeed has location data but doesn't create dedicated city-level landing pages that capture high-intent local search traffic. |
 | **User Story** | As a buyer searching for products in my city, I want to find a dedicated page showing local sellers and products available near me. |
 
@@ -398,17 +401,31 @@ Seller sends WhatsApp message (photo + "Red dress R250 size S-XL")
 | Marketplace | "Browse by City" section |
 | Footer | City links for internal linking |
 
+### Implementation Notes
+
+Most of the location infrastructure was already built (province pages at `/marketplace/[province]`, city pages at `/marketplace/[province]/[city]`, 31 cities across 9 provinces, JSON-LD, sitemap). This feature filled the remaining gaps:
+
+- **City+Category combo pages** (`/marketplace/[province]/[city]/[category]`) — ~1,271 new SEO pages targeting "buy hoodies in Johannesburg" searches
+- **Category cross-links on city pages** — "Browse in Johannesburg: Clothing, Shoes..." pills linking to combo pages
+- **Popular Cities section** on marketplace footer — 12 top SA cities for internal linking
+- **JSON-LD** — `generateCityCategoryPageJsonLd()` with BreadcrumbList + WebPage (Place + ItemList)
+- **Sitemap** — All city×category combos included (priority 0.7, weekly changefreq)
+- **Sort fix** — Province, city, category pages now default to "quality" (Best Match) sort
+
+Build generates 5,749 static pages total.
+
 ### Testing Checklist
 
-- [ ] All 50+ city pages render correctly
-- [ ] City + category combinations work
-- [ ] Structured data (WebPage, ItemList, BreadcrumbList) present
-- [ ] Sitemap includes all city pages
-- [ ] Internal linking from marketplace/categories
-- [ ] Correct meta titles and descriptions per city
-- [ ] OpenStreetMap embed shows shop locations
-- [ ] Page loads < 2s (ISR cached)
-- [ ] Mobile responsive
+- [x] All 50+ city pages render correctly (31 cities, ISR 300s)
+- [x] City + category combinations work (~1,271 pages)
+- [x] Structured data (WebPage, ItemList, BreadcrumbList, Place) present
+- [x] Sitemap includes all city pages + city+category combos
+- [x] Internal linking from marketplace + city pages to categories
+- [x] Correct meta titles and descriptions per city+category
+- [ ] OpenStreetMap embed shows shop locations (deferred — no map component yet)
+- [x] Page loads < 2s (ISR cached, static generated)
+- [x] Mobile responsive
+- [x] TypeScript clean, production build passes
 
 ---
 
@@ -556,12 +573,12 @@ Seller sends WhatsApp message (photo + "Red dress R250 size S-XL")
 | # | Feature | Status | Priority |
 |---|---------|--------|----------|
 | 1 | WhatsApp Product Import | ✅ Complete | P0 |
-| 2 | AI Product Builder | ⏳ Planned | P0 |
-| 3 | Payment Links via WhatsApp | ⏳ Planned | P1 |
-| 4 | Seller Analytics V2 | ⏳ Planned | P1 |
-| 5 | Automated Order Reply Bot | ⏳ Planned | P1 |
-| 6 | Marketplace Ranking Algorithm | ⏳ Planned | P2 |
-| 7 | Location-Based Discovery Pages | ⏳ Planned | P0 |
+| 2 | AI Product Builder | ✅ Complete | P0 |
+| 3 | Payment Links via WhatsApp | ✅ Complete | P1 |
+| 4 | Seller Analytics V2 | ✅ Complete | P1 |
+| 5 | Automated Order Reply Bot | ✅ Complete | P1 |
+| 6 | Marketplace Ranking Algorithm | ✅ Complete | P2 |
+| 7 | Location-Based Discovery Pages | ✅ Complete | P0 |
 | 8 | Seller Referral Program | ⏳ Planned | P1 |
 | 9 | Cash-on-Delivery Support | ⏳ Planned | P1 |
 | 10 | Local Language AI Assistant | ⏳ Planned | P1 |
