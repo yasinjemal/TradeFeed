@@ -15,7 +15,10 @@ import {
   getDailyAnalytics,
   getTopProducts,
   getUniqueVisitors,
+  getConversionFunnel,
+  getProductPerformance,
 } from "@/lib/db/analytics";
+import { getDailyRevenue } from "@/lib/db/revenue";
 import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { getShopPromotionStats, getPromotionFunnel } from "@/lib/db/promotions";
 import { AnalyticsDashboard } from "@/components/analytics/analytics-dashboard";
@@ -41,9 +44,9 @@ export default async function AnalyticsPage({
   }
   if (!access) return redirect("/");
 
-  const days = query.days === "7" ? 7 : 30;
+  const days = query.days === "7" ? 7 : query.days === "90" ? 90 : 30;
 
-  const [overview, daily, topProducts, uniqueVisitors, subscription, promotionStats, promotionFunnel] = await Promise.all([
+  const [overview, daily, topProducts, uniqueVisitors, subscription, promotionStats, promotionFunnel, conversionFunnel, productPerformance, dailyRevenue] = await Promise.all([
     getAnalyticsOverview(access.shopId, days),
     getDailyAnalytics(access.shopId, days),
     getTopProducts(access.shopId, days),
@@ -51,6 +54,9 @@ export default async function AnalyticsPage({
     getShopSubscription(access.shopId),
     getShopPromotionStats(access.shopId),
     getPromotionFunnel(access.shopId),
+    getConversionFunnel(access.shopId, days),
+    getProductPerformance(access.shopId, days),
+    getDailyRevenue(access.shopId, days),
   ]);
 
   const isPro = (!!subscription?.plan.slug && subscription.plan.slug !== "free") || isTrialActive(subscription).active;
@@ -81,6 +87,9 @@ export default async function AnalyticsPage({
           shopSlug={slug}
           promotionStats={promotionStats}
           promotionFunnel={promotionFunnel}
+          conversionFunnel={conversionFunnel}
+          productPerformance={productPerformance}
+          dailyRevenue={dailyRevenue}
         />
       </ProFeatureGate>
     </div>

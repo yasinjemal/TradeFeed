@@ -13,7 +13,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { formatZAR } from "@/types";
 import type { PromotionStats, PromotionFunnelData } from "@/lib/db/promotions";
+import type { ConversionFunnel, ProductPerformance } from "@/lib/db/analytics";
 
 interface OverviewData {
   totalPageViews: number;
@@ -39,6 +41,12 @@ interface TopProduct {
   totalEvents: number;
 }
 
+interface DailyRevenue {
+  date: string;
+  revenueCents: number;
+  orders: number;
+}
+
 interface AnalyticsDashboardProps {
   overview: OverviewData;
   daily: DailyData[];
@@ -48,6 +56,9 @@ interface AnalyticsDashboardProps {
   shopSlug: string;
   promotionStats?: PromotionStats;
   promotionFunnel?: PromotionFunnelData;
+  conversionFunnel?: ConversionFunnel;
+  productPerformance?: ProductPerformance[];
+  dailyRevenue?: DailyRevenue[];
 }
 
 export function AnalyticsDashboard({
@@ -59,6 +70,9 @@ export function AnalyticsDashboard({
   shopSlug,
   promotionStats,
   promotionFunnel,
+  conversionFunnel,
+  productPerformance,
+  dailyRevenue,
 }: AnalyticsDashboardProps) {
   const pathname = usePathname();
 
@@ -78,6 +92,11 @@ export function AnalyticsDashboard({
         />
         <PeriodButton
           days={30}
+          currentDays={currentDays}
+          pathname={pathname}
+        />
+        <PeriodButton
+          days={90}
           currentDays={currentDays}
           pathname={pathname}
         />
@@ -201,6 +220,105 @@ export function AnalyticsDashboard({
         )}
       </div>
 
+      {/* ── Conversion Funnel ────────────────────────────── */}
+      {conversionFunnel && conversionFunnel.pageViews > 0 && (
+        <div className="bg-white rounded-2xl border border-stone-200/60 p-5 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-800">
+            🔄 Conversion Funnel — Last {currentDays} days
+          </h2>
+          <div className="space-y-1.5">
+            <FunnelBar label="Page Views" value={conversionFunnel.pageViews} pct={100} color="bg-blue-400" />
+            <FunnelBar
+              label="Product Views"
+              value={conversionFunnel.productViews}
+              pct={conversionFunnel.pageViews > 0 ? (conversionFunnel.productViews / conversionFunnel.pageViews) * 100 : 0}
+              color="bg-purple-400"
+            />
+            <FunnelBar
+              label="Add to Cart"
+              value={conversionFunnel.addToCart}
+              pct={conversionFunnel.pageViews > 0 ? (conversionFunnel.addToCart / conversionFunnel.pageViews) * 100 : 0}
+              color="bg-amber-400"
+            />
+            <FunnelBar
+              label="Checkout"
+              value={conversionFunnel.checkoutStart}
+              pct={conversionFunnel.pageViews > 0 ? (conversionFunnel.checkoutStart / conversionFunnel.pageViews) * 100 : 0}
+              color="bg-orange-400"
+            />
+            <FunnelBar
+              label="Paid"
+              value={conversionFunnel.paymentComplete}
+              pct={conversionFunnel.pageViews > 0 ? (conversionFunnel.paymentComplete / conversionFunnel.pageViews) * 100 : 0}
+              color="bg-emerald-500"
+            />
+          </div>
+          {conversionFunnel.productViews > 0 && (
+            <p className="text-[10px] text-stone-400 pt-1">
+              Cart rate: {((conversionFunnel.addToCart / conversionFunnel.productViews) * 100).toFixed(1)}% · Checkout rate: {((conversionFunnel.checkoutStart / Math.max(conversionFunnel.addToCart, 1)) * 100).toFixed(1)}% · Payment rate: {((conversionFunnel.paymentComplete / Math.max(conversionFunnel.checkoutStart, 1)) * 100).toFixed(1)}%
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* ── Revenue Trend ────────────────────────────────── */}
+      {dailyRevenue && dailyRevenue.some((d) => d.revenueCents > 0) && (
+        <div className="bg-white rounded-2xl border border-stone-200/60 p-5">
+          <h2 className="text-sm font-semibold text-stone-800 mb-4">
+            💰 Revenue Trend — Last {currentDays} days
+          </h2>
+          <RevenueBarChart data={dailyRevenue} />
+        </div>
+      )}
+
+      {/* ── Product Performance Table ────────────────────── */}
+      {productPerformance && productPerformance.length > 0 && (
+        <div className="bg-white rounded-2xl border border-stone-200/60 p-5 space-y-3">
+          <h2 className="text-sm font-semibold text-stone-800">
+            📊 Product Performance — Top {Math.min(productPerformance.length, 10)}
+          </h2>
+          <div className="overflow-x-auto -mx-2">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-stone-100">
+                  <th className="text-left font-medium text-stone-500 pb-2 pl-2">Product</th>
+                  <th className="text-right font-medium text-stone-500 pb-2 px-2">Views</th>
+                  <th className="text-right font-medium text-stone-500 pb-2 px-2">Cart</th>
+                  <th className="text-right font-medium text-stone-500 pb-2 px-2">Orders</th>
+                  <th className="text-right font-medium text-stone-500 pb-2 pr-2">Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {productPerformance.slice(0, 10).map((p) => (
+                  <tr key={p.productId} className="border-b border-stone-50 last:border-0">
+                    <td className="py-2 pl-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-md bg-stone-100 overflow-hidden flex-shrink-0">
+                          {p.imageUrl ? (
+                            <Image src={p.imageUrl} alt={p.name} width={32} height={32} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-stone-300">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <span className="font-medium text-stone-800 truncate max-w-[120px] sm:max-w-[200px]">{p.name}</span>
+                      </div>
+                    </td>
+                    <td className="text-right tabular-nums text-stone-600 px-2">{p.views.toLocaleString()}</td>
+                    <td className="text-right tabular-nums text-stone-600 px-2">{p.cartAdds.toLocaleString()}</td>
+                    <td className="text-right tabular-nums text-stone-600 px-2">{p.orders.toLocaleString()}</td>
+                    <td className="text-right tabular-nums font-semibold text-emerald-700 pr-2">{formatZAR(p.revenueCents)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* ── Promotion Summary ────────────────────────────── */}
       {promotionStats && promotionStats.totalImpressions > 0 && (
         <div className="bg-white rounded-2xl border border-stone-200/60 p-5 space-y-4">
@@ -299,7 +417,7 @@ function PeriodButton({
           : "bg-white border border-stone-200 text-stone-600 hover:border-stone-300"
       }`}
     >
-      {days === 7 ? "7 days" : "30 days"}
+      {days === 7 ? "7 days" : days === 90 ? "90 days" : "30 days"}
     </Link>
   );
 }
@@ -422,6 +540,52 @@ function EmptyChart({ shopSlug }: { shopSlug: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
         </svg>
       </Link>
+    </div>
+  );
+}
+
+function RevenueBarChart({ data }: { data: DailyRevenue[] }) {
+  const maxRevenue = Math.max(...data.map((d) => d.revenueCents), 1);
+
+  return (
+    <div className="flex items-end gap-[2px] h-32">
+      {data.map((day) => {
+        const heightPercent = Math.max((day.revenueCents / maxRevenue) * 100, 2);
+        const dateObj = new Date(day.date);
+        const dayLabel = dateObj.toLocaleDateString("en-ZA", {
+          day: "numeric",
+          month: "short",
+        });
+
+        return (
+          <div
+            key={day.date}
+            className="flex-1 flex flex-col items-center justify-end gap-0.5 group relative"
+          >
+            {/* Tooltip */}
+            <div className="absolute bottom-full mb-2 hidden group-hover:block z-10">
+              <div className="bg-stone-900 text-white text-[10px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg">
+                <p className="font-semibold">{dayLabel}</p>
+                <p>{formatZAR(day.revenueCents)}</p>
+                {day.orders > 0 && (
+                  <p className="text-emerald-300">{day.orders} order{day.orders !== 1 ? "s" : ""}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Order indicator dot */}
+            {day.orders > 0 && (
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mb-0.5" />
+            )}
+
+            {/* Bar */}
+            <div
+              className="w-full rounded-t-sm bg-gradient-to-t from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 transition-colors cursor-pointer min-h-[2px]"
+              style={{ height: `${heightPercent}%` }}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

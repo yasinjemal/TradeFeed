@@ -267,3 +267,129 @@ export async function getUniqueVisitors(shopId: string, days: number = 30) {
 
   return result.length;
 }
+
+// ── Conversion Funnel ───────────────────────────────────────
+
+export interface ConversionFunnel {
+  pageViews: number;
+  productViews: number;
+  addToCart: number;
+  checkoutStart: number;
+  paymentComplete: number;
+}
+
+/**
+ * Get full conversion funnel counts for a shop.
+ * Tracks: Page View → Product View → Add to Cart → Checkout → Payment
+ */
+export async function getConversionFunnel(
+  shopId: string,
+  days: number = 30,
+): Promise<ConversionFunnel> {
+  const { from, to } = getDateRange(days);
+  const where = { shopId, createdAt: { gte: from, lte: to } };
+
+  const [pageViews, productViews, addToCart, checkoutStart, paymentComplete] =
+    await Promise.all([
+      db.analyticsEvent.count({ where: { ...where, type: "PAGE_VIEW" } }),
+      db.analyticsEvent.count({ where: { ...where, type: "PRODUCT_VIEW" } }),
+      db.analyticsEvent.count({ where: { ...where, type: "ADD_TO_CART" } }),
+      db.analyticsEvent.count({ where: { ...where, type: "CHECKOUT_START" } }),
+      db.analyticsEvent.count({ where: { ...where, type: "PAYMENT_COMPLETE" } }),
+    ]);
+
+  return { pageViews, productViews, addToCart, checkoutStart, paymentComplete };
+}
+
+// ── Product Performance Table ───────────────────────────────
+
+export interface ProductPerformance {
+  productId: string;
+  name: string;
+  imageUrl: string | null;
+  views: number;
+  cartAdds: number;
+  orders: number;
+  revenueCents: number;
+}
+
+/**
+ * Get product performance data for sortable table.
+ * Merges analytics events with order data.
+ */
+export async function getProductPerformance(
+  shopId: string,
+  days: number = 30,
+): Promise<ProductPerformance[]> {
+  const { from } = getDateRange(days);
+
+  // Views + cart adds from analytics events
+  const eventCounts = await db.$queryRaw<
+    { productId: string; type: string; count: bigint }[]
+  >`
+    SELECT "productId", "type", COUNT(*) as count
+    FROM "AnalyticsEvent"
+    WHERE "shopId" = ${shopId}
+      AND "productId" IS NOT NULL
+      AND "type" IN ('PRODUCT_VIEW', 'ADD_TO_CART')
+      AND "createdAt" >= ${from}
+    GROUP BY "productId", "type"
+  `;
+
+  // Orders + revenue from order items
+  const orderData = await db.$queryRaw<
+    { productId: string; units: bigint; revenue: bigint }[]
+  >`
+    SELECT oi."productId", SUM(oi.quantity) as units, SUM(oi."priceInCents" * oi.quantity) as revenue
+    FROM "OrderItem" oi
+    JOIN "Order" o ON oi."orderId" = o.id
+    WHERE o."shopId" = ${shopId}
+      AND o.status != 'CANCELLED'
+      AND o."createdAt" >= ${from}
+    GROUP BY oi."productId"
+  `;
+
+  // Merge into a single map
+  const perfMap = new Map<string, { views: number; cartAdds: number; orders: number; revenueCents: number }>();
+
+  for (const row of eventCounts) {
+    const existing = perfMap.get(row.productId) ?? { views: 0, cartAdds: 0, orders: 0, revenueCents: 0 };
+    if (row.type === "PRODUCT_VIEW") existing.views = Number(row.count);
+    if (row.type === "ADD_TO_CART") existing.cartAdds = Number(row.count);
+    perfMap.set(row.productId, existing);
+  }
+
+  for (const row of orderData) {
+    const existing = perfMap.get(row.productId) ?? { views: 0, cartAdds: 0, orders: 0, revenueCents: 0 };
+    existing.orders = Number(row.units);
+    existing.revenueCents = Number(row.revenue);
+    perfMap.set(row.productId, existing);
+  }
+
+  if (perfMap.size === 0) return [];
+
+  // Fetch product details
+  const productIds = Array.from(perfMap.keys());
+  const products = await db.product.findMany({
+    where: { id: { in: productIds } },
+    select: {
+      id: true,
+      name: true,
+      images: { take: 1, orderBy: { position: "asc" }, select: { url: true } },
+    },
+  });
+
+  const productDetails = new Map(products.map((p) => [p.id, p]));
+
+  return Array.from(perfMap.entries())
+    .map(([productId, data]) => {
+      const product = productDetails.get(productId);
+      return {
+        productId,
+        name: product?.name ?? "Unknown Product",
+        imageUrl: product?.images[0]?.url ?? null,
+        ...data,
+      };
+    })
+    .sort((a, b) => b.views - a.views); // Default sort by views
+}

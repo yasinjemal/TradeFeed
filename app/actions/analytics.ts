@@ -59,3 +59,44 @@ export async function trackWhatsAppCheckoutAction(
     shopId: parsedShop.data,
   });
 }
+
+/**
+ * Track an add-to-cart event from the catalog product page.
+ */
+export async function trackAddToCartAction(
+  shopId: string,
+  productId: string,
+): Promise<void> {
+  const ip = await getActionClientIp();
+  const rl = await checkRateLimit("analytics", ip);
+  if (!rl.allowed) return;
+
+  const parsedShop = shopIdSchema.safeParse(shopId);
+  const parsedProduct = z.string().min(1).max(100).safeParse(productId);
+  if (!parsedShop.success || !parsedProduct.success) return;
+
+  void trackEvent({
+    type: "ADD_TO_CART",
+    shopId: parsedShop.data,
+    productId: parsedProduct.data,
+  });
+}
+
+/**
+ * Track checkout start (order creation from cart).
+ */
+export async function trackCheckoutStartAction(
+  shopId: string,
+): Promise<void> {
+  const ip = await getActionClientIp();
+  const rl = await checkRateLimit("analytics", ip);
+  if (!rl.allowed) return;
+
+  const parsedShop = shopIdSchema.safeParse(shopId);
+  if (!parsedShop.success) return;
+
+  void trackEvent({
+    type: "CHECKOUT_START",
+    shopId: parsedShop.data,
+  });
+}

@@ -21,6 +21,7 @@ import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/cart/cart-context";
 import { formatZAR } from "@/types";
 import { toast } from "sonner";
+import { trackAddToCartAction } from "@/app/actions/analytics";
 
 interface Variant {
   id: string;
@@ -52,7 +53,7 @@ export function AddToCart({
   minWholesaleQty = 1,
   bulkDiscountTiers = [],
 }: AddToCartProps) {
-  const { addItem } = useCart();
+  const { addItem, shopId } = useCart();
   const t = useTranslations("catalog");
 
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -162,6 +163,9 @@ export function AddToCart({
       minWholesaleQty,
       orderType,
     }, quantity);
+
+    // Fire-and-forget analytics
+    void trackAddToCartAction(shopId, productId);
 
     // Show toast
     toast.success(`${productName} added to cart`, {

@@ -9,9 +9,10 @@
 ## Active Feature
 
 > **Feature 1: WhatsApp Product Import** — ✅ Complete  
-> **Feature 2: AI Product Builder** — ✅ Complete
+> **Feature 2: AI Product Builder** — ✅ Complete  
+> **Feature 3: Payment Links via WhatsApp** — ✅ Complete
 > 
-> **Next Up: Feature 3: Payment Links via WhatsApp**
+> **Next Up: Feature 4: Seller Analytics Dashboard V2**
 
 ---
 
@@ -141,7 +142,7 @@ Seller sends WhatsApp message (photo + "Red dress R250 size S-XL")
 | Field | Detail |
 |-------|--------|
 | **Feature Name** | Payment Links via WhatsApp |
-| **Status** | ⏳ Planned |
+| **Status** | ✅ Complete |
 | **Problem** | Sellers share bank details manually in WhatsApp chats for payment. This is error-prone, unprofessional, and doesn't track payments. Payment completion rate for manual bank transfers is ~30%. |
 | **User Story** | As a seller, I want to generate a payment link for an order and send it via WhatsApp, so buyers can pay instantly with their preferred method. |
 

@@ -28,6 +28,7 @@ import { activateShopBoost } from "@/lib/db/shops";
 import { reportError } from "@/lib/telemetry";
 import { markOrderPaid, getOrderForWebhook } from "@/lib/db/orders";
 import { createTransactionFee } from "@/lib/db/transaction-fees";
+import { trackEvent } from "@/lib/db/analytics";
 
 export async function POST(request: Request) {
   try {
@@ -215,6 +216,9 @@ async function handleOrderPayment(
     try {
       const order = await getOrderForWebhook(orderId);
       if (order) {
+        // Track payment completion (fire-and-forget)
+        void trackEvent({ type: "PAYMENT_COMPLETE", shopId: order.shopId });
+
         await createTransactionFee({
           orderId: order.id,
           shopId: order.shopId,

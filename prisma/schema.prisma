@@ -333,6 +333,9 @@ enum EventType {
   PRODUCT_VIEW                               // Individual product detail view
   WHATSAPP_CLICK                             // WhatsApp order/enquiry button tap
   WHATSAPP_CHECKOUT                          // Cart checkout via WhatsApp
+  ADD_TO_CART                                // Product added to cart
+  CHECKOUT_START                             // Buyer initiated checkout
+  PAYMENT_COMPLETE                           // Buyer completed payment (PayFast ITN)
   MARKETPLACE_VIEW                           // Marketplace page view
   MARKETPLACE_CLICK                          // Click from marketplace to product/shop
   PROMOTED_IMPRESSION                        // Promoted listing rendered on screen

@@ -28,6 +28,7 @@ import { checkoutSchema } from "@/lib/validation/checkout";
 import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
 import { sendOrderConfirmation, sendOrderStatusUpdate as sendStatusWhatsApp, sendBuyerPaymentLink } from "@/lib/whatsapp/business-api";
 import { formatZAR } from "@/types";
+import { trackEvent } from "@/lib/db/analytics";
 import type { OrderStatus, ShippingMethod } from "@prisma/client";
 
 type ActionResult = {
@@ -130,6 +131,9 @@ async function _attemptCheckout(
     if (!rl.allowed) {
       return { success: false, error: "Too many checkout attempts. Please wait a moment." };
     }
+
+    // Track checkout start (fire-and-forget)
+    void trackEvent({ type: "CHECKOUT_START", shopId });
 
     // 0. Validate & sanitize all inputs
     const parsed = checkoutSchema.safeParse({
