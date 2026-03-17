@@ -541,6 +541,8 @@ model Order {
 
   // Payment (PayFast order payment link)
   paymentRequestedAt DateTime?                      // When seller generated/sent payment link to buyer
+  paymentLinkUrl     String?                        // Full buyer-facing payment page URL
+  paymentLinkExpiresAt DateTime?                    // Link expiry (24h after generation)
   paidAt          DateTime?                         // When buyer completed payment (set by PayFast ITN)
 
   // WhatsApp tracking

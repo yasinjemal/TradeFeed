@@ -44,6 +44,7 @@ export async function getOrderByNumber(orderNumber: string) {
     orderNumber: order.orderNumber,
     status: order.status,
     paymentRequestedAt: order.paymentRequestedAt,
+    paymentLinkExpiresAt: order.paymentLinkExpiresAt,
     paidAt: order.paidAt,
     buyerName: order.buyerName,
     buyerPhone: maskedPhone,

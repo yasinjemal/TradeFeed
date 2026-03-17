@@ -24,12 +24,17 @@ export default async function OrdersPage({ params, searchParams }: OrdersPagePro
 
   // Validate status filter
   const validStatuses = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"] as const;
+  const isAwaitingPayment = status === "AWAITING_PAYMENT";
   const statusFilter = validStatuses.includes(status as typeof validStatuses[number])
     ? (status as typeof validStatuses[number])
     : undefined;
 
   const [orders, stats] = await Promise.all([
-    listOrders(access.shopId, { status: statusFilter, limit: 50 }),
+    listOrders(access.shopId, {
+      status: statusFilter,
+      awaitingPayment: isAwaitingPayment,
+      limit: 50,
+    }),
     getOrderStats(access.shopId),
   ]);
 
@@ -60,7 +65,7 @@ export default async function OrdersPage({ params, searchParams }: OrdersPagePro
         orders={JSON.parse(JSON.stringify(orders))}
         stats={stats}
         shopSlug={slug}
-        currentStatus={statusFilter}
+        currentStatus={isAwaitingPayment ? "AWAITING_PAYMENT" : statusFilter}
       />
     </div>
   );

@@ -72,6 +72,7 @@ interface OrderStats {
   shipped: number;
   delivered: number;
   cancelled: number;
+  awaitingPayment: number;
   revenueCents: number;
 }
 
@@ -139,6 +140,7 @@ const STATUS_ACTIONS: Record<OrderStatus, { label: string; status: OrderStatus }
 const TABS = [
   { label: "All", value: undefined, icon: "📋" },
   { label: "Pending", value: "PENDING", icon: "⏳" },
+  { label: "Awaiting Payment", value: "AWAITING_PAYMENT", icon: "💳" },
   { label: "Confirmed", value: "CONFIRMED", icon: "✅" },
   { label: "Shipped", value: "SHIPPED", icon: "📦" },
   { label: "Delivered", value: "DELIVERED", icon: "🎉" },
@@ -276,7 +278,9 @@ export function OrdersDashboard({
           const count =
             tab.value === undefined
               ? stats.total
-              : stats[tab.value.toLowerCase() as keyof OrderStats];
+              : tab.value === "AWAITING_PAYMENT"
+                ? stats.awaitingPayment
+                : stats[tab.value.toLowerCase() as keyof OrderStats];
           return (
             <button
               key={tab.label}

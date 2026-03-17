@@ -8,9 +8,10 @@
 
 ## Active Feature
 
-> **Feature 1: WhatsApp Product Import** — ✅ Complete
+> **Feature 1: WhatsApp Product Import** — ✅ Complete  
+> **Feature 2: AI Product Builder** — ✅ Complete
 > 
-> **Next Up: Feature 2: AI Product Builder**
+> **Next Up: Feature 3: Payment Links via WhatsApp**
 
 ---
 
@@ -89,7 +90,7 @@ Seller sends WhatsApp message (photo + "Red dress R250 size S-XL")
 | Field | Detail |
 |-------|--------|
 | **Feature Name** | AI Product Builder |
-| **Status** | ⏳ Planned |
+| **Status** | ✅ Complete |
 | **Problem** | Sellers with limited English or digital skills struggle to write product descriptions and choose categories. Product listings with poor titles and descriptions get less marketplace visibility. |
 | **User Story** | As a seller creating a product on the web dashboard, I want AI to auto-generate the title, description, and category from my product photo, so I can create professional listings in seconds. |
 

@@ -238,17 +238,19 @@ export async function listOrders(
   shopId: string,
   options?: {
     status?: OrderStatus;
+    awaitingPayment?: boolean;
     limit?: number;
     cursor?: string;
   },
 ) {
-  const { status, limit = 20, cursor } = options ?? {};
+  const { status, awaitingPayment, limit = 20, cursor } = options ?? {};
 
   return db.order.findMany({
     where: {
       shopId,
       deletedAt: null,
       ...(status ? { status } : {}),
+      ...(awaitingPayment ? { paymentRequestedAt: { not: null }, paidAt: null, status: { not: "CANCELLED" } } : {}),
     },
     include: {
       items: true,
@@ -316,17 +318,29 @@ export async function getOrderForWebhook(orderId: string) {
 
 // ── Mark payment link requested (seller sent link to buyer) ──
 
-export async function markPaymentRequested(orderId: string, shopId: string) {
+/** Default payment link validity: 24 hours */
+const PAYMENT_LINK_TTL_MS = 24 * 60 * 60 * 1000;
+
+export async function markPaymentRequested(
+  orderId: string,
+  shopId: string,
+  paymentLinkUrl?: string,
+) {
+  const now = new Date();
   return db.order.update({
     where: { id: orderId, shopId },
-    data: { paymentRequestedAt: new Date() },
+    data: {
+      paymentRequestedAt: now,
+      paymentLinkUrl: paymentLinkUrl ?? undefined,
+      paymentLinkExpiresAt: new Date(now.getTime() + PAYMENT_LINK_TTL_MS),
+    },
   });
 }
 
 // ── Order Stats ─────────────────────────────────────────────
 
 export async function getOrderStats(shopId: string) {
-  const [total, pending, confirmed, shipped, delivered, cancelled, revenue] =
+  const [total, pending, confirmed, shipped, delivered, cancelled, awaitingPayment, revenue] =
     await Promise.all([
       db.order.count({ where: { shopId, deletedAt: null } }),
       db.order.count({ where: { shopId, deletedAt: null, status: "PENDING" } }),
@@ -334,6 +348,7 @@ export async function getOrderStats(shopId: string) {
       db.order.count({ where: { shopId, deletedAt: null, status: "SHIPPED" } }),
       db.order.count({ where: { shopId, deletedAt: null, status: "DELIVERED" } }),
       db.order.count({ where: { shopId, deletedAt: null, status: "CANCELLED" } }),
+      db.order.count({ where: { shopId, deletedAt: null, paymentRequestedAt: { not: null }, paidAt: null, status: { not: "CANCELLED" } } }),
       db.order.aggregate({
         where: { shopId, deletedAt: null, status: { not: "CANCELLED" } },
         _sum: { totalCents: true },
@@ -347,6 +362,7 @@ export async function getOrderStats(shopId: string) {
     shipped,
     delivered,
     cancelled,
+    awaitingPayment,
     revenueCents: revenue._sum.totalCents ?? 0,
   };
 }

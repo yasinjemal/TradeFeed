@@ -383,13 +383,17 @@ export async function createOrderPaymentLinkAction(
       return { success: false, error: "Cannot create payment link for a cancelled order." };
     }
 
+    if (order.paidAt) {
+      return { success: false, error: "This order has already been paid." };
+    }
+
     const { buildOrderPaymentUrl } = await import("@/lib/payfast");
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tradefeed.co.za";
     const buyerEmail = ""; // PayFast allows empty; buyer enters at checkout
     const buyerName = order.buyerName ?? undefined;
 
-    const paymentUrl = buildOrderPaymentUrl({
+    buildOrderPaymentUrl({
       orderId: order.id,
       orderNumber: order.orderNumber,
       shopSlug,
@@ -398,11 +402,31 @@ export async function createOrderPaymentLinkAction(
       buyerName,
     });
 
-    await markPaymentRequested(orderId, access.shopId);
+    // Build the buyer-facing payment page URL (not the raw PayFast URL)
+    const buyerPayUrl = `${baseUrl}/pay/${encodeURIComponent(order.orderNumber)}`;
+
+    await markPaymentRequested(orderId, access.shopId, buyerPayUrl);
+
+    // Auto-send payment link via WhatsApp Business API if buyer phone exists (fire-and-forget)
+    if (order.buyerPhone) {
+      const { db: prismaDb } = await import("@/lib/db");
+      prismaDb.shop.findUnique({ where: { id: access.shopId }, select: { name: true } })
+        .then((shop) => {
+          if (!shop) return;
+          return sendBuyerPaymentLink(
+            order.buyerPhone!,
+            order.orderNumber,
+            shop.name,
+            formatZAR(order.totalCents),
+            buyerPayUrl,
+          );
+        })
+        .catch(() => {});
+    }
 
     revalidatePath(`/dashboard/${shopSlug}/orders`);
 
-    return { success: true, paymentUrl };
+    return { success: true, paymentUrl: buyerPayUrl };
   } catch (error) {
     await reportError("createOrderPaymentLinkAction", error, { shopSlug, orderId });
     return {
