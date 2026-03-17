@@ -240,6 +240,15 @@ export async function createProductAction(
 
     // 4. Revalidate and return success (show success screen in form)
     deps.revalidatePath(`/dashboard/${shopSlug}/products`);
+
+    // 5. Check referral reward qualification (3+ active products triggers reward for referrer)
+    try {
+      const { applyReferralReward } = await import("@/lib/db/referrals");
+      applyReferralReward(access.shopId).catch(() => {});
+    } catch {
+      // Non-fatal — product creation succeeded
+    }
+
     return {
       success: true,
       productId: product.id,

@@ -38,7 +38,15 @@ export async function applyReferralReward(
 
   const referrerSlug = referredShop.referredBy;
 
-  // 2. Check if reward was already applied (idempotency guard)
+  // 2. Check if referred shop has 3+ products (qualification threshold)
+  const productCount = await db.product.count({
+    where: { shopId: referredShopId, isActive: true },
+  });
+  if (productCount < 3) {
+    return { applied: false, referrerSlug, reason: "not-qualified-yet" };
+  }
+
+  // 3. Check if reward was already applied (idempotency guard)
   const existing = await db.referralReward.findUnique({
     where: { referredShopId },
   });
@@ -47,7 +55,7 @@ export async function applyReferralReward(
     return { applied: false, referrerSlug, reason: "already-rewarded" };
   }
 
-  // 3. Find the referrer's shop
+  // 4. Find the referrer's shop
   const referrerShop = await db.shop.findFirst({
     where: { slug: referrerSlug, isActive: true },
     select: { id: true },
@@ -57,7 +65,7 @@ export async function applyReferralReward(
     return { applied: false, referrerSlug, reason: "referrer-not-found" };
   }
 
-  // 4. Check if the referrer has an active paid subscription
+  // 5. Check if the referrer has an active paid subscription
   const referrerSub = await db.subscription.findUnique({
     where: { shopId: referrerShop.id },
     include: { plan: true },
@@ -76,7 +84,7 @@ export async function applyReferralReward(
     return { applied: false, referrerSlug, reason: "referrer-not-active" };
   }
 
-  // 5. Extend subscription + record reward atomically
+  // 6. Extend subscription + record reward atomically
   const currentEnd = referrerSub.currentPeriodEnd ?? new Date();
   const newEnd = new Date(currentEnd);
   newEnd.setMonth(newEnd.getMonth() + 1);
@@ -100,6 +108,39 @@ export async function applyReferralReward(
     `[referral] Rewarded ${referrerSlug}: extended subscription by 1 month ` +
     `(new end: ${newEnd.toISOString()}) for referring ${referredShop.slug}`
   );
+
+  // Send notification email to referrer (fire-and-forget)
+  try {
+    const referrerOwner = await db.shopUser.findFirst({
+      where: { shopId: referrerShop.id, role: "OWNER" },
+      select: { user: { select: { email: true, firstName: true } } },
+    });
+    const referredShopName = await db.shop.findUnique({
+      where: { id: referredShopId },
+      select: { name: true },
+    });
+    if (referrerOwner?.user.email) {
+      const { sendEmail } = await import("@/lib/email/resend");
+      const { referralRewardEmailHtml, referralRewardEmailText } = await import(
+        "@/lib/email/templates/referral-reward"
+      );
+      const { SITE_URL } = await import("@/lib/config/site");
+      const emailData = {
+        referrerName: referrerOwner.user.firstName || referrerSlug,
+        referredShopName: referredShopName?.name || "A seller you referred",
+        newEndDate: newEnd.toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" }),
+        dashboardUrl: `${SITE_URL}/dashboard/${referrerSlug}/referrals`,
+      };
+      sendEmail({
+        to: referrerOwner.user.email,
+        subject: "🎉 You earned a free month of Pro!",
+        html: referralRewardEmailHtml(emailData),
+        text: referralRewardEmailText(emailData),
+      }).catch(() => {});
+    }
+  } catch {
+    // Non-fatal — reward was already applied
+  }
 
   return { applied: true, referrerSlug };
 }
