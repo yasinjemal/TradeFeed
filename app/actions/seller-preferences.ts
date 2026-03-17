@@ -19,6 +19,7 @@ const sellerPreferencesSchema = z.object({
   languagePreference: z.string().trim().max(10).optional().or(z.literal("")),
   aiToneNotes: z.string().trim().max(500).optional().or(z.literal("")),
   autoReplyEnabled: z.string().optional(),
+  whatsappImportEnabled: z.string().optional(),
 });
 
 type ActionResult = {
@@ -51,6 +52,7 @@ export async function updateSellerPreferencesAction(
       languagePreference: formData.get("languagePreference") as string,
       aiToneNotes: formData.get("aiToneNotes") as string,
       autoReplyEnabled: formData.get("autoReplyEnabled") as string,
+      whatsappImportEnabled: formData.get("whatsappImportEnabled") as string,
     };
 
     const parsed = sellerPreferencesSchema.safeParse(rawInput);
@@ -76,6 +78,7 @@ export async function updateSellerPreferencesAction(
       languagePreference: parsed.data.languagePreference || "en",
       aiToneNotes: parsed.data.aiToneNotes || null,
       autoReplyEnabled: parsed.data.autoReplyEnabled === "on",
+      whatsappImportEnabled: parsed.data.whatsappImportEnabled === "on",
     });
 
     revalidatePath(`/dashboard/${shopSlug}/settings`);

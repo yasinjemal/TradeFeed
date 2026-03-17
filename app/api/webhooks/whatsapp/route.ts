@@ -18,6 +18,8 @@ import { detectIntent, shouldAutoReply } from "@/lib/whatsapp/intent-detection";
 import { generateAutoReply } from "@/lib/whatsapp/auto-reply";
 import { generateAIReply } from "@/lib/whatsapp/ai-sales";
 import { sendTextMessage } from "@/lib/whatsapp/business-api";
+import { processWhatsAppProductImport } from "@/lib/whatsapp/product-import";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { db } from "@/lib/db";
 
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
@@ -59,6 +61,7 @@ interface WhatsAppWebhookEntry {
         timestamp: string;
         type: string;
         text?: { body: string };
+        image?: { id: string; mime_type: string; caption?: string };
       }[];
     };
     field: string;
@@ -112,6 +115,11 @@ export async function POST(request: NextRequest) {
                 message.text.body,
                 value.metadata.phone_number_id
               );
+            }
+
+            // Product import for image messages from sellers
+            if (FEATURE_FLAGS.WHATSAPP_PRODUCT_IMPORT && message.type === "image" && message.image?.id) {
+              await handleImageImport(message);
             }
           }
         }
@@ -224,5 +232,40 @@ async function handleAutoReply(
   } catch (error) {
     // Non-fatal — don't crash the webhook handler
     console.error("[whatsapp-webhook] Auto-reply error:", error);
+  }
+}
+
+// ── Image Import Handler ──────────────────────────────────
+
+/**
+ * Process an image message as a potential product import.
+ * Checks if the sender is a registered seller, then delegates
+ * to the product import service.
+ */
+async function handleImageImport(message: {
+  id: string;
+  from: string;
+  timestamp: string;
+  image?: { id: string; mime_type: string; caption?: string };
+}) {
+  try {
+    if (!message.image?.id) return;
+
+    const result = await processWhatsAppProductImport({
+      from: message.from,
+      imageId: message.image.id,
+      caption: message.image.caption,
+      messageId: message.id,
+      timestamp: message.timestamp,
+    });
+
+    console.log("[whatsapp-webhook] Image import result:", {
+      from: message.from,
+      success: result.success,
+      productId: result.productId,
+      error: result.error,
+    });
+  } catch (error) {
+    console.error("[whatsapp-webhook] Image import error:", error);
   }
 }

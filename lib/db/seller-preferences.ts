@@ -40,6 +40,7 @@ export async function upsertSellerPreferences(
     languagePreference?: string;
     aiToneNotes?: string | null;
     autoReplyEnabled?: boolean;
+    whatsappImportEnabled?: boolean;
   }
 ): Promise<SellerPreferences> {
   return db.sellerPreferences.upsert({

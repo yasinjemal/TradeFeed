@@ -86,6 +86,7 @@ model Shop {
   sequenceState   SellerSequenceState?         // Follow-up sequence progress tracker
   referralRewardsGiven ReferralReward[] @relation("ReferrerRewards")  // Rewards earned by referring others
   referralRewardReceived ReferralReward? @relation("ReferredRewards") // Reward triggered when this shop upgraded
+  whatsAppProductImports WhatsAppProductImport[] // Products imported via WhatsApp
 
   @@index([slug])
   @@index([isActive])
@@ -188,6 +189,10 @@ model Product {
   slug        String?                         // SEO-friendly URL slug (unique per shop)
   description String?                         // Product description
   isActive    Boolean @default(true)          // Controls visibility on public catalog
+
+  // ── Source Tracking ──────────────────────────────
+  source      ProductSource @default(WEB)      // How this product was created
+  aiGenerated Boolean @default(false)          // Whether AI generated the listing
 
   // Admin moderation
   isFlagged   Boolean @default(false)          // Flagged for policy violation
@@ -976,6 +981,7 @@ model SellerPreferences {
   // ── AI Behavior ────────────────────────────────────
   aiToneNotes         String?                       // Free-text notes for AI personality tuning
   autoReplyEnabled    Boolean  @default(false)      // Whether WhatsApp auto-reply is active
+  whatsappImportEnabled Boolean @default(true)       // Whether WhatsApp product import is active
 
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -1099,6 +1105,13 @@ enum WholesaleBuyerStatus {
   REJECTED                                     // Application denied
 }
 
+enum ProductSource {
+  WEB                                          // Created via web dashboard
+  WHATSAPP                                     // Imported via WhatsApp photo
+  CSV                                          // Bulk imported via CSV
+  API                                          // Created via API
+}
+
 // ============================================================
 // BULK DISCOUNT TIER: Volume-based discount tiers per product
 // Sellers set breakpoints where unit price drops.
@@ -1139,4 +1152,43 @@ model ReferralReward {
   createdAt       DateTime @default(now())
 
   @@index([referrerShopId])
+}
+
+// ============================================================
+// WHATSAPP PRODUCT IMPORT: Tracks product imports via WhatsApp
+// When a seller sends a photo + caption via WhatsApp, this table
+// records the attempt, processing status, and resulting product.
+// Used for rate limiting, deduplication, and analytics.
+// ============================================================
+model WhatsAppProductImport {
+  id             String   @id @default(cuid())
+
+  shopId         String
+  shop           Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  messageId      String   @unique              // WhatsApp message ID (idempotency key)
+  imageMediaId   String                        // WhatsApp media ID for the image
+  captionText    String?                       // Text sent with the image
+
+  // Processing status
+  status         WhatsAppImportStatus @default(PENDING)
+  errorMessage   String?                       // Error details if failed
+
+  // Result
+  productId      String?                       // Created product (null if failed)
+  parsedPrice    Int?                          // Detected price in cents
+  parsedSizes    String[]                      // Detected sizes
+  aiProductName  String?                       // AI-generated product name
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([shopId, createdAt])
+  @@index([status])
+}
+
+enum WhatsAppImportStatus {
+  PENDING                                      // Received, not yet processed
+  PROCESSED                                    // Successfully created product
+  FAILED                                       // Processing failed
 }

@@ -389,6 +389,7 @@ export async function getDashboardStats(shopId: string) {
     outOfStockCount,
     ordersToday,
     revenueToday,
+    whatsappImportCount,
   ] = await Promise.all([
     // Total products
     db.product.count({ where: { shopId } }),
@@ -430,6 +431,8 @@ export async function getDashboardStats(shopId: string) {
       where: { shopId, createdAt: { gte: startOfToday } },
       _sum: { totalCents: true },
     }),
+    // Products imported via WhatsApp
+    db.product.count({ where: { shopId, source: "WHATSAPP" } }),
   ]);
 
   return {
@@ -444,6 +447,7 @@ export async function getDashboardStats(shopId: string) {
     recentProducts,
     ordersToday,
     revenueTodayCents: revenueToday._sum.totalCents ?? 0,
+    whatsappImportCount,
   };
 }
 

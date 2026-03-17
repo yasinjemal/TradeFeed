@@ -215,6 +215,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
               languagePreference: sellerPrefs.languagePreference,
               aiToneNotes: sellerPrefs.aiToneNotes,
               autoReplyEnabled: sellerPrefs.autoReplyEnabled,
+              whatsappImportEnabled: sellerPrefs.whatsappImportEnabled,
             } : null}
           />
 
