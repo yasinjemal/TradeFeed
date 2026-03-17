@@ -146,10 +146,26 @@ export async function createFirstProductAction(
     if (!shop) return { success: false, error: "Shop not found." };
 
     const productName = ((formData.get("productName") as string) ?? "").trim() || "My First Product";
+    const description = ((formData.get("description") as string) ?? "").trim();
+    const categoryName = ((formData.get("category") as string) ?? "").trim();
+    const quantity = ((formData.get("quantity") as string) ?? "1").trim() || "1";
     const priceInRands = ((formData.get("priceInRands") as string) ?? "").trim();
 
     if (!priceInRands || parseFloat(priceInRands) <= 0) {
       return { success: false, error: "Enter a price greater than zero." };
+    }
+
+    // Map AI category string → globalCategoryId (best-effort)
+    let globalCategoryId: string | undefined;
+    if (categoryName) {
+      const globalCat = await db.globalCategory.findFirst({
+        where: {
+          isActive: true,
+          name: { equals: categoryName, mode: "insensitive" },
+        },
+        select: { id: true },
+      });
+      if (globalCat) globalCategoryId = globalCat.id;
     }
 
     // Create product
@@ -157,9 +173,10 @@ export async function createFirstProductAction(
     const product = await createProduct(
       {
         name: productName,
-        description: "",
+        description,
         isActive: true,
-        aiGenerated: false,
+        aiGenerated: !!description,
+        globalCategoryId,
         option1Label: "Size",
         option2Label: "Color",
         minWholesaleQty: 1,
@@ -168,12 +185,12 @@ export async function createFirstProductAction(
       shop.id,
     );
 
-    // Create default variant with price
+    // Create default variant with price + stock
     const { variantCreateSchema } = await import("@/lib/validation/product");
     const variantInput = variantCreateSchema.safeParse({
       size: "Default",
       priceInRands,
-      stock: "1",
+      stock: quantity,
     });
     if (variantInput.success) {
       const { createVariant } = await import("@/lib/db/variants");

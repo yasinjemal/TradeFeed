@@ -80,6 +80,8 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
   // ── Step 2: AI-Powered Product creation ──────────────
   const [productName, setProductName] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [quantity, setQuantity] = useState("1");
   const [price, setPrice] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
@@ -149,6 +151,7 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
             // AI magic — auto-fill fields
             setProductName(data.data.name || "");
             setDescription(data.data.description || "");
+            if (data.data.category) setCategory(data.data.category);
             setAiDone(true);
           }
           // If AI fails (credits, error), silently degrade — user can type manually
@@ -178,6 +181,9 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
       // Create the product
       const formData = new FormData();
       formData.set("productName", productName || "My First Product");
+      formData.set("description", description);
+      formData.set("category", category);
+      formData.set("quantity", quantity || "1");
       formData.set("priceInRands", price);
 
       const result = await createFirstProductAction(shopSlug, formData);
@@ -655,30 +661,71 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
               />
             </div>
 
-            {/* Price */}
-            <div className="space-y-2">
-              <label
-                htmlFor="price"
-                className="text-sm font-medium text-stone-200"
-              >
-                Price (ZAR)
-              </label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-stone-500 font-medium">
-                  R
+            {/* AI Category chip */}
+            {category && (
+              <div className="flex items-center gap-2 animate-in fade-in slide-in-from-bottom-1 duration-300">
+                <span className="text-xs text-stone-500">Category:</span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400">
+                  {aiDone && (
+                    <svg className="w-3 h-3 text-violet-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                    </svg>
+                  )}
+                  {category}
+                </span>
+              </div>
+            )}
+
+            {/* Price + Quantity row */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Price */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="price"
+                  className="text-sm font-medium text-stone-200"
+                >
+                  Price (ZAR)
+                </label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-stone-500 font-medium">
+                    R
+                  </div>
+                  <input
+                    id="price"
+                    type="number"
+                    inputMode="decimal"
+                    min="1"
+                    step="0.01"
+                    placeholder="150"
+                    required
+                    disabled={isPublishing}
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-full h-12 pl-9 pr-4 rounded-xl bg-stone-800/60 border border-stone-700/60 text-stone-100 placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/50 transition-all disabled:opacity-50"
+                  />
                 </div>
+              </div>
+
+              {/* Quantity */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="quantity"
+                  className="text-sm font-medium text-stone-200"
+                >
+                  Quantity
+                </label>
                 <input
-                  id="price"
+                  id="quantity"
                   type="number"
-                  inputMode="decimal"
+                  inputMode="numeric"
                   min="1"
-                  step="0.01"
-                  placeholder="150"
-                  required
+                  max="999999"
+                  step="1"
+                  placeholder="1"
                   disabled={isPublishing}
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="w-full h-12 pl-9 pr-4 rounded-xl bg-stone-800/60 border border-stone-700/60 text-stone-100 placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/50 transition-all disabled:opacity-50"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xl bg-stone-800/60 border border-stone-700/60 text-stone-100 placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/50 transition-all disabled:opacity-50"
                 />
               </div>
             </div>
