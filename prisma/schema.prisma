@@ -121,7 +121,8 @@ model User {
   updatedAt     DateTime @updatedAt
 
   // Relations
-  shops         ShopUser[]                    // Shops this user belongs to
+  shops              ShopUser[]                    // Shops this user belongs to
+  onboardingEvents   OnboardingEvent[]             // Onboarding funnel tracking
 
   @@index([clerkId])
 }
@@ -1238,4 +1239,20 @@ model RankingFactor {
   @@index([productId, computedAt])
   @@index([shopId, computedAt])
   @@index([computedAt])
+}
+
+// ── Onboarding Funnel Tracking ──────────────────────────────
+// Tracks each step of the seller onboarding flow to measure
+// activation rate and identify drop-off points.
+model OnboardingEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  step      String                           // "started" | "shop_created" | "product_created" | "completed"
+  metadata  Json?                            // Optional context (e.g. time spent, source)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, step])
+  @@index([createdAt])
 }

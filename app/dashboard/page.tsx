@@ -39,6 +39,6 @@ export default async function DashboardRedirectPage() {
     redirect(`/dashboard/${existingSlug}`);
   }
 
-  // No shop yet — send to create-shop
-  redirect("/create-shop");
+  // No shop yet — send to product-first onboarding
+  redirect("/get-started");
 }
