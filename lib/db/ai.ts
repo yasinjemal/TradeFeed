@@ -14,6 +14,9 @@ const AI_UNLIMITED_PLANS = ["pro-ai", "business"];
 /** Number of free AI generations for non-AI plans */
 export const FREE_AI_CREDITS = 5;
 
+/** Maximum AI generations per shop per day (safety cap, even for unlimited plans) */
+export const AI_DAILY_LIMIT = 50;
+
 /**
  * Check if a shop can use AI features and how many credits remain.
  *

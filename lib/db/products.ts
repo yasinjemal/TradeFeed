@@ -42,6 +42,7 @@ export async function createProduct(
       option2Label: input.option2Label ?? "Color",
       minWholesaleQty: input.minWholesaleQty ?? 1,
       wholesaleOnly: input.wholesaleOnly ?? false,
+      aiGenerated: input.aiGenerated ?? false,
     },
     include: {
       variants: true,

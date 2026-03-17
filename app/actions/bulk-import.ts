@@ -247,6 +247,7 @@ export async function bulkImportAction(
             option2Label: first.option2Label,
             minWholesaleQty: 1,
             wholesaleOnly: false,
+            aiGenerated: false,
           },
           access.shopId,
         );

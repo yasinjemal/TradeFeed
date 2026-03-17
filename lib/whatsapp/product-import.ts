@@ -309,6 +309,7 @@ async function createProductFromImport(
       option2Label: "Color",
       minWholesaleQty: 1,
       wholesaleOnly: false,
+      aiGenerated: false,
     },
     shopId
   );

@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import NextImage from "next/image";
 import { useUploadThing } from "@/lib/uploadthing";
 import {
@@ -30,6 +30,8 @@ interface ImageUploadProps {
   images: ProductImage[];
   shopSlug: string;
   productId: string;
+  /** If set, auto-uploads this data URL as the first image on mount */
+  autoUploadDataUrl?: string | null;
 }
 
 const MAX_IMAGES = 8;
@@ -71,6 +73,7 @@ export function ImageUpload({
   images,
   shopSlug,
   productId,
+  autoUploadDataUrl,
 }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -142,6 +145,22 @@ export function ImageUpload({
     },
     [images.length, shopSlug, productId, startUpload]
   );
+
+  // Auto-upload AI image on mount if provided
+  useEffect(() => {
+    if (!autoUploadDataUrl || images.length > 0) return;
+    (async () => {
+      try {
+        const res = await fetch(autoUploadDataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], "ai-product-image.jpg", { type: blob.type || "image/jpeg" });
+        processFiles([file]);
+      } catch {
+        // Silent fail — user can still upload manually
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {

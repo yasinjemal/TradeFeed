@@ -86,6 +86,8 @@ export const productCreateSchema = z.object({
   wholesaleOnly: z.boolean().default(false),
 
   isActive: z.boolean().default(true),
+
+  aiGenerated: z.boolean().default(false),
 });
 
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;

@@ -181,6 +181,7 @@ export async function createProductAction(
       minWholesaleQty: parseInt((formData.get("minWholesaleQty") as string) || "1", 10) || 1,
       wholesaleOnly: formData.get("wholesaleOnly") === "on",
       isActive: formData.get("isActive") === "on",
+      aiGenerated: formData.get("aiGenerated") === "on",
     };
 
     const parsed = productCreateSchema.safeParse(rawInput);

@@ -19,7 +19,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireShopAccess } from "@/lib/auth";
-import { checkAiAccess, trackAiGeneration, FREE_AI_CREDITS } from "@/lib/db/ai";
+import { checkAiAccess, trackAiGeneration, FREE_AI_CREDITS, AI_DAILY_LIMIT } from "@/lib/db/ai";
+import { rateLimit } from "@/lib/rate-limit";
 import { getSellerPreferences, buildSellerAIContext } from "@/lib/db/seller-preferences";
 import { aiGenerateRequestSchema, aiProductResponseSchema, applyAISafety } from "@/lib/validation/ai-product";
 import type { AiProductResponse } from "@/lib/validation/ai-product";
@@ -62,9 +63,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 3b. Daily safety cap — 50 generations per shop per day (even unlimited plans)
+    const dailyCheck = rateLimit(`ai-daily:${access.shopId}`, AI_DAILY_LIMIT, 86_400_000);
+    if (!dailyCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: "DAILY_LIMIT_REACHED",
+          message: `You've reached the daily limit of ${AI_DAILY_LIMIT} AI generations. Try again tomorrow.`,
+          resetAt: dailyCheck.resetAt,
+        },
+        { status: 429 }
+      );
+    }
+
     // 4. Load seller preferences for personalized AI output
     const sellerPrefs = await getSellerPreferences(access.shopId);
     const sellerContext = buildSellerAIContext(sellerPrefs);
+    const language = sellerPrefs?.languagePreference || "en";
+    const LANG_NAMES: Record<string, string> = { en: "English", zu: "isiZulu", xh: "isiXhosa", af: "Afrikaans", st: "Sesotho" };
+    const langName = LANG_NAMES[language] || "English";
+    const langInstruction = language !== "en"
+      ? `\n\nLANGUAGE: Write the name, description, shortCaption, seoTitle, and seoDescription in ${langName}. Tags should remain in English for search visibility.`
+      : "";
 
     // 5. Call AI provider
     let aiResult: AiProductResponse;
@@ -76,7 +96,7 @@ export async function POST(req: NextRequest) {
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
-        max_tokens: 1200,
+        max_tokens: 2000,
         temperature: 0.6,
         response_format: { type: "json_object" },
         messages: [
@@ -91,10 +111,10 @@ SEO RULES:
   Example: "Premium Oversized Hoodie — Fleece Lined, Unisex, S-XXL"
   Keep 5-80 characters. Front-load the most important keyword.
 
-- Product DESCRIPTION: Write 100-350 characters. Structure it as:
-  Line 1: What it is + primary selling point.
-  Line 2: Key features (material, fit, size range, technical specs).
-  Line 3: Who it's for or use case.
+- Product DESCRIPTION: Write a detailed, keyword-rich description of 150-300 words. Structure it as:
+  Paragraph 1: What it is + primary selling point + key differentiator.
+  Paragraph 2: Key features — material, fit, size range, technical specs, care instructions.
+  Paragraph 3: Who it's for, styling suggestions, or use cases.
   Naturally include relevant search terms South African buyers would use.
   Avoid keyword stuffing — write for humans first, Google second.
 
@@ -114,13 +134,13 @@ SEO RULES:
 Return ONLY valid JSON:
 {
   "name": "SEO-optimized product name (5-80 chars)",
-  "description": "Keyword-rich, structured product description (100-350 chars)",
+  "description": "Keyword-rich, detailed product description (150-300 words)",
   "category": "Best-fitting category from: T-Shirts, Hoodies, Jackets, Jeans, Dresses, Sneakers, Phones, Earbuds, Chargers, Skincare, Fragrance, Snacks, Beverages, Home Decor, Accessories, Other",
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6"],
   "shortCaption": "WhatsApp caption with emoji + CTA (under 160 chars)",
   "seoTitle": "Google search title under 60 chars with Buy Online or SA keyword",
   "seoDescription": "Google meta description 120-155 chars with benefit + feature + CTA"
-}` + sellerContext,
+}` + langInstruction + sellerContext,
           },
           {
             role: "user",
