@@ -24,11 +24,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://tradefeed.co.za"),
   title: {
     default:
-      "TradeFeed — South Africa's Online Marketplace | Sell & Buy Wholesale, Retail & Fashion",
+      "TradeFeed — South Africa's Online Marketplace | Sell & Buy Wholesale & Retail",
     template: "%s | TradeFeed — SA Online Marketplace",
   },
   description:
-    "South Africa's fastest-growing online marketplace. Create your free online shop, list products with AI, and get orders via WhatsApp. Buy wholesale clothing, shoes, bags & more from verified SA sellers in Johannesburg, Durban, Cape Town & all 9 provinces. Start selling online today — no app needed.",
+    "South Africa's fastest-growing online marketplace. Create your free online shop, list products with AI, and get orders via WhatsApp. Buy wholesale & retail products from verified SA sellers in Johannesburg, Durban, Cape Town & all 9 provinces. Start selling online today — no app needed.",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
@@ -54,23 +54,24 @@ export const metadata: Metadata = {
     "WhatsApp shop",
     // Wholesale (huge SA market)
     "wholesale South Africa",
-    "wholesale clothing South Africa",
-    "cheap wholesale clothing South Africa",
+    "wholesale South Africa",
+    "cheap wholesale South Africa",
     "buy wholesale South Africa",
     "wholesale suppliers South Africa",
-    "bulk buy clothing SA",
+    "bulk buy South Africa",
     // City-specific wholesale (Jeppe, Durban, Cape Town)
-    "wholesale clothing Johannesburg",
+    "wholesale Johannesburg",
     "Jeppe Street wholesale",
     "wholesale Durban",
     "wholesale Cape Town",
     "wholesale Pretoria",
     // Product categories (what buyers search)
-    "buy clothes online South Africa",
-    "sell clothes online South Africa",
+    "buy products online South Africa",
+    "sell products online South Africa",
     "buy shoes online South Africa",
-    "buy bags wholesale South Africa",
-    "fashion wholesale SA",
+    "buy wholesale South Africa online",
+    "sell clothes online South Africa",
+    "sell electronics online South Africa",
     // Small business / reseller
     "reseller South Africa",
     "township business online",
@@ -82,9 +83,9 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "TradeFeed",
     title:
-      "TradeFeed — South Africa's Online Marketplace | Sell & Buy Wholesale, Retail & Fashion",
+      "TradeFeed — South Africa's Online Marketplace | Sell & Buy Wholesale & Retail",
     description:
-      "Create your free online shop in 2 minutes. List products with AI, share on WhatsApp, get orders. Buy wholesale clothing, shoes & fashion from verified SA sellers.",
+      "Create your free online shop in 2 minutes. List products with AI, share on WhatsApp, get orders. Buy wholesale & retail products from verified SA sellers.",
     url: "https://tradefeed.co.za",
     images: [
       {
@@ -101,7 +102,7 @@ export const metadata: Metadata = {
     title:
       "TradeFeed — South Africa's Online Marketplace | Sell & Buy Wholesale",
     description:
-      "Create your free online shop. List products with AI. Sell on WhatsApp. Buy wholesale clothing, shoes & fashion from SA sellers.",
+      "Create your free online shop. List products with AI. Sell on WhatsApp. Buy wholesale & retail products from verified SA sellers.",
     images: [
       "/api/og?title=Online+Marketplace+South+Africa&subtitle=Sell+Online+%E2%80%A2+Create+Your+Shop+%E2%80%A2+Free+to+Start",
     ],

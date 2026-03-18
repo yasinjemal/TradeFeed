@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const topCities = province.cities.slice(0, 3).map((c) => c.name).join(", ");
 
-  const title = `Suppliers in ${province.name} — Wholesale Clothing, Fashion & More | TradeFeed`;
+  const title = `Suppliers in ${province.name} — Wholesale & Retail Products | TradeFeed`;
   const description = `${province.description} Browse wholesale and retail products from verified sellers in ${topCities} and across ${province.name}. Order via WhatsApp on TradeFeed.`;
 
   return {
@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       `suppliers in ${province.name}`,
       `suppliers ${province.name}`,
       `wholesale ${province.name}`,
-      `wholesale clothing ${province.name}`,
+      `wholesale products ${province.name}`,
       `buy online ${province.name}`,
       ...province.cities.slice(0, 4).map((c) => `suppliers ${c.name}`),
       ...province.cities.slice(0, 4).map((c) => `wholesale ${c.name}`),

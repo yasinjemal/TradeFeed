@@ -21,9 +21,9 @@ import type { Metadata } from "next";
 // Landing Page SEO — targeted for "wholesale marketplace South Africa"
 // ============================================================
 export const metadata: Metadata = {
-  title: "Sell Clothing Online South Africa — WhatsApp Catalog in 2 Minutes | TradeFeed",
+  title: "Sell Online South Africa — Create Your Shop & WhatsApp Catalog in 2 Minutes | TradeFeed",
   description:
-    "Turn your WhatsApp clothing business into a professional online shop. Upload a photo, AI creates the listing in 10 seconds. Share your catalog link in WhatsApp groups and get orders with sizes, colors & quantities — no back-and-forth. Free forever. Join 100+ fashion sellers in Johannesburg, Durban, Cape Town & all 9 provinces.",
+    "Turn your WhatsApp business into a professional online shop. Upload a photo, AI creates the listing in 10 seconds. Share your catalog link and get orders — no back-and-forth. Free forever. Join 100+ sellers in Johannesburg, Durban, Cape Town & all 9 provinces.",
   keywords: [
     // Primary high-volume
     "sell online South Africa",
@@ -32,18 +32,20 @@ export const metadata: Metadata = {
     "start online business South Africa",
     "sell on WhatsApp South Africa",
     // Wholesale (money keywords)
-    "wholesale clothing Johannesburg",
+    "wholesale Johannesburg",
     "wholesale marketplace South Africa",
     "buy wholesale South Africa",
-    "cheap wholesale clothing South Africa",
-    "bulk buy clothing SA",
+    "cheap wholesale South Africa",
+    "bulk buy South Africa",
     "Jeppe Street wholesale",
     "wholesale suppliers Johannesburg",
     // Product-specific
-    "sell clothes online South Africa",
-    "buy clothes online South Africa",
+    "sell products online South Africa",
+    "buy products online South Africa",
     "sell shoes online South Africa",
-    "fashion wholesale SA",
+    "wholesale South Africa",
+    "sell clothes online South Africa",
+    "sell electronics online South Africa",
     // Intent-based
     "online shop South Africa free",
     "WhatsApp catalog South Africa",
@@ -75,7 +77,7 @@ const FAQ_ITEMS = [
   { q: "Is my WhatsApp number safe?", a: "Absolutely. Your WhatsApp number is only used to receive orders. When a customer taps the order button, it opens their WhatsApp with a pre-filled message. We never share your number with third parties, and it's protected by our POPIA-compliant privacy policy." },
   { q: "How much does it cost?", a: "Free to start with up to 20 products — forever. When you're ready to scale, upgrade to Starter for R99/month (unlimited products), Pro for R299/month (unlimited AI + team accounts), or Pro AI for R499/month (full AI automation). No hidden fees. Cancel anytime." },
   { q: "How is this different from posting in WhatsApp groups?", a: "WhatsApp posts get buried in 10 minutes. With TradeFeed, your products live on a permanent, searchable, shareable catalog page. Customers can browse anytime, filter by category, sort by price, and send you organized orders with exact sizes, colors, and quantities — no back-and-forth." },
-  { q: "Who is TradeFeed for?", a: "Fashion and clothing sellers who sell on WhatsApp — whether you're a Jeppe Street wholesaler, a boutique reseller, or selling from home. If your customers DM you for sizes, prices, and stock — TradeFeed replaces that back-and-forth with a professional catalog link. Also works great for shoes, beauty products, accessories, and any physical goods." },
+  { q: "Who is TradeFeed for?", a: "Any seller who uses WhatsApp to sell products — whether you're a Jeppe Street wholesaler, a boutique reseller, or selling from home. If your customers DM you for prices and stock — TradeFeed replaces that back-and-forth with a professional catalog link. Works great for clothing, shoes, electronics, beauty products, accessories, and any physical goods." },
   { q: "Can I use this if I'm not tech-savvy?", a: "If you can post a photo on WhatsApp, you can use TradeFeed. Upload a photo, type a name and price, hit save. That's it. No coding, no design skills needed. We even have a bulk import if you have a spreadsheet of products." },
   { q: "Do you support PayFast for payments?", a: "Yes! Subscription payments are processed securely through PayFast — South Africa's most trusted payment gateway. Pay with card, EFT, or any PayFast-supported method. We also use PayFast for promoted listing purchases." },
   { q: "Can buyers track their orders?", a: "Yes. Every order gets a unique tracking number (e.g. TF-20260224-0042). Sellers update the order status from their dashboard (Pending → Confirmed → Shipped → Delivered), and buyers can enquire via WhatsApp using their order number." },
@@ -1066,9 +1068,9 @@ export default async function HomePage() {
           {/* Testimonial quotes — social proof */}
           <div className="grid sm:grid-cols-3 gap-6 mb-14">
             {[
-              { quote: "I used to send 50 photos a day on WhatsApp. Now I share one link and my customers browse and order. Game changer.", name: "Thandi M.", role: "Clothing reseller, Johannesburg", img: "/img/testimonial_thandi.png" },
-              { quote: "Set up my catalog in 10 minutes. First order came the same day. No app, no complicated setup — just my phone.", name: "Sipho K.", role: "Beauty products, Durban", img: null },
-              { quote: "The AI listing saved me hours. Upload a photo, it writes the description. I just adjust the price and publish.", name: "Lerato P.", role: "Fashion wholesaler, Cape Town", img: null },
+              { quote: "I used to send 50 photos a day on WhatsApp. Now I share one link and my customers browse and order. Game changer.", name: "Thandi M.", role: "Reseller, Johannesburg", img: "/img/testimonial_thandi.png" },
+              { quote: "Set up my catalog in 10 minutes. First order came the same day. No app, no complicated setup — just my phone.", name: "Sipho K.", role: "Beauty & wellness, Durban", img: null },
+              { quote: "The AI listing saved me hours. Upload a photo, it writes the description. I just adjust the price and publish.", name: "Lerato P.", role: "Wholesaler, Cape Town", img: null },
             ].map((t, i) => (
               <ScrollReveal key={t.name} delay={i * 100}>
                 <div className="p-5 rounded-2xl bg-stone-800/40 border border-stone-700/50 h-full flex flex-col">

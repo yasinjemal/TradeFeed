@@ -57,11 +57,11 @@ export async function generateMetadata({
 
   const title = categoryName
     ? `Buy ${categoryName} Online South Africa — Wholesale & Retail | TradeFeed Marketplace`
-    : "Buy Online South Africa — Wholesale Clothing, Shoes, Fashion & More | TradeFeed Marketplace";
+    : "Buy Online South Africa — Wholesale & Retail Products | TradeFeed Marketplace";
 
   const description = categoryName
     ? `Shop ${categoryName.toLowerCase()} from verified South African sellers on TradeFeed. Wholesale & retail prices. Free delivery options. Order via WhatsApp. Browse ${categoryName.toLowerCase()} from Johannesburg, Durban, Cape Town & more.`
-    : "Browse thousands of products from verified South African fashion sellers. Wholesale & retail clothing, shoes, bags & accessories. Compare prices, order via WhatsApp. Sellers in all 9 provinces.";
+    : "Browse thousands of products from verified South African sellers. Wholesale & retail prices across all categories. Compare prices, order via WhatsApp. Sellers in all 9 provinces.";
 
   // Build OG image URL
   const ogUrl = new URL("/api/og", APP_URL);
@@ -81,7 +81,7 @@ export async function generateMetadata({
       "wholesale South Africa",
       "SA marketplace",
       "buy wholesale online SA",
-      "cheap clothes South Africa",
+      "cheap products South Africa",
       "buy shoes online South Africa",
       "fashion South Africa",
       "online shopping South Africa",

@@ -29,7 +29,7 @@ export function generateSiteJsonLd() {
     url: APP_URL,
     logo: `${APP_URL}/icon.svg`,
     description:
-      "TradeFeed is South Africa's free online marketplace where sellers create their own online shop, list wholesale & retail products, and receive orders via WhatsApp. Sell clothing, shoes, fashion, electronics and more online across Johannesburg, Cape Town, Durban, Pretoria and all 9 provinces. No app download required.",
+      "TradeFeed is South Africa's free online marketplace where sellers create their own online shop, list wholesale & retail products, and receive orders via WhatsApp. Sell any product online across Johannesburg, Cape Town, Durban, Pretoria and all 9 provinces. No app download required.",
     sameAs: [],
     contactPoint: {
       "@type": "ContactPoint",
@@ -48,7 +48,7 @@ export function generateSiteJsonLd() {
     name: "TradeFeed",
     url: APP_URL,
     description:
-      "Buy and sell online South Africa — browse wholesale clothing, shoes, fashion, electronics and more from local sellers. Create your own free online shop and sell via WhatsApp across all 9 provinces.",
+      "Buy and sell online South Africa — browse wholesale & retail products from local sellers across all categories. Create your own free online shop and sell via WhatsApp across all 9 provinces.",
     inLanguage: "en-ZA",
     potentialAction: {
       "@type": "SearchAction",

@@ -33,7 +33,7 @@ export const SA_PROVINCES: SAProvince[] = [
     slug: "gauteng",
     name: "Gauteng",
     description:
-      "South Africa's economic hub. Browse wholesale clothing, fashion, electronics and more from suppliers in Johannesburg, Pretoria, and Ekurhuleni.",
+      "South Africa's economic hub. Browse wholesale and retail products from suppliers in Johannesburg, Pretoria, and Ekurhuleni.",
     cities: [
       { slug: "johannesburg", name: "Johannesburg", aliases: ["Joburg", "JHB", "Jozi", "Jeppe Street", "Jeppe"] },
       { slug: "pretoria", name: "Pretoria", aliases: ["Tshwane", "PTA"] },
@@ -47,7 +47,7 @@ export const SA_PROVINCES: SAProvince[] = [
     slug: "western-cape",
     name: "Western Cape",
     description:
-      "From Cape Town's fashion scene to Stellenbosch and Paarl. Find wholesale suppliers, clothing, and local products across the Western Cape.",
+      "From Cape Town to Stellenbosch and Paarl. Find wholesale suppliers and local products across the Western Cape.",
     cities: [
       { slug: "cape-town", name: "Cape Town", aliases: ["CPT", "Mother City"] },
       { slug: "stellenbosch", name: "Stellenbosch", aliases: [] },
@@ -59,7 +59,7 @@ export const SA_PROVINCES: SAProvince[] = [
     slug: "kwazulu-natal",
     name: "KwaZulu-Natal",
     description:
-      "Browse suppliers in Durban, Pietermaritzburg and across KZN. Wholesale clothing, fashion, textiles, and more from KwaZulu-Natal sellers.",
+      "Browse suppliers in Durban, Pietermaritzburg and across KZN. Wholesale products, textiles, and more from KwaZulu-Natal sellers.",
     cities: [
       { slug: "durban", name: "Durban", aliases: ["eThekwini", "DBN"] },
       { slug: "pietermaritzburg", name: "Pietermaritzburg", aliases: ["PMB", "Msunduzi"] },
@@ -82,7 +82,7 @@ export const SA_PROVINCES: SAProvince[] = [
     slug: "free-state",
     name: "Free State",
     description:
-      "Browse products from sellers in Bloemfontein and across the Free State. Wholesale clothing, retail goods, and local suppliers.",
+      "Browse products from sellers in Bloemfontein and across the Free State. Wholesale and retail goods from local suppliers.",
     cities: [
       { slug: "bloemfontein", name: "Bloemfontein", aliases: ["Bloem", "Mangaung"] },
       { slug: "welkom", name: "Welkom", aliases: [] },
@@ -103,7 +103,7 @@ export const SA_PROVINCES: SAProvince[] = [
     slug: "limpopo",
     name: "Limpopo",
     description:
-      "Discover suppliers in Polokwane and across Limpopo. Wholesale clothing, products, and local sellers on TradeFeed.",
+      "Discover suppliers in Polokwane and across Limpopo. Wholesale products and local sellers on TradeFeed.",
     cities: [
       { slug: "polokwane", name: "Polokwane", aliases: ["Pietersburg"] },
       { slug: "tzaneen", name: "Tzaneen", aliases: [] },

@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { province, city } = result;
   const title = `Suppliers in ${city.name}, ${province.name} — Wholesale & Retail | TradeFeed`;
-  const description = `Find wholesale clothing, fashion, electronics and more from suppliers in ${city.name}, ${province.name}. Order via WhatsApp on TradeFeed — South Africa's online marketplace.`;
+  const description = `Find wholesale and retail products from suppliers in ${city.name}, ${province.name}. Order via WhatsApp on TradeFeed — South Africa's online marketplace.`;
 
   const allNames = [city.name, ...city.aliases];
 
@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       `suppliers in ${city.name}`,
       `suppliers ${city.name}`,
       `wholesale ${city.name}`,
-      `wholesale clothing ${city.name}`,
+      `wholesale products ${city.name}`,
       `buy online ${city.name}`,
       `${city.name} shops`,
       `${city.name} marketplace`,
