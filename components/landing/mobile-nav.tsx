@@ -110,7 +110,7 @@ export function MobileNav({
       {/* ── Hamburger Button ──────────────────────────── */}
       <button
         onClick={() => setOpen(true)}
-        className="md:hidden flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-white/[0.06] hover:bg-white/[0.1] active:scale-90 transition-all text-stone-300"
+        className="md:hidden flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 active:scale-90 transition-all text-slate-600"
         aria-label="Open menu"
         suppressHydrationWarning
       >
@@ -134,7 +134,7 @@ export function MobileNav({
         <div className="fixed inset-0 z-[60] md:hidden">
           {/* Backdrop */}
           <div
-            className={`absolute inset-0 bg-stone-950/95 backdrop-blur-2xl transition-opacity duration-300 ${
+            className={`absolute inset-0 bg-white/98 backdrop-blur-2xl transition-opacity duration-300 ${
               mounted ? "opacity-100" : "opacity-0"
             }`}
             onClick={close}
@@ -143,12 +143,12 @@ export function MobileNav({
           {/* Background decoration */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div
-              className={`absolute -top-20 -right-20 w-72 h-72 bg-emerald-500/[0.07] rounded-full blur-[100px] transition-opacity duration-700 ${
+              className={`absolute -top-20 -right-20 w-72 h-72 bg-blue-500/[0.06] rounded-full blur-[100px] transition-opacity duration-700 ${
                 mounted ? "opacity-100" : "opacity-0"
               }`}
             />
             <div
-              className={`absolute bottom-32 -left-16 w-56 h-56 bg-emerald-500/[0.05] rounded-full blur-[80px] transition-opacity duration-700 delay-200 ${
+              className={`absolute bottom-32 -left-16 w-56 h-56 bg-purple-500/[0.04] rounded-full blur-[80px] transition-opacity duration-700 delay-200 ${
                 mounted ? "opacity-100" : "opacity-0"
               }`}
             />
@@ -169,7 +169,7 @@ export function MobileNav({
               </div>
               <button
                 onClick={close}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/[0.06] hover:bg-white/[0.1] active:scale-90 transition-all text-stone-300"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-90 transition-all text-slate-600"
                 aria-label="Close menu"
               >
                 <svg
@@ -191,7 +191,7 @@ export function MobileNav({
             {/* ── Navigation Links ───────────────────── */}
             <nav className="flex-1 px-5 pt-6 pb-2 overflow-y-auto">
               <p
-                className={`text-[11px] font-semibold uppercase tracking-widest text-stone-600 mb-3 pl-4 transition-all duration-300 ${
+                className={`text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-3 pl-4 transition-all duration-300 ${
                   mounted
                     ? "opacity-100 translate-x-0"
                     : "opacity-0 -translate-x-3"
@@ -206,7 +206,7 @@ export function MobileNav({
                     key={item.label}
                     href={item.href}
                     onClick={close}
-                    className={`group flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/[0.06] active:bg-white/[0.1] active:scale-[0.98] transition-all duration-200 ${
+                    className={`group flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-slate-100 active:bg-slate-200 active:scale-[0.98] transition-all duration-200 ${
                       mounted
                         ? "opacity-100 translate-x-0"
                         : "opacity-0 -translate-x-4"
@@ -215,19 +215,19 @@ export function MobileNav({
                       transitionDelay: mounted ? `${100 + i * 60}ms` : "0ms",
                     }}
                   >
-                    <div className="w-11 h-11 rounded-xl bg-white/[0.06] group-hover:bg-emerald-500/15 flex items-center justify-center text-stone-400 group-hover:text-emerald-400 transition-all duration-200 flex-shrink-0">
+                    <div className="w-11 h-11 rounded-xl bg-slate-100 group-hover:bg-blue-50 flex items-center justify-center text-slate-500 group-hover:text-blue-600 transition-all duration-200 flex-shrink-0">
                       {item.icon}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[15px] font-semibold text-stone-100 group-hover:text-white transition-colors">
+                      <p className="text-[15px] font-semibold text-slate-800 group-hover:text-slate-900 transition-colors">
                         {item.label}
                       </p>
-                      <p className="text-[12px] text-stone-500 group-hover:text-stone-400 transition-colors mt-0.5">
+                      <p className="text-[12px] text-slate-500 group-hover:text-slate-600 transition-colors mt-0.5">
                         {item.description}
                       </p>
                     </div>
                     <svg
-                      className="w-4 h-4 text-stone-700 group-hover:text-stone-400 group-hover:translate-x-0.5 transition-all flex-shrink-0"
+                      className="w-4 h-4 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={2}
@@ -247,7 +247,7 @@ export function MobileNav({
               {isAdminUser && (
                 <div className="mt-4">
                   <p
-                    className={`text-[11px] font-semibold uppercase tracking-widest text-stone-600 mb-3 pl-4 transition-all duration-300 ${
+                    className={`text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-3 pl-4 transition-all duration-300 ${
                       mounted
                         ? "opacity-100 translate-x-0"
                         : "opacity-0 -translate-x-3"
@@ -259,29 +259,29 @@ export function MobileNav({
                   <Link
                     href="/admin"
                     onClick={close}
-                    className={`group flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-red-500/[0.08] active:bg-red-500/[0.15] active:scale-[0.98] transition-all duration-200 ${
+                    className={`group flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-red-50 active:bg-red-100 active:scale-[0.98] transition-all duration-200 ${
                       mounted
                         ? "opacity-100 translate-x-0"
                         : "opacity-0 -translate-x-4"
                     }`}
                     style={{ transitionDelay: mounted ? "400ms" : "0ms" }}
                   >
-                    <div className="w-11 h-11 rounded-xl bg-red-500/10 group-hover:bg-red-500/20 flex items-center justify-center text-red-400 group-hover:text-red-300 transition-all duration-200 flex-shrink-0">
+                    <div className="w-11 h-11 rounded-xl bg-red-50 group-hover:bg-red-100 flex items-center justify-center text-red-500 group-hover:text-red-600 transition-all duration-200 flex-shrink-0">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                       </svg>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[15px] font-semibold text-red-400 group-hover:text-red-300 transition-colors">
+                      <p className="text-[15px] font-semibold text-red-500 group-hover:text-red-600 transition-colors">
                         Admin Panel
                       </p>
-                      <p className="text-[12px] text-stone-500 group-hover:text-stone-400 transition-colors mt-0.5">
+                      <p className="text-[12px] text-slate-500 group-hover:text-slate-600 transition-colors mt-0.5">
                         Manage platform
                       </p>
                     </div>
                     <svg
-                      className="w-4 h-4 text-stone-700 group-hover:text-red-400 group-hover:translate-x-0.5 transition-all flex-shrink-0"
+                      className="w-4 h-4 text-slate-300 group-hover:text-red-500 group-hover:translate-x-0.5 transition-all flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={2}
@@ -300,15 +300,15 @@ export function MobileNav({
               {/* ── Live Stats Card ────────────────────── */}
               {stats && (
                 <div
-                  className={`mt-6 mx-1 p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.02] border border-white/[0.06] transition-all duration-400 ${
+                  className={`mt-6 mx-1 p-4 rounded-2xl bg-slate-50 border border-slate-200/60 transition-all duration-400 ${
                     mounted
                       ? "opacity-100 translate-y-0 scale-100"
                       : "opacity-0 translate-y-4 scale-95"
                   }`}
                   style={{ transitionDelay: mounted ? "380ms" : "0ms" }}
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-stone-600 mb-3">
-                    🟢 Live Platform
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-3">
+                    Live Platform
                   </p>
                   <div className="grid grid-cols-3 gap-2">
                     {[
@@ -318,12 +318,12 @@ export function MobileNav({
                     ].map((stat) => (
                       <div
                         key={stat.label}
-                        className="text-center py-2 rounded-xl bg-white/[0.03]"
+                        className="text-center py-2 rounded-xl bg-white"
                       >
-                        <p className="text-xl font-bold text-emerald-400 tabular-nums">
+                        <p className="text-xl font-bold text-blue-600 tabular-nums">
                           {stat.value}{stat.suffix}
                         </p>
-                        <p className="text-[10px] text-stone-500 mt-0.5 font-medium">
+                        <p className="text-[10px] text-slate-500 mt-0.5 font-medium">
                           {stat.label}
                         </p>
                       </div>
@@ -335,7 +335,7 @@ export function MobileNav({
 
             {/* ── Bottom Actions ──────────────────────── */}
             <div
-              className={`px-5 pt-3 space-y-3 border-t border-white/[0.04] transition-all duration-300 ${
+              className={`px-5 pt-3 space-y-3 border-t border-slate-200/60 transition-all duration-300 ${
                 mounted
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-6"
@@ -350,7 +350,7 @@ export function MobileNav({
                 <Link
                   href={ctaHref}
                   onClick={close}
-                  className="flex items-center justify-center gap-2.5 w-full px-5 py-4 text-[15px] font-bold rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-400 hover:to-emerald-500 active:scale-[0.98] transition-all shadow-xl shadow-emerald-600/25"
+                  className="flex items-center justify-center gap-2.5 w-full px-5 py-4 text-[15px] font-bold rounded-2xl bg-blue-600 text-white hover:bg-blue-500 active:scale-[0.98] transition-all shadow-xl shadow-blue-600/25"
                 >
                   {ctaLabel}
                   <svg
@@ -372,7 +372,7 @@ export function MobileNav({
                   <Link
                     href="/sign-up"
                     onClick={close}
-                    className="flex items-center justify-center gap-2.5 w-full px-5 py-4 text-[15px] font-bold rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-400 hover:to-emerald-500 active:scale-[0.98] transition-all shadow-xl shadow-emerald-600/25"
+                    className="flex items-center justify-center gap-2.5 w-full px-5 py-4 text-[15px] font-bold rounded-2xl bg-blue-600 text-white hover:bg-blue-500 active:scale-[0.98] transition-all shadow-xl shadow-blue-600/25"
                   >
                     Start Selling — It&apos;s Free
                     <svg
@@ -392,7 +392,7 @@ export function MobileNav({
                   <Link
                     href="/sign-in"
                     onClick={close}
-                    className="flex items-center justify-center w-full px-5 py-3.5 text-sm font-medium text-stone-400 hover:text-white rounded-2xl border border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.04] active:scale-[0.98] transition-all"
+                    className="flex items-center justify-center w-full px-5 py-3.5 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-2xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] transition-all"
                   >
                     Already have an account? Sign In
                   </Link>
@@ -400,12 +400,12 @@ export function MobileNav({
               )}
 
               {/* Trust badges */}
-              <div className="flex items-center justify-center gap-4 pt-1 text-[11px] text-stone-600">
+              <div className="flex items-center justify-center gap-4 pt-1 text-[11px] text-slate-400">
                 {["No credit card", "Setup in 5 min", "10 products free"].map(
                   (text) => (
                     <span key={text} className="flex items-center gap-1">
                       <svg
-                        className="w-3 h-3 text-emerald-500/70"
+                        className="w-3 h-3 text-blue-500"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
