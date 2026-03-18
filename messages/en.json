@@ -38,12 +38,12 @@
       "title": "Sell Online in",
       "titleHighlight": "South Africa",
       "subtitle": "Turn your WhatsApp clothing business into a professional catalog. Upload a photo — AI writes the listing. Share your link and get orders with sizes, colors & quantities.",
-      "aiOffer": "5 FREE AI listings every month — no credit card needed",
+      "aiOffer": "10 FREE AI listings every month — no credit card needed",
       "cta": "✨ Try AI Free",
       "ctaSecondary": "or browse the marketplace →",
       "proofSellers": "Sellers in",
       "proofCities": "Jeppe, Durban & Cape Town",
-      "benefitAi": "5 free AI listings",
+      "benefitAi": "10 free AI listings",
       "benefitSpeed": "Photo → listing in 10 sec",
       "benefitWhatsApp": "Share & sell on WhatsApp"
     },
@@ -60,7 +60,7 @@
       "title": "Create Your Online Shop in Three Steps",
       "subtitle": "No coding, no designers, no expensive platforms. Just your products and a WhatsApp number.",
       "step1Title": "Snap a Photo → AI Lists It",
-      "step1Desc": "Upload a product photo and AI generates the title, description, category & SEO tags in 10 seconds. 5 free AI listings every month — no typing needed.",
+      "step1Desc": "Upload a product photo and AI generates the title, description, category & SEO tags in 10 seconds. 10 free AI listings every month — no typing needed.",
       "step2Title": "Share Your Catalog Link",
       "step2Desc": "Get your unique URL. Drop it in WhatsApp groups, status, Instagram bio, TikTok — anywhere your customers hang out.",
       "step3Title": "Receive Structured Orders",
@@ -129,8 +129,8 @@
         "period": "forever",
         "cta": "Get Started Free",
         "features": [
-          "✨ 5 free AI generations",
-          "Up to 10 products",
+          "✨ 10 free AI generations",
+          "Up to 20 products",
           "WhatsApp checkout",
           "Public catalog page",
           "Basic analytics",
@@ -169,7 +169,7 @@
       "badge": "Join {shopCount}+ South African sellers",
       "button": "✨ Try AI Free",
       "buttonSecondary": "or browse the marketplace →",
-      "footer": "5 free AI listings · No credit card · Set up in under 3 minutes · Cancel anytime"
+      "footer": "10 free AI listings · No credit card · Set up in under 3 minutes · Cancel anytime"
     }
   },
   "marketplace": {

@@ -437,7 +437,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
                   </svg>
                 </Link>
 
-                <p className="text-[11px] text-purple-200/70 font-medium">5 free AI credits included</p>
+                <p className="text-[11px] text-purple-200/70 font-medium">10 free AI credits included</p>
               </div>
             </div>
           </div>

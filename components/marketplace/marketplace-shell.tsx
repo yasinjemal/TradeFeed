@@ -10,6 +10,7 @@
 import { useState, useEffect, useCallback, useTransition, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useUser, UserButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
@@ -401,6 +402,17 @@ export function MarketplaceShell({
 
       {/* ── Hero ────────────────────────────────────────── */}
       <section className="relative pt-24 pb-6 sm:pt-28 sm:pb-8 px-4 sm:px-6">
+        {/* Background banner image */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <Image
+            src="/img/marketplace_banner.png"
+            alt=""
+            fill
+            className="object-cover opacity-10"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-stone-950/40 to-stone-950/90" />
+        </div>
         {/* Background glow */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-emerald-500/6 rounded-full blur-[100px]" />

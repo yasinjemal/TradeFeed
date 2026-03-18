@@ -193,28 +193,19 @@ export function BillingDashboard({
       )}
 
       {/* ── Plan Comparison ──────────────────────────────── */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className={`grid gap-4 ${
+        plans.length >= 4 ? 'md:grid-cols-2 lg:grid-cols-4' :
+        plans.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'
+      }`}>
         {plans.map((plan) => (
           <PlanCard
             key={plan.id}
             plan={plan}
             isCurrent={currentPlan?.id === plan.id}
-            isFreePlan={isFreePlan}
+            currentPlanPrice={currentPlan?.priceInCents ?? 0}
             shopSlug={shopSlug}
           />
         ))}
-
-        {/* If no Pro plan exists yet, show a placeholder */}
-        {plans.length < 2 && (
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl border-2 border-dashed border-emerald-200 p-6 flex flex-col items-center justify-center text-center">
-            <span className="text-3xl mb-3">🚀</span>
-            <h3 className="text-sm font-bold text-emerald-800">Pro Plan</h3>
-            <p className="text-xs text-emerald-600 mt-1">R199/month</p>
-            <p className="text-xs text-stone-500 mt-3">
-              Coming soon — unlimited products, priority support, and more!
-            </p>
-          </div>
-        )}
       </div>
 
       {/* ── Cancel Section ───────────────────────────────── */}
@@ -232,12 +223,12 @@ export function BillingDashboard({
 function PlanCard({
   plan,
   isCurrent,
-  isFreePlan,
+  currentPlanPrice,
   shopSlug,
 }: {
   plan: Plan;
   isCurrent: boolean;
-  isFreePlan: boolean;
+  currentPlanPrice: number;
   shopSlug: string;
 }) {
   const [isPending, startTransition] = useTransition();
@@ -252,7 +243,9 @@ function PlanCard({
       ? "Free"
       : `R${(plan.priceInCents / 100).toFixed(0)}`;
 
-  const canUpgrade = isFreePlan && plan.priceInCents > 0 && !isCurrent;
+  const canUpgrade = !isCurrent && plan.priceInCents > currentPlanPrice;
+  const isAiPlan = plan.slug === "pro-ai";
+  const isPopular = plan.slug === "starter";
 
   const handleUpgrade = () => {
     setError(null);
@@ -268,10 +261,14 @@ function PlanCard({
 
   return (
     <div
-      className={`bg-white rounded-2xl border-2 p-6 transition-all ${
+      className={`bg-white rounded-2xl border-2 p-6 transition-all flex flex-col ${
         isCurrent
           ? "border-emerald-400 shadow-lg shadow-emerald-100/50"
-          : "border-stone-200/60 hover:border-stone-300"
+          : isAiPlan
+            ? "border-violet-200 hover:border-violet-300"
+            : isPopular
+              ? "border-emerald-200 hover:border-emerald-300"
+              : "border-stone-200/60 hover:border-stone-300"
       }`}
     >
       <div className="flex items-center justify-between mb-3">
@@ -281,17 +278,22 @@ function PlanCard({
             Current
           </span>
         )}
+        {!isCurrent && isPopular && (
+          <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+            Popular
+          </span>
+        )}
+        {!isCurrent && isAiPlan && (
+          <span className="text-[10px] font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">
+            ✨ AI
+          </span>
+        )}
       </div>
 
       <div className="mb-4">
         <span className="text-3xl font-bold text-stone-900">{priceDisplay}</span>
         {plan.priceInCents > 0 && (
           <span className="text-sm text-stone-400 ml-1">/month</span>
-        )}
-        {plan.priceInCents > 0 && (
-          <p className="text-xs text-emerald-600 mt-1">
-            💡 Save R389/year with annual billing
-          </p>
         )}
       </div>
 
@@ -304,10 +306,10 @@ function PlanCard({
       </div>
 
       {features.length > 0 && (
-        <ul className="space-y-2 mb-5">
+        <ul className="space-y-2 mb-5 flex-1">
           {features.map((feature) => (
             <li key={feature} className="flex items-center gap-2 text-xs text-stone-600">
-              <svg className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+              <svg className={`w-3.5 h-3.5 flex-shrink-0 ${isAiPlan ? "text-violet-500" : "text-emerald-500"}`} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
               {feature}
@@ -319,7 +321,11 @@ function PlanCard({
       {canUpgrade && (
         <Link
           href={`/dashboard/${shopSlug}/billing/upgrade?plan=${plan.slug}`}
-          className="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2.5 rounded-xl transition-all active:scale-[0.98]"
+          className={`block w-full text-center text-white text-sm font-medium py-2.5 rounded-xl transition-all active:scale-[0.98] ${
+            isAiPlan
+              ? "bg-violet-600 hover:bg-violet-700"
+              : "bg-emerald-600 hover:bg-emerald-700"
+          }`}
         >
           Upgrade to {plan.name}
         </Link>
@@ -328,6 +334,12 @@ function PlanCard({
       {isCurrent && plan.priceInCents === 0 && (
         <div className="text-center py-2">
           <p className="text-xs text-stone-400">Your current plan</p>
+        </div>
+      )}
+
+      {isCurrent && plan.priceInCents > 0 && (
+        <div className="text-center py-2">
+          <p className="text-xs text-emerald-600 font-medium">✓ Active</p>
         </div>
       )}
     </div>

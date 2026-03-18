@@ -8,6 +8,7 @@
 // ============================================================
 
 import { SignUp } from "@clerk/nextjs";
+import Image from "next/image";
 import { cookies } from "next/headers";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import {
@@ -42,6 +43,15 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
     <main className="flex min-h-screen flex-col lg:flex-row">
       {/* ── Left panel — Value proposition ── */}
       <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 px-8 py-10 text-white lg:w-1/2 lg:px-16 lg:py-16">
+        {/* Background photo */}
+        <Image
+          src="/img/signup_panel.png"
+          alt=""
+          fill
+          className="object-cover opacity-20"
+          priority
+          sizes="50vw"
+        />
         {/* Background decorative circles */}
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
@@ -55,7 +65,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
         <div className="relative z-10 my-8 lg:my-0">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
             <Sparkles className="h-4 w-4" />
-            5 FREE AI listings every month
+            10 FREE AI listings every month
           </div>
           <h1 className="text-3xl font-bold leading-tight tracking-tight lg:text-4xl xl:text-5xl">
             Sell your stock

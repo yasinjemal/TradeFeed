@@ -73,7 +73,7 @@ const FAQ_ITEMS = [
   { q: "Do my customers need to download an app?", a: "No! Your customers just tap your catalog link — it opens in their phone browser. No app download, no sign-up, no registration. They browse products, add to cart, and order via WhatsApp. Works on any smartphone." },
   { q: "Can I update stock and prices easily?", a: "Yes. Log into your dashboard from any device, edit any product, change prices, add new sizes or colors, upload new photos, or mark items as sold out. Changes appear on your catalog link instantly." },
   { q: "Is my WhatsApp number safe?", a: "Absolutely. Your WhatsApp number is only used to receive orders. When a customer taps the order button, it opens their WhatsApp with a pre-filled message. We never share your number with third parties, and it's protected by our POPIA-compliant privacy policy." },
-  { q: "How much does it cost?", a: "Free to start with up to 10 products — forever. When you're ready to scale with unlimited products, promoted listings, and advanced features, upgrade to Pro for R199/month via PayFast. No hidden fees. Cancel anytime." },
+  { q: "How much does it cost?", a: "Free to start with up to 20 products — forever. When you're ready to scale, upgrade to Starter for R99/month (unlimited products), Pro for R299/month (unlimited AI + team accounts), or Pro AI for R499/month (full AI automation). No hidden fees. Cancel anytime." },
   { q: "How is this different from posting in WhatsApp groups?", a: "WhatsApp posts get buried in 10 minutes. With TradeFeed, your products live on a permanent, searchable, shareable catalog page. Customers can browse anytime, filter by category, sort by price, and send you organized orders with exact sizes, colors, and quantities — no back-and-forth." },
   { q: "Who is TradeFeed for?", a: "Fashion and clothing sellers who sell on WhatsApp — whether you're a Jeppe Street wholesaler, a boutique reseller, or selling from home. If your customers DM you for sizes, prices, and stock — TradeFeed replaces that back-and-forth with a professional catalog link. Also works great for shoes, beauty products, accessories, and any physical goods." },
   { q: "Can I use this if I'm not tech-savvy?", a: "If you can post a photo on WhatsApp, you can use TradeFeed. Upload a photo, type a name and price, hit save. That's it. No coding, no design skills needed. We even have a bulk import if you have a spreadsheet of products." },
@@ -277,6 +277,18 @@ export default async function HomePage() {
           SECTION 2 — HERO
       ───────────────────────────────────────────────────── */}
       <AnimatedGradient className="relative pt-32 pb-24 px-5">
+        {/* Hero background image */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <Image
+            src="/img/homepage_hero.png"
+            alt=""
+            fill
+            className="object-cover opacity-15"
+            priority
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-stone-950/60 via-stone-950/40 to-stone-950/80" />
+        </div>
         {/* Animated gradient orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-emerald-500/[0.07] rounded-full blur-[140px] animate-pulse" style={{ animationDuration: "4s" }} />
@@ -729,12 +741,17 @@ export default async function HomePage() {
           <div className="grid sm:grid-cols-3 gap-8 relative">
             <div className="hidden sm:block absolute top-10 left-[16%] right-[16%] h-px bg-gradient-to-r from-emerald-500/40 via-emerald-500/20 to-emerald-500/40" style={{ zIndex: 0 }} />
             {[
-              { step: "1", title: tLanding("howItWorks.step1Title"), desc: tLanding("howItWorks.step1Desc"), icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>, gradient: "from-violet-600 to-purple-500" },
-              { step: "2", title: tLanding("howItWorks.step2Title"), desc: tLanding("howItWorks.step2Desc"), icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.95 9.318" /></svg>, gradient: "from-blue-600 to-blue-500" },
-              { step: "3", title: tLanding("howItWorks.step3Title"), desc: tLanding("howItWorks.step3Desc"), icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>, gradient: "from-purple-600 to-purple-500" },
+              { step: "1", title: tLanding("howItWorks.step1Title"), desc: tLanding("howItWorks.step1Desc"), icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>, gradient: "from-violet-600 to-purple-500", img: "/img/snap_photo_step.png" },
+              { step: "2", title: tLanding("howItWorks.step2Title"), desc: tLanding("howItWorks.step2Desc"), icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.95 9.318" /></svg>, gradient: "from-blue-600 to-blue-500", img: null },
+              { step: "3", title: tLanding("howItWorks.step3Title"), desc: tLanding("howItWorks.step3Desc"), icon: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>, gradient: "from-purple-600 to-purple-500", img: "/img/share_link_step.png" },
             ].map((item, i) => (
               <ScrollReveal key={item.step} delay={i * 150}>
                 <div className="relative p-7 rounded-2xl bg-stone-900/60 border border-stone-800/60 hover:border-stone-700/80 transition-all text-center sm:text-left" style={{ zIndex: 1 }}>
+                  {item.img && (
+                    <div className="relative w-full h-36 rounded-xl overflow-hidden mb-5">
+                      <Image src={item.img} alt={item.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
+                    </div>
+                  )}
                   <div className={`inline-flex w-12 h-12 rounded-xl bg-gradient-to-br ${item.gradient} items-center justify-center text-white shadow-lg mb-5`}>{item.icon}</div>
                   <div className="absolute top-5 right-5 text-5xl font-extrabold text-stone-800/50">{item.step}</div>
                   <h3 className="text-lg font-bold text-stone-100">{item.title}</h3>
@@ -759,21 +776,26 @@ export default async function HomePage() {
           </ScrollReveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { title: tLanding("features.whatsapp.title"), desc: tLanding("features.whatsapp.description"), icon: "💬", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
-              { title: tLanding("features.mobile.title"), desc: tLanding("features.mobile.description"), icon: "📱", color: "from-blue-500/15 to-blue-600/5 border-blue-500/10" },
-              { title: tLanding("features.variants.title"), desc: tLanding("features.variants.description"), icon: "🎨", color: "from-purple-500/15 to-purple-600/5 border-purple-500/10" },
-              { title: tLanding("features.tracking.title"), desc: tLanding("features.tracking.description"), icon: "📦", color: "from-amber-500/15 to-amber-600/5 border-amber-500/10" },
-              { title: tLanding("features.analytics.title"), desc: tLanding("features.analytics.description"), icon: "📊", color: "from-pink-500/15 to-pink-600/5 border-pink-500/10" },
-              { title: tLanding("features.photos.title"), desc: tLanding("features.photos.description"), icon: "🖼️", color: "from-orange-500/15 to-orange-600/5 border-orange-500/10" },
-              { title: tLanding("features.import.title"), desc: tLanding("features.import.description"), icon: "📋", color: "from-cyan-500/15 to-cyan-600/5 border-cyan-500/10" },
-              { title: tLanding("features.marketplace.title"), desc: tLanding("features.marketplace.description"), icon: "🏪", color: "from-indigo-500/15 to-indigo-600/5 border-indigo-500/10" },
-              { title: tLanding("features.notifications.title"), desc: tLanding("features.notifications.description"), icon: "🔔", color: "from-rose-500/15 to-rose-600/5 border-rose-500/10" },
-              { title: tLanding("features.reviews.title"), desc: tLanding("features.reviews.description"), icon: "⭐", color: "from-yellow-500/15 to-yellow-600/5 border-yellow-500/10" },
-              { title: tLanding("features.verified.title"), desc: tLanding("features.verified.description"), icon: "✅", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10" },
-              { title: tLanding("features.revenue.title"), desc: tLanding("features.revenue.description"), icon: "💰", color: "from-green-500/15 to-green-600/5 border-green-500/10" },
+              { title: tLanding("features.whatsapp.title"), desc: tLanding("features.whatsapp.description"), icon: "💬", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10", img: "/img/whatsapp_order_feature.png" },
+              { title: tLanding("features.mobile.title"), desc: tLanding("features.mobile.description"), icon: "📱", color: "from-blue-500/15 to-blue-600/5 border-blue-500/10", img: "/img/any_phone_feature.png" },
+              { title: tLanding("features.variants.title"), desc: tLanding("features.variants.description"), icon: "🎨", color: "from-purple-500/15 to-purple-600/5 border-purple-500/10", img: null },
+              { title: tLanding("features.tracking.title"), desc: tLanding("features.tracking.description"), icon: "📦", color: "from-amber-500/15 to-amber-600/5 border-amber-500/10", img: null },
+              { title: tLanding("features.analytics.title"), desc: tLanding("features.analytics.description"), icon: "📊", color: "from-pink-500/15 to-pink-600/5 border-pink-500/10", img: null },
+              { title: tLanding("features.photos.title"), desc: tLanding("features.photos.description"), icon: "🖼️", color: "from-orange-500/15 to-orange-600/5 border-orange-500/10", img: null },
+              { title: tLanding("features.import.title"), desc: tLanding("features.import.description"), icon: "📋", color: "from-cyan-500/15 to-cyan-600/5 border-cyan-500/10", img: null },
+              { title: tLanding("features.marketplace.title"), desc: tLanding("features.marketplace.description"), icon: "🏪", color: "from-indigo-500/15 to-indigo-600/5 border-indigo-500/10", img: null },
+              { title: tLanding("features.notifications.title"), desc: tLanding("features.notifications.description"), icon: "🔔", color: "from-rose-500/15 to-rose-600/5 border-rose-500/10", img: null },
+              { title: tLanding("features.reviews.title"), desc: tLanding("features.reviews.description"), icon: "⭐", color: "from-yellow-500/15 to-yellow-600/5 border-yellow-500/10", img: null },
+              { title: tLanding("features.verified.title"), desc: tLanding("features.verified.description"), icon: "✅", color: "from-emerald-500/15 to-emerald-600/5 border-emerald-500/10", img: null },
+              { title: tLanding("features.revenue.title"), desc: tLanding("features.revenue.description"), icon: "💰", color: "from-green-500/15 to-green-600/5 border-green-500/10", img: null },
             ].map((feature, i) => (
               <ScrollReveal key={feature.title} delay={(i % 3) * 100}>
                 <div className={`p-5 rounded-xl bg-gradient-to-br ${feature.color} border hover:scale-[1.02] hover:shadow-lg transition-all duration-200 h-full`}>
+                  {feature.img && (
+                    <div className="relative w-full h-32 rounded-lg overflow-hidden mb-3">
+                      <Image src={feature.img} alt={feature.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                    </div>
+                  )}
                   <div className="text-2xl mb-3">{feature.icon}</div>
                   <h3 className="font-bold text-stone-100 text-sm">{feature.title}</h3>
                   <p className="mt-1.5 text-xs text-stone-400 leading-relaxed">{feature.desc}</p>
@@ -809,7 +831,7 @@ export default async function HomePage() {
             </div>
           </ScrollReveal>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* Free Plan */}
             <ScrollReveal delay={0}>
               <div className="relative p-8 rounded-2xl bg-stone-900/60 border border-stone-800/60 hover:border-stone-700/80 transition-all h-full flex flex-col">
@@ -823,8 +845,8 @@ export default async function HomePage() {
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
-                    { text: "✨ 5 free AI generations", highlight: true },
-                    "Up to 10 products",
+                    { text: "✨ 10 free AI generations", highlight: true },
+                    "Up to 20 products",
                     "WhatsApp checkout",
                     "Public catalog page",
                     "Basic analytics",
@@ -856,27 +878,62 @@ export default async function HomePage() {
                   <div className="px-4 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-lg shadow-emerald-600/30">MOST POPULAR</div>
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-lg font-bold text-stone-100">{tLanding("pricing.proPlan.name")}</h3>
-                  <p className="text-sm text-emerald-400/80 mt-1">{tLanding("pricing.proPlan.subtitle")}</p>
+                  <h3 className="text-lg font-bold text-stone-100">Starter</h3>
+                  <p className="text-sm text-emerald-400/80 mt-1">For serious sellers</p>
                 </div>
                 <div className="mb-2">
-                  <span className="text-4xl font-extrabold text-stone-100">{tLanding("pricing.proPlan.price")}</span>
-                  <span className="text-stone-500 text-sm ml-1">{tLanding("pricing.proPlan.period")}</span>
+                  <span className="text-4xl font-extrabold text-stone-100">R99</span>
+                  <span className="text-stone-500 text-sm ml-1">/month</span>
                 </div>
-                <p className="text-sm text-emerald-400/70 mb-2">Less than R7/day — one sale covers it ☕</p>
+                <p className="text-sm text-emerald-400/70 mb-2">Less than R3.50/day — one sale covers it ☕</p>
                 <div className="mb-8 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/15">
-                  <p className="text-xs text-emerald-400">💡 <span className="font-semibold">Save R389/year</span> with annual billing — R1,999/year (R167/mo)</p>
+                  <p className="text-xs text-emerald-400">💡 <span className="font-semibold">Save R189/year</span> with annual billing — R999/year (R83/mo)</p>
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
                     { text: "Unlimited products", highlight: true },
+                    { text: "25 AI generations/month", highlight: true },
                     { text: "Everything in Free", highlight: false },
-                    { text: "WhatsApp support — message us directly", highlight: false },
-                    { text: "Promoted listings", highlight: true },
                     { text: "Revenue dashboard", highlight: false },
-                    { text: "Upload all products at once", highlight: false },
-                    { text: "Never miss a sale — instant alerts", highlight: true },
+                    { text: "Bulk product upload", highlight: false },
+                    { text: "Instant order alerts", highlight: true },
                     { text: "Buyer reviews & ratings", highlight: false },
+                  ].map((f) => (
+                    <li key={f.text} className="flex items-start gap-3 text-sm text-stone-200">
+                      <svg className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                      <span>{f.text}{f.highlight && <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">NEW</span>}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+                  Get Starter →
+                </Link>
+              </div>
+            </ScrollReveal>
+
+            {/* Pro Plan */}
+            <ScrollReveal delay={300}>
+              <div className="relative p-8 rounded-2xl bg-gradient-to-b from-emerald-950/40 to-stone-900/60 border border-emerald-500/20 hover:border-emerald-500/40 transition-all h-full flex flex-col">
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-stone-100">{tLanding("pricing.proPlan.name")}</h3>
+                  <p className="text-sm text-emerald-400/80 mt-1">For growing businesses</p>
+                </div>
+                <div className="mb-2">
+                  <span className="text-4xl font-extrabold text-stone-100">R299</span>
+                  <span className="text-stone-500 text-sm ml-1">/month</span>
+                </div>
+                <p className="text-sm text-emerald-400/70 mb-2">R10/day — scale with confidence</p>
+                <div className="mb-8 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/15">
+                  <p className="text-xs text-emerald-400">💡 <span className="font-semibold">Save R589/year</span> with annual billing — R2,999/year (R250/mo)</p>
+                </div>
+                <ul className="space-y-3.5 mb-8 flex-1">
+                  {[
+                    { text: "Unlimited AI generations", highlight: true },
+                    { text: "Everything in Starter", highlight: false },
+                    { text: "Priority WhatsApp support", highlight: false },
+                    { text: "Enhanced promoted listings", highlight: true },
+                    { text: "Advanced analytics", highlight: false },
+                    { text: "Team accounts (up to 3)", highlight: true },
                   ].map((f) => (
                     <li key={f.text} className="flex items-start gap-3 text-sm text-stone-200">
                       <svg className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
@@ -891,7 +948,7 @@ export default async function HomePage() {
             </ScrollReveal>
 
             {/* Pro AI Plan */}
-            <ScrollReveal delay={300}>
+            <ScrollReveal delay={450}>
               <div className="relative p-8 rounded-2xl bg-gradient-to-b from-violet-950/40 to-stone-900/60 border border-violet-500/30 hover:border-violet-500/50 transition-all h-full flex flex-col">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                   <div className="px-4 py-1 rounded-full bg-violet-600 text-white text-xs font-bold shadow-lg shadow-violet-600/30">✨ AI POWERED</div>
@@ -901,12 +958,12 @@ export default async function HomePage() {
                   <p className="text-sm text-violet-400/80 mt-1">The AI selling machine</p>
                 </div>
                 <div className="mb-2">
-                  <span className="text-4xl font-extrabold text-stone-100">R299</span>
+                  <span className="text-4xl font-extrabold text-stone-100">R499</span>
                   <span className="text-stone-500 text-sm ml-1">/month</span>
                 </div>
                 <p className="text-sm text-violet-400/70 mb-2">AI generates listings for you — save hours ⚡</p>
                 <div className="mb-8 px-3 py-2 rounded-lg bg-violet-500/10 border border-violet-500/15">
-                  <p className="text-xs text-violet-400">💡 <span className="font-semibold">Save R589/year</span> with annual billing — R2,999/year (R250/mo)</p>
+                  <p className="text-xs text-violet-400">💡 <span className="font-semibold">Save R989/year</span> with annual billing — R4,999/year (R417/mo)</p>
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
@@ -935,35 +992,38 @@ export default async function HomePage() {
 
           {/* AI Feature Comparison */}
           <ScrollReveal>
-            <div className="mt-16 max-w-3xl mx-auto">
-              <h3 className="text-center text-lg font-bold text-stone-200 mb-6">AI Feature Comparison</h3>
-              <div className="rounded-2xl border border-stone-800/60 overflow-hidden">
+            <div className="mt-16 max-w-4xl mx-auto">
+              <h3 className="text-center text-lg font-bold text-stone-200 mb-6">Plan Comparison</h3>
+              <div className="rounded-2xl border border-stone-800/60 overflow-hidden overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-stone-800/60">
                       <th className="text-left px-5 py-3 text-stone-400 font-medium">Feature</th>
-                      <th className="text-center px-4 py-3 text-stone-400 font-medium">Free</th>
-                      <th className="text-center px-4 py-3 text-stone-400 font-medium">Pro</th>
-                      <th className="text-center px-4 py-3 text-violet-400 font-bold">Pro AI</th>
+                      <th className="text-center px-3 py-3 text-stone-400 font-medium">Free</th>
+                      <th className="text-center px-3 py-3 text-emerald-400 font-bold">Starter</th>
+                      <th className="text-center px-3 py-3 text-stone-400 font-medium">Pro</th>
+                      <th className="text-center px-3 py-3 text-violet-400 font-bold">Pro AI</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-800/40">
                     {[
-                      { feature: "AI Auto Title from Photo", free: "5 free", pro: "5 free", proAi: true },
-                      { feature: "AI Product Description", free: "5 free", pro: "5 free", proAi: true },
-                      { feature: "AI Category Suggestion", free: "5 free", pro: "5 free", proAi: true },
-                      { feature: "AI SEO Tags & Meta", free: "5 free", pro: "5 free", proAi: true },
-                      { feature: "AI Generations", free: "5", pro: "5", proAi: "∞ Unlimited" },
-                      { feature: "WhatsApp Checkout", free: true, pro: true, proAi: true },
-                      { feature: "Products", free: "10", pro: "∞", proAi: "∞" },
-                      { feature: "Marketplace Listing", free: true, pro: true, proAi: true },
-                      { feature: "Promoted Listings", free: false, pro: true, proAi: true },
-                      { feature: "Revenue Dashboard", free: false, pro: true, proAi: true },
+                      { feature: "Products", free: "20", starter: "∞", pro: "∞", proAi: "∞" },
+                      { feature: "AI Generations", free: "10", starter: "25/mo", pro: "∞", proAi: "∞" },
+                      { feature: "AI Auto Title from Photo", free: "10 free", starter: "25/mo", pro: true, proAi: true },
+                      { feature: "AI Product Description", free: "10 free", starter: "25/mo", pro: true, proAi: true },
+                      { feature: "AI Category Suggestion", free: "10 free", starter: "25/mo", pro: true, proAi: true },
+                      { feature: "AI SEO Tags & Meta", free: "10 free", starter: "25/mo", pro: true, proAi: true },
+                      { feature: "WhatsApp Checkout", free: true, starter: true, pro: true, proAi: true },
+                      { feature: "Marketplace Listing", free: true, starter: true, pro: true, proAi: true },
+                      { feature: "Revenue Dashboard", free: false, starter: true, pro: true, proAi: true },
+                      { feature: "Promoted Listings", free: false, starter: true, pro: true, proAi: true },
+                      { feature: "Priority Support", free: false, starter: false, pro: true, proAi: true },
+                      { feature: "Team Accounts", free: false, starter: false, pro: "3 users", proAi: "3 users" },
                     ].map((row) => (
                       <tr key={row.feature} className={row.feature.startsWith("AI") && row.proAi === true ? "bg-violet-500/[0.04]" : undefined}>
                         <td className="px-5 py-3 text-stone-300 font-medium">{row.feature}</td>
-                        {[row.free, row.pro, row.proAi].map((val, i) => (
-                          <td key={i} className="text-center px-4 py-3">
+                        {[row.free, row.starter, row.pro, row.proAi].map((val, i) => (
+                          <td key={i} className="text-center px-3 py-3">
                             {val === true ? (
                               <span className="text-emerald-400">✅</span>
                             ) : val === false ? (
@@ -983,7 +1043,7 @@ export default async function HomePage() {
                   href={aiCtaHref}
                   className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white font-semibold text-sm shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
                 >
-                  ✨ Try AI Now — 5 Free Generations
+                  ✨ Try AI Now — 10 Free Generations
                 </Link>
               </div>
             </div>
@@ -1006,16 +1066,27 @@ export default async function HomePage() {
           {/* Testimonial quotes — social proof */}
           <div className="grid sm:grid-cols-3 gap-6 mb-14">
             {[
-              { quote: "I used to send 50 photos a day on WhatsApp. Now I share one link and my customers browse and order. Game changer.", name: "Thandi M.", role: "Clothing reseller, Johannesburg" },
-              { quote: "Set up my catalog in 10 minutes. First order came the same day. No app, no complicated setup — just my phone.", name: "Sipho K.", role: "Beauty products, Durban" },
-              { quote: "The AI listing saved me hours. Upload a photo, it writes the description. I just adjust the price and publish.", name: "Lerato P.", role: "Fashion wholesaler, Cape Town" },
+              { quote: "I used to send 50 photos a day on WhatsApp. Now I share one link and my customers browse and order. Game changer.", name: "Thandi M.", role: "Clothing reseller, Johannesburg", img: "/img/testimonial_thandi.png" },
+              { quote: "Set up my catalog in 10 minutes. First order came the same day. No app, no complicated setup — just my phone.", name: "Sipho K.", role: "Beauty products, Durban", img: null },
+              { quote: "The AI listing saved me hours. Upload a photo, it writes the description. I just adjust the price and publish.", name: "Lerato P.", role: "Fashion wholesaler, Cape Town", img: null },
             ].map((t, i) => (
               <ScrollReveal key={t.name} delay={i * 100}>
                 <div className="p-5 rounded-2xl bg-stone-800/40 border border-stone-700/50 h-full flex flex-col">
                   <p className="text-stone-300 text-sm leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
-                  <div className="mt-4 pt-3 border-t border-stone-700/50">
-                    <p className="text-xs font-bold text-stone-200">{t.name}</p>
-                    <p className="text-[11px] text-stone-500">{t.role}</p>
+                  <div className="mt-4 pt-3 border-t border-stone-700/50 flex items-center gap-3">
+                    {t.img ? (
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                        <Image src={t.img} alt={t.name} fill className="object-cover" sizes="40px" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-xs font-bold text-emerald-400">{t.name.split(" ").map(n => n[0]).join("")}</span>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-xs font-bold text-stone-200">{t.name}</p>
+                      <p className="text-[11px] text-stone-500">{t.role}</p>
+                    </div>
                   </div>
                 </div>
               </ScrollReveal>
@@ -1097,6 +1168,10 @@ export default async function HomePage() {
         <div className="max-w-3xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-14">
+              <div className="relative w-full h-48 rounded-2xl overflow-hidden mb-8 mx-auto max-w-2xl">
+                <Image src="/img/faq_header.png" alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 672px" />
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/60 to-transparent" />
+              </div>
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">{tLanding("faq.title")}</h2>
               <p className="mt-3 text-stone-400 text-sm">{tLanding("faq.subtitle")}</p>
             </div>
@@ -1212,9 +1287,9 @@ export default async function HomePage() {
                 Start Free, Upgrade Anytime
               </h3>
               <p className="text-stone-400 leading-relaxed mb-6">
-                List up to 10 products on our Free plan — forever. When your business grows, upgrade to
-                Pro for just R199/month for unlimited products, promoted listings, revenue analytics,
-                and instant order notifications. Payments are handled securely through PayFast, South Africa&apos;s
+                List up to 20 products on our Free plan — forever. When your business grows, upgrade to
+                Starter for just R99/month for unlimited products, or Pro for R299/month for unlimited AI,
+                promoted listings, revenue analytics, and instant order notifications. Payments are handled securely through PayFast, South Africa&apos;s
                 most trusted payment gateway.{" "}
                 <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}` : "/create-shop") : "/sign-up"} className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
                   Create your online shop

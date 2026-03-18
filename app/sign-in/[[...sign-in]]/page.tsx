@@ -6,6 +6,7 @@
 // ============================================================
 
 import { ClerkLoaded, ClerkLoading, SignIn } from "@clerk/nextjs";
+import Image from "next/image";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import {
   BarChart3,
@@ -19,7 +20,16 @@ export default function SignInPage() {
     <main className="flex min-h-screen flex-col lg:flex-row">
       {/* ── Left panel — Welcome back ── */}
       <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 px-8 py-10 text-white lg:w-1/2 lg:px-16 lg:py-16">
-        {/* Background decorative circles */}
+        {/* Background photo */}
+        <Image
+          src="/img/signin_panel.png"
+          alt=""
+          fill
+          className="object-cover opacity-20"
+          priority
+          sizes="50vw"
+        />
+        {/* Background decorative circles */}}
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
 

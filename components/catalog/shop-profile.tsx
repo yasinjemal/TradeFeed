@@ -211,8 +211,8 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
             : "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255,255,255,0.15) 0%, transparent 50%)"
         }} />
 
-        {/* Banner image if available */}
-        {shop.bannerUrl && (
+        {/* Banner image if available, or placeholder fallback */}
+        {shop.bannerUrl ? (
           <Image
             src={shop.bannerUrl}
             alt={`${shop.name} banner`}
@@ -220,6 +220,14 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
             placeholder="blur"
             blurDataURL={SHIMMER_DARK}
             className="object-cover opacity-60"
+            sizes="(max-width: 640px) 100vw, 640px"
+          />
+        ) : (
+          <Image
+            src="/img/shop_header_placeholder.png"
+            alt=""
+            fill
+            className="object-cover opacity-30"
             sizes="(max-width: 640px) 100vw, 640px"
           />
         )}
@@ -415,10 +423,14 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
 
       {/* ── Expanded Content ──────────────────────────────── */}
       {expanded && (
-        <div className="border-t border-stone-100/80 px-4 py-5 space-y-6 luxury-fade-in">
+        <div className="relative border-t border-stone-100/80 px-4 py-5 space-y-6 luxury-fade-in overflow-hidden">
+          {/* About background */}
+          <div className="absolute inset-0 pointer-events-none">
+            <Image src="/img/about_seller_bg.png" alt="" fill className="object-cover opacity-[0.04]" sizes="640px" />
+          </div>
           {/* About */}
           {hasAbout && (
-            <div>
+            <div className="relative">
               <SectionHeading icon="✦" accentColor={frame.accentColor}>About</SectionHeading>
               <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-line mt-2">
                 {shop.aboutText}

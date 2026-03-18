@@ -2,7 +2,7 @@
 // ============================================================
 // Seed Script — Plans
 // ============================================================
-// Seeds the Free and Pro plans into the database.
+// Seeds Free, Starter, Pro, and Pro AI plans into the database.
 // Idempotent — safe to run multiple times.
 //
 // USAGE: npx tsx scripts/seed-plans.ts
@@ -21,9 +21,10 @@ async function main() {
     update: {
       name: "Free",
       priceInCents: 0,
-      productLimit: 10,
+      productLimit: 20,
       features: JSON.stringify([
-        "Up to 10 products",
+        "Up to 20 products",
+        "10 free AI generations",
         "WhatsApp checkout",
         "Public catalog page",
         "Basic analytics",
@@ -34,9 +35,10 @@ async function main() {
       name: "Free",
       slug: "free",
       priceInCents: 0,
-      productLimit: 10,
+      productLimit: 20,
       features: JSON.stringify([
-        "Up to 10 products",
+        "Up to 20 products",
+        "10 free AI generations",
         "WhatsApp checkout",
         "Public catalog page",
         "Basic analytics",
@@ -46,35 +48,76 @@ async function main() {
   });
   console.log(`  ✅ Free plan: ${freePlan.id}`);
 
+  // Starter plan
+  const starterPlan = await db.plan.upsert({
+    where: { slug: "starter" },
+    update: {
+      name: "Starter",
+      priceInCents: 9900, // R99.00
+      productLimit: 0, // 0 = unlimited
+      features: JSON.stringify([
+        "Unlimited products",
+        "25 AI generations/month",
+        "WhatsApp checkout",
+        "Public catalog page",
+        "Revenue dashboard",
+        "Bulk product upload",
+        "Instant order alerts",
+        "Buyer reviews & ratings",
+      ]),
+      isActive: true,
+    },
+    create: {
+      name: "Starter",
+      slug: "starter",
+      priceInCents: 9900,
+      productLimit: 0,
+      features: JSON.stringify([
+        "Unlimited products",
+        "25 AI generations/month",
+        "WhatsApp checkout",
+        "Public catalog page",
+        "Revenue dashboard",
+        "Bulk product upload",
+        "Instant order alerts",
+        "Buyer reviews & ratings",
+      ]),
+      isActive: true,
+    },
+  });
+  console.log(`  ✅ Starter plan: ${starterPlan.id}`);
+
   // Pro plan
   const proPlan = await db.plan.upsert({
     where: { slug: "pro" },
     update: {
       name: "Pro",
-      priceInCents: 19900, // R199.00
+      priceInCents: 29900, // R299.00
       productLimit: 0, // 0 = unlimited
       features: JSON.stringify([
         "Unlimited products",
-        "WhatsApp checkout",
-        "Public catalog page",
+        "Unlimited AI generations",
+        "Everything in Starter",
+        "Priority WhatsApp support",
+        "Enhanced promoted listings",
         "Advanced analytics",
-        "Priority support",
-        "Custom branding (coming soon)",
+        "Team accounts (up to 3)",
       ]),
       isActive: true,
     },
     create: {
       name: "Pro",
       slug: "pro",
-      priceInCents: 19900,
+      priceInCents: 29900,
       productLimit: 0,
       features: JSON.stringify([
         "Unlimited products",
-        "WhatsApp checkout",
-        "Public catalog page",
+        "Unlimited AI generations",
+        "Everything in Starter",
+        "Priority WhatsApp support",
+        "Enhanced promoted listings",
         "Advanced analytics",
-        "Priority support",
-        "Custom branding (coming soon)",
+        "Team accounts (up to 3)",
       ]),
       isActive: true,
     },
@@ -86,32 +129,32 @@ async function main() {
     where: { slug: "pro-ai" },
     update: {
       name: "Pro AI",
-      priceInCents: 29900, // R299.00
+      priceInCents: 49900, // R499.00
       productLimit: 0, // 0 = unlimited
       features: JSON.stringify([
-        "Unlimited products",
-        "AI product generator",
-        "WhatsApp checkout",
-        "Public catalog page",
-        "Advanced analytics",
+        "Everything in Pro",
+        "Unlimited AI generations",
+        "AI auto title from photo",
+        "AI product description",
+        "AI category suggestion",
+        "AI SEO tags & meta",
         "Priority support",
-        "Custom branding (coming soon)",
       ]),
       isActive: true,
     },
     create: {
       name: "Pro AI",
       slug: "pro-ai",
-      priceInCents: 29900,
+      priceInCents: 49900,
       productLimit: 0,
       features: JSON.stringify([
-        "Unlimited products",
-        "AI product generator",
-        "WhatsApp checkout",
-        "Public catalog page",
-        "Advanced analytics",
+        "Everything in Pro",
+        "Unlimited AI generations",
+        "AI auto title from photo",
+        "AI product description",
+        "AI category suggestion",
+        "AI SEO tags & meta",
         "Priority support",
-        "Custom branding (coming soon)",
       ]),
       isActive: true,
     },

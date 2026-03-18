@@ -158,7 +158,7 @@ export default async function ImportWhatsAppCataloguePage() {
                 </Link>
               </div>
               <p className="mt-4 text-xs text-stone-600">
-                5 free AI listings · No credit card · Set up in under 3 minutes
+                10 free AI listings · No credit card · Set up in under 3 minutes
               </p>
             </>
           )}
@@ -323,7 +323,7 @@ export default async function ImportWhatsAppCataloguePage() {
                 icon: "🆓",
                 title: "Free Forever Plan",
                 description:
-                  "List up to 10 products completely free — no credit card, no trial period, no hidden fees. Upgrade only when you're ready.",
+                  "List up to 20 products completely free — no credit card, no trial period, no hidden fees. Upgrade only when you're ready.",
               },
             ].map((benefit) => (
               <div
@@ -395,7 +395,7 @@ export default async function ImportWhatsAppCataloguePage() {
               },
               {
                 q: "Is it really free?",
-                a: "Yes. Our Free plan lets you list up to 10 products with 5 AI generations per month — forever. No credit card required. Upgrade to Pro (R199/month) for unlimited products and AI listings.",
+                a: "Yes. Our Free plan lets you list up to 20 products with 10 AI generations per month — forever. No credit card required. Upgrade to Starter (R99/month) for unlimited products, or Pro (R299/month) for unlimited AI.",
               },
               {
                 q: "Will my customers still order on WhatsApp?",

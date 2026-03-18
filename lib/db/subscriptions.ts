@@ -5,8 +5,10 @@
 // enforcement for the freemium business model.
 //
 // PLANS:
-// - Free: 10 products, basic features
-// - Pro: R199/mo, unlimited products, priority badge
+// - Free: 20 products, basic features, 10 AI generations
+// - Starter: R99/mo, unlimited products, 25 AI generations
+// - Pro: R299/mo, unlimited products, unlimited AI
+// - Pro AI: R499/mo, everything + advanced AI
 //
 // RULES:
 // - Every shop gets a Free subscription on creation
@@ -28,9 +30,10 @@ export async function getFreePlan() {
       name: "Free",
       slug: "free",
       priceInCents: 0,
-      productLimit: 10,
+      productLimit: 20,
       features: JSON.stringify([
-        "Up to 10 products",
+        "Up to 20 products",
+        "10 free AI generations",
         "WhatsApp checkout",
         "Public catalog page",
         "Basic analytics",
@@ -158,7 +161,7 @@ export async function checkProductLimit(shopId: string) {
   ]);
 
   // No subscription = use default free limits
-  const limit = subscription?.plan.productLimit ?? 10;
+  const limit = subscription?.plan.productLimit ?? 20;
   const planName = subscription?.plan.name ?? "Free";
 
   // Check for active trial — trial gives unlimited products

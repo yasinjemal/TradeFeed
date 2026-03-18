@@ -2,17 +2,18 @@
 // Data Access — AI Feature Gating & Credits
 // ============================================================
 // Checks whether a shop's subscription plan includes AI features.
-// Free-tier shops get 5 AI generations to "taste" the feature.
+// Free-tier shops get 10 AI generations to "taste" the feature.
 // Pro AI / Business plans get unlimited generations.
 // ============================================================
 
 import { db } from "@/lib/db";
 
 /** Plan slugs that include unlimited AI product generation */
-const AI_UNLIMITED_PLANS = ["pro-ai", "business"];
+const AI_UNLIMITED_PLANS = ["pro", "pro-ai", "business"];
 
-/** Number of free AI generations for non-AI plans */
-export const FREE_AI_CREDITS = 5;
+/** AI generation limits per plan tier */
+export const FREE_AI_CREDITS = 10;
+export const STARTER_AI_CREDITS = 25;
 
 /** Maximum AI generations per shop per day (safety cap, even for unlimited plans) */
 export const AI_DAILY_LIMIT = 50;
@@ -51,8 +52,9 @@ export async function checkAiAccess(shopId: string): Promise<{
     return { canGenerate: true, hasUnlimitedAi: true, creditsRemaining: Infinity, creditsUsed, planSlug };
   }
 
-  // Free / Pro users: limited credits
-  const creditsRemaining = Math.max(0, FREE_AI_CREDITS - creditsUsed);
+  // Free / Starter users: limited credits based on plan
+  const creditLimit = planSlug === "starter" ? STARTER_AI_CREDITS : FREE_AI_CREDITS;
+  const creditsRemaining = Math.max(0, creditLimit - creditsUsed);
   return {
     canGenerate: creditsRemaining > 0,
     hasUnlimitedAi: false,
