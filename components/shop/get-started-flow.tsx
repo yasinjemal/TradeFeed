@@ -227,7 +227,7 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
       {/* Header */}
       <div className="w-full max-w-lg mx-auto px-4 pt-8 pb-4">
         <Link href="/" className="inline-flex items-center gap-2.5 group">
-          <TradeFeedLogo size="lg" />
+          <TradeFeedLogo size="lg" variant="dark" />
         </Link>
       </div>
 

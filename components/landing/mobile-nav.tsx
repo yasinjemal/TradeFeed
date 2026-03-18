@@ -165,7 +165,7 @@ export function MobileNav({
             {/* ── Header ─────────────────────────────── */}
             <div className="flex items-center justify-between px-5 h-16">
               <div className="flex items-center gap-2.5">
-                <TradeFeedLogo size="lg" />
+                <TradeFeedLogo size="lg" variant="dark" />
               </div>
               <button
                 onClick={close}
