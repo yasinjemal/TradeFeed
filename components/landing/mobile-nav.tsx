@@ -93,7 +93,6 @@ export function MobileNav({
 }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [scrollShadow, setScrollShadow] = useState({ top: false, bottom: false });
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -110,21 +109,6 @@ export function MobileNav({
       document.body.style.overflow = "";
     };
   }, [open, close]);
-
-  // Scroll shadow detection
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el || !open) return;
-    const update = () => {
-      setScrollShadow({
-        top: el.scrollTop > 8,
-        bottom: el.scrollHeight - el.scrollTop - el.clientHeight > 8,
-      });
-    };
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    return () => el.removeEventListener("scroll", update);
-  }, [open]);
 
   return (
     <>
@@ -160,10 +144,10 @@ export function MobileNav({
           />
 
           {/* Drawer panel — slides from right */}
-          <div className="absolute right-0 top-0 bottom-0 h-full w-[300px] max-w-[85vw] bg-white shadow-2xl shadow-black/10 animate-in slide-in-from-right duration-300 flex flex-col">
+          <div className="absolute right-0 top-0 bottom-0 w-[300px] max-w-[85vw] bg-white shadow-2xl shadow-black/10 animate-in slide-in-from-right duration-300 flex flex-col">
 
             {/* ── Header ─────────────────────────────── */}
-            <div className="flex items-center justify-between px-5 h-16 border-b border-slate-100 flex-shrink-0">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <TradeFeedLogo size="md" variant="dark" />
               <button
                 onClick={close}
@@ -187,19 +171,11 @@ export function MobileNav({
             </div>
 
             {/* ── Scrollable Content ─────────────────── */}
-            <div
+            <nav
               ref={scrollRef}
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
-              style={{ WebkitOverflowScrolling: "touch" }}
+              className="flex-1 overflow-y-auto overscroll-contain px-4 py-4"
             >
-              {/* Top scroll shadow */}
-              <div
-                className={`sticky top-0 z-10 h-3 -mb-3 bg-gradient-to-b from-white to-transparent pointer-events-none transition-opacity duration-200 ${
-                  scrollShadow.top ? "opacity-100" : "opacity-0"
-                }`}
-              />
-
-              <div className="px-4 py-4 space-y-5">
+              <div className="space-y-5">
                 {/* ── Nav Sections ──────────────────── */}
                 {NAV_SECTIONS.map((section) => (
                   <div key={section.title}>
@@ -297,18 +273,11 @@ export function MobileNav({
                   </div>
                 )}
               </div>
-
-              {/* Bottom scroll shadow */}
-              <div
-                className={`sticky bottom-0 z-10 h-4 -mt-4 bg-gradient-to-t from-white to-transparent pointer-events-none transition-opacity duration-200 ${
-                  scrollShadow.bottom ? "opacity-100" : "opacity-0"
-                }`}
-              />
-            </div>
+            </nav>
 
             {/* ── Footer — fixed at bottom ───────────── */}
             <div
-              className="flex-shrink-0 px-4 pt-3 space-y-2.5 border-t border-slate-100"
+              className="px-4 pt-3 space-y-2.5 border-t border-slate-100"
               style={{
                 paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))",
               }}
