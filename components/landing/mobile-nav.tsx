@@ -134,17 +134,9 @@ export function MobileNav({
         </svg>
       </button>
 
-      {/* ── Slide-out Drawer ─────────────────────────── */}
+      {/* ── Full-screen Nav Overlay ────────────────── */}
       {open && (
-        <div className="fixed inset-0 z-[9999] md:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={close}
-          />
-
-          {/* Drawer panel — slides from right */}
-          <div className="absolute right-0 top-0 bottom-0 w-[300px] max-w-[85vw] bg-white shadow-2xl shadow-black/10 animate-in slide-in-from-right duration-300 flex flex-col">
+        <div className="fixed inset-0 z-[9999] md:hidden bg-white flex flex-col">
 
             {/* ── Header ─────────────────────────────── */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
@@ -329,7 +321,6 @@ export function MobileNav({
                 )}
               </div>
             </div>
-          </div>
         </div>
       )}
     </>
