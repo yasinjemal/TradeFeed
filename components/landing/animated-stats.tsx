@@ -152,14 +152,14 @@ export function FaqItem({ question, answer }: { question: string; answer: string
   }, [answer]);
 
   return (
-    <div className="rounded-xl border border-stone-800/50 bg-stone-900/40 overflow-hidden hover:border-stone-700/60 transition-colors">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden hover:border-blue-300 transition-colors">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full px-6 py-5 text-left group"
       >
-        <span className="font-medium text-sm text-stone-200 pr-4 group-hover:text-white transition-colors">{question}</span>
-        <div className={`w-6 h-6 rounded-full border border-stone-700 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen ? "bg-emerald-600 border-emerald-600 rotate-45" : "group-hover:border-stone-600"}`}>
-          <svg className="w-3.5 h-3.5 text-stone-400" style={{ color: isOpen ? "white" : undefined }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <span className="font-medium text-sm text-slate-800 pr-4 group-hover:text-slate-900 transition-colors">{question}</span>
+        <div className={`w-6 h-6 rounded-full border border-slate-300 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen ? "bg-blue-600 border-blue-600 rotate-45" : "group-hover:border-slate-400"}`}>
+          <svg className="w-3.5 h-3.5 text-slate-500" style={{ color: isOpen ? "white" : undefined }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
         </div>
@@ -169,7 +169,7 @@ export function FaqItem({ question, answer }: { question: string; answer: string
         className="overflow-hidden transition-all duration-300 ease-in-out"
       >
         <div ref={contentRef} className="px-6 pb-5">
-          <p className="text-sm text-stone-400 leading-relaxed">{answer}</p>
+          <p className="text-sm text-slate-600 leading-relaxed">{answer}</p>
         </div>
       </div>
     </div>

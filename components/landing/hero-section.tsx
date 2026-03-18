@@ -78,7 +78,7 @@ export function HeroSection({
 
           {/* Subtitle */}
           <FadeIn delay={0.2}>
-            <p className="mt-6 text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
               {subtitle}
             </p>
           </FadeIn>
@@ -107,7 +107,7 @@ export function HeroSection({
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-500">
                 {proofSellers}{" "}
                 <span className="text-slate-600 font-medium">{proofCities}</span>
               </p>
@@ -150,7 +150,7 @@ export function HeroSection({
           <FadeIn delay={0.4}>
             <div className="mt-6 flex items-center justify-center gap-5 flex-wrap">
               {benefits.map((benefit, i) => (
-                <span key={i} className="flex items-center gap-1.5 text-xs text-slate-400">
+                <span key={i} className="flex items-center gap-1.5 text-xs text-slate-500">
                   <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>

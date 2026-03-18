@@ -361,7 +361,7 @@ export default async function HomePage() {
                           )}
                         </div>
                         <p className="text-[11px] text-slate-500">
-                          {seller.city && `ðŸ“ ${seller.city} · `}{seller._count.products} {seller._count.products === 1 ? "product" : "products"}
+                          {seller.city && <>{"\uD83D\uDCCD"} {seller.city} &middot; </>}{seller._count.products} {seller._count.products === 1 ? "product" : "products"}
                         </p>
                       </div>
                     </div>
