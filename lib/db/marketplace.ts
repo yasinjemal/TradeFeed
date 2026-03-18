@@ -133,6 +133,8 @@ export interface FeaturedShop {
   isVerified: boolean;
   productCount: number;
   hasSpotlight: boolean;
+  avgRating: number | null;
+  reviewCount: number;
 }
 
 // ── Core Queries ─────────────────────────────────────────────
@@ -967,19 +969,42 @@ export async function getFeaturedShops(
     orderBy: { createdAt: "asc" },
   });
 
-  return shops.map((s) => ({
-    id: s.id,
-    name: s.name,
-    slug: s.slug,
-    description: s.description,
-    logoUrl: s.logoUrl,
-    bannerUrl: s.bannerUrl,
-    city: s.city,
-    province: s.province,
-    isVerified: s.isVerified,
-    productCount: s._count.products,
-    hasSpotlight: s.promotedListings.length > 0,
-  }));
+  // Enrich with aggregated review stats across all shop products
+  const shopIds = shops.map((s) => s.id);
+  const reviewAggs = await db.review.groupBy({
+    by: ["shopId"],
+    where: {
+      shopId: { in: shopIds },
+      isApproved: true,
+    },
+    _avg: { rating: true },
+    _count: { rating: true },
+  });
+  const reviewMap = new Map(
+    reviewAggs.map((r) => [
+      r.shopId,
+      { avg: r._avg.rating, count: r._count.rating },
+    ])
+  );
+
+  return shops.map((s) => {
+    const rev = reviewMap.get(s.id);
+    return {
+      id: s.id,
+      name: s.name,
+      slug: s.slug,
+      description: s.description,
+      logoUrl: s.logoUrl,
+      bannerUrl: s.bannerUrl,
+      city: s.city,
+      province: s.province,
+      isVerified: s.isVerified,
+      productCount: s._count.products,
+      hasSpotlight: s.promotedListings.length > 0,
+      avgRating: rev?.avg ?? null,
+      reviewCount: rev?.count ?? 0,
+    };
+  });
 }
 
 /**

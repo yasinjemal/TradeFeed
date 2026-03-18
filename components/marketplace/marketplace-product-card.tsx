@@ -1,8 +1,9 @@
 // ============================================================
-// Marketplace Product Card
+// Marketplace Product Card — Trust-driven design
 // ============================================================
-// Product card for marketplace grid. Dark theme, shows shop name,
-// location, price range, "Sponsored" badge for promoted items.
+// Clean white card with clear hierarchy: Image → Price → Title
+// → Seller (verified + location) → Rating → Social proof.
+// Inspired by Amazon/Takealot product cards.
 // ============================================================
 
 "use client";
@@ -32,9 +33,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
   const [imgError, setImgError] = useState(false);
 
   const handleClick = () => {
-    // Track marketplace click
     trackMarketplaceClickAction(product.shop.id, product.id);
-    // Track promoted click if sponsored
     if (product.promotion) {
       trackPromotedClickAction(product.promotion.promotedListingId, product.shop.id, product.id);
     }
@@ -49,7 +48,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
     >
       <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden transition-all duration-300 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-100/40 hover:-translate-y-1 active:scale-[0.98]">
         {/* Image */}
-        <div className={`relative ${compact ? "aspect-square" : "aspect-[3/4]"} bg-slate-100 overflow-hidden`}>
+        <div className={`relative ${compact ? "aspect-square" : "aspect-[4/5]"} bg-slate-50 overflow-hidden`}>
           {product.imageUrl && !imgError ? (
             <Image
               src={product.imageUrl}
@@ -58,11 +57,11 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               placeholder="blur"
               blurDataURL={SHIMMER_LIGHT}
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               onError={() => setImgError(true)}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-400">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-300">
               <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
               </svg>
@@ -70,15 +69,12 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
             </div>
           )}
 
-          {/* Sponsored badge */}
-          {product.promotion && (
+          {/* Top-left: Sponsored or Verified badge */}
+          {product.promotion ? (
             <div className="absolute top-2 left-2">
               <SponsoredBadge tier={product.promotion.tier} />
             </div>
-          )}
-
-          {/* Verified badge */}
-          {product.shop.isVerified && !product.promotion && (
+          ) : product.shop.isVerified ? (
             <div className="absolute top-2 left-2">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500 text-white text-[10px] font-semibold shadow-sm">
                 <svg className="w-2.5 h-2.5" viewBox="0 0 20 20" fill="currentColor">
@@ -87,9 +83,9 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
                 Verified
               </span>
             </div>
-          )}
+          ) : null}
 
-          {/* Seller tier badge */}
+          {/* Top-right: Seller tier */}
           {product.sellerTier && (
             <div className="absolute top-2 right-2">
               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/90 backdrop-blur-sm text-[9px] font-bold text-slate-700 border border-slate-200 shadow-sm">
@@ -98,17 +94,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
             </div>
           )}
 
-          {/* Price badge */}
-          <div className="absolute bottom-2 left-2">
-            <span className="bg-white/95 backdrop-blur-sm text-slate-900 text-xs font-bold px-2.5 py-1 rounded-full shadow-md border border-slate-200/50">
-              {formatZAR(product.minPriceCents)}
-              {product.minPriceCents !== product.maxPriceCents && (
-                <span className="text-slate-400 font-normal"> +</span>
-              )}
-            </span>
-          </div>
-
-          {/* Ranking badges */}
+          {/* Bottom-right: Ranking badges */}
           <div className="absolute bottom-2 right-2 flex flex-col gap-1 items-end">
             {(product.avgRating ?? 0) >= 4.5 && product.reviewCount >= 3 && (
               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-bold shadow-sm">
@@ -123,23 +109,28 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
           </div>
         </div>
 
-        {/* Info */}
-        <div className={`${compact ? "p-2.5" : "p-3.5 sm:p-4"} space-y-1.5`}>
-          {/* Category tag */}
-          {product.globalCategory && !compact && (
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-blue-600">
-              {product.globalCategory.name}
+        {/* Info — clear hierarchy */}
+        <div className={`${compact ? "p-2.5" : "p-3.5 sm:p-4"}`}>
+          {/* Price — most important, bold at top */}
+          <div className="flex items-baseline gap-1.5 mb-1">
+            <span className={`font-bold text-slate-900 ${compact ? "text-sm" : "text-base sm:text-lg"}`}>
+              {formatZAR(product.minPriceCents)}
             </span>
-          )}
+            {product.minPriceCents !== product.maxPriceCents && (
+              <span className={`font-medium text-slate-400 ${compact ? "text-[10px]" : "text-xs"}`}>
+                – {formatZAR(product.maxPriceCents)}
+              </span>
+            )}
+          </div>
 
           {/* Product name */}
-          <h3 className={`font-semibold text-slate-800 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors ${compact ? "text-xs" : "text-[13px] sm:text-sm"}`}>
+          <h3 className={`font-medium text-slate-700 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors ${compact ? "text-xs" : "text-[13px] sm:text-sm"}`}>
             {product.name}
           </h3>
 
-          {/* Star rating */}
+          {/* Rating row */}
           {product.reviewCount > 0 && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 mt-1.5">
               <div className="flex items-center gap-px">
                 {[1, 2, 3, 4, 5].map((star) => {
                   const filled = (product.avgRating ?? 0) >= star;
@@ -147,7 +138,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
                   return (
                     <svg
                       key={star}
-                      className={`${compact ? "w-2.5 h-2.5" : "w-3 h-3"} ${filled ? "text-amber-400" : halfFilled ? "text-amber-400/60" : "text-slate-200"}`}
+                      className={`${compact ? "w-3 h-3" : "w-3.5 h-3.5"} ${filled ? "text-amber-400" : halfFilled ? "text-amber-400/60" : "text-slate-200"}`}
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -156,59 +147,69 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
                   );
                 })}
               </div>
-              <span className={`text-slate-600 font-medium ${compact ? "text-[9px]" : "text-[10px]"}`}>
+              <span className={`text-slate-600 font-semibold ${compact ? "text-[10px]" : "text-xs"}`}>
                 {product.avgRating?.toFixed(1)}
               </span>
-              <span className={`text-slate-400 ${compact ? "text-[9px]" : "text-[10px]"}`}>
-                ({product.reviewCount})
+              <span className={`text-slate-400 ${compact ? "text-[10px]" : "text-xs"}`}>
+                ({product.reviewCount} {product.reviewCount === 1 ? "review" : "reviews"})
               </span>
             </div>
           )}
 
-          {/* Sold count badge */}
-          {product.soldCount > 0 && (
-            <span className={`inline-flex items-center gap-0.5 text-green-600 font-medium ${compact ? "text-[9px]" : "text-[10px]"}`}>
-              <svg className={`${compact ? "w-2.5 h-2.5" : "w-3 h-3"}`} viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-              </svg>
-              {product.soldCount >= 100 ? "100+" : product.soldCount} sold
-            </span>
-          )}
-
-          {/* Shop info */}
+          {/* Seller info + location — trust row */}
           {!compact && (
-            <div className="flex items-center gap-1.5 pt-0.5">
-              {product.shop.logoUrl ? (
-                <Image
-                  src={product.shop.logoUrl}
-                  alt={product.shop.name}
-                  width={16}
-                  height={16}
-                  className="w-4 h-4 rounded-full object-cover border border-slate-200"
-                />
-              ) : (
-                <div className="w-4 h-4 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
-                  <span className="text-[8px] font-bold text-slate-500">
-                    {product.shop.name.charAt(0)}
+            <div className="mt-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center gap-1.5">
+                {product.shop.logoUrl ? (
+                  <Image
+                    src={product.shop.logoUrl}
+                    alt={product.shop.name}
+                    width={20}
+                    height={20}
+                    className="w-5 h-5 rounded-full object-cover border border-slate-200"
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-blue-50 border border-slate-200 flex items-center justify-center">
+                    <span className="text-[9px] font-bold text-blue-600">
+                      {product.shop.name.charAt(0)}
+                    </span>
+                  </div>
+                )}
+                <span className="text-xs text-slate-700 font-medium truncate">
+                  {product.shop.name}
+                </span>
+                {product.shop.isVerified && (
+                  <svg className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.403 12.652a3 3 0 010-5.304 3 3 0 00-3.75-3.751 3 3 0 00-5.305 0 3 3 0 00-3.751 3.75 3 3 0 000 5.305 3 3 0 003.75 3.751 3 3 0 005.305 0 3 3 0 003.751-3.75zm-2.546-4.46a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                  </svg>
+                )}
+                {product.shop.subscription?.status === "ACTIVE" && product.shop.subscription.plan.slug !== "free" && (
+                  <span className="inline-flex items-center px-1 py-0.5 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-200 text-[8px] font-bold text-amber-700 uppercase tracking-wider flex-shrink-0">
+                    PRO
                   </span>
+                )}
+              </div>
+              {product.shop.city && (
+                <div className="flex items-center gap-1 mt-1">
+                  <svg className="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                  </svg>
+                  <span className="text-[11px] text-slate-500">{product.shop.city}</span>
                 </div>
               )}
-              <span className="text-[11px] text-slate-500 truncate">
-                {product.shop.name}
+            </div>
+          )}
+
+          {/* Social proof */}
+          {product.soldCount > 0 && !compact && (
+            <div className="mt-1.5">
+              <span className="inline-flex items-center gap-1 text-[11px] text-green-600 font-medium">
+                <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                </svg>
+                {product.soldCount >= 100 ? "100+" : product.soldCount} sold
               </span>
-              {product.shop.subscription?.status === "ACTIVE" && product.shop.subscription.plan.slug !== "free" && (
-                <span className="inline-flex items-center px-1 py-0.5 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-200 text-[8px] font-bold text-amber-700 uppercase tracking-wider flex-shrink-0">
-                  PRO
-                </span>
-              )}
-              {product.shop.city && (
-                <>
-                  <span className="text-slate-300">·</span>
-                  <span className="text-[11px] text-slate-400 truncate">
-                    {product.shop.city}
-                  </span>
-                </>
-              )}
             </div>
           )}
         </div>

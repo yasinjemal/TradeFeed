@@ -402,13 +402,13 @@ export function MarketplaceShell({
         </div>
       </nav>
 
-      {/* ── Hero ────────────────────────────────────────── */}
-      <section className="relative pt-24 pb-8 sm:pt-28 sm:pb-10 px-4 sm:px-6">
+      {/* ── Hero — Trust Header ───────────────────────── */}
+      <section className="relative pt-24 pb-6 sm:pt-28 sm:pb-8 px-4 sm:px-6">
         {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-white pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 via-white to-white pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-slate-900">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-slate-900">
             Find trusted products from{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-500">
               South African sellers
@@ -418,20 +418,27 @@ export function MarketplaceShell({
             Browse thousands of products. Wholesale &amp; retail prices. Order directly via WhatsApp.
           </p>
 
-          {/* Trust badges */}
-          <div className="mt-5 flex items-center justify-center gap-5 flex-wrap">
-            {[
-              { icon: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z", label: "Verified Sellers" },
-              { icon: "M15 10.5a3 3 0 11-6 0 3 3 0 016 0z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z", label: "Local Businesses" },
-              { icon: "M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z", label: "Fast Response" },
-            ].map((badge) => (
-              <span key={badge.label} className="inline-flex items-center gap-1.5 text-xs text-slate-500">
-                <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d={badge.icon} />
-                </svg>
-                {badge.label}
-              </span>
-            ))}
+          {/* Trust badges — pill style */}
+          <div className="mt-5 flex items-center justify-center gap-3 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-xs font-medium text-blue-700">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Verified Sellers
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 border border-green-100 text-xs font-medium text-green-700">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+              Local Businesses
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-xs font-medium text-emerald-700">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+              </svg>
+              WhatsApp Ordering
+            </span>
           </div>
 
           {/* Live activity signal */}
@@ -570,9 +577,8 @@ export function MarketplaceShell({
         <section className="px-4 sm:px-6 pt-6 pb-2">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg">🔥</span>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                Featured Products
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                🔥 Featured Products
               </h2>
             </div>
             <FeaturedCarousel products={promotedProducts} />
@@ -584,13 +590,17 @@ export function MarketplaceShell({
       {featuredShops.length > 0 && !hasFiltersOrSearch && (
         <section className="px-4 sm:px-6 pt-6 pb-2">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg">⭐</span>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                Featured Shops
-              </h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                  Featured Shops
+                </h2>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-[10px] font-semibold text-blue-600">
+                  {featuredShops.length} verified
+                </span>
+              </div>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:-mx-6 sm:px-6">
               {featuredShops.map((shop) => (
                 <FeaturedShopCard key={shop.id} shop={shop} />
               ))}
@@ -604,9 +614,8 @@ export function MarketplaceShell({
         <section className="px-4 sm:px-6 pt-6 pb-2">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg">📈</span>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                Trending This Week
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                📈 Trending This Week
               </h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -623,9 +632,8 @@ export function MarketplaceShell({
         <section className="px-4 sm:px-6 pt-6 pb-2">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg">✨</span>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                Just Listed
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                ✨ Just Listed
               </h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
