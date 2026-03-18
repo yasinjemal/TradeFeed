@@ -127,7 +127,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
         </div>
 
         {/* Info */}
-        <div className={`${compact ? "p-2.5" : "p-3 sm:p-3.5"} space-y-1`}>
+        <div className={`${compact ? "p-2.5" : "p-3.5 sm:p-4"} space-y-1.5`}>
           {/* Category tag */}
           {product.globalCategory && !compact && (
             <span className="text-[10px] uppercase tracking-wider font-semibold text-emerald-500">

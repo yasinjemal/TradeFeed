@@ -546,7 +546,11 @@ export function MarketplaceShell({
               <button
                 type="button"
                 onClick={() => setFilterOpen(true)}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-900 border border-stone-800 text-sm text-stone-300 hover:border-stone-700 transition-all"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all btn-press ${
+                  activeFilterCount > 0
+                    ? "bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/25"
+                    : "bg-stone-900 border border-stone-800 text-stone-300 hover:border-stone-600 hover:text-stone-100"
+                }`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
@@ -666,7 +670,7 @@ export function MarketplaceShell({
             <>
               {/* Loading overlay with skeleton shimmer */}
               <div className={`transition-opacity duration-300 ${isPending ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
                   {allProducts.map((product, idx) => (
                     <MarketplaceProductCard key={`${product.id}-${idx}`} product={product} />
                   ))}
@@ -675,7 +679,7 @@ export function MarketplaceShell({
 
               {/* Searching indicator */}
               {isPending && allProducts.length === 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} className="rounded-2xl bg-stone-900 border border-stone-800/50 overflow-hidden">
                       <div className="aspect-square bg-stone-800 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />

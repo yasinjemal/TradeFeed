@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import Script from "next/script";
 import { headers } from "next/headers";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -12,6 +13,12 @@ import { generateSiteJsonLd } from "@/lib/seo/json-ld";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tradefeed.co.za"),
@@ -127,7 +134,7 @@ export default async function RootLayout({
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
     >
-      <html lang={locale}>
+      <html lang={locale} className={inter.variable}>
         <head>
           {/* Google Merchant Center verification */}
           <meta name="google-site-verification" content="t7VN3FQbd8ShLmh9D_6FGqAgNepY9Dm5CwUZLagBhXs" />

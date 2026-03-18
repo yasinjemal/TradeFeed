@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 body {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -12,6 +13,29 @@ body {
 @theme inline {
   --color-whatsapp: #25D366;
   --color-whatsapp-hover: #20bd5a;
+
+  /* ── Brand Palette ────────────────────────────────── */
+  --color-brand-green: #25D366;
+  --color-brand-green-hover: #20bd5a;
+  --color-brand-emerald: #059669;
+  --color-brand-emerald-light: #34d399;
+  --color-brand-purple: #7c3aed;
+  --color-brand-purple-light: #a78bfa;
+  --color-brand-dark: #0c0a09;
+  --color-brand-dark-surface: #1c1917;
+  --color-brand-dark-card: #292524;
+  --color-brand-muted: #78716c;
+  --color-brand-text: #fafaf9;
+  --color-brand-text-secondary: #a8a29e;
+
+  /* ── Standardized Elevation (Shadows) ─────────────── */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.15), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-glow-emerald: 0 0 20px rgb(16 185 129 / 0.15), 0 0 40px rgb(16 185 129 / 0.05);
+  --shadow-glow-purple: 0 0 20px rgb(124 58 237 / 0.15), 0 0 40px rgb(124 58 237 / 0.05);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -368,4 +392,141 @@ img[loading="lazy"]:not([src=""]) {
 .glow-hover:hover {
   box-shadow: 0 0 30px rgba(16, 185, 129, 0.15), 0 10px 40px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
+}
+
+/* ── Global Interactive States (Audit: §7 Animations) ── */
+
+/* Consistent link hover — underline reveal */
+.link-hover {
+  position: relative;
+  text-decoration: none;
+}
+.link-hover::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.25s ease;
+}
+.link-hover:hover::after {
+  width: 100%;
+}
+
+/* Card interactive lift — standardized for all cards */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(168, 162, 158, 0.3);
+}
+
+/* Button press feedback */
+.btn-press {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Success checkmark animation */
+@keyframes check-draw {
+  0% { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+.animate-check-draw {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: check-draw 0.4s ease forwards;
+}
+
+/* Toast / notification slide-in */
+@keyframes slide-in-right {
+  0% { transform: translateX(100%); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out forwards;
+}
+
+/* Smooth counter increment */
+@keyframes count-up {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-count-up {
+  animation: count-up 0.3s ease-out forwards;
+}
+
+/* ── Form Enhancement (Audit: §6 Components) ──────────── */
+
+/* Enhanced focus ring for inputs */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 0 0 1px rgba(16, 185, 129, 0.4);
+  border-color: #34d399;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* Error state for form fields */
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* Success state for validated fields */
+input[aria-valid="true"],
+textarea[aria-valid="true"] {
+  border-color: #22c55e;
+}
+
+/* ── Product Card Spacing (Audit: §3 Layout) ──────────── */
+
+/* Relaxed grid for marketplace product listings */
+.product-grid {
+  gap: 1.25rem;
+}
+@media (min-width: 640px) {
+  .product-grid {
+    gap: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .product-grid {
+    gap: 1.75rem;
+  }
+}
+
+/* ── Badge Integration (Audit: §6 Components) ─────────── */
+
+/* Integrated badge style (not floating overlay) */
+.badge-integrated {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+/* ── Typography Scale (Audit: §2 Typography) ──────────── */
+
+/* Heading letter-spacing refinement */
+h1, h2, h3 {
+  letter-spacing: -0.025em;
+}
+h4, h5, h6 {
+  letter-spacing: -0.01em;
 }
