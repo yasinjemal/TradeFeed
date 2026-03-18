@@ -97,8 +97,14 @@ export default clerkMiddleware(async (auth, request) => {
     if (!isPublicRoute(request)) {
       await auth.protect();
     }
-  } catch (err) {
-    // Fail open — never block legitimate users because middleware crashed
+  } catch (err: unknown) {
+    // Re-throw Clerk / Next.js redirect errors (auth.protect() throws
+    // NEXT_HTTP_ERROR_FALLBACK to trigger the sign-in redirect).
+    // Swallowing it would let unauthenticated users into protected routes.
+    if (err instanceof Error && (err as Error & { digest?: string }).digest?.includes("NEXT_HTTP_ERROR_FALLBACK")) {
+      throw err;
+    }
+    // Fail open only for truly unexpected errors (rate-limit failures, etc.)
     console.error("[middleware] invocation error, failing open", err);
   }
 
