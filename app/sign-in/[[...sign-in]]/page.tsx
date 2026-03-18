@@ -29,7 +29,7 @@ export default function SignInPage() {
           priority
           sizes="50vw"
         />
-        {/* Background decorative circles */}}
+        {/* Background decorative circles */}
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
 
