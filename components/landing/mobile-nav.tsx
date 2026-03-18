@@ -138,30 +138,28 @@ export function MobileNav({
         </svg>
       </button>
 
-      {/* ── Full-screen Nav Overlay (portal to escape backdrop-blur containing block) ── */}
+      {/* ── Slide-out Drawer (portal to escape backdrop-blur containing block) ── */}
       {mounted && open && createPortal(
-        <div className="fixed inset-0 z-[9999] md:hidden bg-white flex flex-col">
+        <div className="fixed inset-0 z-[9999] md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={close}
+          />
+
+          {/* Drawer — slides from right */}
+          <div className="absolute right-0 top-0 bottom-0 w-[300px] max-w-[85vw] bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
 
             {/* ── Header ─────────────────────────────── */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <TradeFeedLogo size="md" variant="dark" />
               <button
                 onClick={close}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-90 transition-all text-slate-500"
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"
                 aria-label="Close menu"
               >
-                <svg
-                  className="w-4.5 h-4.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
@@ -325,6 +323,7 @@ export function MobileNav({
                 )}
               </div>
             </div>
+          </div>
         </div>,
         document.body
       )}
