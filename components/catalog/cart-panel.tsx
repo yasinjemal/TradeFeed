@@ -266,9 +266,16 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         // 7. Clear cart after opening WhatsApp
         clearCart();
         onClose();
-      } catch {
-        // Network error, server action transport failure, etc.
-        setCheckoutError("Connection issue — please check your internet and try again.");
+      } catch (err) {
+        // Detect stale deployment — server action hash mismatch after new
+        // deploy causes 404 / UnrecognizedActionsError on POST.
+        const msg = err instanceof Error ? err.message : String(err);
+        const isStaleAction = /not found on the server|404|UnrecognizedAction|Failed to fetch/i.test(msg);
+        if (isStaleAction) {
+          setCheckoutError("We've just updated TradeFeed. Please reload the page and try again.");
+        } else {
+          setCheckoutError("Connection issue — please check your internet and try again.");
+        }
       }
     });
   };
@@ -478,7 +485,18 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                 </svg>
-                <span>{checkoutError}</span>
+                <div className="flex-1">
+                  <span>{checkoutError}</span>
+                  {checkoutError.includes("reload") && (
+                    <button
+                      type="button"
+                      onClick={() => window.location.reload()}
+                      className="mt-1.5 block text-xs font-semibold text-red-800 underline underline-offset-2 hover:text-red-900"
+                    >
+                      Reload now
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
