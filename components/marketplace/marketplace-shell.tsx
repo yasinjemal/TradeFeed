@@ -265,19 +265,19 @@ export function MarketplaceShell({
     currentFilters.verifiedOnly;
 
   return (
-    <main className="min-h-screen bg-stone-950 text-stone-100">
+    <main className="min-h-screen bg-white text-slate-900">
       {/* ── Navbar ──────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-stone-950/80 backdrop-blur-xl border-b border-stone-800/50">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
           <Link href="/" className="flex items-center gap-2.5">
-            <TradeFeedLogo />
+            <TradeFeedLogo variant="dark" />
           </Link>
 
           {/* Desktop search */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-lg mx-8">
             <div className="relative w-full" ref={suggestionsBoxRef}>
               <svg
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={2}
@@ -294,7 +294,7 @@ export function MarketplaceShell({
                     setShowSuggestions(true);
                 }}
                 placeholder={t("searchPlaceholder")}
-                className="w-full rounded-xl bg-stone-900 border border-stone-800 pl-10 pr-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all"
               />
               {search && (
                 <button
@@ -306,7 +306,7 @@ export function MarketplaceShell({
                     updateFilters({ search: undefined });
                   }}
                   aria-label="Clear search"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-stone-700 flex items-center justify-center text-stone-400 hover:bg-stone-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors"
                 >
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -316,18 +316,18 @@ export function MarketplaceShell({
 
               {/* Autocomplete dropdown */}
               {showSuggestions && (
-                <div className="absolute top-full left-0 right-0 mt-1.5 rounded-xl bg-stone-900 border border-stone-700/80 shadow-2xl overflow-hidden z-50">
+                <div className="absolute top-full left-0 right-0 mt-1.5 rounded-xl bg-white border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden z-50">
                   {suggestions.categories.length > 0 && (
                     <div className="px-3 pt-2.5 pb-1">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 px-1">Categories</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-1">Categories</p>
                       {suggestions.categories.map((c) => (
                         <button
                           key={c.slug}
                           type="button"
                           onMouseDown={() => selectCategorySuggestion(c.slug)}
-                          className="w-full text-left px-2 py-1.5 text-sm text-emerald-400 hover:bg-stone-800 rounded-lg transition-colors flex items-center gap-2"
+                          className="w-full text-left px-2 py-1.5 text-sm text-blue-600 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2"
                         >
-                          <svg className="w-3.5 h-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6z" />
                           </svg>
                           {c.name}
@@ -337,16 +337,16 @@ export function MarketplaceShell({
                   )}
                   {suggestions.products.length > 0 && (
                     <div className="px-3 pt-2 pb-2">
-                      {suggestions.categories.length > 0 && <div className="border-t border-stone-800 mb-2" />}
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-500 px-1 mb-1">Products</p>
+                      {suggestions.categories.length > 0 && <div className="border-t border-slate-100 mb-2" />}
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-1 mb-1">Products</p>
                       {suggestions.products.map((p) => (
                         <button
                           key={p.slug}
                           type="button"
                           onMouseDown={() => selectSuggestion(p.name)}
-                          className="w-full text-left px-2 py-1.5 text-sm text-stone-200 hover:bg-stone-800 rounded-lg transition-colors flex items-center gap-2"
+                          className="w-full text-left px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2"
                         >
-                          <svg className="w-3.5 h-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                           </svg>
                           {p.name}
@@ -367,7 +367,7 @@ export function MarketplaceShell({
               <>
                 <Link
                   href="/dashboard"
-                  className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-400 hover:text-white transition-colors"
+                  className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
                 >
                   Dashboard
                 </Link>
@@ -384,13 +384,13 @@ export function MarketplaceShell({
               <>
                 <Link
                   href="/sign-in"
-                  className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-400 hover:text-white transition-colors"
+                  className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/sign-up"
-                  className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-all"
+                  className="px-4 py-2.5 text-sm font-semibold rounded-xl bg-blue-600 text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
                 >
                   Start Selling
                 </Link>
@@ -401,42 +401,135 @@ export function MarketplaceShell({
       </nav>
 
       {/* ── Hero ────────────────────────────────────────── */}
-      <section className="relative pt-24 pb-6 sm:pt-28 sm:pb-8 px-4 sm:px-6">
-        {/* Background banner image */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <Image
-            src="/img/marketplace_banner.png"
-            alt=""
-            fill
-            className="object-cover opacity-10"
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-stone-950/40 to-stone-950/90" />
-        </div>
-        {/* Background glow */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-emerald-500/6 rounded-full blur-[100px]" />
-        </div>
+      <section className="relative pt-24 pb-8 sm:pt-28 sm:pb-10 px-4 sm:px-6">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-white pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-              Discover SA&apos;s Best{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-300">
-                Products
+        <div className="relative max-w-7xl mx-auto text-center">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-slate-900">
+            Find trusted products from{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-500">
+              South African sellers
+            </span>
+          </h1>
+          <p className="mt-3 text-slate-500 text-sm sm:text-base max-w-xl mx-auto">
+            Browse thousands of products. Wholesale &amp; retail prices. Order directly via WhatsApp.
+          </p>
+
+          {/* Trust badges */}
+          <div className="mt-5 flex items-center justify-center gap-5 flex-wrap">
+            {[
+              { icon: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z", label: "Verified Sellers" },
+              { icon: "M15 10.5a3 3 0 11-6 0 3 3 0 016 0z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z", label: "Local Businesses" },
+              { icon: "M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z", label: "Fast Response" },
+            ].map((badge) => (
+              <span key={badge.label} className="inline-flex items-center gap-1.5 text-xs text-slate-500">
+                <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d={badge.icon} />
+                </svg>
+                {badge.label}
               </span>
-            </h1>
-            <p className="mt-2 text-stone-400 text-sm sm:text-base max-w-lg">
-              Browse thousands of products from verified South African sellers.
-              Wholesale &amp; retail prices. Order directly via WhatsApp.
-            </p>
+            ))}
           </div>
 
+          {/* Desktop search (centered, large) */}
+          <form onSubmit={handleSearch} className="hidden md:block mt-8 max-w-2xl mx-auto">
+            <div className="relative" ref={suggestionsBoxRef}>
+              <svg
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => handleSearchInput(e.target.value)}
+                onFocus={() => {
+                  if (suggestions.products.length > 0 || suggestions.categories.length > 0)
+                    setShowSuggestions(true);
+                }}
+                placeholder={t("searchPlaceholder")}
+                className="w-full rounded-2xl bg-white border border-slate-200 pl-12 pr-14 py-4 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 shadow-lg shadow-slate-200/50 transition-all"
+              />
+              {search ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setSuggestions({ products: [], categories: [] });
+                    setShowSuggestions(false);
+                    updateFilters({ search: undefined });
+                  }}
+                  aria-label="Clear search"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 transition-colors"
+                >
+                  Search
+                </button>
+              )}
+
+              {/* Autocomplete dropdown */}
+              {showSuggestions && (
+                <div className="absolute top-full left-0 right-0 mt-1.5 rounded-xl bg-white border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden z-50">
+                  {suggestions.categories.length > 0 && (
+                    <div className="px-3 pt-2.5 pb-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-1">Categories</p>
+                      {suggestions.categories.map((c) => (
+                        <button
+                          key={c.slug}
+                          type="button"
+                          onMouseDown={() => selectCategorySuggestion(c.slug)}
+                          className="w-full text-left px-2 py-1.5 text-sm text-blue-600 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6z" />
+                          </svg>
+                          {c.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {suggestions.products.length > 0 && (
+                    <div className="px-3 pt-2 pb-2">
+                      {suggestions.categories.length > 0 && <div className="border-t border-slate-100 mb-2" />}
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-1 mb-1">Products</p>
+                      {suggestions.products.map((p) => (
+                        <button
+                          key={p.slug}
+                          type="button"
+                          onMouseDown={() => selectSuggestion(p.name)}
+                          className="w-full text-left px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                          </svg>
+                          {p.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </form>
+
           {/* Mobile search */}
-          <form onSubmit={handleSearch} className="md:hidden mt-4">
+          <form onSubmit={handleSearch} className="md:hidden mt-6">
             <div className="relative">
               <svg
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={2}
@@ -449,7 +542,7 @@ export function MarketplaceShell({
                 value={search}
                 onChange={(e) => handleSearchInput(e.target.value)}
                 placeholder={t("searchPlaceholder")}
-                className="w-full rounded-xl bg-stone-900 border border-stone-800 pl-10 pr-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-emerald-500/50 transition-all"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all"
               />
             </div>
           </form>
@@ -467,11 +560,11 @@ export function MarketplaceShell({
 
       {/* ── Featured Carousel (only if promoted products exist) */}
       {promotedProducts.length > 0 && !hasFiltersOrSearch && (
-        <section className="px-4 sm:px-6 pt-4 pb-2">
+        <section className="px-4 sm:px-6 pt-6 pb-2">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <span className="text-lg">🔥</span>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
                 Featured Products
               </h2>
             </div>
@@ -482,11 +575,11 @@ export function MarketplaceShell({
 
       {/* ── Featured Shops (only on default view) ───────── */}
       {featuredShops.length > 0 && !hasFiltersOrSearch && (
-        <section className="px-4 sm:px-6 pt-4 pb-2">
+        <section className="px-4 sm:px-6 pt-6 pb-2">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <span className="text-lg">⭐</span>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
                 Featured Shops
               </h2>
             </div>
@@ -501,11 +594,11 @@ export function MarketplaceShell({
 
       {/* ── Trending (only on default view, no search) ──── */}
       {trendingProducts.length > 0 && !hasFiltersOrSearch && (
-        <section className="px-4 sm:px-6 pt-4 pb-2">
+        <section className="px-4 sm:px-6 pt-6 pb-2">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <span className="text-lg">📈</span>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
                 Trending This Week
               </h2>
             </div>
@@ -520,11 +613,11 @@ export function MarketplaceShell({
 
       {/* ── New Arrivals (only on default view, no search) ── */}
       {newArrivals.length > 0 && !hasFiltersOrSearch && (
-        <section className="px-4 sm:px-6 pt-4 pb-2">
+        <section className="px-4 sm:px-6 pt-6 pb-2">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <span className="text-lg">✨</span>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
                 Just Listed
               </h2>
             </div>
@@ -548,8 +641,8 @@ export function MarketplaceShell({
                 onClick={() => setFilterOpen(true)}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all btn-press ${
                   activeFilterCount > 0
-                    ? "bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/25"
-                    : "bg-stone-900 border border-stone-800 text-stone-300 hover:border-stone-600 hover:text-stone-100"
+                    ? "bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100"
+                    : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 shadow-sm"
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -557,7 +650,7 @@ export function MarketplaceShell({
                 </svg>
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center">
+                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[11px] font-bold flex items-center justify-center">
                     {activeFilterCount}
                   </span>
                 )}
@@ -568,14 +661,14 @@ export function MarketplaceShell({
                 {isPending ? (
                   <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                 ) : (
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
                 )}
-                <p className="text-sm text-stone-500">
-                  <span className="font-semibold text-stone-300">{totalProducts.toLocaleString()}</span>{" "}
+                <p className="text-sm text-slate-500">
+                  <span className="font-semibold text-slate-800">{totalProducts.toLocaleString()}</span>{" "}
                   {totalProducts === 1 ? "product" : "products"}
                   {currentFilters.search && (
-                    <span className="text-stone-500">
-                      {" "}for &ldquo;<span className="text-emerald-400">{currentFilters.search}</span>&rdquo;
+                    <span className="text-slate-500">
+                      {" "}for &ldquo;<span className="text-blue-600 font-medium">{currentFilters.search}</span>&rdquo;
                     </span>
                   )}
                 </p>
@@ -587,7 +680,7 @@ export function MarketplaceShell({
               value={currentFilters.sortBy}
               onChange={(e) => updateFilters({ sort: e.target.value })}
               aria-label="Sort products"
-              className="rounded-xl bg-stone-900 border border-stone-800 px-3 py-2 text-sm text-stone-300 focus:outline-none focus:border-emerald-500/50 cursor-pointer"
+              className="rounded-xl bg-white border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:outline-none focus:border-blue-400 cursor-pointer shadow-sm"
             >
               <option value="quality">Best Match</option>
               <option value="newest">Newest</option>
@@ -635,7 +728,7 @@ export function MarketplaceShell({
                   setSearch("");
                   router.push("/marketplace");
                 }}
-                className="text-xs text-emerald-400 hover:text-emerald-300 font-medium px-2 py-1"
+                className="text-xs text-blue-600 hover:text-blue-500 font-medium px-2 py-1"
               >
                 Clear all
               </button>
@@ -651,8 +744,8 @@ export function MarketplaceShell({
             /* Empty State */
             <div className="flex flex-col items-center py-20 text-center">
               <IllustrationSearchNotFound className="w-44 h-44 mb-4" />
-              <h3 className="text-lg font-bold text-stone-300 mb-1">{t("noResults")}</h3>
-              <p className="text-sm text-stone-500 max-w-sm mb-4">
+              <h3 className="text-lg font-bold text-slate-800 mb-1">{t("noResults")}</h3>
+              <p className="text-sm text-slate-500 max-w-sm mb-4">
                 Try adjusting your filters, search for something else, or browse all products.
               </p>
               <button
@@ -661,7 +754,7 @@ export function MarketplaceShell({
                   setSearch("");
                   router.push("/marketplace");
                 }}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-all"
+                className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
               >
                 Browse All Products
               </button>
@@ -681,12 +774,12 @@ export function MarketplaceShell({
               {isPending && allProducts.length === 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="rounded-2xl bg-stone-900 border border-stone-800/50 overflow-hidden">
-                      <div className="aspect-square bg-stone-800 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+                    <div key={i} className="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
+                      <div className="aspect-square bg-slate-100 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
                       <div className="p-3 space-y-2">
-                        <div className="h-4 w-3/4 rounded bg-stone-800 animate-pulse" style={{ animationDelay: `${i * 80 + 40}ms` }} />
-                        <div className="h-3 w-1/2 rounded bg-stone-800/60 animate-pulse" style={{ animationDelay: `${i * 80 + 80}ms` }} />
-                        <div className="h-5 w-1/3 rounded bg-stone-800 animate-pulse" style={{ animationDelay: `${i * 80 + 120}ms` }} />
+                        <div className="h-4 w-3/4 rounded bg-slate-100 animate-pulse" style={{ animationDelay: `${i * 80 + 40}ms` }} />
+                        <div className="h-3 w-1/2 rounded bg-slate-100 animate-pulse" style={{ animationDelay: `${i * 80 + 80}ms` }} />
+                        <div className="h-5 w-1/3 rounded bg-slate-100 animate-pulse" style={{ animationDelay: `${i * 80 + 120}ms` }} />
                       </div>
                     </div>
                   ))}
@@ -697,11 +790,11 @@ export function MarketplaceShell({
               {hasMore && (
                 <div ref={sentinelRef} className="flex items-center justify-center py-10">
                   {isLoadingMore && (
-                    <div className="flex items-center gap-3 text-sm text-stone-500">
+                    <div className="flex items-center gap-3 text-sm text-slate-500">
                       <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "300ms" }} />
                       </div>
                       Loading more products…
                     </div>
@@ -711,7 +804,7 @@ export function MarketplaceShell({
 
               {/* End of results */}
               {!hasMore && allProducts.length > 0 && totalProducts > currentFilters.pageSize && (
-                <p className="text-center text-sm text-stone-600 py-8">
+                <p className="text-center text-sm text-slate-400 py-8">
                   You&apos;ve seen all {totalProducts.toLocaleString()} products ✓
                 </p>
               )}
@@ -721,20 +814,20 @@ export function MarketplaceShell({
       </section>
 
       {/* ── Footer ──────────────────────────────────────── */}
-      <footer className="border-t border-stone-800/50 mt-12">
+      <footer className="border-t border-slate-200 mt-12 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <TradeFeedLogo size="sm" />
+              <TradeFeedLogo size="sm" variant="dark" />
             </Link>
-            <div className="flex items-center gap-6 text-xs text-stone-500">
-              <Link href="/privacy" className="hover:text-stone-300 transition-colors">Privacy</Link>
-              <Link href="/terms" className="hover:text-stone-300 transition-colors">Terms</Link>
-              <Link href="/contact" className="hover:text-stone-300 transition-colors">Contact</Link>
+            <div className="flex items-center gap-6 text-xs text-slate-500">
+              <Link href="/privacy" className="hover:text-slate-800 transition-colors">Privacy</Link>
+              <Link href="/terms" className="hover:text-slate-800 transition-colors">Terms</Link>
+              <Link href="/contact" className="hover:text-slate-800 transition-colors">Contact</Link>
               {isSignedIn ? (
-                <Link href="/dashboard" className="hover:text-emerald-400 transition-colors">Dashboard</Link>
+                <Link href="/dashboard" className="hover:text-blue-600 transition-colors">Dashboard</Link>
               ) : (
-                <Link href="/sign-up" className="hover:text-emerald-400 transition-colors">Start Selling</Link>
+                <Link href="/sign-up" className="hover:text-blue-600 transition-colors">Start Selling</Link>
               )}
             </div>
           </div>
@@ -767,13 +860,13 @@ function FilterTag({
   onRemove: () => void;
 }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-600">
       {label}
       <button
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${label} filter`}
-        className="w-3.5 h-3.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/40 flex items-center justify-center transition-colors"
+        className="w-3.5 h-3.5 rounded-full bg-blue-100 hover:bg-blue-200 flex items-center justify-center transition-colors"
       >
         <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

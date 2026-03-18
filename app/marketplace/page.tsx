@@ -189,11 +189,11 @@ export default async function MarketplacePage({
       />
 
       {/* ── Internal linking for SEO ─────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 py-16 border-t border-stone-800/30">
+      <section className="max-w-7xl mx-auto px-4 py-16 border-t border-slate-200">
         <div className="grid md:grid-cols-3 gap-12">
           {/* Browse by Province */}
           <div>
-            <h2 className="text-lg font-bold text-stone-200 mb-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-4">
               Browse Suppliers by Province
             </h2>
             <ul className="grid grid-cols-1 gap-y-2">
@@ -201,7 +201,7 @@ export default async function MarketplacePage({
                 <li key={p.slug}>
                   <Link
                     href={`/marketplace/${p.slug}`}
-                    className="text-sm text-stone-400 hover:text-emerald-400 transition-colors"
+                    className="text-sm text-slate-500 hover:text-blue-600 transition-colors"
                   >
                     Suppliers in {p.name} →
                   </Link>
@@ -212,7 +212,7 @@ export default async function MarketplacePage({
 
           {/* Popular Cities */}
           <div>
-            <h2 className="text-lg font-bold text-stone-200 mb-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-4">
               Popular Cities
             </h2>
             <ul className="grid grid-cols-1 gap-y-2">
@@ -220,7 +220,7 @@ export default async function MarketplacePage({
                 <li key={`${province.slug}-${city.slug}`}>
                   <Link
                     href={`/marketplace/${province.slug}/${city.slug}`}
-                    className="text-sm text-stone-400 hover:text-emerald-400 transition-colors"
+                    className="text-sm text-slate-500 hover:text-blue-600 transition-colors"
                   >
                     {city.name}, {province.name} →
                   </Link>
@@ -231,7 +231,7 @@ export default async function MarketplacePage({
 
           {/* Browse by Category */}
           <div>
-            <h2 className="text-lg font-bold text-stone-200 mb-4">
+            <h2 className="text-lg font-bold text-slate-800 mb-4">
               Browse by Category
             </h2>
             <ul className="grid grid-cols-1 gap-y-2">
@@ -242,7 +242,7 @@ export default async function MarketplacePage({
                   <li key={c.slug}>
                     <Link
                       href={`/marketplace/category/${c.slug}`}
-                      className="text-sm text-stone-400 hover:text-emerald-400 transition-colors"
+                      className="text-sm text-slate-500 hover:text-blue-600 transition-colors"
                     >
                       {c.name} →
                     </Link>
@@ -253,12 +253,12 @@ export default async function MarketplacePage({
         </div>
 
         {/* WhatsApp Import CTA */}
-        <div className="mt-10 pt-8 border-t border-stone-800/30 text-center">
-          <p className="text-sm text-stone-500">
+        <div className="mt-10 pt-8 border-t border-slate-200 text-center">
+          <p className="text-sm text-slate-500">
             Already selling on WhatsApp?{" "}
             <Link
               href="/import-whatsapp-catalogue"
-              className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2"
+              className="text-blue-600 hover:text-blue-500 underline underline-offset-2"
             >
               Import your WhatsApp catalogue
             </Link>{" "}

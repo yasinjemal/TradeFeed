@@ -49,8 +49,8 @@ export function CategoryBar({
               onClick={() => onSelectCategory(undefined)}
               className={`relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl min-h-[76px] transition-all duration-200 active:scale-[0.96] ${
                 !selectedCategory
-                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/25 ring-1 ring-emerald-500/50"
-                  : "bg-stone-900/80 text-stone-400 border border-stone-800/60 hover:border-stone-700"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-1 ring-blue-500/50"
+                  : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 shadow-sm"
               }`}
             >
               <span className="text-xl leading-none">🛍️</span>
@@ -74,8 +74,8 @@ export function CategoryBar({
                   }
                   className={`relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl min-h-[76px] transition-all duration-200 active:scale-[0.96] ${
                     isActive
-                      ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/25 ring-1 ring-emerald-500/50"
-                      : "bg-stone-900/80 text-stone-400 border border-stone-800/60 hover:border-stone-700"
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-1 ring-blue-500/50"
+                      : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 shadow-sm"
                   }`}
                 >
                   {cat.icon && (
@@ -87,7 +87,7 @@ export function CategoryBar({
                   {cat.productCount > 0 && (
                     <span
                       className={`text-[9px] font-medium leading-none ${
-                        isActive ? "text-emerald-200" : "text-stone-600"
+                        isActive ? "text-blue-200" : "text-slate-400"
                       }`}
                     >
                       {cat.productCount} items
@@ -105,7 +105,7 @@ export function CategoryBar({
               <button
                 type="button"
                 onClick={() => setExpanded(!expanded)}
-                className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl min-h-[76px] bg-stone-900/50 border border-dashed border-stone-800/60 text-stone-500 hover:text-stone-300 hover:border-stone-700 transition-all duration-200 active:scale-[0.96]"
+                className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl min-h-[76px] bg-slate-50 border border-dashed border-slate-300 text-slate-500 hover:text-slate-700 hover:border-slate-400 transition-all duration-200 active:scale-[0.96]"
               >
                 <svg
                   className={`w-5 h-5 transition-transform duration-300 ${
@@ -137,8 +137,8 @@ export function CategoryBar({
             onClick={() => onSelectCategory(undefined)}
             className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
               !selectedCategory
-                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-                : "bg-stone-900 border border-stone-800 text-stone-400 hover:border-stone-700 hover:text-stone-300"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "bg-slate-50 border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800"
             }`}
           >
             🛍️ All Products
@@ -155,8 +155,8 @@ export function CategoryBar({
               }
               className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
                 selectedCategory === cat.slug
-                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-                  : "bg-stone-900 border border-stone-800 text-stone-400 hover:border-stone-700 hover:text-stone-300"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                  : "bg-slate-50 border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800"
               }`}
             >
               {cat.icon && <span>{cat.icon}</span>}
@@ -165,8 +165,8 @@ export function CategoryBar({
                 <span
                   className={`text-[10px] ${
                     selectedCategory === cat.slug
-                      ? "text-emerald-200"
-                      : "text-stone-600"
+                      ? "text-blue-200"
+                      : "text-slate-400"
                   }`}
                 >
                   {cat.productCount}
