@@ -9,6 +9,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 
@@ -134,8 +135,8 @@ export function MobileNav({
         </svg>
       </button>
 
-      {/* ── Full-screen Nav Overlay ────────────────── */}
-      {open && (
+      {/* ── Full-screen Nav Overlay (portal to escape backdrop-blur containing block) ── */}
+      {open && createPortal(
         <div className="fixed inset-0 z-[9999] md:hidden bg-white flex flex-col">
 
             {/* ── Header ─────────────────────────────── */}
@@ -321,7 +322,8 @@ export function MobileNav({
                 )}
               </div>
             </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
