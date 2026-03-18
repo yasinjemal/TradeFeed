@@ -160,7 +160,7 @@ export function MobileNav({
           />
 
           {/* Drawer panel — slides from right */}
-          <div className="absolute right-0 top-0 bottom-0 w-[300px] max-w-[85vw] bg-white shadow-2xl shadow-black/10 animate-in slide-in-from-right duration-300 flex flex-col">
+          <div className="absolute right-0 top-0 bottom-0 h-full w-[300px] max-w-[85vw] bg-white shadow-2xl shadow-black/10 animate-in slide-in-from-right duration-300 flex flex-col">
 
             {/* ── Header ─────────────────────────────── */}
             <div className="flex items-center justify-between px-5 h-16 border-b border-slate-100 flex-shrink-0">
@@ -189,7 +189,7 @@ export function MobileNav({
             {/* ── Scrollable Content ─────────────────── */}
             <div
               ref={scrollRef}
-              className="flex-1 overflow-y-auto overscroll-contain"
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
               style={{ WebkitOverflowScrolling: "touch" }}
             >
               {/* Top scroll shadow */}
