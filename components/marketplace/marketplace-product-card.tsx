@@ -1,11 +1,3 @@
-// ============================================================
-// Marketplace Product Card — Trust-driven design
-// ============================================================
-// Clean white card with clear hierarchy: Image → Price → Title
-// → Seller (verified + location) → Rating → Social proof.
-// Inspired by Amazon/Takealot product cards.
-// ============================================================
-
 "use client";
 
 import { useState } from "react";
@@ -14,24 +6,49 @@ import Link from "next/link";
 import Image from "next/image";
 import type { MarketplaceProduct } from "@/lib/db/marketplace";
 import { SHIMMER_LIGHT } from "@/lib/image-placeholder";
+import { cn } from "@/lib/utils";
+import { TrustBadge } from "@/components/ui/trust-badge";
 import { trackMarketplaceClickAction, trackPromotedClickAction } from "@/app/actions/marketplace";
 
 interface MarketplaceProductCardProps {
   product: MarketplaceProduct;
-  /** Compact mode for trending section (smaller card) */
   compact?: boolean;
 }
 
-const formatZAR = (cents: number) =>
-  new Intl.NumberFormat("en-ZA", {
+const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
+
+function formatZAR(cents: number) {
+  return new Intl.NumberFormat("en-ZA", {
     style: "currency",
     currency: "ZAR",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(cents / 100);
+}
+
+function getPromotionLabel(tier: "BOOST" | "FEATURED" | "SPOTLIGHT") {
+  switch (tier) {
+    case "SPOTLIGHT":
+      return "Spotlight";
+    case "FEATURED":
+      return "Featured";
+    case "BOOST":
+      return "Promoted";
+  }
+}
+
+function getActivityLabel(product: MarketplaceProduct) {
+  if (product.soldCount >= 25) return `${product.soldCount}+ sold`;
+  if (product.soldCount > 0) return `${product.soldCount} sold`;
+  if (Date.now() - product.createdAt.getTime() < ONE_WEEK_IN_MS) return "New this week";
+  return product.shop.isVerified ? "Verified store" : "Fresh listing";
+}
 
 export function MarketplaceProductCard({ product, compact = false }: MarketplaceProductCardProps) {
-  const [imgError, setImgError] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const isNewListing = Date.now() - product.createdAt.getTime() < ONE_WEEK_IN_MS;
+  const showTopSellerBadge = (product.avgRating ?? 0) >= 4.7 && product.reviewCount >= 5;
+  const locationLabel = product.shop.city ?? product.shop.province ?? "South Africa";
 
   const handleClick = () => {
     trackMarketplaceClickAction(product.shop.id, product.id);
@@ -43,207 +60,196 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
   return (
     <Link
       href={`/catalog/${product.shop.slug}/products/${product.slug ?? product.id}`}
-      onClick={handleClick}
       aria-label={`${product.name} from ${product.shop.name}`}
-      className="group block"
+      onClick={handleClick}
+      className="block h-full"
     >
-      <motion.div
-        className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden transition-colors duration-200 hover:border-blue-200"
-        whileHover={{ y: -6, boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.15)" }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      <motion.article
+        whileHover={{ y: -6 }}
+        transition={{ type: "spring", stiffness: 320, damping: 24 }}
+        className={cn(
+          "group flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/60 transition-all duration-300 hover:border-emerald-200 hover:shadow-xl hover:shadow-slate-200/70",
+          compact ? "rounded-2xl" : ""
+        )}
       >
-        {/* Image */}
-        <div className={`relative ${compact ? "aspect-square" : "aspect-[4/5]"} bg-slate-50 overflow-hidden`}>
-          {product.imageUrl && !imgError ? (
+        <div className="relative aspect-square overflow-hidden bg-slate-100">
+          {product.imageUrl && !imageFailed ? (
             <Image
               src={product.imageUrl}
               alt={product.name}
               fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              sizes={compact ? "(max-width: 768px) 50vw, 220px" : "(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"}
               placeholder="blur"
               blurDataURL={SHIMMER_LIGHT}
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              onError={() => setImgError(true)}
+              onError={() => setImageFailed(true)}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-300">
-              <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-slate-300">
+              <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" strokeWidth={1.4} stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
               </svg>
-              <span className="text-xs">No image</span>
+              <span className="text-xs font-medium">Image coming soon</span>
             </div>
           )}
 
-          {/* Top-left: Sponsored or Verified badge */}
-          {product.promotion ? (
-            <div className="absolute top-2 left-2">
-              <SponsoredBadge tier={product.promotion.tier} />
+          <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
+            <div className="flex flex-wrap gap-2">
+              {product.promotion ? (
+                <TrustBadge
+                  variant="promoted"
+                  small
+                  label={getPromotionLabel(product.promotion.tier)}
+                  className="bg-white/90 backdrop-blur"
+                />
+              ) : null}
+              {product.shop.isVerified ? (
+                <TrustBadge variant="verified" small className="bg-white/90 backdrop-blur" />
+              ) : null}
             </div>
-          ) : product.shop.isVerified ? (
-            <div className="absolute top-2 left-2">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500 text-white text-[10px] font-semibold shadow-sm">
-                <svg className="w-2.5 h-2.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.403 12.652a3 3 0 010-5.304 3 3 0 00-3.75-3.751 3 3 0 00-5.305 0 3 3 0 00-3.751 3.75 3 3 0 000 5.305 3 3 0 003.75 3.751 3 3 0 005.305 0 3 3 0 003.751-3.75zm-2.546-4.46a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-                </svg>
-                Verified
+
+            {product.sellerTier ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/90 px-2.5 py-1 text-[11px] font-medium text-slate-700 backdrop-blur">
+                <span aria-hidden="true">{product.sellerTier.emoji}</span>
+                <span>{product.sellerTier.label}</span>
               </span>
+            ) : null}
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/65 via-slate-950/25 to-transparent px-3 pb-3 pt-8 text-white">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/70">From</p>
+                <p className={cn("font-bold tracking-tight", compact ? "text-base" : "text-xl")}>{formatZAR(product.minPriceCents)}</p>
+                {product.minPriceCents !== product.maxPriceCents ? (
+                  <p className="text-xs text-white/80">Up to {formatZAR(product.maxPriceCents)}</p>
+                ) : null}
+              </div>
+
+              <div className="flex flex-col items-end gap-1">
+                {product.reviewCount > 0 ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium backdrop-blur-sm">
+                    <svg className="h-3.5 w-3.5 text-amber-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    {(product.avgRating ?? 0).toFixed(1)}
+                  </span>
+                ) : null}
+
+                {isNewListing ? (
+                  <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm">New</span>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={cn("flex flex-1 flex-col", compact ? "p-3.5" : "p-4")}>
+          <div className="mb-2 flex items-start justify-between gap-3">
+            <h3 className={cn("line-clamp-2 font-semibold leading-snug text-slate-900 transition-colors group-hover:text-emerald-700", compact ? "text-sm" : "text-base")}>
+              {product.name}
+            </h3>
+
+            {showTopSellerBadge && !compact ? <TrustBadge variant="top-seller" small className="shrink-0" /> : null}
+          </div>
+
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            {product.shop.logoUrl ? (
+              <Image
+                src={product.shop.logoUrl}
+                alt={product.shop.name}
+                width={28}
+                height={28}
+                className="h-7 w-7 rounded-full border border-slate-200 object-cover"
+              />
+            ) : (
+              <div className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[11px] font-semibold text-slate-700">
+                {product.shop.name.charAt(0)}
+              </div>
+            )}
+
+            <div className="min-w-0">
+              <p className="truncate font-medium text-slate-700">{product.shop.name}</p>
+              <div className="flex items-center gap-1 text-xs text-slate-500">
+                <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+                <span className="truncate">{locationLabel}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {product.reviewCount > 0 ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                <svg className="h-3.5 w-3.5 text-amber-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <span>{(product.avgRating ?? 0).toFixed(1)}</span>
+                <span className="text-slate-400">·</span>
+                <span>{product.reviewCount} reviews</span>
+              </span>
+            ) : (
+              <TrustBadge variant="new-seller" small label="No reviews yet" />
+            )}
+
+            {!compact ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                <svg className="h-3.5 w-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{getActivityLabel(product)}</span>
+              </span>
+            ) : null}
+          </div>
+
+          {!compact ? (
+            <div className="mt-auto pt-4">
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-600">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Trust signal</p>
+                  <p className="mt-1 font-medium text-slate-700">
+                    {product.shop.isVerified ? "Phone-verified seller on TradeFeed" : "Order directly with a real seller"}
+                  </p>
+                </div>
+                <svg className="h-5 w-5 shrink-0 text-emerald-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path
+                    fillRule="evenodd"
+                    d="M16.403 12.652a3 3 0 010-5.304 3 3 0 00-3.75-3.751 3 3 0 00-5.305 0 3 3 0 00-3.751 3.75 3 3 0 000 5.305 3 3 0 003.75 3.751 3 3 0 005.305 0 3 3 0 003.751-3.75zm-2.546-4.46a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
             </div>
           ) : null}
-
-          {/* Top-right: Seller tier */}
-          {product.sellerTier && (
-            <div className="absolute top-2 right-2">
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/90 backdrop-blur-sm text-[9px] font-bold text-slate-700 border border-slate-200 shadow-sm">
-                {product.sellerTier.emoji} {product.sellerTier.label}
-              </span>
-            </div>
-          )}
-
-          {/* Bottom-right: Ranking badges */}
-          <div className="absolute bottom-2 right-2 flex flex-col gap-1 items-end">
-            {(product.avgRating ?? 0) >= 4.5 && product.reviewCount >= 3 && (
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-bold shadow-sm">
-                ⭐ Top Rated
-              </span>
-            )}
-            {product.soldCount >= 10 && (
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-green-500 text-white text-[9px] font-bold shadow-sm">
-                ⚡ Fast Seller
-              </span>
-            )}
-          </div>
         </div>
-
-        {/* Info — clear hierarchy */}
-        <div className={`${compact ? "p-2.5" : "p-3.5 sm:p-4"}`}>
-          {/* Price — most important, bold at top */}
-          <div className="flex items-baseline gap-1.5 mb-1">
-            <span className={`font-bold text-slate-900 ${compact ? "text-sm" : "text-base sm:text-lg"}`}>
-              {formatZAR(product.minPriceCents)}
-            </span>
-            {product.minPriceCents !== product.maxPriceCents && (
-              <span className={`font-medium text-slate-400 ${compact ? "text-[10px]" : "text-xs"}`}>
-                – {formatZAR(product.maxPriceCents)}
-              </span>
-            )}
-          </div>
-
-          {/* Product name */}
-          <h3 className={`font-medium text-slate-700 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors ${compact ? "text-xs" : "text-[13px] sm:text-sm"}`}>
-            {product.name}
-          </h3>
-
-          {/* Rating row */}
-          {product.reviewCount > 0 && (
-            <div className="flex items-center gap-1 mt-1.5">
-              <div className="flex items-center gap-px">
-                {[1, 2, 3, 4, 5].map((star) => {
-                  const filled = (product.avgRating ?? 0) >= star;
-                  const halfFilled = !filled && (product.avgRating ?? 0) >= star - 0.5;
-                  return (
-                    <svg
-                      key={star}
-                      className={`${compact ? "w-3 h-3" : "w-3.5 h-3.5"} ${filled ? "text-amber-400" : halfFilled ? "text-amber-400/60" : "text-slate-200"}`}
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd" />
-                    </svg>
-                  );
-                })}
-              </div>
-              <span className={`text-slate-600 font-semibold ${compact ? "text-[10px]" : "text-xs"}`}>
-                {product.avgRating?.toFixed(1)}
-              </span>
-              <span className={`text-slate-400 ${compact ? "text-[10px]" : "text-xs"}`}>
-                ({product.reviewCount} {product.reviewCount === 1 ? "review" : "reviews"})
-              </span>
-            </div>
-          )}
-
-          {/* Seller info + location — trust row */}
-          {!compact && (
-            <div className="mt-2 pt-2 border-t border-slate-100">
-              <div className="flex items-center gap-1.5">
-                {product.shop.logoUrl ? (
-                  <Image
-                    src={product.shop.logoUrl}
-                    alt={product.shop.name}
-                    width={20}
-                    height={20}
-                    className="w-5 h-5 rounded-full object-cover border border-slate-200"
-                  />
-                ) : (
-                  <div className="w-5 h-5 rounded-full bg-blue-50 border border-slate-200 flex items-center justify-center">
-                    <span className="text-[9px] font-bold text-blue-600">
-                      {product.shop.name.charAt(0)}
-                    </span>
-                  </div>
-                )}
-                <span className="text-xs text-slate-700 font-medium truncate">
-                  {product.shop.name}
-                </span>
-                {product.shop.isVerified && (
-                  <svg className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.403 12.652a3 3 0 010-5.304 3 3 0 00-3.75-3.751 3 3 0 00-5.305 0 3 3 0 00-3.751 3.75 3 3 0 000 5.305 3 3 0 003.75 3.751 3 3 0 005.305 0 3 3 0 003.751-3.75zm-2.546-4.46a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-                  </svg>
-                )}
-                {product.shop.subscription?.status === "ACTIVE" && product.shop.subscription.plan.slug !== "free" && (
-                  <span className="inline-flex items-center px-1 py-0.5 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-200 text-[8px] font-bold text-amber-700 uppercase tracking-wider flex-shrink-0">
-                    PRO
-                  </span>
-                )}
-              </div>
-              {product.shop.city && (
-                <div className="flex items-center gap-1 mt-1">
-                  <svg className="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                  </svg>
-                  <span className="text-[11px] text-slate-500">{product.shop.city}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Social proof */}
-          {product.soldCount > 0 && !compact && (
-            <div className="mt-1.5">
-              <span className="inline-flex items-center gap-1 text-[11px] text-green-600 font-medium">
-                <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-                </svg>
-                {product.soldCount >= 100 ? "100+" : product.soldCount} sold
-              </span>
-            </div>
-          )}
-        </div>
-      </motion.div>
+      </motion.article>
     </Link>
   );
 }
 
-// ── Sponsored Badge ──────────────────────────────────────────
-
-function SponsoredBadge({ tier }: { tier: "BOOST" | "FEATURED" | "SPOTLIGHT" }) {
-  switch (tier) {
-    case "SPOTLIGHT":
-      return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold shadow-lg shadow-amber-500/30">
-          ⭐ Spotlight
-        </span>
-      );
-    case "FEATURED":
-      return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/90 text-white text-[10px] font-bold backdrop-blur-sm">
-          Featured
-        </span>
-      );
-    case "BOOST":
-      return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100/90 text-slate-600 text-[10px] font-medium backdrop-blur-sm border border-slate-200">
-          Sponsored
-        </span>
-      );
-  }
+export function MarketplaceProductCardSkeleton({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className="overflow-hidden rounded-[1.35rem] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/60">
+      <div className="aspect-square animate-pulse bg-slate-100" />
+      <div className={cn("space-y-3", compact ? "p-3.5" : "p-4")}>
+        <div className="h-5 w-24 animate-pulse rounded bg-slate-100" />
+        <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
+        <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
+        <div className="flex items-center gap-2 pt-1">
+          <div className="h-7 w-7 animate-pulse rounded-full bg-slate-100" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 w-2/3 animate-pulse rounded bg-slate-100" />
+            <div className="h-3 w-1/3 animate-pulse rounded bg-slate-100" />
+          </div>
+        </div>
+        <div className="flex gap-2 pt-1">
+          <div className="h-7 w-24 animate-pulse rounded-full bg-slate-100" />
+          {!compact ? <div className="h-7 w-28 animate-pulse rounded-full bg-slate-100" /> : null}
+        </div>
+      </div>
+    </div>
+  );
 }

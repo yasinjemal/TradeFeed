@@ -242,7 +242,7 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | Completed |
 | **Priority** | High |
 | **Description** | The core product discovery engine. Where buyers browse, search, and filter products across all sellers. |
 
@@ -259,6 +259,61 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 - Province filter: add map-based or icon-based province selector
 - Add "Recently Viewed" shelf for returning visitors
 - Add infinite scroll or pagination with visible page count
+
+#### Implementation Notes (Marketplace)
+
+**Component breakdown**:
+- `MarketplaceShell` remains the page orchestrator for header, trends, filters, and product grid composition
+- `SearchBar` will be extracted from the shell into a reusable marketplace search component with suggestion, recent-search, and trust copy support
+- `MarketplaceFilterSidebar` will be upgraded to collapsible filter groups with applied-filter chips and clearer mobile parity with the sheet variant
+- `MarketplaceProductCard` will be redesigned around trust-first commerce metadata: verified badge, rating, seller, province, pricing, promoted state, and activity indicators
+- `EmptyState` will provide a reusable no-results experience for marketplace search outcomes
+- `TrustBadge` will provide the first shared trust primitive for verified, promoted, and response-time states
+
+**Layout structure**:
+- Replace the current dark hero treatment with a light, trust-first marketplace header
+- Keep category discovery near the top, followed by search and applied filters
+- Keep trending content above the main results when there is no active search/filter state
+- Use a two-column desktop layout: left filter rail, right results stack
+- Preserve a mobile-first flow with sticky search/filter controls and bottom-sheet filtering
+
+**Data flow**:
+- Continue using the existing marketplace page loaders in `app/marketplace/*` routes to fetch products, promoted listings, categories, trending products, and featured shops on the server
+- Pass the current query parameters into the extracted search and filter components so URL state remains the source of truth
+- Derive trust and activity display from existing product/shop metadata already returned by marketplace queries
+- Use loading boundaries for skeleton states and conditional empty states when result sets are empty
+
+**What will be created**:
+- `components/marketplace/search-bar.tsx`
+- `components/ui/trust-badge.tsx`
+
+**What will be updated**:
+- `components/marketplace/marketplace-shell.tsx`
+- `components/marketplace/marketplace-product-card.tsx`
+- `components/marketplace/marketplace-filter-sidebar.tsx`
+- `components/marketplace/marketplace-filter-sheet.tsx`
+- `components/ui/empty-state.tsx`
+- `app/marketplace/loading.tsx`
+
+**What was implemented**:
+- Replaced the marketplace hero with a light, trust-first header focused on seller verification, buyer protection, and live marketplace activity
+- Extracted the marketplace search experience into `components/marketplace/search-bar.tsx` with autocomplete, recent searches, and trending query shortcuts
+- Redesigned `MarketplaceProductCard` around square imagery, clearer pricing hierarchy, seller identity, location, rating, verification, promotion, and activity metadata
+- Rebuilt desktop and mobile filtering into clearer category, location, price, and trust groupings with improved chips and bottom-sheet behavior on mobile
+- Added a stronger no-results experience using the shared `EmptyState` component with suggested searches
+- Updated marketplace loading states to use product skeleton cards and header/layout-aware placeholders
+- Added the initial `TrustBadge` shared component and used it across marketplace discovery surfaces
+
+**What remains**:
+- Add map/icon-based province selection instead of the current select input
+- Add a persistent recently viewed shelf for returning visitors
+- Add explicit page-count pagination or richer infinite-scroll progress messaging
+- Broaden trust signals beyond marketplace cards into full seller response-time and last-active indicators once backend support is wired
+
+**Known limitations**:
+- Recent searches are stored locally in the browser and do not sync across devices or sessions for signed-in users
+- Marketplace activity signals in the header remain heuristic summaries derived from marketplace totals, not real-time Redis-backed counters
+- Mobile filter category buttons currently prioritize the most relevant top categories; deeper category discovery still relies on the horizontal category bar and route pages
 
 ---
 
@@ -577,10 +632,10 @@ Display these trust signals at key anxiety points:
 
 ### Phase 2 — Core Buyer Experience
 
-- [ ] Marketplace page redesigned (search, filters, cards, empty states)
+- [x] Marketplace page redesigned (search, filters, cards, empty states)
 - [ ] Product page redesigned (gallery, trust signals, seller info, related products)
 - [ ] Seller shop page redesigned (hero, stats, product grid, reviews)
-- [ ] Search bar extracted and improved with autocomplete
+- [x] Search bar extracted and improved with autocomplete
 
 ### Phase 3 — Seller Experience
 
@@ -591,7 +646,7 @@ Display these trust signals at key anxiety points:
 
 ### Phase 4 — Trust System
 
-- [ ] `TrustBadge` component created
+- [x] `TrustBadge` component created
 - [ ] Seller verification tiers computed and displayed
 - [ ] Reviews histogram implemented
 - [ ] Activity indicators implemented (last active, response time, stock status)
