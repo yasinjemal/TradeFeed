@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
@@ -20,12 +20,12 @@ import { generateFaqJsonLd } from "@/lib/seo/json-ld";
 import type { Metadata } from "next";
 
 // ============================================================
-// Landing Page SEO â€” targeted for "wholesale marketplace South Africa"
+// Landing Page SEO — targeted for "wholesale marketplace South Africa"
 // ============================================================
 export const metadata: Metadata = {
-  title: "Sell Online South Africa â€” Create Your Shop & WhatsApp Catalog in 2 Minutes | TradeFeed",
+  title: "Sell Online South Africa — Create Your Shop & WhatsApp Catalog in 2 Minutes | TradeFeed",
   description:
-    "Turn your WhatsApp business into a professional online shop. Upload a photo, AI creates the listing in 10 seconds. Share your catalog link and get orders â€” no back-and-forth. Free forever. Join 100+ sellers in Johannesburg, Durban, Cape Town & all 9 provinces.",
+    "Turn your WhatsApp business into a professional online shop. Upload a photo, AI creates the listing in 10 seconds. Share your catalog link and get orders — no back-and-forth. Free forever. Join 100+ sellers in Johannesburg, Durban, Cape Town & all 9 provinces.",
   keywords: [
     // Primary high-volume
     "sell online South Africa",
@@ -72,21 +72,21 @@ export const metadata: Metadata = {
   },
 };
 
-// â”€â”€ FAQ data (used for both UI rendering + JSON-LD schema) â”€â”€
+// ── FAQ data (used for both UI rendering + JSON-LD schema) ──
 const FAQ_ITEMS = [
-  { q: "Do my customers need to download an app?", a: "No! Your customers just tap your catalog link â€” it opens in their phone browser. No app download, no sign-up, no registration. They browse products, add to cart, and order via WhatsApp. Works on any smartphone." },
+  { q: "Do my customers need to download an app?", a: "No! Your customers just tap your catalog link — it opens in their phone browser. No app download, no sign-up, no registration. They browse products, add to cart, and order via WhatsApp. Works on any smartphone." },
   { q: "Can I update stock and prices easily?", a: "Yes. Log into your dashboard from any device, edit any product, change prices, add new sizes or colors, upload new photos, or mark items as sold out. Changes appear on your catalog link instantly." },
   { q: "Is my WhatsApp number safe?", a: "Absolutely. Your WhatsApp number is only used to receive orders. When a customer taps the order button, it opens their WhatsApp with a pre-filled message. We never share your number with third parties, and it's protected by our POPIA-compliant privacy policy." },
-  { q: "How much does it cost?", a: "Free to start with up to 20 products â€” forever. When you're ready to scale, upgrade to Starter for R99/month (unlimited products), Pro for R299/month (unlimited AI + team accounts), or Pro AI for R499/month (full AI automation). No hidden fees. Cancel anytime." },
-  { q: "How is this different from posting in WhatsApp groups?", a: "WhatsApp posts get buried in 10 minutes. With TradeFeed, your products live on a permanent, searchable, shareable catalog page. Customers can browse anytime, filter by category, sort by price, and send you organized orders with exact sizes, colors, and quantities â€” no back-and-forth." },
-  { q: "Who is TradeFeed for?", a: "Any seller who uses WhatsApp to sell products â€” whether you're a Jeppe Street wholesaler, a boutique reseller, or selling from home. If your customers DM you for prices and stock â€” TradeFeed replaces that back-and-forth with a professional catalog link. Works great for clothing, shoes, electronics, beauty products, accessories, and any physical goods." },
+  { q: "How much does it cost?", a: "Free to start with up to 20 products — forever. When you're ready to scale, upgrade to Starter for R99/month (unlimited products), Pro for R299/month (unlimited AI + team accounts), or Pro AI for R499/month (full AI automation). No hidden fees. Cancel anytime." },
+  { q: "How is this different from posting in WhatsApp groups?", a: "WhatsApp posts get buried in 10 minutes. With TradeFeed, your products live on a permanent, searchable, shareable catalog page. Customers can browse anytime, filter by category, sort by price, and send you organized orders with exact sizes, colors, and quantities — no back-and-forth." },
+  { q: "Who is TradeFeed for?", a: "Any seller who uses WhatsApp to sell products — whether you're a Jeppe Street wholesaler, a boutique reseller, or selling from home. If your customers DM you for prices and stock — TradeFeed replaces that back-and-forth with a professional catalog link. Works great for clothing, shoes, electronics, beauty products, accessories, and any physical goods." },
   { q: "Can I use this if I'm not tech-savvy?", a: "If you can post a photo on WhatsApp, you can use TradeFeed. Upload a photo, type a name and price, hit save. That's it. No coding, no design skills needed. We even have a bulk import if you have a spreadsheet of products." },
-  { q: "Do you support PayFast for payments?", a: "Yes! Subscription payments are processed securely through PayFast â€” South Africa's most trusted payment gateway. Pay with card, EFT, or any PayFast-supported method. We also use PayFast for promoted listing purchases." },
-  { q: "Can buyers track their orders?", a: "Yes. Every order gets a unique tracking number (e.g. TF-20260224-0042). Sellers update the order status from their dashboard (Pending â†’ Confirmed â†’ Shipped â†’ Delivered), and buyers can enquire via WhatsApp using their order number." },
+  { q: "Do you support PayFast for payments?", a: "Yes! Subscription payments are processed securely through PayFast — South Africa's most trusted payment gateway. Pay with card, EFT, or any PayFast-supported method. We also use PayFast for promoted listing purchases." },
+  { q: "Can buyers track their orders?", a: "Yes. Every order gets a unique tracking number (e.g. TF-20260224-0042). Sellers update the order status from their dashboard (Pending → Confirmed → Shipped → Delivered), and buyers can enquire via WhatsApp using their order number." },
 ];
 
 // ============================================================
-// TradeFeed Landing Page â€” Industry-Grade Conversion Machine
+// TradeFeed Landing Page — Industry-Grade Conversion Machine
 // ============================================================
 // Sections:
 //   1. Sticky Navbar (auth-aware)
@@ -104,7 +104,7 @@ const FAQ_ITEMS = [
 //  13. Footer (extended)
 // ============================================================
 
-// Cache platform stats for 5 minutes â€” avoids 3 COUNT queries on every landing page hit
+// Cache platform stats for 5 minutes — avoids 3 COUNT queries on every landing page hit
 const getPlatformStats = unstable_cache(
   async () => {
     const [shopCount, productCount, orderCount] = await Promise.all([
@@ -118,7 +118,7 @@ const getPlatformStats = unstable_cache(
   { revalidate: 300 } // 5 minutes
 );
 
-// Cache featured sellers for 10 minutes â€” real social proof on the homepage
+// Cache featured sellers for 10 minutes — real social proof on the homepage
 const getHomepageSellers = unstable_cache(
   async () => {
     const shops = await db.shop.findMany({
@@ -145,13 +145,13 @@ const getHomepageSellers = unstable_cache(
 );
 
 export default async function HomePage() {
-  // â”€â”€ i18n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── i18n ──────────────────────────────────────────────
   const tNav = await getTranslations("nav");
   const tLanding = await getTranslations("landing");
   const tCommon = await getTranslations("common");
   const tFooter = await getTranslations("footer");
 
-  // â”€â”€ Auth-aware CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Auth-aware CTA ────────────────────────────────────
   const { userId: clerkId } = await auth();
   let dashboardSlug: string | null = null;
 
@@ -180,14 +180,14 @@ export default async function HomePage() {
       : "Create Your Shop"
     : "Get Your Catalog Link";
 
-  // â”€â”€ AI CTA â€” deep-links to product creation with AI pre-opened â”€â”€
+  // ── AI CTA — deep-links to product creation with AI pre-opened ──
   const aiCtaHref = clerkId
     ? dashboardSlug
       ? `/dashboard/${dashboardSlug}/products/new?ai=true`
       : "/create-shop?ai=true"
     : "/sign-up?redirect_url=/dashboard&ai=true";
 
-  // â”€â”€ Live platform stats (cached) + admin check + sellers (parallel) â”€â”€
+  // ── Live platform stats (cached) + admin check + sellers (parallel) ──
   const [{ shopCount, productCount, orderCount }, adminClerkId, featuredSellers] = await Promise.all([
     getPlatformStats(),
     isAdmin(),
@@ -197,9 +197,9 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 1 â€” NAVBAR (Stripe-inspired frosted glass)
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 1 — NAVBAR (Stripe-inspired frosted glass)
+      ───────────────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 lg:px-8 h-16">
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -248,7 +248,7 @@ export default async function HomePage() {
                 aria-label={ctaLabel}
                 className="px-5 py-2 text-sm font-semibold rounded-xl bg-blue-600 text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
               >
-                <span className="hidden sm:inline">{ctaLabel} â†’</span>
+                <span className="hidden sm:inline">{ctaLabel} →</span>
                 <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z" />
                 </svg>
@@ -266,7 +266,7 @@ export default async function HomePage() {
                   aria-label="Start Selling Free"
                   className="px-5 py-2.5 text-sm font-semibold rounded-xl bg-blue-600 text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
                 >
-                  <span className="hidden sm:inline">Start Selling Free â†’</span>
+                  <span className="hidden sm:inline">Start Selling Free →</span>
                   <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                   </svg>
@@ -277,9 +277,9 @@ export default async function HomePage() {
         </div>
       </nav>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 2 â€” HERO
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 2 — HERO
+      ───────────────────────────────────────────────────── */}
       <HeroSection
         badge={tLanding("hero.badge", { shopCount: Math.max(shopCount, 50) })}
         title={tLanding("hero.title")}
@@ -299,9 +299,9 @@ export default async function HomePage() {
         proofCities={tLanding("hero.proofCities")}
       />
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 3 â€” SOCIAL PROOF STATS
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 3 — SOCIAL PROOF STATS
+      ───────────────────────────────────────────────────── */}
       <SocialProofSection
         shopCount={shopCount}
         productCount={productCount}
@@ -316,14 +316,14 @@ export default async function HomePage() {
         }}
       />
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 4 â€” CATALOG PREVIEW
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 4 — CATALOG PREVIEW
+      ───────────────────────────────────────────────────── */}
       <ProductPreviewSection />
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 4b â€” FEATURED SELLERS
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 4b — FEATURED SELLERS
+      ───────────────────────────────────────────────────── */}
       {featuredSellers.length > 0 && (
         <section className="px-6 lg:px-8 py-24 bg-slate-50">
           <FadeIn>
@@ -361,12 +361,12 @@ export default async function HomePage() {
                           )}
                         </div>
                         <p className="text-[11px] text-slate-500">
-                          {seller.city && `ðŸ“ ${seller.city} Â· `}{seller._count.products} {seller._count.products === 1 ? "product" : "products"}
+                          {seller.city && `ðŸ“ ${seller.city} · `}{seller._count.products} {seller._count.products === 1 ? "product" : "products"}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400 group-hover:text-blue-500 transition-colors">Browse catalog â†’</span>
+                      <span className="text-[10px] text-slate-400 group-hover:text-blue-500 transition-colors">Browse catalog →</span>
                     </div>
                   </Link>
                 ))}
@@ -376,7 +376,7 @@ export default async function HomePage() {
                   href={ctaHref}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-500 hover:shadow-xl hover:shadow-blue-500/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
                 >
-                  Join These Sellers â€” It&apos;s Free â†’
+                  Join These Sellers — It&apos;s Free →
                 </Link>
               </div>
             </div>
@@ -384,42 +384,42 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 5 â€” FEATURES
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 5 — FEATURES
+      ───────────────────────────────────────────────────── */}
       <FeaturesSection
         title={tLanding("features.title")}
         subtitle={tLanding("features.subtitle")}
         features={[
-          { icon: "listing", title: tLanding("features.feature1.title"), description: tLanding("features.feature1.description") },
-          { icon: "inventory", title: tLanding("features.feature2.title"), description: tLanding("features.feature2.description") },
-          { icon: "customers", title: tLanding("features.feature3.title"), description: tLanding("features.feature3.description") },
-          { icon: "checkout", title: tLanding("features.feature4.title"), description: tLanding("features.feature4.description") },
+          { icon: "listing", title: tLanding("features.whatsapp.title"), description: tLanding("features.whatsapp.description") },
+          { icon: "inventory", title: tLanding("features.variants.title"), description: tLanding("features.variants.description") },
+          { icon: "customers", title: tLanding("features.analytics.title"), description: tLanding("features.analytics.description") },
+          { icon: "checkout", title: tLanding("features.tracking.title"), description: tLanding("features.tracking.description") },
         ]}
       />
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 6 â€” HOW IT WORKS
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 6 — HOW IT WORKS
+      ───────────────────────────────────────────────────── */}
       <HowItWorksSection
         badge={tLanding("howItWorks.badge")}
         title={tLanding("howItWorks.title")}
         subtitle={tLanding("howItWorks.subtitle")}
         steps={[
-          { title: tLanding("howItWorks.step1.title"), description: tLanding("howItWorks.step1.description") },
-          { title: tLanding("howItWorks.step2.title"), description: tLanding("howItWorks.step2.description") },
-          { title: tLanding("howItWorks.step3.title"), description: tLanding("howItWorks.step3.description") },
+          { title: tLanding("howItWorks.step1Title"), description: tLanding("howItWorks.step1Desc") },
+          { title: tLanding("howItWorks.step2Title"), description: tLanding("howItWorks.step2Desc") },
+          { title: tLanding("howItWorks.step3Title"), description: tLanding("howItWorks.step3Desc") },
         ]}
       />
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 7 â€” PRICING
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 7 — PRICING
+      ───────────────────────────────────────────────────── */}
       <section id="pricing" className="py-24 px-6 lg:px-8 border-t border-slate-200">
         <div className="max-w-7xl mx-auto">
           <FadeIn>
             <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-[11px] font-medium mb-4">ðŸ’° {tLanding("pricing.badge")}</div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-[11px] font-medium mb-4">💰 {tLanding("pricing.badge")}</div>
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">{tLanding("pricing.title")}</h2>
               <p className="mt-3 text-slate-500 text-lg max-w-xl mx-auto">{tLanding("pricing.subtitle")}</p>
             </div>
@@ -439,7 +439,7 @@ export default async function HomePage() {
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
-                    { text: "âœ¨ 10 free AI generations", highlight: true },
+                    { text: "✨ 10 free AI generations", highlight: true },
                     "Up to 20 products",
                     "WhatsApp checkout",
                     "Public catalog page",
@@ -479,9 +479,9 @@ export default async function HomePage() {
                   <span className="text-4xl font-extrabold text-slate-900">R99</span>
                   <span className="text-slate-500 text-sm ml-1">/month</span>
                 </div>
-                <p className="text-sm text-blue-600/80 mb-2">Less than R3.50/day â€” one sale covers it â˜•</p>
+                <p className="text-sm text-blue-600/80 mb-2">Less than R3.50/day — one sale covers it ☕</p>
                 <div className="mb-8 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200">
-                  <p className="text-xs text-blue-600">ðŸ’¡ <span className="font-semibold">Save R189/year</span> with annual billing â€” R999/year (R83/mo)</p>
+                  <p className="text-xs text-blue-600">💡 <span className="font-semibold">Save R189/year</span> with annual billing — R999/year (R83/mo)</p>
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
@@ -500,7 +500,7 @@ export default async function HomePage() {
                   ))}
                 </ul>
                 <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-500 hover:-translate-y-0.5 active:translate-y-0 transition-all">
-                  Get Starter â†’
+                  Get Starter →
                 </Link>
               </div>
             </FadeIn>
@@ -516,9 +516,9 @@ export default async function HomePage() {
                   <span className="text-4xl font-extrabold text-slate-900">R299</span>
                   <span className="text-slate-500 text-sm ml-1">/month</span>
                 </div>
-                <p className="text-sm text-blue-600/80 mb-2">R10/day â€” scale with confidence</p>
+                <p className="text-sm text-blue-600/80 mb-2">R10/day — scale with confidence</p>
                 <div className="mb-8 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200">
-                  <p className="text-xs text-blue-600">ðŸ’¡ <span className="font-semibold">Save R589/year</span> with annual billing â€” R2,999/year (R250/mo)</p>
+                  <p className="text-xs text-blue-600">💡 <span className="font-semibold">Save R589/year</span> with annual billing — R2,999/year (R250/mo)</p>
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
@@ -545,7 +545,7 @@ export default async function HomePage() {
             <FadeIn delay={0.3}>
               <div className="relative p-8 rounded-2xl bg-white border border-violet-200 shadow-sm hover:shadow-lg transition-all h-full flex flex-col">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <div className="px-4 py-1 rounded-full bg-violet-600 text-white text-xs font-bold shadow-lg shadow-violet-600/30">âœ¨ AI POWERED</div>
+                  <div className="px-4 py-1 rounded-full bg-violet-600 text-white text-xs font-bold shadow-lg shadow-violet-600/30">✨ AI POWERED</div>
                 </div>
                 <div className="mb-6">
                   <h3 className="text-lg font-bold text-slate-900">Pro AI</h3>
@@ -555,16 +555,16 @@ export default async function HomePage() {
                   <span className="text-4xl font-extrabold text-slate-900">R499</span>
                   <span className="text-slate-500 text-sm ml-1">/month</span>
                 </div>
-                <p className="text-sm text-violet-600/80 mb-2">AI generates listings for you â€” save hours âš¡</p>
+                <p className="text-sm text-violet-600/80 mb-2">AI generates listings for you — save hours ⚡</p>
                 <div className="mb-8 px-3 py-2 rounded-lg bg-violet-50 border border-violet-200">
-                  <p className="text-xs text-violet-600">ðŸ’¡ <span className="font-semibold">Save R989/year</span> with annual billing â€” R4,999/year (R417/mo)</p>
+                  <p className="text-xs text-violet-600">💡 <span className="font-semibold">Save R989/year</span> with annual billing — R4,999/year (R417/mo)</p>
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
-                    { text: "ðŸ¤– AI auto title from photo", highlight: true },
-                    { text: "ðŸ¤– AI product description", highlight: true },
-                    { text: "ðŸ¤– AI category suggestion", highlight: true },
-                    { text: "ðŸ¤– AI SEO tags & meta", highlight: true },
+                    { text: "🤖 AI auto title from photo", highlight: true },
+                    { text: "🤖 AI product description", highlight: true },
+                    { text: "🤖 AI category suggestion", highlight: true },
+                    { text: "🤖 AI SEO tags & meta", highlight: true },
                     { text: "Everything in Pro", highlight: false },
                     { text: "Unlimited products", highlight: false },
                     { text: "Advanced analytics", highlight: false },
@@ -577,12 +577,12 @@ export default async function HomePage() {
                   ))}
                 </ul>
                 <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white font-semibold text-sm shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all">
-                  Upgrade to Pro AI â†’
+                  Upgrade to Pro AI →
                 </Link>
               </div>
             </FadeIn>
           </div>
-          <p className="text-center text-xs text-slate-400 mt-8">Payments processed securely by PayFast ðŸ‡¿ðŸ‡¦ Â· Cancel anytime Â· VAT inclusive</p>
+          <p className="text-center text-xs text-slate-400 mt-8">Payments processed securely by PayFast 🇿🇦 · Cancel anytime · VAT inclusive</p>
 
           {/* Plan Comparison */}
           <FadeIn>
@@ -601,8 +601,8 @@ export default async function HomePage() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {[
-                      { feature: "Products", free: "20", starter: "âˆž", pro: "âˆž", proAi: "âˆž" },
-                      { feature: "AI Generations", free: "10", starter: "25/mo", pro: "âˆž", proAi: "âˆž" },
+                      { feature: "Products", free: "20", starter: "∞", pro: "∞", proAi: "∞" },
+                      { feature: "AI Generations", free: "10", starter: "25/mo", pro: "∞", proAi: "∞" },
                       { feature: "AI Auto Title from Photo", free: "10 free", starter: "25/mo", pro: true, proAi: true },
                       { feature: "AI Product Description", free: "10 free", starter: "25/mo", pro: true, proAi: true },
                       { feature: "AI Category Suggestion", free: "10 free", starter: "25/mo", pro: true, proAi: true },
@@ -619,9 +619,9 @@ export default async function HomePage() {
                         {[row.free, row.starter, row.pro, row.proAi].map((val, i) => (
                           <td key={i} className="text-center px-3 py-3">
                             {val === true ? (
-                              <span className="text-blue-500">âœ…</span>
+                              <span className="text-blue-500">✅</span>
                             ) : val === false ? (
-                              <span className="text-slate-300">â€”</span>
+                              <span className="text-slate-300">—</span>
                             ) : (
                               <span className="text-slate-700 font-semibold">{val}</span>
                             )}
@@ -637,7 +637,7 @@ export default async function HomePage() {
                   href={aiCtaHref}
                   className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-500 text-white font-semibold text-sm shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
                 >
-                  âœ¨ Try AI Now â€” 10 Free Generations
+                  ✨ Try AI Now — 10 Free Generations
                 </Link>
               </div>
             </div>
@@ -645,9 +645,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 8 â€” TESTIMONIALS & TRUST
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 8 — TESTIMONIALS & TRUST
+      ───────────────────────────────────────────────────── */}
       <section className="py-24 px-6 lg:px-8 bg-slate-50 border-t border-slate-200">
         <div className="max-w-7xl mx-auto">
           <FadeIn>
@@ -661,7 +661,7 @@ export default async function HomePage() {
           <div className="grid sm:grid-cols-3 gap-6 mb-14">
             {[
               { quote: "I used to send 50 photos a day on WhatsApp. Now I share one link and my customers browse and order. Game changer.", name: "Thandi M.", role: "Reseller, Johannesburg", img: "/img/testimonial_thandi.png" },
-              { quote: "Set up my catalog in 10 minutes. First order came the same day. No app, no complicated setup â€” just my phone.", name: "Sipho K.", role: "Beauty & wellness, Durban", img: null },
+              { quote: "Set up my catalog in 10 minutes. First order came the same day. No app, no complicated setup — just my phone.", name: "Sipho K.", role: "Beauty & wellness, Durban", img: null },
               { quote: "The AI listing saved me hours. Upload a photo, it writes the description. I just adjust the price and publish.", name: "Lerato P.", role: "Wholesaler, Cape Town", img: null },
             ].map((t, i) => (
               <FadeIn key={t.name} delay={i * 0.1}>
@@ -705,7 +705,7 @@ export default async function HomePage() {
                 icon: (<svg className="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>),
                 stat: "See what sells",
                 heading: "Data, Not Guesswork",
-                description: "Analytics show which products get the most views. Drop slow sellers and double down on winners â€” no more guessing what customers want.",
+                description: "Analytics show which products get the most views. Drop slow sellers and double down on winners — no more guessing what customers want.",
               },
             ].map((card, i) => (
               <FadeIn key={card.heading} delay={i * 0.15}>
@@ -721,9 +721,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 9 â€” FAQ
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 9 — FAQ
+      ───────────────────────────────────────────────────── */}
       <section id="faq" className="py-24 px-6 lg:px-8 border-t border-slate-200">
         <div className="max-w-3xl mx-auto">
           <FadeIn>
@@ -753,9 +753,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 10 â€” FINAL CTA
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 10 — FINAL CTA
+      ───────────────────────────────────────────────────── */}
       <FinalCTASection
         badge={tLanding("cta.badge", { shopCount: Math.max(shopCount, 50) })}
         title={tLanding("cta.title")}
@@ -768,41 +768,41 @@ export default async function HomePage() {
         footer={tLanding("cta.footer")}
       />
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 11 â€” SEO CONTENT
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 11 — SEO CONTENT
+      ───────────────────────────────────────────────────── */}
       <section className="py-20 px-6 lg:px-8 border-t border-slate-200 bg-slate-50">
         <div className="max-w-4xl mx-auto">
           <FadeIn>
             <div className="prose prose-slate max-w-none">
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mb-6">
-                Why Sell on TradeFeed â€” South Africa&apos;s Growing Online Marketplace
+                Why Sell on TradeFeed — South Africa&apos;s Growing Online Marketplace
               </h2>
 
               <p className="text-slate-500 leading-relaxed mb-6">
                 TradeFeed is the <strong className="text-slate-700">online marketplace in South Africa</strong> built
                 for the way local sellers actually do business. Whether you&apos;re a clothing wholesaler in
-                Johannesburg, a beauty supplier in Cape Town, or an electronics reseller in Durban â€” TradeFeed
+                Johannesburg, a beauty supplier in Cape Town, or an electronics reseller in Durban — TradeFeed
                 gives you the tools to <strong className="text-slate-700">sell online in South Africa</strong> without
                 the complexity and high fees of traditional e-commerce platforms.
               </p>
 
               <h3 className="text-xl font-bold text-slate-800 mt-10 mb-4">
-                Create Your Online Shop in South Africa â€” Free
+                Create Your Online Shop in South Africa — Free
               </h3>
               <p className="text-slate-500 leading-relaxed mb-6">
                 Setting up an online store shouldn&apos;t cost thousands of rands or require a web developer.
                 With TradeFeed, you can <strong className="text-slate-700">create your own online shop in South Africa</strong> in
-                under five minutes â€” completely free. Upload your product photos, set prices, add sizes and
+                under five minutes — completely free. Upload your product photos, set prices, add sizes and
                 colours, and you&apos;ll have a professional, mobile-friendly product catalog with its own
-                shareable link. Your customers browse on any smartphone â€” no app download needed.
+                shareable link. Your customers browse on any smartphone — no app download needed.
               </p>
 
               <h3 className="text-xl font-bold text-slate-800 mt-10 mb-4">
-                WhatsApp-First Ordering â€” Built for South African Buyers
+                WhatsApp-First Ordering — Built for South African Buyers
               </h3>
               <p className="text-slate-500 leading-relaxed mb-6">
-                South Africa has over 30 million WhatsApp users. Your customers are already there â€” so why
+                South Africa has over 30 million WhatsApp users. Your customers are already there — so why
                 force them onto a complicated checkout page? TradeFeed integrates directly with WhatsApp,
                 allowing buyers to browse your products, select exact sizes and colours, and send you a clean,
                 structured order message. No sign-ups, no payment gateways, no friction. Just tap, pick,
@@ -820,7 +820,7 @@ export default async function HomePage() {
                 </Link>
                 , where buyers from across all 9 South African provinces can discover and shop from local
                 sellers. Unlike posting in WhatsApp groups where your products get buried in minutes,
-                your TradeFeed catalog is permanent, searchable, and optimised for Google â€” giving you
+                your TradeFeed catalog is permanent, searchable, and optimised for Google — giving you
                 free exposure to new customers 24/7.
               </p>
 
@@ -828,7 +828,7 @@ export default async function HomePage() {
                 Start Free, Upgrade Anytime
               </h3>
               <p className="text-slate-500 leading-relaxed mb-6">
-                List up to 20 products on our Free plan â€” forever. When your business grows, upgrade to
+                List up to 20 products on our Free plan — forever. When your business grows, upgrade to
                 Starter for just R99/month for unlimited products, or Pro for R299/month for unlimited AI,
                 promoted listings, revenue analytics, and instant order notifications. Payments are handled securely through PayFast, South Africa&apos;s
                 most trusted payment gateway.{" "}
@@ -844,19 +844,19 @@ export default async function HomePage() {
                 <h3 className="text-lg font-bold text-slate-700 mb-4">Explore TradeFeed</h3>
                 <div className="flex flex-wrap gap-3">
                   <Link href="/marketplace" className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
-                    Browse Marketplace â†’
+                    Browse Marketplace →
                   </Link>
                   <Link href="/import-whatsapp-catalogue" className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
-                    Import WhatsApp Catalogue â†’
+                    Import WhatsApp Catalogue →
                   </Link>
                   <Link href={clerkId ? "/create-shop" : "/sign-up"} className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
-                    Create Online Shop â†’
+                    Create Online Shop →
                   </Link>
                   <Link href="#pricing" className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
-                    View Pricing â†’
+                    View Pricing →
                   </Link>
                   <Link href="#how-it-works" className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
-                    How It Works â†’
+                    How It Works →
                   </Link>
                 </div>
                 {/* Province links for geographic SEO */}
@@ -879,9 +879,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-          SECTION 12 â€” FOOTER
-      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ─────────────────────────────────────────────────────
+          SECTION 12 — FOOTER
+      ───────────────────────────────────────────────────── */}
       <footer className="py-14 px-6 lg:px-8 border-t border-slate-800/50 bg-slate-900">
         <div className="max-w-7xl mx-auto">
           <div className="grid sm:grid-cols-4 gap-8 mb-10">
@@ -889,7 +889,7 @@ export default async function HomePage() {
               <div className="flex items-center gap-2 mb-3">
                 <TradeFeedLogo size="sm" />
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">South Africa&apos;s online marketplace for sellers and buyers. Create your online shop, list products, and sell via WhatsApp. ðŸ‡¿ðŸ‡¦</p>
+              <p className="text-xs text-slate-400 leading-relaxed">South Africa&apos;s online marketplace for sellers and buyers. Create your online shop, list products, and sell via WhatsApp. 🇿🇦</p>
             </div>
             <div>
               <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-4">{tFooter("product")}</h4>
@@ -917,7 +917,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="pt-8 border-t border-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-500">Â© {new Date().getFullYear()} TradeFeed. South Africa&apos;s online marketplace. Made with â¤ï¸ in South Africa.</p>
+            <p className="text-xs text-slate-500">© {new Date().getFullYear()} TradeFeed. South Africa&apos;s online marketplace. Made with ❤️ in South Africa.</p>
             <div className="flex items-center gap-4">
               <span className="text-xs text-slate-500 flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
