@@ -25,6 +25,8 @@ import { FeaturedCarousel } from "./featured-carousel";
 import { FeaturedShopCard } from "./featured-shop-card";
 import { CategoryBar } from "./category-bar";
 import { MarketplaceFilterSheet } from "./marketplace-filter-sheet";
+import { MarketplaceFilterSidebar } from "./marketplace-filter-sidebar";
+import { MarketplaceActivity } from "./marketplace-activity";
 import { BackToTop } from "@/components/ui/back-to-top";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { IllustrationSearchNotFound } from "@/components/ui/illustrations";
@@ -432,6 +434,11 @@ export function MarketplaceShell({
             ))}
           </div>
 
+          {/* Live activity signal */}
+          <div className="mt-4 flex justify-center">
+            <MarketplaceActivity totalProducts={totalProducts} totalShops={featuredShops.length} />
+          </div>
+
           {/* Desktop search (centered, large) */}
           <form onSubmit={handleSearch} className="hidden md:block mt-8 max-w-2xl mx-auto">
             <div className="relative" ref={suggestionsBoxRef}>
@@ -635,11 +642,11 @@ export function MarketplaceShell({
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              {/* Filter button */}
+              {/* Filter button (hidden on lg: where sidebar is visible) */}
               <button
                 type="button"
                 onClick={() => setFilterOpen(true)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all btn-press ${
+                className={`lg:hidden inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all btn-press ${
                   activeFilterCount > 0
                     ? "bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100"
                     : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900 shadow-sm"
@@ -737,9 +744,18 @@ export function MarketplaceShell({
         </div>
       </section>
 
-      {/* ── Product Grid ────────────────────────────────── */}
+      {/* ── Product Grid with Desktop Sidebar ───────────── */}
       <section className="px-4 sm:px-6 py-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto flex gap-6">
+          {/* Desktop filter sidebar */}
+          <MarketplaceFilterSidebar
+            categories={categories}
+            currentFilters={currentFilters}
+            onApply={(filters) => updateFilters(filters)}
+          />
+
+          {/* Main product area */}
+          <div className="flex-1 min-w-0">
           {allProducts.length === 0 && !isPending ? (
             /* Empty State */
             <div className="flex flex-col items-center py-20 text-center">
@@ -763,7 +779,7 @@ export function MarketplaceShell({
             <>
               {/* Loading overlay with skeleton shimmer */}
               <div className={`transition-opacity duration-300 ${isPending ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                   {allProducts.map((product, idx) => (
                     <MarketplaceProductCard key={`${product.id}-${idx}`} product={product} />
                   ))}
@@ -772,7 +788,7 @@ export function MarketplaceShell({
 
               {/* Searching indicator */}
               {isPending && allProducts.length === 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} className="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm">
                       <div className="aspect-square bg-slate-100 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
@@ -810,6 +826,7 @@ export function MarketplaceShell({
               )}
             </>
           )}
+          </div>
         </div>
       </section>
 

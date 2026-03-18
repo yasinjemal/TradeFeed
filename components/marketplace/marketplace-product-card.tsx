@@ -47,7 +47,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
       aria-label={`${product.name} from ${product.shop.name}`}
       className="group block"
     >
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden transition-all duration-300 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 active:scale-[0.98]">
+      <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden transition-all duration-300 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-100/40 hover:-translate-y-1 active:scale-[0.98]">
         {/* Image */}
         <div className={`relative ${compact ? "aspect-square" : "aspect-[3/4]"} bg-slate-100 overflow-hidden`}>
           {product.imageUrl && !imgError ? (
