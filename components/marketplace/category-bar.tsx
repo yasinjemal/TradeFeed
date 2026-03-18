@@ -26,20 +26,20 @@ export function CategoryBar({
   if (nonEmptyCategories.length === 0) return null;
 
   return (
-    <section className="px-4 sm:px-6 pb-2">
+    <section className="px-4 sm:px-6 py-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:-mx-6 sm:px-6">
           {/* All Products card */}
           <button
             type="button"
             onClick={() => onSelectCategory(undefined)}
-            className={`relative flex flex-col items-center justify-center gap-2 min-w-[90px] sm:min-w-[100px] px-4 py-4 rounded-2xl shrink-0 transition-all duration-200 active:scale-[0.96] ${
+            className={`relative flex flex-col items-center justify-center gap-2.5 min-w-[100px] sm:min-w-[120px] px-5 py-5 rounded-2xl shrink-0 transition-all duration-200 active:scale-[0.96] ${
               !selectedCategory
                 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
                 : "bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-md shadow-sm"
             }`}
           >
-            <span className="text-2xl leading-none">🛍️</span>
+            <span className="text-3xl leading-none">🛍️</span>
             <span className="text-xs font-semibold leading-tight text-center whitespace-nowrap">
               All
             </span>
@@ -55,14 +55,14 @@ export function CategoryBar({
                 onClick={() =>
                   onSelectCategory(isActive ? undefined : cat.slug)
                 }
-                className={`relative flex flex-col items-center justify-center gap-2 min-w-[90px] sm:min-w-[100px] px-4 py-4 rounded-2xl shrink-0 transition-all duration-200 active:scale-[0.96] ${
+                className={`relative flex flex-col items-center justify-center gap-2.5 min-w-[100px] sm:min-w-[120px] px-5 py-5 rounded-2xl shrink-0 transition-all duration-200 active:scale-[0.96] ${
                   isActive
                     ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
                     : "bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-md shadow-sm"
                 }`}
               >
                 {cat.icon && (
-                  <span className="text-2xl leading-none">{cat.icon}</span>
+                  <span className="text-3xl leading-none">{cat.icon}</span>
                 )}
                 <span className="text-xs font-semibold leading-tight text-center whitespace-nowrap">
                   {cat.name}

@@ -8,6 +8,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useTransition, useRef } from "react";
+import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -403,12 +404,20 @@ export function MarketplaceShell({
       </nav>
 
       {/* ── Hero — Trust Header ───────────────────────── */}
-      <section className="relative pt-24 pb-6 sm:pt-28 sm:pb-8 px-4 sm:px-6">
-        {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 via-white to-white pointer-events-none" />
+      <section className="relative pt-24 pb-10 sm:pt-28 sm:pb-14 px-4 sm:px-6 overflow-hidden">
+        {/* Premium gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/60 via-white to-white pointer-events-none" />
+        {/* Decorative gradient orbs */}
+        <div className="absolute -top-24 left-1/4 w-[500px] h-[500px] bg-blue-200/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-10 right-1/3 w-[400px] h-[400px] bg-indigo-200/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-slate-900">
+        <motion.div
+          className="relative max-w-7xl mx-auto text-center"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1.1] text-slate-900">
             Find trusted products from{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-500">
               South African sellers
@@ -560,7 +569,7 @@ export function MarketplaceShell({
               />
             </div>
           </form>
-        </div>
+        </motion.div>
       </section>
 
       {/* ── Category Bar ────────────────────────────────── */}
@@ -574,10 +583,10 @@ export function MarketplaceShell({
 
       {/* ── Featured Carousel (only if promoted products exist) */}
       {promotedProducts.length > 0 && !hasFiltersOrSearch && (
-        <section className="px-4 sm:px-6 pt-6 pb-2">
+        <section className="px-4 sm:px-6 pt-8 pb-4">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+            <div className="flex items-center gap-2 mb-5">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900">
                 🔥 Featured Products
               </h2>
             </div>
@@ -588,11 +597,11 @@ export function MarketplaceShell({
 
       {/* ── Featured Shops (only on default view) ───────── */}
       {featuredShops.length > 0 && !hasFiltersOrSearch && (
-        <section className="px-4 sm:px-6 pt-6 pb-2">
+        <section className="px-4 sm:px-6 py-10 sm:py-12 bg-gradient-to-b from-slate-50/80 to-white">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">
                   Featured Shops
                 </h2>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-[10px] font-semibold text-blue-600">
@@ -611,10 +620,10 @@ export function MarketplaceShell({
 
       {/* ── Trending (only on default view, no search) ──── */}
       {trendingProducts.length > 0 && !hasFiltersOrSearch && (
-        <section className="px-4 sm:px-6 pt-6 pb-2">
+        <section className="px-4 sm:px-6 py-8 sm:py-10">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+            <div className="flex items-center gap-2 mb-5">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900">
                 📈 Trending This Week
               </h2>
             </div>
@@ -629,10 +638,10 @@ export function MarketplaceShell({
 
       {/* ── New Arrivals (only on default view, no search) ── */}
       {newArrivals.length > 0 && !hasFiltersOrSearch && (
-        <section className="px-4 sm:px-6 pt-6 pb-2">
+        <section className="px-4 sm:px-6 py-8 sm:py-10">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+            <div className="flex items-center gap-2 mb-5">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900">
                 ✨ Just Listed
               </h2>
             </div>
@@ -646,7 +655,7 @@ export function MarketplaceShell({
       )}
 
       {/* ── Filter Bar + Sort ───────────────────────────── */}
-      <section className="px-4 sm:px-6 pt-6 pb-2">
+      <section className="px-4 sm:px-6 pt-8 pb-3">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -753,7 +762,7 @@ export function MarketplaceShell({
       </section>
 
       {/* ── Product Grid with Desktop Sidebar ───────────── */}
-      <section className="px-4 sm:px-6 py-4">
+      <section className="px-4 sm:px-6 py-6">
         <div className="max-w-7xl mx-auto flex gap-6">
           {/* Desktop filter sidebar */}
           <MarketplaceFilterSidebar

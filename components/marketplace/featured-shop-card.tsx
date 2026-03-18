@@ -4,6 +4,7 @@
 
 "use client";
 
+import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { SHIMMER_LIGHT } from "@/lib/image-placeholder";
@@ -16,7 +17,11 @@ interface FeaturedShopCardProps {
 export function FeaturedShopCard({ shop }: FeaturedShopCardProps) {
   return (
     <Link href={`/catalog/${shop.slug}`} className="group block shrink-0">
-      <div className="w-[240px] sm:w-[280px] bg-white rounded-2xl border border-slate-200 p-4 transition-all duration-300 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50 hover:-translate-y-0.5">
+      <motion.div
+        className="w-[260px] sm:w-[300px] bg-white rounded-2xl border border-slate-200 p-5 transition-colors duration-200 hover:border-blue-300"
+        whileHover={{ y: -4, boxShadow: "0 20px 40px -12px rgba(59, 130, 246, 0.12)" }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      >
         {/* Header: Logo + Name + Verified */}
         <div className="flex items-center gap-3 mb-3">
           {shop.logoUrl ? (
@@ -93,7 +98,7 @@ export function FeaturedShopCard({ shop }: FeaturedShopCardProps) {
             Visit Shop &rarr;
           </span>
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 }

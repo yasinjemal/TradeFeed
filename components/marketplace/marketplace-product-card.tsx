@@ -9,6 +9,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import type { MarketplaceProduct } from "@/lib/db/marketplace";
@@ -46,7 +47,11 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
       aria-label={`${product.name} from ${product.shop.name}`}
       className="group block"
     >
-      <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden transition-all duration-300 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-100/40 hover:-translate-y-1 active:scale-[0.98]">
+      <motion.div
+        className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden transition-colors duration-200 hover:border-blue-200"
+        whileHover={{ y: -6, boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.15)" }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      >
         {/* Image */}
         <div className={`relative ${compact ? "aspect-square" : "aspect-[4/5]"} bg-slate-50 overflow-hidden`}>
           {product.imageUrl && !imgError ? (
@@ -213,7 +218,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 }
