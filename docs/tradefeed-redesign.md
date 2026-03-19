@@ -379,7 +379,7 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | Completed |
 | **Priority** | Medium |
 | **Description** | Seller's interface for creating a new product listing. First key moment of product adoption. |
 
@@ -391,6 +391,16 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 - Add a "Quick Sell" shortcut (name + price + photo only — fill the rest later)
 - Listing quality score widget: show real-time score as fields are completed
 - Add inline help tooltips for each field explaining what buyers see
+
+**Implementation notes (v2 redesign):**
+- Redesigned as 5-step wizard: Photos → Title & Category → Price & Stock → Description → Preview & Publish
+- Removed name-before-images friction — draft product created with placeholder so images upload immediately
+- AI integration: after first photo upload, "✨ Auto-fill with AI" analyzes photo via GPT-4o-mini vision and pre-fills title, description, and category
+- Live product card preview at Step 5 with thumbnail grid, all fields, and quality score
+- Fixed image tracking bug: added `onImagesChange` callback to ImageUpload + server actions now return updated image list
+- Slate theme migration (stone→slate)
+- Quick edit buttons on preview step to jump back to any section
+- AI credits tracking with remaining count display
 
 ---
 
@@ -682,7 +692,7 @@ Display these trust signals at key anxiety points:
 ### Phase 3 — Seller Experience
 
 - [ ] Dashboard homepage redesigned ("today at a glance")
-- [ ] Add product wizard redesigned (stepped, with live preview)
+- [x] Add product wizard redesigned (stepped, with live preview, AI integration)
 - [ ] Onboarding flow built (post-signup wizard + checklist widget)
 - [x] Seller shop page (public) redesigned
 

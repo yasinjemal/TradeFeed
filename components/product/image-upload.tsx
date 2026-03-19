@@ -32,6 +32,8 @@ interface ImageUploadProps {
   productId: string;
   /** If set, auto-uploads this data URL as the first image on mount */
   autoUploadDataUrl?: string | null;
+  /** Called after images are saved/deleted with the updated image list */
+  onImagesChange?: (images: ProductImage[]) => void;
 }
 
 const MAX_IMAGES = 8;
@@ -74,6 +76,7 @@ export function ImageUpload({
   shopSlug,
   productId,
   autoUploadDataUrl,
+  onImagesChange,
 }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -134,6 +137,8 @@ export function ImageUpload({
         );
         if (!saveResult.success) {
           setError(saveResult.error ?? "Failed to save images");
+        } else if (saveResult.images) {
+          onImagesChange?.(saveResult.images);
         }
       } catch {
         setError("Upload failed. Try again.");
@@ -143,7 +148,7 @@ export function ImageUpload({
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     },
-    [images.length, shopSlug, productId, startUpload]
+    [images.length, shopSlug, productId, startUpload, onImagesChange]
   );
 
   // Auto-upload AI image on mount if provided
@@ -177,13 +182,14 @@ export function ImageUpload({
       try {
         const result = await deleteProductImageAction(shopSlug, productId, imageId);
         if (!result.success) setError(result.error ?? "Failed to delete");
+        else if (result.images) onImagesChange?.(result.images);
       } catch {
         setError("Failed to delete");
       } finally {
         setDeletingId(null);
       }
     },
-    [shopSlug, productId]
+    [shopSlug, productId, onImagesChange]
   );
 
   const remaining = MAX_IMAGES - images.length;

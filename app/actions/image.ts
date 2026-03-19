@@ -18,6 +18,7 @@ import { revalidatePath } from "next/cache";
 type ImageActionResult = {
   success: boolean;
   error?: string;
+  images?: { id: string; url: string; altText: string | null; position: number }[];
 };
 
 const MAX_IMAGES = 8;
@@ -78,7 +79,14 @@ export async function saveProductImagesAction(
     });
 
     revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
-    return { success: true };
+
+    // Return updated image list so callers (e.g. wizard) can track state
+    const allImages = await db.productImage.findMany({
+      where: { productId },
+      select: { id: true, url: true, altText: true, position: true },
+      orderBy: { position: "asc" },
+    });
+    return { success: true, images: allImages };
   } catch (error) {
     console.error("[saveProductImages]", error);
     return { success: false, error: "Failed to save images. Please try again." };
@@ -116,7 +124,14 @@ export async function deleteProductImageAction(
     // Delete from database
     await db.productImage.delete({ where: { id: imageId } });
     revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
-    return { success: true };
+
+    // Return updated image list
+    const allImages = await db.productImage.findMany({
+      where: { productId },
+      select: { id: true, url: true, altText: true, position: true },
+      orderBy: { position: "asc" },
+    });
+    return { success: true, images: allImages };
   } catch (error) {
     console.error("[deleteProductImage]", error);
     return { success: false, error: "Delete failed." };
