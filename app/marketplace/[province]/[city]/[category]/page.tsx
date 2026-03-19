@@ -46,31 +46,8 @@ interface Props {
   }>;
 }
 
-/** Generate all province × city × category combos at build time */
-export async function generateStaticParams() {
-  const [cityParams, categories] = await Promise.all([
-    Promise.resolve(getAllCityParams()),
-    getGlobalCategories(),
-  ]);
-
-  const categorySlugs: string[] = [];
-  for (const cat of categories) {
-    categorySlugs.push(cat.slug);
-    if (cat.children) {
-      for (const child of cat.children) {
-        categorySlugs.push(child.slug);
-      }
-    }
-  }
-
-  return cityParams.flatMap((cp) =>
-    categorySlugs.map((slug) => ({
-      province: cp.province,
-      city: cp.city,
-      category: slug,
-    })),
-  );
-}
+// Static generation removed — 30 cities × ~185 categories = ~5,550 pages
+// was too heavy for build. ISR via revalidate = 300 handles caching.
 
 /** Recursively find a category by slug in the tree */
 function findCategory(

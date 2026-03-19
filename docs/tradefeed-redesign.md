@@ -321,7 +321,7 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | ✅ Completed |
 | **Priority** | High |
 | **Description** | Individual product detail page. Primary intent-to-buy moment for marketplace buyers. |
 
@@ -336,6 +336,42 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 - Show review count with star breakdown histogram
 - Add WhatsApp CTA with urgency signal: "X people viewed this today"
 - Show stock status prominently (In Stock / Low Stock / Sold Out)
+
+#### Implementation Notes (Product Page)
+
+**Status: COMPLETED**
+
+**What was implemented**:
+- `components/catalog/product-breadcrumb.tsx` — Breadcrumb nav: Marketplace → Category → Product Name
+- `components/catalog/seller-info-card.tsx` — Shop name, logo, Pro badge, verified/response-time badges, rating/products/completed stats, location, member since, review count, View Shop CTA
+- `components/catalog/trust-messaging.tsx` — Buyer protection block with 4 trust signals (verified seller, WhatsApp ordering, real contact details, order reference)
+- `components/catalog/similar-products.tsx` — Horizontal scroll cards from same category by other sellers, verified badges, price, shop name
+- `components/catalog/more-from-seller.tsx` — Responsive grid (2→3→4 cols) of other products from same shop
+- `lib/db/catalog.ts` — Added `getSimilarProducts(categoryId, excludeShopId, excludeProductId)` and `getMoreFromSeller(shopId, excludeProductId)` queries
+
+**Layout changes**:
+- Two-column desktop layout (gallery 7/12 left, info 5/12 right) with single-column mobile
+- Container upgraded from max-w-3xl to max-w-6xl
+- Gallery sticky on desktop for scroll
+- Stone-themed colors migrated to slate (slate-900 text, slate-200 borders, emerald accents)
+- Seller Info Card and Trust Messaging sit in right column below product info
+- Full-width sections below: Reviews → Recently Viewed → Similar Products → More from Seller → Viral CTAs (now side-by-side grid)
+- Loading skeleton updated to match new two-column layout
+
+**Preserved existing functionality**:
+- `AddToCart` with wholesale/retail toggle, size/color selection, sticky mobile bar
+- `ShareProduct` (WhatsApp/Facebook/copy/native)
+- `RestockAlert` for out-of-stock products
+- `ProductReviews` with star distribution bars
+- `RecentlyViewedTracker` + `RecentlyViewedStrip`
+- Wholesale RFQ button for bulk orders
+- Full JSON-LD schema and SEO metadata
+- Viral CTAs (Start Your Shop + AI advertising)
+
+**What was NOT changed (out of scope)**:
+- ProductImageGallery fullscreen zoom modal (existing component works well, enhancement deferred)
+- "X people viewed this today" urgency signal (requires real-time view tracking, separate feature)
+- Stepped wizard/Quick Sell for add product page (separate item 4.4)
 
 ---
 
@@ -382,7 +418,7 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | ✅ Completed |
 | **Priority** | High |
 | **Description** | Public-facing seller storefront. The URL sellers share with customers on WhatsApp. Key trust and conversion surface. |
 
@@ -397,6 +433,12 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 - Add "About this seller" section with seller story/bio
 - Add reviews section at bottom of page
 - Mobile: sticky "Contact Seller" bottom bar on mobile
+
+**Implementation Notes:**
+- Created `components/catalog/shop-hero.tsx` — Trust-first hero: banner, avatar (rounded-2xl), name + verified/PRO/tier badges, description (2-line clamp), location, stats row (products, fulfilled, rating, member since), prominent WhatsApp CTA, "Open now" live indicator
+- Created `components/catalog/shop-about-section.tsx` — Always-visible about section: seller bio, photo gallery with lightbox, business hours card, location card with Google Maps link, social links (Instagram, Facebook, TikTok, Website, WhatsApp Group)
+- Redesigned `app/catalog/[slug]/page.tsx` — New layout order: Hero → Search+Filter+Grid → Drops → Combos → About → Recently Viewed → CTAs → Browse → Cache. stone→slate/white/emerald theme migration. Removed old collapsible ShopProfile import, replaced with ShopHero (above fold) + ShopAboutSection (below products). Streamlined recruitment CTAs (removed AI showcase, kept shop CTA).
+- Updated `app/catalog/[slug]/loading.tsx` — Skeleton now matches hero+grid layout with banner shimmer, avatar, stats row, search bar, and 6-card product grid. stone→slate theme.
 
 ---
 
@@ -633,8 +675,8 @@ Display these trust signals at key anxiety points:
 ### Phase 2 — Core Buyer Experience
 
 - [x] Marketplace page redesigned (search, filters, cards, empty states)
-- [ ] Product page redesigned (gallery, trust signals, seller info, related products)
-- [ ] Seller shop page redesigned (hero, stats, product grid, reviews)
+- [x] Product page redesigned (gallery, trust signals, seller info, related products)
+- [x] Seller shop page redesigned (hero, stats, product grid, reviews)
 - [x] Search bar extracted and improved with autocomplete
 
 ### Phase 3 — Seller Experience
@@ -642,7 +684,7 @@ Display these trust signals at key anxiety points:
 - [ ] Dashboard homepage redesigned ("today at a glance")
 - [ ] Add product wizard redesigned (stepped, with live preview)
 - [ ] Onboarding flow built (post-signup wizard + checklist widget)
-- [ ] Seller shop page (public) redesigned
+- [x] Seller shop page (public) redesigned
 
 ### Phase 4 — Trust System
 
@@ -650,7 +692,7 @@ Display these trust signals at key anxiety points:
 - [ ] Seller verification tiers computed and displayed
 - [ ] Reviews histogram implemented
 - [ ] Activity indicators implemented (last active, response time, stock status)
-- [ ] Buyer protection messaging added at key touchpoints
+- [x] Buyer protection messaging added at key touchpoints
 
 ### Phase 5 — Homepage & Auth
 

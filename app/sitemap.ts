@@ -27,6 +27,11 @@ import {
   SA_PROVINCES,
 } from "@/lib/marketplace/locations";
 
+// Generate sitemap at runtime — DB queries can't run at build time,
+// and URL count scales with data so static export is not viable.
+export const dynamic = "force-dynamic";
+export const revalidate = 3600; // regenerate at most once per hour
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const MAX_URLS_PER_SITEMAP = 10_000;
 

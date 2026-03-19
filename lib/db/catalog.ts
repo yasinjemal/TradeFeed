@@ -274,6 +274,113 @@ export async function getCatalogProductCount(shopId: string) {
 }
 
 /**
+ * Get similar products (same category, different shops).
+ *
+ * WHAT: Returns products in the same category from other sellers.
+ * WHY: Buyers explore alternatives — builds marketplace trust & discovery.
+ *
+ * PUBLIC: No auth. Only returns active products with active variants.
+ */
+export async function getSimilarProducts(
+  categoryId: string,
+  excludeShopId: string,
+  excludeProductId: string,
+  limit = 8
+) {
+  const products = await db.product.findMany({
+    where: {
+      categoryId,
+      shopId: { not: excludeShopId },
+      id: { not: excludeProductId },
+      isActive: true,
+      shop: { isActive: true },
+      variants: { some: { isActive: true } },
+    },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      images: {
+        select: { url: true },
+        orderBy: { position: "asc" },
+        take: 1,
+      },
+      variants: {
+        where: { isActive: true },
+        select: { retailPriceCents: true, priceInCents: true },
+        orderBy: { priceInCents: "asc" },
+        take: 1,
+      },
+      shop: {
+        select: { name: true, slug: true, isVerified: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  return products.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    imageUrl: p.images[0]?.url ?? null,
+    minPriceCents: p.variants[0]?.retailPriceCents ?? p.variants[0]?.priceInCents ?? 0,
+    shopName: p.shop.name,
+    shopSlug: p.shop.slug,
+    isVerified: p.shop.isVerified,
+  }));
+}
+
+/**
+ * Get more products from the same seller.
+ *
+ * WHAT: Returns other products from the same shop, excluding the current one.
+ * WHY: Encourages browsing more of the seller's catalog — higher AOV.
+ *
+ * PUBLIC: No auth. Only active products with active variants.
+ */
+export async function getMoreFromSeller(
+  shopId: string,
+  excludeProductId: string,
+  limit = 8
+) {
+  const products = await db.product.findMany({
+    where: {
+      shopId,
+      id: { not: excludeProductId },
+      isActive: true,
+      variants: { some: { isActive: true } },
+    },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      images: {
+        select: { url: true },
+        orderBy: { position: "asc" },
+        take: 1,
+      },
+      variants: {
+        where: { isActive: true },
+        select: { retailPriceCents: true, priceInCents: true },
+        orderBy: { priceInCents: "asc" },
+        take: 1,
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  return products.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    imageUrl: p.images[0]?.url ?? null,
+    minPriceCents: p.variants[0]?.retailPriceCents ?? p.variants[0]?.priceInCents ?? 0,
+  }));
+}
+
+/**
  * Get all active combos for a shop's public catalog.
  *
  * WHAT: Returns combos with their items, images, and category.
