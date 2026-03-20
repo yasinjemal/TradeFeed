@@ -13,10 +13,13 @@
 // URLS:
 //   - / (home)
 //   - /marketplace (marketplace hub)
-//   - /marketplace?category=[slug] (each category)
+//   - /marketplace/category/[slug] (each category — canonical path)
+//   - /marketplace/[province] (each province)
+//   - /marketplace/[province]/[city] (each city)
+//   - /marketplace/[province]/[city]/[category] (popular city+category combos)
 //   - /catalog/[slug] (each active shop)
 //   - /catalog/[slug]/products/[id] (each active product)
-//   - /privacy, /terms (legal pages)
+//   - /privacy, /terms, /contact (legal/info pages)
 // ============================================================
 
 import type { MetadataRoute } from "next";
@@ -24,7 +27,7 @@ import { db } from "@/lib/db";
 import {
   getAllProvinceSlugs,
   getAllCityParams,
-  SA_PROVINCES,
+  POPULAR_CITIES,
 } from "@/lib/marketplace/locations";
 
 // Generate sitemap at runtime — DB queries can't run at build time,
@@ -43,15 +46,17 @@ const MAX_URLS_PER_SITEMAP = 10_000;
  * If total URLs < MAX_URLS_PER_SITEMAP, returns a single chunk.
  */
 export async function generateSitemaps() {
-  const productCount = await db.product.count({
-    where: { isActive: true, shop: { isActive: true } },
-  });
-  // Static + categories + shops contribute ~200 URLs at most for now.
-  // City+category combos add ~31 cities × ~41 categories ≈ 1,271 URLs.
-  // Products are the main scaling dimension.
-  const estimatedTotal = productCount + 1500;
-  const chunks = Math.max(1, Math.ceil(estimatedTotal / MAX_URLS_PER_SITEMAP));
-  return Array.from({ length: chunks }, (_, i) => ({ id: i }));
+  try {
+    const productCount = await db.product.count({
+      where: { isActive: true, shop: { isActive: true } },
+    });
+    const estimatedTotal = productCount + 1500;
+    const chunks = Math.max(1, Math.ceil(estimatedTotal / MAX_URLS_PER_SITEMAP));
+    return Array.from({ length: chunks }, (_, i) => ({ id: i }));
+  } catch (error) {
+    console.error("[sitemap] generateSitemaps failed, returning single chunk", error);
+    return [{ id: 0 }];
+  }
 }
 
 // ── Per-chunk sitemap ───────────────────────────────────────
@@ -61,10 +66,9 @@ export default async function sitemap({
 }: {
   id: number;
 }): Promise<MetadataRoute.Sitemap> {
-  // Next.js may pass id as a string from the route segment — coerce safely
   const chunkId = Number(id) || 0;
 
-  // ── Static pages (only in first chunk) ─────────────────
+  // Always return static pages even if DB queries fail
   const staticPages: MetadataRoute.Sitemap = chunkId === 0 ? [
     {
       url: APP_URL,
@@ -104,7 +108,7 @@ export default async function sitemap({
     },
   ] : [];
 
-  // ── Province & city location pages (only in first chunk) ─
+  // Province & city pages are static data — no DB needed
   const provincePages: MetadataRoute.Sitemap = chunkId === 0
     ? getAllProvinceSlugs().map((slug) => ({
         url: `${APP_URL}/marketplace/${slug}`,
@@ -123,107 +127,88 @@ export default async function sitemap({
       }))
     : [];
 
-  // ── City + Category combo pages (only in first chunk) ───
-  // These target "buy [category] in [city]" searches.
-  const allCityParams = chunkId === 0 ? getAllCityParams() : [];
-  const allCategorySlugs: string[] = [];
-  // We'll populate these after the DB query below.
+  // DB-dependent pages — wrapped in try/catch so a DB failure
+  // still returns a valid sitemap with static + location pages.
+  let categoryPathPages: MetadataRoute.Sitemap = [];
+  let cityCategoryPages: MetadataRoute.Sitemap = [];
+  let shopPages: MetadataRoute.Sitemap = [];
+  let productPages: MetadataRoute.Sitemap = [];
 
-  // ── Marketplace category pages (only in first chunk) ───
-  // Run all DB queries in parallel for speed (avoids Vercel timeout at scale)
-  const [globalCategories, subCategories, shops, products] = await Promise.all([
-    chunkId === 0
-      ? db.globalCategory.findMany({
-          where: { parentId: null },
-          select: { slug: true, updatedAt: true },
-        })
-      : Promise.resolve([]),
-    chunkId === 0
-      ? db.globalCategory.findMany({
-          where: { parentId: { not: null } },
-          select: { slug: true, updatedAt: true },
-        })
-      : Promise.resolve([]),
-    chunkId === 0
-      ? db.shop.findMany({
-          where: { isActive: true },
-          select: { slug: true, updatedAt: true },
-        })
-      : Promise.resolve([]),
-    // Products are paginated across chunks
-    db.product.findMany({
-      where: { isActive: true, shop: { isActive: true } },
-      select: {
-        id: true,
-        slug: true,
-        updatedAt: true,
-        shop: { select: { slug: true } },
-      },
-      skip: chunkId * MAX_URLS_PER_SITEMAP,
-      take: MAX_URLS_PER_SITEMAP,
-      orderBy: { id: "asc" },
-    }),
-  ]);
+  try {
+    const [allCategories, shops, products] = await Promise.all([
+      chunkId === 0
+        ? db.globalCategory.findMany({
+            select: { slug: true, updatedAt: true, parentId: true },
+          })
+        : Promise.resolve([]),
+      chunkId === 0
+        ? db.shop.findMany({
+            where: { isActive: true },
+            select: { slug: true, updatedAt: true },
+          })
+        : Promise.resolve([]),
+      db.product.findMany({
+        where: { isActive: true, shop: { isActive: true } },
+        select: {
+          id: true,
+          slug: true,
+          updatedAt: true,
+          shop: { select: { slug: true } },
+        },
+        skip: chunkId * MAX_URLS_PER_SITEMAP,
+        take: MAX_URLS_PER_SITEMAP,
+        orderBy: { id: "asc" },
+      }),
+    ]);
 
-  const categoryPages: MetadataRoute.Sitemap = globalCategories.map((cat) => ({
-    url: `${APP_URL}/marketplace?category=${cat.slug}`,
-    lastModified: cat.updatedAt,
-    changeFrequency: "daily" as const,
-    priority: 0.8,
-  }));
+    // ── Category pages — canonical /marketplace/category/[slug] paths only.
+    // (The old ?category= URLs 301-redirect via middleware, so exclude them.)
+    categoryPathPages = allCategories.map((cat) => ({
+      url: `${APP_URL}/marketplace/category/${cat.slug}`,
+      lastModified: cat.updatedAt,
+      changeFrequency: "daily" as const,
+      priority: cat.parentId ? 0.7 : 0.8,
+    }));
 
-  // ── Clean URL category path pages (/marketplace/category/[slug]) ──
-  const allCats = [...globalCategories, ...subCategories];
-  const categoryPathPages: MetadataRoute.Sitemap = allCats.map((cat) => ({
-    url: `${APP_URL}/marketplace/category/${cat.slug}`,
-    lastModified: cat.updatedAt,
-    changeFrequency: "daily" as const,
-    priority: 0.8,
-  }));
-
-  // ── City + Category combo pages (/marketplace/[province]/[city]/[category]) ──
-  const cityCategoryPages: MetadataRoute.Sitemap = chunkId === 0
-    ? allCityParams.flatMap(({ province, city }) =>
-        allCats.map((cat) => ({
-          url: `${APP_URL}/marketplace/${province}/${city}/${cat.slug}`,
+    // ── City + Category combos — only for POPULAR_CITIES (top 12)
+    // to keep URL count manageable and function fast.
+    if (chunkId === 0 && allCategories.length > 0) {
+      const parentCategories = allCategories.filter((c) => !c.parentId);
+      cityCategoryPages = POPULAR_CITIES.flatMap(({ province, city }) =>
+        parentCategories.map((cat) => ({
+          url: `${APP_URL}/marketplace/${province.slug}/${city.slug}/${cat.slug}`,
           lastModified: cat.updatedAt,
           changeFrequency: "weekly" as const,
           priority: 0.7,
         })),
-      )
-    : [];
+      );
+    }
 
-  const subCategoryPages: MetadataRoute.Sitemap = subCategories.map((cat) => ({
-    url: `${APP_URL}/marketplace?category=${cat.slug}`,
-    lastModified: cat.updatedAt,
-    changeFrequency: "daily" as const,
-    priority: 0.7,
-  }));
+    // ── Shop catalog pages
+    shopPages = shops.map((shop) => ({
+      url: `${APP_URL}/catalog/${shop.slug}`,
+      lastModified: shop.updatedAt,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    }));
 
-  // ── Shop catalog pages ────────────────────────────────
-  const shopPages: MetadataRoute.Sitemap = shops.map((shop) => ({
-    url: `${APP_URL}/catalog/${shop.slug}`,
-    lastModified: shop.updatedAt,
-    changeFrequency: "daily" as const,
-    priority: 0.8,
-  }));
-
-  // ── Product detail pages ──────────────────────────────
-  const productPages: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${APP_URL}/catalog/${product.shop.slug}/products/${product.slug ?? product.id}`,
-    lastModified: product.updatedAt,
-    changeFrequency: "daily" as const,
-    priority: 0.6,
-  }));
+    // ── Product detail pages
+    productPages = products.map((product) => ({
+      url: `${APP_URL}/catalog/${product.shop.slug}/products/${product.slug ?? product.id}`,
+      lastModified: product.updatedAt,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    }));
+  } catch (error) {
+    console.error("[sitemap] DB queries failed, returning static pages only", error);
+  }
 
   return [
     ...staticPages,
     ...provincePages,
     ...cityPages,
-    ...categoryPages,
     ...categoryPathPages,
     ...cityCategoryPages,
-    ...subCategoryPages,
     ...shopPages,
     ...productPages,
   ];
