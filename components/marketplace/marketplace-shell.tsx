@@ -17,7 +17,6 @@ import { loadMoreProducts, trackMarketplaceViewAction, trackPromotedImpressionsA
 import { CategoryBar } from "./category-bar";
 import { FeaturedCarousel } from "./featured-carousel";
 import { FeaturedShopCard } from "./featured-shop-card";
-import { MarketplaceActivity } from "./marketplace-activity";
 import { MarketplaceFilterSheet } from "./marketplace-filter-sheet";
 import { MarketplaceFilterSidebar } from "./marketplace-filter-sidebar";
 import { MarketplaceProductCard, MarketplaceProductCardSkeleton } from "./marketplace-product-card";
@@ -376,10 +375,6 @@ export function MarketplaceShell({
               onSelectProductSuggestion={selectSuggestion}
               onSelectCategorySuggestion={selectCategorySuggestion}
             />
-          </div>
-
-          <div className="mt-4">
-            <MarketplaceActivity totalProducts={totalProducts} totalShops={Math.max(featuredShops.length, 1)} />
           </div>
         </motion.div>
       </section>

@@ -308,6 +308,31 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 - Add map/icon-based province selection instead of the current select input
 - Add a persistent recently viewed shelf for returning visitors
 - Add explicit page-count pagination or richer infinite-scroll progress messaging
+
+**Refinement pass (9456b89)**:
+After the initial marketplace redesign, a refinement pass was applied to tighten the visual hierarchy and remove trust noise that made the page feel cluttered:
+
+*Product card (`marketplace-product-card.tsx`)*:
+- Removed trust signal footer, activity badge, duplicate rating badges, and image overlay price gradient
+- Price is now the most prominent element (`font-extrabold text-xl`), followed by a compact title (`text-sm line-clamp-2`)
+- Inline seller row: shop logo + name + verified checkmark + location + rating — all in one scannable line
+- Added "View Product" CTA button (slate-900 → emerald-600 on hover)
+- Subtle hover lift: `y: -4, scale: 1.01` with `stiffness: 400, damping: 28`
+- Net result: ~50 fewer lines, cleaner card, faster visual parsing
+
+*Hero section (`marketplace-shell.tsx`)*:
+- Replaced the 40+ line gradient card (stat cards, buyer protection box, trust explanation panel) with a minimal ~20 line hero: subtitle + h1 + search bar + live activity bar
+- Removed `TrustBadge` import and `headerStats` variable entirely
+
+*Section headers (`marketplace-shell.tsx`)*:
+- "Featured shops" → "Popular sellers" with "View all" link to `/marketplace?sort=popular`
+- "Trending this week" → "Trending products" with "View all" link to `/marketplace?sort=trending`
+- "Just listed" description simplified to "Fresh from the catalogue" with "View all" link
+- Removed `TrustBadge` from all section headers; reduced heading sizes to `text-lg`
+
+*Filter sidebar (`marketplace-filter-sidebar.tsx`)*:
+- Added Lucide icons to each `CollapsibleSection` header: LayoutGrid (Category), MapPin (Location), Tag (Price), ShieldCheck (Trust)
+- Improved spacing in section headers (`py-3.5`, `gap-2.5`)
 - Broaden trust signals beyond marketplace cards into full seller response-time and last-active indicators once backend support is wired
 
 **Known limitations**:
