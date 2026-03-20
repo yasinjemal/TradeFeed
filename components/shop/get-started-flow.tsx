@@ -520,7 +520,6 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 className="hidden"
                 onChange={handleImageSelect}
                 disabled={isPublishing || isUploading || isAnalyzing}
