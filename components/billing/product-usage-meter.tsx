@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 
@@ -30,10 +30,10 @@ export function ProductUsageMeter({
       <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-emerald-600 text-lg">âˆž</span>
+            <span className="text-emerald-600 text-lg">∞</span>
             <div>
               <p className="text-sm font-semibold text-emerald-800">Unlimited Products</p>
-              <p className="text-xs text-emerald-600">{planName} plan Â· {current} products</p>
+              <p className="text-xs text-emerald-600">{planName} plan · {current} products</p>
             </div>
           </div>
           <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
@@ -88,7 +88,7 @@ export function ProductUsageMeter({
               href={`/dashboard/${shopSlug}/billing`}
               className="text-xs font-bold text-emerald-600 hover:text-emerald-700 whitespace-nowrap"
             >
-              Upgrade â†’
+              Upgrade →
             </Link>
           )}
         </div>
@@ -102,13 +102,13 @@ export function ProductUsageMeter({
         <div>
           <p className={`text-sm font-semibold ${textColor}`}>
             {atLimit
-              ? "ðŸš« Product limit reached"
+              ? "🚫 Product limit reached"
               : nearLimit
-                ? "ðŸ”¥ Almost at your limit"
-                : "ðŸ“¦ Product Usage"}
+                ? "🔥 Almost at your limit"
+                : "📦 Product Usage"}
           </p>
           <p className="text-xs text-slate-500 mt-0.5">
-            {current} of {limit} products used Â· {planName} plan
+            {current} of {limit} products used · {planName} plan
           </p>
         </div>
         <span className={`text-2xl font-extrabold ${textColor}`}>
@@ -134,7 +134,7 @@ export function ProductUsageMeter({
             href={`/dashboard/${shopSlug}/billing`}
             className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-600/20 whitespace-nowrap"
           >
-            âš¡ Go Pro â€” R199/mo
+            ⚡ Go Pro — R199/mo
           </Link>
         </div>
       )}
@@ -147,7 +147,7 @@ export function ProductUsageMeter({
             href={`/dashboard/${shopSlug}/billing`}
             className="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold hover:bg-amber-200 transition-colors whitespace-nowrap"
           >
-            âš¡ Upgrade
+            ⚡ Upgrade
           </Link>
         </div>
       )}

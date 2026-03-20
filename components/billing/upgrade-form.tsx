@@ -1,8 +1,8 @@
-﻿// ============================================================
-// Component â€” Upgrade Form (Seller)
 // ============================================================
-// Multi-step upgrade form: select plan â†’ select payment method
-// â†’ enter reference â†’ optional proof upload â†’ submit.
+// Component — Upgrade Form (Seller)
+// ============================================================
+// Multi-step upgrade form: select plan → select payment method
+// → enter reference → optional proof upload → submit.
 // ============================================================
 
 "use client";
@@ -75,7 +75,7 @@ export function UpgradeForm({
     });
   };
 
-  // â”€â”€ Success screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Success screen ──────────────────────────────────
   if (success) {
     return (
       <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 text-center">
@@ -106,7 +106,7 @@ export function UpgradeForm({
 
   return (
     <div className="space-y-6">
-      {/* â”€â”€ Step 1: Select Plan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Step 1: Select Plan ───────────────────────────── */}
       <div className="bg-white border border-slate-200/60 rounded-2xl p-6">
         <h2 className="text-sm font-bold text-slate-800 mb-1">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold mr-2">1</span>
@@ -169,14 +169,14 @@ export function UpgradeForm({
         </div>
       </div>
 
-      {/* â”€â”€ Step 2: Select Payment Method â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Step 2: Select Payment Method ─────────────────── */}
       <div className="bg-white border border-slate-200/60 rounded-2xl p-6">
         <h2 className="text-sm font-bold text-slate-800 mb-1">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold mr-2">2</span>
           Make Payment
         </h2>
         <p className="text-xs text-slate-500 mb-4 ml-7">
-          Pay <span className="font-bold text-slate-800">R{plan ? (plan.priceInCents / 100).toFixed(0) : "â€”"}</span> using
+          Pay <span className="font-bold text-slate-800">R{plan ? (plan.priceInCents / 100).toFixed(0) : "—"}</span> using
           one of the methods below, then enter your reference.
         </p>
 
@@ -220,7 +220,7 @@ export function UpgradeForm({
         </div>
       </div>
 
-      {/* â”€â”€ Step 3: Enter Reference â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Step 3: Enter Reference ───────────────────────── */}
       <div className="bg-white border border-slate-200/60 rounded-2xl p-6">
         <h2 className="text-sm font-bold text-slate-800 mb-1">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold mr-2">3</span>
@@ -262,14 +262,14 @@ export function UpgradeForm({
         </div>
       </div>
 
-      {/* â”€â”€ Error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Error ─────────────────────────────────────────── */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      {/* â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Submit ────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <a
           href={`/dashboard/${shopSlug}/billing`}

@@ -1,5 +1,5 @@
-﻿// ============================================================
-// Component â€” Dashboard Mobile Navigation (Slide-out Drawer)
+// ============================================================
+// Component — Dashboard Mobile Navigation (Slide-out Drawer)
 // ============================================================
 // Full mobile navigation for the seller dashboard.
 // Opens from the left with backdrop blur overlay.
@@ -198,7 +198,7 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
 
   const handleClose = useCallback(() => setIsOpen(false), []);
 
-  // Drawer rendered outside the header â€” no backdrop-blur containing block
+  // Drawer rendered outside the header — no backdrop-blur containing block
   if (!isOpen) return null;
 
   return (

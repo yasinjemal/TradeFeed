@@ -1,9 +1,9 @@
-﻿// ============================================================
-// Component â€” Order Notification Sound
+// ============================================================
+// Component — Order Notification Sound
 // ============================================================
 // Polls for new orders and plays a WhatsApp-style notification
 // sound when a new order arrives. Toggle on/off.
-// Uses Web Audio API â€” no audio files needed.
+// Uses Web Audio API — no audio files needed.
 // ============================================================
 
 "use client";
@@ -40,13 +40,13 @@ function playNotificationSound() {
     };
 
     const now = ctx.currentTime;
-    playDing(now, 830);        // First ding â€” B5
-    playDing(now + 0.15, 1050); // Second ding â€” C6 (higher)
+    playDing(now, 830);        // First ding — B5
+    playDing(now + 0.15, 1050); // Second ding — C6 (higher)
 
     // Clean up context after sounds finish
     setTimeout(() => ctx.close(), 1000);
   } catch {
-    // Web Audio API not available â€” fail silently
+    // Web Audio API not available — fail silently
   }
 }
 
@@ -72,7 +72,7 @@ export function OrderNotificationSound({
         setTimeout(() => setHasNew(false), 10000);
       }
     } catch {
-      // Network error â€” silently skip
+      // Network error — silently skip
     }
   }, [shopId]);
 
@@ -104,7 +104,7 @@ export function OrderNotificationSound({
           ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
           : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200"
       }`}
-      title={enabled ? "Order alerts ON â€” you'll hear a ding for new orders" : "Enable order sound alerts"}
+      title={enabled ? "Order alerts ON — you'll hear a ding for new orders" : "Enable order sound alerts"}
     >
       {hasNew && (
         <span className="relative flex h-2 w-2">
@@ -119,7 +119,7 @@ export function OrderNotificationSound({
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
         )}
       </svg>
-      {enabled ? "ðŸ”” Alerts ON" : "ðŸ”• Alerts"}
+      {enabled ? "🔔 Alerts ON" : "🔕 Alerts"}
     </button>
   );
 }

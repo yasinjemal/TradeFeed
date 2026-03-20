@@ -1,5 +1,5 @@
-﻿// ============================================================
-// Component â€” Shop Settings Form (v2 â€” Mind-blowing Edition)
+// ============================================================
+// Component — Shop Settings Form (v2 — Mind-blowing Edition)
 // ============================================================
 // Beautiful, smooth, automatic:
 // - Animated expanding sections with smooth transitions
@@ -30,7 +30,7 @@ import {
   type DayKey,
 } from "@/lib/validation/shop-settings";
 
-/* â”€â”€ SA Cities â†’ Province auto-map â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── SA Cities → Province auto-map ───────────────────────── */
 const CITY_PROVINCE_MAP: Record<string, string> = {
   "Johannesburg": "Gauteng",
   "Pretoria": "Gauteng",
@@ -57,30 +57,30 @@ const CITY_PROVINCE_MAP: Record<string, string> = {
 
 const SA_CITIES = Object.keys(CITY_PROVINCE_MAP);
 
-/* â”€â”€ Map Presets for popular wholesale areas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Map Presets for popular wholesale areas ──────────────── */
 const MAP_PRESETS = [
-  { label: "Jeppe St, JHB", lat: -26.2023, lng: 28.0436, emoji: "ðŸª" },
-  { label: "Fashion District", lat: -26.2050, lng: 28.0400, emoji: "ðŸ‘—" },
-  { label: "Oriental Plaza", lat: -26.2060, lng: 28.0255, emoji: "ðŸ¬" },
-  { label: "Cape Town CBD", lat: -33.9249, lng: 18.4241, emoji: "ðŸŒŠ" },
-  { label: "Durban CBD", lat: -29.8587, lng: 31.0218, emoji: "â˜€ï¸" },
-  { label: "Pretoria CBD", lat: -25.7479, lng: 28.2293, emoji: "ðŸ›ï¸" },
+  { label: "Jeppe St, JHB", lat: -26.2023, lng: 28.0436, emoji: "🏪" },
+  { label: "Fashion District", lat: -26.2050, lng: 28.0400, emoji: "👗" },
+  { label: "Oriental Plaza", lat: -26.2060, lng: 28.0255, emoji: "🏬" },
+  { label: "Cape Town CBD", lat: -33.9249, lng: 18.4241, emoji: "🌊" },
+  { label: "Durban CBD", lat: -29.8587, lng: 31.0218, emoji: "☀️" },
+  { label: "Pretoria CBD", lat: -25.7479, lng: 28.2293, emoji: "🏛️" },
 ] as const;
 
-/* â”€â”€ Business hour presets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Business hour presets ────────────────────────────────── */
 const HOUR_PRESETS = [
   {
     label: "Weekdays + Sat AM",
-    icon: "ðŸ¢",
-    desc: "Monâ€“Fri 8â€“5, Sat 9â€“2",
+    icon: "🏢",
+    desc: "Mon–Fri 8–5, Sat 9–2",
     hours: {
       mon: "08:00-17:00", tue: "08:00-17:00", wed: "08:00-17:00",
       thu: "08:00-17:00", fri: "08:00-17:00", sat: "09:00-14:00", sun: "Closed",
     } as BusinessHours,
   },
   {
-    label: "Every Day 8â€“6",
-    icon: "ðŸ”„",
+    label: "Every Day 8–6",
+    icon: "🔄",
     desc: "Open 7 days a week",
     hours: {
       mon: "08:00-18:00", tue: "08:00-18:00", wed: "08:00-18:00",
@@ -89,8 +89,8 @@ const HOUR_PRESETS = [
   },
   {
     label: "Early Bird",
-    icon: "ðŸŒ…",
-    desc: "Monâ€“Sat 6â€“3",
+    icon: "🌅",
+    desc: "Mon–Sat 6–3",
     hours: {
       mon: "06:00-15:00", tue: "06:00-15:00", wed: "06:00-15:00",
       thu: "06:00-15:00", fri: "06:00-15:00", sat: "06:00-15:00", sun: "Closed",
@@ -129,7 +129,7 @@ export function ShopSettingsForm({
   const boundAction = updateShopSettingsAction.bind(null, shopSlug);
   const [state, formAction, isPending] = useActionState(boundAction, null);
 
-  // â”€â”€ Location state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Location state ──────────────────────────────────────
   const [lat, setLat] = useState(initialData.latitude?.toString() ?? "");
   const [lng, setLng] = useState(initialData.longitude?.toString() ?? "");
   const [gpsStatus, setGpsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -137,14 +137,14 @@ export function ShopSettingsForm({
   const [cityValue, setCityValue] = useState(initialData.city ?? "");
   const [provinceValue, setProvinceValue] = useState(initialData.province ?? "");
 
-  // â”€â”€ Business hours state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Business hours state ────────────────────────────────
   const initialHours: BusinessHours = initialData.businessHours
     ? (JSON.parse(initialData.businessHours) as BusinessHours)
     : {};
   const [hours, setHours] = useState<BusinessHours>(initialHours);
   const [activePreset, setActivePreset] = useState<number | null>(null);
 
-  // â”€â”€ Controlled text fields (prevents paste/refresh bug on mobile) â”€â”€
+  // ── Controlled text fields (prevents paste/refresh bug on mobile) ──
   // Using controlled state ensures values survive re-renders after
   // accidental form submission or revalidation.
   const [nameValue, setNameValue] = useState(initialData.name);
@@ -165,7 +165,7 @@ export function ShopSettingsForm({
     if (!isDirty) setIsDirty(true);
   }, [isDirty]);
 
-  // â”€â”€ Image upload state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Image upload state ──────────────────────────────────
   const [logoUrl, setLogoUrl] = useState(initialData.logoUrl ?? "");
   const [bannerUrl, setBannerUrl] = useState(initialData.bannerUrl ?? "");
   const [logoUploading, setLogoUploading] = useState(false);
@@ -213,7 +213,7 @@ export function ShopSettingsForm({
     startBannerUpload([file]);
   };
 
-  // â”€â”€ Success animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Success animation ───────────────────────────────────
   const [showSuccess, setShowSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -228,7 +228,7 @@ export function ShopSettingsForm({
     }
   }, [state?.success]);
 
-  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Helpers ─────────────────────────────────────────────
   const updateHour = (day: DayKey, value: string) => {
     setHours((prev) => ({ ...prev, [day]: value }));
     setActivePreset(null);
@@ -281,7 +281,7 @@ export function ShopSettingsForm({
     setLng(preset.lng.toString());
   };
 
-  // â”€â”€ Section component (always visible, scroll-targetable) â”€â”€
+  // ── Section component (always visible, scroll-targetable) ──
   const Section = ({
     id,
     icon,
@@ -353,7 +353,7 @@ export function ShopSettingsForm({
         onChange={handleBannerSelect}
       />
 
-      {/* â”€â”€ Success Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Success Toast ────────────────────────────────── */}
       {showSuccess && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
           <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-emerald-600 text-white shadow-2xl shadow-emerald-200/50">
@@ -370,7 +370,7 @@ export function ShopSettingsForm({
         </div>
       )}
 
-      {/* â”€â”€ Error Message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Error Message ────────────────────────────────── */}
       {state?.error && !state.success && (
         <div className="rounded-2xl bg-red-50 border border-red-200 px-5 py-4 flex items-start gap-3">
           <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -393,15 +393,15 @@ export function ShopSettingsForm({
         </div>
       )}
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       {/* Section 0: Shop Images (Profile + Banner)           */}
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       <Section
         id="images"
-        icon="ðŸ“¸"
+        icon="📸"
         iconBg="bg-violet-50"
         title="Shop Images"
-        subtitle="Upload your profile picture and banner â€” first thing buyers see"
+        subtitle="Upload your profile picture and banner — first thing buyers see"
         badge={
           logoUrl || bannerUrl ? (
             <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">
@@ -412,14 +412,14 @@ export function ShopSettingsForm({
         }
       >
         <div className="space-y-6">
-          {/* â”€â”€ Profile Picture (Logo) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── Profile Picture (Logo) ─────────────────── */}
           <div className="space-y-3">
             <Label className="text-sm font-medium flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">ðŸ‘¤</span>
+              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">👤</span>
               Profile Picture
             </Label>
             <p className="text-[11px] text-slate-400 -mt-1">
-              Square image works best (e.g. 400Ã—400). Shown as your shop avatar everywhere.
+              Square image works best (e.g. 400×400). Shown as your shop avatar everywhere.
             </p>
 
             <div className="flex items-center gap-5">
@@ -478,7 +478,7 @@ export function ShopSettingsForm({
                     </>
                   )}
                 </button>
-                <p className="text-[10px] text-slate-400">JPG, PNG or WebP â€¢ Max 4MB</p>
+                <p className="text-[10px] text-slate-400">JPG, PNG or WebP • Max 4MB</p>
               </div>
             </div>
           </div>
@@ -486,14 +486,14 @@ export function ShopSettingsForm({
           {/* Divider */}
           <div className="border-t border-slate-100" />
 
-          {/* â”€â”€ Banner Image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── Banner Image ───────────────────────────── */}
           <div className="space-y-3">
             <Label className="text-sm font-medium flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">ðŸ–¼ï¸</span>
+              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">🖼️</span>
               Banner Image
             </Label>
             <p className="text-[11px] text-slate-400 -mt-1">
-              Wide image works best (e.g. 1200Ã—400). Shown as the hero background on your catalog page.
+              Wide image works best (e.g. 1200×400). Shown as the hero background on your catalog page.
             </p>
 
             {/* Preview */}
@@ -550,7 +550,7 @@ export function ShopSettingsForm({
                       </svg>
                       <div className="text-center">
                         <span className="text-sm font-medium block">Click to upload banner</span>
-                        <span className="text-[10px] text-slate-400">JPG, PNG or WebP â€¢ Max 4MB â€¢ Recommended 1200Ã—400</span>
+                        <span className="text-[10px] text-slate-400">JPG, PNG or WebP • Max 4MB • Recommended 1200×400</span>
                       </div>
                     </>
                   )}
@@ -561,15 +561,15 @@ export function ShopSettingsForm({
         </div>
       </Section>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       {/* Section 1: Basic Info                               */}
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       <Section
         id="basic"
-        icon="ðŸª"
+        icon="🏪"
         iconBg="bg-emerald-50"
         title="Basic Info"
-        subtitle="Your shop name and story â€” first impression matters"
+        subtitle="Your shop name and story — first impression matters"
       >
         <div className="space-y-5">
           <div className="space-y-2">
@@ -624,21 +624,21 @@ export function ShopSettingsForm({
               name="aboutText"
               value={aboutValue}
               onChange={(e) => { setAboutValue(e.target.value); markDirty(); }}
-              placeholder="Tell your story â€” what you sell, your history, why buyers should trust you..."
+              placeholder="Tell your story — what you sell, your history, why buyers should trust you..."
               className="rounded-xl min-h-[120px] border-slate-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all resize-y"
               rows={5}
               maxLength={2000}
               disabled={isPending}
             />
             <p className="text-[11px] text-slate-400">
-              ðŸ’¡ Tip: Mention your years of experience, what brands you carry, and what makes you different
+              💡 Tip: Mention your years of experience, what brands you carry, and what makes you different
             </p>
           </div>
 
           {/* WhatsApp Numbers */}
           <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 space-y-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">ðŸ“±</span>
+              <span className="text-lg">📱</span>
               <span className="text-sm font-semibold text-slate-800">WhatsApp Numbers</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -677,12 +677,12 @@ export function ShopSettingsForm({
         </div>
       </Section>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       {/* Section 2: Location                                 */}
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       <Section
         id="location"
-        icon="ðŸ“"
+        icon="📍"
         iconBg="bg-blue-50"
         title="Location"
         subtitle="Help buyers find your physical shop"
@@ -803,7 +803,7 @@ export function ShopSettingsForm({
                     Location found!
                   </>
                 ) : gpsStatus === "error" ? (
-                  <>âš ï¸ {gpsError || "GPS unavailable"}</>
+                  <>⚠️ {gpsError || "GPS unavailable"}</>
                 ) : (
                   <>
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -878,7 +878,7 @@ export function ShopSettingsForm({
                 />
                 <div className="bg-slate-50 px-3 py-2 flex items-center justify-between">
                   <span className="text-[11px] text-slate-400">
-                    ðŸ“ {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}
+                    📍 {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}
                   </span>
                   <a
                     href={`https://www.google.com/maps?q=${lat},${lng}`}
@@ -886,7 +886,7 @@ export function ShopSettingsForm({
                     rel="noopener noreferrer"
                     className="text-[11px] text-blue-500 hover:text-blue-700 font-medium transition-colors"
                   >
-                    Open in Google Maps â†’
+                    Open in Google Maps →
                   </a>
                 </div>
               </div>
@@ -895,12 +895,12 @@ export function ShopSettingsForm({
         </div>
       </Section>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       {/* Section 3: Business Hours                           */}
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       <Section
         id="hours"
-        icon="ðŸ•"
+        icon="🕐"
         iconBg="bg-amber-50"
         title="Business Hours"
         subtitle="Let buyers know when to visit or expect replies"
@@ -990,15 +990,15 @@ export function ShopSettingsForm({
         </div>
       </Section>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       {/* Section 4: Social Links                             */}
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════════════════════════════════════════════ */}
       <Section
         id="social"
-        icon="ðŸ”—"
+        icon="🔗"
         iconBg="bg-purple-50"
         title="Social & Links"
-        subtitle="Connect your socials â€” builds buyer confidence"
+        subtitle="Connect your socials — builds buyer confidence"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Instagram */}
@@ -1111,13 +1111,13 @@ export function ShopSettingsForm({
               disabled={isPending}
             />
             <p className="text-[10px] text-slate-400">
-              Paste your WhatsApp group invite link â€” buyers can join for updates & deals
+              Paste your WhatsApp group invite link — buyers can join for updates & deals
             </p>
           </div>
         </div>
       </Section>
 
-      {/* â”€â”€ Floating Save Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Floating Save Bar ────────────────────────────── */}
       <div className="sticky bottom-6 z-40">
         <div className="bg-white/95 backdrop-blur-2xl rounded-2xl border border-slate-200/50 shadow-2xl shadow-slate-900/[0.08] px-6 py-4 flex items-center justify-between gap-4 ring-1 ring-slate-900/[0.03]">
           <div className="flex items-center gap-3 text-sm min-w-0">

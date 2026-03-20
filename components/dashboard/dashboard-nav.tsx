@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
-// â”€â”€ Primary nav items (always visible with icon + label) â”€â”€
+// ── Primary nav items (always visible with icon + label) ──
 const primaryItems = [
   {
     label: "Overview",
@@ -50,7 +50,7 @@ const primaryItems = [
   },
 ];
 
-// â”€â”€ "More" dropdown items (grouped logically) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── "More" dropdown items (grouped logically) ──────────────
 const moreItemGroups = [
   {
     label: "Products",
@@ -283,7 +283,7 @@ export function DashboardNav({ slug }: { slug: string }) {
 
   return (
     <nav className="hidden md:flex items-center gap-0.5">
-      {/* â”€â”€ Primary Items â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Primary Items ──────────────────────────────── */}
       {primaryItems.map((item) => {
         const href = item.href(slug);
         const isActive = item.exact
@@ -313,7 +313,7 @@ export function DashboardNav({ slug }: { slug: string }) {
         );
       })}
 
-      {/* â”€â”€ More Dropdown â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── More Dropdown ──────────────────────────────── */}
       <div className="relative" ref={moreRef}>
         <button
           type="button"

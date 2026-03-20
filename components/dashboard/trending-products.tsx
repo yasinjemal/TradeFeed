@@ -1,7 +1,7 @@
-﻿// ============================================================
-// Component â€” Trending Products Widget (Dashboard)
 // ============================================================
-// Server component â€” fetches trending products and renders
+// Component — Trending Products Widget (Dashboard)
+// ============================================================
+// Server component — fetches trending products and renders
 // a ranked list with momentum indicators. Matches the
 // existing dashboard card styling.
 // ============================================================
@@ -24,7 +24,7 @@ export async function TrendingProductsWidget({ shopId, shopSlug }: TrendingProdu
     <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden">
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
         <div className="flex items-center gap-2">
-          <span className="text-lg">ðŸ”¥</span>
+          <span className="text-lg">🔥</span>
           <h2 className="font-semibold text-slate-900">Trending Products</h2>
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 font-medium">
             Last 30 days
@@ -34,7 +34,7 @@ export async function TrendingProductsWidget({ shopId, shopSlug }: TrendingProdu
           href={`/dashboard/${shopSlug}/analytics`}
           className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
         >
-          Analytics â†’
+          Analytics →
         </Link>
       </div>
 
@@ -56,7 +56,7 @@ function TrendingRow({
   rank: number;
   shopSlug: string;
 }) {
-  const medal = rank === 1 ? "ðŸ¥‡" : rank === 2 ? "ðŸ¥ˆ" : rank === 3 ? "ðŸ¥‰" : null;
+  const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
 
   return (
     <Link
@@ -74,7 +74,7 @@ function TrendingRow({
           {item.productName}
         </p>
         <p className="text-[11px] text-slate-400 mt-0.5">
-          {item.orderCount} order{item.orderCount !== 1 ? "s" : ""} Â· R{Math.round(item.totalRevenueCents / 100).toLocaleString()} revenue
+          {item.orderCount} order{item.orderCount !== 1 ? "s" : ""} · R{Math.round(item.totalRevenueCents / 100).toLocaleString()} revenue
         </p>
       </div>
 

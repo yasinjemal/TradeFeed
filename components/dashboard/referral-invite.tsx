@@ -1,5 +1,5 @@
-﻿// ============================================================
-// Component â€” Referral Invite Card (Client)
+// ============================================================
+// Component — Referral Invite Card (Client)
 // ============================================================
 // WhatsApp share + copy invite link for the referral program
 // ============================================================
@@ -22,7 +22,7 @@ export function ReferralInvite({ referralCode, shopName, shopSlug }: ReferralInv
       ? `${window.location.origin}/sign-up?ref=${referralCode}`
       : `/sign-up?ref=${referralCode}`;
 
-  const shareText = `Hey! I'm using TradeFeed to sell my products via WhatsApp ðŸ›ï¸\n\nIt's free â€” create your catalog and start getting orders.\n\nSign up with my link:\n${inviteUrl}\n\nâ€” ${shopName}`;
+  const shareText = `Hey! I'm using TradeFeed to sell my products via WhatsApp 🛍️\n\nIt's free — create your catalog and start getting orders.\n\nSign up with my link:\n${inviteUrl}\n\n— ${shopName}`;
   const waShareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 
   const copyLink = async () => {
@@ -65,7 +65,7 @@ export function ReferralInvite({ referralCode, shopName, shopSlug }: ReferralInv
           className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors flex-shrink-0"
         >
           {copied ? (
-            <span className="text-emerald-600">Copied! âœ“</span>
+            <span className="text-emerald-600">Copied! ✓</span>
           ) : (
             "Copy"
           )}

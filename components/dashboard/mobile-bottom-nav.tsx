@@ -1,8 +1,8 @@
-﻿// ============================================================
-// Component â€” Mobile Bottom Tab Bar
+// ============================================================
+// Component — Mobile Bottom Tab Bar
 // ============================================================
 // Fixed bottom nav for mobile dashboard (md:hidden).
-// 4 tabs: Products Â· Orders Â· Share Â· More
+// 4 tabs: Products · Orders · Share · More
 // 48px+ tap targets for fat-finger friendliness.
 // ============================================================
 

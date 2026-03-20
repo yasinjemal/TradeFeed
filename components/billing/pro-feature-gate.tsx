@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 
@@ -53,7 +53,7 @@ export function ProFeatureGate({
             href={`/dashboard/${shopSlug}/billing`}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
           >
-            âš¡ Upgrade to Pro
+            ⚡ Upgrade to Pro
           </Link>
         </div>
       </div>

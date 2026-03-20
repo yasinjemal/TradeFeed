@@ -1,13 +1,13 @@
-﻿// ============================================================
-// Component â€” Seller Health Score Card
 // ============================================================
-// Displays the seller's health score (0â€“100) with:
+// Component — Seller Health Score Card
+// ============================================================
+// Displays the seller's health score (0–100) with:
 //   - Circular score indicator with color coding
 //   - 5-dimension breakdown bars
 //   - Top 3 actionable suggestions
 //
 // Mobile-first. No external chart libraries.
-// Color coding: emerald (good) â†’ amber (warning) â†’ red (critical)
+// Color coding: emerald (good) → amber (warning) → red (critical)
 // ============================================================
 
 import Link from "next/link";
@@ -18,7 +18,7 @@ interface SellerHealthCardProps {
   shopSlug: string;
 }
 
-// â”€â”€ Color helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Color helpers ────────────────────────────────────────
 
 function getScoreColor(score: number): {
   text: string;
@@ -68,17 +68,17 @@ function getBarColor(value: number, max: number): string {
   return "bg-red-500";
 }
 
-// â”€â”€ Breakdown dimension labels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Breakdown dimension labels ───────────────────────────
 
 const DIMENSIONS = [
-  { key: "completeness" as const, label: "Product Quality", max: 25, icon: "ðŸ“¦" },
-  { key: "inventory" as const, label: "Inventory", max: 20, icon: "ðŸ“Š" },
-  { key: "reliability" as const, label: "Fulfillment", max: 20, icon: "âœ…" },
-  { key: "activity" as const, label: "Activity", max: 15, icon: "âš¡" },
-  { key: "diversity" as const, label: "Catalog Breadth", max: 20, icon: "ðŸ·ï¸" },
+  { key: "completeness" as const, label: "Product Quality", max: 25, icon: "📦" },
+  { key: "inventory" as const, label: "Inventory", max: 20, icon: "📊" },
+  { key: "reliability" as const, label: "Fulfillment", max: 20, icon: "✅" },
+  { key: "activity" as const, label: "Activity", max: 15, icon: "⚡" },
+  { key: "diversity" as const, label: "Catalog Breadth", max: 20, icon: "🏷️" },
 ];
 
-// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Component ────────────────────────────────────────────
 
 export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
   const { score, breakdown, suggestions } = health;
@@ -93,7 +93,7 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
 
   return (
     <div className={`rounded-2xl border ${color.border} ${color.bg} p-4 sm:p-5`}>
-      {/* â”€â”€ Header row: Score ring + label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Header row: Score ring + label ───────────── */}
       <div className="flex items-center gap-4 sm:gap-5">
         {/* Circular score indicator */}
         <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
@@ -149,7 +149,7 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
         </div>
       </div>
 
-      {/* â”€â”€ Breakdown bars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Breakdown bars ────────────────────────────── */}
       <div className="mt-4 space-y-2.5">
         {DIMENSIONS.map((dim) => {
           const value = breakdown[dim.key];
@@ -177,11 +177,11 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
         })}
       </div>
 
-      {/* â”€â”€ Suggestions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Suggestions ───────────────────────────────── */}
       {suggestions.length > 0 && (
         <div className="mt-4 pt-3 border-t border-slate-200/50">
           <p className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-2">
-            ðŸ’¡ How to improve
+            💡 How to improve
           </p>
           <ul className="space-y-1.5">
             {suggestions.map((s, i) =>
@@ -212,7 +212,7 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
                   className="flex items-start gap-2 text-[12px] text-slate-600 leading-relaxed px-2 py-1.5 -mx-2"
                 >
                   <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold text-slate-400">
-                    âœ“
+                    ✓
                   </span>
                   {s.text}
                 </li>

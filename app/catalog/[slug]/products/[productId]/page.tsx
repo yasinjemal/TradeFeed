@@ -1,4 +1,4 @@
-﻿import { getCatalogProduct, getCatalogShop, getSimilarProducts, getMoreFromSeller } from "@/lib/db/catalog";
+import { getCatalogProduct, getCatalogShop, getSimilarProducts, getMoreFromSeller } from "@/lib/db/catalog";
 import { trackEvent } from "@/lib/db/analytics";
 import { getProductReviews, getReviewAggregation } from "@/lib/db/reviews";
 import { getProductSoldCount } from "@/lib/db/orders";

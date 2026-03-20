@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -11,7 +11,7 @@ interface CatalogQrShareProps {
 }
 
 /**
- * QR code for catalog URL â€” for offline sharing (print, stall, packaging).
+ * QR code for catalog URL — for offline sharing (print, stall, packaging).
  * Uses a free public API to generate the QR image; no dependency.
  */
 export function CatalogQrShare({ catalogPath, shopName }: CatalogQrShareProps) {

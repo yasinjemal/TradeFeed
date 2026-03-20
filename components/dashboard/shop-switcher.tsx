@@ -1,8 +1,8 @@
-﻿// ============================================================
-// Component â€” Shop Switcher (Dashboard Header Dropdown)
+// ============================================================
+// Component — Shop Switcher (Dashboard Header Dropdown)
 // ============================================================
 // Dropdown for users who own/manage multiple shops.
-// Shows current shop name with a chevron â€” click to see all shops.
+// Shows current shop name with a chevron — click to see all shops.
 // Navigates to /dashboard/{slug} on selection.
 //
 // BEHAVIOUR:
@@ -75,7 +75,7 @@ export function ShopSwitcher({ currentSlug, shops }: ShopSwitcherProps) {
     [currentSlug, router],
   );
 
-  // Single shop â€” just plain text, no dropdown
+  // Single shop — just plain text, no dropdown
   if (!hasMultipleShops) {
     return (
       <span className="text-sm font-medium text-slate-600 truncate max-w-[200px]">
@@ -84,7 +84,7 @@ export function ShopSwitcher({ currentSlug, shops }: ShopSwitcherProps) {
     );
   }
 
-  // Multi-shop â€” interactive dropdown
+  // Multi-shop — interactive dropdown
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -110,7 +110,7 @@ export function ShopSwitcher({ currentSlug, shops }: ShopSwitcherProps) {
         </svg>
       </button>
 
-      {/* â”€â”€ Dropdown Menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Dropdown Menu ───────────────────────────────── */}
       {isOpen && (
         <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="px-3 pb-2 mb-1 border-b border-slate-100">

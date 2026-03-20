@@ -1,5 +1,5 @@
-﻿// ============================================================
-// Component â€” Billing Dashboard (Client)
+// ============================================================
+// Component — Billing Dashboard (Client)
 // ============================================================
 // Plan comparison, current usage, and upgrade/cancel actions.
 // ============================================================
@@ -57,7 +57,7 @@ export function BillingDashboard({
 
   return (
     <div className="space-y-6">
-      {/* â”€â”€ Current Plan Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Current Plan Card ────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-slate-200/60 p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
@@ -95,7 +95,7 @@ export function BillingDashboard({
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-600">Product Usage</span>
             <span className="text-xs text-slate-500">
-              {productLimit.current} / {productLimit.unlimited ? "âˆž" : productLimit.limit}
+              {productLimit.current} / {productLimit.unlimited ? "∞" : productLimit.limit}
             </span>
           </div>
           <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
@@ -116,13 +116,13 @@ export function BillingDashboard({
           </div>
           {!productLimit.allowed && (
             <p className="text-xs text-red-600 mt-2 font-medium">
-              âš ï¸ Product limit reached â€” upgrade to add more products.
+              ⚠️ Product limit reached — upgrade to add more products.
             </p>
           )}
         </div>
       </div>
 
-      {/* â”€â”€ Upgrade Request Status Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Upgrade Request Status Banner ────────────────── */}
       {subscription?.upgradeStatus === "UNDER_REVIEW" && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3">
           <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -148,7 +148,7 @@ export function BillingDashboard({
             </svg>
           </div>
           <div>
-            <p className="text-sm font-semibold text-emerald-800">Upgrade Approved! ðŸŽ‰</p>
+            <p className="text-sm font-semibold text-emerald-800">Upgrade Approved! 🎉</p>
             <p className="text-xs text-emerald-700 mt-1">Your plan has been upgraded successfully.</p>
           </div>
         </div>
@@ -170,29 +170,29 @@ export function BillingDashboard({
               href={`/dashboard/${shopSlug}/billing/upgrade`}
               className="inline-block mt-2 text-xs text-red-600 hover:text-red-700 font-medium underline"
             >
-              Submit a new request â†’
+              Submit a new request →
             </Link>
           </div>
         </div>
       )}
 
-      {/* â”€â”€ Pro Social Proof â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Pro Social Proof ─────────────────────────────── */}
       {isFreePlan && (
         <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-2xl border border-amber-200/60 p-5">
           <div className="flex items-start gap-3">
-            <span className="text-2xl flex-shrink-0">ðŸ“ˆ</span>
+            <span className="text-2xl flex-shrink-0">📈</span>
             <div>
-              <p className="text-sm font-bold text-slate-800">Pro sellers earn 3Ã— more on average</p>
+              <p className="text-sm font-bold text-slate-800">Pro sellers earn 3× more on average</p>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Unlimited products, promoted listings, and the trusted â­ PRO badge help you sell more.
-                For less than R7/day â€” one sale covers it.
+                Unlimited products, promoted listings, and the trusted ⭐ PRO badge help you sell more.
+                For less than R7/day — one sale covers it.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* â”€â”€ Plan Comparison â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Plan Comparison ──────────────────────────────── */}
       <div className={`grid gap-4 ${
         plans.length >= 4 ? 'md:grid-cols-2 lg:grid-cols-4' :
         plans.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'
@@ -208,7 +208,7 @@ export function BillingDashboard({
         ))}
       </div>
 
-      {/* â”€â”€ Cancel Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Cancel Section ───────────────────────────────── */}
       {!isFreePlan && (
         <CancelSection shopSlug={shopSlug} />
       )}
@@ -285,7 +285,7 @@ function PlanCard({
         )}
         {!isCurrent && isAiPlan && (
           <span className="text-[10px] font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">
-            âœ¨ AI
+            ✨ AI
           </span>
         )}
       </div>
@@ -339,7 +339,7 @@ function PlanCard({
 
       {isCurrent && plan.priceInCents > 0 && (
         <div className="text-center py-2">
-          <p className="text-xs text-emerald-600 font-medium">âœ“ Active</p>
+          <p className="text-xs text-emerald-600 font-medium">✓ Active</p>
         </div>
       )}
     </div>
