@@ -10,7 +10,6 @@ import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { BackToTop } from "@/components/ui/back-to-top";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IllustrationSearchNotFound } from "@/components/ui/illustrations";
-import { TrustBadge } from "@/components/ui/trust-badge";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import type { CategoryWithCount, FeaturedShop, MarketplaceProduct, MarketplaceSortBy } from "@/lib/db/marketplace";
 import { buildMarketplaceSearchParams } from "@/lib/marketplace/search-params";
@@ -299,12 +298,6 @@ export function MarketplaceShell({
       : null,
   ].filter(Boolean) as { label: string; onRemove: () => void }[];
 
-  const headerStats = [
-    { label: "Products live", value: totalProducts.toLocaleString(), tone: "text-slate-900" },
-    { label: "Featured shops", value: featuredShops.length.toLocaleString(), tone: "text-emerald-700" },
-    { label: "Categories", value: categories.length.toLocaleString(), tone: "text-slate-900" },
-  ];
-
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <nav className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
@@ -359,73 +352,34 @@ export function MarketplaceShell({
         </div>
       </nav>
 
-      <section className="px-4 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-28">
+      <section className="px-4 pb-6 pt-24 sm:px-6 sm:pb-8 sm:pt-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="mx-auto max-w-7xl"
         >
-          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.14),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(15,23,42,0.08),_transparent_26%),linear-gradient(180deg,_rgba(255,255,255,1)_0%,_rgba(248,250,252,1)_100%)] p-6 shadow-xl shadow-slate-200/70 sm:p-8 lg:p-10">
-            <div className="grid gap-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.55fr)]">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-600">TradeFeed Marketplace</p>
-                <h1 className="mt-3 max-w-3xl text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
-                  Discover verified products from sellers buyers can trust.
-                </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                  Compare products from real South African businesses, see trust signals up front, and order directly via WhatsApp with clear seller details and promotion labels.
-                </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600">TradeFeed Marketplace</p>
+          <h1 className="mt-2 max-w-2xl text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
+            Discover products from verified South African sellers
+          </h1>
 
-                <div className="mt-5 flex flex-wrap gap-2.5">
-                  <TrustBadge variant="verified" label="Seller phone checks" />
-                  <TrustBadge variant="promoted" label="Promoted listings labelled" />
-                  <TrustBadge variant="response-time" label="Fast-moving marketplace" />
-                </div>
+          <div className="mt-5 max-w-2xl">
+            <MarketplaceSearchBar
+              value={search}
+              placeholder={t("searchPlaceholder")}
+              suggestions={suggestions}
+              trendingTerms={suggestedSearches}
+              onValueChange={handleSearchInput}
+              onSubmit={submitSearch}
+              onClear={clearSearch}
+              onSelectProductSuggestion={selectSuggestion}
+              onSelectCategorySuggestion={selectCategorySuggestion}
+            />
+          </div>
 
-                <div className="mt-6 max-w-3xl">
-                  <MarketplaceSearchBar
-                    value={search}
-                    placeholder={t("searchPlaceholder")}
-                    suggestions={suggestions}
-                    trendingTerms={suggestedSearches}
-                    onValueChange={handleSearchInput}
-                    onSubmit={submitSearch}
-                    onClear={clearSearch}
-                    onSelectProductSuggestion={selectSuggestion}
-                    onSelectCategorySuggestion={selectCategorySuggestion}
-                  />
-                </div>
-
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm shadow-slate-200/60">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Buyer protection</p>
-                  <p className="mt-2 text-sm text-slate-700">
-                    Every product page surfaces seller identity, location, and verification so buyers can make decisions with less guesswork.
-                  </p>
-                </div>
-
-                <div className="mt-4 flex justify-start">
-                  <MarketplaceActivity totalProducts={totalProducts} totalShops={Math.max(featuredShops.length, 1)} />
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                {headerStats.map((stat) => (
-                  <div key={stat.label} className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5 shadow-sm shadow-slate-200/60">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stat.label}</p>
-                    <p className={`mt-3 text-3xl font-extrabold tracking-tight ${stat.tone}`}>{stat.value}</p>
-                  </div>
-                ))}
-                <div className="rounded-[1.5rem] border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm shadow-emerald-100/50 sm:col-span-3 lg:col-span-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">How trust shows up</p>
-                  <ul className="mt-3 space-y-2 text-sm text-emerald-900">
-                    <li>Verified sellers are marked on cards and product pages.</li>
-                    <li>Promoted products are clearly distinguished from organic listings.</li>
-                    <li>Ratings, reviews, and activity indicators stay visible as you browse.</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+          <div className="mt-4">
+            <MarketplaceActivity totalProducts={totalProducts} totalShops={Math.max(featuredShops.length, 1)} />
           </div>
         </motion.div>
       </section>
@@ -439,12 +393,9 @@ export function MarketplaceShell({
       {promotedProducts.length > 0 && !hasFiltersOrSearch ? (
         <section className="px-4 pb-4 pt-8 sm:px-6">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">Promoted picks</h2>
-                <p className="mt-1 text-sm text-slate-500">Sponsored products are clearly labelled so buyers always know what is paid placement.</p>
-              </div>
-              <TrustBadge variant="promoted" label="Clear promotion label" />
+            <div className="mb-5">
+              <h2 className="text-lg font-bold text-slate-900">Promoted picks</h2>
+              <p className="mt-0.5 text-sm text-slate-500">Sponsored products — clearly labelled</p>
             </div>
             <FeaturedCarousel products={promotedProducts} />
           </div>
@@ -456,12 +407,12 @@ export function MarketplaceShell({
           <div className="mx-auto max-w-7xl">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Featured shops</h2>
-                <p className="mt-1 text-sm text-slate-500">Real storefronts with reputation signals, product depth, and public profiles.</p>
+                <h2 className="text-lg font-bold text-slate-900">Popular sellers</h2>
+                <p className="mt-0.5 text-sm text-slate-500">Established stores with verified profiles</p>
               </div>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                {featuredShops.length} featured
-              </span>
+              <Link href="/marketplace?sort=popular" className="text-xs font-semibold text-emerald-600 transition-colors hover:text-emerald-700">
+                View all
+              </Link>
             </div>
             <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6">
               {featuredShops.map((shop) => (
@@ -477,10 +428,12 @@ export function MarketplaceShell({
           <div className="mx-auto max-w-7xl">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Trending this week</h2>
-                <p className="mt-1 text-sm text-slate-500">High-intent listings buyers are actively viewing and ordering right now.</p>
+                <h2 className="text-lg font-bold text-slate-900">Trending products</h2>
+                <p className="mt-0.5 text-sm text-slate-500">Most viewed and ordered right now</p>
               </div>
-              <TrustBadge variant="response-time" label="Live marketplace activity" />
+              <Link href="/marketplace?sort=trending" className="text-xs font-semibold text-emerald-600 transition-colors hover:text-emerald-700">
+                View all
+              </Link>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {trendingProducts.slice(0, 6).map((product) => (
@@ -496,10 +449,12 @@ export function MarketplaceShell({
           <div className="mx-auto max-w-7xl">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Just listed</h2>
-                <p className="mt-1 text-sm text-slate-500">Fresh inventory from sellers who are actively updating their catalogues.</p>
+                <h2 className="text-lg font-bold text-slate-900">Just listed</h2>
+                <p className="mt-0.5 text-sm text-slate-500">Fresh from the catalogue</p>
               </div>
-              <TrustBadge variant="new-seller" label="Fresh catalog activity" />
+              <Link href="/marketplace?sort=newest" className="text-xs font-semibold text-emerald-600 transition-colors hover:text-emerald-700">
+                View all
+              </Link>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {newArrivals.slice(0, 6).map((product) => (

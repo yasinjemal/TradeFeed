@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { LayoutGrid, MapPin, Tag, ShieldCheck } from "lucide-react";
 import type { CategoryWithCount, MarketplaceSortBy } from "@/lib/db/marketplace";
 
 const SA_PROVINCES = [
@@ -63,11 +64,13 @@ function flattenCategories(categories: CategoryWithCount[]) {
 function CollapsibleSection({
   title,
   subtitle,
+  icon,
   defaultOpen = true,
   children,
 }: {
   title: string;
   subtitle?: string;
+  icon?: React.ReactNode;
   defaultOpen?: boolean;
   children: React.ReactNode;
 }) {
@@ -78,11 +81,14 @@ function CollapsibleSection({
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"
       >
-        <div>
-          <p className="text-sm font-semibold text-slate-900">{title}</p>
-          {subtitle ? <p className="mt-1 text-xs text-slate-500">{subtitle}</p> : null}
+        <div className="flex items-center gap-2.5">
+          {icon ? <span className="text-slate-400">{icon}</span> : null}
+          <div>
+            <p className="text-sm font-semibold text-slate-900">{title}</p>
+            {subtitle ? <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p> : null}
+          </div>
         </div>
         <svg
           className={`h-4 w-4 text-slate-400 transition-transform ${open ? "rotate-180" : "rotate-0"}`}
@@ -226,7 +232,7 @@ export function MarketplaceFilterSidebar({
           </div>
         ) : null}
 
-        <CollapsibleSection title="Category" subtitle="Browse the most active shopping categories.">
+        <CollapsibleSection title="Category" subtitle="Browse the most active shopping categories." icon={<LayoutGrid className="size-4" />}>
           <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
             <button
               type="button"
@@ -267,7 +273,7 @@ export function MarketplaceFilterSidebar({
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Location" subtitle="Prioritize products near your buyers.">
+        <CollapsibleSection title="Location" subtitle="Prioritize products near your buyers." icon={<MapPin className="size-4" />}>
           <select
             value={province}
             onChange={(event) => {
@@ -285,7 +291,7 @@ export function MarketplaceFilterSidebar({
           </select>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Price" subtitle="Use a budget band or set a custom range.">
+        <CollapsibleSection title="Price" subtitle="Use a budget band or set a custom range." icon={<Tag className="size-4" />}>
           <div className="grid grid-cols-2 gap-2">
             {PRICE_PRESETS.map((preset) => (
               <button
@@ -347,7 +353,7 @@ export function MarketplaceFilterSidebar({
           </button>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Trust" subtitle="Only surface stores buyers can trust quickly.">
+        <CollapsibleSection title="Trust" subtitle="Only surface stores buyers can trust quickly." icon={<ShieldCheck className="size-4" />}>
           <button
             type="button"
             onClick={() => {
