@@ -19,6 +19,19 @@ import { db } from "@/lib/db";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
+/**
+ * Proxy an UploadThing image URL through Next.js image optimization.
+ * Google Merchant Center often rejects raw UploadThing CDN URLs due to
+ * Content-Type/redirect issues. Routing through /_next/image ensures:
+ *  - Proper Content-Type headers (image/webp or image/avif)
+ *  - Images served from our own verified domain
+ *  - Vercel edge caching (Google only triggers optimization once)
+ */
+function toMerchantImageUrl(rawUrl: string): string {
+  if (!rawUrl) return "";
+  return `${APP_URL}/_next/image?url=${encodeURIComponent(rawUrl)}&w=1200&q=80`;
+}
+
 // TSV header row — Google Merchant Center required + recommended fields
 const HEADERS = [
   "id",
@@ -99,10 +112,12 @@ export async function GET() {
       if (product.variants.length === 0 || product.images.length === 0) continue;
 
       const productUrl = `${APP_URL}/catalog/${product.shop.slug}/products/${product.slug ?? product.id}`;
-      const primaryImage = product.images[0]?.url ?? "";
+      const primaryImage = toMerchantImageUrl(product.images[0]?.url ?? "");
+      if (!primaryImage) continue; // Google rejects products without valid image
       const additionalImages = product.images
         .slice(1, 5)
-        .map((img) => img.url)
+        .map((img) => toMerchantImageUrl(img.url))
+        .filter(Boolean)
         .join(",");
 
       const title = escapeField(product.name).slice(0, 150);
