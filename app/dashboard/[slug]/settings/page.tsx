@@ -63,7 +63,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
   return (
     <div className="max-w-5xl mx-auto">
       {/* ── Hero Header ──────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-950 via-stone-900 to-emerald-950 p-8 sm:p-10">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 p-8 sm:p-10">
         {/* Animated decorative orbs */}
         <div className="absolute -top-20 -right-20 w-80 h-80 bg-emerald-500/15 rounded-full blur-[100px]" />
         <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-teal-400/10 rounded-full blur-[80px]" />
@@ -180,15 +180,15 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           />
 
           {/* ── Storefront Theme ───────────────────────── */}
-          <div id="section-theme" className="scroll-mt-28 relative rounded-2xl border border-stone-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden">
+          <div id="section-theme" className="scroll-mt-28 relative rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-violet-200 rounded-l-2xl" />
             <div className="pl-2">
               <div className="flex items-center gap-2 mb-1">
                 <span>🎨</span>
-                <h3 className="text-lg font-bold text-stone-900">Storefront Theme</h3>
+                <h3 className="text-lg font-bold text-slate-900">Storefront Theme</h3>
                 {!isPro && <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Pro</span>}
               </div>
-              <p className="text-sm text-stone-500 mb-5">Customize your catalog&apos;s colors, fonts, and visual style.</p>
+              <p className="text-sm text-slate-500 mb-5">Customize your catalog&apos;s colors, fonts, and visual style.</p>
               <ThemePicker
                 shopSlug={slug}
                 isPro={isPro}
@@ -222,7 +222,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           />
 
           {/* ── Gallery ────────────────────────────────── */}
-          <div id="section-gallery" className="scroll-mt-28 relative rounded-2xl border border-stone-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden">
+          <div id="section-gallery" className="scroll-mt-28 relative rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-pink-200 rounded-l-2xl" />
             <div className="pl-2">
               <ShopGalleryUpload
@@ -247,7 +247,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
                 <span className="text-red-500">🗑️</span>
                 <h2 className="text-sm font-bold text-red-700">Danger Zone</h2>
               </div>
-              <p className="text-xs text-stone-500 mb-4">
+              <p className="text-xs text-slate-500 mb-4">
                 Permanently delete this shop and all its products, orders, and data. This action cannot be undone.
               </p>
               <DeleteShopButton shopSlug={slug} shopName={shop.name} />
