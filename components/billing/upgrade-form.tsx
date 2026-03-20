@@ -1,8 +1,8 @@
+﻿// ============================================================
+// Component â€” Upgrade Form (Seller)
 // ============================================================
-// Component — Upgrade Form (Seller)
-// ============================================================
-// Multi-step upgrade form: select plan → select payment method
-// → enter reference → optional proof upload → submit.
+// Multi-step upgrade form: select plan â†’ select payment method
+// â†’ enter reference â†’ optional proof upload â†’ submit.
 // ============================================================
 
 "use client";
@@ -75,7 +75,7 @@ export function UpgradeForm({
     });
   };
 
-  // ── Success screen ──────────────────────────────────
+  // â”€â”€ Success screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (success) {
     return (
       <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 text-center">
@@ -106,13 +106,13 @@ export function UpgradeForm({
 
   return (
     <div className="space-y-6">
-      {/* ── Step 1: Select Plan ───────────────────────────── */}
-      <div className="bg-white border border-stone-200/60 rounded-2xl p-6">
-        <h2 className="text-sm font-bold text-stone-800 mb-1">
+      {/* â”€â”€ Step 1: Select Plan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div className="bg-white border border-slate-200/60 rounded-2xl p-6">
+        <h2 className="text-sm font-bold text-slate-800 mb-1">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold mr-2">1</span>
           Select Plan
         </h2>
-        <p className="text-xs text-stone-500 mb-4 ml-7">
+        <p className="text-xs text-slate-500 mb-4 ml-7">
           You&apos;re currently on <span className="font-medium">{currentPlanName}</span>. Choose your upgrade:
         </p>
 
@@ -129,13 +129,13 @@ export function UpgradeForm({
                 className={`text-left p-4 rounded-xl border-2 transition-all ${
                   isSelected
                     ? "border-emerald-500 bg-emerald-50/50 shadow-sm"
-                    : "border-stone-200 hover:border-stone-300"
+                    : "border-slate-200 hover:border-slate-300"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-bold text-stone-900">{p.name}</h3>
+                  <h3 className="text-sm font-bold text-slate-900">{p.name}</h3>
                   <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    isSelected ? "border-emerald-500 bg-emerald-500" : "border-stone-300"
+                    isSelected ? "border-emerald-500 bg-emerald-500" : "border-slate-300"
                   }`}>
                     {isSelected && (
                       <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
@@ -144,14 +144,14 @@ export function UpgradeForm({
                     )}
                   </div>
                 </div>
-                <p className="text-lg font-bold text-stone-900">
+                <p className="text-lg font-bold text-slate-900">
                   R{(p.priceInCents / 100).toFixed(0)}
-                  <span className="text-xs font-normal text-stone-400 ml-1">/month</span>
+                  <span className="text-xs font-normal text-slate-400 ml-1">/month</span>
                 </p>
                 {features.length > 0 && (
                   <ul className="mt-3 space-y-1">
                     {features.slice(0, 4).map((f) => (
-                      <li key={f} className="flex items-center gap-1.5 text-[11px] text-stone-600">
+                      <li key={f} className="flex items-center gap-1.5 text-[11px] text-slate-600">
                         <svg className="w-3 h-3 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                         </svg>
@@ -159,7 +159,7 @@ export function UpgradeForm({
                       </li>
                     ))}
                     {features.length > 4 && (
-                      <li className="text-[11px] text-stone-400">+{features.length - 4} more</li>
+                      <li className="text-[11px] text-slate-400">+{features.length - 4} more</li>
                     )}
                   </ul>
                 )}
@@ -169,14 +169,14 @@ export function UpgradeForm({
         </div>
       </div>
 
-      {/* ── Step 2: Select Payment Method ─────────────────── */}
-      <div className="bg-white border border-stone-200/60 rounded-2xl p-6">
-        <h2 className="text-sm font-bold text-stone-800 mb-1">
+      {/* â”€â”€ Step 2: Select Payment Method â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div className="bg-white border border-slate-200/60 rounded-2xl p-6">
+        <h2 className="text-sm font-bold text-slate-800 mb-1">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold mr-2">2</span>
           Make Payment
         </h2>
-        <p className="text-xs text-stone-500 mb-4 ml-7">
-          Pay <span className="font-bold text-stone-800">R{plan ? (plan.priceInCents / 100).toFixed(0) : "—"}</span> using
+        <p className="text-xs text-slate-500 mb-4 ml-7">
+          Pay <span className="font-bold text-slate-800">R{plan ? (plan.priceInCents / 100).toFixed(0) : "â€”"}</span> using
           one of the methods below, then enter your reference.
         </p>
 
@@ -191,18 +191,18 @@ export function UpgradeForm({
                   className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
                     isSelected
                       ? "border-emerald-500 bg-emerald-50/30"
-                      : "border-stone-200 hover:border-stone-300"
+                      : "border-slate-200 hover:border-slate-300"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-sm font-bold text-stone-900">{pm.name}</h3>
+                      <h3 className="text-sm font-bold text-slate-900">{pm.name}</h3>
                       {pm.description && (
-                        <p className="text-xs text-stone-500 mt-0.5">{pm.description}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{pm.description}</p>
                       )}
                     </div>
                     <svg
-                      className={`w-4 h-4 text-stone-400 transition-transform ${isSelected ? "rotate-180" : ""}`}
+                      className={`w-4 h-4 text-slate-400 transition-transform ${isSelected ? "rotate-180" : ""}`}
                       fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -210,7 +210,7 @@ export function UpgradeForm({
                   </div>
                 </button>
                 {isSelected && (
-                  <div className="mt-2 ml-4 p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-600 leading-relaxed whitespace-pre-wrap">
+                  <div className="mt-2 ml-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">
                     {pm.instructions}
                   </div>
                 )}
@@ -220,19 +220,19 @@ export function UpgradeForm({
         </div>
       </div>
 
-      {/* ── Step 3: Enter Reference ───────────────────────── */}
-      <div className="bg-white border border-stone-200/60 rounded-2xl p-6">
-        <h2 className="text-sm font-bold text-stone-800 mb-1">
+      {/* â”€â”€ Step 3: Enter Reference â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div className="bg-white border border-slate-200/60 rounded-2xl p-6">
+        <h2 className="text-sm font-bold text-slate-800 mb-1">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold mr-2">3</span>
           Payment Details
         </h2>
-        <p className="text-xs text-stone-500 mb-4 ml-7">
+        <p className="text-xs text-slate-500 mb-4 ml-7">
           Enter the reference from your payment so we can verify it.
         </p>
 
         <div className="space-y-4 ml-7">
           <div>
-            <label className="block text-xs font-medium text-stone-700 mb-1.5">
+            <label className="block text-xs font-medium text-slate-700 mb-1.5">
               Payment Reference <span className="text-red-500">*</span>
             </label>
             <input
@@ -240,40 +240,40 @@ export function UpgradeForm({
               value={paymentRef}
               onChange={(e) => setPaymentRef(e.target.value)}
               placeholder="e.g. TF-20250301-1234 or bank reference"
-              className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-stone-900 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-stone-700 mb-1.5">
-              Proof of Payment URL <span className="text-stone-400">(optional)</span>
+            <label className="block text-xs font-medium text-slate-700 mb-1.5">
+              Proof of Payment URL <span className="text-slate-400">(optional)</span>
             </label>
             <input
               type="url"
               value={proofUrl}
               onChange={(e) => setProofUrl(e.target.value)}
               placeholder="Paste a link to your payment screenshot"
-              className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-stone-900 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40"
             />
-            <p className="text-[10px] text-stone-400 mt-1">
+            <p className="text-[10px] text-slate-400 mt-1">
               Upload your proof screenshot to any image host and paste the URL here.
             </p>
           </div>
         </div>
       </div>
 
-      {/* ── Error ─────────────────────────────────────────── */}
+      {/* â”€â”€ Error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      {/* ── Submit ────────────────────────────────────────── */}
+      {/* â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex items-center justify-between">
         <a
           href={`/dashboard/${shopSlug}/billing`}
-          className="text-sm text-stone-500 hover:text-stone-700 transition-colors"
+          className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
         >
           Cancel
         </a>

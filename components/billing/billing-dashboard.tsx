@@ -1,5 +1,5 @@
-// ============================================================
-// Component — Billing Dashboard (Client)
+﻿// ============================================================
+// Component â€” Billing Dashboard (Client)
 // ============================================================
 // Plan comparison, current usage, and upgrade/cancel actions.
 // ============================================================
@@ -57,30 +57,30 @@ export function BillingDashboard({
 
   return (
     <div className="space-y-6">
-      {/* ── Current Plan Card ────────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-stone-200/60 p-6">
+      {/* â”€â”€ Current Plan Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div className="bg-white rounded-2xl border border-slate-200/60 p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-stone-900">
+              <h2 className="text-lg font-bold text-slate-900">
                 {currentPlan?.name ?? "Free"} Plan
               </h2>
               <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                 isFreePlan
-                  ? "bg-stone-100 text-stone-500"
+                  ? "bg-slate-100 text-slate-500"
                   : "bg-emerald-100 text-emerald-700"
               }`}>
                 {subscription?.status ?? "ACTIVE"}
               </span>
             </div>
-            <p className="text-sm text-stone-500 mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               {isFreePlan
                 ? "You're on the free plan with limited features."
                 : `R${((currentPlan?.priceInCents ?? 0) / 100).toFixed(2)}/month`}
             </p>
           </div>
           {!isFreePlan && subscription?.currentPeriodEnd && (
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-slate-400">
               Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString("en-ZA", {
                 day: "numeric",
                 month: "short",
@@ -91,14 +91,14 @@ export function BillingDashboard({
         </div>
 
         {/* Usage meter */}
-        <div className="bg-stone-50 rounded-xl p-4">
+        <div className="bg-slate-50 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-stone-600">Product Usage</span>
-            <span className="text-xs text-stone-500">
-              {productLimit.current} / {productLimit.unlimited ? "∞" : productLimit.limit}
+            <span className="text-xs font-medium text-slate-600">Product Usage</span>
+            <span className="text-xs text-slate-500">
+              {productLimit.current} / {productLimit.unlimited ? "âˆž" : productLimit.limit}
             </span>
           </div>
-          <div className="w-full h-2 bg-stone-200 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
                 !productLimit.allowed
@@ -116,13 +116,13 @@ export function BillingDashboard({
           </div>
           {!productLimit.allowed && (
             <p className="text-xs text-red-600 mt-2 font-medium">
-              ⚠️ Product limit reached — upgrade to add more products.
+              âš ï¸ Product limit reached â€” upgrade to add more products.
             </p>
           )}
         </div>
       </div>
 
-      {/* ── Upgrade Request Status Banner ────────────────── */}
+      {/* â”€â”€ Upgrade Request Status Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {subscription?.upgradeStatus === "UNDER_REVIEW" && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3">
           <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -148,7 +148,7 @@ export function BillingDashboard({
             </svg>
           </div>
           <div>
-            <p className="text-sm font-semibold text-emerald-800">Upgrade Approved! 🎉</p>
+            <p className="text-sm font-semibold text-emerald-800">Upgrade Approved! ðŸŽ‰</p>
             <p className="text-xs text-emerald-700 mt-1">Your plan has been upgraded successfully.</p>
           </div>
         </div>
@@ -170,29 +170,29 @@ export function BillingDashboard({
               href={`/dashboard/${shopSlug}/billing/upgrade`}
               className="inline-block mt-2 text-xs text-red-600 hover:text-red-700 font-medium underline"
             >
-              Submit a new request →
+              Submit a new request â†’
             </Link>
           </div>
         </div>
       )}
 
-      {/* ── Pro Social Proof ─────────────────────────────── */}
+      {/* â”€â”€ Pro Social Proof â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {isFreePlan && (
         <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-2xl border border-amber-200/60 p-5">
           <div className="flex items-start gap-3">
-            <span className="text-2xl flex-shrink-0">📈</span>
+            <span className="text-2xl flex-shrink-0">ðŸ“ˆ</span>
             <div>
-              <p className="text-sm font-bold text-stone-800">Pro sellers earn 3× more on average</p>
-              <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-                Unlimited products, promoted listings, and the trusted ⭐ PRO badge help you sell more.
-                For less than R7/day — one sale covers it.
+              <p className="text-sm font-bold text-slate-800">Pro sellers earn 3Ã— more on average</p>
+              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                Unlimited products, promoted listings, and the trusted â­ PRO badge help you sell more.
+                For less than R7/day â€” one sale covers it.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Plan Comparison ──────────────────────────────── */}
+      {/* â”€â”€ Plan Comparison â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className={`grid gap-4 ${
         plans.length >= 4 ? 'md:grid-cols-2 lg:grid-cols-4' :
         plans.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'
@@ -208,7 +208,7 @@ export function BillingDashboard({
         ))}
       </div>
 
-      {/* ── Cancel Section ───────────────────────────────── */}
+      {/* â”€â”€ Cancel Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {!isFreePlan && (
         <CancelSection shopSlug={shopSlug} />
       )}
@@ -268,11 +268,11 @@ function PlanCard({
             ? "border-violet-200 hover:border-violet-300"
             : isPopular
               ? "border-emerald-200 hover:border-emerald-300"
-              : "border-stone-200/60 hover:border-stone-300"
+              : "border-slate-200/60 hover:border-slate-300"
       }`}
     >
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-base font-bold text-stone-900">{plan.name}</h3>
+        <h3 className="text-base font-bold text-slate-900">{plan.name}</h3>
         {isCurrent && (
           <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
             Current
@@ -285,20 +285,20 @@ function PlanCard({
         )}
         {!isCurrent && isAiPlan && (
           <span className="text-[10px] font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">
-            ✨ AI
+            âœ¨ AI
           </span>
         )}
       </div>
 
       <div className="mb-4">
-        <span className="text-3xl font-bold text-stone-900">{priceDisplay}</span>
+        <span className="text-3xl font-bold text-slate-900">{priceDisplay}</span>
         {plan.priceInCents > 0 && (
-          <span className="text-sm text-stone-400 ml-1">/month</span>
+          <span className="text-sm text-slate-400 ml-1">/month</span>
         )}
       </div>
 
       <div className="mb-4">
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-slate-500">
           {plan.productLimit === 0
             ? "Unlimited products"
             : `Up to ${plan.productLimit} products`}
@@ -308,7 +308,7 @@ function PlanCard({
       {features.length > 0 && (
         <ul className="space-y-2 mb-5 flex-1">
           {features.map((feature) => (
-            <li key={feature} className="flex items-center gap-2 text-xs text-stone-600">
+            <li key={feature} className="flex items-center gap-2 text-xs text-slate-600">
               <svg className={`w-3.5 h-3.5 flex-shrink-0 ${isAiPlan ? "text-violet-500" : "text-emerald-500"}`} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
@@ -333,13 +333,13 @@ function PlanCard({
 
       {isCurrent && plan.priceInCents === 0 && (
         <div className="text-center py-2">
-          <p className="text-xs text-stone-400">Your current plan</p>
+          <p className="text-xs text-slate-400">Your current plan</p>
         </div>
       )}
 
       {isCurrent && plan.priceInCents > 0 && (
         <div className="text-center py-2">
-          <p className="text-xs text-emerald-600 font-medium">✓ Active</p>
+          <p className="text-xs text-emerald-600 font-medium">âœ“ Active</p>
         </div>
       )}
     </div>
@@ -364,9 +364,9 @@ function CancelSection({ shopSlug }: { shopSlug: string }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200/60 p-6">
-      <h3 className="text-sm font-semibold text-stone-800 mb-2">Cancel Subscription</h3>
-      <p className="text-xs text-stone-500 mb-4">
+    <div className="bg-white rounded-2xl border border-slate-200/60 p-6">
+      <h3 className="text-sm font-semibold text-slate-800 mb-2">Cancel Subscription</h3>
+      <p className="text-xs text-slate-500 mb-4">
         You&apos;ll keep Pro features until the end of your billing period.
         After that, you&apos;ll be downgraded to the Free plan.
       </p>
@@ -392,7 +392,7 @@ function CancelSection({ shopSlug }: { shopSlug: string }) {
           <button
             type="button"
             onClick={() => setShowConfirm(false)}
-            className="text-xs text-stone-500 hover:text-stone-700 px-4 py-2"
+            className="text-xs text-slate-500 hover:text-slate-700 px-4 py-2"
           >
             Keep plan
           </button>

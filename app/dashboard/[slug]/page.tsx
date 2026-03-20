@@ -69,11 +69,11 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const catalogUrl = `/catalog/${shop.slug}`;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* ═══════════════════════════════════════════════════ */}
       {/* Hero Welcome — compact on mobile                    */}
       {/* ═══════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-900 via-stone-800 to-emerald-900 p-5 sm:p-10">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 p-5 sm:p-10">
         <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-emerald-400/5 rounded-full blur-2xl" />
 
@@ -93,21 +93,21 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               {shop.name}
             </h1>
             {shop.description && (
-              <p className="text-stone-400 text-sm mt-1 max-w-md truncate hidden sm:block">{shop.description}</p>
+              <p className="text-slate-400 text-sm mt-1 max-w-md truncate hidden sm:block">{shop.description}</p>
             )}
 
             {/* Quick inline stats — hidden on mobile (shown in cards below) */}
             <div className="hidden sm:flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
-              <span className="flex items-center gap-1.5 text-sm text-stone-300">
+              <span className="flex items-center gap-1.5 text-sm text-slate-300">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
                 {stats.activeProductCount} active product{stats.activeProductCount !== 1 ? "s" : ""}
               </span>
-              <span className="flex items-center gap-1.5 text-sm text-stone-300">
+              <span className="flex items-center gap-1.5 text-sm text-slate-300">
                 <span className="w-2 h-2 rounded-full bg-blue-400" />
                 {stats.totalStock} units in stock
               </span>
               {shop.city && (
-                <span className="flex items-center gap-1.5 text-sm text-stone-400">
+                <span className="flex items-center gap-1.5 text-sm text-slate-400">
                   📍 {shop.city}
                 </span>
               )}
@@ -151,7 +151,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         return (
           <div className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 p-5 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-stone-900 flex items-center gap-2">
+              <h3 className="font-bold text-slate-900 flex items-center gap-2">
                 <span className="text-lg">🚀</span> Get Your Shop Ready
               </h3>
               <span className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2.5 py-1 rounded-full">
@@ -170,7 +170,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
                   step.done ? 'bg-emerald-50/50' : 'bg-white/60 hover:bg-white'
                 }`}>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    step.done ? 'bg-emerald-100 text-emerald-600' : 'bg-stone-100 text-stone-400'
+                    step.done ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
                   }`}>
                     {step.done ? (
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -185,8 +185,8 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
                       href={`/dashboard/${slug}/${step.href}`}
                       className={`text-sm font-medium transition-colors flex-1 ${
                         step.done
-                          ? 'text-stone-400 line-through'
-                          : 'text-stone-700 hover:text-emerald-700'
+                          ? 'text-slate-400 line-through'
+                          : 'text-slate-700 hover:text-emerald-700'
                       }`}
                     >
                       {step.label}
@@ -194,7 +194,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
                     </Link>
                   ) : (
                     <span className={`text-sm font-medium flex-1 ${
-                      step.done ? 'text-stone-400 line-through' : 'text-stone-700'
+                      step.done ? 'text-slate-400 line-through' : 'text-slate-700'
                     }`}>
                       {step.label}
                     </span>
@@ -228,14 +228,14 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-sm text-stone-800">
+              <h3 className="font-bold text-sm text-slate-800">
                 Import Your WhatsApp Catalogue
               </h3>
-              <p className="text-xs text-stone-500 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Upload product photos — AI creates the listings in seconds. List 10× faster.
               </p>
             </div>
-            <svg className="w-5 h-5 text-stone-400 group-hover:text-[#25D366] group-hover:translate-x-1 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg className="w-5 h-5 text-slate-400 group-hover:text-[#25D366] group-hover:translate-x-1 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
           </div>
@@ -243,197 +243,76 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       )}
 
       {/* ═══════════════════════════════════════════════════ */}
-      {/* Product Usage Meter — conversion lever               */}
+      {/* TODAY AT A GLANCE — key metrics first                */}
       {/* ═══════════════════════════════════════════════════ */}
-      {!productLimit.unlimited && (
-        <ProductUsageMeter
-          current={productLimit.current}
-          limit={productLimit.limit}
-          unlimited={productLimit.unlimited}
-          planName={productLimit.planName}
-          shopSlug={slug}
-        />
-      )}
-
-      {/* ═══════════════════════════════════════════════════ */}
-      {/* Seller Tier Badge                                   */}
-      {/* ═══════════════════════════════════════════════════ */}
-      <div className={`rounded-2xl border ${tierData.tier.borderColor} ${tierData.tier.bgColor} p-4 sm:p-5`}>
-        <div className="flex items-center gap-4">
-          <div className="text-2xl flex-shrink-0">{tierData.tier.emoji}</div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className={`font-bold text-sm ${tierData.tier.textColor}`}>
-                {tierData.tier.label}
-              </h3>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/60 text-stone-600 font-medium">
-                {tierData.points} pts
-              </span>
-            </div>
-            {tierData.nextTier ? (
-              <div className="mt-2">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] text-stone-500">
-                    {tierData.nextTier.emoji} {tierData.nextTier.label} at {tierData.nextTier.minPoints} pts
-                  </span>
-                  <span className="text-[11px] font-medium text-stone-600">
-                    {tierData.progressToNext}%
-                  </span>
-                </div>
-                <div className="h-1.5 rounded-full bg-white/50 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-current opacity-40 transition-all duration-500"
-                    style={{ width: `${tierData.progressToNext}%` }}
-                  />
-                </div>
-                {/* Actionable tier hints */}
-                <p className="text-[10px] text-stone-500 mt-1.5">
-                  {tierData.metrics.activeProducts < 5 && `Add ${5 - tierData.metrics.activeProducts} more product${5 - tierData.metrics.activeProducts !== 1 ? "s" : ""} · `}
-                  {tierData.metrics.totalOrders < 25 && `${25 - tierData.metrics.totalOrders} more order${25 - tierData.metrics.totalOrders !== 1 ? "s" : ""} · `}
-                  {tierData.metrics.profileCompletePct < 100 && `Complete your profile`}
-                  {tierData.metrics.activeProducts >= 5 && tierData.metrics.totalOrders >= 25 && tierData.metrics.profileCompletePct >= 100 && `Keep getting great reviews!`}
-                </p>
+      <div>
+        <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">Today at a glance</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Orders Today */}
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-4 sm:p-5 hover:shadow-lg hover:shadow-slate-200/50 transition-all group">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
               </div>
-            ) : (
-              <p className="text-[11px] text-stone-500 mt-0.5">{tierData.tier.description}</p>
-            )}
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-600 font-medium">Today</span>
+            </div>
+            <p className="text-3xl font-bold text-slate-900">{stats.ordersToday}</p>
+            <p className="text-sm text-slate-500 mt-0.5">Orders</p>
           </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════ */}
-      {/* AI Credits — Activation lever                        */}
-      {/* ═══════════════════════════════════════════════════ */}
-      <div className={`rounded-2xl border ${aiAccess.hasUnlimitedAi ? 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50' : 'border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50'} p-4 sm:p-5`}>
-        <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-xl ${aiAccess.hasUnlimitedAi ? 'bg-emerald-100' : 'bg-violet-100'} flex items-center justify-center text-2xl flex-shrink-0`}>
-            ✨
+          {/* Revenue Today */}
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-4 sm:p-5 hover:shadow-lg hover:shadow-slate-200/50 transition-all group">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">Today</span>
+            </div>
+            <p className="text-3xl font-bold text-slate-900">{formatZAR(stats.revenueTodayCents)}</p>
+            <p className="text-sm text-slate-500 mt-0.5">Revenue</p>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className={`font-bold text-sm ${aiAccess.hasUnlimitedAi ? 'text-emerald-900' : 'text-violet-900'}`}>
-                AI Listing Credits
-              </h3>
-              {aiAccess.hasUnlimitedAi ? (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold">
-                  ∞ UNLIMITED
-                </span>
-              ) : (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500 text-white font-bold">
-                  {aiAccess.creditsUsed} / {FREE_AI_CREDITS} used
-                </span>
+          {/* Products */}
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-4 sm:p-5 hover:shadow-lg hover:shadow-slate-200/50 transition-all group">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+              </div>
+              {stats.inactiveProductCount > 0 && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 font-medium">{stats.inactiveProductCount} hidden</span>
               )}
             </div>
-            {aiAccess.hasUnlimitedAi ? (
-              <p className="text-[11px] text-emerald-600 mt-1">
-                Upload a photo → AI generates SEO-optimized listings instantly
-              </p>
-            ) : (
-              <>
-                <div className="mt-2 h-2 rounded-full bg-white/80 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      aiAccess.creditsRemaining === 0 ? 'bg-red-400' : aiAccess.creditsRemaining <= 2 ? 'bg-amber-400' : 'bg-violet-500'
-                    }`}
-                    style={{ width: `${(aiAccess.creditsUsed / FREE_AI_CREDITS) * 100}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between mt-1.5">
-                  <p className="text-[11px] text-violet-600">
-                    {aiAccess.creditsRemaining > 0
-                      ? `${aiAccess.creditsRemaining} free AI generation${aiAccess.creditsRemaining === 1 ? '' : 's'} remaining`
-                      : 'All free credits used — upgrade for unlimited AI'}
-                  </p>
-                  {aiAccess.creditsRemaining === 0 ? (
-                    <Link
-                      href={`/dashboard/${slug}/billing`}
-                      className="text-[11px] font-bold text-violet-700 hover:text-violet-900 transition-colors"
-                    >
-                      Upgrade →
-                    </Link>
-                  ) : (
-                    <Link
-                      href={`/dashboard/${slug}/products/new?ai=true`}
-                      className="text-[11px] font-bold text-violet-700 hover:text-violet-900 transition-colors"
-                    >
-                      Use AI →
-                    </Link>
-                  )}
-                </div>
-              </>
-            )}
+            <p className="text-3xl font-bold text-slate-900">{stats.productCount}</p>
+            <p className="text-sm text-slate-500 mt-0.5">Products</p>
+          </div>
+          {/* Stock */}
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-4 sm:p-5 hover:shadow-lg hover:shadow-slate-200/50 transition-all group">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75l-5.571-3m11.142 0l4.179 2.25L12 17.25l-9.75-5.25 4.179-2.25" />
+                </svg>
+              </div>
+              {stats.outOfStockCount > 0 && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-red-500 font-medium">{stats.outOfStockCount} out</span>
+              )}
+            </div>
+            <p className="text-3xl font-bold text-slate-900">{stats.totalStock.toLocaleString()}</p>
+            <p className="text-sm text-slate-500 mt-0.5">Units in stock</p>
           </div>
         </div>
       </div>
-
-      {/* ═══════════════════════════════════════════════════ */}
-      {/* Seller Health Intelligence                           */}
-      {/* ═══════════════════════════════════════════════════ */}
-      <SellerHealthCard health={health} shopSlug={slug} />
-
-      {/* ═══════════════════════════════════════════════════ */}
-      {/* Today's Performance — MOVED UP (orders first!)      */}
-      {/* ═══════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        {/* Orders Today */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg className="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-              </svg>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-600 font-medium">
-              Today
-            </span>
-          </div>
-          <p className="text-4xl sm:text-3xl font-bold text-stone-900">{stats.ordersToday}</p>
-          <p className="text-sm text-stone-500 mt-0.5">Orders today</p>
-        </div>
-
-        {/* Revenue Today */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg className="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 font-medium">
-              Today
-            </span>
-          </div>
-          <p className="text-4xl sm:text-3xl font-bold text-stone-900">{formatZAR(stats.revenueTodayCents)}</p>
-          <p className="text-sm text-stone-500 mt-0.5">Revenue today</p>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════ */}
-      {/* WhatsApp Import Stat — show if any imports exist     */}
-      {/* ═══════════════════════════════════════════════════ */}
-      {stats.whatsappImportCount > 0 && (
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-[#25D366]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg className="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-              </svg>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#25D366]/10 text-[#25D366] font-medium">
-              WhatsApp
-            </span>
-          </div>
-          <p className="text-4xl sm:text-3xl font-bold text-stone-900">{stats.whatsappImportCount}</p>
-          <p className="text-sm text-stone-500 mt-0.5">Imported via WhatsApp</p>
-        </div>
-      )}
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* Revenue from orders — tie to completed orders       */}
       {/* ═══════════════════════════════════════════════════ */}
       <Link
         href={`/dashboard/${slug}/orders`}
-        className="block rounded-2xl border border-stone-200 bg-white p-5 hover:shadow-lg hover:shadow-stone-200/50 hover:border-emerald-200 transition-all group"
+        className="block rounded-2xl border border-slate-200/60 bg-white p-5 hover:shadow-lg hover:shadow-slate-200/50 hover:border-emerald-200 transition-all group"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -443,18 +322,149 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-stone-900 text-sm">Revenue from orders</h3>
-              <p className="text-xs text-stone-500 mt-0.5">
-                Total from {orderStats.total} order{orderStats.total !== 1 ? "s" : ""} (excl. cancelled)
+              <h3 className="font-semibold text-slate-900 text-sm">Total revenue</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                From {orderStats.total} order{orderStats.total !== 1 ? "s" : ""} (excl. cancelled)
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xl font-bold text-stone-900">{formatZAR(orderStats.revenueCents)}</p>
+            <p className="text-xl font-bold text-slate-900">{formatZAR(orderStats.revenueCents)}</p>
             <span className="text-xs text-emerald-600 font-medium group-hover:underline">View orders →</span>
           </div>
         </div>
       </Link>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Low Stock Warning — urgent alerts surface first      */}
+      {/* ═══════════════════════════════════════════════════ */}
+      {stats.outOfStockCount > 0 && (
+        <Link
+          href={`/dashboard/${slug}/notifications`}
+          className="group flex items-center gap-4 rounded-2xl border border-red-200/80 bg-gradient-to-r from-red-50 to-orange-50 p-5 min-h-[56px] hover:shadow-lg hover:shadow-red-100/50 transition-all"
+        >
+          <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+            <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-red-900 text-sm">
+              {stats.outOfStockCount} variant{stats.outOfStockCount !== 1 ? "s" : ""} out of stock
+            </h3>
+            <p className="text-xs text-red-700/70 mt-0.5">Tap to review and restock — don&apos;t miss sales!</p>
+          </div>
+          <svg className="w-5 h-5 text-red-400 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </Link>
+      )}
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Growth Tools — AI Credits + Product Limit            */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* AI Credits */}
+        <div className={`rounded-2xl border ${aiAccess.hasUnlimitedAi ? 'border-emerald-200/60 bg-gradient-to-br from-emerald-50/80 to-teal-50/80' : 'border-violet-200/60 bg-gradient-to-br from-violet-50/80 to-purple-50/80'} p-4 sm:p-5`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-11 h-11 rounded-xl ${aiAccess.hasUnlimitedAi ? 'bg-emerald-100' : 'bg-violet-100'} flex items-center justify-center text-xl flex-shrink-0`}>✨</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className={`font-bold text-sm ${aiAccess.hasUnlimitedAi ? 'text-emerald-900' : 'text-violet-900'}`}>AI Credits</h3>
+                {aiAccess.hasUnlimitedAi ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold">∞ UNLIMITED</span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500 text-white font-bold">{aiAccess.creditsUsed}/{FREE_AI_CREDITS}</span>
+                )}
+              </div>
+              {!aiAccess.hasUnlimitedAi && (
+                <div className="mt-2 h-1.5 rounded-full bg-white/80 overflow-hidden">
+                  <div className={`h-full rounded-full transition-all duration-500 ${aiAccess.creditsRemaining === 0 ? 'bg-red-400' : aiAccess.creditsRemaining <= 2 ? 'bg-amber-400' : 'bg-violet-500'}`} style={{ width: `${(aiAccess.creditsUsed / FREE_AI_CREDITS) * 100}%` }} />
+                </div>
+              )}
+              <div className="flex items-center justify-between mt-1.5">
+                <p className={`text-[11px] ${aiAccess.hasUnlimitedAi ? 'text-emerald-600' : 'text-violet-600'}`}>
+                  {aiAccess.hasUnlimitedAi ? 'Upload a photo → AI generates listings' : aiAccess.creditsRemaining > 0 ? `${aiAccess.creditsRemaining} free remaining` : 'Upgrade for unlimited AI'}
+                </p>
+                {!aiAccess.hasUnlimitedAi && (
+                  <Link href={aiAccess.creditsRemaining === 0 ? `/dashboard/${slug}/billing` : `/dashboard/${slug}/products/new?ai=true`} className="text-[11px] font-bold text-violet-700 hover:text-violet-900 transition-colors">
+                    {aiAccess.creditsRemaining === 0 ? 'Upgrade →' : 'Use AI →'}
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Product Usage / Seller Tier */}
+        {!productLimit.unlimited ? (
+          <ProductUsageMeter current={productLimit.current} limit={productLimit.limit} unlimited={productLimit.unlimited} planName={productLimit.planName} shopSlug={slug} />
+        ) : (
+          <div className={`rounded-2xl border ${tierData.tier.borderColor} ${tierData.tier.bgColor} p-4 sm:p-5`}>
+            <div className="flex items-center gap-3">
+              <div className="text-2xl flex-shrink-0">{tierData.tier.emoji}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className={`font-bold text-sm ${tierData.tier.textColor}`}>{tierData.tier.label}</h3>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/60 text-slate-600 font-medium">{tierData.points} pts</span>
+                </div>
+                {tierData.nextTier ? (
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11px] text-slate-500">{tierData.nextTier.emoji} {tierData.nextTier.label} at {tierData.nextTier.minPoints} pts</span>
+                      <span className="text-[11px] font-medium text-slate-600">{tierData.progressToNext}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-white/50 overflow-hidden">
+                      <div className="h-full rounded-full bg-current opacity-40 transition-all duration-500" style={{ width: `${tierData.progressToNext}%` }} />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-500 mt-0.5">{tierData.tier.description}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Seller Tier (shown separately when product limit is visible) */}
+      {!productLimit.unlimited && (
+        <div className={`rounded-2xl border ${tierData.tier.borderColor} ${tierData.tier.bgColor} p-4 sm:p-5`}>
+          <div className="flex items-center gap-4">
+            <div className="text-2xl flex-shrink-0">{tierData.tier.emoji}</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className={`font-bold text-sm ${tierData.tier.textColor}`}>{tierData.tier.label}</h3>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/60 text-slate-600 font-medium">{tierData.points} pts</span>
+              </div>
+              {tierData.nextTier ? (
+                <div className="mt-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] text-slate-500">{tierData.nextTier.emoji} {tierData.nextTier.label} at {tierData.nextTier.minPoints} pts</span>
+                    <span className="text-[11px] font-medium text-slate-600">{tierData.progressToNext}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-white/50 overflow-hidden">
+                    <div className="h-full rounded-full bg-current opacity-40 transition-all duration-500" style={{ width: `${tierData.progressToNext}%` }} />
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1.5">
+                    {tierData.metrics.activeProducts < 5 && `Add ${5 - tierData.metrics.activeProducts} more product${5 - tierData.metrics.activeProducts !== 1 ? "s" : ""} · `}
+                    {tierData.metrics.totalOrders < 25 && `${25 - tierData.metrics.totalOrders} more order${25 - tierData.metrics.totalOrders !== 1 ? "s" : ""} · `}
+                    {tierData.metrics.profileCompletePct < 100 && `Complete your profile`}
+                    {tierData.metrics.activeProducts >= 5 && tierData.metrics.totalOrders >= 25 && tierData.metrics.profileCompletePct >= 100 && `Keep getting great reviews!`}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-[11px] text-slate-500 mt-0.5">{tierData.tier.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Seller Health Intelligence                           */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <SellerHealthCard health={health} shopSlug={slug} />
+
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* Share Catalog — PROMINENT (growth lever #1)         */}
@@ -468,12 +478,12 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               </svg>
             </div>
             <div className="min-w-0">
-              <h3 className="font-semibold text-stone-900 text-sm">Share your catalog</h3>
+              <h3 className="font-semibold text-slate-900 text-sm">Share your catalog</h3>
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <span className="font-mono text-xs text-stone-600 truncate">tradefeed.co.za{catalogUrl}</span>
+                <span className="font-mono text-xs text-slate-600 truncate">tradefeed.co.za{catalogUrl}</span>
                 <CopyButton text={`https://tradefeed.co.za${catalogUrl}`} />
-                <span className="text-[10px] text-stone-400">or short link:</span>
-                <span className="font-mono text-xs text-stone-600">tradefeed.co.za/s/{slug}</span>
+                <span className="text-[10px] text-slate-400">or short link:</span>
+                <span className="font-mono text-xs text-slate-600">tradefeed.co.za/s/{slug}</span>
                 <CopyButton text={`https://tradefeed.co.za/s/${slug}`} />
               </div>
             </div>
@@ -494,7 +504,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         </div>
         {/* WhatsApp Status + QR code for offline sharing */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 pt-2 border-t border-emerald-200/50">
-          <span className="text-xs text-stone-500">📢</span>
+          <span className="text-xs text-slate-500">📢</span>
           <a
             href={`https://wa.me/?text=${encodeURIComponent(
               `🛍️ New products just dropped!\n\nBrowse my catalog: https://tradefeed.co.za${catalogUrl}\n\n${shop.name} — Order via WhatsApp ✅`
@@ -505,118 +515,12 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           >
             Post to WhatsApp Status →
           </a>
-          <span className="text-stone-300">|</span>
+          <span className="text-slate-300">|</span>
           <CatalogQrShare catalogPath={catalogUrl} shopName={shop.name} />
-          <span className="text-[10px] text-stone-400 hidden sm:inline">Print or show at your stall</span>
+          <span className="text-[10px] text-slate-400 hidden sm:inline">Print or show at your stall</span>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════ */}
-      {/* Stat Cards — show 2 on mobile, 4 on desktop         */}
-      {/* ═══════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Products — always visible */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-              </svg>
-            </div>
-            {stats.inactiveProductCount > 0 && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 font-medium">
-                {stats.inactiveProductCount} hidden
-              </span>
-            )}
-          </div>
-          <p className="text-4xl sm:text-3xl font-bold text-stone-900">{stats.productCount}</p>
-          <p className="text-sm text-stone-500 mt-0.5">Products</p>
-        </div>
-
-        {/* Total Stock — always visible */}
-        <div className="bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75l-5.571-3m11.142 0l4.179 2.25L12 17.25l-9.75-5.25 4.179-2.25" />
-              </svg>
-            </div>
-            {stats.outOfStockCount > 0 && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-red-500 font-medium">
-                {stats.outOfStockCount} out
-              </span>
-            )}
-          </div>
-          <p className="text-4xl sm:text-3xl font-bold text-stone-900">{stats.totalStock.toLocaleString()}</p>
-          <p className="text-sm text-stone-500 mt-0.5">Units in stock</p>
-        </div>
-
-        {/* Variants — hidden on mobile */}
-        <div className="hidden lg:block bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-              </svg>
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-stone-900">{stats.variantCount}</p>
-          <p className="text-sm text-stone-500 mt-0.5">Product variants</p>
-        </div>
-
-        {/* Price Range — hidden on mobile */}
-        <div className="hidden lg:block bg-white rounded-2xl border border-stone-200/80 p-5 hover:shadow-lg hover:shadow-stone-200/50 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-              </svg>
-            </div>
-          </div>
-          {stats.minPrice !== null ? (
-            <>
-              <p className="text-2xl font-bold text-stone-900">
-                {formatZAR(stats.minPrice)}
-              </p>
-              {stats.maxPrice !== null && stats.minPrice !== stats.maxPrice && (
-                <p className="text-xs text-stone-400 mt-0.5">
-                  up to {formatZAR(stats.maxPrice)}
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-2xl font-bold text-stone-400">—</p>
-          )}
-          <p className="text-sm text-stone-500 mt-0.5">Price range</p>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════ */}
-      {/* Low Stock Warning Banner                            */}
-      {/* ═══════════════════════════════════════════════════ */}
-      {stats.outOfStockCount > 0 && (
-        <Link
-          href={`/dashboard/${slug}/notifications`}
-          className="group flex items-center gap-4 rounded-2xl border border-red-200/80 bg-gradient-to-r from-red-50 to-orange-50 p-5 min-h-[56px] hover:shadow-lg hover:shadow-red-100/50 transition-all"
-        >
-          <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-            <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-red-900 text-sm">
-              {stats.outOfStockCount} variant{stats.outOfStockCount !== 1 ? "s" : ""} out of stock
-            </h3>
-            <p className="text-xs text-red-700/70 mt-0.5">
-              Tap to review and restock — don&apos;t miss sales!
-            </p>
-          </div>
-          <svg className="w-5 h-5 text-red-400 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        </Link>
-      )}
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* Profile Completeness CTA                            */}
@@ -637,7 +541,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-stone-900">Complete Your Profile</h3>
+                  <h3 className="font-semibold text-slate-900">Complete Your Profile</h3>
                   <span className="text-xs font-bold text-amber-700 bg-amber-200/60 px-2 py-0.5 rounded-full">
                     {profilePct}%
                   </span>
@@ -677,9 +581,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       {/* ═══════════════════════════════════════════════════ */}
       {/* Recent Products                                     */}
       {/* ═══════════════════════════════════════════════════ */}
-      <div className="rounded-2xl border border-stone-200/80 bg-white overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
-          <h2 className="font-semibold text-stone-900">Recent Products</h2>
+      <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <h2 className="font-semibold text-slate-900">Recent Products</h2>
           <Link
             href={`/dashboard/${slug}/products`}
             className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
@@ -690,16 +594,16 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
         {stats.recentProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4">
-            <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-stone-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
               </svg>
             </div>
-            <p className="text-stone-600 font-medium mb-1">No products yet</p>
-            <p className="text-xs text-stone-400 mb-4">Add your first product to get started</p>
+            <p className="text-slate-600 font-medium mb-1">No products yet</p>
+            <p className="text-xs text-slate-400 mb-4">Add your first product to get started</p>
             <Link
               href={`/dashboard/${slug}/products/new`}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium transition-all active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium transition-all active:scale-[0.98]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -708,7 +612,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             </Link>
           </div>
         ) : (
-          <div className="divide-y divide-stone-100">
+          <div className="divide-y divide-slate-100">
             {stats.recentProducts.map((product) => {
               const prices = product.variants.map((v) => v.priceInCents);
               const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
@@ -719,15 +623,15 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
                 <Link
                   key={product.id}
                   href={`/dashboard/${slug}/products/${product.id}`}
-                  className="flex items-center gap-4 px-6 py-3.5 hover:bg-stone-50 transition-colors group"
+                  className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 transition-colors group"
                 >
                   {/* Thumbnail */}
-                  <div className="w-12 h-12 rounded-xl bg-stone-100 overflow-hidden flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
                     {image ? (
                       <Image src={image.url} alt={product.name} width={48} height={48} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-5 h-5 text-stone-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <svg className="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
                         </svg>
                       </div>
@@ -737,11 +641,11 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-stone-900 truncate group-hover:text-emerald-700 transition-colors">
+                      <p className="text-sm font-medium text-slate-900 truncate group-hover:text-emerald-700 transition-colors">
                         {product.name}
                       </p>
                       {!product.isActive && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-500 font-medium flex-shrink-0">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium flex-shrink-0">
                           Hidden
                         </span>
                       )}
@@ -750,7 +654,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
                       {product.category && (
                         <span className="text-[11px] text-emerald-600 font-medium">{product.category.name}</span>
                       )}
-                      <span className="text-[11px] text-stone-400">
+                      <span className="text-[11px] text-slate-400">
                         {product.variants.length} variant{product.variants.length !== 1 ? "s" : ""}
                       </span>
                     </div>
@@ -758,14 +662,14 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
                   {/* Price + Stock */}
                   <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-semibold text-stone-900">{formatZAR(minPrice)}</p>
+                    <p className="text-sm font-semibold text-slate-900">{formatZAR(minPrice)}</p>
                     <p className={`text-[11px] font-medium ${totalStock > 0 ? "text-emerald-600" : "text-red-500"}`}>
                       {totalStock > 0 ? `${totalStock} in stock` : "Out of stock"}
                     </p>
                   </div>
 
                   {/* Arrow */}
-                  <svg className="w-4 h-4 text-stone-300 group-hover:text-stone-500 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <svg className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </Link>
@@ -810,35 +714,35 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
         <Link
           href={`/dashboard/${slug}/products/new`}
-          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-stone-200/80 bg-white hover:shadow-lg hover:shadow-stone-200/50 hover:border-emerald-200 transition-all group min-h-[100px]"
+          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-slate-200/80 bg-white hover:shadow-lg hover:shadow-slate-200/50 hover:border-emerald-200 transition-all group min-h-[100px]"
         >
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 group-hover:bg-emerald-100 flex items-center justify-center transition-colors group-hover:scale-110">
             <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
           </div>
-          <span className="text-sm font-medium text-stone-700 group-hover:text-emerald-700 transition-colors text-center">
+          <span className="text-sm font-medium text-slate-700 group-hover:text-emerald-700 transition-colors text-center">
             Add Product
           </span>
         </Link>
 
         <Link
           href={`/dashboard/${slug}/products`}
-          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-stone-200/80 bg-white hover:shadow-lg hover:shadow-stone-200/50 hover:border-blue-200 transition-all group"
+          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-slate-200/80 bg-white hover:shadow-lg hover:shadow-slate-200/50 hover:border-blue-200 transition-all group"
         >
           <div className="w-12 h-12 rounded-2xl bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors group-hover:scale-110">
             <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
             </svg>
           </div>
-          <span className="text-sm font-medium text-stone-700 group-hover:text-blue-700 transition-colors text-center">
+          <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700 transition-colors text-center">
             All Products
           </span>
         </Link>
 
         <Link
           href={`/dashboard/${slug}/settings`}
-          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-stone-200/80 bg-white hover:shadow-lg hover:shadow-stone-200/50 hover:border-purple-200 transition-all group"
+          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-slate-200/80 bg-white hover:shadow-lg hover:shadow-slate-200/50 hover:border-purple-200 transition-all group"
         >
           <div className="w-12 h-12 rounded-2xl bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center transition-colors group-hover:scale-110">
             <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -846,7 +750,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <span className="text-sm font-medium text-stone-700 group-hover:text-purple-700 transition-colors text-center">
+          <span className="text-sm font-medium text-slate-700 group-hover:text-purple-700 transition-colors text-center">
             Settings
           </span>
         </Link>
@@ -854,14 +758,14 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         <Link
           href={catalogUrl}
           target="_blank"
-          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-stone-200/80 bg-white hover:shadow-lg hover:shadow-stone-200/50 hover:border-amber-200 transition-all group"
+          className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-slate-200/80 bg-white hover:shadow-lg hover:shadow-slate-200/50 hover:border-amber-200 transition-all group"
         >
           <div className="w-12 h-12 rounded-2xl bg-amber-50 group-hover:bg-amber-100 flex items-center justify-center transition-colors group-hover:scale-110">
             <svg className="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
           </div>
-          <span className="text-sm font-medium text-stone-700 group-hover:text-amber-700 transition-colors text-center">
+          <span className="text-sm font-medium text-slate-700 group-hover:text-amber-700 transition-colors text-center">
             Public Catalog
           </span>
         </Link>

@@ -99,6 +99,7 @@ export default async function NewProductPage({ params, searchParams }: NewProduc
           shopSlug={slug}
           categories={categories.map((c) => ({ id: c.id, name: c.name }))}
           globalCategories={globalCategories}
+          planSlug={planSlug}
         />
       ) : (
         <CreateProductForm

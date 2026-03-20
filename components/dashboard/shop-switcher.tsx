@@ -1,8 +1,8 @@
-// ============================================================
-// Component — Shop Switcher (Dashboard Header Dropdown)
+﻿// ============================================================
+// Component â€” Shop Switcher (Dashboard Header Dropdown)
 // ============================================================
 // Dropdown for users who own/manage multiple shops.
-// Shows current shop name with a chevron — click to see all shops.
+// Shows current shop name with a chevron â€” click to see all shops.
 // Navigates to /dashboard/{slug} on selection.
 //
 // BEHAVIOUR:
@@ -75,28 +75,28 @@ export function ShopSwitcher({ currentSlug, shops }: ShopSwitcherProps) {
     [currentSlug, router],
   );
 
-  // Single shop — just plain text, no dropdown
+  // Single shop â€” just plain text, no dropdown
   if (!hasMultipleShops) {
     return (
-      <span className="text-sm font-medium text-stone-600 truncate max-w-[200px]">
+      <span className="text-sm font-medium text-slate-600 truncate max-w-[200px]">
         {currentShop?.name ?? currentSlug}
       </span>
     );
   }
 
-  // Multi-shop — interactive dropdown
+  // Multi-shop â€” interactive dropdown
   return (
     <div ref={containerRef} className="relative">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors rounded-lg px-2 py-1 -mx-2 -my-1 hover:bg-stone-100"
+        className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg px-2 py-1 -mx-2 -my-1 hover:bg-slate-100"
       >
         <span className="truncate max-w-[180px]">
           {currentShop?.name ?? currentSlug}
         </span>
         <svg
-          className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 flex-shrink-0 ${isOpen ? "rotate-180" : ""}`}
+          className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 flex-shrink-0 ${isOpen ? "rotate-180" : ""}`}
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}
@@ -110,11 +110,11 @@ export function ShopSwitcher({ currentSlug, shops }: ShopSwitcherProps) {
         </svg>
       </button>
 
-      {/* ── Dropdown Menu ───────────────────────────────── */}
+      {/* â”€â”€ Dropdown Menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl border border-stone-200 shadow-xl shadow-stone-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="px-3 pb-2 mb-1 border-b border-stone-100">
-            <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
+        <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="px-3 pb-2 mb-1 border-b border-slate-100">
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Your Shops
             </p>
           </div>
@@ -129,7 +129,7 @@ export function ShopSwitcher({ currentSlug, shops }: ShopSwitcherProps) {
                   className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
                     isCurrent
                       ? "bg-emerald-50"
-                      : "hover:bg-stone-50"
+                      : "hover:bg-slate-50"
                   }`}
                 >
                   {/* Shop Initial Avatar */}
@@ -137,7 +137,7 @@ export function ShopSwitcher({ currentSlug, shops }: ShopSwitcherProps) {
                     className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold ${
                       isCurrent
                         ? "bg-emerald-600 text-white"
-                        : "bg-stone-200 text-stone-600"
+                        : "bg-slate-200 text-slate-600"
                     }`}
                   >
                     {shop.name.charAt(0).toUpperCase()}
@@ -147,12 +147,12 @@ export function ShopSwitcher({ currentSlug, shops }: ShopSwitcherProps) {
                   <div className="flex-1 min-w-0">
                     <p
                       className={`text-sm font-medium truncate ${
-                        isCurrent ? "text-emerald-700" : "text-stone-800"
+                        isCurrent ? "text-emerald-700" : "text-slate-800"
                       }`}
                     >
                       {shop.name}
                     </p>
-                    <p className="text-[11px] text-stone-400 capitalize">
+                    <p className="text-[11px] text-slate-400 capitalize">
                       {shop.role.toLowerCase()}
                     </p>
                   </div>

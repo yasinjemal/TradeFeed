@@ -1,5 +1,5 @@
-// ============================================================
-// Component — Quick Reply Templates
+﻿// ============================================================
+// Component â€” Quick Reply Templates
 // ============================================================
 // Pre-written WhatsApp reply messages for SA informal sellers.
 // Copy-to-clipboard with visual feedback. Grouped by category.
@@ -25,137 +25,137 @@ interface TemplateGroup {
 const TEMPLATE_GROUPS: TemplateGroup[] = [
   {
     title: "Stock & Availability",
-    icon: "📦",
+    icon: "ðŸ“¦",
     templates: [
       {
         id: "in-stock",
         label: "Item in stock",
-        emoji: "✅",
+        emoji: "âœ…",
         message:
-          "Hi! ✅ Yes, this item is in stock and ready to go. Would you like to place an order?",
+          "Hi! âœ… Yes, this item is in stock and ready to go. Would you like to place an order?",
       },
       {
         id: "out-of-stock",
         label: "Out of stock",
-        emoji: "😔",
+        emoji: "ðŸ˜”",
         message:
-          "Hi! Unfortunately this item is currently out of stock 😔 I'll let you know as soon as it's back. Can I suggest something similar?",
+          "Hi! Unfortunately this item is currently out of stock ðŸ˜” I'll let you know as soon as it's back. Can I suggest something similar?",
       },
       {
         id: "sizes-available",
         label: "Available sizes",
-        emoji: "📏",
+        emoji: "ðŸ“",
         message:
-          "Hi! Here are the sizes currently in stock:\n\n• S — available ✅\n• M — available ✅\n• L — available ✅\n• XL — available ✅\n\nWhich size would you like?",
+          "Hi! Here are the sizes currently in stock:\n\nâ€¢ S â€” available âœ…\nâ€¢ M â€” available âœ…\nâ€¢ L â€” available âœ…\nâ€¢ XL â€” available âœ…\n\nWhich size would you like?",
       },
       {
         id: "last-one",
         label: "Last one left",
-        emoji: "🔥",
+        emoji: "ðŸ”¥",
         message:
-          "Hi! 🔥 Great choice — this is the last one in stock! Shall I reserve it for you?",
+          "Hi! ðŸ”¥ Great choice â€” this is the last one in stock! Shall I reserve it for you?",
       },
     ],
   },
   {
     title: "Pricing & Payment",
-    icon: "💰",
+    icon: "ðŸ’°",
     templates: [
       {
         id: "price-info",
         label: "Price details",
-        emoji: "💵",
+        emoji: "ðŸ’µ",
         message:
           "Hi! The price is R[AMOUNT]. This includes [details]. Would you like to order?",
       },
       {
         id: "payment-methods",
         label: "Payment methods",
-        emoji: "💳",
+        emoji: "ðŸ’³",
         message:
-          "Hi! We accept the following payment methods:\n\n• Cash on delivery 💵\n• EFT / Bank transfer 🏦\n• eWallet (Capitec Pay, FNB) 📱\n\nWhich works best for you?",
+          "Hi! We accept the following payment methods:\n\nâ€¢ Cash on delivery ðŸ’µ\nâ€¢ EFT / Bank transfer ðŸ¦\nâ€¢ eWallet (Capitec Pay, FNB) ðŸ“±\n\nWhich works best for you?",
       },
       {
         id: "bulk-discount",
         label: "Bulk discount",
-        emoji: "🏷️",
+        emoji: "ðŸ·ï¸",
         message:
-          "Hi! Great news — we offer bulk discounts:\n\n• 3+ items: 10% off\n• 5+ items: 15% off\n• 10+ items: 20% off\n\nHow many were you looking at?",
+          "Hi! Great news â€” we offer bulk discounts:\n\nâ€¢ 3+ items: 10% off\nâ€¢ 5+ items: 15% off\nâ€¢ 10+ items: 20% off\n\nHow many were you looking at?",
       },
       {
         id: "banking-details",
         label: "Banking details",
-        emoji: "🏦",
+        emoji: "ðŸ¦",
         message:
-          "Hi! Here are our banking details:\n\n🏦 Bank: [Bank Name]\n👤 Account Name: [Name]\n🔢 Account Number: [Number]\n📋 Reference: [Your Name]\n\nPlease send proof of payment once done ✅",
+          "Hi! Here are our banking details:\n\nðŸ¦ Bank: [Bank Name]\nðŸ‘¤ Account Name: [Name]\nðŸ”¢ Account Number: [Number]\nðŸ“‹ Reference: [Your Name]\n\nPlease send proof of payment once done âœ…",
       },
     ],
   },
   {
     title: "Delivery & Collection",
-    icon: "🚚",
+    icon: "ðŸšš",
     templates: [
       {
         id: "delivery-options",
         label: "Delivery options",
-        emoji: "📍",
+        emoji: "ðŸ“",
         message:
-          "Hi! Here are our delivery options:\n\n🚚 Courier: R[AMOUNT] (2-3 days)\n🏪 Collection: FREE (from [location])\n📦 Paxi: R[AMOUNT] (to your nearest PEP)\n\nWhich option suits you?",
+          "Hi! Here are our delivery options:\n\nðŸšš Courier: R[AMOUNT] (2-3 days)\nðŸª Collection: FREE (from [location])\nðŸ“¦ Paxi: R[AMOUNT] (to your nearest PEP)\n\nWhich option suits you?",
       },
       {
         id: "order-shipped",
         label: "Order shipped",
-        emoji: "📬",
+        emoji: "ðŸ“¬",
         message:
-          "Hi! Great news — your order has been shipped! 📦\n\n🚚 Tracking: [TRACKING NUMBER]\n📅 Expected delivery: [DATE]\n\nI'll keep you updated!",
+          "Hi! Great news â€” your order has been shipped! ðŸ“¦\n\nðŸšš Tracking: [TRACKING NUMBER]\nðŸ“… Expected delivery: [DATE]\n\nI'll keep you updated!",
       },
       {
         id: "collection-ready",
         label: "Ready for collection",
-        emoji: "🏪",
+        emoji: "ðŸª",
         message:
-          "Hi! Your order is packed and ready for collection! 🎉\n\n📍 Address: [ADDRESS]\n🕐 Hours: [HOURS]\n\nPlease bring your order reference. See you soon!",
+          "Hi! Your order is packed and ready for collection! ðŸŽ‰\n\nðŸ“ Address: [ADDRESS]\nðŸ• Hours: [HOURS]\n\nPlease bring your order reference. See you soon!",
       },
       {
         id: "delivery-delay",
         label: "Delivery delay",
-        emoji: "⏳",
+        emoji: "â³",
         message:
-          "Hi! I wanted to update you — there's a small delay on your delivery ⏳\n\nNew expected date: [DATE]\n\nSorry for the wait, and thank you for your patience! 🙏",
+          "Hi! I wanted to update you â€” there's a small delay on your delivery â³\n\nNew expected date: [DATE]\n\nSorry for the wait, and thank you for your patience! ðŸ™",
       },
     ],
   },
   {
     title: "Customer Service",
-    icon: "🤝",
+    icon: "ðŸ¤",
     templates: [
       {
         id: "thank-you",
         label: "Thank you",
-        emoji: "🙏",
+        emoji: "ðŸ™",
         message:
-          "Thank you so much for your order! 🎉 We really appreciate your support. Enjoy your purchase and don't hesitate to reach out if you need anything! 💚",
+          "Thank you so much for your order! ðŸŽ‰ We really appreciate your support. Enjoy your purchase and don't hesitate to reach out if you need anything! ðŸ’š",
       },
       {
         id: "review-request",
         label: "Ask for review",
-        emoji: "⭐",
+        emoji: "â­",
         message:
-          "Hi! Hope you're loving your purchase! 😊 If you have a moment, we'd really appreciate a review on our catalog — it helps other buyers trust us! ⭐\n\nThank you! 🙏",
+          "Hi! Hope you're loving your purchase! ðŸ˜Š If you have a moment, we'd really appreciate a review on our catalog â€” it helps other buyers trust us! â­\n\nThank you! ðŸ™",
       },
       {
         id: "return-policy",
         label: "Return policy",
-        emoji: "🔄",
+        emoji: "ðŸ”„",
         message:
-          "Hi! Our return policy:\n\n• Returns accepted within 7 days\n• Item must be unused and in original packaging\n• Buyer covers return shipping\n\nPlease send photos of any issues and we'll sort it out 🤝",
+          "Hi! Our return policy:\n\nâ€¢ Returns accepted within 7 days\nâ€¢ Item must be unused and in original packaging\nâ€¢ Buyer covers return shipping\n\nPlease send photos of any issues and we'll sort it out ðŸ¤",
       },
       {
         id: "new-arrivals",
         label: "New arrivals",
-        emoji: "🆕",
+        emoji: "ðŸ†•",
         message:
-          "Hi! 🆕 Just wanted to let you know we've got new stock in! Check out our latest products on our catalog. Let me know if anything catches your eye! 👀",
+          "Hi! ðŸ†• Just wanted to let you know we've got new stock in! Check out our latest products on our catalog. Let me know if anything catches your eye! ðŸ‘€",
       },
     ],
   },
@@ -186,7 +186,7 @@ export function QuickReplyTemplates({ shopSlug }: { shopSlug: string }) {
     <div className="space-y-6">
       {TEMPLATE_GROUPS.map((group) => (
         <div key={group.title} className="space-y-3">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-stone-700">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-700">
             <span>{group.icon}</span>
             {group.title}
           </h2>
@@ -201,12 +201,12 @@ export function QuickReplyTemplates({ shopSlug }: { shopSlug: string }) {
                   className={`group relative rounded-xl border-2 p-3 text-left transition-all duration-200 ${
                     isCopied
                       ? "border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100"
-                      : "border-stone-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/30 hover:shadow-sm active:scale-[0.98]"
+                      : "border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/30 hover:shadow-sm active:scale-[0.98]"
                   }`}
                 >
                   {/* Header */}
                   <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1.5 text-sm font-medium text-stone-800">
+                    <span className="flex items-center gap-1.5 text-sm font-medium text-slate-800">
                       <span>{template.emoji}</span>
                       {template.label}
                     </span>
@@ -214,14 +214,14 @@ export function QuickReplyTemplates({ shopSlug }: { shopSlug: string }) {
                       className={`flex-shrink-0 rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-all ${
                         isCopied
                           ? "bg-emerald-500 text-white"
-                          : "bg-stone-100 text-stone-400 group-hover:bg-emerald-100 group-hover:text-emerald-600"
+                          : "bg-slate-100 text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600"
                       }`}
                     >
-                      {isCopied ? "✓ Copied!" : "TAP TO COPY"}
+                      {isCopied ? "âœ“ Copied!" : "TAP TO COPY"}
                     </span>
                   </div>
                   {/* Preview */}
-                  <p className="line-clamp-2 text-xs leading-relaxed text-stone-500">
+                  <p className="line-clamp-2 text-xs leading-relaxed text-slate-500">
                     {template.message}
                   </p>
                 </button>
@@ -233,8 +233,8 @@ export function QuickReplyTemplates({ shopSlug }: { shopSlug: string }) {
 
       {/* Tip */}
       <div className="rounded-xl border border-dashed border-emerald-200 bg-emerald-50/40 p-4 text-center">
-        <p className="text-xs text-stone-500">
-          💡 <span className="font-medium text-stone-700">Pro tip:</span> Replace the
+        <p className="text-xs text-slate-500">
+          ðŸ’¡ <span className="font-medium text-slate-700">Pro tip:</span> Replace the
           [BRACKETED] placeholders with your actual details before sending
         </p>
       </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 
@@ -31,27 +31,27 @@ export function UpgradeGate({ current, limit, shopSlug, mode }: UpgradeGateProps
           You&apos;ve used all <span className="font-bold">{limit}</span> product slots on the Free plan.
         </p>
         <p className="text-xs text-red-600/70 mb-6">
-          Upgrade to Pro for unlimited products, AI listings, and analytics — that&apos;s less than R7/day.
+          Upgrade to Pro for unlimited products, AI listings, and analytics â€” that&apos;s less than R7/day.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href={`/dashboard/${shopSlug}/billing`}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
           >
-            ⚡ Upgrade to Pro
+            âš¡ Upgrade to Pro
           </Link>
           <Link
             href={`/dashboard/${shopSlug}/products`}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-6 py-3 text-sm font-medium text-stone-700 hover:bg-stone-50 transition"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
           >
-            ← Back to Products
+            â† Back to Products
           </Link>
         </div>
       </div>
     );
   }
 
-  // Soft gate — dismissible amber banner
+  // Soft gate â€” dismissible amber banner
   return (
     <div className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 flex items-start gap-4">
       <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -74,7 +74,7 @@ export function UpgradeGate({ current, limit, shopSlug, mode }: UpgradeGateProps
           href={`/dashboard/${shopSlug}/billing`}
           className="inline-flex items-center gap-1.5 mt-3 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all"
         >
-          ⚡ Go Pro — Unlimited Products
+          âš¡ Go Pro â€” Unlimited Products
         </Link>
       </div>
     </div>

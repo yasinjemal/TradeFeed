@@ -1,5 +1,5 @@
-// ============================================================
-// Component — Dashboard Mobile Navigation (Slide-out Drawer)
+﻿// ============================================================
+// Component â€” Dashboard Mobile Navigation (Slide-out Drawer)
 // ============================================================
 // Full mobile navigation for the seller dashboard.
 // Opens from the left with backdrop blur overlay.
@@ -198,7 +198,7 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
 
   const handleClose = useCallback(() => setIsOpen(false), []);
 
-  // Drawer rendered outside the header — no backdrop-blur containing block
+  // Drawer rendered outside the header â€” no backdrop-blur containing block
   if (!isOpen) return null;
 
   return (
@@ -212,16 +212,16 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
           {/* Drawer */}
           <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-white shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <TradeFeedLogo size="md" variant="dark" />
                 <div className="min-w-0">
-                  <p className="text-[11px] text-stone-400 truncate">{shopName}</p>
+                  <p className="text-[11px] text-slate-400 truncate">{shopName}</p>
                 </div>
               </div>
               <button
                 onClick={handleClose}
-                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-stone-100 text-stone-400"
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"
                 aria-label="Close menu"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -233,13 +233,13 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
             {/* Nav Items */}
             <nav className="flex-1 overflow-y-auto py-3 px-3" role="navigation" aria-label="Dashboard navigation">
               {/* Quick links: Home & Marketplace */}
-              <div className="space-y-0.5 mb-3 pb-3 border-b border-stone-100">
+              <div className="space-y-0.5 mb-3 pb-3 border-b border-slate-100">
                 <Link
                   href="/"
                   onClick={handleClose}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
                 >
-                  <span className="flex-shrink-0 text-stone-400">
+                  <span className="flex-shrink-0 text-slate-400">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12 11.204 3.045a1.125 1.125 0 0 1 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" />
                     </svg>
@@ -249,9 +249,9 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
                 <Link
                   href="/marketplace"
                   onClick={handleClose}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all"
                 >
-                  <span className="flex-shrink-0 text-stone-400">
+                  <span className="flex-shrink-0 text-slate-400">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35m0 0A7.125 7.125 0 1 0 6.575 6.575a7.125 7.125 0 0 0 10.075 10.075Z" />
                     </svg>
@@ -275,10 +275,10 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
                       className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                         isActive
                           ? "bg-emerald-50 text-emerald-700"
-                          : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                       }`}
                     >
-                      <span className={`flex-shrink-0 ${isActive ? "text-emerald-600" : "text-stone-400"}`}>
+                      <span className={`flex-shrink-0 ${isActive ? "text-emerald-600" : "text-slate-400"}`}>
                         {item.icon}
                       </span>
                       {item.label}
@@ -292,7 +292,7 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
             </nav>
 
             {/* Footer */}
-            <div className="border-t border-stone-100 px-4 py-3 space-y-2">
+            <div className="border-t border-slate-100 px-4 py-3 space-y-2">
               <Link
                 href={`/catalog/${slug}`}
                 target="_blank"

@@ -408,9 +408,19 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | ✅ Completed (Homepage) |
 | **Priority** | High |
 | **Description** | Central command center for sellers. Where they manage orders, products, analytics, and shop settings. |
+
+**Implementation notes (Dashboard Homepage):**
+- Redesigned as "Today at a glance" 4-stat grid (Orders, Revenue, Products, Stock) at top of page
+- Revenue from orders link + Low Stock Warning surfaced early for urgency
+- Growth Tools grid: AI Credits + Product Usage / Seller Tier side by side
+- Seller Tier + Seller Health Intelligence preserved below
+- Full stone→slate theme migration across page, layout, and all 10+ dashboard components
+- Activation checklist and WhatsApp Import banner retained for new sellers
+- Share Catalog, Profile Completeness, Recent Products, Trending Products, Quick Actions at bottom
+- Reduced page from 1100+ to 779 lines by removing duplicate sections
 
 **Key improvements needed:**
 - Dashboard home: redesign as a **Today at a glance** card grid — orders pending, views today, revenue this month
@@ -474,9 +484,16 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | ✅ Completed |
 | **Priority** | Low |
 | **Description** | Seller's account and shop settings page. Where they configure their public profile. |
+
+**Implementation notes:**
+- Fixed paste/refresh bug: converted all inputs from uncontrolled (`defaultValue`) to controlled (`value` + `onChange`)
+- Added `onKeyDown` Enter prevention on all 11 single-line inputs
+- Added `isDirty` state tracking with visual indicator in save bar
+- Migrated stone→slate theme throughout
+- Social links, business hours, address, and all profile fields working correctly
 
 **Key improvements needed:**
 - Redesign as a tabbed layout: General / Shop Branding / Payment / Notifications / Danger Zone
@@ -691,7 +708,7 @@ Display these trust signals at key anxiety points:
 
 ### Phase 3 — Seller Experience
 
-- [ ] Dashboard homepage redesigned ("today at a glance")
+- [x] Dashboard homepage redesigned ("today at a glance")
 - [x] Add product wizard redesigned (stepped, with live preview, AI integration)
 - [ ] Onboarding flow built (post-signup wizard + checklist widget)
 - [x] Seller shop page (public) redesigned

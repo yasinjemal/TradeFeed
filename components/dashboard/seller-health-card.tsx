@@ -1,13 +1,13 @@
+﻿// ============================================================
+// Component â€” Seller Health Score Card
 // ============================================================
-// Component — Seller Health Score Card
-// ============================================================
-// Displays the seller's health score (0–100) with:
+// Displays the seller's health score (0â€“100) with:
 //   - Circular score indicator with color coding
 //   - 5-dimension breakdown bars
 //   - Top 3 actionable suggestions
 //
 // Mobile-first. No external chart libraries.
-// Color coding: emerald (good) → amber (warning) → red (critical)
+// Color coding: emerald (good) â†’ amber (warning) â†’ red (critical)
 // ============================================================
 
 import Link from "next/link";
@@ -18,7 +18,7 @@ interface SellerHealthCardProps {
   shopSlug: string;
 }
 
-// ── Color helpers ────────────────────────────────────────
+// â”€â”€ Color helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function getScoreColor(score: number): {
   text: string;
@@ -68,17 +68,17 @@ function getBarColor(value: number, max: number): string {
   return "bg-red-500";
 }
 
-// ── Breakdown dimension labels ───────────────────────────
+// â”€â”€ Breakdown dimension labels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const DIMENSIONS = [
-  { key: "completeness" as const, label: "Product Quality", max: 25, icon: "📦" },
-  { key: "inventory" as const, label: "Inventory", max: 20, icon: "📊" },
-  { key: "reliability" as const, label: "Fulfillment", max: 20, icon: "✅" },
-  { key: "activity" as const, label: "Activity", max: 15, icon: "⚡" },
-  { key: "diversity" as const, label: "Catalog Breadth", max: 20, icon: "🏷️" },
+  { key: "completeness" as const, label: "Product Quality", max: 25, icon: "ðŸ“¦" },
+  { key: "inventory" as const, label: "Inventory", max: 20, icon: "ðŸ“Š" },
+  { key: "reliability" as const, label: "Fulfillment", max: 20, icon: "âœ…" },
+  { key: "activity" as const, label: "Activity", max: 15, icon: "âš¡" },
+  { key: "diversity" as const, label: "Catalog Breadth", max: 20, icon: "ðŸ·ï¸" },
 ];
 
-// ── Component ────────────────────────────────────────────
+// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
   const { score, breakdown, suggestions } = health;
@@ -93,7 +93,7 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
 
   return (
     <div className={`rounded-2xl border ${color.border} ${color.bg} p-4 sm:p-5`}>
-      {/* ── Header row: Score ring + label ───────────── */}
+      {/* â”€â”€ Header row: Score ring + label â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex items-center gap-4 sm:gap-5">
         {/* Circular score indicator */}
         <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
@@ -136,20 +136,20 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-bold text-sm text-stone-900">Shop Health</h3>
+            <h3 className="font-bold text-sm text-slate-900">Shop Health</h3>
             <span
               className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${color.text} ${color.bg} border ${color.border}`}
             >
               {color.label}
             </span>
           </div>
-          <p className="text-[12px] text-stone-500 mt-1">
+          <p className="text-[12px] text-slate-500 mt-1">
             How well your shop is performing across 5 key areas. Higher scores boost your marketplace ranking.
           </p>
         </div>
       </div>
 
-      {/* ── Breakdown bars ────────────────────────────── */}
+      {/* â”€â”€ Breakdown bars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="mt-4 space-y-2.5">
         {DIMENSIONS.map((dim) => {
           const value = breakdown[dim.key];
@@ -158,11 +158,11 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
           return (
             <div key={dim.key}>
               <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[11px] font-medium text-stone-600 flex items-center gap-1.5">
+                <span className="text-[11px] font-medium text-slate-600 flex items-center gap-1.5">
                   <span className="text-xs">{dim.icon}</span>
                   {dim.label}
                 </span>
-                <span className="text-[10px] text-stone-500 tabular-nums">
+                <span className="text-[10px] text-slate-500 tabular-nums">
                   {value}/{dim.max}
                 </span>
               </div>
@@ -177,11 +177,11 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
         })}
       </div>
 
-      {/* ── Suggestions ───────────────────────────────── */}
+      {/* â”€â”€ Suggestions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {suggestions.length > 0 && (
-        <div className="mt-4 pt-3 border-t border-stone-200/50">
-          <p className="text-[11px] font-semibold text-stone-600 uppercase tracking-wider mb-2">
-            💡 How to improve
+        <div className="mt-4 pt-3 border-t border-slate-200/50">
+          <p className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-2">
+            ðŸ’¡ How to improve
           </p>
           <ul className="space-y-1.5">
             {suggestions.map((s, i) =>
@@ -189,14 +189,14 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
                 <li key={i}>
                   <Link
                     href={`/dashboard/${shopSlug}/${s.href}`}
-                    className="flex items-start gap-2 text-[12px] text-stone-600 leading-relaxed rounded-lg px-2 py-1.5 -mx-2 hover:bg-white/80 hover:text-stone-900 transition-colors group/tip"
+                    className="flex items-start gap-2 text-[12px] text-slate-600 leading-relaxed rounded-lg px-2 py-1.5 -mx-2 hover:bg-white/80 hover:text-slate-900 transition-colors group/tip"
                   >
-                    <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold text-stone-400 group-hover/tip:text-emerald-500 group-hover/tip:bg-emerald-50 transition-colors">
+                    <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold text-slate-400 group-hover/tip:text-emerald-500 group-hover/tip:bg-emerald-50 transition-colors">
                       {i + 1}
                     </span>
                     <span className="flex-1">{s.text}</span>
                     <svg
-                      className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-stone-300 group-hover/tip:text-emerald-500 group-hover/tip:translate-x-0.5 transition-all"
+                      className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-slate-300 group-hover/tip:text-emerald-500 group-hover/tip:translate-x-0.5 transition-all"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={2.5}
@@ -209,10 +209,10 @@ export function SellerHealthCard({ health, shopSlug }: SellerHealthCardProps) {
               ) : (
                 <li
                   key={i}
-                  className="flex items-start gap-2 text-[12px] text-stone-600 leading-relaxed px-2 py-1.5 -mx-2"
+                  className="flex items-start gap-2 text-[12px] text-slate-600 leading-relaxed px-2 py-1.5 -mx-2"
                 >
-                  <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold text-stone-400">
-                    ✓
+                  <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold text-slate-400">
+                    âœ“
                   </span>
                   {s.text}
                 </li>

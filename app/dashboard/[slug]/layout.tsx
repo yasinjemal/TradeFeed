@@ -1,5 +1,5 @@
-// ============================================================
-// Layout — Seller Dashboard (Auth-Protected · Redesigned)
+﻿// ============================================================
+// Layout â€” Seller Dashboard (Auth-Protected Â· Redesigned)
 // ============================================================
 // Polished layout with branded nav, active-state links, icons,
 // responsive mobile menu, and subtle visual hierarchy.
@@ -58,17 +58,17 @@ export default async function DashboardLayout({
   const userIsAdmin = !!adminId;
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* ── Top Nav ─────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/80 backdrop-blur-xl">
+    <div className="min-h-screen bg-slate-50">
+      {/* â”€â”€ Top Nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           {/* Brand + Shop + Mobile Menu */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* Hamburger — triggers mobile nav rendered outside header */}
+            {/* Hamburger â€” triggers mobile nav rendered outside header */}
             <button
               type="button"
               id="mobile-nav-trigger"
-              className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl hover:bg-stone-100 transition-colors text-stone-600"
+              className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl hover:bg-slate-100 transition-colors text-slate-600"
               aria-label="Open navigation menu"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -84,7 +84,7 @@ export default async function DashboardLayout({
             </Link>
 
             <div className="hidden sm:flex items-center gap-2 ml-1">
-              <svg className="w-4 h-4 text-stone-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
               <ShopSwitcher
@@ -126,7 +126,7 @@ export default async function DashboardLayout({
                 Admin
               </Link>
             )}
-            <div className="pl-3 border-l border-stone-200">
+            <div className="pl-3 border-l border-slate-200">
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{
@@ -143,17 +143,17 @@ export default async function DashboardLayout({
       {/* Mobile nav rendered OUTSIDE header to avoid backdrop-blur containing block */}
       <DashboardMobileNav slug={slug} shopName={shop.name} />
 
-      {/* ── Page Content ────────────────────────────────── */}
+      {/* â”€â”€ Page Content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8">{children}</main>
 
-      {/* ── Floating Help Button ────────────────────────── */}
+      {/* â”€â”€ Floating Help Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <a
         href="mailto:support@tradefeed.co.za?subject=Help with my TradeFeed shop"
         className="fixed bottom-6 left-4 z-50 md:bottom-6 md:left-6
           group flex items-center gap-2
           h-11 px-4 rounded-full
-          bg-white border border-stone-200 shadow-lg shadow-stone-200/50
-          text-stone-600 hover:text-emerald-600 hover:border-emerald-200 hover:shadow-emerald-100/50
+          bg-white border border-slate-200 shadow-lg shadow-slate-200/50
+          text-slate-600 hover:text-emerald-600 hover:border-emerald-200 hover:shadow-emerald-100/50
           transition-all duration-200"
         aria-label="Get help"
       >
@@ -163,7 +163,7 @@ export default async function DashboardLayout({
         <span className="text-xs font-medium">Need help?</span>
       </a>
 
-      {/* ── Floating Add Product Button (mobile) ────────── */}
+      {/* â”€â”€ Floating Add Product Button (mobile) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <a
         href={`/dashboard/${slug}/products/new`}
         className="fixed bottom-[4.5rem] right-4 z-50 md:hidden
@@ -180,7 +180,7 @@ export default async function DashboardLayout({
         </svg>
       </a>
 
-      {/* ── Mobile Bottom Tab Bar ───────────────────────── */}
+      {/* â”€â”€ Mobile Bottom Tab Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <MobileBottomNav slug={slug} />
     </div>
   );

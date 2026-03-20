@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -11,7 +11,7 @@ interface CatalogQrShareProps {
 }
 
 /**
- * QR code for catalog URL — for offline sharing (print, stall, packaging).
+ * QR code for catalog URL â€” for offline sharing (print, stall, packaging).
  * Uses a free public API to generate the QR image; no dependency.
  */
 export function CatalogQrShare({ catalogPath, shopName }: CatalogQrShareProps) {
@@ -45,11 +45,11 @@ export function CatalogQrShare({ catalogPath, shopName }: CatalogQrShareProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-stone-900">QR code for your catalog</h3>
+              <h3 className="font-bold text-slate-900">QR code for your catalog</h3>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="p-1 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                 aria-label="Close"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -57,10 +57,10 @@ export function CatalogQrShare({ catalogPath, shopName }: CatalogQrShareProps) {
                 </svg>
               </button>
             </div>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-slate-500">
               Customers can scan this to open your catalog. Print it for your stall or packaging.
             </p>
-            <div className="flex justify-center bg-stone-50 rounded-xl p-4">
+            <div className="flex justify-center bg-slate-50 rounded-xl p-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={qrImageUrl}
@@ -71,14 +71,14 @@ export function CatalogQrShare({ catalogPath, shopName }: CatalogQrShareProps) {
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-stone-600 truncate flex-1">{fullUrl}</span>
+              <span className="font-mono text-xs text-slate-600 truncate flex-1">{fullUrl}</span>
               <CopyButton text={fullUrl} />
             </div>
             <a
               href={qrImageUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full py-2.5 rounded-xl text-center text-sm font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors"
+              className="block w-full py-2.5 rounded-xl text-center text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors"
             >
               Open QR image (right-click to save)
             </a>

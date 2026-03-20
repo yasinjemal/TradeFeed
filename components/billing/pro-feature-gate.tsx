@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 
@@ -45,15 +45,15 @@ export function ProFeatureGate({
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-stone-900 mb-1">{feature}</h3>
-          <p className="text-sm text-stone-600 mb-5">
+          <h3 className="text-lg font-bold text-slate-900 mb-1">{feature}</h3>
+          <p className="text-sm text-slate-600 mb-5">
             {description ?? "Upgrade to Pro to unlock this feature and grow your business."}
           </p>
           <Link
             href={`/dashboard/${shopSlug}/billing`}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
           >
-            ⚡ Upgrade to Pro
+            âš¡ Upgrade to Pro
           </Link>
         </div>
       </div>

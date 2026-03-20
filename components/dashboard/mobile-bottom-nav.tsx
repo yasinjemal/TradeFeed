@@ -1,8 +1,8 @@
-// ============================================================
-// Component — Mobile Bottom Tab Bar
+﻿// ============================================================
+// Component â€” Mobile Bottom Tab Bar
 // ============================================================
 // Fixed bottom nav for mobile dashboard (md:hidden).
-// 4 tabs: Products · Orders · Share · More
+// 4 tabs: Products Â· Orders Â· Share Â· More
 // 48px+ tap targets for fat-finger friendliness.
 // ============================================================
 
@@ -77,7 +77,7 @@ export function MobileBottomNav({ slug }: MobileBottomNavProps) {
   };
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white border-t border-stone-200 safe-area-pb">
+    <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white border-t border-slate-200 safe-area-pb">
       <div className="flex items-stretch h-14">
         {tabs.map((tab) => {
           const active = isActive(tab.match);
@@ -106,8 +106,8 @@ export function MobileBottomNav({ slug }: MobileBottomNavProps) {
               key={tab.label}
               href={href}
               className={`flex-1 flex flex-col items-center justify-center gap-0.5 min-h-[48px]
-                transition-colors active:bg-stone-100
-                ${active ? "text-emerald-600" : "text-stone-400 hover:text-stone-600"}`}
+                transition-colors active:bg-slate-100
+                ${active ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
             >
               {tab.icon}
               <span className={`text-[10px] leading-none ${active ? "font-bold" : "font-medium"}`}>
