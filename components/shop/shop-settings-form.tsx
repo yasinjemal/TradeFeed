@@ -1,5 +1,5 @@
-// ============================================================
-// Component — Shop Settings Form (v2 — Mind-blowing Edition)
+﻿// ============================================================
+// Component â€” Shop Settings Form (v2 â€” Mind-blowing Edition)
 // ============================================================
 // Beautiful, smooth, automatic:
 // - Animated expanding sections with smooth transitions
@@ -30,7 +30,7 @@ import {
   type DayKey,
 } from "@/lib/validation/shop-settings";
 
-/* ── SA Cities → Province auto-map ───────────────────────── */
+/* â”€â”€ SA Cities â†’ Province auto-map â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const CITY_PROVINCE_MAP: Record<string, string> = {
   "Johannesburg": "Gauteng",
   "Pretoria": "Gauteng",
@@ -57,30 +57,30 @@ const CITY_PROVINCE_MAP: Record<string, string> = {
 
 const SA_CITIES = Object.keys(CITY_PROVINCE_MAP);
 
-/* ── Map Presets for popular wholesale areas ──────────────── */
+/* â”€â”€ Map Presets for popular wholesale areas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const MAP_PRESETS = [
-  { label: "Jeppe St, JHB", lat: -26.2023, lng: 28.0436, emoji: "🏪" },
-  { label: "Fashion District", lat: -26.2050, lng: 28.0400, emoji: "👗" },
-  { label: "Oriental Plaza", lat: -26.2060, lng: 28.0255, emoji: "🏬" },
-  { label: "Cape Town CBD", lat: -33.9249, lng: 18.4241, emoji: "🌊" },
-  { label: "Durban CBD", lat: -29.8587, lng: 31.0218, emoji: "☀️" },
-  { label: "Pretoria CBD", lat: -25.7479, lng: 28.2293, emoji: "🏛️" },
+  { label: "Jeppe St, JHB", lat: -26.2023, lng: 28.0436, emoji: "ðŸª" },
+  { label: "Fashion District", lat: -26.2050, lng: 28.0400, emoji: "ðŸ‘—" },
+  { label: "Oriental Plaza", lat: -26.2060, lng: 28.0255, emoji: "ðŸ¬" },
+  { label: "Cape Town CBD", lat: -33.9249, lng: 18.4241, emoji: "ðŸŒŠ" },
+  { label: "Durban CBD", lat: -29.8587, lng: 31.0218, emoji: "â˜€ï¸" },
+  { label: "Pretoria CBD", lat: -25.7479, lng: 28.2293, emoji: "ðŸ›ï¸" },
 ] as const;
 
-/* ── Business hour presets ────────────────────────────────── */
+/* â”€â”€ Business hour presets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const HOUR_PRESETS = [
   {
     label: "Weekdays + Sat AM",
-    icon: "🏢",
-    desc: "Mon–Fri 8–5, Sat 9–2",
+    icon: "ðŸ¢",
+    desc: "Monâ€“Fri 8â€“5, Sat 9â€“2",
     hours: {
       mon: "08:00-17:00", tue: "08:00-17:00", wed: "08:00-17:00",
       thu: "08:00-17:00", fri: "08:00-17:00", sat: "09:00-14:00", sun: "Closed",
     } as BusinessHours,
   },
   {
-    label: "Every Day 8–6",
-    icon: "🔄",
+    label: "Every Day 8â€“6",
+    icon: "ðŸ”„",
     desc: "Open 7 days a week",
     hours: {
       mon: "08:00-18:00", tue: "08:00-18:00", wed: "08:00-18:00",
@@ -89,8 +89,8 @@ const HOUR_PRESETS = [
   },
   {
     label: "Early Bird",
-    icon: "🌅",
-    desc: "Mon–Sat 6–3",
+    icon: "ðŸŒ…",
+    desc: "Monâ€“Sat 6â€“3",
     hours: {
       mon: "06:00-15:00", tue: "06:00-15:00", wed: "06:00-15:00",
       thu: "06:00-15:00", fri: "06:00-15:00", sat: "06:00-15:00", sun: "Closed",
@@ -129,7 +129,7 @@ export function ShopSettingsForm({
   const boundAction = updateShopSettingsAction.bind(null, shopSlug);
   const [state, formAction, isPending] = useActionState(boundAction, null);
 
-  // ── Location state ──────────────────────────────────────
+  // â”€â”€ Location state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [lat, setLat] = useState(initialData.latitude?.toString() ?? "");
   const [lng, setLng] = useState(initialData.longitude?.toString() ?? "");
   const [gpsStatus, setGpsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -137,18 +137,35 @@ export function ShopSettingsForm({
   const [cityValue, setCityValue] = useState(initialData.city ?? "");
   const [provinceValue, setProvinceValue] = useState(initialData.province ?? "");
 
-  // ── Business hours state ────────────────────────────────
+  // â”€â”€ Business hours state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const initialHours: BusinessHours = initialData.businessHours
     ? (JSON.parse(initialData.businessHours) as BusinessHours)
     : {};
   const [hours, setHours] = useState<BusinessHours>(initialHours);
   const [activePreset, setActivePreset] = useState<number | null>(null);
 
-  // ── Character counters ──────────────────────────────────
-  const [aboutLength, setAboutLength] = useState(initialData.aboutText?.length ?? 0);
-  const [descLength, setDescLength] = useState(initialData.description?.length ?? 0);
+  // â”€â”€ Controlled text fields (prevents paste/refresh bug on mobile) â”€â”€
+  // Using controlled state ensures values survive re-renders after
+  // accidental form submission or revalidation.
+  const [nameValue, setNameValue] = useState(initialData.name);
+  const [descValue, setDescValue] = useState(initialData.description ?? "");
+  const [aboutValue, setAboutValue] = useState(initialData.aboutText ?? "");
+  const [isDirty, setIsDirty] = useState(false);
 
-  // ── Image upload state ──────────────────────────────────
+  const descLength = descValue.length;
+  const aboutLength = aboutValue.length;
+
+  // Prevent Enter key from submitting form on single-line inputs
+  const preventEnterSubmit = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter") e.preventDefault();
+  }, []);
+
+  // Track dirty state
+  const markDirty = useCallback(() => {
+    if (!isDirty) setIsDirty(true);
+  }, [isDirty]);
+
+  // â”€â”€ Image upload state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [logoUrl, setLogoUrl] = useState(initialData.logoUrl ?? "");
   const [bannerUrl, setBannerUrl] = useState(initialData.bannerUrl ?? "");
   const [logoUploading, setLogoUploading] = useState(false);
@@ -196,21 +213,22 @@ export function ShopSettingsForm({
     startBannerUpload([file]);
   };
 
-  // ── Success animation ───────────────────────────────────
+  // â”€â”€ Success animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [showSuccess, setShowSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Scroll to top on success
+  // Scroll to top on success + reset dirty state
   useEffect(() => {
     if (state?.success) {
       setShowSuccess(true);
+      setIsDirty(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
       const t = setTimeout(() => setShowSuccess(false), 3000);
       return () => clearTimeout(t);
     }
   }, [state?.success]);
 
-  // ── Helpers ─────────────────────────────────────────────
+  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const updateHour = (day: DayKey, value: string) => {
     setHours((prev) => ({ ...prev, [day]: value }));
     setActivePreset(null);
@@ -263,7 +281,7 @@ export function ShopSettingsForm({
     setLng(preset.lng.toString());
   };
 
-  // ── Section component (always visible, scroll-targetable) ──
+  // â”€â”€ Section component (always visible, scroll-targetable) â”€â”€
   const Section = ({
     id,
     icon,
@@ -283,21 +301,21 @@ export function ShopSettingsForm({
   }) => {
     return (
       <section id={`section-${id}`} className="scroll-mt-28">
-        <div className="relative rounded-2xl border border-stone-200/60 bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 group/card">
+        <div className="relative rounded-2xl border border-slate-200/50 bg-gradient-to-br from-white via-white to-slate-50/80 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.03),0_4px_16px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-500 group/card">
           {/* Left accent stripe */}
-          <div className={`absolute top-0 left-0 w-1 h-full ${iconBg} opacity-80 rounded-l-2xl`} />
+          <div className={`absolute top-0 left-0 w-[3px] h-full ${iconBg} opacity-90 rounded-l-2xl`} />
 
           {/* Header */}
           <div className="flex items-center gap-4 px-6 pt-6 pb-3 pl-8">
-            <div className={`w-11 h-11 rounded-xl ${iconBg} flex items-center justify-center text-lg flex-shrink-0 shadow-sm group-hover/card:scale-105 transition-transform duration-300`}>
+            <div className={`w-12 h-12 rounded-2xl ${iconBg} flex items-center justify-center text-lg flex-shrink-0 shadow-sm ring-1 ring-black/[0.03] group-hover/card:scale-105 group-hover/card:shadow-md transition-all duration-300`}>
               {icon}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5">
-                <h2 className="font-semibold text-stone-800 text-[17px] tracking-tight">{title}</h2>
+                <h2 className="font-semibold text-slate-800 text-[17px] tracking-tight">{title}</h2>
                 {badge}
               </div>
-              <p className="text-[13px] text-stone-400 mt-0.5">{subtitle}</p>
+              <p className="text-[13px] text-slate-400 mt-0.5 tracking-wide">{subtitle}</p>
             </div>
           </div>
 
@@ -335,7 +353,7 @@ export function ShopSettingsForm({
         onChange={handleBannerSelect}
       />
 
-      {/* ── Success Toast ────────────────────────────────── */}
+      {/* â”€â”€ Success Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {showSuccess && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
           <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-emerald-600 text-white shadow-2xl shadow-emerald-200/50">
@@ -352,7 +370,7 @@ export function ShopSettingsForm({
         </div>
       )}
 
-      {/* ── Error Message ────────────────────────────────── */}
+      {/* â”€â”€ Error Message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {state?.error && !state.success && (
         <div className="rounded-2xl bg-red-50 border border-red-200 px-5 py-4 flex items-start gap-3">
           <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -375,15 +393,15 @@ export function ShopSettingsForm({
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {/* Section 0: Shop Images (Profile + Banner)           */}
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <Section
         id="images"
-        icon="📸"
+        icon="ðŸ“¸"
         iconBg="bg-violet-50"
         title="Shop Images"
-        subtitle="Upload your profile picture and banner — first thing buyers see"
+        subtitle="Upload your profile picture and banner â€” first thing buyers see"
         badge={
           logoUrl || bannerUrl ? (
             <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">
@@ -394,21 +412,21 @@ export function ShopSettingsForm({
         }
       >
         <div className="space-y-6">
-          {/* ── Profile Picture (Logo) ─────────────────── */}
+          {/* â”€â”€ Profile Picture (Logo) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div className="space-y-3">
             <Label className="text-sm font-medium flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">👤</span>
+              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">ðŸ‘¤</span>
               Profile Picture
             </Label>
-            <p className="text-[11px] text-stone-400 -mt-1">
-              Square image works best (e.g. 400×400). Shown as your shop avatar everywhere.
+            <p className="text-[11px] text-slate-400 -mt-1">
+              Square image works best (e.g. 400Ã—400). Shown as your shop avatar everywhere.
             </p>
 
             <div className="flex items-center gap-5">
               {/* Preview */}
               <div className="relative group">
                 {logoUrl ? (
-                  <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-stone-200 shadow-sm">
+                  <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-sm">
                     <Image
                       src={logoUrl}
                       alt="Shop logo"
@@ -429,7 +447,7 @@ export function ShopSettingsForm({
                     </button>
                   </div>
                 ) : (
-                  <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50 flex flex-col items-center justify-center text-stone-400">
+                  <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-slate-400">
                     <svg className="w-8 h-8 mb-1" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
@@ -444,7 +462,7 @@ export function ShopSettingsForm({
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
                   disabled={logoUploading || isPending}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-sm font-medium text-stone-700 hover:bg-violet-50 hover:border-violet-300 hover:text-violet-700 transition-all disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-violet-50 hover:border-violet-300 hover:text-violet-700 transition-all disabled:opacity-50"
                 >
                   {logoUploading ? (
                     <>
@@ -460,28 +478,28 @@ export function ShopSettingsForm({
                     </>
                   )}
                 </button>
-                <p className="text-[10px] text-stone-400">JPG, PNG or WebP • Max 4MB</p>
+                <p className="text-[10px] text-slate-400">JPG, PNG or WebP â€¢ Max 4MB</p>
               </div>
             </div>
           </div>
 
           {/* Divider */}
-          <div className="border-t border-stone-100" />
+          <div className="border-t border-slate-100" />
 
-          {/* ── Banner Image ───────────────────────────── */}
+          {/* â”€â”€ Banner Image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div className="space-y-3">
             <Label className="text-sm font-medium flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">🖼️</span>
+              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-xs">ðŸ–¼ï¸</span>
               Banner Image
             </Label>
-            <p className="text-[11px] text-stone-400 -mt-1">
-              Wide image works best (e.g. 1200×400). Shown as the hero background on your catalog page.
+            <p className="text-[11px] text-slate-400 -mt-1">
+              Wide image works best (e.g. 1200Ã—400). Shown as the hero background on your catalog page.
             </p>
 
             {/* Preview */}
             <div className="relative group">
               {bannerUrl ? (
-                <div className="relative w-full h-40 sm:h-48 rounded-2xl overflow-hidden border-2 border-stone-200 shadow-sm">
+                <div className="relative w-full h-40 sm:h-48 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-sm">
                   <Image
                     src={bannerUrl}
                     alt="Shop banner"
@@ -505,7 +523,7 @@ export function ShopSettingsForm({
                     type="button"
                     onClick={() => bannerInputRef.current?.click()}
                     disabled={bannerUploading || isPending}
-                    className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-white/90 hover:bg-white text-stone-700 text-xs font-medium px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all shadow-lg backdrop-blur-sm"
+                    className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-white/90 hover:bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all shadow-lg backdrop-blur-sm"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
@@ -518,7 +536,7 @@ export function ShopSettingsForm({
                   type="button"
                   onClick={() => bannerInputRef.current?.click()}
                   disabled={bannerUploading || isPending}
-                  className="w-full h-40 sm:h-48 rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50 hover:bg-violet-50 hover:border-violet-300 transition-all flex flex-col items-center justify-center gap-3 text-stone-400 hover:text-violet-500 disabled:opacity-50"
+                  className="w-full h-40 sm:h-48 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-violet-50 hover:border-violet-300 transition-all flex flex-col items-center justify-center gap-3 text-slate-400 hover:text-violet-500 disabled:opacity-50"
                 >
                   {bannerUploading ? (
                     <>
@@ -532,7 +550,7 @@ export function ShopSettingsForm({
                       </svg>
                       <div className="text-center">
                         <span className="text-sm font-medium block">Click to upload banner</span>
-                        <span className="text-[10px] text-stone-400">JPG, PNG or WebP • Max 4MB • Recommended 1200×400</span>
+                        <span className="text-[10px] text-slate-400">JPG, PNG or WebP â€¢ Max 4MB â€¢ Recommended 1200Ã—400</span>
                       </div>
                     </>
                   )}
@@ -543,15 +561,15 @@ export function ShopSettingsForm({
         </div>
       </Section>
 
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {/* Section 1: Basic Info                               */}
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <Section
         id="basic"
-        icon="🏪"
+        icon="ðŸª"
         iconBg="bg-emerald-50"
         title="Basic Info"
-        subtitle="Your shop name and story — first impression matters"
+        subtitle="Your shop name and story â€” first impression matters"
       >
         <div className="space-y-5">
           <div className="space-y-2">
@@ -561,8 +579,10 @@ export function ShopSettingsForm({
             <Input
               id="name"
               name="name"
-              defaultValue={initialData.name}
-              className="rounded-xl h-12 text-base font-medium border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+              value={nameValue}
+              onChange={(e) => { setNameValue(e.target.value); markDirty(); }}
+              onKeyDown={preventEnterSubmit}
+              className="rounded-xl h-12 text-base font-medium border-slate-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
               disabled={isPending}
             />
           </div>
@@ -572,21 +592,22 @@ export function ShopSettingsForm({
               <Label htmlFor="description" className="text-sm font-medium">
                 Short Description
               </Label>
-              <span className={`text-xs tabular-nums ${descLength > 400 ? "text-amber-500" : "text-stone-400"}`}>
+              <span className={`text-xs tabular-nums ${descLength > 400 ? "text-amber-500" : "text-slate-400"}`}>
                 {descLength}/500
               </span>
             </div>
             <Input
               id="description"
               name="description"
-              defaultValue={initialData.description ?? ""}
+              value={descValue}
+              onChange={(e) => { setDescValue(e.target.value); markDirty(); }}
+              onKeyDown={preventEnterSubmit}
               placeholder="e.g. Premium wholesale men's and women's clothing"
-              className="rounded-xl h-12 border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+              className="rounded-xl h-12 border-slate-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
               maxLength={500}
-              onChange={(e) => setDescLength(e.target.value.length)}
               disabled={isPending}
             />
-            <p className="text-[11px] text-stone-400">Shown in catalog header and search results</p>
+            <p className="text-[11px] text-slate-400">Shown in catalog header and search results</p>
           </div>
 
           <div className="space-y-2">
@@ -594,31 +615,31 @@ export function ShopSettingsForm({
               <Label htmlFor="aboutText" className="text-sm font-medium">
                 About Your Shop
               </Label>
-              <span className={`text-xs tabular-nums ${aboutLength > 1800 ? "text-amber-500" : "text-stone-400"}`}>
+              <span className={`text-xs tabular-nums ${aboutLength > 1800 ? "text-amber-500" : "text-slate-400"}`}>
                 {aboutLength}/2000
               </span>
             </div>
             <Textarea
               id="aboutText"
               name="aboutText"
-              defaultValue={initialData.aboutText ?? ""}
-              placeholder="Tell your story — what you sell, your history, why buyers should trust you..."
-              className="rounded-xl min-h-[120px] border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all resize-y"
+              value={aboutValue}
+              onChange={(e) => { setAboutValue(e.target.value); markDirty(); }}
+              placeholder="Tell your story â€” what you sell, your history, why buyers should trust you..."
+              className="rounded-xl min-h-[120px] border-slate-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all resize-y"
               rows={5}
               maxLength={2000}
-              onChange={(e) => setAboutLength(e.target.value.length)}
               disabled={isPending}
             />
-            <p className="text-[11px] text-stone-400">
-              💡 Tip: Mention your years of experience, what brands you carry, and what makes you different
+            <p className="text-[11px] text-slate-400">
+              ðŸ’¡ Tip: Mention your years of experience, what brands you carry, and what makes you different
             </p>
           </div>
 
           {/* WhatsApp Numbers */}
           <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 space-y-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">📱</span>
-              <span className="text-sm font-semibold text-stone-800">WhatsApp Numbers</span>
+              <span className="text-lg">ðŸ“±</span>
+              <span className="text-sm font-semibold text-slate-800">WhatsApp Numbers</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -630,36 +651,38 @@ export function ShopSettingsForm({
                   name="whatsappNumber"
                   defaultValue={initialData.whatsappNumber}
                   placeholder="+27612345678"
-                  className="rounded-xl h-12 border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+                  className="rounded-xl h-12 border-slate-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+                  onKeyDown={preventEnterSubmit}
                   disabled={isPending}
                 />
-                <p className="text-[11px] text-stone-400">Main number for wholesale orders</p>
+                <p className="text-[11px] text-slate-400">Main number for wholesale orders</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="retailWhatsappNumber" className="text-sm font-medium">
-                  Retail WhatsApp <span className="text-stone-400">(optional)</span>
+                  Retail WhatsApp <span className="text-slate-400">(optional)</span>
                 </Label>
                 <Input
                   id="retailWhatsappNumber"
                   name="retailWhatsappNumber"
                   defaultValue={initialData.retailWhatsappNumber ?? ""}
                   placeholder="+27612345679"
-                  className="rounded-xl h-12 border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+                  className="rounded-xl h-12 border-slate-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+                  onKeyDown={preventEnterSubmit}
                   disabled={isPending}
                 />
-                <p className="text-[11px] text-stone-400">Separate number for retail customers</p>
+                <p className="text-[11px] text-slate-400">Separate number for retail customers</p>
               </div>
             </div>
           </div>
         </div>
       </Section>
 
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {/* Section 2: Location                                 */}
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <Section
         id="location"
-        icon="📍"
+        icon="ðŸ“"
         iconBg="bg-blue-50"
         title="Location"
         subtitle="Help buyers find your physical shop"
@@ -681,7 +704,8 @@ export function ShopSettingsForm({
               name="address"
               defaultValue={initialData.address ?? ""}
               placeholder="e.g. Shop 42, Marble Tower, 62 Jeppe St"
-              className="rounded-xl h-12 border-stone-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
+              className="rounded-xl h-12 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
+              onKeyDown={preventEnterSubmit}
               disabled={isPending}
             />
           </div>
@@ -700,7 +724,7 @@ export function ShopSettingsForm({
                   if (match) setProvinceValue(match);
                 }}
                 placeholder="e.g. Johannesburg"
-                className="rounded-xl h-12 border-stone-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
+                className="rounded-xl h-12 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
                 disabled={isPending}
               />
               {/* Quick city select */}
@@ -713,7 +737,7 @@ export function ShopSettingsForm({
                     className={`text-[11px] px-2.5 py-1 rounded-full transition-all ${
                       cityValue === city
                         ? "bg-blue-100 text-blue-700 border border-blue-200 font-medium"
-                        : "bg-stone-50 text-stone-500 border border-stone-100 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
+                        : "bg-slate-50 text-slate-500 border border-slate-100 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
                     }`}
                   >
                     {city}
@@ -729,7 +753,7 @@ export function ShopSettingsForm({
                 name="province"
                 value={provinceValue}
                 onChange={(e) => setProvinceValue(e.target.value)}
-                className="flex h-12 w-full rounded-xl border border-stone-200 bg-background px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all"
+                className="flex h-12 w-full rounded-xl border border-slate-200 bg-background px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all"
                 disabled={isPending}
               >
                 <option value="">Select province...</option>
@@ -779,7 +803,7 @@ export function ShopSettingsForm({
                     Location found!
                   </>
                 ) : gpsStatus === "error" ? (
-                  <>⚠️ {gpsError || "GPS unavailable"}</>
+                  <>âš ï¸ {gpsError || "GPS unavailable"}</>
                 ) : (
                   <>
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -802,7 +826,7 @@ export function ShopSettingsForm({
                   className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left text-xs transition-all ${
                     lat === preset.lat.toString() && lng === preset.lng.toString()
                       ? "border-blue-400 bg-blue-50 text-blue-700 shadow-sm shadow-blue-100"
-                      : "border-stone-200 bg-white text-stone-600 hover:border-blue-300 hover:bg-blue-50/50"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:bg-blue-50/50"
                   }`}
                 >
                   <span className="text-base">{preset.emoji}</span>
@@ -814,7 +838,7 @@ export function ShopSettingsForm({
             {/* Lat/Lng inputs (compact) */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label htmlFor="lat-input" className="text-xs text-stone-400">Latitude</Label>
+                <Label htmlFor="lat-input" className="text-xs text-slate-400">Latitude</Label>
                 <Input
                   id="lat-input"
                   type="number"
@@ -822,12 +846,12 @@ export function ShopSettingsForm({
                   value={lat}
                   onChange={(e) => setLat(e.target.value)}
                   placeholder="-26.2023"
-                  className="rounded-xl text-sm h-10 border-stone-200 focus:border-blue-400 focus:ring-blue-400/20"
+                  className="rounded-xl text-sm h-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20"
                   disabled={isPending}
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="lng-input" className="text-xs text-stone-400">Longitude</Label>
+                <Label htmlFor="lng-input" className="text-xs text-slate-400">Longitude</Label>
                 <Input
                   id="lng-input"
                   type="number"
@@ -835,7 +859,7 @@ export function ShopSettingsForm({
                   value={lng}
                   onChange={(e) => setLng(e.target.value)}
                   placeholder="28.0436"
-                  className="rounded-xl text-sm h-10 border-stone-200 focus:border-blue-400 focus:ring-blue-400/20"
+                  className="rounded-xl text-sm h-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20"
                   disabled={isPending}
                 />
               </div>
@@ -843,7 +867,7 @@ export function ShopSettingsForm({
 
             {/* Live map preview */}
             {lat && lng && (
-              <div className="rounded-2xl overflow-hidden border border-stone-200 shadow-sm">
+              <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
                 <iframe
                   title="Shop Location Preview"
                   width="100%"
@@ -852,9 +876,9 @@ export function ShopSettingsForm({
                   loading="lazy"
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(lng) - 0.005}%2C${Number(lat) - 0.003}%2C${Number(lng) + 0.005}%2C${Number(lat) + 0.003}&layer=mapnik&marker=${lat}%2C${lng}`}
                 />
-                <div className="bg-stone-50 px-3 py-2 flex items-center justify-between">
-                  <span className="text-[11px] text-stone-400">
-                    📍 {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}
+                <div className="bg-slate-50 px-3 py-2 flex items-center justify-between">
+                  <span className="text-[11px] text-slate-400">
+                    ðŸ“ {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}
                   </span>
                   <a
                     href={`https://www.google.com/maps?q=${lat},${lng}`}
@@ -862,7 +886,7 @@ export function ShopSettingsForm({
                     rel="noopener noreferrer"
                     className="text-[11px] text-blue-500 hover:text-blue-700 font-medium transition-colors"
                   >
-                    Open in Google Maps →
+                    Open in Google Maps â†’
                   </a>
                 </div>
               </div>
@@ -871,12 +895,12 @@ export function ShopSettingsForm({
         </div>
       </Section>
 
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {/* Section 3: Business Hours                           */}
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <Section
         id="hours"
-        icon="🕐"
+        icon="ðŸ•"
         iconBg="bg-amber-50"
         title="Business Hours"
         subtitle="Let buyers know when to visit or expect replies"
@@ -903,18 +927,18 @@ export function ShopSettingsForm({
                 className={`flex flex-col items-start gap-1 px-4 py-3 rounded-xl border text-left transition-all ${
                   activePreset === i
                     ? "border-amber-400 bg-amber-50 shadow-sm shadow-amber-100"
-                    : "border-stone-200 bg-white hover:border-amber-300 hover:bg-amber-50/50"
+                    : "border-slate-200 bg-white hover:border-amber-300 hover:bg-amber-50/50"
                 }`}
               >
                 <span className="text-lg">{preset.icon}</span>
-                <span className="text-sm font-semibold text-stone-800">{preset.label}</span>
-                <span className="text-[11px] text-stone-500">{preset.desc}</span>
+                <span className="text-sm font-semibold text-slate-800">{preset.label}</span>
+                <span className="text-[11px] text-slate-500">{preset.desc}</span>
               </button>
             ))}
           </div>
 
           {/* Day-by-day editor */}
-          <div className="rounded-2xl border border-stone-200 overflow-hidden">
+          <div className="rounded-2xl border border-slate-200 overflow-hidden">
             {DAYS_OF_WEEK.map((day, i) => {
               const isClosed = hours[day]?.toLowerCase() === "closed";
               const hasValue = !!hours[day] && !isClosed;
@@ -923,11 +947,11 @@ export function ShopSettingsForm({
                 <div
                   key={day}
                   className={`flex items-center gap-3 px-4 py-3 ${
-                    i < DAYS_OF_WEEK.length - 1 ? "border-b border-stone-100" : ""
-                  } ${isClosed ? "bg-stone-50/50" : "bg-white"} transition-colors`}
+                    i < DAYS_OF_WEEK.length - 1 ? "border-b border-slate-100" : ""
+                  } ${isClosed ? "bg-slate-50/50" : "bg-white"} transition-colors`}
                 >
                   {/* Day label */}
-                  <span className={`w-24 text-sm font-medium ${isClosed ? "text-stone-400" : "text-stone-700"}`}>
+                  <span className={`w-24 text-sm font-medium ${isClosed ? "text-slate-400" : "text-slate-700"}`}>
                     {DAY_LABELS[day]}
                   </span>
 
@@ -937,7 +961,7 @@ export function ShopSettingsForm({
                       value={isClosed ? "" : (hours[day] ?? "")}
                       onChange={(e) => updateHour(day, e.target.value)}
                       placeholder="08:00-17:00"
-                      className={`rounded-lg h-9 text-sm border-stone-200 focus:border-amber-400 focus:ring-amber-400/20 transition-all ${
+                      className={`rounded-lg h-9 text-sm border-slate-200 focus:border-amber-400 focus:ring-amber-400/20 transition-all ${
                         isClosed ? "opacity-40" : ""
                       }`}
                       disabled={isPending || isClosed}
@@ -949,7 +973,7 @@ export function ShopSettingsForm({
                     type="button"
                     onClick={() => updateHour(day, isClosed ? "08:00-17:00" : "Closed")}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${
-                      !isClosed ? "bg-emerald-500" : "bg-stone-300"
+                      !isClosed ? "bg-emerald-500" : "bg-slate-300"
                     }`}
                     title={isClosed ? "Mark as open" : "Mark as closed"}
                   >
@@ -966,15 +990,15 @@ export function ShopSettingsForm({
         </div>
       </Section>
 
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {/* Section 4: Social Links                             */}
-      {/* ═══════════════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <Section
         id="social"
-        icon="🔗"
+        icon="ðŸ”—"
         iconBg="bg-purple-50"
         title="Social & Links"
-        subtitle="Connect your socials — builds buyer confidence"
+        subtitle="Connect your socials â€” builds buyer confidence"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Instagram */}
@@ -988,13 +1012,14 @@ export function ShopSettingsForm({
               Instagram
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-stone-400 font-medium">@</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-medium">@</span>
               <Input
                 id="instagram"
                 name="instagram"
                 defaultValue={initialData.instagram ?? ""}
                 placeholder="yourshop"
-                className="rounded-xl h-11 pl-8 border-stone-200 focus:border-pink-400 focus:ring-pink-400/20 transition-all"
+                className="rounded-xl h-11 pl-8 border-slate-200 focus:border-pink-400 focus:ring-pink-400/20 transition-all"
+                onKeyDown={preventEnterSubmit}
                 disabled={isPending}
               />
             </div>
@@ -1011,13 +1036,14 @@ export function ShopSettingsForm({
               TikTok
             </Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-stone-400 font-medium">@</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-medium">@</span>
               <Input
                 id="tiktok"
                 name="tiktok"
                 defaultValue={initialData.tiktok ?? ""}
                 placeholder="yourshop"
-                className="rounded-xl h-11 pl-8 border-stone-200 focus:border-stone-400 focus:ring-stone-400/20 transition-all"
+                className="rounded-xl h-11 pl-8 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 transition-all"
+                onKeyDown={preventEnterSubmit}
                 disabled={isPending}
               />
             </div>
@@ -1038,7 +1064,8 @@ export function ShopSettingsForm({
               name="facebook"
               defaultValue={initialData.facebook ?? ""}
               placeholder="facebook.com/yourshop"
-              className="rounded-xl h-11 border-stone-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
+              className="rounded-xl h-11 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
+              onKeyDown={preventEnterSubmit}
               disabled={isPending}
             />
           </div>
@@ -1046,7 +1073,7 @@ export function ShopSettingsForm({
           {/* Website */}
           <div className="space-y-2">
             <Label htmlFor="website" className="flex items-center gap-2 text-sm font-medium">
-              <span className="w-6 h-6 rounded-lg bg-stone-700 flex items-center justify-center">
+              <span className="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                 </svg>
@@ -1058,7 +1085,8 @@ export function ShopSettingsForm({
               name="website"
               defaultValue={initialData.website ?? ""}
               placeholder="https://yourshop.co.za"
-              className="rounded-xl h-11 border-stone-200 focus:border-stone-400 focus:ring-stone-400/20 transition-all"
+              className="rounded-xl h-11 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 transition-all"
+              onKeyDown={preventEnterSubmit}
               disabled={isPending}
             />
           </div>
@@ -1078,22 +1106,32 @@ export function ShopSettingsForm({
               name="whatsappGroupLink"
               defaultValue={initialData.whatsappGroupLink ?? ""}
               placeholder="https://chat.whatsapp.com/..."
-              className="rounded-xl h-11 border-stone-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+              className="rounded-xl h-11 border-slate-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all"
+              onKeyDown={preventEnterSubmit}
               disabled={isPending}
             />
-            <p className="text-[10px] text-stone-400">
-              Paste your WhatsApp group invite link — buyers can join for updates & deals
+            <p className="text-[10px] text-slate-400">
+              Paste your WhatsApp group invite link â€” buyers can join for updates & deals
             </p>
           </div>
         </div>
       </Section>
 
-      {/* ── Floating Save Bar ────────────────────────────── */}
+      {/* â”€â”€ Floating Save Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="sticky bottom-6 z-40">
-        <div className="bg-white/90 backdrop-blur-2xl rounded-2xl border border-stone-200/60 shadow-2xl shadow-stone-900/[0.08] px-6 py-4 flex items-center justify-between gap-4 ring-1 ring-stone-900/[0.03]">
-          <div className="flex items-center gap-3 text-sm text-stone-500 min-w-0">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-            <span className="truncate font-medium">Ready to save your changes</span>
+        <div className="bg-white/95 backdrop-blur-2xl rounded-2xl border border-slate-200/50 shadow-2xl shadow-slate-900/[0.08] px-6 py-4 flex items-center justify-between gap-4 ring-1 ring-slate-900/[0.03]">
+          <div className="flex items-center gap-3 text-sm min-w-0">
+            {isDirty ? (
+              <>
+                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
+                <span className="truncate font-medium text-amber-600">Unsaved changes</span>
+              </>
+            ) : (
+              <>
+                <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+                <span className="truncate font-medium text-slate-400">All changes saved</span>
+              </>
+            )}
           </div>
           <Button
             type="submit"

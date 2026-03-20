@@ -242,7 +242,7 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | Completed |
 | **Priority** | High |
 | **Description** | The core product discovery engine. Where buyers browse, search, and filter products across all sellers. |
 
@@ -260,13 +260,68 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 - Add "Recently Viewed" shelf for returning visitors
 - Add infinite scroll or pagination with visible page count
 
+#### Implementation Notes (Marketplace)
+
+**Component breakdown**:
+- `MarketplaceShell` remains the page orchestrator for header, trends, filters, and product grid composition
+- `SearchBar` will be extracted from the shell into a reusable marketplace search component with suggestion, recent-search, and trust copy support
+- `MarketplaceFilterSidebar` will be upgraded to collapsible filter groups with applied-filter chips and clearer mobile parity with the sheet variant
+- `MarketplaceProductCard` will be redesigned around trust-first commerce metadata: verified badge, rating, seller, province, pricing, promoted state, and activity indicators
+- `EmptyState` will provide a reusable no-results experience for marketplace search outcomes
+- `TrustBadge` will provide the first shared trust primitive for verified, promoted, and response-time states
+
+**Layout structure**:
+- Replace the current dark hero treatment with a light, trust-first marketplace header
+- Keep category discovery near the top, followed by search and applied filters
+- Keep trending content above the main results when there is no active search/filter state
+- Use a two-column desktop layout: left filter rail, right results stack
+- Preserve a mobile-first flow with sticky search/filter controls and bottom-sheet filtering
+
+**Data flow**:
+- Continue using the existing marketplace page loaders in `app/marketplace/*` routes to fetch products, promoted listings, categories, trending products, and featured shops on the server
+- Pass the current query parameters into the extracted search and filter components so URL state remains the source of truth
+- Derive trust and activity display from existing product/shop metadata already returned by marketplace queries
+- Use loading boundaries for skeleton states and conditional empty states when result sets are empty
+
+**What will be created**:
+- `components/marketplace/search-bar.tsx`
+- `components/ui/trust-badge.tsx`
+
+**What will be updated**:
+- `components/marketplace/marketplace-shell.tsx`
+- `components/marketplace/marketplace-product-card.tsx`
+- `components/marketplace/marketplace-filter-sidebar.tsx`
+- `components/marketplace/marketplace-filter-sheet.tsx`
+- `components/ui/empty-state.tsx`
+- `app/marketplace/loading.tsx`
+
+**What was implemented**:
+- Replaced the marketplace hero with a light, trust-first header focused on seller verification, buyer protection, and live marketplace activity
+- Extracted the marketplace search experience into `components/marketplace/search-bar.tsx` with autocomplete, recent searches, and trending query shortcuts
+- Redesigned `MarketplaceProductCard` around square imagery, clearer pricing hierarchy, seller identity, location, rating, verification, promotion, and activity metadata
+- Rebuilt desktop and mobile filtering into clearer category, location, price, and trust groupings with improved chips and bottom-sheet behavior on mobile
+- Added a stronger no-results experience using the shared `EmptyState` component with suggested searches
+- Updated marketplace loading states to use product skeleton cards and header/layout-aware placeholders
+- Added the initial `TrustBadge` shared component and used it across marketplace discovery surfaces
+
+**What remains**:
+- Add map/icon-based province selection instead of the current select input
+- Add a persistent recently viewed shelf for returning visitors
+- Add explicit page-count pagination or richer infinite-scroll progress messaging
+- Broaden trust signals beyond marketplace cards into full seller response-time and last-active indicators once backend support is wired
+
+**Known limitations**:
+- Recent searches are stored locally in the browser and do not sync across devices or sessions for signed-in users
+- Marketplace activity signals in the header remain heuristic summaries derived from marketplace totals, not real-time Redis-backed counters
+- Mobile filter category buttons currently prioritize the most relevant top categories; deeper category discovery still relies on the horizontal category bar and route pages
+
 ---
 
 ### 4.3 Product Page (`/catalog/[slug]/products/[productSlug]`)
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | ✅ Completed |
 | **Priority** | High |
 | **Description** | Individual product detail page. Primary intent-to-buy moment for marketplace buyers. |
 
@@ -282,13 +337,49 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 - Add WhatsApp CTA with urgency signal: "X people viewed this today"
 - Show stock status prominently (In Stock / Low Stock / Sold Out)
 
+#### Implementation Notes (Product Page)
+
+**Status: COMPLETED**
+
+**What was implemented**:
+- `components/catalog/product-breadcrumb.tsx` — Breadcrumb nav: Marketplace → Category → Product Name
+- `components/catalog/seller-info-card.tsx` — Shop name, logo, Pro badge, verified/response-time badges, rating/products/completed stats, location, member since, review count, View Shop CTA
+- `components/catalog/trust-messaging.tsx` — Buyer protection block with 4 trust signals (verified seller, WhatsApp ordering, real contact details, order reference)
+- `components/catalog/similar-products.tsx` — Horizontal scroll cards from same category by other sellers, verified badges, price, shop name
+- `components/catalog/more-from-seller.tsx` — Responsive grid (2→3→4 cols) of other products from same shop
+- `lib/db/catalog.ts` — Added `getSimilarProducts(categoryId, excludeShopId, excludeProductId)` and `getMoreFromSeller(shopId, excludeProductId)` queries
+
+**Layout changes**:
+- Two-column desktop layout (gallery 7/12 left, info 5/12 right) with single-column mobile
+- Container upgraded from max-w-3xl to max-w-6xl
+- Gallery sticky on desktop for scroll
+- Stone-themed colors migrated to slate (slate-900 text, slate-200 borders, emerald accents)
+- Seller Info Card and Trust Messaging sit in right column below product info
+- Full-width sections below: Reviews → Recently Viewed → Similar Products → More from Seller → Viral CTAs (now side-by-side grid)
+- Loading skeleton updated to match new two-column layout
+
+**Preserved existing functionality**:
+- `AddToCart` with wholesale/retail toggle, size/color selection, sticky mobile bar
+- `ShareProduct` (WhatsApp/Facebook/copy/native)
+- `RestockAlert` for out-of-stock products
+- `ProductReviews` with star distribution bars
+- `RecentlyViewedTracker` + `RecentlyViewedStrip`
+- Wholesale RFQ button for bulk orders
+- Full JSON-LD schema and SEO metadata
+- Viral CTAs (Start Your Shop + AI advertising)
+
+**What was NOT changed (out of scope)**:
+- ProductImageGallery fullscreen zoom modal (existing component works well, enhancement deferred)
+- "X people viewed this today" urgency signal (requires real-time view tracking, separate feature)
+- Stepped wizard/Quick Sell for add product page (separate item 4.4)
+
 ---
 
 ### 4.4 Add Product Page (`/dashboard/[slug]/products/add`)
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | Completed |
 | **Priority** | Medium |
 | **Description** | Seller's interface for creating a new product listing. First key moment of product adoption. |
 
@@ -300,6 +391,16 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 - Add a "Quick Sell" shortcut (name + price + photo only — fill the rest later)
 - Listing quality score widget: show real-time score as fields are completed
 - Add inline help tooltips for each field explaining what buyers see
+
+**Implementation notes (v2 redesign):**
+- Redesigned as 5-step wizard: Photos → Title & Category → Price & Stock → Description → Preview & Publish
+- Removed name-before-images friction — draft product created with placeholder so images upload immediately
+- AI integration: after first photo upload, "✨ Auto-fill with AI" analyzes photo via GPT-4o-mini vision and pre-fills title, description, and category
+- Live product card preview at Step 5 with thumbnail grid, all fields, and quality score
+- Fixed image tracking bug: added `onImagesChange` callback to ImageUpload + server actions now return updated image list
+- Slate theme migration (stone→slate)
+- Quick edit buttons on preview step to jump back to any section
+- AI credits tracking with remaining count display
 
 ---
 
@@ -327,7 +428,7 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 
 | | |
 |--|--|
-| **Status** | Not Started |
+| **Status** | ✅ Completed |
 | **Priority** | High |
 | **Description** | Public-facing seller storefront. The URL sellers share with customers on WhatsApp. Key trust and conversion surface. |
 
@@ -342,6 +443,12 @@ Pro:                 bg-purple-50 text-purple-700 border border-purple-200 round
 - Add "About this seller" section with seller story/bio
 - Add reviews section at bottom of page
 - Mobile: sticky "Contact Seller" bottom bar on mobile
+
+**Implementation Notes:**
+- Created `components/catalog/shop-hero.tsx` — Trust-first hero: banner, avatar (rounded-2xl), name + verified/PRO/tier badges, description (2-line clamp), location, stats row (products, fulfilled, rating, member since), prominent WhatsApp CTA, "Open now" live indicator
+- Created `components/catalog/shop-about-section.tsx` — Always-visible about section: seller bio, photo gallery with lightbox, business hours card, location card with Google Maps link, social links (Instagram, Facebook, TikTok, Website, WhatsApp Group)
+- Redesigned `app/catalog/[slug]/page.tsx` — New layout order: Hero → Search+Filter+Grid → Drops → Combos → About → Recently Viewed → CTAs → Browse → Cache. stone→slate/white/emerald theme migration. Removed old collapsible ShopProfile import, replaced with ShopHero (above fold) + ShopAboutSection (below products). Streamlined recruitment CTAs (removed AI showcase, kept shop CTA).
+- Updated `app/catalog/[slug]/loading.tsx` — Skeleton now matches hero+grid layout with banner shimmer, avatar, stats row, search bar, and 6-card product grid. stone→slate theme.
 
 ---
 
@@ -577,25 +684,25 @@ Display these trust signals at key anxiety points:
 
 ### Phase 2 — Core Buyer Experience
 
-- [ ] Marketplace page redesigned (search, filters, cards, empty states)
-- [ ] Product page redesigned (gallery, trust signals, seller info, related products)
-- [ ] Seller shop page redesigned (hero, stats, product grid, reviews)
-- [ ] Search bar extracted and improved with autocomplete
+- [x] Marketplace page redesigned (search, filters, cards, empty states)
+- [x] Product page redesigned (gallery, trust signals, seller info, related products)
+- [x] Seller shop page redesigned (hero, stats, product grid, reviews)
+- [x] Search bar extracted and improved with autocomplete
 
 ### Phase 3 — Seller Experience
 
 - [ ] Dashboard homepage redesigned ("today at a glance")
-- [ ] Add product wizard redesigned (stepped, with live preview)
+- [x] Add product wizard redesigned (stepped, with live preview, AI integration)
 - [ ] Onboarding flow built (post-signup wizard + checklist widget)
-- [ ] Seller shop page (public) redesigned
+- [x] Seller shop page (public) redesigned
 
 ### Phase 4 — Trust System
 
-- [ ] `TrustBadge` component created
+- [x] `TrustBadge` component created
 - [ ] Seller verification tiers computed and displayed
 - [ ] Reviews histogram implemented
 - [ ] Activity indicators implemented (last active, response time, stock status)
-- [ ] Buyer protection messaging added at key touchpoints
+- [x] Buyer protection messaging added at key touchpoints
 
 ### Phase 5 — Homepage & Auth
 

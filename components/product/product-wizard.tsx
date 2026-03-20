@@ -1,21 +1,23 @@
 // ============================================================
-// Component — Product Listing Wizard (Guided Multi-Step)
+// Component — Product Listing Wizard v2 (Redesigned)
 // ============================================================
-// A beginner-friendly wizard that guides sellers through
-// creating a high-quality listing step by step.
+// A guided 5-step wizard that helps sellers create high-quality
+// product listings with AI assistance.
 //
-// Steps: 1) Photos → 2) Details → 3) Price & Stock → 4) Review
+// Steps: 1) Photos → 2) Title & Category → 3) Price & Stock
+//        → 4) Description → 5) Preview & Publish
 //
 // Architecture:
-//  - Product is created as a draft (isActive: false) at Step 1
-//    so images can be uploaded immediately via existing ImageUpload.
-//  - At Step 4 (Publish), the product is activated via updateProduct.
-//  - This avoids orphaned uploads and reuses existing server actions.
+//  - Draft created immediately at Step 1 (no name required first)
+//    so images can be uploaded right away via ImageUpload.
+//  - AI auto-fill offered after first image upload.
+//  - Live product card preview at Step 5.
+//  - At Step 5 (Publish), the product is activated via updateProduct.
 // ============================================================
 
 "use client";
 
-import { useState, useActionState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { createProductAction, updateProductAction } from "@/app/actions/product";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,34 +49,38 @@ const PRODUCT_TYPES = [
   { label: "Other", emoji: "📦" },
 ] as const;
 
-const STEP_LABELS = ["Photos", "Details", "Price & Stock", "Review"] as const;
+const STEP_LABELS = ["Photos", "Title", "Price", "Description", "Preview"] as const;
 
 interface ProductWizardProps {
   shopSlug: string;
   categories?: { id: string; name: string }[];
   globalCategories?: GlobalCategoryOption[];
+  planSlug?: string;
 }
 
+type WizardImage = {
+  id: string;
+  url: string;
+  altText: string | null;
+  position: number;
+};
+
 type WizardData = {
-  // Step 1 result
   productId: string | null;
-  uploadedImageCount: number;
-  // Step 2
   name: string;
   description: string;
   categoryId: string;
   globalCategoryId: string;
   option1Label: string;
   option2Label: string;
-  // Step 3
   priceInRands: string;
   stock: string;
   minWholesaleQty: string;
+  aiGenerated: boolean;
 };
 
 const DEFAULT_DATA: WizardData = {
   productId: null,
-  uploadedImageCount: 0,
   name: "",
   description: "",
   categoryId: "",
@@ -84,77 +90,126 @@ const DEFAULT_DATA: WizardData = {
   priceInRands: "",
   stock: "1",
   minWholesaleQty: "1",
+  aiGenerated: false,
 };
 
 export function ProductWizard({
   shopSlug,
   categories = [],
   globalCategories = [],
+  planSlug = "free",
 }: ProductWizardProps) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<WizardData>(DEFAULT_DATA);
+  const [wizardImages, setWizardImages] = useState<WizardImage[]>([]);
+  const [isCreatingDraft, setIsCreatingDraft] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [published, setPublished] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
-  // ── Draft creation for image uploads (Step 1) ────────
-  const boundCreateAction = createProductAction.bind(null, shopSlug);
-  const [createState, createAction, isCreating] = useActionState(boundCreateAction, null);
+  // AI state
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiCredits, setAiCredits] = useState<number | null>(null);
+  const [aiFilled, setAiFilled] = useState(false);
 
-  // Track image count manually (ImageUpload uses server revalidation)
-  const [wizardImages, setWizardImages] = useState<{ id: string; url: string; altText: string | null; position: number }[]>([]);
+  // ── Draft creation (creates inactive product for image attachment) ──
+  const createDraftProduct = useCallback(async () => {
+    if (data.productId) return data.productId;
+    setIsCreatingDraft(true);
+    try {
+      const formData = new FormData();
+      formData.set("name", "New Product");
+      formData.set("isActive", "");
+      formData.set("option1Label", "Size");
+      formData.set("option2Label", "Color");
+      formData.set("minWholesaleQty", "1");
 
-  // ── Step navigation ──────────────────────────────────
-  const canProceed = useCallback((): boolean => {
-    switch (step) {
-      case 0: // Photos — require at least 1 image
-        return wizardImages.length > 0;
-      case 1: // Details — require name
-        return data.name.trim().length >= 2;
-      case 2: // Price & Stock — require price
-        return data.priceInRands.trim() !== "" && parseFloat(data.priceInRands) > 0;
-      case 3: // Review — always can publish
-        return true;
-      default:
-        return false;
+      const result = await createProductAction(shopSlug, null, formData);
+      if (result?.success && result.productId) {
+        setData((d) => ({ ...d, productId: result.productId! }));
+        return result.productId;
+      }
+      if (result?.error) toast.error(result.error);
+      return null;
+    } catch {
+      toast.error("Failed to create draft. Try again.");
+      return null;
+    } finally {
+      setIsCreatingDraft(false);
     }
-  }, [step, wizardImages.length, data.name, data.priceInRands]);
+  }, [data.productId, shopSlug]);
 
-  const next = () => {
-    if (canProceed() && step < 3) setStep(step + 1);
-  };
-  const back = () => {
-    if (step > 0) setStep(step - 1);
-  };
-
-  // Create draft product for image attachment
-  const createDraftProduct = async () => {
-    if (data.productId) return data.productId; // already created
-
-    const formData = new FormData();
-    formData.set("name", data.name || "New Product");
-    formData.set("isActive", ""); // NOT "on", so it's a draft
-    formData.set("option1Label", data.option1Label);
-    formData.set("option2Label", data.option2Label);
-    formData.set("minWholesaleQty", "1");
-
-    // Call create action directly (bypass useActionState for programmatic use)
-    const result = await createProductAction(shopSlug, null, formData);
-    if (result?.success && result.productId) {
-      setData((d) => ({ ...d, productId: result.productId! }));
-      return result.productId;
+  // ── AI generation handler ────────────────────────────
+  const handleAiGenerate = useCallback(async () => {
+    if (wizardImages.length === 0) {
+      toast.error("Upload at least one photo first");
+      return;
     }
-    if (result?.error) {
-      toast.error(result.error);
-    }
-    return null;
-  };
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/ai/generate-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl: wizardImages[0]!.url, shopSlug }),
+      });
+      const result = await res.json();
 
-  // Auto-suggest labels from category
+      if (!res.ok) {
+        if (result.error === "PLAN_REQUIRED") {
+          setAiError("Upgrade to use AI. You can still fill details manually.");
+          return;
+        }
+        if (result.error === "CREDITS_EXHAUSTED") {
+          setAiError("AI credits used up for today. Fill details manually.");
+          setAiCredits(0);
+          return;
+        }
+        throw new Error(result.message || "AI generation failed");
+      }
+
+      if (result.credits) {
+        setAiCredits(result.credits.unlimited ? null : result.credits.remaining);
+      }
+
+      const ai = result.data;
+      setData((d) => ({
+        ...d,
+        name: ai.name || d.name,
+        description: ai.description || d.description,
+        aiGenerated: true,
+      }));
+
+      // Auto-map AI category
+      if (ai.category) {
+        const slug = suggestGlobalCategory(ai.category);
+        if (slug) {
+          const labels = getVariantLabels(slug);
+          setData((d) => ({
+            ...d,
+            option1Label: labels.option1Label,
+            option2Label: labels.option2Label,
+          }));
+        }
+      }
+
+      setAiFilled(true);
+      toast.success("✨ AI filled your listing details!");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "AI generation failed";
+      setAiError(msg);
+      toast.error(msg);
+    } finally {
+      setAiLoading(false);
+    }
+  }, [wizardImages, shopSlug]);
+
+  // ── Auto-suggest labels from product type ────────────
   const handleTypeSelect = (label: string) => {
     setSelectedType(label);
-    if (!data.name || PRODUCT_TYPES.some((t) => t.label === data.name)) {
+    if (!data.name || data.name === "New Product" || PRODUCT_TYPES.some((t) => t.label === data.name)) {
       setData((d) => ({ ...d, name: label }));
     }
     const slug = suggestGlobalCategory(label);
@@ -168,7 +223,22 @@ export function ProductWizard({
     }
   };
 
-  // ── Publish handler (Step 4) ─────────────────────────
+  // ── Step navigation ──────────────────────────────────
+  const canProceed = useCallback((): boolean => {
+    switch (step) {
+      case 0: return wizardImages.length > 0;
+      case 1: return data.name.trim().length >= 2;
+      case 2: return data.priceInRands.trim() !== "" && parseFloat(data.priceInRands) > 0;
+      case 3: return true; // description is optional
+      case 4: return true;
+      default: return false;
+    }
+  }, [step, wizardImages.length, data.name, data.priceInRands]);
+
+  const next = () => { if (canProceed() && step < 4) setStep(step + 1); };
+  const back = () => { if (step > 0) setStep(step - 1); };
+
+  // ── Publish handler ──────────────────────────────────
   const handlePublish = async () => {
     if (!data.productId) {
       setPublishError("No product draft found. Please go back and try again.");
@@ -178,7 +248,6 @@ export function ProductWizard({
     setPublishError(null);
 
     try {
-      // Build update formData
       const formData = new FormData();
       formData.set("name", data.name);
       formData.set("description", data.description);
@@ -187,20 +256,15 @@ export function ProductWizard({
       formData.set("option1Label", data.option1Label);
       formData.set("option2Label", data.option2Label);
       formData.set("minWholesaleQty", data.minWholesaleQty);
-      formData.set("isActive", "on"); // Publish!
+      formData.set("isActive", "on");
       formData.set("priceInRands", data.priceInRands);
       formData.set("stock", data.stock || "1");
+      if (data.aiGenerated) formData.set("aiGenerated", "on");
 
-      const result = await updateProductAction(
-        shopSlug,
-        data.productId,
-        null,
-        formData
-      );
-
+      const result = await updateProductAction(shopSlug, data.productId, null, formData);
       if (result?.success) {
         setPublished(true);
-        toast.success("🎉 Your listing is live!");
+        toast.success("Your listing is live!");
       } else {
         setPublishError(result?.error ?? "Failed to publish. Try again.");
       }
@@ -214,21 +278,25 @@ export function ProductWizard({
   // ── Success Screen ──────────────────────────────────
   if (published && data.productId) {
     const catalogUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/catalog/${shopSlug}`;
-    const whatsappMessage = encodeURIComponent(`🛍️ Check out my shop!\n${catalogUrl}`);
+    const whatsappMessage = encodeURIComponent(`Check out my shop!\n${catalogUrl}`);
     return (
       <div className="w-full max-w-lg mx-auto text-center space-y-6 py-8">
-        <div className="text-6xl animate-bounce">🎉</div>
-        <h2 className="text-2xl font-bold text-stone-900">Your product is live!</h2>
-        <p className="text-stone-500">
-          <span className="font-semibold text-stone-700">{data.name}</span> is now visible to buyers.
+        <div className="relative">
+          <div className="text-6xl animate-bounce">🎉</div>
+          <div className="absolute inset-0 bg-emerald-400/10 blur-3xl rounded-full" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900">Your product is live!</h2>
+        <p className="text-slate-500">
+          <span className="font-semibold text-slate-700">{data.name}</span> is now visible to buyers.
         </p>
 
+        {/* Catalog link */}
         <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50/50 p-4 space-y-2">
           <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider">Your catalog link</p>
-          <p className="text-sm font-mono text-stone-700 break-all select-all">{catalogUrl}</p>
+          <p className="text-sm font-mono text-slate-700 break-all select-all">{catalogUrl}</p>
           <button
             type="button"
-            onClick={() => navigator.clipboard.writeText(catalogUrl)}
+            onClick={() => { navigator.clipboard.writeText(catalogUrl); toast.success("Copied!"); }}
             className="text-xs font-medium text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
           >
             Copy link
@@ -256,7 +324,7 @@ export function ProductWizard({
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="w-full py-3 rounded-xl text-sm font-medium text-stone-600 border-2 border-stone-200 bg-white hover:bg-stone-50 hover:border-stone-300 transition-all"
+            className="w-full py-3 rounded-xl text-sm font-medium text-slate-600 border-2 border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all"
           >
             + Add another product
           </button>
@@ -265,7 +333,7 @@ export function ProductWizard({
     );
   }
 
-  // ── Quality score for review step ───────────────────
+  // ── Quality score props ─────────────────────────────
   const qualityProps = {
     hasImage: wizardImages.length > 0,
     hasPrice: data.priceInRands.trim() !== "" && parseFloat(data.priceInRands) > 0,
@@ -282,7 +350,7 @@ export function ProductWizard({
           <div key={label} className="flex-1 flex flex-col items-center gap-1.5">
             <div className="w-full flex items-center">
               {i > 0 && (
-                <div className={`flex-1 h-0.5 ${i <= step ? "bg-emerald-500" : "bg-stone-200"} transition-colors duration-300`} />
+                <div className={`flex-1 h-0.5 ${i <= step ? "bg-emerald-500" : "bg-slate-200"} transition-colors duration-300`} />
               )}
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 flex-shrink-0 ${
@@ -290,99 +358,127 @@ export function ProductWizard({
                     ? "bg-emerald-500 text-white"
                     : i === step
                       ? "bg-emerald-500 text-white ring-4 ring-emerald-100"
-                      : "bg-stone-200 text-stone-500"
+                      : "bg-slate-200 text-slate-500"
                 }`}
               >
                 {i < step ? "✓" : i + 1}
               </div>
               {i < STEP_LABELS.length - 1 && (
-                <div className={`flex-1 h-0.5 ${i < step ? "bg-emerald-500" : "bg-stone-200"} transition-colors duration-300`} />
+                <div className={`flex-1 h-0.5 ${i < step ? "bg-emerald-500" : "bg-slate-200"} transition-colors duration-300`} />
               )}
             </div>
-            <span className={`text-[10px] font-medium ${i <= step ? "text-emerald-700" : "text-stone-400"}`}>
+            <span className={`text-[10px] font-medium ${i <= step ? "text-emerald-700" : "text-slate-400"}`}>
               {label}
             </span>
           </div>
         ))}
       </div>
 
-      {/* ── Step Content ────────────────────────────────── */}
-
       {/* ── STEP 1: Photos ──────────────────────────────── */}
       {step === 0 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-bold text-stone-900">Upload product photos</h2>
-            <p className="text-sm text-stone-500 mt-1">
+            <h2 className="text-xl font-bold text-slate-900">Upload product photos</h2>
+            <p className="text-sm text-slate-500 mt-1">
               Great photos are the #1 reason buyers click. Add at least one.
             </p>
           </div>
 
-          <SellerTip>Products with photos sell 3x faster than listings without images.</SellerTip>
+          <SellerTip>Products with photos sell 3× faster than listings without images.</SellerTip>
 
-          {/* Draft creation — need a product ID for image upload */}
+          {/* Auto-create draft on first visit so images can upload immediately */}
           {!data.productId ? (
             <div className="space-y-4">
-              <p className="text-sm text-stone-600">
-                First, give your product a quick name so we can save your photos:
-              </p>
-              <Input
-                value={data.name}
-                onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))}
-                placeholder="e.g. T-Shirt, Sneakers, Phone Case"
-                className="rounded-xl border-2 border-stone-200 focus:border-emerald-400 h-12 text-base"
-              />
               <Button
                 type="button"
-                onClick={async () => {
-                  const id = await createDraftProduct();
-                  if (id) toast.success("Draft saved — now add photos!");
-                }}
-                disabled={!data.name.trim() || isCreating}
+                onClick={createDraftProduct}
+                disabled={isCreatingDraft}
                 className="w-full rounded-xl h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold"
               >
-                {isCreating ? (
+                {isCreatingDraft ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving...
+                    Preparing...
                   </span>
                 ) : (
-                  "Continue to photos →"
+                  "📸 Start adding photos"
                 )}
               </Button>
-              {createState?.error && (
-                <p className="text-sm text-red-600">{createState.error}</p>
-              )}
             </div>
           ) : (
             <ImageUpload
               images={wizardImages}
               shopSlug={shopSlug}
               productId={data.productId}
+              onImagesChange={setWizardImages}
             />
           )}
 
           {wizardImages.length === 0 && data.productId && (
             <SellerTip variant="warning" icon="⚠️">
-              Add at least 1 photo to continue. Drag &amp; drop or click the area above.
+              Add at least 1 photo to continue. Drag &amp; drop or tap the area above.
+            </SellerTip>
+          )}
+
+          {/* AI auto-fill offer — appears after first image upload */}
+          {wizardImages.length > 0 && !aiFilled && (
+            <div className="rounded-xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">✨</span>
+                <div>
+                  <p className="text-sm font-semibold text-indigo-900">Let AI fill your listing</p>
+                  <p className="text-xs text-indigo-600">
+                    We&apos;ll analyze your photo and generate title, description &amp; category.
+                  </p>
+                </div>
+              </div>
+              {aiError && (
+                <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">{aiError}</p>
+              )}
+              <Button
+                type="button"
+                onClick={handleAiGenerate}
+                disabled={aiLoading}
+                className="w-full rounded-xl h-11 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+              >
+                {aiLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Analyzing photo...
+                  </span>
+                ) : (
+                  "✨ Auto-fill with AI"
+                )}
+              </Button>
+              {aiCredits !== null && (
+                <p className="text-[10px] text-indigo-400 text-center">
+                  {aiCredits} AI credit{aiCredits !== 1 ? "s" : ""} remaining
+                </p>
+              )}
+            </div>
+          )}
+
+          {aiFilled && (
+            <SellerTip variant="success" icon="✨">
+              AI filled your title &amp; description. Review them in the next steps.
             </SellerTip>
           )}
         </div>
       )}
 
-      {/* ── STEP 2: Details ─────────────────────────────── */}
+      {/* ── STEP 2: Title & Category ───────────────────── */}
       {step === 1 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-bold text-stone-900">Product details</h2>
-            <p className="text-sm text-stone-500 mt-1">
-              Help buyers find and understand your product.
+            <h2 className="text-xl font-bold text-slate-900">Title &amp; category</h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Help buyers find your product in search.
             </p>
           </div>
 
           {/* Product Type Tiles */}
           <div>
-            <p className="text-sm font-medium text-stone-700 mb-2">Quick pick a type:</p>
+            <p className="text-sm font-medium text-slate-700 mb-2">Quick pick a type:</p>
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
               {PRODUCT_TYPES.map(({ label, emoji }) => (
                 <button
@@ -392,11 +488,11 @@ export function ProductWizard({
                   className={`flex flex-col items-center gap-1 rounded-xl p-2.5 border-2 transition-all duration-200 ${
                     selectedType === label
                       ? "border-emerald-500 bg-emerald-50 shadow-md shadow-emerald-100 scale-105"
-                      : "border-stone-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/50"
+                      : "border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/50"
                   }`}
                 >
                   <span className="text-xl">{emoji}</span>
-                  <span className="text-[10px] font-medium text-stone-700 leading-tight text-center">{label}</span>
+                  <span className="text-[10px] font-medium text-slate-700 leading-tight text-center">{label}</span>
                 </button>
               ))}
             </div>
@@ -404,35 +500,21 @@ export function ProductWizard({
 
           {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="wiz-name" className="text-sm font-medium">Product Name *</Label>
+            <Label htmlFor="wiz-name" className="text-sm font-medium">
+              Product Name *
+              {aiFilled && <span className="ml-2 text-xs text-indigo-500 font-normal">AI-suggested</span>}
+            </Label>
             <Input
               id="wiz-name"
-              value={data.name}
+              value={data.name === "New Product" ? "" : data.name}
               onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))}
               placeholder="e.g. Premium Cotton T-Shirt"
               required
               minLength={2}
               maxLength={200}
-              className="rounded-xl border-2 border-stone-200 focus:border-emerald-400 h-12 text-base"
+              className="rounded-xl border-2 border-slate-200 focus:border-emerald-400 h-12 text-base"
             />
             <SellerTip>Clear, specific titles help buyers find your product in search.</SellerTip>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="wiz-desc" className="text-sm font-medium">
-              Description <span className="text-stone-400 font-normal">(recommended)</span>
-            </Label>
-            <Textarea
-              id="wiz-desc"
-              value={data.description}
-              onChange={(e) => setData((d) => ({ ...d, description: e.target.value }))}
-              placeholder="Material, fit, style notes..."
-              maxLength={2000}
-              rows={3}
-              className="rounded-xl border-2 border-stone-200 focus:border-emerald-400"
-            />
-            <SellerTip>Detailed descriptions reduce buyer questions and boost confidence.</SellerTip>
           </div>
 
           {/* Category */}
@@ -443,7 +525,7 @@ export function ProductWizard({
                 id="wiz-cat"
                 value={data.categoryId}
                 onChange={(e) => setData((d) => ({ ...d, categoryId: e.target.value }))}
-                className="flex h-12 w-full rounded-xl border-2 border-stone-200 bg-white px-3 py-2 text-base text-stone-900 focus:border-emerald-400 focus:outline-none"
+                className="flex h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-3 py-2 text-base text-slate-900 focus:border-emerald-400 focus:outline-none"
               >
                 <option value="">No category</option>
                 {categories.map((cat) => (
@@ -479,8 +561,8 @@ export function ProductWizard({
       {step === 2 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-bold text-stone-900">Price & stock</h2>
-            <p className="text-sm text-stone-500 mt-1">
+            <h2 className="text-xl font-bold text-slate-900">Price &amp; stock</h2>
+            <p className="text-sm text-slate-500 mt-1">
               Set your price and how many you have available.
             </p>
           </div>
@@ -489,7 +571,7 @@ export function ProductWizard({
           <div className="space-y-2">
             <Label htmlFor="wiz-price" className="text-sm font-medium">Price (Rands) *</Label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm font-medium">R</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">R</span>
               <Input
                 id="wiz-price"
                 type="number"
@@ -499,15 +581,15 @@ export function ProductWizard({
                 value={data.priceInRands}
                 onChange={(e) => setData((d) => ({ ...d, priceInRands: e.target.value }))}
                 placeholder="0.00"
-                className="pl-7 rounded-xl border-2 border-stone-200 focus:border-emerald-400 h-12 text-base"
+                className="pl-7 rounded-xl border-2 border-slate-200 focus:border-emerald-400 h-12 text-base"
               />
             </div>
-            <SellerTip>This is the wholesale price buyers pay per unit.</SellerTip>
+            <SellerTip>This is the price buyers pay per unit.</SellerTip>
           </div>
 
           {/* Stock */}
           <div className="space-y-2">
-            <Label htmlFor="wiz-stock" className="text-sm font-medium">Stock Quantity *</Label>
+            <Label htmlFor="wiz-stock" className="text-sm font-medium">Stock Quantity</Label>
             <Input
               id="wiz-stock"
               type="number"
@@ -516,18 +598,16 @@ export function ProductWizard({
               value={data.stock}
               onChange={(e) => setData((d) => ({ ...d, stock: e.target.value }))}
               placeholder="e.g. 50"
-              className="rounded-xl border-2 border-stone-200 focus:border-emerald-400 h-12 text-base"
+              className="rounded-xl border-2 border-slate-200 focus:border-emerald-400 h-12 text-base"
             />
             <SellerTip variant="warning" icon="⚠️">
-              If stock is 0, your product appears as &quot;sold out&quot; and buyers cannot order. Set to at least 1.
+              If stock is 0, your product appears as &quot;sold out&quot;. Set to at least 1.
             </SellerTip>
           </div>
 
           {/* Min Wholesale Qty */}
           <div className="space-y-2">
-            <Label htmlFor="wiz-moq" className="text-sm font-medium">
-              Min. Wholesale Order
-            </Label>
+            <Label htmlFor="wiz-moq" className="text-sm font-medium">Min. Order Quantity</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="wiz-moq"
@@ -537,88 +617,147 @@ export function ProductWizard({
                 max={99999}
                 value={data.minWholesaleQty}
                 onChange={(e) => setData((d) => ({ ...d, minWholesaleQty: e.target.value }))}
-                className="rounded-xl border-2 border-stone-200 focus:border-emerald-400 h-11 text-base w-28"
+                className="rounded-xl border-2 border-slate-200 focus:border-emerald-400 h-11 text-base w-28"
               />
-              <span className="text-sm text-stone-500">units per order</span>
+              <span className="text-sm text-slate-500">units per order</span>
             </div>
-            <p className="text-[10px] text-stone-400">Set to 1 for no minimum.</p>
+            <p className="text-[10px] text-slate-400">Set to 1 for no minimum.</p>
           </div>
         </div>
       )}
 
-      {/* ── STEP 4: Review & Publish ───────────────────── */}
+      {/* ── STEP 4: Description ────────────────────────── */}
       {step === 3 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-bold text-stone-900">Review your listing</h2>
-            <p className="text-sm text-stone-500 mt-1">
-              Check everything looks good, then publish.
+            <h2 className="text-xl font-bold text-slate-900">Description</h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Tell buyers about your product — materials, fit, what makes it special.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="wiz-desc" className="text-sm font-medium">
+              Product Description
+              {aiFilled && data.description && (
+                <span className="ml-2 text-xs text-indigo-500 font-normal">AI-generated — feel free to edit</span>
+              )}
+            </Label>
+            <Textarea
+              id="wiz-desc"
+              value={data.description}
+              onChange={(e) => setData((d) => ({ ...d, description: e.target.value }))}
+              placeholder="Material, fit, style notes, care instructions..."
+              maxLength={2000}
+              rows={5}
+              className="rounded-xl border-2 border-slate-200 focus:border-emerald-400 text-base"
+            />
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-400">{data.description.length}/2000</span>
+              {data.description.length > 0 && (
+                <span className="text-xs text-emerald-600 font-medium">+15% listing quality</span>
+              )}
+            </div>
+          </div>
+
+          {/* AI generate button if no description yet */}
+          {!data.description && wizardImages.length > 0 && !aiLoading && (
+            <Button
+              type="button"
+              onClick={handleAiGenerate}
+              disabled={aiLoading}
+              variant="outline"
+              className="w-full rounded-xl h-11 border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-medium"
+            >
+              ✨ Generate description with AI
+            </Button>
+          )}
+
+          <SellerTip>Detailed descriptions reduce buyer questions and boost confidence to buy.</SellerTip>
+        </div>
+      )}
+
+      {/* ── STEP 5: Preview & Publish ──────────────────── */}
+      {step === 4 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">Preview &amp; publish</h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Check everything looks good, then go live.
             </p>
           </div>
 
           {/* Quality Score */}
           <ListingQualityScore {...qualityProps} />
 
-          {/* Preview Card */}
-          <div className="rounded-2xl border-2 border-stone-200 bg-white overflow-hidden">
-            {/* Preview Image */}
+          {/* Live Product Card Preview */}
+          <div className="rounded-2xl border-2 border-slate-200 bg-white overflow-hidden shadow-sm">
+            {/* Image */}
             {wizardImages.length > 0 ? (
-              <div className="aspect-video bg-stone-100 overflow-hidden relative">
+              <div className="aspect-square bg-slate-100 overflow-hidden relative">
                 <img
                   src={wizardImages[0]!.url}
                   alt={data.name}
                   className="w-full h-full object-cover"
                 />
+                {wizardImages.length > 1 && (
+                  <div className="absolute bottom-2 right-2 flex gap-1">
+                    {wizardImages.slice(1, 4).map((img) => (
+                      <div key={img.id} className="w-10 h-10 rounded-lg overflow-hidden border-2 border-white shadow-sm">
+                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                    {wizardImages.length > 4 && (
+                      <div className="w-10 h-10 rounded-lg bg-black/50 border-2 border-white shadow-sm flex items-center justify-center text-white text-xs font-bold">
+                        +{wizardImages.length - 4}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="aspect-video bg-stone-50 flex items-center justify-center">
-                <span className="text-4xl opacity-40">📷</span>
+              <div className="aspect-square bg-slate-50 flex items-center justify-center">
+                <span className="text-5xl opacity-30">📷</span>
               </div>
             )}
 
-            {/* Preview Info */}
+            {/* Info */}
             <div className="p-4 space-y-3">
-              <h3 className="text-lg font-bold text-stone-900">{data.name || "Untitled Product"}</h3>
+              <h3 className="text-lg font-bold text-slate-900">{data.name || "Untitled Product"}</h3>
               {data.description && (
-                <p className="text-sm text-stone-500 line-clamp-2">{data.description}</p>
+                <p className="text-sm text-slate-500 line-clamp-3">{data.description}</p>
               )}
-              <div className="flex items-center gap-4 pt-2 border-t border-stone-100">
-                <span className="text-lg font-bold text-emerald-600">
+              <div className="flex items-center gap-4 pt-3 border-t border-slate-100">
+                <span className="text-xl font-bold text-emerald-600">
                   {data.priceInRands ? `R${parseFloat(data.priceInRands).toFixed(2)}` : "No price"}
                 </span>
-                <span className="text-sm text-stone-500">
+                <span className="text-sm text-slate-500">
                   {data.stock || "0"} in stock
                 </span>
-                <span className="text-xs text-stone-400">
+                <span className="text-xs text-slate-400">
                   {wizardImages.length} photo{wizardImages.length !== 1 ? "s" : ""}
                 </span>
               </div>
+              {data.aiGenerated && (
+                <div className="flex items-center gap-1 text-xs text-indigo-500">
+                  <span>✨</span> AI-assisted listing
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Edit buttons */}
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => setStep(0)}
-              className="py-2 rounded-lg border border-stone-200 bg-white text-xs font-medium text-stone-600 hover:bg-stone-50 transition-colors"
-            >
-              ✏️ Photos
-            </button>
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="py-2 rounded-lg border border-stone-200 bg-white text-xs font-medium text-stone-600 hover:bg-stone-50 transition-colors"
-            >
-              ✏️ Details
-            </button>
-            <button
-              type="button"
-              onClick={() => setStep(2)}
-              className="py-2 rounded-lg border border-stone-200 bg-white text-xs font-medium text-stone-600 hover:bg-stone-50 transition-colors"
-            >
-              ✏️ Price
-            </button>
+          {/* Quick edit buttons */}
+          <div className="grid grid-cols-4 gap-2">
+            {(["Photos", "Title", "Price", "Description"] as const).map((label, i) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setStep(i)}
+                className="py-2 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+              >
+                ✏️ {label}
+              </button>
+            ))}
           </div>
 
           {/* Publish Error */}
@@ -631,7 +770,7 @@ export function ProductWizard({
       )}
 
       {/* ── Navigation Bar ──────────────────────────────── */}
-      <div className="flex items-center gap-3 pt-4 border-t border-stone-100">
+      <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
         {step > 0 && (
           <Button
             type="button"
@@ -644,7 +783,7 @@ export function ProductWizard({
         )}
         <div className="flex-1" />
 
-        {step < 3 ? (
+        {step < 4 ? (
           <Button
             type="button"
             onClick={next}

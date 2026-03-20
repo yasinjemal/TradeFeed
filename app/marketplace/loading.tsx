@@ -1,67 +1,78 @@
-// ============================================================
-// Marketplace Loading Skeleton (M3.10)
-// ============================================================
-// Shimmer grid matching the marketplace layout. Shows while
-// the server component fetches data.
-// ============================================================
+import { MarketplaceProductCardSkeleton } from "@/components/marketplace/marketplace-product-card";
 
 export default function MarketplaceLoading() {
   return (
     <main className="min-h-screen bg-white text-slate-900">
-      {/* Navbar skeleton */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 animate-pulse" />
-            <div className="w-24 h-5 rounded bg-slate-100 animate-pulse" />
+            <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-100" />
+            <div className="h-5 w-24 animate-pulse rounded bg-slate-100" />
           </div>
-          <div className="hidden md:block w-64 h-10 rounded-xl bg-slate-100 animate-pulse" />
-          <div className="w-24 h-9 rounded-lg bg-slate-100 animate-pulse" />
+          <div className="hidden h-8 w-48 animate-pulse rounded-full bg-slate-100 lg:block" />
+          <div className="h-10 w-28 animate-pulse rounded-xl bg-slate-100" />
         </div>
       </nav>
 
-      {/* Hero skeleton */}
-      <section className="pt-24 pb-6 sm:pt-28 sm:pb-8 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="w-80 h-10 rounded bg-slate-100 animate-pulse" />
-          <div className="w-96 h-5 rounded bg-slate-50 animate-pulse mt-3" />
+      <section className="px-4 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-28">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-50/80 p-6 shadow-sm shadow-slate-200/60 sm:p-8 lg:p-10">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.55fr)]">
+            <div>
+              <div className="h-3 w-40 animate-pulse rounded bg-slate-100" />
+              <div className="mt-4 h-12 w-3/4 animate-pulse rounded bg-slate-100" />
+              <div className="mt-3 h-5 w-full max-w-2xl animate-pulse rounded bg-slate-100" />
+              <div className="mt-2 h-5 w-2/3 animate-pulse rounded bg-slate-100" />
+              <div className="mt-5 flex gap-2">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="h-8 w-36 animate-pulse rounded-full bg-slate-100" />
+                ))}
+              </div>
+              <div className="mt-6 h-14 w-full max-w-3xl animate-pulse rounded-2xl bg-white" />
+              <div className="mt-4 h-20 w-full max-w-3xl animate-pulse rounded-2xl bg-white" />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="h-28 animate-pulse rounded-[1.5rem] bg-white" />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Category bar skeleton */}
-      <section className="px-4 sm:px-6 pb-4">
-        <div className="max-w-7xl mx-auto flex gap-2 overflow-hidden">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="w-28 h-9 rounded-xl bg-slate-100 animate-pulse shrink-0"
-              style={{ animationDelay: `${i * 100}ms` }}
-            />
+      <section className="px-4 pb-4 sm:px-6">
+        <div className="mx-auto flex max-w-7xl gap-2 overflow-hidden">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div key={index} className="h-20 w-28 shrink-0 animate-pulse rounded-2xl bg-slate-100" />
           ))}
         </div>
       </section>
 
-      {/* Grid skeleton */}
-      <section className="px-4 sm:px-6 py-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-40 h-5 rounded bg-slate-100 animate-pulse" />
-            <div className="w-32 h-9 rounded-xl bg-slate-100 animate-pulse" />
+      <section className="px-4 pb-3 pt-8 sm:px-6">
+        <div className="mx-auto max-w-7xl rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60 sm:p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="h-10 w-44 animate-pulse rounded-xl bg-slate-100" />
+            <div className="h-10 w-32 animate-pulse rounded-xl bg-slate-100" />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                <div
-                  className="aspect-[3/4] bg-slate-100 animate-pulse"
-                  style={{ animationDelay: `${i * 80}ms` }}
-                />
-                <div className="p-3 space-y-2">
-                  <div className="w-16 h-2.5 rounded bg-slate-100 animate-pulse" />
-                  <div className="w-full h-4 rounded bg-slate-100 animate-pulse" />
-                  <div className="w-24 h-3 rounded bg-slate-50 animate-pulse" />
-                </div>
-              </div>
-            ))}
+        </div>
+      </section>
+
+      <section className="px-4 py-6 sm:px-6">
+        <div className="mx-auto flex max-w-7xl gap-6">
+          <aside className="hidden w-[300px] shrink-0 lg:block">
+            <div className="space-y-4 rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="h-28 animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
+          </aside>
+
+          <div className="min-w-0 flex-1">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <MarketplaceProductCardSkeleton key={index} />
+              ))}
+            </div>
           </div>
         </div>
       </section>

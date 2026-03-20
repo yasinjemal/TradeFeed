@@ -39,21 +39,8 @@ interface Props {
   }>;
 }
 
-// ── Generate params from all global categories ──────────────
-export async function generateStaticParams() {
-  const categories = await getGlobalCategories();
-  // Flatten parent + child categories
-  const slugs: { slug: string }[] = [];
-  for (const cat of categories) {
-    slugs.push({ slug: cat.slug });
-    if (cat.children) {
-      for (const child of cat.children) {
-        slugs.push({ slug: child.slug });
-      }
-    }
-  }
-  return slugs;
-}
+// Static generation removed — ISR via revalidate = 300 handles caching.
+// Categories are generated on first request and cached for 5 minutes.
 
 /** Recursively find a category by slug in the tree */
 function findCategory(
