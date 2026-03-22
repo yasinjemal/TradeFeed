@@ -185,7 +185,7 @@ Tracks progress on the 13 growth-plan features from `docs/TradeFeed — Cursor A
 | # | Feature | Status | Notes |
 |---|---------|--------|-------|
 | P8 | Printable QR Code Generator | ✅ Done | 3 template styles (Dark/Light/Colorful) + A5 300DPI PNG download. Commit: `b2c5bfb` |
-| P9 | Custom Domain for Pro Users | ❌ Not built | Vercel API domain attach + DNS verify UI needed |
+| P9 | Custom Domain for Pro Users | ✅ Done | 73ab649 — Vercel API, DNS verify UI, host-based middleware routing |
 
 ### Phase 4: Scale (Q3 & Q4)
 
@@ -205,4 +205,4 @@ Tracks progress on the 13 growth-plan features from `docs/TradeFeed — Cursor A
 - **Done**: 11 / 13 (P1, P2, P3, P4, P5, P6, P7, P8, P12, P13)
 - **Partial**: 0 / 13
 - **Not built**: 2 / 13 (P9, P10, P11)
-- **Next up**: P10 weekly sales report → P9 custom domains → P11 multi-staff
+- **Next up**: P10 weekly sales report → P11 multi-staff
