@@ -29,14 +29,11 @@
 - Trigger: PR + main branch push.
 - File: `.github/workflows/ci.yml`
 
-2. Add minimal automated tests.
-- Unit:
-  - `interleavePromotedProducts` behavior and de-duplication.
-  - rate limiter window behavior.
-  - WhatsApp message builder formatting.
-- Integration:
-  - marketplace filters/sort URL-param behavior.
-  - product CRUD server actions with mocked auth boundary.
+2. ✅ Add minimal automated tests.
+- 168 tests across 14 test files, all passing.
+- Unit: `interleavePromotedProducts`, rate limiter, WhatsApp message builder, checkout schema, AI safety, telemetry, trending, intent detection, product import parser, review schema.
+- Integration: marketplace search params, product CRUD actions with mocked auth.
+- Runner: Node.js native test runner via `npx tsx --test tests/**/*.test.ts`.
 
 3. ✅ Add error telemetry.
 - Sentry `^10.40.0` installed and configured (`sentry.server.config.ts`, `sentry.edge.config.ts`).

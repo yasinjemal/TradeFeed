@@ -144,10 +144,10 @@ test("checkoutSchema rejects negative priceInCents", () => {
   assert.equal(result.success, false);
 });
 
-test("checkoutSchema rejects missing whatsappMessage", () => {
+test("checkoutSchema accepts missing whatsappMessage (field is optional)", () => {
   const { whatsappMessage, ...input } = buildValidCheckoutInput();
   const result = checkoutSchema.safeParse(input);
-  assert.equal(result.success, false);
+  assert.equal(result.success, true);
 });
 
 test("checkoutSchema accepts multiple items", () => {

@@ -56,3 +56,13 @@ test("buildWhatsAppCheckoutUrl includes order number in URL message", () => {
   assert.match(decoded, /New Order #TF-20260226-A1B2/);
   assert.match(decoded, /tradefeed\.co\.za\/track\/TF-20260226-A1B2/);
 });
+
+test("buildWhatsAppMessage includes COD payment note when paymentMethod is COD", () => {
+  const message = buildWhatsAppMessage(items, null, "TF-COD-001", "shop", "COD");
+  assert.match(message, /Payment: Cash on Delivery/);
+});
+
+test("buildWhatsAppMessage omits COD note for PAYFAST payment", () => {
+  const message = buildWhatsAppMessage(items, null, "TF-PF-001", "shop", "PAYFAST");
+  assert.doesNotMatch(message, /Cash on Delivery/);
+});
