@@ -176,15 +176,15 @@ Tracks progress on the 13 growth-plan features from `docs/TradeFeed — Cursor A
 
 | # | Feature | Status | Notes |
 |---|---------|--------|-------|
-| P5 | Inventory Alerts via WhatsApp | ⚠️ Partial | Back-in-stock alerts exist; low-stock seller push alerts not wired |
+| P5 | Inventory Alerts via WhatsApp | ✅ Done | WhatsApp push added alongside email in `checkAndNotifyLowStock()`. Commit: `b2c5bfb` |
 | P6 | Buyer Reviews & Ratings | ✅ Done | `components/reviews/` — stars, aggregation, dashboard, submission form |
-| P7 | First Sale Celebration | ⚠️ Partial | Shop-live celebration exists; first-order confetti + upgrade prompt missing |
+| P7 | First Sale Celebration | ✅ Done | Confetti modal + FIRSTSALE50 upgrade prompt + WhatsApp message. Commit: `b2c5bfb` |
 
 ### Phase 3: Professional (90 Days)
 
 | # | Feature | Status | Notes |
 |---|---------|--------|-------|
-| P8 | Printable QR Code Generator | ⚠️ Partial | QR generation + download exists; A5 print template + PDF export missing |
+| P8 | Printable QR Code Generator | ✅ Done | 3 template styles (Dark/Light/Colorful) + A5 300DPI PNG download. Commit: `b2c5bfb` |
 | P9 | Custom Domain for Pro Users | ❌ Not built | Vercel API domain attach + DNS verify UI needed |
 
 ### Phase 4: Scale (Q3 & Q4)
@@ -202,7 +202,7 @@ Tracks progress on the 13 growth-plan features from `docs/TradeFeed — Cursor A
 | P13 | SEO Meta Tags | ✅ Done | All pages: OG, Twitter, JSON-LD (Product, LocalBusiness, FAQ, etc.) |
 
 ### Summary
-- **Done**: 8 / 13 (P1, P2, P3, P4, P6, P12, P13)
-- **Partial**: 3 / 13 (P5, P7, P8)
-- **Not built**: 3 / 13 (P9, P10, P11)
-- **Next up**: P5 low-stock alerts → P7 first-sale celebration → P8 QR templates
+- **Done**: 11 / 13 (P1, P2, P3, P4, P5, P6, P7, P8, P12, P13)
+- **Partial**: 0 / 13
+- **Not built**: 2 / 13 (P9, P10, P11)
+- **Next up**: P10 weekly sales report → P9 custom domains → P11 multi-staff
