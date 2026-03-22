@@ -4,6 +4,12 @@
 // Wraps Vercel REST API for adding/removing/verifying domains
 // on the TradeFeed project. Used by Pro plan sellers.
 //
+// Features:
+// - Add/remove domains to Vercel project
+// - Verify DNS configuration
+// - Get SSL certificate status
+// - Domain health checks (used by cron)
+//
 // Requires env vars: VERCEL_API_TOKEN, VERCEL_PROJECT_ID
 // Docs: https://vercel.com/docs/rest-api/endpoints/projects
 // ============================================================
@@ -24,6 +30,8 @@ function headers(token: string) {
   };
 }
 
+// ── Types ─────────────────────────────────────────────────
+
 export interface DomainConfig {
   configuredBy: "CNAME" | "A" | "http" | "dns-01" | null;
   misconfigured: boolean;
@@ -39,6 +47,28 @@ export interface VerifyDomainResult {
   configuredBy: string | null;
   error?: string;
 }
+
+export interface DomainHealthResult {
+  configured: boolean;
+  configuredBy: string | null;
+  sslReady: boolean;
+  sslExpiry: string | null;
+  isApex: boolean;
+  error?: string;
+}
+
+// ── Helpers ───────────────────────────────────────────────
+
+/** Detect if a domain is an apex domain (no subdomain). */
+export function isApexDomain(domain: string): boolean {
+  const parts = domain.split(".");
+  // co.za, co.uk, com.au etc. have 2-part TLDs
+  const ccSlds = ["co", "com", "net", "org", "ac", "gov"];
+  if (parts.length === 3 && ccSlds.includes(parts[1]!)) return true;
+  return parts.length <= 2;
+}
+
+// ── API Functions ─────────────────────────────────────────
 
 /**
  * Add a custom domain to the Vercel project.
@@ -61,6 +91,9 @@ export async function addDomainToProject(domain: string): Promise<AddDomainResul
     );
 
     if (res.ok) return { success: true };
+
+    // 409 = domain already exists on this project (safe to treat as success)
+    if (res.status === 409) return { success: true };
 
     const body = await res.json().catch(() => ({}));
     const msg = body?.error?.message || `Vercel API ${res.status}`;
@@ -129,4 +162,48 @@ export async function verifyDomainConfig(domain: string): Promise<VerifyDomainRe
     console.error("[vercel-domains] verifyDomain error:", err);
     return { configured: false, configuredBy: null, error: "Network error" };
   }
+}
+
+/**
+ * Full domain health check — DNS config + SSL status + apex detection.
+ * Used by the cron job and the settings UI for rich status display.
+ */
+export async function checkDomainHealth(domain: string): Promise<DomainHealthResult> {
+  const config = getVercelConfig();
+  const apex = isApexDomain(domain);
+
+  if (!config) {
+    console.log("[vercel-domains] Not configured — mock health for:", domain);
+    return { configured: true, configuredBy: apex ? "A" : "CNAME", sslReady: true, sslExpiry: null, isApex: apex };
+  }
+
+  // 1. Check DNS configuration
+  const dnsResult = await verifyDomainConfig(domain);
+
+  // 2. Check SSL certificate (GET project domain details)
+  let sslReady = false;
+  let sslExpiry: string | null = null;
+  try {
+    const res = await fetch(
+      `${VERCEL_API}/v10/projects/${config.projectId}/domains/${encodeURIComponent(domain)}`,
+      { method: "GET", headers: headers(config.token) },
+    );
+    if (res.ok) {
+      const data = await res.json();
+      // Vercel returns verified: true when SSL cert is active
+      sslReady = data.verified === true;
+      sslExpiry = data.sslCertExpiresAt ?? null;
+    }
+  } catch {
+    // SSL check failed — non‐critical, continue
+  }
+
+  return {
+    configured: dnsResult.configured,
+    configuredBy: dnsResult.configuredBy,
+    sslReady,
+    sslExpiry,
+    isApex: apex,
+    error: dnsResult.error,
+  };
 }

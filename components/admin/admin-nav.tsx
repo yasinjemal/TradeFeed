@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { href: "/admin/upgrade-requests", label: "Upgrades", icon: "⬆️" },
   { href: "/admin/wholesale", label: "Wholesale", icon: "🏭" },
   { href: "/admin/payment-methods", label: "Payments", icon: "💳" },
+  { href: "/admin/domains", label: "Domains", icon: "🌐" },
   { href: "/admin/analytics", label: "Analytics", icon: "📈" },
   { href: "/admin/audit-log", label: "Audit Log", icon: "📋" },
 ] as const;

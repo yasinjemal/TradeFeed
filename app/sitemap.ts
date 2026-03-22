@@ -101,7 +101,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
       db.shop.findMany({
         where: { isActive: true },
-        select: { slug: true, updatedAt: true },
+        select: { slug: true, updatedAt: true, customDomain: true, domainStatus: true },
       }),
       db.product.findMany({
         where: { isActive: true, shop: { isActive: true } },
@@ -138,21 +138,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       );
     }
 
-    // ── Shop catalog pages
+    // ── Shop catalog pages (+ custom domain alternate if active)
     shopPages = shops.map((shop) => ({
-      url: `${APP_URL}/catalog/${shop.slug}`,
+      url: shop.customDomain && shop.domainStatus === "ACTIVE"
+        ? `https://${shop.customDomain}`
+        : `${APP_URL}/catalog/${shop.slug}`,
       lastModified: shop.updatedAt,
       changeFrequency: "daily" as const,
       priority: 0.8,
     }));
 
+    // Build a lookup for products on custom-domain shops
+    const domainBySlug = new Map<string, string>();
+    for (const shop of shops) {
+      if (shop.customDomain && shop.domainStatus === "ACTIVE") {
+        domainBySlug.set(shop.slug, shop.customDomain);
+      }
+    }
+
     // ── Product detail pages
-    productPages = products.map((product) => ({
-      url: `${APP_URL}/catalog/${product.shop.slug}/products/${product.slug ?? product.id}`,
-      lastModified: product.updatedAt,
-      changeFrequency: "daily" as const,
-      priority: 0.6,
-    }));
+    productPages = products.map((product) => {
+      const shopDomain = domainBySlug.get(product.shop.slug);
+      const base = shopDomain ? `https://${shopDomain}` : `${APP_URL}/catalog/${product.shop.slug}`;
+      return {
+        url: `${base}/products/${product.slug ?? product.id}`,
+        lastModified: product.updatedAt,
+        changeFrequency: "daily" as const,
+        priority: 0.6,
+      };
+    });
   } catch (error) {
     console.error("[sitemap] DB queries failed, returning static pages only", error);
   }

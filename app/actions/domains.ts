@@ -3,8 +3,14 @@
 // ============================================================
 // Server Actions — Custom Domain Management
 // ============================================================
-// Pro-only: add, verify, and remove custom domains.
+// Pro-only: add, verify, remove, swap, and health-check domains.
 // Calls Vercel REST API and persists state in Prisma.
+//
+// Features:
+// - Add domain with auto www variant
+// - Swap domain (change without remove-first)
+// - Full health check with SSL status
+// - Smart apex vs subdomain detection
 // ============================================================
 
 import { db } from "@/lib/db";
@@ -14,7 +20,10 @@ import {
   addDomainToProject,
   removeDomainFromProject,
   verifyDomainConfig,
+  checkDomainHealth,
+  isApexDomain,
 } from "@/lib/vercel/domains";
+import type { DomainHealthResult } from "@/lib/vercel/domains";
 import { revalidatePath } from "next/cache";
 
 // Basic domain format validation — no protocol, no path, no spaces
@@ -44,11 +53,12 @@ async function requireProAccess(shopSlug: string) {
 
 /**
  * Add a custom domain to the seller's shop.
+ * Auto-adds www variant for apex domains.
  */
 export async function addCustomDomainAction(
   shopSlug: string,
   domain: string,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; isApex?: boolean }> {
   try {
     const shop = await requireProAccess(shopSlug);
 
@@ -73,15 +83,25 @@ export async function addCustomDomainAction(
       return { success: false, error: "This domain is already in use by another shop" };
     }
 
-    // Remove old domain from Vercel if changing
+    // Remove old domain from Vercel if swapping
     if (shop.customDomain && shop.customDomain !== cleaned) {
       await removeDomainFromProject(shop.customDomain);
+      // Also remove old www variant
+      if (isApexDomain(shop.customDomain)) {
+        await removeDomainFromProject(`www.${shop.customDomain}`);
+      }
     }
 
-    // Add to Vercel
+    // Add primary domain to Vercel
     const result = await addDomainToProject(cleaned);
     if (!result.success) {
       return { success: false, error: result.error || "Failed to add domain to hosting" };
+    }
+
+    // Auto-add www variant for apex domains (www.example.co.za → redirect to example.co.za)
+    const apex = isApexDomain(cleaned);
+    if (apex) {
+      await addDomainToProject(`www.${cleaned}`).catch(() => {});
     }
 
     // Save to DB
@@ -95,7 +115,7 @@ export async function addCustomDomainAction(
     });
 
     revalidatePath(`/dashboard/${shopSlug}/settings`);
-    return { success: true };
+    return { success: true, isApex: apex };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
     if (msg === "Unauthorized" || msg === "Pro plan required") {
@@ -146,6 +166,50 @@ export async function verifyCustomDomainAction(
 }
 
 /**
+ * Full health check — DNS + SSL status for the settings UI.
+ */
+export async function checkDomainHealthAction(
+  shopSlug: string,
+): Promise<{ success: boolean; health?: DomainHealthResult; error?: string }> {
+  try {
+    const shop = await requireProAccess(shopSlug);
+
+    if (!shop.customDomain) {
+      return { success: false, error: "No domain configured" };
+    }
+
+    const health = await checkDomainHealth(shop.customDomain);
+
+    // Update status if changed
+    let newStatus = shop.domainStatus;
+    if (health.configured && health.sslReady) {
+      newStatus = "ACTIVE";
+    } else if (health.configured) {
+      newStatus = shop.domainStatus === "ACTIVE" ? "ACTIVE" : "PENDING";
+    } else {
+      newStatus = shop.domainStatus === "ACTIVE" ? "ERROR" : "PENDING";
+    }
+
+    if (newStatus !== shop.domainStatus) {
+      await db.shop.update({
+        where: { id: shop.id },
+        data: {
+          domainStatus: newStatus,
+          ...(newStatus === "ACTIVE" ? { domainVerifiedAt: new Date() } : {}),
+        },
+      });
+      revalidatePath(`/dashboard/${shopSlug}/settings`);
+    }
+
+    return { success: true, health };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    console.error("[checkDomainHealth]", err);
+    return { success: false, error: msg };
+  }
+}
+
+/**
  * Remove the custom domain from the seller's shop.
  */
 export async function removeCustomDomainAction(
@@ -156,6 +220,10 @@ export async function removeCustomDomainAction(
 
     if (shop.customDomain) {
       await removeDomainFromProject(shop.customDomain);
+      // Also remove www variant if apex
+      if (isApexDomain(shop.customDomain)) {
+        await removeDomainFromProject(`www.${shop.customDomain}`).catch(() => {});
+      }
     }
 
     await db.shop.update({
