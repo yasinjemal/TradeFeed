@@ -1,14 +1,8 @@
 // ============================================================
 // Dynamic Sitemap — /sitemap.xml
 // ============================================================
-// Generates a sitemap listing all active shops, products,
+// Generates a single sitemap listing all active shops, products,
 // marketplace pages, and category pages for search engine crawlers.
-//
-// SITEMAP INDEX:
-//   When total URLs exceed MAX_URLS_PER_SITEMAP (10,000),
-//   Next.js automatically splits into multiple sitemaps with
-//   the generateSitemaps() convention. Each sitemap chunk
-//   stays under the 50,000 URL / 50 MB Google limit.
 //
 // URLS:
 //   - / (home)
@@ -36,40 +30,10 @@ export const dynamic = "force-dynamic";
 export const revalidate = 3600; // regenerate at most once per hour
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-const MAX_URLS_PER_SITEMAP = 10_000;
 
-// ── Sitemap Index — split into chunks when needed ───────────
-
-/**
- * Next.js calls this to determine how many sitemap files to generate.
- * Returns [{ id: 0 }, { id: 1 }, ...] — one per chunk.
- * If total URLs < MAX_URLS_PER_SITEMAP, returns a single chunk.
- */
-export async function generateSitemaps() {
-  try {
-    const productCount = await db.product.count({
-      where: { isActive: true, shop: { isActive: true } },
-    });
-    const estimatedTotal = productCount + 1500;
-    const chunks = Math.max(1, Math.ceil(estimatedTotal / MAX_URLS_PER_SITEMAP));
-    return Array.from({ length: chunks }, (_, i) => ({ id: i }));
-  } catch (error) {
-    console.error("[sitemap] generateSitemaps failed, returning single chunk", error);
-    return [{ id: 0 }];
-  }
-}
-
-// ── Per-chunk sitemap ───────────────────────────────────────
-
-export default async function sitemap({
-  id,
-}: {
-  id: number;
-}): Promise<MetadataRoute.Sitemap> {
-  const chunkId = Number(id) || 0;
-
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Always return static pages even if DB queries fail
-  const staticPages: MetadataRoute.Sitemap = chunkId === 0 ? [
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: APP_URL,
       lastModified: new Date(),
@@ -106,26 +70,22 @@ export default async function sitemap({
       changeFrequency: "monthly",
       priority: 0.4,
     },
-  ] : [];
+  ];
 
   // Province & city pages are static data — no DB needed
-  const provincePages: MetadataRoute.Sitemap = chunkId === 0
-    ? getAllProvinceSlugs().map((slug) => ({
-        url: `${APP_URL}/marketplace/${slug}`,
-        lastModified: new Date(),
-        changeFrequency: "daily" as const,
-        priority: 0.85,
-      }))
-    : [];
+  const provincePages: MetadataRoute.Sitemap = getAllProvinceSlugs().map((slug) => ({
+    url: `${APP_URL}/marketplace/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.85,
+  }));
 
-  const cityPages: MetadataRoute.Sitemap = chunkId === 0
-    ? getAllCityParams().map(({ province, city }) => ({
-        url: `${APP_URL}/marketplace/${province}/${city}`,
-        lastModified: new Date(),
-        changeFrequency: "daily" as const,
-        priority: 0.8,
-      }))
-    : [];
+  const cityPages: MetadataRoute.Sitemap = getAllCityParams().map(({ province, city }) => ({
+    url: `${APP_URL}/marketplace/${province}/${city}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.8,
+  }));
 
   // DB-dependent pages — wrapped in try/catch so a DB failure
   // still returns a valid sitemap with static + location pages.
@@ -136,17 +96,13 @@ export default async function sitemap({
 
   try {
     const [allCategories, shops, products] = await Promise.all([
-      chunkId === 0
-        ? db.globalCategory.findMany({
-            select: { slug: true, updatedAt: true, parentId: true },
-          })
-        : Promise.resolve([]),
-      chunkId === 0
-        ? db.shop.findMany({
-            where: { isActive: true },
-            select: { slug: true, updatedAt: true },
-          })
-        : Promise.resolve([]),
+      db.globalCategory.findMany({
+        select: { slug: true, updatedAt: true, parentId: true },
+      }),
+      db.shop.findMany({
+        where: { isActive: true },
+        select: { slug: true, updatedAt: true },
+      }),
       db.product.findMany({
         where: { isActive: true, shop: { isActive: true } },
         select: {
@@ -155,8 +111,6 @@ export default async function sitemap({
           updatedAt: true,
           shop: { select: { slug: true } },
         },
-        skip: chunkId * MAX_URLS_PER_SITEMAP,
-        take: MAX_URLS_PER_SITEMAP,
         orderBy: { id: "asc" },
       }),
     ]);
@@ -172,7 +126,7 @@ export default async function sitemap({
 
     // ── City + Category combos — only for POPULAR_CITIES (top 12)
     // to keep URL count manageable and function fast.
-    if (chunkId === 0 && allCategories.length > 0) {
+    if (allCategories.length > 0) {
       const parentCategories = allCategories.filter((c) => !c.parentId);
       cityCategoryPages = POPULAR_CITIES.flatMap(({ province, city }) =>
         parentCategories.map((cat) => ({
