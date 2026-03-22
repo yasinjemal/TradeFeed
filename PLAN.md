@@ -126,3 +126,33 @@ Added full COD payment method alongside existing PayFast online payments.
 - Wired `app/marketplace/page.tsx` with `getTranslations("marketplace")` server-side.
 - Rich text support for WhatsApp import CTA link via `t.rich()`.
 - Commit: `9439cf7`
+
+---
+
+### i18n: Additional Pages Wiring — ✅ Complete
+- Added 3 new namespaces to all 5 locale files: `contact` (FAQ Q&A sub-keys), `onboarding`, `tracking`.
+- Expanded `orders` namespace with buyer-facing strings (myOrders, signInPrompt, etc.).
+- Wired 4 server pages: `app/contact/page.tsx`, `app/create-shop/page.tsx`, `app/orders/page.tsx`, `app/track/page.tsx` — all using `getTranslations()`.
+- Commit: `eb732e4`
+
+---
+
+### Full-Text Search — ✅ Already Complete
+- 3-tier search: tsvector (weighted A/B fields) → pg_trgm fuzzy → ILIKE fallback.
+- Implemented in `lib/db/search.ts`, auto-healed via `instrumentation.ts` health check on cold start.
+- No additional work needed.
+
+---
+
+### Offline Caching Enhancement — ✅ Complete
+- Enhanced `public/offline.html` with IndexedDB reader: shows previously visited shops (name, avatar, time-since-visited) from `tradefeed-catalog` database when user is offline.
+- Bumped service worker cache version v4 → v5 to re-cache updated offline page.
+- Commit: `09fbd8f`
+
+---
+
+### Advanced SEO URLs — ✅ Complete
+- Added `getCityBySlug()` helper to `lib/marketplace/locations.ts`.
+- Created `app/city/[city]/page.tsx` — flat city redirect route (`/city/johannesburg` → `/marketplace/gauteng/johannesburg`) with `generateStaticParams` and canonical metadata.
+- Added "Browse by Province" footer section on landing page with links to all 9 provinces.
+- Commit: `588a909`
