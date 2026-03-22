@@ -26,6 +26,7 @@ import { TrendingProductsWidget } from "@/components/dashboard/trending-products
 import { ProductUsageMeter } from "@/components/billing/product-usage-meter";
 import { TrialBanner } from "@/components/billing/trial-banner";
 import { FirstSaleCelebration } from "@/components/dashboard/first-sale-celebration";
+import { CustomDomainBanner } from "@/components/dashboard/custom-domain-banner";
 
 interface DashboardPageProps {
   params: Promise<{ slug: string }>;
@@ -140,6 +141,15 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       {trial.active && (
         <TrialBanner daysLeft={trial.daysLeft} shopSlug={slug} />
       )}
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* Custom Domain Upgrade CTA — Free/Starter only       */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <CustomDomainBanner
+        shopSlug={slug}
+        planSlug={subscription?.plan?.slug ?? null}
+        hasCustomDomain={!!shop.customDomain}
+      />
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* Activation Checklist — TOP for new sellers           */}

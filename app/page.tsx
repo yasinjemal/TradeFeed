@@ -12,6 +12,7 @@ import { FeaturesSection } from "@/components/landing/features-section";
 import { HowItWorksSection } from "@/components/landing/how-it-works-section";
 import { ProductPreviewSection } from "@/components/landing/product-preview-section";
 import { FinalCTASection } from "@/components/landing/final-cta-section";
+import { CustomDomainSection } from "@/components/landing/custom-domain-section";
 import { FadeIn } from "@/components/landing/fade-in";
 import { MobileNav } from "@/components/landing/mobile-nav";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -400,6 +401,11 @@ export default async function HomePage() {
       />
 
       {/* ─────────────────────────────────────────────────────
+          SECTION 5.5 — CUSTOM DOMAIN SHOWCASE
+      ───────────────────────────────────────────────────── */}
+      <CustomDomainSection />
+
+      {/* ─────────────────────────────────────────────────────
           SECTION 6 — HOW IT WORKS
       ───────────────────────────────────────────────────── */}
       <HowItWorksSection
@@ -524,6 +530,7 @@ export default async function HomePage() {
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
                     { text: "Unlimited AI generations", highlight: true },
+                    { text: "Custom domain (yourbrand.co.za)", highlight: true },
                     { text: "Everything in Starter", highlight: false },
                     { text: "Priority WhatsApp support", highlight: false },
                     { text: "Enhanced promoted listings", highlight: true },
@@ -613,6 +620,7 @@ export default async function HomePage() {
                       { feature: "Revenue Dashboard", free: false, starter: true, pro: true, proAi: true },
                       { feature: "Promoted Listings", free: false, starter: true, pro: true, proAi: true },
                       { feature: "Priority Support", free: false, starter: false, pro: true, proAi: true },
+                      { feature: "Custom Domain", free: false, starter: false, pro: true, proAi: true },
                       { feature: "Team Accounts", free: false, starter: false, pro: "3 users", proAi: "3 users" },
                     ].map((row) => (
                       <tr key={row.feature} className={row.feature.startsWith("AI") && row.proAi === true ? "bg-violet-50/50" : undefined}>
