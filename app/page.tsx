@@ -17,6 +17,7 @@ import { MobileNav } from "@/components/landing/mobile-nav";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { generateFaqJsonLd } from "@/lib/seo/json-ld";
+import { SA_PROVINCES } from "@/lib/marketplace/locations";
 import type { Metadata } from "next";
 
 // ============================================================
@@ -916,6 +917,19 @@ export default async function HomePage() {
               </ul>
             </div>
           </div>
+
+          {/* Province SEO links */}
+          <div className="pt-6 border-t border-slate-800/50 mb-6">
+            <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Browse by Province</h4>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              {SA_PROVINCES.map((p) => (
+                <Link key={p.slug} href={`/marketplace/${p.slug}`} className="text-xs text-slate-500 hover:text-emerald-400 transition-colors">
+                  {p.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
           <div className="pt-8 border-t border-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-slate-500">© {new Date().getFullYear()} TradeFeed. South Africa&apos;s online marketplace. Made with ❤️ in South Africa.</p>
             <div className="flex items-center gap-4">

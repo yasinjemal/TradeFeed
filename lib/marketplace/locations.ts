@@ -186,6 +186,18 @@ export function citySlugToDbValue(
   return result?.city.name;
 }
 
+/**
+ * Find a city by its slug alone (without province).
+ * Scans all provinces. Returns the first match.
+ */
+export function getCityBySlug(citySlug: string): { province: SAProvince; city: SACity } | undefined {
+  for (const province of SA_PROVINCES) {
+    const city = province.cities.find((c) => c.slug === citySlug);
+    if (city) return { province, city };
+  }
+  return undefined;
+}
+
 /** Top cities for marketplace "Popular Cities" section — 12 most searched */
 export const POPULAR_CITIES: { province: SAProvince; city: SACity }[] = [
   "gauteng/johannesburg",
