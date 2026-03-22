@@ -11,6 +11,8 @@ import { sendEmail } from "@/lib/email/resend";
 import { newOrderEmailHtml } from "@/lib/email/templates/order-notification";
 import { lowStockAlertEmailHtml } from "@/lib/email/templates/low-stock-alert";
 import { newReviewEmailHtml } from "@/lib/email/templates/review-notification";
+import { sendLowStockAlert } from "@/lib/whatsapp/business-api";
+import { sendTextMessage } from "@/lib/whatsapp/business-api";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://trade-feed.vercel.app";
 
@@ -114,6 +116,27 @@ export async function notifyNewOrder(order: {
       subject: `🛒 New order ${order.orderNumber} — ${shop.name}`,
       html,
     });
+
+    // First-sale WhatsApp celebration message
+    const totalOrders = await db.order.count({
+      where: { shopId: order.shopId, deletedAt: null },
+    });
+    if (totalOrders === 1) {
+      const sellerPhone = await db.shop.findUnique({
+        where: { id: order.shopId },
+        select: { whatsappNumber: true },
+      });
+      if (sellerPhone?.whatsappNumber) {
+        const msg =
+          `🎉 *Amazing! You just received your first TradeFeed order!*\n\n` +
+          `Order ${order.orderNumber} from ${order.buyerName ?? "a buyer"}.\n\n` +
+          `Want to grow even faster? Get 50% off Starter for 3 months:\n` +
+          `${APP_URL}/dashboard/${shop.slug}/billing?coupon=FIRSTSALE50`;
+        await sendTextMessage(sellerPhone.whatsappNumber, msg).catch((err) =>
+          console.error("[notifyNewOrder] First-sale WA failed:", err),
+        );
+      }
+    }
   } catch (error) {
     console.error("[notifyNewOrder] Failed:", error);
   }
@@ -179,6 +202,25 @@ export async function checkAndNotifyLowStock(
       : `⚠️ ${variants.length} variant${variants.length > 1 ? "s" : ""} low on stock — ${shop.name}`;
 
     await sendEmail({ to: email, subject, html });
+
+    // Also send WhatsApp alert to seller
+    const sellerPhone = await db.shop.findUnique({
+      where: { id: shopId },
+      select: { whatsappNumber: true },
+    });
+    if (sellerPhone?.whatsappNumber) {
+      await sendLowStockAlert(
+        sellerPhone.whatsappNumber,
+        shop.name,
+        variants.map((v) => ({
+          productName: v.product.name,
+          currentStock: v.stock,
+        })),
+        `${APP_URL}/dashboard/${shop.slug}/products`,
+      ).catch((err) =>
+        console.error("[checkAndNotifyLowStock] WhatsApp failed:", err),
+      );
+    }
   } catch (error) {
     console.error("[checkAndNotifyLowStock] Failed:", error);
   }

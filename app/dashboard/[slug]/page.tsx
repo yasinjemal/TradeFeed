@@ -25,6 +25,7 @@ import { CatalogQrShare } from "@/components/dashboard/catalog-qr-share";
 import { TrendingProductsWidget } from "@/components/dashboard/trending-products";
 import { ProductUsageMeter } from "@/components/billing/product-usage-meter";
 import { TrialBanner } from "@/components/billing/trial-banner";
+import { FirstSaleCelebration } from "@/components/dashboard/first-sale-celebration";
 
 interface DashboardPageProps {
   params: Promise<{ slug: string }>;
@@ -70,6 +71,11 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
   return (
     <div className="space-y-6">
+      {/* First-sale celebration — shows once when seller gets 1st order */}
+      {orderStats.total === 1 && (
+        <FirstSaleCelebration shopName={shop.name} shopSlug={shop.slug} />
+      )}
+
       {/* ═══════════════════════════════════════════════════ */}
       {/* Hero Welcome — compact on mobile                    */}
       {/* ═══════════════════════════════════════════════════ */}

@@ -156,3 +156,53 @@ Added full COD payment method alongside existing PayFast online payments.
 - Created `app/city/[city]/page.tsx` — flat city redirect route (`/city/johannesburg` → `/marketplace/gauteng/johannesburg`) with `generateStaticParams` and canonical metadata.
 - Added "Browse by Province" footer section on landing page with links to all 9 provinces.
 - Commit: `588a909`
+
+---
+
+## Feature Prompt Phase Tracker
+
+Tracks progress on the 13 growth-plan features from `docs/TradeFeed — Cursor AI Feature Prompts.md`.
+
+### Phase 1: Trust & Friction (30 Days)
+
+| # | Feature | Status | Notes |
+|---|---------|--------|-------|
+| P1 | FAQ Page `/faq` | ✅ Done | `app/(public)/faq/page.tsx` — accordion with JSON-LD FAQ schema |
+| P2 | How It Works `/how-it-works` | ✅ Done | `app/(public)/how-it-works/page.tsx` — 3-step + 5-benefit sections |
+| P3 | WhatsApp Magic Link Login | ✅ Done | `app/(public)/whatsapp-login/` + `MagicLinkToken` model + OTP verify |
+| P4 | Bulk Image Upload | ✅ Done | `components/bulk-import/` — up to 50 images, AI listing, client compression |
+
+### Phase 2: Conversion (60 Days)
+
+| # | Feature | Status | Notes |
+|---|---------|--------|-------|
+| P5 | Inventory Alerts via WhatsApp | ⚠️ Partial | Back-in-stock alerts exist; low-stock seller push alerts not wired |
+| P6 | Buyer Reviews & Ratings | ✅ Done | `components/reviews/` — stars, aggregation, dashboard, submission form |
+| P7 | First Sale Celebration | ⚠️ Partial | Shop-live celebration exists; first-order confetti + upgrade prompt missing |
+
+### Phase 3: Professional (90 Days)
+
+| # | Feature | Status | Notes |
+|---|---------|--------|-------|
+| P8 | Printable QR Code Generator | ⚠️ Partial | QR generation + download exists; A5 print template + PDF export missing |
+| P9 | Custom Domain for Pro Users | ❌ Not built | Vercel API domain attach + DNS verify UI needed |
+
+### Phase 4: Scale (Q3 & Q4)
+
+| # | Feature | Status | Notes |
+|---|---------|--------|-------|
+| P10 | Weekly WhatsApp Sales Report | ❌ Not built | Cron infra exists; weekly digest endpoint + message builder needed |
+| P11 | Multi-Staff Accounts | ❌ Not built | Roles, invite flow, shared dashboard for Pro users |
+
+### Bonus: SEO & Marketing
+
+| # | Feature | Status | Notes |
+|---|---------|--------|-------|
+| P12 | Dynamic Sitemap | ✅ Done | `app/sitemap.ts` — ISR, shops, products, categories, cities |
+| P13 | SEO Meta Tags | ✅ Done | All pages: OG, Twitter, JSON-LD (Product, LocalBusiness, FAQ, etc.) |
+
+### Summary
+- **Done**: 8 / 13 (P1, P2, P3, P4, P6, P12, P13)
+- **Partial**: 3 / 13 (P5, P7, P8)
+- **Not built**: 3 / 13 (P9, P10, P11)
+- **Next up**: P5 low-stock alerts → P7 first-sale celebration → P8 QR templates

@@ -191,6 +191,29 @@ export async function sendTextMessage(
 }
 
 /**
+ * Send low-stock alert to seller via WhatsApp.
+ */
+export async function sendLowStockAlert(
+  sellerPhone: string,
+  shopName: string,
+  variants: { productName: string; currentStock: number }[],
+  dashboardUrl: string,
+): Promise<SendMessageResult> {
+  const lines = variants.slice(0, 5).map(
+    (v) =>
+      `• ${v.productName} — ${v.currentStock === 0 ? "OUT OF STOCK" : `${v.currentStock} left`}`,
+  );
+  const extra = variants.length > 5 ? `\n...and ${variants.length - 5} more` : "";
+
+  const text =
+    `⚠️ *Low Stock Alert — ${shopName}*\n\n` +
+    `${lines.join("\n")}${extra}\n\n` +
+    `Update stock: ${dashboardUrl}`;
+
+  return sendTextMessage(sellerPhone, text);
+}
+
+/**
  * Send buyer a payment link for their order.
  * Combines order confirmation + payment CTA in one message.
  */
