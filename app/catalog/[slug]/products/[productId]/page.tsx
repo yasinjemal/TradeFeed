@@ -273,6 +273,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                     <span className="text-xs text-slate-400 line-through">{formatZAR(minRetailPrice)}</span>
                   </div>
                 )}
+
+                {/* Dual pricing: wholesale vs retail breakdown */}
+                {minRetailPrice && (
+                  <div className="mt-2 flex flex-col gap-1.5 rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">🏭 Wholesale</span>
+                      <span>{formatZAR(minPrice)}{minPrice !== maxPrice ? ` - ${formatZAR(maxPrice)}` : ""}</span>
+                      {product.minWholesaleQty > 1 && <span className="text-slate-400">· min. {product.minWholesaleQty} units</span>}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
                       <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">🛍️ Retail</span>
                       <span>{formatZAR(minRetailPrice)}{maxRetailPrice && minRetailPrice !== maxRetailPrice ? ` - ${formatZAR(maxRetailPrice)}` : ""}</span>
                       <span className="text-slate-400">· from 1 unit</span>
