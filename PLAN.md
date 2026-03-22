@@ -6,33 +6,28 @@
 - Priority is to harden correctness, observability, and deploy safety before more features.
 
 ### Current Health Snapshot
-- Build/testability: healthy build output with one platform warning about middleware deprecation.
-- Repo hygiene: working tree is currently dirty with functional changes in progress.
-- Gaps: no automated CI pipeline and no test suite found.
-- Documentation drift exists between tracker claims and actual code.
+- Build/testability: ✅ healthy — `tsc` and `build` both pass cleanly.
+- CI pipeline: ✅ GitHub Actions workflow exists (`.github/workflows/ci.yml`).
+- Proxy: ✅ migrated to `proxy.ts` (Next.js 16 convention, no deprecation warning).
+- Repo hygiene: clean.
 
 ### P0 (This Week) — Correctness + Platform Compatibility
-1. Fix marketplace analytics identity mismatch.
-- Issue: marketplace click tracking sends `shop.slug` where action/database semantics expect shop ID.
-- Evidence:
-  - [marketplace-product-card.tsx:31](/e:/apps/whatsapp-clone-market-place/components/marketplace/marketplace-product-card.tsx:31)
-  - [marketplace-product-card.tsx:34](/e:/apps/whatsapp-clone-market-place/components/marketplace/marketplace-product-card.tsx:34)
-  - [marketplace.ts:50](/e:/apps/whatsapp-clone-market-place/app/actions/marketplace.ts:50)
-- Decision: add `shop.id` to marketplace query payload and use `shop.id` for analytics events; keep `shop.slug` only for routing.
+1. ✅ Fix marketplace analytics identity mismatch.
+- Was: marketplace click tracking sent `shop.slug` where action/database expected shop ID.
+- Status: **Already fixed** — `marketplace-product-card.tsx` now passes `product.shop.id`.
 
-2. Migrate from deprecated `middleware.ts` to `proxy.ts` (Next 16 guidance).
-- Evidence: Next build warning about middleware convention deprecation.
-- Decision: move logic as-is to `proxy.ts`, keep matcher and behavior unchanged.
+2. ✅ Migrate from deprecated `middleware.ts` to `proxy.ts` (Next 16 guidance).
+- Renamed file, updated header comment. Build passes without deprecation warning.
+- Commit: `591322a`
 
-3. Stabilize auth surface and remove dead legacy path.
-- Issue: tracker says dev auth removed, but file remains.
-- Evidence: [dev.ts](/e:/apps/whatsapp-clone-market-place/lib/auth/dev.ts)
-- Decision: delete unused dev auth helper and update docs accordingly.
+3. ✅ Stabilize auth surface and remove dead legacy path.
+- Status: **Already done** — `lib/auth/dev.ts` no longer exists in repo.
 
 ### P1 (Week 2) — Delivery Safety
-1. Add CI pipeline (GitHub Actions).
+1. ✅ Add CI pipeline (GitHub Actions).
 - Gates: `npm ci`, `npx tsc --noEmit`, `npm run lint`, `npm run build`.
 - Trigger: PR + main branch push.
+- File: `.github/workflows/ci.yml`
 
 2. Add minimal automated tests.
 - Unit:
@@ -43,20 +38,18 @@
   - marketplace filters/sort URL-param behavior.
   - product CRUD server actions with mocked auth boundary.
 
-3. Add error telemetry.
-- Add Sentry (or equivalent) for:
-  - server action errors
-  - webhook failures
-  - middleware/proxy throttling anomalies
+3. ✅ Add error telemetry.
+- Sentry `^10.40.0` installed and configured (`sentry.server.config.ts`, `sentry.edge.config.ts`).
+- Source map upload gated on `SENTRY_AUTH_TOKEN`.
 
 ### P2 (Week 3–4) — Operational Hardening
-1. Replace in-memory rate limiting with shared-store limiter (Upstash Redis).
-- Keep same limits first; switch implementation only.
-- Preserve response headers for observability.
+1. ✅ Replace in-memory rate limiting with shared-store limiter (Upstash Redis).
+- Implemented in `lib/rate-limit-upstash.ts`. Falls back to in-memory when env vars missing (local dev).
+- `proxy.ts` imports from `@/lib/rate-limit-upstash`.
 
-2. Add data safety checks for production.
-- Startup/env validation for required keys.
-- Guardrails around payment webhook idempotency and signature failures.
+2. ✅ Add data safety checks for production.
+- `lib/env.ts` validates all required env vars at import time via Zod.
+- Crashes in production if required vars missing; warns in dev.
 
 3. Refresh project docs to match real state.
 - Reconcile tracker dates/statuses and remove “done” claims that drifted from code.
