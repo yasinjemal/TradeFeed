@@ -8,6 +8,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 import { getBuyerOrders } from "@/lib/db/orders";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TrackingSearch } from "@/components/tracking/tracking-search";
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
 
 export default async function BuyerOrdersPage() {
   const { userId } = await auth();
+  const t = await getTranslations("orders");
 
   // Signed-in buyer: show their order history
   if (userId) {
@@ -44,12 +46,12 @@ export default async function BuyerOrdersPage() {
 
         <main className="max-w-2xl mx-auto px-5 py-10">
           <h1 className="text-2xl font-extrabold tracking-tight mb-1">
-            My Orders
+            {t("myOrders")}
           </h1>
           <p className="text-stone-400 text-sm mb-8">
             {orders.length === 0
-              ? "You haven't placed any orders yet."
-              : `${orders.length} order${orders.length === 1 ? "" : "s"}`}
+              ? t("noOrdersYet")
+              : t("orderCount", { count: orders.length })}
           </p>
 
           {orders.length === 0 ? (
@@ -70,13 +72,13 @@ export default async function BuyerOrdersPage() {
                 </svg>
               </div>
               <p className="text-stone-500 text-sm mb-4">
-                Start shopping on the marketplace to see your orders here.
+                {t("startShopping")}
               </p>
               <Link
                 href="/marketplace"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 transition-colors"
               >
-                Browse Marketplace
+                {t("browseMarketplace")}
               </Link>
             </div>
           ) : (
@@ -86,7 +88,7 @@ export default async function BuyerOrdersPage() {
           {/* Also show search for tracking by order number */}
           <div className="mt-12 pt-8 border-t border-stone-800/30">
             <h2 className="text-sm font-semibold text-stone-400 mb-4">
-              Track a different order
+              {t("trackDifferentOrder")}
             </h2>
             <TrackingSearch />
           </div>
@@ -131,28 +133,26 @@ export default async function BuyerOrdersPage() {
             </svg>
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight mb-2">
-            My Orders
+            {t("myOrders")}
           </h1>
           <p className="text-stone-400 text-sm leading-relaxed mb-6">
-            Sign in to see all your orders in one place, track deliveries, and
-            reorder your favourites.
+            {t("signInPrompt")}
           </p>
           <Link
             href="/sign-in?redirect_url=/orders"
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 transition-colors"
           >
-            Sign In to View Orders
+            {t("signInToView")}
           </Link>
         </div>
 
         {/* Order number search fallback */}
         <div className="rounded-2xl bg-stone-900/40 border border-stone-800/30 p-6">
           <h2 className="text-sm font-semibold text-stone-300 mb-1">
-            Have an order number?
+            {t("haveOrderNumber")}
           </h2>
           <p className="text-xs text-stone-500 mb-4">
-            Track a specific order using the number from your WhatsApp
-            confirmation.
+            {t("trackByNumber")}
           </p>
           <TrackingSearch />
         </div>

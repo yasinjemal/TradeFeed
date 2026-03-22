@@ -6,6 +6,7 @@
 
 import { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { TrackingSearch } from "@/components/tracking/tracking-search";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 
@@ -14,7 +15,8 @@ export const metadata: Metadata = {
   description: "Enter your TradeFeed order number to check the status of your order in real-time.",
 };
 
-export default function TrackingLandingPage() {
+export default async function TrackingLandingPage() {
+  const t = await getTranslations("tracking");
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100">
       {/* Header */}
@@ -37,10 +39,9 @@ export default function TrackingLandingPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Track Your Order</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight mb-2">{t("title")}</h1>
           <p className="text-stone-400 text-sm leading-relaxed">
-            Enter the order number from your WhatsApp confirmation message
-            to check the current status of your order.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -49,14 +50,14 @@ export default function TrackingLandingPage() {
 
         {/* Help */}
         <div className="mt-10 rounded-2xl bg-stone-900/40 border border-stone-800/30 p-5">
-          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Where to find your order number?</h3>
+          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">{t("whereToFind")}</h3>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <div className="w-6 h-6 rounded-lg bg-stone-800 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <span className="text-[10px] font-bold text-stone-400">1</span>
               </div>
               <p className="text-sm text-stone-400">
-                Open the <span className="text-stone-300">WhatsApp message</span> you sent to the seller when you placed your order.
+                {t("step1")}
               </p>
             </div>
             <div className="flex items-start gap-3">
@@ -64,8 +65,7 @@ export default function TrackingLandingPage() {
                 <span className="text-[10px] font-bold text-stone-400">2</span>
               </div>
               <p className="text-sm text-stone-400">
-                Look for the order number at the top of the message. It looks like{" "}
-                <span className="font-mono text-emerald-400/80 text-xs">TF-20260224-A1B2</span>.
+                {t("step2")}
               </p>
             </div>
             <div className="flex items-start gap-3">
@@ -73,7 +73,7 @@ export default function TrackingLandingPage() {
                 <span className="text-[10px] font-bold text-stone-400">3</span>
               </div>
               <p className="text-sm text-stone-400">
-                Paste it above and tap <span className="text-stone-300">Track</span> to see the latest status.
+                {t("step3")}
               </p>
             </div>
           </div>
@@ -81,7 +81,7 @@ export default function TrackingLandingPage() {
 
         {/* Example preview */}
         <div className="mt-6 rounded-xl bg-stone-900/60 border border-stone-800/40 p-4">
-          <p className="text-[10px] font-medium text-stone-600 uppercase tracking-wider mb-2">Example WhatsApp message</p>
+          <p className="text-[10px] font-medium text-stone-600 uppercase tracking-wider mb-2">{t("exampleMessage")}</p>
           <div className="font-mono text-[11px] text-stone-500 leading-relaxed space-y-1">
             <p className="text-emerald-400/70 font-bold">🛍️ New Order #TF-20260224-A1B2</p>
             <p>─────────────────</p>
@@ -100,7 +100,7 @@ export default function TrackingLandingPage() {
             © {new Date().getFullYear()} TradeFeed
           </Link>
           <Link href="/marketplace" className="text-xs text-stone-600 hover:text-stone-400 transition-colors">
-            Browse Marketplace
+            {t("browseMarketplace")}
           </Link>
         </div>
       </footer>

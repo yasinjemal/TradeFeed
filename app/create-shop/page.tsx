@@ -9,6 +9,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { CreateShopForm } from "@/components/shop/create-shop-form";
@@ -39,6 +40,7 @@ export default async function CreateShopPage() {
       redirect(`/dashboard/${existingSlug}`);
     }
   }
+  const t = await getTranslations("onboarding");
   return (
     <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col lg:flex-row">
       {/* ── Left Panel — Branding & Trust ──────────────── */}
@@ -59,28 +61,28 @@ export default async function CreateShopPage() {
         <div className="relative z-10 my-12 lg:my-0">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-6">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-            Takes less than 2 minutes
+            {t("badge")}
           </div>
 
           <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.15]">
-            Launch your <br className="hidden sm:block" />
+            {t("title")} <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
-              digital catalog
+              {t("titleHighlight")}
             </span>{" "}
-            today
+            {t("titleEnd")}
           </h1>
 
           <p className="mt-4 text-stone-400 text-base lg:text-lg max-w-md leading-relaxed">
-            Give your business a professional storefront link. Share it on WhatsApp and let buyers browse, select options, and order — all structured.
+            {t("subtitle")}
           </p>
 
           {/* Feature checklist */}
           <div className="mt-8 space-y-3.5">
             {[
-              { icon: "🔗", text: "Get a shareable catalog link instantly" },
-              { icon: "📱", text: "Buyers order via WhatsApp — no app needed" },
-              { icon: "📦", text: "Manage products, variants, and stock" },
-              { icon: "⚡", text: "Free plan — upgrade anytime" },
+              { icon: "🔗", text: t("feature1") },
+              { icon: "📱", text: t("feature2") },
+              { icon: "📦", text: t("feature3") },
+              { icon: "⚡", text: t("feature4") },
             ].map((item) => (
               <div key={item.text} className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-stone-800/80 border border-stone-700/50 flex items-center justify-center text-sm">
@@ -117,7 +119,7 @@ export default async function CreateShopPage() {
                   <svg key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                 ))}
               </div>
-              <p className="text-xs text-stone-500 mt-0.5">Trusted by 200+ SA sellers</p>
+              <p className="text-xs text-stone-500 mt-0.5">{t("trustedBy")}</p>
             </div>
           </div>
 

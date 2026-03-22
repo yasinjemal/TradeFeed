@@ -8,6 +8,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 
 export const metadata: Metadata = {
@@ -22,40 +23,18 @@ export const metadata: Metadata = {
 const SUPPORT_EMAIL = "support@tradefeed.co.za";
 const SUPPORT_WHATSAPP = "27835034502";
 
-const HELP_TOPICS = [
-  {
-    icon: "🛍️",
-    q: "How do I create a shop?",
-    a: 'Click "Start Selling" on the homepage, sign up with your email or Google account, and follow the setup wizard. You\'ll have your catalog link in under 2 minutes.',
-  },
-  {
-    icon: "📸",
-    q: "How does AI listing work?",
-    a: "Upload a product photo and our AI automatically generates the title, description, category, and suggested price. You can edit anything before publishing. Free plan includes 5 AI listings per month.",
-  },
-  {
-    icon: "💳",
-    q: "How do payments work?",
-    a: "Subscription payments are processed securely through PayFast — South Africa's most trusted payment gateway. Buyers pay sellers directly via WhatsApp/EFT — TradeFeed does not handle buyer payments.",
-  },
-  {
-    icon: "📦",
-    q: "How do orders work?",
-    a: "When a buyer taps \"Order on WhatsApp\", a pre-filled message with their cart is sent to your WhatsApp. You confirm the order, arrange payment, and ship. Buyers can track their order status on TradeFeed.",
-  },
-  {
-    icon: "🔒",
-    q: "Is my WhatsApp number safe?",
-    a: "Yes. Your number is only used to receive orders via WhatsApp's official API. We never share your number with third parties. See our Privacy Policy for full details.",
-  },
-  {
-    icon: "❌",
-    q: "How do I cancel my Pro subscription?",
-    a: "Go to Dashboard → Billing → Cancel Plan. Your Pro features will remain active until the end of your billing period. You can always downgrade to the free plan.",
-  },
-];
+export default async function ContactPage() {
+  const t = await getTranslations("contact");
 
-export default function ContactPage() {
+  const HELP_TOPICS = [
+    { icon: "🛍️", q: t("faq.createShop"), a: t("faq.createShopAnswer") },
+    { icon: "📸", q: t("faq.aiListing"), a: t("faq.aiListingAnswer") },
+    { icon: "💳", q: t("faq.payments"), a: t("faq.paymentsAnswer") },
+    { icon: "📦", q: t("faq.orders"), a: t("faq.ordersAnswer") },
+    { icon: "🔒", q: t("faq.whatsappSafe"), a: t("faq.whatsappSafeAnswer") },
+    { icon: "❌", q: t("faq.cancelPro"), a: t("faq.cancelProAnswer") },
+  ];
+
   return (
     <main className="min-h-screen bg-white">
       {/* ── Header ───────────────────────────────────────── */}
@@ -69,18 +48,18 @@ export default function ContactPage() {
               href="/marketplace"
               className="text-sm text-stone-500 hover:text-emerald-600 transition-colors"
             >
-              Browse Marketplace →
-            </Link>
+            {t("browseMarketplace")}
+          </Link>
           </div>
           <h1 className="text-3xl font-bold text-stone-900">
-            Contact &amp; Help
+            {t("title")}
           </h1>
           <p className="text-stone-500 text-sm mt-2">
-            Get help with your shop, orders, or account.
+            {t("subtitle")}
           </p>
           <p className="text-xs text-stone-500 mt-1 flex items-center gap-1.5">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
-            We aim to respond within 24 hours on business days (Mon–Fri). WhatsApp often gets a same-day reply.
+            {t("responseTime")}
           </p>
         </div>
       </div>
@@ -110,14 +89,13 @@ export default function ContactPage() {
             </div>
             <div>
               <h2 className="text-base font-bold text-stone-900">
-                Email Support
+                {t("emailSupport")}
               </h2>
               <p className="text-sm text-emerald-600 font-medium mt-0.5">
                 {SUPPORT_EMAIL}
               </p>
               <p className="text-xs text-stone-500 mt-1">
-                Best for account issues, billing questions, and detailed
-                inquiries. We respond within 24 hours.
+                {t("emailDesc")}
               </p>
             </div>
           </a>
@@ -140,14 +118,13 @@ export default function ContactPage() {
             </div>
             <div>
               <h2 className="text-base font-bold text-stone-900">
-                WhatsApp Support
+                {t("whatsappSupport")}
               </h2>
               <p className="text-sm text-emerald-600 font-medium mt-0.5">
-                Chat with us
+                {t("whatsappChat")}
               </p>
               <p className="text-xs text-stone-500 mt-1">
-                Quick questions? Chat with our team on WhatsApp. Available
-                Mon–Fri, 8am–5pm SAST.
+                {t("whatsappDesc")}
               </p>
             </div>
           </a>
@@ -156,10 +133,10 @@ export default function ContactPage() {
         {/* ── Help Topics / FAQ ──────────────────────────── */}
         <div>
           <h2 className="text-xl font-bold text-stone-900 mb-1">
-            Common Questions
+            {t("commonQuestions")}
           </h2>
           <p className="text-sm text-stone-500 mb-6">
-            Quick answers to the most frequently asked questions.
+            {t("commonQuestionsDesc")}
           </p>
 
           <div className="space-y-3">
@@ -196,11 +173,10 @@ export default function ContactPage() {
         {/* ── Still need help? ───────────────────────────── */}
         <div className="mt-12 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-6 text-center">
           <h3 className="text-base font-bold text-stone-900">
-            Still need help?
+            {t("stillNeedHelp")}
           </h3>
           <p className="text-sm text-stone-600 mt-1 mb-4">
-            Can&apos;t find what you&apos;re looking for? Our team is happy to
-            help.
+            {t("stillNeedHelpDesc")}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
@@ -220,7 +196,7 @@ export default function ContactPage() {
                   d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
                 />
               </svg>
-              Email Us
+              {t("emailUs")}
             </a>
             <a
               href={`https://wa.me/${SUPPORT_WHATSAPP}`}
@@ -228,7 +204,7 @@ export default function ContactPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-stone-700 ring-1 ring-stone-200 hover:bg-stone-50 transition-all"
             >
-              💬 WhatsApp Us
+              💬 {t("whatsappUs")}
             </a>
           </div>
         </div>

@@ -260,6 +260,16 @@
     "referrals": "Referrals"
   },
   "orders": {
+    "myOrders": "My Orders",
+    "noOrdersYet": "You haven't placed any orders yet.",
+    "orderCount": "{count} {count, plural, one {order} other {orders}}",
+    "startShopping": "Start shopping on the marketplace to see your orders here.",
+    "browseMarketplace": "Browse Marketplace",
+    "trackDifferentOrder": "Track a different order",
+    "signInPrompt": "Sign in to see all your orders in one place, track deliveries, and reorder your favourites.",
+    "signInToView": "Sign In to View Orders",
+    "haveOrderNumber": "Have an order number?",
+    "trackByNumber": "Track a specific order using the number from your WhatsApp confirmation.",
     "orderPlaced": "Order placed!",
     "trackOrder": "Track Order",
     "status": {
@@ -269,6 +279,59 @@
       "delivered": "Delivered",
       "cancelled": "Cancelled"
     }
+  },
+  "contact": {
+    "title": "Contact & Help",
+    "subtitle": "Get help with your shop, orders, or account.",
+    "responseTime": "We aim to respond within 24 hours on business days (Mon–Fri). WhatsApp often gets a same-day reply.",
+    "emailSupport": "Email Support",
+    "emailDesc": "Best for account issues, billing questions, and detailed inquiries. We respond within 24 hours.",
+    "whatsappSupport": "WhatsApp Support",
+    "whatsappChat": "Chat with us",
+    "whatsappDesc": "Quick questions? Chat with our team on WhatsApp. Available Mon–Fri, 8am–5pm SAST.",
+    "commonQuestions": "Common Questions",
+    "commonQuestionsDesc": "Quick answers to the most frequently asked questions.",
+    "stillNeedHelp": "Still need help?",
+    "stillNeedHelpDesc": "Can't find what you're looking for? Our team is happy to help.",
+    "emailUs": "Email Us",
+    "whatsappUs": "WhatsApp Us",
+    "browseMarketplace": "Browse Marketplace →",
+    "faq": {
+      "createShop": "How do I create a shop?",
+      "createShopAnswer": "Click \"Start Selling\" on the homepage, sign up with your email or Google account, and follow the setup wizard. You'll have your catalog link in under 2 minutes.",
+      "aiListing": "How does AI listing work?",
+      "aiListingAnswer": "Upload a product photo and our AI automatically generates the title, description, category, and suggested price. You can edit anything before publishing. Free plan includes 5 AI listings per month.",
+      "payments": "How do payments work?",
+      "paymentsAnswer": "Subscription payments are processed securely through PayFast — South Africa's most trusted payment gateway. Buyers pay sellers directly via WhatsApp/EFT — TradeFeed does not handle buyer payments.",
+      "orders": "How do orders work?",
+      "ordersAnswer": "When a buyer taps \"Order on WhatsApp\", a pre-filled message with their cart is sent to your WhatsApp. You confirm the order, arrange payment, and ship. Buyers can track their order status on TradeFeed.",
+      "whatsappSafe": "Is my WhatsApp number safe?",
+      "whatsappSafeAnswer": "Yes. Your number is only used to receive orders via WhatsApp's official API. We never share your number with third parties. See our Privacy Policy for full details.",
+      "cancelPro": "How do I cancel my Pro subscription?",
+      "cancelProAnswer": "Go to Dashboard → Billing → Cancel Plan. Your Pro features will remain active until the end of your billing period. You can always downgrade to the free plan."
+    }
+  },
+  "onboarding": {
+    "badge": "Takes less than 2 minutes",
+    "title": "Launch your",
+    "titleHighlight": "digital catalog",
+    "titleEnd": "today",
+    "subtitle": "Give your business a professional storefront link. Share it on WhatsApp and let buyers browse, select options, and order — all structured.",
+    "feature1": "Get a shareable catalog link instantly",
+    "feature2": "Buyers order via WhatsApp — no app needed",
+    "feature3": "Manage products, variants, and stock",
+    "feature4": "Free plan — upgrade anytime",
+    "trustedBy": "Trusted by 200+ SA sellers"
+  },
+  "tracking": {
+    "title": "Track Your Order",
+    "subtitle": "Enter the order number from your WhatsApp confirmation message to check the current status of your order.",
+    "whereToFind": "Where to find your order number?",
+    "step1": "Open the WhatsApp message you sent to the seller when you placed your order.",
+    "step2": "Look for the order number at the top of the message.",
+    "step3": "Paste it above and tap Track to see the latest status.",
+    "exampleMessage": "Example WhatsApp message",
+    "browseMarketplace": "Browse Marketplace"
   },
   "errors": {
     "somethingWrong": "Something went wrong",
