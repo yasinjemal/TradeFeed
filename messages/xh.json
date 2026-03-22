@@ -195,7 +195,12 @@
     "noResultsHint": "Zama ukukhangela okwahlukileyo okanye ulungise izihluzi zakho.",
     "sponsored": "Okukhushulweyo",
     "verified": "Umthengisi Oqinisekisiweyo",
-    "featured": "Okukhethekileyo"
+    "featured": "Okukhethekileyo",
+    "browseByProvince": "Bhrawuza Abathengisi Ngephondo",
+    "suppliersIn": "Abathengisi e-{name} →",
+    "popularCities": "Izixeko Ezidumileyo",
+    "browseByCategory": "Bhrawuza Ngoluhlu",
+    "whatsappImportCta": "Sele uthengisa ku-WhatsApp? <link>Ngenisa ikhathaloghu yakho ye-WhatsApp</link> kwaye ufumane ivenkile yakho ye-intanethi ngomzuzwana ongu-30."
   },
   "catalog": {
     "addToCart": "Yongeza Enqwelweni",

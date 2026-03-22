@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import {
   getMarketplaceProducts,
   getPromotedProducts,
@@ -115,6 +116,7 @@ export default async function MarketplacePage({
   searchParams,
 }: MarketplacePageProps) {
   const params = await searchParams;
+  const t = await getTranslations("marketplace");
 
   // Build filters from URL params
   const filters = {
@@ -194,7 +196,7 @@ export default async function MarketplacePage({
           {/* Browse by Province */}
           <div>
             <h2 className="text-lg font-bold text-slate-800 mb-4">
-              Browse Suppliers by Province
+              {t("browseByProvince")}
             </h2>
             <ul className="grid grid-cols-1 gap-y-2">
               {SA_PROVINCES.map((p) => (
@@ -203,7 +205,7 @@ export default async function MarketplacePage({
                     href={`/marketplace/${p.slug}`}
                     className="text-sm text-slate-500 hover:text-blue-600 transition-colors"
                   >
-                    Suppliers in {p.name} →
+                    {t("suppliersIn", { name: p.name })}
                   </Link>
                 </li>
               ))}
@@ -213,7 +215,7 @@ export default async function MarketplacePage({
           {/* Popular Cities */}
           <div>
             <h2 className="text-lg font-bold text-slate-800 mb-4">
-              Popular Cities
+              {t("popularCities")}
             </h2>
             <ul className="grid grid-cols-1 gap-y-2">
               {POPULAR_CITIES.map(({ province, city }) => (
@@ -232,7 +234,7 @@ export default async function MarketplacePage({
           {/* Browse by Category */}
           <div>
             <h2 className="text-lg font-bold text-slate-800 mb-4">
-              Browse by Category
+              {t("browseByCategory")}
             </h2>
             <ul className="grid grid-cols-1 gap-y-2">
               {categories
@@ -255,14 +257,16 @@ export default async function MarketplacePage({
         {/* WhatsApp Import CTA */}
         <div className="mt-10 pt-8 border-t border-slate-200 text-center">
           <p className="text-sm text-slate-500">
-            Already selling on WhatsApp?{" "}
-            <Link
-              href="/import-whatsapp-catalogue"
-              className="text-blue-600 hover:text-blue-500 underline underline-offset-2"
-            >
-              Import your WhatsApp catalogue
-            </Link>{" "}
-            and get your own online shop in 30 seconds.
+            {t.rich("whatsappImportCta", {
+              link: (chunks) => (
+                <Link
+                  href="/import-whatsapp-catalogue"
+                  className="text-blue-600 hover:text-blue-500 underline underline-offset-2"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         </div>
       </section>

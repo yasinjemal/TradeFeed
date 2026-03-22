@@ -195,7 +195,12 @@
     "noResultsHint": "Zama ukusesha okwehlukile noma ulungise izihluzi zakho.",
     "sponsored": "Okukhushulwe",
     "verified": "Umdayisi Oqinisekisiwe",
-    "featured": "Okukhethekile"
+    "featured": "Okukhethekile",
+    "browseByProvince": "Bhrawuza Abahlinzeki Ngesifundazwe",
+    "suppliersIn": "Abahlinzeki e-{name} →",
+    "popularCities": "Amadolobha Adumile",
+    "browseByCategory": "Bhrawuza Ngohlobo",
+    "whatsappImportCta": "Usudayisa ku-WhatsApp? <link>Ngenisa ikhathalogu yakho ye-WhatsApp</link> uthole isitolo sakho ku-inthanethi ngomzuzwana ongu-30."
   },
   "catalog": {
     "addToCart": "Engeza Ekalini",

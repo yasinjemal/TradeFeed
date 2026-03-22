@@ -195,7 +195,12 @@
     "noResultsHint": "Probeer 'n ander soektog of pas jou filters aan.",
     "sponsored": "Geborg",
     "verified": "Geverifieerde Verkoper",
-    "featured": "Uitgelig"
+    "featured": "Uitgelig",
+    "browseByProvince": "Blaai Verskaffers per Provinsie",
+    "suppliersIn": "Verskaffers in {name} →",
+    "popularCities": "Gewilde Stede",
+    "browseByCategory": "Blaai per Kategorie",
+    "whatsappImportCta": "Verkoop jy reeds op WhatsApp? <link>Voer jou WhatsApp-katalogus in</link> en kry jou eie aanlyn winkel binne 30 sekondes."
   },
   "catalog": {
     "addToCart": "Voeg by Mandjie",

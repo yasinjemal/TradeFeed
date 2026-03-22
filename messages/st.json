@@ -195,7 +195,12 @@
     "noResultsHint": "Leka ho batla ho fapaneng kapa o fetole difilthara tsa hao.",
     "sponsored": "E Kgodisitsweng",
     "verified": "Morekisi O Netefaditsweng",
-    "featured": "E Kgethilweng"
+    "featured": "E Kgethilweng",
+    "browseByProvince": "Sheba Barekisi ka Provense",
+    "suppliersIn": "Barekisi ba {name} →",
+    "popularCities": "Metse e Tsebahalang",
+    "browseByCategory": "Sheba ka Sehlopha",
+    "whatsappImportCta": "O se o rekisa ho WhatsApp? <link>Kenya khathaloko ya hao ya WhatsApp</link> mme o fumane lebenkele la hao la inthanete ka metsotswana e 30."
   },
   "catalog": {
     "addToCart": "Kenya Karakeng",

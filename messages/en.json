@@ -195,7 +195,12 @@
     "noResultsHint": "Try a different search or adjust your filters.",
     "sponsored": "Sponsored",
     "verified": "Verified Seller",
-    "featured": "Featured"
+    "featured": "Featured",
+    "browseByProvince": "Browse Suppliers by Province",
+    "suppliersIn": "Suppliers in {name} →",
+    "popularCities": "Popular Cities",
+    "browseByCategory": "Browse by Category",
+    "whatsappImportCta": "Already selling on WhatsApp? <link>Import your WhatsApp catalogue</link> and get your own online shop in 30 seconds."
   },
   "catalog": {
     "addToCart": "Add to Cart",
