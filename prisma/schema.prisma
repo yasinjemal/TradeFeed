@@ -1256,3 +1256,23 @@ model OnboardingEvent {
   @@index([userId, step])
   @@index([createdAt])
 }
+
+// ============================================================
+// MAGIC LINK: WhatsApp passwordless login tokens
+// Generated when a user requests WhatsApp login. Token is sent
+// via WhatsApp and consumed once to create a Clerk session.
+// Short-lived (5 min), single-use, rate-limited by phone number.
+// ============================================================
+model MagicLink {
+  id          String    @id @default(cuid())
+  token       String    @unique
+  phoneNumber String                               // Normalized E.164 format (+27XXXXXXXXX)
+  expiresAt   DateTime                             // Token expiry (5 minutes after creation)
+  usedAt      DateTime?                            // Set when token is consumed (prevents replay)
+  userId      String?                              // Clerk user ID (set after verification)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([phoneNumber, createdAt])                // Rate-limiting queries
+  @@index([token])
+}

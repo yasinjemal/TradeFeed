@@ -94,6 +94,26 @@ export const ourFileRouter = {
     }),
 
   /**
+   * Bulk product image uploader.
+   * - Up to 50 images per batch (for bulk import flow)
+   * - Max 4MB each (compressed client-side)
+   * - JPEG/PNG/WebP only
+   */
+  bulkProductImageUploader: f({
+    image: { maxFileSize: "4MB", maxFileCount: 50 },
+  })
+    .middleware(async () => {
+      const { userId } = await auth();
+      if (!userId) throw new Error("Unauthorized");
+      return { userId };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      const fileUrl = file.ufsUrl ?? file.url;
+      console.log("[UploadThing] Bulk upload complete for user:", metadata.userId);
+      return { url: fileUrl, key: file.key, name: file.name };
+    }),
+
+  /**
    * Shop banner image uploader.
    * - 1 image only
    * - Max 4MB, JPEG/PNG/WebP

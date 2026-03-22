@@ -1,0 +1,63 @@
+# TradeFeed — Cursor AI Project Rules
+
+## Project Overview
+TradeFeed (www.tradefeed.co.za) is a South African e-commerce platform that lets sellers create professional product catalogs and receive orders via WhatsApp. Hosted on Vercel. Solo developer project.
+
+## Tech Context
+- Frontend: Next.js (React) with TypeScript
+- Hosting: Vercel
+- Payments: PayFast (South African gateway)
+- Target Market: South African wholesalers, retailers, and informal sellers
+- Currency: South African Rand (ZAR / R)
+- Primary User Flow: Seller creates catalog → shares link → buyer browses → orders via WhatsApp
+
+## Design System
+- Theme: Dark mode primary (#1A1A1A background, #F5F5F5 text)
+- Brand Color: Emerald Green (#25D366) — used for CTAs, accents, highlights
+- Secondary Accent: Purple (#8A2BE2) for highlights
+- Font: System sans-serif (consider migrating to Inter or Poppins)
+- Mobile-first responsive design — most SA users are on mobile
+- Minimize data usage — optimize images, lazy load, compress assets
+
+## Code Standards
+- Write clean, modular TypeScript with proper types
+- Use server components where possible for performance
+- Keep bundle size minimal — SA users have expensive data
+- All user-facing text must be simple, clear English (many users are not native English speakers)
+- All prices in ZAR (R) format, e.g., R199.00
+- WhatsApp integration is core — always use wa.me links with pre-filled messages
+- POPIA compliant — always handle user data with consent, never share without permission
+
+## Current Pricing Tiers
+- Free: R0/month — up to 20 products, 10 AI generations, basic analytics
+- Starter: R99/month — unlimited products, 25 AI generations, promoted listings, buyer reviews
+- Pro: R299/month — unlimited everything, priority support, team accounts, advanced analytics
+
+## Key Features
+- AI-powered product listing (photo → listing)
+- WhatsApp checkout (pre-filled order messages)
+- Public marketplace for product discovery
+- Seller analytics and revenue dashboard
+- Order tracking
+- Product variants (size, color, etc.)
+- CSV bulk import
+- CDN image hosting
+- Verified seller badges
+- Buyer reviews and ratings
+
+## Growth Priorities (March–December 2026)
+Goal: 10,000 users, 1,000 paid users by end of 2026.
+Always prioritize features that:
+1. Reduce onboarding friction
+2. Drive free-to-paid conversion
+3. Create viral/sharing loops
+4. Make the tool "sticky" (hard to leave)
+
+## When Writing Code
+- Always consider mobile performance first
+- Minimize API calls and database queries
+- Use optimistic UI updates where possible
+- Handle WhatsApp deep links correctly for both iOS and Android
+- Always include loading states and error handling
+- Write accessible HTML (aria-labels, proper contrast, semantic elements)
+- Keep components reusable and composable

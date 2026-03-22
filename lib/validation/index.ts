@@ -38,3 +38,10 @@ export {
   variantUpdateSchema,
   type VariantUpdateInput,
 } from "./product";
+
+// Auth schemas
+export {
+  whatsappLoginSchema,
+  normalizeToE164,
+  type WhatsappLoginInput,
+} from "./auth";

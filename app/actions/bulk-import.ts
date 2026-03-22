@@ -2,6 +2,7 @@
 // Server Actions — Bulk Product Import
 // ============================================================
 // Handles CSV parsing, validation, and batch product creation.
+// Supports optional image URLs with AI-driven product analysis.
 // Respects product limits, handles duplicates, creates variants.
 // ============================================================
 
@@ -13,6 +14,8 @@ import { db } from "@/lib/db";
 import { parseCsv, autoMapColumns, validateColumnMapping, type CsvRow } from "@/lib/csv/parser";
 import { createProduct } from "@/lib/db/products";
 import { syncProductPriceRange } from "@/lib/db/variants";
+import { analyzeProductImages, type AiProductAnalysis } from "@/lib/ai/analyze-product-image";
+import { checkAiAccess, trackAiGeneration } from "@/lib/db/ai";
 
 type ImportResult = {
   success: boolean;
@@ -20,8 +23,14 @@ type ImportResult = {
   totalRows?: number;
   imported?: number;
   skipped?: number;
+  aiAnalyzed?: number;
   errors?: { row: number; message: string }[];
 };
+
+export interface BulkImageItem {
+  url: string;
+  name: string;
+}
 
 interface ParsedProductRow {
   name: string;
@@ -45,7 +54,6 @@ function validateRow(
   mapping: Record<string, string>,
   rowIndex: number,
 ): { data: ParsedProductRow | null; error: string | null } {
-  // Reverse mapping: column name → CSV header
   const reverseMap: Record<string, string> = {};
   for (const [csvHeader, colName] of Object.entries(mapping)) {
     reverseMap[colName] = csvHeader;
@@ -108,12 +116,44 @@ function validateRow(
 }
 
 /**
- * Bulk import products from CSV content.
+ * Resolve or create a shop-level category, returning its ID.
+ */
+async function resolveCategory(
+  categoryName: string,
+  shopId: string,
+  categoryMap: Map<string, string>,
+): Promise<string> {
+  const existing = categoryMap.get(categoryName.toLowerCase());
+  if (existing) return existing;
+
+  const slug = categoryName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const newCat = await db.category.create({
+    data: {
+      name: categoryName,
+      slug: slug || `cat-${Date.now()}`,
+      shopId,
+    },
+  });
+  categoryMap.set(categoryName.toLowerCase(), newCat.id);
+  return newCat.id;
+}
+
+/**
+ * Bulk import products from CSV content, optionally enriched with
+ * AI analysis of uploaded images.
+ *
+ * Images are matched to CSV product groups in order: image 1 → first
+ * unique product, image 2 → second, etc. Surplus images (no CSV match)
+ * create standalone AI-generated products.
  */
 export async function bulkImportAction(
   shopSlug: string,
   csvContent: string,
   columnMapping?: Record<string, string>,
+  images?: BulkImageItem[],
 ): Promise<ImportResult> {
   try {
     // 1. Auth check
@@ -124,52 +164,35 @@ export async function bulkImportAction(
 
     // 2. Parse CSV
     const { headers, rows, errors: parseErrors } = parseCsv(csvContent);
-    if (rows.length === 0) {
+    const hasCsv = rows.length > 0;
+    const hasImages = images && images.length > 0;
+
+    if (!hasCsv && !hasImages) {
       return {
         success: false,
-        error: parseErrors.length > 0
-          ? parseErrors[0]!.message
-          : "No data rows found in CSV.",
+        error: "Please provide a CSV file and/or product images.",
       };
     }
 
-    // 3. Map columns
-    const mapping = columnMapping ?? autoMapColumns(headers).mapping;
-    const { valid, missing } = validateColumnMapping(mapping);
-    if (!valid) {
-      return {
-        success: false,
-        error: `Missing required columns: ${missing.join(", ")}. Found: ${headers.join(", ")}`,
-      };
-    }
-
-    // 4. Check product limit
-    const { checkProductLimit } = await import("@/lib/db/subscriptions");
-    const limit = await checkProductLimit(access.shopId);
-
-    // Count unique product names in CSV
-    const uniqueNames = new Set(rows.map((r) => {
-      const reverseMap: Record<string, string> = {};
-      for (const [csvH, colN] of Object.entries(mapping)) {
-        reverseMap[colN] = csvH;
+    // 3. Map columns (only if CSV data present)
+    let mapping: Record<string, string> = {};
+    if (hasCsv) {
+      mapping = columnMapping ?? autoMapColumns(headers).mapping;
+      const { valid, missing } = validateColumnMapping(mapping);
+      if (!valid) {
+        return {
+          success: false,
+          error: `Missing required columns: ${missing.join(", ")}. Found: ${headers.join(", ")}`,
+        };
       }
-      const nameHeader = reverseMap["name"];
-      return nameHeader ? (r[nameHeader] ?? "").trim().toLowerCase() : "";
-    }));
-
-    if (!limit.allowed && limit.current + uniqueNames.size > limit.limit) {
-      return {
-        success: false,
-        error: `Import would exceed product limit (${limit.current}/${limit.limit}). CSV contains ${uniqueNames.size} unique products. Upgrade to Pro for unlimited products.`,
-      };
     }
 
-    // 5. Validate all rows first
+    // 4. Validate CSV rows
     const validatedRows: ParsedProductRow[] = [];
     const rowErrors: { row: number; message: string }[] = [...parseErrors];
 
     for (let i = 0; i < rows.length; i++) {
-      const { data, error } = validateRow(rows[i]!, mapping, i + 2); // +2 for header + 1-indexed
+      const { data, error } = validateRow(rows[i]!, mapping, i + 2);
       if (error) {
         rowErrors.push({ row: i + 2, message: error });
       } else if (data) {
@@ -177,18 +200,63 @@ export async function bulkImportAction(
       }
     }
 
-    if (validatedRows.length === 0) {
+    // Group CSV rows by product name
+    const productGroups: Map<string, ParsedProductRow[]> = new Map();
+    for (const row of validatedRows) {
+      const key = row.name.toLowerCase();
+      const existing = productGroups.get(key) ?? [];
+      existing.push(row);
+      productGroups.set(key, existing);
+    }
+    const productGroupKeys = [...productGroups.keys()];
+
+    // 5. Check product limit
+    const { checkProductLimit } = await import("@/lib/db/subscriptions");
+    const limit = await checkProductLimit(access.shopId);
+    const csvProductCount = productGroups.size;
+    const extraImageCount = hasImages
+      ? Math.max(0, images.length - csvProductCount)
+      : 0;
+    const totalNewProducts = csvProductCount + extraImageCount;
+
+    if (!limit.allowed && limit.current + totalNewProducts > limit.limit) {
       return {
         success: false,
-        error: "No valid rows to import.",
-        errors: rowErrors,
-        totalRows: rows.length,
-        imported: 0,
-        skipped: rows.length,
+        error: `Import would exceed product limit (${limit.current}/${limit.limit}). This import would add ${totalNewProducts} products. Upgrade to Pro for unlimited products.`,
       };
     }
 
-    // 6. Get existing categories for this shop
+    // 6. AI analysis of uploaded images
+    let aiResults: (AiProductAnalysis | null)[] = [];
+    let aiAnalyzedCount = 0;
+
+    if (hasImages) {
+      const aiAccess = await checkAiAccess(access.shopId);
+      const creditsAvailable = aiAccess.hasUnlimitedAi
+        ? images.length
+        : Math.min(images.length, aiAccess.creditsRemaining);
+
+      if (creditsAvailable > 0) {
+        const imagesToAnalyze = images.slice(0, creditsAvailable);
+        aiResults = await analyzeProductImages(
+          imagesToAnalyze.map((img) => ({ url: img.url, hint: img.name })),
+        );
+        aiAnalyzedCount = aiResults.filter(Boolean).length;
+
+        for (let i = 0; i < aiAnalyzedCount; i++) {
+          await trackAiGeneration(access.shopId);
+        }
+      }
+
+      if (creditsAvailable < images.length) {
+        rowErrors.push({
+          row: 0,
+          message: `AI credits exhausted — ${images.length - creditsAvailable} image(s) were not analyzed. Upgrade your plan for more AI generations.`,
+        });
+      }
+    }
+
+    // 7. Get existing categories
     const existingCategories = await db.category.findMany({
       where: { shopId: access.shopId },
       select: { id: true, name: true, slug: true },
@@ -197,62 +265,55 @@ export async function bulkImportAction(
       existingCategories.map((c) => [c.name.toLowerCase(), c.id]),
     );
 
-    // 7. Group rows by product name (rows with same name = variants of same product)
-    const productGroups = new Map<string, ParsedProductRow[]>();
-    for (const row of validatedRows) {
-      const key = row.name.toLowerCase();
-      const existing = productGroups.get(key) ?? [];
-      existing.push(row);
-      productGroups.set(key, existing);
-    }
-
-    // 8. Create products + variants in batch
+    // 8. Create products
     let imported = 0;
     let skipped = 0;
 
+    // 8a. CSV-based products (enriched with AI data from matching image)
+    let groupIndex = 0;
     for (const [, groupRows] of productGroups) {
       const first = groupRows[0]!;
+      const matchingAi = groupIndex < aiResults.length ? aiResults[groupIndex] : null;
+      const matchingImage = hasImages && groupIndex < images.length ? images[groupIndex] : null;
 
       try {
-        // Resolve or create category
+        // AI fills gaps: use CSV data first, AI data as fallback
+        const description = first.description || matchingAi?.description || undefined;
+        const category = first.category || matchingAi?.category || "";
+
         let categoryId: string | null = null;
-        if (first.category) {
-          categoryId = categoryMap.get(first.category.toLowerCase()) ?? null;
-          if (!categoryId) {
-            // Create category on the fly
-            const slug = first.category
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-")
-              .replace(/(^-|-$)/g, "");
-            const newCat = await db.category.create({
-              data: {
-                name: first.category,
-                slug: slug || `cat-${Date.now()}`,
-                shopId: access.shopId,
-              },
-            });
-            categoryId = newCat.id;
-            categoryMap.set(first.category.toLowerCase(), categoryId);
-          }
+        if (category) {
+          categoryId = await resolveCategory(category, access.shopId, categoryMap);
         }
 
-        // Create the product
         const product = await createProduct(
           {
             name: first.name,
-            description: first.description || undefined,
+            description,
             isActive: first.isActive,
             categoryId: categoryId ?? undefined,
             option1Label: first.option1Label,
             option2Label: first.option2Label,
             minWholesaleQty: 1,
             wholesaleOnly: false,
-            aiGenerated: false,
+            aiGenerated: !!matchingAi,
           },
           access.shopId,
         );
 
-        // Create variants for all rows in this group
+        // Attach image if matched
+        if (matchingImage) {
+          await db.productImage.create({
+            data: {
+              productId: product.id,
+              url: matchingImage.url,
+              altText: first.name,
+              position: 0,
+            },
+          });
+        }
+
+        // Create variants
         for (const row of groupRows) {
           try {
             await db.productVariant.create({
@@ -267,8 +328,7 @@ export async function bulkImportAction(
               },
             });
             imported++;
-          } catch (variantErr) {
-            // Likely duplicate size+color — skip
+          } catch {
             skipped++;
             rowErrors.push({
               row: 0,
@@ -277,7 +337,6 @@ export async function bulkImportAction(
           }
         }
 
-        // Sync denormalized price range after creating all variants
         await syncProductPriceRange(product.id);
       } catch (productErr) {
         skipped += groupRows.length;
@@ -286,15 +345,101 @@ export async function bulkImportAction(
           message: `Failed to create product "${first.name}": ${productErr instanceof Error ? productErr.message : "Unknown error"}`,
         });
       }
+
+      groupIndex++;
+    }
+
+    // 8b. Image-only products (surplus images not matched to CSV rows)
+    if (hasImages) {
+      for (let i = csvProductCount; i < images.length; i++) {
+        const img = images[i]!;
+        const ai = i < aiResults.length ? aiResults[i] : null;
+
+        if (!ai) {
+          rowErrors.push({
+            row: 0,
+            message: `Image "${img.name}" could not be analyzed by AI — skipped.`,
+          });
+          skipped++;
+          continue;
+        }
+
+        try {
+          const categoryId = ai.category && ai.category !== "Other"
+            ? await resolveCategory(ai.category, access.shopId, categoryMap)
+            : null;
+
+          const product = await createProduct(
+            {
+              name: ai.name,
+              description: ai.description,
+              isActive: true,
+              categoryId: categoryId ?? undefined,
+              option1Label: "Size",
+              option2Label: "Color",
+              minWholesaleQty: 1,
+              wholesaleOnly: false,
+              aiGenerated: true,
+            },
+            access.shopId,
+          );
+
+          await db.product.update({
+            where: { id: product.id },
+            data: { source: "CSV" },
+          });
+
+          await db.productImage.create({
+            data: {
+              productId: product.id,
+              url: img.url,
+              altText: ai.name,
+              position: 0,
+            },
+          });
+
+          // Default variant — seller edits price/stock later
+          await db.productVariant.create({
+            data: {
+              productId: product.id,
+              size: "Default",
+              color: null,
+              priceInCents: 0,
+              stock: 0,
+              isActive: false,
+            },
+          });
+
+          await syncProductPriceRange(product.id);
+          imported++;
+        } catch (err) {
+          skipped++;
+          rowErrors.push({
+            row: 0,
+            message: `Failed to create AI product "${ai.name}": ${err instanceof Error ? err.message : "Unknown error"}`,
+          });
+        }
+      }
+    }
+
+    if (imported === 0 && hasCsv && validatedRows.length === 0 && !hasImages) {
+      return {
+        success: false,
+        error: "No valid rows to import.",
+        errors: rowErrors,
+        totalRows: rows.length,
+        imported: 0,
+        skipped: rows.length,
+      };
     }
 
     // 9. Log the import job
     await db.bulkImportJob.create({
       data: {
         shopId: access.shopId,
-        fileName: "csv-import",
-        status: rowErrors.length > 0 && imported === 0 ? "FAILED" : "COMPLETED",
-        totalRows: rows.length,
+        fileName: hasImages ? `csv+images-import (${images?.length ?? 0} images)` : "csv-import",
+        status: imported === 0 ? "FAILED" : "COMPLETED",
+        totalRows: rows.length + (images?.length ?? 0),
         successCount: imported,
         errorCount: skipped + rowErrors.length,
         errors: rowErrors.length > 0 ? JSON.stringify(rowErrors.slice(0, 50)) : null,
@@ -307,9 +452,10 @@ export async function bulkImportAction(
 
     return {
       success: true,
-      totalRows: rows.length,
+      totalRows: rows.length + extraImageCount,
       imported,
       skipped,
+      aiAnalyzed: aiAnalyzedCount > 0 ? aiAnalyzedCount : undefined,
       errors: rowErrors.length > 0 ? rowErrors : undefined,
     };
   } catch (error) {
