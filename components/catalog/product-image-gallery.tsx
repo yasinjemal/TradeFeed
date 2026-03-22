@@ -16,6 +16,7 @@
 import Image from "next/image";
 import { useState, useCallback, useRef, type TouchEvent } from "react";
 import { SHIMMER_LIGHT } from "@/lib/image-placeholder";
+import { ImageZoom } from "./image-zoom";
 
 interface GalleryImage {
   id: string;
@@ -42,6 +43,7 @@ export function ProductImageGallery({
   const imagesWithUrl = validImages(images);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [zoomOpen, setZoomOpen] = useState(false);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
@@ -119,9 +121,19 @@ export function ProductImageGallery({
 
   return (
     <div className="relative" onKeyDown={handleKeyDown} tabIndex={0}>
+      {/* ── Zoom Lightbox ─────────────────────────────── */}
+      {zoomOpen && currentImage?.url && (
+        <ImageZoom
+          src={currentImage.url}
+          alt={currentImage.altText || productName}
+          onClose={() => setZoomOpen(false)}
+        />
+      )}
+
       {/* ── Hero Image ─────────────────────────────────── */}
       <div
-        className="relative aspect-square bg-stone-100 overflow-hidden cursor-pointer select-none"
+        className="relative aspect-square bg-stone-100 overflow-hidden cursor-zoom-in select-none"
+        onClick={() => currentImage?.url && setZoomOpen(true)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -202,6 +214,12 @@ export function ProductImageGallery({
             </button>
           </>
         )}
+
+        {/* ── Zoom hint (desktop) ──────────────────────── */}
+        <div className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 text-white text-xs font-medium hidden sm:flex items-center gap-1">
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" /></svg>
+          Zoom
+        </div>
 
         {/* ── Image counter badge ──────────────────────── */}
         {imagesWithUrl.length > 1 && (

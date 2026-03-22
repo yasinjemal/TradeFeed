@@ -19,6 +19,8 @@ import { SellerInfoCard } from "@/components/catalog/seller-info-card";
 import { TrustMessaging } from "@/components/catalog/trust-messaging";
 import { SimilarProducts } from "@/components/catalog/similar-products";
 import { MoreFromSeller } from "@/components/catalog/more-from-seller";
+import { StickyBuyBar } from "@/components/catalog/sticky-buy-bar";
+import { DeliveryEstimate } from "@/components/catalog/delivery-estimate";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -168,6 +170,14 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         <script key={`product-ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       ))}
 
+      {/* ── Sticky Mobile Buy Bar ── */}
+      <StickyBuyBar
+        productName={product.name}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        totalStock={totalStock}
+      />
+
       {/* ── Section 1: Breadcrumb ── */}
       <ProductBreadcrumb category={product.category} productName={product.name} />
 
@@ -214,21 +224,35 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   </Link>
                 )}
                 <h1 className="text-xl font-bold leading-tight text-slate-900 sm:text-2xl">{product.name}</h1>
-                {soldCount > 0 && (
-                  <p className="mt-1.5 inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
-                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-                    </svg>
-                    {soldCount >= 100 ? "100+" : soldCount} sold
-                  </p>
-                )}
-                <div className="mt-3">
-                  <ShareProduct
-                    productName={product.name}
-                    productUrl={`${process.env.NEXT_PUBLIC_BASE_URL ?? "https://tradefeed.co.za"}/catalog/${slug}/products/${product.id}`}
-                    price={minPrice === maxPrice ? formatZAR(minPrice) : `${formatZAR(minPrice)} - ${formatZAR(maxPrice)}`}
-                    shopName={shop.name}
-                  />
+
+                {/* Star rating + sold count — social proof above the fold */}
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {reviewAgg.averageRating > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <svg
+                            key={star}
+                            className={`h-4 w-4 ${star <= Math.round(reviewAgg.averageRating) ? "text-amber-400" : "text-slate-200"}`}
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <span className="text-sm font-medium text-slate-600">{reviewAgg.averageRating.toFixed(1)}</span>
+                      <span className="text-xs text-slate-400">({reviewAgg.totalReviews})</span>
+                    </div>
+                  )}
+                  {soldCount > 0 && (
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
+                      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                      </svg>
+                      {soldCount >= 100 ? "100+" : soldCount} sold
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -240,14 +264,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   <span className="ml-auto text-xs text-slate-400">per unit</span>
                 </div>
 
-                {minRetailPrice && (
-                  <div className="mt-2 flex flex-col gap-1.5 rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">🏭 Wholesale</span>
-                      <span>{formatZAR(minPrice)}{minPrice !== maxPrice ? ` - ${formatZAR(maxPrice)}` : ""}</span>
-                      {product.minWholesaleQty > 1 && <span className="text-slate-400">· min. {product.minWholesaleQty} units</span>}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                {/* Savings callout — show when retail price is higher than wholesale */}
+                {minRetailPrice && minRetailPrice > minPrice && (
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5">
+                      Save {Math.round(((minRetailPrice - minPrice) / minRetailPrice) * 100)}% wholesale
+                    </span>
+                    <span className="text-xs text-slate-400 line-through">{formatZAR(minRetailPrice)}</span>
+                  </div>
+                )}
                       <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-blue-700">🛍️ Retail</span>
                       <span>{formatZAR(minRetailPrice)}{maxRetailPrice && minRetailPrice !== maxRetailPrice ? ` - ${formatZAR(maxRetailPrice)}` : ""}</span>
                       <span className="text-slate-400">· from 1 unit</span>
@@ -261,6 +286,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                     <span className={`h-1.5 w-1.5 rounded-full ${totalStock > 0 ? "bg-emerald-500" : "bg-slate-500"}`} />
                     {totalStock > 0 ? `${totalStock} in stock` : "Out of stock"}
                   </span>
+                  {/* Low stock urgency */}
+                  {totalStock > 0 && totalStock <= 5 && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-50 border border-red-200 px-2.5 py-1 text-red-600 font-semibold animate-pulse">
+                      🔥 Only {totalStock} left!
+                    </span>
+                  )}
                   {product.minWholesaleQty > 1 && !minRetailPrice && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-amber-700">
                       📦 Wholesale min. {product.minWholesaleQty} units
@@ -289,6 +320,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               {product.description && (
                 <p className="text-sm leading-relaxed text-slate-600">{product.description}</p>
               )}
+
+              {/* Share — moved below description, out of the purchase flow */}
+              <div className="pt-1">
+                <ShareProduct
+                  productName={product.name}
+                  productUrl={`${process.env.NEXT_PUBLIC_BASE_URL ?? "https://tradefeed.co.za"}/catalog/${slug}/products/${product.id}`}
+                  price={minPrice === maxPrice ? formatZAR(minPrice) : `${formatZAR(minPrice)} - ${formatZAR(maxPrice)}`}
+                  shopName={shop.name}
+                />
+              </div>
 
               <div className="border-t border-slate-100" />
 
@@ -342,6 +383,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
           {/* ── Section 5: Trust Messaging ── */}
           <TrustMessaging isVerified={shop.isVerified} />
+
+          {/* ── Section 5b: Delivery Estimate ── */}
+          <DeliveryEstimate />
         </div>
       </div>
 
