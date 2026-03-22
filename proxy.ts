@@ -1,6 +1,7 @@
 // ============================================================
-// Clerk Proxy â€” Route Protection + Rate Limiting
+// Clerk Proxy — Route Protection + Rate Limiting
 // ============================================================
+// Next.js 16 proxy convention (replaces middleware.ts).
 // Protects private routes (dashboard, create-shop, API).
 // Public routes: home, catalog, sign-in, sign-up, webhooks.
 // Rate limits public routes to prevent abuse.
