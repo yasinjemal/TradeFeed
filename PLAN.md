@@ -109,3 +109,20 @@ Added full COD payment method alongside existing PayFast online payments.
 - Shop Settings → Payment Options section with COD toggle
 - Orders dashboard shows 💵 COD badge, "Confirm Cash Received" button
 - COD orders hide PayFast payment link
+
+---
+
+### Accessibility (WCAG AA) Audit — ✅ Complete
+- Contrast fixes: upgraded light-grey text (`slate-400/500`, `blue-600/80`, `emerald-200/70`) to meet 4.5:1 ratio across landing page, marketplace cards, catalog page, and product reviews.
+- Form accessibility: added `aria-required="true"` on delivery address and province inputs in cart panel.
+- Error handling: added `role="alert"` on review submission error messages.
+- Commit: `b922260`
+
+---
+
+### i18n: Marketplace Page Translations — ✅ Complete
+- Added 6 marketplace translation keys to all 5 locale files (en, zu, xh, af, st):
+  `browseByProvince`, `suppliersIn`, `popularCities`, `browseByCategory`, `whatsappImportCta`.
+- Wired `app/marketplace/page.tsx` with `getTranslations("marketplace")` server-side.
+- Rich text support for WhatsApp import CTA link via `t.rich()`.
+- Commit: `9439cf7`
