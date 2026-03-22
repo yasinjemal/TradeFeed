@@ -8,10 +8,12 @@
 
 import Image from "next/image";
 import { SHIMMER_DARK } from "@/lib/image-placeholder";
+import { ShareShopButton } from "./share-shop-button";
 
 interface ShopHeroProps {
   shop: {
     name: string;
+    slug: string;
     description: string | null;
     logoUrl?: string | null;
     bannerUrl?: string | null;
@@ -169,8 +171,8 @@ export function ShopHero({ shop, tierBadge }: ShopHeroProps) {
             )}
           </div>
 
-          {/* WhatsApp CTA — prominent, right-aligned */}
-          <div className="ml-auto mb-1">
+          {/* CTA buttons — WhatsApp + Share */}
+          <div className="ml-auto mb-1 flex items-center gap-2">
             <a
               href={`https://wa.me/${shop.whatsappNumber.replace("+", "")}`}
               target="_blank"
@@ -186,6 +188,7 @@ export function ShopHero({ shop, tierBadge }: ShopHeroProps) {
               </svg>
               Contact
             </a>
+            <ShareShopButton shopName={shop.name} shopSlug={shop.slug} />
           </div>
         </div>
 
@@ -255,22 +258,50 @@ export function ShopHero({ shop, tierBadge }: ShopHeroProps) {
         </div>
 
         {/* ── Stats row ─────────────────────────────────── */}
-        <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-3">
-          <StatItem value={shop._count.products} label="Products" />
-          {shop._count.orders > 0 && (
-            <StatItem
-              value={shop._count.orders}
-              label="Fulfilled"
-              accent
-            />
+        <div className="mt-4 grid grid-cols-4 gap-2 border-t border-slate-100 pt-3">
+          <StatItem icon="📦" value={shop._count.products} label="Products" />
+          {shop._count.orders > 0 ? (
+            <StatItem icon="✅" value={shop._count.orders} label="Fulfilled" accent />
+          ) : (
+            <StatItem icon="🆕" value="New" label="Seller" />
           )}
-          {shop.avgRating > 0 && (
-            <StatItem
-              value={`${shop.avgRating.toFixed(1)} ★`}
-              label={`${shop._count.reviews} review${shop._count.reviews !== 1 ? "s" : ""}`}
-            />
+          {shop.avgRating > 0 ? (
+            <div className="min-w-0 text-center">
+              <div className="flex items-center justify-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg
+                    key={star}
+                    className={`h-3.5 w-3.5 ${star <= Math.round(shop.avgRating) ? "text-amber-400" : "text-slate-200"}`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">{shop.avgRating.toFixed(1)} ({shop._count.reviews})</p>
+            </div>
+          ) : (
+            <StatItem icon="⭐" value="—" label="No reviews" />
           )}
-          <StatItem value={memberSince} label="Member since" />
+          <StatItem icon="📅" value={memberSince} label="Joined" />
+        </div>
+
+        {/* Trust badges */}
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {shop.isVerified && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+              ✅ Verified seller
+            </span>
+          )}
+          {shop._count.orders >= 10 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200/60 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+              ⚡ Responds quickly
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 border border-slate-200/60 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+            📱 Orders via WhatsApp
+          </span>
         </div>
       </div>
     </div>
@@ -278,24 +309,28 @@ export function ShopHero({ shop, tierBadge }: ShopHeroProps) {
 }
 
 function StatItem({
+  icon,
   value,
   label,
   accent,
 }: {
+  icon: string;
   value: string | number;
   label: string;
   accent?: boolean;
 }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 text-center">
       <p
         className={`text-sm font-bold tabular-nums ${
           accent ? "text-emerald-600" : "text-slate-800"
         }`}
       >
-        {value}
+        <span className="mr-0.5">{icon}</span> {value}
       </p>
       <p className="text-[11px] text-slate-400 truncate">{label}</p>
     </div>
   );
 }
+
+

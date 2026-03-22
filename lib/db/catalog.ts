@@ -111,6 +111,25 @@ export async function getCatalogShop(slug: string) {
 }
 
 /**
+ * Get recent approved reviews for a shop (for shop page social proof).
+ */
+export async function getShopReviewHighlights(shopId: string, limit = 4) {
+  return db.review.findMany({
+    where: { shopId, isApproved: true, rating: { gte: 4 }, comment: { not: null } },
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      buyerName: true,
+      isVerified: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+}
+
+/**
  * Get all active products for a shop's public catalog.
  *
  * WHAT: Returns products with their variants, images, and category.

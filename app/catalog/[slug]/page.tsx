@@ -16,6 +16,7 @@ import {
   getCatalogProducts,
   getCatalogShop,
   getCatalogCombos,
+  getShopReviewHighlights,
 } from "@/lib/db/catalog";
 import { getSellerTierData } from "@/lib/db/shops";
 import { getShopDrops } from "@/lib/db/drops";
@@ -26,6 +27,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ShopHero } from "@/components/catalog/shop-hero";
 import { ShopAboutSection } from "@/components/catalog/shop-about-section";
+import { ShopReviewHighlights } from "@/components/catalog/shop-review-highlights";
 import { IllustrationRocket } from "@/components/ui/illustrations";
 
 // ISR: revalidate catalog pages every 60 seconds for near-real-time updates
@@ -100,11 +102,12 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   const shop = await getCatalogShop(slug);
   if (!shop) return notFound();
 
-  const [products, combos, tierData, recentDrops] = await Promise.all([
+  const [products, combos, tierData, recentDrops, reviewHighlights] = await Promise.all([
     getCatalogProducts(shop.id),
     getCatalogCombos(shop.id),
     getSellerTierData(shop.id, shop),
     getShopDrops(slug, 1),
+    getShopReviewHighlights(shop.id),
   ]);
 
   // ── Detect viewer type (fire in parallel, lightweight) ──────
@@ -274,6 +277,9 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
 
       {/* ── Combo Deals ─────────────────────────────── */}
       <ComboSection combos={combos} shopSlug={slug} />
+
+      {/* ── Review Highlights (social proof) ─────────── */}
+      <ShopReviewHighlights reviews={reviewHighlights} shopName={shop.name} />
 
       {/* ── About This Seller ──────────────────────────── */}
       <ShopAboutSection shop={shop} />
