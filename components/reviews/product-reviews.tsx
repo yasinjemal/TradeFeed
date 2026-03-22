@@ -240,7 +240,7 @@ function ReviewForm({
 
       <div>
         <label htmlFor="buyerEmail" className="text-sm font-medium text-stone-700 block mb-1">
-          Email <span className="text-stone-400">(optional)</span>
+          Email <span className="text-stone-500">(optional)</span>
         </label>
         <input
           id="buyerEmail"
@@ -252,7 +252,7 @@ function ReviewForm({
 
       <div>
         <label htmlFor="title" className="text-sm font-medium text-stone-700 block mb-1">
-          Review Title <span className="text-stone-400">(optional)</span>
+          Review Title <span className="text-stone-500">(optional)</span>
         </label>
         <input
           id="title"
@@ -264,7 +264,7 @@ function ReviewForm({
 
       <div>
         <label htmlFor="comment" className="text-sm font-medium text-stone-700 block mb-1">
-          Your Review <span className="text-stone-400">(optional)</span>
+          Your Review <span className="text-stone-500">(optional)</span>
         </label>
         <textarea
           id="comment"
@@ -276,7 +276,7 @@ function ReviewForm({
       </div>
 
       {result?.error && (
-        <p className="text-sm text-red-600">{result.error}</p>
+        <p role="alert" className="text-sm text-red-600">{result.error}</p>
       )}
 
       <button

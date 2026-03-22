@@ -514,9 +514,9 @@ export default async function HomePage() {
                 </div>
                 <div className="mb-2">
                   <span className="text-4xl font-extrabold text-slate-900">R299</span>
-                  <span className="text-slate-500 text-sm ml-1">/month</span>
+                  <span className="text-slate-600 text-sm ml-1">/month</span>
                 </div>
-                <p className="text-sm text-blue-600/80 mb-2">R10/day — scale with confidence</p>
+                <p className="text-sm text-blue-700 mb-2">R10/day — scale with confidence</p>
                 <div className="mb-8 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200">
                   <p className="text-xs text-blue-600">💡 <span className="font-semibold">Save R589/year</span> with annual billing — R2,999/year (R250/mo)</p>
                 </div>

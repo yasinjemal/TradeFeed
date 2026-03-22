@@ -370,7 +370,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
                   </svg>
                 </Link>
 
-                <p className="text-[11px] text-emerald-200/70 font-medium">Free forever · No credit card needed</p>
+                <p className="text-[11px] text-emerald-100 font-medium">Free forever · No credit card needed</p>
               </div>
             </div>
           </div>

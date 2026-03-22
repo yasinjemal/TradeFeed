@@ -587,6 +587,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                     placeholder="123 Main Road, Unit 4B"
                     value={delivery.address}
                     onChange={(e) => setDelivery((prev) => ({ ...prev, address: e.target.value }))}
+                    aria-required="true"
                     className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-stone-900 placeholder:text-stone-400"
                   />
                 </div>
@@ -627,6 +628,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                     id="delivery-province"
                     value={delivery.province}
                     onChange={(e) => setDelivery((prev) => ({ ...prev, province: e.target.value }))}
+                    aria-required="true"
                     className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-stone-900"
                   >
                     <option value="">Select province…</option>
