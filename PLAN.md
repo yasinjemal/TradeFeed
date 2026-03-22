@@ -185,7 +185,7 @@ Tracks progress on the 13 growth-plan features from `docs/TradeFeed — Cursor A
 | # | Feature | Status | Notes |
 |---|---------|--------|-------|
 | P8 | Printable QR Code Generator | ✅ Done | 3 template styles (Dark/Light/Colorful) + A5 300DPI PNG download. Commit: `b2c5bfb` |
-| P9 | Custom Domain for Pro Users | ✅ Done | 73ab649 — Vercel API, DNS verify UI, host-based middleware routing |
+| P9 | Custom Domain for Pro Users | ✅ Done | 73ab649+934262c — Vercel API, step wizard UI, SSL monitoring, health cron, WhatsApp alerts, domain swap, SEO sitemap, admin dashboard |
 
 ### Phase 4: Scale (Q3 & Q4)
 
