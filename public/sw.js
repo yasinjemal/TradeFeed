@@ -10,7 +10,7 @@
 // - Resilience during SA load shedding
 // ============================================================
 
-const CACHE_NAME = "tradefeed-v4";
+const CACHE_NAME = "tradefeed-v5";
 const OFFLINE_URL = "/offline.html";
 const IMAGE_CACHE = "tradefeed-images-v1";
 const PAGE_CACHE = "tradefeed-pages-v1";
