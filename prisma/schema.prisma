@@ -73,6 +73,11 @@ model Shop {
   themeAccent     String?                      // Accent color hex (e.g. "#f59e0b")
   themeFont       String?                      // Font family: "inter" | "playfair" | "poppins" | "space-grotesk" | "dm-sans"
 
+  // ── Custom Domain (Pro) ──────────────────────────────
+  customDomain       String?   @unique         // Seller's custom domain (e.g. "myshop.co.za")
+  domainStatus       String?                   // PENDING | VERIFIED | ACTIVE | ERROR
+  domainVerifiedAt   DateTime?                 // When DNS verification succeeded
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

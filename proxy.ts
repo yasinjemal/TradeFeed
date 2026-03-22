@@ -11,6 +11,24 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit-upstash";
 
+// In-memory cache for custom domain → shop slug lookups (5 min TTL)
+const domainCache = new Map<string, { slug: string | null; ts: number }>();
+const DOMAIN_CACHE_TTL = 5 * 60 * 1000;
+
+// Known platform hostnames that should NOT trigger custom domain lookup
+const PLATFORM_HOSTS = new Set([
+  "tradefeed.co.za",
+  "www.tradefeed.co.za",
+  "trade-feed.vercel.app",
+  "localhost",
+  "127.0.0.1",
+]);
+
+function isPlatformHost(host: string): boolean {
+  const bare = host.split(":")[0]!.toLowerCase();
+  return PLATFORM_HOSTS.has(bare) || bare.endsWith(".vercel.app");
+}
+
 // Routes that DON'T require authentication
 const isPublicRoute = createRouteMatcher([
   "/",                              // Landing page
@@ -45,6 +63,37 @@ const isWebhookRoute = createRouteMatcher(["/api/webhooks/(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
   try {
+    // ── Custom domain rewrite ───────────────────────────
+    // If the request comes from a custom domain, rewrite to /catalog/[slug]
+    const host = request.headers.get("host") || "";
+    if (!isPlatformHost(host)) {
+      const bare = host.split(":")[0]!.toLowerCase();
+      let entry = domainCache.get(bare);
+      if (!entry || Date.now() - entry.ts > DOMAIN_CACHE_TTL) {
+        // Dynamic import to avoid bundling prisma in edge — runs in Node runtime
+        let slug: string | null = null;
+        try {
+          const { db } = await import("@/lib/db");
+          const shop = await db.shop.findUnique({
+            where: { customDomain: bare },
+            select: { slug: true, domainStatus: true },
+          });
+          slug = shop?.domainStatus === "ACTIVE" ? shop.slug : null;
+        } catch {
+          // DB unavailable — fall through to normal routing
+        }
+        entry = { slug, ts: Date.now() };
+        domainCache.set(bare, entry);
+      }
+      if (entry.slug) {
+        const url = request.nextUrl.clone();
+        // Rewrite /anything on custom domain to /catalog/slug/anything
+        const path = url.pathname === "/" ? "" : url.pathname;
+        url.pathname = `/catalog/${entry.slug}${path}`;
+        return NextResponse.rewrite(url);
+      }
+    }
+
     // ── Category canonical redirect ─────────────────────
     // Redirect /marketplace?category=slug to /marketplace/category/slug
     // to avoid duplicate content in search engines.

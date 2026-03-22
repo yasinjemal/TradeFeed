@@ -44,6 +44,10 @@ const envSchema = z.object({
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 
+  // Vercel — used for custom domain management (Pro sellers)
+  VERCEL_API_TOKEN: z.string().optional(),
+  VERCEL_PROJECT_ID: z.string().optional(),
+
   // Node
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });
