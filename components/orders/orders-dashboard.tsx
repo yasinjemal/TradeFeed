@@ -12,7 +12,7 @@
 
 import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { updateOrderStatusAction, createOrderPaymentLinkAction, shipOrderAction } from "@/app/actions/orders";
+import { updateOrderStatusAction, createOrderPaymentLinkAction, shipOrderAction, confirmCodPaymentAction } from "@/app/actions/orders";
 import type { OrderStatus } from "@prisma/client";
 import { ExportButtons } from "@/components/export/export-buttons";
 import { IllustrationNoOrders } from "@/components/ui/illustrations";
@@ -63,6 +63,9 @@ interface Order {
   shippedAt?: string | null;
   deliveredAt?: string | null;
   estimatedDelivery?: string | null;
+  // Payment method
+  paymentMethod?: string | null;
+  codConfirmedAt?: string | null;
 }
 
 interface OrderStats {
@@ -448,6 +451,19 @@ function OrderCard({
     });
   }
 
+  function handleConfirmCod() {
+    if (!confirm("Confirm you received cash payment for this order?")) return;
+    setError(null);
+    startTransition(async () => {
+      const result = await confirmCodPaymentAction(shopSlug, order.id);
+      if (!result.success) {
+        setError(result.error ?? "Failed to confirm payment.");
+      } else {
+        router.refresh();
+      }
+    });
+  }
+
   // Build WhatsApp payment message
   const buyerPayUrl = typeof window !== "undefined"
     ? `${window.location.origin}/pay/${encodeURIComponent(order.orderNumber)}`
@@ -475,6 +491,11 @@ function OrderCard({
             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${config.bg} ${config.color}`}>
               {config.icon} {config.label}
             </span>
+            {order.paymentMethod === "COD" && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                💵 COD
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3 mt-1 text-xs text-stone-500">
             <span>{orderDate}</span>
@@ -548,8 +569,8 @@ function OrderCard({
             </div>
           )}
 
-          {/* Payment link (for non-cancelled orders, show until paid) */}
-          {order.status !== "CANCELLED" && !order.paidAt && (
+          {/* Payment link (for non-cancelled, non-COD orders, show until paid) */}
+          {order.status !== "CANCELLED" && !order.paidAt && order.paymentMethod !== "COD" && (
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <button
                 type="button"
@@ -593,7 +614,27 @@ function OrderCard({
               <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="text-sm text-emerald-600 font-semibold">Payment received</p>
+              <p className="text-sm text-emerald-600 font-semibold">
+                Payment received{order.paymentMethod === "COD" ? " (Cash)" : ""}
+              </p>
+            </div>
+          )}
+
+          {/* COD: Confirm Cash Received button */}
+          {order.paymentMethod === "COD" && !order.codConfirmedAt && order.status !== "CANCELLED" && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={handleConfirmCod}
+                disabled={isPending}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-amber-600 text-white hover:bg-amber-700 transition-colors shadow-sm ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                </svg>
+                {isPending ? "Confirming…" : "Confirm Cash Received"}
+              </button>
+              <p className="text-[10px] text-stone-400 mt-1">Marks the order as paid &amp; delivered</p>
             </div>
           )}
 

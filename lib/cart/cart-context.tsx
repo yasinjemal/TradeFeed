@@ -90,6 +90,7 @@ interface CartProviderProps {
   retailWhatsappNumber?: string;
   shopProvince?: string;
   shopCity?: string;
+  codEnabled?: boolean;
 }
 
 export function CartProvider({
@@ -100,6 +101,7 @@ export function CartProvider({
   retailWhatsappNumber,
   shopProvince,
   shopCity,
+  codEnabled,
 }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -223,6 +225,7 @@ export function CartProvider({
       shopId,
       shopProvince,
       shopCity,
+      codEnabled,
     }),
     [
       items,
@@ -238,6 +241,7 @@ export function CartProvider({
       shopId,
       shopProvince,
       shopCity,
+      codEnabled,
     ]
   );
 

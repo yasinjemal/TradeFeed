@@ -67,4 +67,6 @@ export interface CartContextValue {
   shopProvince?: string;
   /** Shop city for shipping rate calculation */
   shopCity?: string;
+  /** Whether this shop accepts cash on delivery */
+  codEnabled?: boolean;
 }

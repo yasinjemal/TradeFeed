@@ -39,13 +39,14 @@ export default async function PayPage({ params, searchParams }: PayPageProps) {
   const formatRand = (cents: number) => `R ${(cents / 100).toFixed(2)}`;
   const alreadyPaid = !!order.paidAt;
   const isCancelled = order.status === "CANCELLED";
+  const isCod = order.paymentMethod === "COD";
   const isExpired = order.paymentLinkExpiresAt
     ? new Date(order.paymentLinkExpiresAt) < new Date()
     : false;
 
   // Generate PayFast URL server-side (no client action needed)
   const paymentUrl =
-    !alreadyPaid && !isCancelled && !isExpired
+    !alreadyPaid && !isCancelled && !isExpired && !isCod
       ? buildOrderPaymentUrl({
           orderId: order.id,
           orderNumber: order.orderNumber,
@@ -209,6 +210,28 @@ export default async function PayPage({ params, searchParams }: PayPageProps) {
             </span>
           </div>
         </div>
+
+        {/* COD order — no online payment needed */}
+        {isCod && !alreadyPaid && !isCancelled && (
+          <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-5 text-center">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-amber-500/20 flex items-center justify-center">
+              <svg className="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-amber-400 mb-1">Cash on Delivery</h2>
+            <p className="text-sm text-stone-400">
+              You&apos;ll pay {formatRand(order.totalCents)} in cash when you receive your order.
+              No online payment is required.
+            </p>
+            <Link
+              href={`/track/${encodeURIComponent(order.orderNumber)}`}
+              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-amber-600 text-white text-sm font-medium hover:bg-amber-500 transition-colors"
+            >
+              Track Your Order →
+            </Link>
+          </div>
+        )}
 
         {/* Pay Now Button */}
         {paymentUrl && !alreadyPaid && !isCancelled && (

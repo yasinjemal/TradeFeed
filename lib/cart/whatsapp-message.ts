@@ -48,6 +48,7 @@ export interface DeliveryAddress {
  * @param delivery - Optional delivery address
  * @param orderNumber - Optional order number (e.g. "TF-20260224-A1B2") to include at top
  * @param shopSlug - Optional shop slug for building product links
+ * @param paymentMethod - Optional payment method ("PAYFAST" | "COD")
  * @returns URL-encoded message string ready for wa.me
  */
 export function buildWhatsAppMessage(
@@ -55,6 +56,7 @@ export function buildWhatsAppMessage(
   delivery?: DeliveryAddress | null,
   orderNumber?: string,
   shopSlug?: string,
+  paymentMethod?: "PAYFAST" | "COD" | "MANUAL",
 ): string {
   if (items.length === 0) return "";
 
@@ -98,6 +100,11 @@ export function buildWhatsAppMessage(
     ? `\n\n📍 *Deliver to:*\n   ${delivery.address}\n   ${delivery.city}, ${delivery.province} ${delivery.postalCode}`
     : "";
 
+  // Payment method note
+  const paymentNote = paymentMethod === "COD"
+    ? `\n💳 *Payment: Cash on Delivery*`
+    : "";
+
   // Include order number in header when available (for tracking)
   const header = orderNumber
     ? `🛒 *New Order #${orderNumber}*`
@@ -113,6 +120,7 @@ export function buildWhatsAppMessage(
     `━━━━━━━━━━━━━━━━━━━━━━━━\n` +
     `💰 *Total: ${totalFormatted}*\n` +
     `📦 Items: ${totalItems}` +
+    paymentNote +
     deliverySection +
     trackingLine + `\n\n` +
     `Thank you for your order! 🙏`;
@@ -143,8 +151,9 @@ export function buildWhatsAppCheckoutUrl(
   delivery?: DeliveryAddress | null,
   orderNumber?: string,
   shopSlug?: string,
+  paymentMethod?: "PAYFAST" | "COD" | "MANUAL",
 ): string {
-  const message = buildWhatsAppMessage(items, delivery, orderNumber, shopSlug);
+  const message = buildWhatsAppMessage(items, delivery, orderNumber, shopSlug, paymentMethod);
   const phone = whatsappNumber.replace("+", "");
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }

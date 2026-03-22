@@ -15,6 +15,10 @@ interface OrderTimelineProps {
   paymentRequestedAt?: string | null;
   /** When buyer completed payment (PayFast ITN) */
   paidAt?: string | null;
+  /** Payment method (PAYFAST, COD, MANUAL) */
+  paymentMethod?: string | null;
+  /** When seller confirmed cash received (COD only) */
+  codConfirmedAt?: string | null;
 }
 
 const STEPS = [
@@ -88,6 +92,8 @@ export function OrderTimeline({
   updatedAt,
   paymentRequestedAt,
   paidAt,
+  paymentMethod,
+  codConfirmedAt,
 }: OrderTimelineProps) {
   // Handle cancelled separately
   if (currentStatus === "CANCELLED") {
@@ -109,13 +115,51 @@ export function OrderTimeline({
   }
 
   const currentIndex = STATUS_ORDER[currentStatus] ?? 0;
+  const isCod = paymentMethod === "COD";
   const paymentDone = !!paidAt;
   const paymentRequested = !!paymentRequestedAt && !paidAt;
+  const codConfirmed = isCod && !!codConfirmedAt;
 
   return (
     <div className="space-y-0">
-      {/* Payment status row (between Order Placed and Confirmed) */}
-      {(paymentRequested || paymentDone) && (
+      {/* COD payment note (between steps) */}
+      {isCod && (
+        <div className="flex gap-4 mb-2">
+          <div className="flex flex-col items-center">
+            <div
+              className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
+                codConfirmed
+                  ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
+                  : "bg-amber-500/20 border-amber-500 text-amber-400"
+              }`}
+            >
+              {codConfirmed ? (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                </svg>
+              )}
+            </div>
+            <div className="w-0.5 flex-1 min-h-[24px] bg-stone-800" />
+          </div>
+          <div className="pb-4">
+            <p className="font-semibold text-sm text-stone-200">
+              {codConfirmed ? "Cash payment confirmed" : "Cash on Delivery"}
+            </p>
+            <p className="text-xs text-stone-500 mt-0.5">
+              {codConfirmed && codConfirmedAt
+                ? `Cash received ${formatRelative(codConfirmedAt)}`
+                : "Pay in cash when you receive your order"}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Payment status row (between Order Placed and Confirmed) — only for non-COD */}
+      {!isCod && (paymentRequested || paymentDone) && (
         <div className="flex gap-4 mb-2">
           <div className="flex flex-col items-center">
             <div

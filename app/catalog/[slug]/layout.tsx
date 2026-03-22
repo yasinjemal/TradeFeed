@@ -114,7 +114,7 @@ export default async function CatalogLayout({
   const themeFont = hasTheme ? themeCssVars["--shop-font"] : undefined;
 
   return (
-    <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined} shopProvince={shop.province ?? undefined} shopCity={shop.city ?? undefined}>
+    <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined} shopProvince={shop.province ?? undefined} shopCity={shop.city ?? undefined} codEnabled={shop.codEnabled}>
     <WhatsAppCTAProvider>
     <WishlistProvider shopSlug={slug} shopId={shop.id}>
       {/* Google Fonts for custom theme fonts */}

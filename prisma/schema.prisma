@@ -64,6 +64,9 @@ model Shop {
   // Based on completeness, inventory, reliability, activity, diversity.
   healthScore     Float   @default(50.0)       // Default 50 — neutral baseline
 
+  // ── Cash on Delivery ──────────────────────────────────
+  codEnabled      Boolean @default(false)       // Whether this shop accepts cash on delivery
+
   // ── Storefront Theme ─────────────────────────────────
   themePreset     String?                      // Preset theme name: "classic" | "modern" | "bold" | "minimal" | "vibrant"
   themePrimary    String?                      // Primary color hex (e.g. "#10b981")
@@ -554,11 +557,13 @@ model Order {
   totalCents      Int                               // Total order value in ZAR cents
   itemCount       Int                               // Total quantity of items
 
-  // Payment (PayFast order payment link)
+  // Payment
+  paymentMethod      PaymentMethod @default(PAYFAST)  // How the buyer pays (PayFast, COD, manual)
   paymentRequestedAt DateTime?                      // When seller generated/sent payment link to buyer
   paymentLinkUrl     String?                        // Full buyer-facing payment page URL
   paymentLinkExpiresAt DateTime?                    // Link expiry (24h after generation)
   paidAt          DateTime?                         // When buyer completed payment (set by PayFast ITN)
+  codConfirmedAt  DateTime?                         // When seller confirmed cash received (COD only)
 
   // WhatsApp tracking
   whatsappSent    Boolean      @default(true)       // Whether WA message was opened
@@ -635,6 +640,12 @@ enum ShippingMethod {
   SELLER_ARRANGED                                   // Seller handles shipping themselves
   COLLECTION                                        // Buyer collects from seller
   PLATFORM_COURIER                                  // Platform-managed courier (Pargo, PostNet, TCG)
+}
+
+enum PaymentMethod {
+  PAYFAST                                           // Online payment via PayFast
+  COD                                               // Cash on delivery — buyer pays at receipt
+  MANUAL                                            // Manual / bank transfer (future)
 }
 
 // ============================================================

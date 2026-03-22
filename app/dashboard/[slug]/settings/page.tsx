@@ -17,6 +17,7 @@ import { SellerPreferencesForm } from "@/components/shop/seller-preferences-form
 import { DeleteShopButton } from "@/components/shop/delete-shop-button";
 import { SettingsSidebar } from "@/components/shop/settings-sidebar";
 import { ThemePicker } from "@/components/shop/theme-picker";
+import { CodToggle } from "@/components/shop/cod-toggle";
 import Link from "next/link";
 
 interface SettingsPageProps {
@@ -203,6 +204,20 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
           </div>
 
           {/* ── AI Preferences ─────────────────────────── */}
+          {/* ── Payment Options ────────────────────────── */}
+          <div id="section-payment" className="scroll-mt-28 relative rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-amber-200 rounded-l-2xl" />
+            <div className="pl-2">
+              <div className="flex items-center gap-2 mb-1">
+                <span>💳</span>
+                <h3 className="text-lg font-bold text-slate-900">Payment Options</h3>
+              </div>
+              <p className="text-sm text-slate-500 mb-5">Choose which payment methods buyers can use at checkout.</p>
+              <CodToggle shopSlug={slug} initialEnabled={shop.codEnabled} />
+            </div>
+          </div>
+
+          {/* ── AI Preferences (continued) ─────────────── */}
           <SellerPreferencesForm
             shopSlug={slug}
             initialData={sellerPrefs ? {

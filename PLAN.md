@@ -85,3 +85,30 @@
 - Default horizon: launch-hardening first, not new feature expansion.
 - Keep current UX and URL structure unchanged while fixing stability.
 - Keep existing DB schema unless needed for analytics correctness; prefer minimal type/query changes first.
+
+---
+
+### Feature: Cash-on-Delivery (COD) Support — ✅ Complete
+Added full COD payment method alongside existing PayFast online payments.
+
+**Schema changes** (`prisma/schema.prisma`):
+- `PaymentMethod` enum: PAYFAST, COD, MANUAL
+- `Order.paymentMethod` (default PAYFAST), `Order.codConfirmedAt`
+- `Shop.codEnabled` (default false)
+
+**Backend** (server actions + DB layer):
+- `checkoutAction` / `_attemptCheckout` accept `paymentMethod` param
+- `confirmCodPaymentAction` — seller confirms cash received → sets paidAt + status
+- `toggleCodAction` — seller enables/disables COD in shop settings
+- `getOrderByNumber` returns `paymentMethod` + `codConfirmedAt`
+
+**Buyer UX**:
+- Cart panel shows payment method selector (radio buttons) when shop has COD enabled
+- WhatsApp message includes "💳 Payment: Cash on Delivery" note
+- Pay page shows COD confirmation instead of PayFast button
+- Order timeline shows COD-specific payment status row
+
+**Seller UX**:
+- Shop Settings → Payment Options section with COD toggle
+- Orders dashboard shows 💵 COD badge, "Confirm Cash Received" button
+- COD orders hide PayFast payment link

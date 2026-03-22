@@ -12,7 +12,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
-import type { OrderStatus, Order, OrderItem, ShippingMethod } from "@prisma/client";
+import type { OrderStatus, Order, OrderItem, ShippingMethod, PaymentMethod } from "@prisma/client";
 
 // ── Order Number Generator ──────────────────────────────────
 
@@ -60,6 +60,8 @@ export interface CreateOrderInput {
   courierName?: string;
   estimatedDelivery?: Date;
   buyerClerkId?: string;
+  // Payment method
+  paymentMethod?: PaymentMethod;
 }
 
 export interface StockValidationResult {
@@ -197,6 +199,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
         shippingCostCents: input.shippingCostCents ?? 0,
         courierName: input.courierName,
         estimatedDelivery: input.estimatedDelivery,
+        paymentMethod: input.paymentMethod ?? "PAYFAST",
         items: {
           create: verifiedItems.map((item) => ({
             productId: item.productId,
@@ -407,5 +410,22 @@ export async function getBuyerOrders(buyerClerkId: string) {
       },
     },
     orderBy: { createdAt: "desc" },
+  });
+}
+
+// ── Confirm COD Payment ─────────────────────────────────────
+
+/**
+ * Mark a COD order as "cash received" by the seller.
+ * Sets codConfirmedAt + auto-advances status to DELIVERED.
+ */
+export async function confirmCodPayment(orderId: string, shopId: string) {
+  return db.order.update({
+    where: { id: orderId, shopId, paymentMethod: "COD" },
+    data: {
+      codConfirmedAt: new Date(),
+      paidAt: new Date(),
+      status: "DELIVERED",
+    },
   });
 }

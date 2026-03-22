@@ -29,7 +29,7 @@ import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
 import { sendOrderConfirmation, sendOrderStatusUpdate as sendStatusWhatsApp, sendBuyerPaymentLink } from "@/lib/whatsapp/business-api";
 import { formatZAR } from "@/types";
 import { trackEvent } from "@/lib/db/analytics";
-import type { OrderStatus, ShippingMethod } from "@prisma/client";
+import type { OrderStatus, ShippingMethod, PaymentMethod } from "@prisma/client";
 
 type ActionResult = {
   success: boolean;
@@ -69,6 +69,7 @@ export async function checkoutAction(
   shippingMethod?: "SELLER_ARRANGED" | "COLLECTION" | "PLATFORM_COURIER",
   shippingCostCents?: number,
   courierName?: string,
+  paymentMethod?: "PAYFAST" | "COD" | "MANUAL",
 ): Promise<ActionResult> {
   // Retry wrapper for transient DB connection failures (Neon cold starts)
   const MAX_RETRIES = 2;
@@ -80,6 +81,7 @@ export async function checkoutAction(
       deliveryAddress, deliveryCity, deliveryProvince, deliveryPostalCode,
       marketingConsent,
       shippingMethod, shippingCostCents, courierName,
+      paymentMethod,
     );
 
     // If it succeeded or was a business-logic error (not a DB connection error), return
@@ -123,6 +125,7 @@ async function _attemptCheckout(
   shippingMethod?: "SELLER_ARRANGED" | "COLLECTION" | "PLATFORM_COURIER",
   shippingCostCents?: number,
   courierName?: string,
+  paymentMethod?: "PAYFAST" | "COD" | "MANUAL",
 ): Promise<InternalResult> {
   try {
     // Rate limit: 10 checkouts/min per IP
@@ -201,6 +204,7 @@ async function _attemptCheckout(
       shippingMethod: shippingMethod as CreateOrderInput["shippingMethod"],
       shippingCostCents: shippingCostCents ?? 0,
       courierName,
+      paymentMethod: paymentMethod as CreateOrderInput["paymentMethod"],
     });
 
     if (!orderResult.success) {
@@ -529,5 +533,62 @@ export async function shipOrderAction(
       success: false,
       error: "Failed to ship order. Please try again.",
     };
+  }
+}
+
+// ── Confirm COD Payment (Seller) ────────────────────────────
+
+/**
+ * Seller confirms they received cash for a COD order.
+ * Marks the order as paid + delivered.
+ */
+export async function confirmCodPaymentAction(
+  shopSlug: string,
+  orderId: string,
+): Promise<ActionResult> {
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access) {
+      return { success: false, error: "Shop not found or access denied." };
+    }
+
+    const order = await getOrder(orderId, access.shopId);
+    if (!order) {
+      return { success: false, error: "Order not found." };
+    }
+
+    if (order.paymentMethod !== "COD") {
+      return { success: false, error: "This order is not a cash-on-delivery order." };
+    }
+
+    if (order.codConfirmedAt) {
+      return { success: false, error: "Cash has already been confirmed for this order." };
+    }
+
+    const { confirmCodPayment } = await import("@/lib/db/orders");
+    await confirmCodPayment(orderId, access.shopId);
+
+    // Send WhatsApp notification to buyer (fire-and-forget)
+    if (order.buyerPhone) {
+      const { db: prismaDb } = await import("@/lib/db");
+      prismaDb.shop.findUnique({ where: { id: access.shopId }, select: { name: true } })
+        .then((shop) => {
+          if (!shop) return;
+          return sendStatusWhatsApp(
+            order.buyerPhone!,
+            order.orderNumber,
+            shop.name,
+            "DELIVERED",
+            `/track/${encodeURIComponent(order.orderNumber)}`,
+          );
+        })
+        .catch(() => {});
+    }
+
+    revalidatePath(`/dashboard/${shopSlug}/orders`);
+    return { success: true };
+  } catch (error) {
+    await reportError("confirmCodPaymentAction", error, { shopSlug, orderId });
+    return { success: false, error: "Failed to confirm payment. Please try again." };
   }
 }

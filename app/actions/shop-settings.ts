@@ -156,3 +156,33 @@ export async function updateShopThemeAction(
     return { success: false, error: "Something went wrong. Please try again." };
   }
 }
+
+// ============================================================
+// Toggle Cash-on-Delivery
+// ============================================================
+
+export async function toggleCodAction(
+  shopSlug: string,
+  enabled: boolean,
+): Promise<ActionResult> {
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access || (access.role !== "OWNER" && access.role !== "MANAGER")) {
+      return { success: false, error: "Access denied." };
+    }
+
+    const { db } = await import("@/lib/db");
+    await db.shop.update({
+      where: { id: access.shopId },
+      data: { codEnabled: enabled },
+    });
+
+    revalidatePath(`/dashboard/${shopSlug}/settings`);
+    revalidatePath(`/catalog/${shopSlug}`);
+
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("[toggleCodAction] Error:", error);
+    return { success: false, error: "Something went wrong. Please try again." };
+  }
+}
