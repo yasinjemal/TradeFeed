@@ -3,6 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { IllustrationError } from "@/components/ui/illustrations";
 
 export default function GlobalError({
@@ -12,6 +13,9 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("errors");
+  const tc = useTranslations("common");
+
   useEffect(() => {
     Sentry.captureException(error);
   }, [error]);
@@ -22,22 +26,22 @@ export default function GlobalError({
           <div className="mx-auto mb-6">
             <IllustrationError className="w-48 h-48 mx-auto" />
           </div>
-          <h1 className="text-2xl font-bold mb-2">Something went wrong</h1>
+          <h1 className="text-2xl font-bold mb-2">{t("somethingWrong")}</h1>
           <p className="text-stone-400 text-sm mb-8">
-            An unexpected error occurred. Our team has been notified.
+            {t("unexpectedError")}
           </p>
           <div className="flex items-center justify-center gap-3">
             <button
               onClick={reset}
               className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition-all active:scale-[0.98]"
             >
-              Try Again
+              {tc("tryAgain")}
             </button>
             <Link
               href="/"
               className="px-5 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 text-sm font-medium rounded-xl transition-all border border-stone-700"
             >
-              Go Home
+              {tc("goHome")}
             </Link>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { LayoutGrid, MapPin, Tag, ShieldCheck } from "lucide-react";
 import type { CategoryWithCount, MarketplaceSortBy } from "@/lib/db/marketplace";
 
@@ -17,10 +18,10 @@ const SA_PROVINCES = [
 ];
 
 const PRICE_PRESETS = [
-  { label: "Under R250", min: "", max: "250" },
-  { label: "R250 - R750", min: "250", max: "750" },
-  { label: "R750 - R1500", min: "750", max: "1500" },
-  { label: "R1500+", min: "1500", max: "" },
+  { labelKey: "priceUnder250" as const, min: "", max: "250" },
+  { labelKey: "price250to750" as const, min: "250", max: "750" },
+  { labelKey: "price750to1500" as const, min: "750", max: "1500" },
+  { labelKey: "price1500plus" as const, min: "1500", max: "" },
 ];
 
 interface MarketplaceFilterSidebarProps {
@@ -111,6 +112,7 @@ export function MarketplaceFilterSidebar({
   currentFilters,
   onApply,
 }: MarketplaceFilterSidebarProps) {
+  const t = useTranslations("marketplace.filters");
   const [province, setProvince] = useState(currentFilters.province ?? "");
   const [minPrice, setMinPrice] = useState(currentFilters.minPrice ? String(currentFilters.minPrice / 100) : "");
   const [maxPrice, setMaxPrice] = useState(currentFilters.maxPrice ? String(currentFilters.maxPrice / 100) : "");
@@ -202,15 +204,15 @@ export function MarketplaceFilterSidebar({
       <div className="sticky top-20 space-y-4 rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-slate-900">Refine results</p>
-            <p className="mt-1 text-xs text-slate-500">Filter by trust, location, and spend range.</p>
+            <p className="text-sm font-semibold text-slate-900">{t("refineResults")}</p>
+            <p className="mt-1 text-xs text-slate-500">{t("filterDescription")}</p>
           </div>
           <button
             type="button"
             onClick={handleReset}
             className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900"
           >
-            Clear all
+            {t("clearAll")}
           </button>
         </div>
 
@@ -232,7 +234,7 @@ export function MarketplaceFilterSidebar({
           </div>
         ) : null}
 
-        <CollapsibleSection title="Category" subtitle="Browse the most active shopping categories." icon={<LayoutGrid className="size-4" />}>
+        <CollapsibleSection title={t("category")} subtitle={t("categoryDescription")} icon={<LayoutGrid className="size-4" />}>
           <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
             <button
               type="button"
@@ -246,8 +248,8 @@ export function MarketplaceFilterSidebar({
                   : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
               }`}
             >
-              <span>All categories</span>
-              <span className="text-xs text-slate-400">Browse all</span>
+              <span>{t("allCategories")}</span>
+              <span className="text-xs text-slate-400">{t("browseAll")}</span>
             </button>
             {categoryOptions.map((option) => {
               const isActive = selectedCategory === option.slug;
@@ -273,7 +275,7 @@ export function MarketplaceFilterSidebar({
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Location" subtitle="Prioritize products near your buyers." icon={<MapPin className="size-4" />}>
+        <CollapsibleSection title={t("location")} subtitle={t("locationDescription")} icon={<MapPin className="size-4" />}>
           <select
             value={province}
             onChange={(event) => {
@@ -282,7 +284,7 @@ export function MarketplaceFilterSidebar({
             }}
             className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
           >
-            <option value="">All provinces</option>
+            <option value="">{t("allProvinces")}</option>
             {SA_PROVINCES.map((item) => (
               <option key={item} value={item}>
                 {item}
@@ -291,11 +293,11 @@ export function MarketplaceFilterSidebar({
           </select>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Price" subtitle="Use a budget band or set a custom range." icon={<Tag className="size-4" />}>
+        <CollapsibleSection title={t("priceRange")} subtitle={t("priceDescription")} icon={<Tag className="size-4" />}>
           <div className="grid grid-cols-2 gap-2">
             {PRICE_PRESETS.map((preset) => (
               <button
-                key={preset.label}
+                key={preset.labelKey}
                 type="button"
                 onClick={() => {
                   setMinPrice(preset.min);
@@ -308,14 +310,14 @@ export function MarketplaceFilterSidebar({
                     : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                 }`}
               >
-                {preset.label}
+                {t(preset.labelKey)}
               </button>
             ))}
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-2">
             <label className="block">
-              <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Min</span>
+              <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("min")}</span>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R</span>
                 <input
@@ -329,7 +331,7 @@ export function MarketplaceFilterSidebar({
               </div>
             </label>
             <label className="block">
-              <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Max</span>
+              <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("max")}</span>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R</span>
                 <input
@@ -349,11 +351,11 @@ export function MarketplaceFilterSidebar({
             onClick={() => applyFilters()}
             className="mt-3 w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
           >
-            Apply price range
+            {t("applyFilters")}
           </button>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Trust" subtitle="Only surface stores buyers can trust quickly." icon={<ShieldCheck className="size-4" />}>
+        <CollapsibleSection title={t("trust")} subtitle={t("verifiedDescription")} icon={<ShieldCheck className="size-4" />}>
           <button
             type="button"
             onClick={() => {
@@ -364,8 +366,8 @@ export function MarketplaceFilterSidebar({
             className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-slate-300"
           >
             <div>
-              <p className="text-sm font-semibold text-slate-900">Verified sellers only</p>
-              <p className="mt-1 text-xs text-slate-500">Show shops with visible TradeFeed verification.</p>
+              <p className="text-sm font-semibold text-slate-900">{t("verifiedOnly")}</p>
+              <p className="mt-1 text-xs text-slate-500">{t("verifiedDescription")}</p>
             </div>
             <div className={`flex h-6 w-11 items-center rounded-full px-1 transition-colors ${verifiedOnly ? "bg-emerald-500" : "bg-slate-200"}`}>
               <div className={`h-4 w-4 rounded-full bg-white transition-transform ${verifiedOnly ? "translate-x-5" : "translate-x-0"}`} />

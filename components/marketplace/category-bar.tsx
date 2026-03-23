@@ -7,6 +7,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { CategoryWithCount } from "@/lib/db/marketplace";
 
 interface CategoryBarProps {
@@ -20,6 +21,7 @@ export function CategoryBar({
   selectedCategory,
   onSelectCategory,
 }: CategoryBarProps) {
+  const t = useTranslations("marketplace.filters");
   if (categories.length === 0) return null;
 
   const nonEmptyCategories = categories.filter((c) => c.productCount > 0);
@@ -41,7 +43,7 @@ export function CategoryBar({
           >
             <span className="text-3xl leading-none">🛍️</span>
             <span className="text-xs font-semibold leading-tight text-center whitespace-nowrap">
-              All
+              {t("allCategories")}
             </span>
           </button>
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import type { MarketplaceProduct } from "@/lib/db/marketplace";
 import { SHIMMER_LIGHT } from "@/lib/image-placeholder";
 import { cn } from "@/lib/utils";
@@ -23,19 +24,20 @@ function formatZAR(cents: number) {
   }).format(cents / 100);
 }
 
-function getPromotionLabel(tier: "BOOST" | "FEATURED" | "SPOTLIGHT") {
+function getPromotionLabelKey(tier: "BOOST" | "FEATURED" | "SPOTLIGHT") {
   switch (tier) {
     case "SPOTLIGHT":
-      return "Spotlight";
+      return "spotlight" as const;
     case "FEATURED":
-      return "Featured";
+      return "promoted" as const;
     case "BOOST":
-      return "Promoted";
+      return "promoted" as const;
   }
 }
 
 export function MarketplaceProductCard({ product, compact = false }: MarketplaceProductCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const t = useTranslations("marketplace.card");
   const locationLabel = product.shop.city ?? product.shop.province ?? "South Africa";
 
   const handleClick = () => {
@@ -78,7 +80,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
               <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" strokeWidth={1.4} stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
               </svg>
-              <span className="text-xs font-medium">Image coming soon</span>
+              <span className="text-xs font-medium">{t("imageSoon")}</span>
             </div>
           )}
 
@@ -87,7 +89,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
             <div className="flex flex-wrap gap-1.5">
               {product.promotion ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
-                  {getPromotionLabel(product.promotion.tier)}
+                  {t(getPromotionLabelKey(product.promotion.tier))}
                 </span>
               ) : null}
               {product.shop.isVerified ? (
@@ -95,7 +97,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
                   <svg className="h-3 w-3 text-emerald-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fillRule="evenodd" d="M16.403 12.652a3 3 0 010-5.304 3 3 0 00-3.75-3.751 3 3 0 00-5.305 0 3 3 0 00-3.751 3.75 3 3 0 000 5.305 3 3 0 003.75 3.751 3 3 0 005.305 0 3 3 0 003.751-3.75zm-2.546-4.46a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
                   </svg>
-                  Verified
+                  {t("verified")}
                 </span>
               ) : null}
             </div>
@@ -172,7 +174,7 @@ export function MarketplaceProductCard({ product, compact = false }: Marketplace
           {!compact ? (
             <div className="mt-3">
               <span className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition-colors group-hover:bg-emerald-600">
-                View Product
+                {t("viewProduct")}
                 <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                 </svg>

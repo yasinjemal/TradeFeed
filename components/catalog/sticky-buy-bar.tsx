@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { formatZAR } from "@/types";
 
 interface StickyBuyBarProps {
@@ -16,6 +17,7 @@ interface StickyBuyBarProps {
  * Shows price + "Select options" CTA that scrolls to the variant picker.
  */
 export function StickyBuyBar({ productName, minPrice, maxPrice, totalStock }: StickyBuyBarProps) {
+  const t = useTranslations("catalog");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export function StickyBuyBar({ productName, minPrice, maxPrice, totalStock }: St
           className="flex-shrink-0 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98]"
           style={{ backgroundColor: "var(--shop-primary, #1c1917)" }}
         >
-          Select Options
+          {t("selectOptions")}
         </button>
       </div>
     </div>

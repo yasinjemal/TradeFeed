@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { CategoryWithCount, MarketplaceSortBy } from "@/lib/db/marketplace";
 
 const SA_PROVINCES = [
@@ -16,10 +17,10 @@ const SA_PROVINCES = [
 ];
 
 const PRICE_PRESETS = [
-  { label: "Under R250", min: "", max: "250" },
-  { label: "R250 - R750", min: "250", max: "750" },
-  { label: "R750 - R1500", min: "750", max: "1500" },
-  { label: "R1500+", min: "1500", max: "" },
+  { labelKey: "priceUnder250" as const, min: "", max: "250" },
+  { labelKey: "price250to750" as const, min: "250", max: "750" },
+  { labelKey: "price750to1500" as const, min: "750", max: "1500" },
+  { labelKey: "price1500plus" as const, min: "1500", max: "" },
 ];
 
 interface MarketplaceFilterSheetProps {
@@ -68,6 +69,7 @@ export function MarketplaceFilterSheet({
   currentFilters,
   onApply,
 }: MarketplaceFilterSheetProps) {
+  const t = useTranslations("marketplace.filters");
   const [province, setProvince] = useState(currentFilters.province ?? "");
   const [minPrice, setMinPrice] = useState(currentFilters.minPrice ? String(currentFilters.minPrice / 100) : "");
   const [maxPrice, setMaxPrice] = useState(currentFilters.maxPrice ? String(currentFilters.maxPrice / 100) : "");
@@ -132,14 +134,14 @@ export function MarketplaceFilterSheet({
       <div className="fixed inset-x-0 bottom-0 z-50 max-h-[88vh] overflow-hidden rounded-t-[2rem] border-t border-slate-200 bg-white shadow-2xl shadow-slate-950/20 lg:hidden">
         <div className="mx-auto flex max-w-lg items-center justify-between px-5 py-4">
           <div>
-            <p className="text-base font-semibold text-slate-900">Refine results</p>
-            <p className="mt-1 text-xs text-slate-500">Filter by category, trust, location, and price.</p>
+            <p className="text-base font-semibold text-slate-900">{t("refineResults")}</p>
+            <p className="mt-1 text-xs text-slate-500">{t("filterDescription")}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500"
-            aria-label="Close filter sheet"
+            aria-label={t("closeFilters")}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -150,7 +152,7 @@ export function MarketplaceFilterSheet({
         <div className="max-h-[calc(88vh-138px)] overflow-y-auto px-5 pb-6">
           <div className="space-y-6">
             <section>
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Category</p>
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("category")}</p>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -161,7 +163,7 @@ export function MarketplaceFilterSheet({
                       : "border-slate-200 bg-white text-slate-600"
                   }`}
                 >
-                  All categories
+                  {t("allCategories")}
                 </button>
                 {categoryOptions.slice(0, 9).map((option) => (
                   <button
@@ -181,13 +183,13 @@ export function MarketplaceFilterSheet({
             </section>
 
             <section>
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Province</p>
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("province")}</p>
               <select
                 value={province}
                 onChange={(event) => setProvince(event.target.value)}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition-colors focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10"
               >
-                <option value="">All provinces</option>
+                <option value="">{t("allProvinces")}</option>
                 {SA_PROVINCES.map((item) => (
                   <option key={item} value={item}>
                     {item}
@@ -197,11 +199,11 @@ export function MarketplaceFilterSheet({
             </section>
 
             <section>
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Price</p>
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("priceRange")}</p>
               <div className="grid grid-cols-2 gap-2">
                 {PRICE_PRESETS.map((preset) => (
                   <button
-                    key={preset.label}
+                    key={preset.labelKey}
                     type="button"
                     onClick={() => {
                       setMinPrice(preset.min);
@@ -213,14 +215,14 @@ export function MarketplaceFilterSheet({
                         : "border-slate-200 bg-white text-slate-600"
                     }`}
                   >
-                    {preset.label}
+                    {t(preset.labelKey)}
                   </button>
                 ))}
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <label className="block">
-                  <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Min</span>
+                  <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("min")}</span>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R</span>
                     <input
@@ -234,7 +236,7 @@ export function MarketplaceFilterSheet({
                   </div>
                 </label>
                 <label className="block">
-                  <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Max</span>
+                  <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("max")}</span>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R</span>
                     <input
@@ -251,15 +253,15 @@ export function MarketplaceFilterSheet({
             </section>
 
             <section>
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Trust</p>
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("trust")}</p>
               <button
                 type="button"
                 onClick={() => setVerifiedOnly((value) => !value)}
                 className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left"
               >
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Verified sellers only</p>
-                  <p className="mt-1 text-xs text-slate-500">Highlight sellers with visible TradeFeed verification.</p>
+                  <p className="text-sm font-semibold text-slate-900">{t("verifiedOnly")}</p>
+                  <p className="mt-1 text-xs text-slate-500">{t("verifiedDescription")}</p>
                 </div>
                 <div className={`flex h-6 w-11 items-center rounded-full px-1 transition-colors ${verifiedOnly ? "bg-emerald-500" : "bg-slate-200"}`}>
                   <div className={`h-4 w-4 rounded-full bg-white transition-transform ${verifiedOnly ? "translate-x-5" : "translate-x-0"}`} />
@@ -276,14 +278,14 @@ export function MarketplaceFilterSheet({
               onClick={handleReset}
               className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
             >
-              Reset
+              {t("reset")}
             </button>
             <button
               type="button"
               onClick={handleApply}
               className="flex-1 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
             >
-              Apply filters
+              {t("applyFilters")}
             </button>
           </div>
         </div>

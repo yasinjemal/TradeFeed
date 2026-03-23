@@ -258,10 +258,10 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
 
         // 6. Show tracking notification
         if (result.orderNumber) {
-          toast.success("Order placed!", {
-            description: `Order ${result.orderNumber} — Track your order anytime.`,
+          toast.success(t("orderPlaced"), {
+            description: `Order ${result.orderNumber} — ${t("trackYourOrder")}`,
             action: result.trackingUrl ? {
-              label: "Track Order",
+              label: t("trackOrder"),
               onClick: () => window.open(result.trackingUrl!, "_self"),
             } : undefined,
             duration: 10000,
@@ -277,16 +277,16 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         const msg = err instanceof Error ? err.message : String(err);
         const isStaleAction = /not found on the server|404|UnrecognizedAction|Failed to fetch/i.test(msg);
         if (isStaleAction) {
-          setCheckoutError("We've just updated TradeFeed. Please reload the page and try again.");
+          setCheckoutError(t("updateError"));
         } else {
-          setCheckoutError("Connection issue — please check your internet and try again.");
+          setCheckoutError(t("connectionError"));
         }
       }
     });
   };
 
   const handleClearCart = () => {
-    if (!confirm("Remove all items from your cart?")) return;
+    if (!confirm(t("removeConfirm"))) return;
     clearCart();
   };
 
@@ -306,7 +306,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col"
         role="dialog"
         aria-modal="true"
-        aria-label="Shopping cart"
+        aria-label={t("shoppingCart")}
       >
         {/* ── Header ──────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200">
@@ -319,7 +319,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
           <button
             ref={closeButtonRef}
             onClick={onClose}
-            aria-label="Close cart"
+            aria-label={t("closeCart")}
             className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-stone-100 transition-colors text-stone-500"
           >
             <svg
@@ -344,7 +344,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <IllustrationEmptyCart className="w-32 h-32 mb-3" />
               <p className="text-stone-600 text-sm font-medium">{t("empty")}</p>
-              <p className="text-stone-400 text-xs mt-1">Add items from the catalog to get started</p>
+              <p className="text-stone-400 text-xs mt-1">{t("emptyHint")}</p>
               <button
                 onClick={onClose}
                 className="mt-4 text-emerald-600 text-sm font-medium hover:text-emerald-700 transition-colors"
@@ -395,11 +395,11 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                     )}
                     {item.orderType === "retail" ? (
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-semibold">
-                        🛍️ Retail
+                        🛍️ {t("retail")}
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-semibold">
-                        🏭 Wholesale
+                        🏭 {t("wholesale")}
                       </span>
                     )}
                   </div>
@@ -451,7 +451,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                     </span>
                   </div>
                   {item.orderType !== "retail" && (item.minWholesaleQty ?? 1) > 1 && (
-                    <p className="text-[10px] text-amber-600 mt-1">Wholesale min. {item.minWholesaleQty} units</p>
+                    <p className="text-[10px] text-amber-600 mt-1">{t("wholesaleMin", { count: item.minWholesaleQty })}</p>
                   )}
                 </div>
 
@@ -498,7 +498,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                       onClick={() => window.location.reload()}
                       className="mt-1.5 block text-xs font-semibold text-red-800 underline underline-offset-2 hover:text-red-900"
                     >
-                      Reload now
+                      {t("reloadNow")}
                     </button>
                   )}
                 </div>
@@ -507,16 +507,16 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
 
             {/* ── Buyer Info (Optional) ─────────────────── */}
             <div className="space-y-2.5 p-3 bg-stone-50 rounded-xl border border-stone-100">
-              <p className="text-xs font-medium text-stone-500">Your details <span className="text-stone-400">(optional)</span></p>
+              <p className="text-xs font-medium text-stone-500">{t("yourDetails")} <span className="text-stone-400">({t("optional")})</span></p>
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
                   <label htmlFor="buyer-name" className="block text-xs font-medium text-stone-500 mb-1">
-                    Name
+                    {t("name")}
                   </label>
                   <input
                     id="buyer-name"
                     type="text"
-                    placeholder="Your name"
+                    placeholder={t("namePlaceholder")}
                     value={buyerName}
                     onChange={(e) => setBuyerName(e.target.value)}
                     className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-stone-900 placeholder:text-stone-400"
@@ -524,7 +524,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 </div>
                 <div>
                   <label htmlFor="buyer-phone" className="block text-xs font-medium text-stone-500 mb-1">
-                    Phone
+                    {t("phone")}
                   </label>
                   <input
                     id="buyer-phone"
@@ -538,11 +538,11 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
               </div>
               <div>
                 <label htmlFor="buyer-note" className="block text-xs font-medium text-stone-500 mb-1">
-                  Order notes
+                  {t("orderNotes")}
                 </label>
                 <textarea
                   id="buyer-note"
-                  placeholder="Any special instructions…"
+                  placeholder={t("orderNotesPlaceholder")}
                   value={buyerNote}
                   onChange={(e) => setBuyerNote(e.target.value)}
                   rows={2}
@@ -562,7 +562,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
               </svg>
-              {showDelivery ? "Remove delivery address" : "Add delivery address"}
+              {showDelivery ? t("removeDelivery") : t("addDelivery")}
               <svg
                 className={`w-3.5 h-3.5 ml-auto transition-transform duration-200 ${showDelivery ? "rotate-180" : ""}`}
                 fill="none"
@@ -579,7 +579,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
               <div className="space-y-2.5 p-3 bg-stone-50 rounded-xl border border-stone-100 animate-in slide-in-from-top-2 duration-200">
                 <div>
                   <label htmlFor="delivery-address" className="block text-xs font-medium text-stone-500 mb-1">
-                    Street Address
+                    {t("streetAddress")}
                   </label>
                   <input
                     id="delivery-address"
@@ -594,7 +594,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 <div className="grid grid-cols-2 gap-2.5">
                   <div>
                     <label htmlFor="delivery-city" className="block text-xs font-medium text-stone-500 mb-1">
-                      City
+                      {t("city")}
                     </label>
                     <input
                       id="delivery-city"
@@ -607,7 +607,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                   </div>
                   <div>
                     <label htmlFor="delivery-postal" className="block text-xs font-medium text-stone-500 mb-1">
-                      Postal Code
+                      {t("postalCode")}
                     </label>
                     <input
                       id="delivery-postal"
@@ -622,7 +622,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 </div>
                 <div>
                   <label htmlFor="delivery-province" className="block text-xs font-medium text-stone-500 mb-1">
-                    Province
+                    {t("province")}
                   </label>
                   <select
                     id="delivery-province"
@@ -631,7 +631,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                     aria-required="true"
                     className="w-full px-3 py-2 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 text-stone-900"
                   >
-                    <option value="">Select province…</option>
+                    <option value="">{t("selectProvince")}</option>
                     {SA_PROVINCES.map((p) => (
                       <option key={p} value={p}>{p}</option>
                     ))}
@@ -647,13 +647,13 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                   <svg className="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.079-.504 1.042-1.125a4.5 4.5 0 00-4.042-4.125H9.75M8.25 11.25h4.875c.621 0 1.163.461 1.204 1.08A61.87 61.87 0 0115 12.75M3.75 18.75V4.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121.75 4.5v10.5" />
                   </svg>
-                  Shipping Options
+                  {t("shippingOptions")}
                 </p>
                 {loadingRates ? (
-                  <div className="text-xs text-stone-400 py-2 text-center">Loading rates…</div>
+                  <div className="text-xs text-stone-400 py-2 text-center">{t("loadingRates")}</div>
                 ) : shippingRates.length === 0 ? (
                   <div className="text-xs text-stone-500 py-1">
-                    Seller arranges delivery — discuss shipping via WhatsApp
+                    {t("sellerArranges")}
                   </div>
                 ) : (
                   <div className="space-y-1.5">
@@ -670,9 +670,9 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                         className="h-3.5 w-3.5 text-blue-600 border-stone-300"
                       />
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs font-medium text-stone-800">Collect from seller</span>
+                        <span className="text-xs font-medium text-stone-800">{t("collectFromSeller")}</span>
                       </div>
-                      <span className="text-xs font-bold text-emerald-600">Free</span>
+                      <span className="text-xs font-bold text-emerald-600">{t("free")}</span>
                     </label>
 
                     {shippingRates.slice(0, 4).map((rate) => {
@@ -710,7 +710,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                   <svg className="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
                   </svg>
-                  Payment Method
+                  {t("paymentMethod")}
                 </p>
                 <div className="space-y-1.5">
                   <label className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition-all ${
@@ -725,8 +725,8 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                       className="h-3.5 w-3.5 text-amber-600 border-stone-300"
                     />
                     <div className="flex-1 min-w-0">
-                      <span className="text-xs font-medium text-stone-800">Pay Online</span>
-                      <span className="block text-[10px] text-stone-400">PayFast — card, EFT, or SnapScan</span>
+                      <span className="text-xs font-medium text-stone-800">{t("payOnline")}</span>
+                      <span className="block text-[10px] text-stone-400">{t("payfast")}</span>
                     </div>
                   </label>
                   <label className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition-all ${
@@ -741,8 +741,8 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                       className="h-3.5 w-3.5 text-amber-600 border-stone-300"
                     />
                     <div className="flex-1 min-w-0">
-                      <span className="text-xs font-medium text-stone-800">Cash on Delivery</span>
-                      <span className="block text-[10px] text-stone-400">Pay when you receive your order</span>
+                      <span className="text-xs font-medium text-stone-800">{t("cashOnDelivery")}</span>
+                      <span className="block text-[10px] text-stone-400">{t("codDesc")}</span>
                     </div>
                   </label>
                 </div>
@@ -756,7 +756,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 {selectedShippingRate && selectedShipping !== "collection" ? (
                   <>
                     <div className="text-xs text-stone-400">
-                      Items: {formatZAR(totalPriceInCents)} + Shipping: {formatShippingCost(selectedShippingRate.priceCents)}
+                      {t("itemsShipping", { items: formatZAR(totalPriceInCents), shipping: formatShippingCost(selectedShippingRate.priceCents) })}
                     </div>
                     <div className="text-xl font-bold text-stone-900">
                       {formatZAR(totalPriceInCents + selectedShippingRate.priceCents)}
@@ -786,7 +786,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 className="mt-0.5 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
               />
               <span className="text-[11px] text-stone-500 leading-tight group-hover:text-stone-600 transition-colors">
-                Send me updates about new products & deals from this seller on WhatsApp
+                {t("whatsappUpdates")}
               </span>
             </label>
 
@@ -808,15 +808,15 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
             <div className="space-y-1.5 pt-1">
               <div className="flex items-center gap-2 text-xs text-stone-500">
                 <span className="text-emerald-500">✔</span>
-                <span>Order sent directly to seller on WhatsApp</span>
+                <span>{t("orderSentToSeller")}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-stone-500">
                 <span className="text-emerald-500">✔</span>
-                <span>Confirm delivery &amp; payment with seller</span>
+                <span>{t("confirmDelivery")}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-stone-500">
                 <span className="text-emerald-500">✔</span>
-                <span>No account required</span>
+                <span>{t("noAccountRequired")}</span>
               </div>
             </div>
           </div>
