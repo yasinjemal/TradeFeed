@@ -88,7 +88,7 @@ export function SmartVariantCreator({
   const [activeGroup, setActiveGroup] = useState(0);
   const [selectedOption1s, setSelectedOption1s] = useState<Set<string>>(new Set());
   const [selectedOption2s, setSelectedOption2s] = useState<Set<string>>(new Set());
-  const [price, setPrice] = useState("299.99");
+  const [price, setPrice] = useState("");
   const [retailPrice, setRetailPrice] = useState("");
   const [stock, setStock] = useState("50");
   const [isPending, startTransition] = useTransition();
@@ -336,6 +336,7 @@ export function SmartVariantCreator({
               inputMode="decimal"
               step="0.01"
               min="0.01"
+              placeholder="—"
               value={price}
               onChange={(e) => {
                 setPrice(e.target.value);
