@@ -100,6 +100,7 @@ model Shop {
   referralRewardsGiven ReferralReward[] @relation("ReferrerRewards")  // Rewards earned by referring others
   referralRewardReceived ReferralReward? @relation("ReferredRewards") // Reward triggered when this shop upgraded
   whatsAppProductImports WhatsAppProductImport[] // Products imported via WhatsApp
+  staffInvites StaffInvite[]                    // Pending staff invitations
 
   @@index([slug])
   @@index([isActive])
@@ -169,6 +170,30 @@ enum UserRole {
   OWNER
   MANAGER
   STAFF
+}
+
+// ============================================================
+// STAFF INVITE: Pending team invitations
+// Tracks invites sent by shop owners to add staff members.
+// Token-based acceptance flow — works even for new users.
+// ============================================================
+model StaffInvite {
+  id          String     @id @default(cuid())
+  shopId      String
+  shop        Shop       @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  email       String                          // Invitee email (lowercased)
+  role        UserRole   @default(STAFF)      // Role to assign on acceptance
+  token       String     @unique @default(cuid()) // Secure invite link token
+  invitedById String                          // User ID of the person who sent invite
+  status      String     @default("pending")  // pending | accepted | expired | revoked
+  acceptedAt  DateTime?
+  expiresAt   DateTime                        // Invite expiry (7 days)
+  createdAt   DateTime   @default(now())
+
+  @@unique([shopId, email])                   // One invite per email per shop
+  @@index([token])
+  @@index([email])
+  @@index([shopId])
 }
 
 // ============================================================
@@ -372,6 +397,7 @@ model Plan {
   slug           String   @unique            // "free", "pro", "business"
   priceInCents   Int      @default(0)        // Monthly price in ZAR cents (0 = free)
   productLimit   Int      @default(10)       // Max products (0 = unlimited)
+  staffLimit     Int      @default(1)        // Max staff members (1 = owner only)
   features       String?                     // JSON array of feature strings
   isActive       Boolean  @default(true)
 

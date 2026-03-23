@@ -19,6 +19,8 @@ import { SettingsSidebar } from "@/components/shop/settings-sidebar";
 import { ThemePicker } from "@/components/shop/theme-picker";
 import { CodToggle } from "@/components/shop/cod-toggle";
 import { CustomDomainSettings } from "@/components/shop/custom-domain-settings";
+import { TeamSection } from "@/components/shop/team-section";
+import { getTeamData } from "@/app/actions/staff";
 import Link from "next/link";
 
 interface SettingsPageProps {
@@ -45,6 +47,9 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
   const isPro =
     (!!subscription?.plan.slug && subscription.plan.slug !== "free") ||
     isTrialActive(subscription).active;
+  const staffLimit = subscription?.plan.staffLimit ?? 1;
+
+  const teamData = await getTeamData(shop.id);
 
   // Calculate profile completeness
   const checks = [
@@ -270,6 +275,27 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
                   caption: item.caption,
                   position: item.position,
                 }))}
+              />
+            </div>
+          </div>
+
+          {/* ── Team ──────────────────────────────────── */}
+          <div id="section-team" className="scroll-mt-28 relative rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-indigo-200 rounded-l-2xl" />
+            <div className="pl-2">
+              <div className="flex items-center gap-2 mb-1">
+                <span>👥</span>
+                <h3 className="text-lg font-bold text-slate-900">Team</h3>
+                {!isPro && <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Pro</span>}
+              </div>
+              <p className="text-sm text-slate-500 mb-5">Invite staff and manage team member roles.</p>
+              <TeamSection
+                shopSlug={slug}
+                members={teamData.members}
+                invites={teamData.invites}
+                isPro={isPro}
+                staffLimit={staffLimit}
+                currentUserId={access.userId}
               />
             </div>
           </div>

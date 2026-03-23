@@ -113,7 +113,7 @@ export async function POST(request: Request) {
       }
 
       // Upsert user — create if new, update if existing
-      await db.user.upsert({
+      const user = await db.user.upsert({
         where: { clerkId: data.id },
         create: {
           clerkId: data.id,
@@ -129,6 +129,39 @@ export async function POST(request: Request) {
           imageUrl: data.image_url,
         },
       });
+
+      // Auto-accept pending staff invitations for this email
+      if (type === "user.created") {
+        const pendingInvites = await db.staffInvite.findMany({
+          where: {
+            email: primaryEmail.email_address.toLowerCase(),
+            status: "pending",
+            expiresAt: { gt: new Date() },
+          },
+        });
+
+        for (const invite of pendingInvites) {
+          try {
+            await db.$transaction([
+              db.shopUser.create({
+                data: {
+                  userId: user.id,
+                  shopId: invite.shopId,
+                  role: invite.role,
+                },
+              }),
+              db.staffInvite.update({
+                where: { id: invite.id },
+                data: { status: "accepted", acceptedAt: new Date() },
+              }),
+            ]);
+            console.log(`[clerk-webhook] Auto-accepted invite ${invite.id} for ${primaryEmail.email_address}`);
+          } catch (err) {
+            // ShopUser might already exist — skip
+            console.warn(`[clerk-webhook] Failed to auto-accept invite ${invite.id}:`, err);
+          }
+        }
+      }
 
       console.log(`[clerk-webhook] User ${type}: ${data.id}`);
       break;

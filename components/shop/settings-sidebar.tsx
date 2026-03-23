@@ -19,6 +19,7 @@ const SECTIONS = [
   { id: "domain", label: "Custom Domain", icon: "🌐" },
   { id: "ai", label: "AI Preferences", icon: "🤖" },
   { id: "gallery", label: "Gallery", icon: "🎨" },
+  { id: "team", label: "Team", icon: "👥" },
 ] as const;
 
 export function SettingsSidebar({ className }: { className?: string }) {
