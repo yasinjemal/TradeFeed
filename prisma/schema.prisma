@@ -1064,6 +1064,7 @@ model SellerSequenceState {
   nudgeShareSentAt      DateTime?             // Day 7: "Share your catalog"
   nudgeInactiveSentAt   DateTime?             // Day 14: "Your shop hasn't been updated"
   lastMonthlySentAt     DateTime?             // Last monthly summary sent
+  lastWeeklySentAt      DateTime?             // Last weekly report sent
 
   // Opt-out
   optedOut        Boolean  @default(false)    // Seller opted out of follow-ups

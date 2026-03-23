@@ -20,7 +20,8 @@ import { db } from "@/lib/db";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
-// Revalidate every 6 hours — products don't change that fast
+// Dynamic route — rendered on demand, cached at edge for 6 hours
+export const dynamic = "force-dynamic";
 export const revalidate = 21600;
 
 function escapeXml(str: string): string {

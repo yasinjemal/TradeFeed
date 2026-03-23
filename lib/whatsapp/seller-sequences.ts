@@ -9,6 +9,7 @@
 //  Day 3  → "Add your first product" (if 0 products)
 //  Day 7  → "Share your catalog" (if no WhatsApp clicks)
 //  Day 14 → "Your shop needs attention" (if inactive)
+//  Weekly → Sales report (views, orders, revenue, top products, WoW trends)
 //  Monthly → Activity summary (views, orders, revenue)
 //
 // RULES:
@@ -121,6 +122,60 @@ function monthlySummary(
   lines.push("", `Full analytics: ${BASE_URL}/dashboard/${slug}/analytics`);
   lines.push("", "Reply STOP to opt out.");
   return lines.join("\n");
+}
+
+// ── Weekly Sales Report ────────────────────────────────────
+
+interface WeeklyStats {
+  views: number;
+  whatsappClicks: number;
+  orders: number;
+  revenueCents: number;
+  prevViews: number;
+  prevOrders: number;
+  prevRevenueCents: number;
+  topProducts: { name: string; qty: number }[];
+}
+
+function weeklyReport(shopName: string, slug: string, stats: WeeklyStats) {
+  const lines = [
+    `📈 Weekly Sales Report — ${shopName}`,
+    "",
+    `👀 Views: ${stats.views}${trendEmoji(stats.views, stats.prevViews)}`,
+    `💬 WhatsApp clicks: ${stats.whatsappClicks}`,
+    `📦 Orders: ${stats.orders}${trendEmoji(stats.orders, stats.prevOrders)}`,
+    `💰 Revenue: ${formatZAR(stats.revenueCents)}${trendEmoji(stats.revenueCents, stats.prevRevenueCents)}`,
+  ];
+
+  if (stats.topProducts.length > 0) {
+    lines.push("", "🏆 Top products:");
+    for (const p of stats.topProducts.slice(0, 3)) {
+      lines.push(`  • ${p.name} (${p.qty} sold)`);
+    }
+  }
+
+  lines.push("");
+
+  if (stats.orders === 0 && stats.prevOrders === 0) {
+    lines.push("💡 Tip: Share your catalog in WhatsApp groups to get your first sale this week.");
+  } else if (stats.orders > stats.prevOrders) {
+    lines.push("🔥 Sales are growing — keep sharing your catalog!");
+  } else if (stats.orders < stats.prevOrders) {
+    lines.push("💡 Tip: Add new products or run a promotion to boost sales.");
+  } else {
+    lines.push("💡 Tip: Update your product photos to stand out from competitors.");
+  }
+
+  lines.push("", `Dashboard: ${BASE_URL}/dashboard/${slug}`);
+  lines.push("", "Reply STOP to opt out.");
+  return lines.join("\n");
+}
+
+function trendEmoji(current: number, previous: number): string {
+  if (previous === 0) return current > 0 ? " ⬆️" : "";
+  if (current > previous) return " ⬆️";
+  if (current < previous) return " ⬇️";
+  return "";
 }
 
 // ── Sequence Engine ────────────────────────────────────────
@@ -246,6 +301,25 @@ export async function processSellerSequences(): Promise<SequenceResult> {
         }
       }
 
+      // Weekly sales report (after 7 days, max once per 7 days)
+      if (shopAgeDays >= 7) {
+        const lastWeekly = state.lastWeeklySentAt;
+        const daysSinceLastWeekly = lastWeekly
+          ? Math.floor((Date.now() - lastWeekly.getTime()) / (1000 * 60 * 60 * 24))
+          : Infinity;
+
+        if (daysSinceLastWeekly >= 7) {
+          const stats = await getWeeklyStats(shop.id);
+          await sendAndLog(shop.id, shop.whatsappNumber, "weekly_report", weeklyReport(shop.name, shop.slug, stats));
+          await db.sellerSequenceState.update({
+            where: { shopId: shop.id },
+            data: { lastWeeklySentAt: new Date() },
+          });
+          result.sent++;
+          continue;
+        }
+      }
+
       // Nothing to send for this seller
       result.skipped++;
     } catch (err) {
@@ -329,6 +403,67 @@ async function getMonthlyStats(shopId: string) {
         shopId,
         createdAt: { gte: thirtyDaysAgo },
       },
+      _count: { id: true },
+      _sum: { totalCents: true },
+    }),
+  ]);
+
+  return {
+    views: analytics.views,
+    whatsappClicks: analytics.whatsappClicks,
+    orders: orders._count.id,
+    revenueCents: orders._sum.totalCents ?? 0,
+  };
+}
+
+async function getWeeklyStats(shopId: string): Promise<WeeklyStats> {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+  const [thisWeek, prevWeek, topProducts] = await Promise.all([
+    getPeriodStats(shopId, sevenDaysAgo, new Date()),
+    getPeriodStats(shopId, fourteenDaysAgo, sevenDaysAgo),
+    db.orderItem.groupBy({
+      by: ["productName"],
+      where: {
+        order: { shopId, createdAt: { gte: sevenDaysAgo } },
+      },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: "desc" } },
+      take: 3,
+    }),
+  ]);
+
+  return {
+    views: thisWeek.views,
+    whatsappClicks: thisWeek.whatsappClicks,
+    orders: thisWeek.orders,
+    revenueCents: thisWeek.revenueCents,
+    prevViews: prevWeek.views,
+    prevOrders: prevWeek.orders,
+    prevRevenueCents: prevWeek.revenueCents,
+    topProducts: topProducts.map((r) => ({
+      name: r.productName,
+      qty: r._sum.quantity ?? 0,
+    })),
+  };
+}
+
+async function getPeriodStats(shopId: string, from: Date, to: Date) {
+  const [analytics, orders] = await Promise.all([
+    db.analyticsEvent.aggregate({
+      where: { shopId, createdAt: { gte: from, lt: to } },
+      _count: { id: true },
+    }).then(async (allEvents) => {
+      const whatsappClicks = await db.analyticsEvent.count({
+        where: { shopId, type: "WHATSAPP_CLICK", createdAt: { gte: from, lt: to } },
+      });
+      return { views: allEvents._count.id, whatsappClicks };
+    }),
+    db.order.aggregate({
+      where: { shopId, createdAt: { gte: from, lt: to } },
       _count: { id: true },
       _sum: { totalCents: true },
     }),
