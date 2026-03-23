@@ -24,6 +24,21 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 export const dynamic = "force-dynamic";
 export const revalidate = 21600;
 
+/**
+ * Convert an UploadThing CDN URL to our image proxy URL.
+ * Google Merchant Center rejects raw UT URLs (wrong Content-Type, redirects).
+ * Our /api/img/[key] proxy serves guaranteed image/jpeg from our domain.
+ */
+function toProxyImageUrl(rawUrl: string): string {
+  if (!rawUrl) return `${APP_URL}/icon.svg`;
+  // Extract UT file key from URLs like:
+  //   https://utfs.io/f/abc123
+  //   https://xxx.ufs.sh/f/abc123/original-name.jpg
+  const match = rawUrl.match(/\/f\/([a-zA-Z0-9_-]+)/);
+  if (!match) return rawUrl; // Not a UT URL — return as-is
+  return `${APP_URL}/api/img/${match[1]}`;
+}
+
 function escapeXml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -45,7 +60,7 @@ export async function GET() {
       slug: true,
       name: true,
       description: true,
-      images: { select: { url: true }, take: 1 },
+      images: { select: { url: true, key: true }, take: 1 },
       category: { select: { name: true } },
       shop: { select: { name: true, slug: true } },
       variants: {
@@ -71,7 +86,7 @@ export async function GET() {
     .map((p) => {
       const v = p.variants[0]!;
       const price = (v.priceInCents / 100).toFixed(2);
-      const imageUrl = p.images[0]?.url || `${APP_URL}/icon.svg`;
+      const imageUrl = toProxyImageUrl(p.images[0]?.url ?? "");
       const link = `${APP_URL}/catalog/${p.shop.slug}/products/${p.slug ?? p.id}`;
       const availability = v.stock > 0 ? "in_stock" : "out_of_stock";
       const category = p.category?.name || "Apparel & Accessories";
