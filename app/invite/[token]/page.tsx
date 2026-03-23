@@ -3,7 +3,8 @@
 // ============================================================
 
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
+import { auth } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
 import { AcceptInviteClient } from "./accept-client";
 
@@ -30,12 +31,16 @@ export default async function InvitePage({ params }: InvitePageProps) {
     return notFound();
   }
 
-  const user = await getCurrentUser();
+  // Check if signed in via Clerk (without DB lookup to avoid race condition)
+  const { userId: clerkId } = await auth();
 
   // Not signed in → redirect to sign-up with return URL
-  if (!user) {
+  if (!clerkId) {
     redirect(`/sign-up?redirect_url=/invite/${token}`);
   }
+
+  // Signed in — resolve DB user (auto-creates if webhook hasn't fired yet)
+  const user = await requireAuth();
 
   return (
     <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
