@@ -19,8 +19,7 @@ import { SettingsSidebar } from "@/components/shop/settings-sidebar";
 import { ThemePicker } from "@/components/shop/theme-picker";
 import { CodToggle } from "@/components/shop/cod-toggle";
 import { CustomDomainSettings } from "@/components/shop/custom-domain-settings";
-import { TeamSection } from "@/components/shop/team-section";
-import { getTeamData } from "@/app/actions/staff";
+import { db } from "@/lib/db";
 import Link from "next/link";
 
 interface SettingsPageProps {
@@ -49,7 +48,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
     isTrialActive(subscription).active;
   const staffLimit = subscription?.plan.staffLimit ?? 1;
 
-  const teamData = await getTeamData(shop.id);
+  const memberCount = await db.shopUser.count({ where: { shopId: shop.id } });
 
   // Calculate profile completeness
   const checks = [
@@ -288,15 +287,16 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
                 <h3 className="text-lg font-bold text-slate-900">Team</h3>
                 {!isPro && <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Pro</span>}
               </div>
-              <p className="text-sm text-slate-500 mb-5">Invite staff and manage team member roles.</p>
-              <TeamSection
-                shopSlug={slug}
-                members={teamData.members}
-                invites={teamData.invites}
-                isPro={isPro}
-                staffLimit={staffLimit}
-                currentUserId={access.userId}
-              />
+              <p className="text-sm text-slate-500 mb-4">{memberCount} of {staffLimit} team member{staffLimit !== 1 ? "s" : ""}</p>
+              <Link
+                href={`/dashboard/${slug}/team`}
+                className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+              >
+                Manage team
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
             </div>
           </div>
 

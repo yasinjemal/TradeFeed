@@ -10,11 +10,44 @@ import { revalidatePath } from "next/cache";
 import { sendEmail } from "@/lib/email/resend";
 import { staffInviteEmailHtml, staffInviteEmailText } from "@/lib/email/templates/staff-invite";
 import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
+import { logShopActivity } from "@/lib/db/activity-logs";
+import { ACTIVITY_ACTIONS, ACTIVITY_ENTITY_TYPES } from "@/lib/config/activity-actions";
+import { TEAM_LIMIT_ERROR } from "@/lib/config/plan-limits";
 
 type ActionResult = {
   success: boolean;
   error?: string;
+  errorCode?: string;
 };
+
+// ============================================================
+// checkTeamLimit — Reusable plan-based team limit check
+// ============================================================
+
+export async function checkTeamLimit(shopId: string) {
+  const [subscription, currentCount] = await Promise.all([
+    getShopSubscription(shopId),
+    db.shopUser.count({ where: { shopId } }),
+  ]);
+
+  const isPro =
+    (!!subscription?.plan.slug && subscription.plan.slug !== "free") ||
+    isTrialActive(subscription).active;
+  const staffLimit = subscription?.plan.staffLimit ?? 2;
+  const planName = subscription?.plan.name ?? "Free";
+  const atLimit = currentCount >= staffLimit;
+  const nearLimit = currentCount >= Math.floor(staffLimit * 0.8);
+
+  return {
+    isPro,
+    staffLimit,
+    currentCount,
+    planName,
+    atLimit,
+    nearLimit,
+    canInvite: isPro ? !atLimit : false,
+  };
+}
 
 // ============================================================
 // inviteStaffAction — Send a staff invitation (OWNER only)
@@ -39,22 +72,15 @@ export async function inviteStaffAction(
     }
 
     // Check staff limit
-    const subscription = await getShopSubscription(access.shopId);
-    const isPro =
-      (!!subscription?.plan.slug && subscription.plan.slug !== "free") ||
-      isTrialActive(subscription).active;
-    const staffLimit = subscription?.plan.staffLimit ?? 1;
+    const teamCheck = await checkTeamLimit(access.shopId);
 
-    const currentStaffCount = await db.shopUser.count({
-      where: { shopId: access.shopId },
-    });
-
-    if (!isPro || currentStaffCount >= staffLimit) {
+    if (!teamCheck.canInvite) {
       return {
         success: false,
-        error: isPro
-          ? `Staff limit reached (${staffLimit} members). Upgrade for more seats.`
+        error: teamCheck.isPro
+          ? `You've reached your limit of ${teamCheck.staffLimit} team members. Upgrade to add more and scale your shop.`
           : "Multi-staff is a Pro feature. Upgrade to invite team members.",
+        errorCode: TEAM_LIMIT_ERROR.code,
       };
     }
 
@@ -135,7 +161,25 @@ export async function inviteStaffAction(
       }),
     });
 
+    // Log activity (fire-and-forget)
+    const inviter = await db.user.findUnique({
+      where: { id: access.userId },
+      select: { firstName: true, lastName: true, email: true },
+    });
+    const inviterName = [inviter?.firstName, inviter?.lastName].filter(Boolean).join(" ") || inviter?.email || "Unknown";
+    logShopActivity({
+      shopId: access.shopId,
+      userId: access.userId,
+      userName: inviterName,
+      action: ACTIVITY_ACTIONS.TEAM_MEMBER_INVITED,
+      entityType: ACTIVITY_ENTITY_TYPES.INVITE,
+      entityId: invite.id,
+      entityName: normalizedEmail,
+      metadata: { email: normalizedEmail, role },
+    });
+
     revalidatePath(`/dashboard/${shopSlug}/settings`);
+    revalidatePath(`/dashboard/${shopSlug}/team`);
     return { success: true };
   } catch (err) {
     console.error("[inviteStaffAction]", err);
@@ -209,7 +253,21 @@ export async function acceptInviteAction(token: string): Promise<ActionResult> {
       }),
     ]);
 
+    // Log activity (fire-and-forget)
+    const accepterName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
+    logShopActivity({
+      shopId: invite.shopId,
+      userId: user.id,
+      userName: accepterName,
+      action: ACTIVITY_ACTIONS.TEAM_INVITE_ACCEPTED,
+      entityType: ACTIVITY_ENTITY_TYPES.TEAM_MEMBER,
+      entityId: user.id,
+      entityName: accepterName,
+      metadata: { email: invite.email, role: invite.role },
+    });
+
     revalidatePath(`/dashboard/${invite.shop.slug}/settings`);
+    revalidatePath(`/dashboard/${invite.shop.slug}/team`);
     return { success: true };
   } catch (err) {
     console.error("[acceptInviteAction]", err);
@@ -243,7 +301,25 @@ export async function revokeInviteAction(
       data: { status: "revoked" },
     });
 
+    // Log activity (fire-and-forget)
+    const revoker = await db.user.findUnique({
+      where: { id: access.userId },
+      select: { firstName: true, lastName: true, email: true },
+    });
+    const revokerName = [revoker?.firstName, revoker?.lastName].filter(Boolean).join(" ") || revoker?.email || "Unknown";
+    logShopActivity({
+      shopId: access.shopId,
+      userId: access.userId,
+      userName: revokerName,
+      action: ACTIVITY_ACTIONS.TEAM_INVITE_REVOKED,
+      entityType: ACTIVITY_ENTITY_TYPES.INVITE,
+      entityId: invite.id,
+      entityName: invite.email,
+      metadata: { email: invite.email },
+    });
+
     revalidatePath(`/dashboard/${shopSlug}/settings`);
+    revalidatePath(`/dashboard/${shopSlug}/team`);
     return { success: true };
   } catch (err) {
     console.error("[revokeInviteAction]", err);
@@ -282,13 +358,40 @@ export async function removeStaffAction(
       return { success: false, error: "Cannot remove the shop owner." };
     }
 
+    // Get names for logging before deletion
+    const [targetUser, actor] = await Promise.all([
+      db.user.findUnique({
+        where: { id: targetUserId },
+        select: { firstName: true, lastName: true, email: true },
+      }),
+      db.user.findUnique({
+        where: { id: access.userId },
+        select: { firstName: true, lastName: true, email: true },
+      }),
+    ]);
+
     await db.shopUser.delete({
       where: {
         userId_shopId: { userId: targetUserId, shopId: access.shopId },
       },
     });
 
+    // Log activity (fire-and-forget)
+    const actorName = [actor?.firstName, actor?.lastName].filter(Boolean).join(" ") || actor?.email || "Unknown";
+    const targetName = [targetUser?.firstName, targetUser?.lastName].filter(Boolean).join(" ") || targetUser?.email || "Unknown";
+    logShopActivity({
+      shopId: access.shopId,
+      userId: access.userId,
+      userName: actorName,
+      action: ACTIVITY_ACTIONS.TEAM_MEMBER_REMOVED,
+      entityType: ACTIVITY_ENTITY_TYPES.TEAM_MEMBER,
+      entityId: targetUserId,
+      entityName: targetName,
+      metadata: { email: targetUser?.email, role: membership.role },
+    });
+
     revalidatePath(`/dashboard/${shopSlug}/settings`);
+    revalidatePath(`/dashboard/${shopSlug}/team`);
     return { success: true };
   } catch (err) {
     console.error("[removeStaffAction]", err);
@@ -326,6 +429,8 @@ export async function updateStaffRoleAction(
       return { success: false, error: "Cannot change the owner's role." };
     }
 
+    const oldRole = membership.role;
+
     await db.shopUser.update({
       where: {
         userId_shopId: { userId: targetUserId, shopId: access.shopId },
@@ -333,7 +438,32 @@ export async function updateStaffRoleAction(
       data: { role: newRole },
     });
 
+    // Log activity (fire-and-forget)
+    const [targetUser, actor] = await Promise.all([
+      db.user.findUnique({
+        where: { id: targetUserId },
+        select: { firstName: true, lastName: true, email: true },
+      }),
+      db.user.findUnique({
+        where: { id: access.userId },
+        select: { firstName: true, lastName: true, email: true },
+      }),
+    ]);
+    const actorName = [actor?.firstName, actor?.lastName].filter(Boolean).join(" ") || actor?.email || "Unknown";
+    const targetName = [targetUser?.firstName, targetUser?.lastName].filter(Boolean).join(" ") || targetUser?.email || "Unknown";
+    logShopActivity({
+      shopId: access.shopId,
+      userId: access.userId,
+      userName: actorName,
+      action: ACTIVITY_ACTIONS.TEAM_MEMBER_ROLE_CHANGED,
+      entityType: ACTIVITY_ENTITY_TYPES.TEAM_MEMBER,
+      entityId: targetUserId,
+      entityName: targetName,
+      metadata: { oldRole, newRole, email: targetUser?.email },
+    });
+
     revalidatePath(`/dashboard/${shopSlug}/settings`);
+    revalidatePath(`/dashboard/${shopSlug}/team`);
     return { success: true };
   } catch (err) {
     console.error("[updateStaffRoleAction]", err);

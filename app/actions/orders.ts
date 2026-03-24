@@ -324,6 +324,32 @@ export async function updateOrderStatusAction(
     // 4. Update
     await updateOrderStatus(orderId, access.shopId, newStatus);
 
+    // 4a. Log activity (fire-and-forget)
+    try {
+      const { logShopActivity } = await import("@/lib/db/activity-logs");
+      const { ACTIVITY_ACTIONS, ACTIVITY_ENTITY_TYPES } = await import("@/lib/config/activity-actions");
+      const { db: prismaDb2 } = await import("@/lib/db");
+      const actor = await prismaDb2.user.findUnique({
+        where: { id: access.userId },
+        select: { firstName: true, lastName: true, email: true },
+      });
+      const actorName = [actor?.firstName, actor?.lastName].filter(Boolean).join(" ") || actor?.email || "Unknown";
+      logShopActivity({
+        shopId: access.shopId,
+        userId: access.userId,
+        userName: actorName,
+        action: ACTIVITY_ACTIONS.ORDER_STATUS_CHANGED,
+        entityType: ACTIVITY_ENTITY_TYPES.ORDER,
+        entityId: orderId,
+        entityName: order.orderNumber,
+        metadata: {
+          orderNumber: order.orderNumber,
+          oldStatus: order.status,
+          newStatus,
+        },
+      });
+    } catch { /* non-fatal */ }
+
     // 4b. Set timestamps for shipping states
     if (newStatus === "SHIPPED" || newStatus === "DELIVERED") {
       const { db: prismaDb } = await import("@/lib/db");

@@ -249,6 +249,28 @@ export async function createProductAction(
       // Non-fatal — product creation succeeded
     }
 
+    // 6. Log activity (fire-and-forget)
+    try {
+      const { logShopActivity } = await import("@/lib/db/activity-logs");
+      const { ACTIVITY_ACTIONS, ACTIVITY_ENTITY_TYPES } = await import("@/lib/config/activity-actions");
+      const { db: prismaUser } = await import("@/lib/db");
+      const actor = await prismaUser.user.findUnique({
+        where: { id: access.userId },
+        select: { firstName: true, lastName: true, email: true },
+      });
+      const actorName = [actor?.firstName, actor?.lastName].filter(Boolean).join(" ") || actor?.email || "Unknown";
+      logShopActivity({
+        shopId: access.shopId,
+        userId: access.userId,
+        userName: actorName,
+        action: ACTIVITY_ACTIONS.PRODUCT_CREATED,
+        entityType: ACTIVITY_ENTITY_TYPES.PRODUCT,
+        entityId: product.id,
+        entityName: parsed.data.name,
+        metadata: { name: parsed.data.name, isActive: parsed.data.isActive },
+      });
+    } catch { /* non-fatal */ }
+
     return {
       success: true,
       productId: product.id,
@@ -313,6 +335,28 @@ export async function updateProductAction(
     deps.revalidatePath(`/dashboard/${shopSlug}/products`);
     deps.revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
 
+    // Log activity (fire-and-forget)
+    try {
+      const { logShopActivity } = await import("@/lib/db/activity-logs");
+      const { ACTIVITY_ACTIONS, ACTIVITY_ENTITY_TYPES } = await import("@/lib/config/activity-actions");
+      const { db: prismaUser } = await import("@/lib/db");
+      const actor = await prismaUser.user.findUnique({
+        where: { id: access.userId },
+        select: { firstName: true, lastName: true, email: true },
+      });
+      const actorName = [actor?.firstName, actor?.lastName].filter(Boolean).join(" ") || actor?.email || "Unknown";
+      logShopActivity({
+        shopId: access.shopId,
+        userId: access.userId,
+        userName: actorName,
+        action: ACTIVITY_ACTIONS.PRODUCT_UPDATED,
+        entityType: ACTIVITY_ENTITY_TYPES.PRODUCT,
+        entityId: productId,
+        entityName: parsed.data.name,
+        metadata: { name: parsed.data.name },
+      });
+    } catch { /* non-fatal */ }
+
     return { success: true };
   } catch (error: unknown) {
     const message = extractActionError(error);
@@ -339,6 +383,28 @@ export async function deleteProductAction(
     if (!deleted) {
       return { success: false, error: "Product not found." };
     }
+
+    // Log activity (fire-and-forget)
+    try {
+      const { logShopActivity } = await import("@/lib/db/activity-logs");
+      const { ACTIVITY_ACTIONS, ACTIVITY_ENTITY_TYPES } = await import("@/lib/config/activity-actions");
+      const { db: prismaUser } = await import("@/lib/db");
+      const actor = await prismaUser.user.findUnique({
+        where: { id: access.userId },
+        select: { firstName: true, lastName: true, email: true },
+      });
+      const actorName = [actor?.firstName, actor?.lastName].filter(Boolean).join(" ") || actor?.email || "Unknown";
+      logShopActivity({
+        shopId: access.shopId,
+        userId: access.userId,
+        userName: actorName,
+        action: ACTIVITY_ACTIONS.PRODUCT_DELETED,
+        entityType: ACTIVITY_ENTITY_TYPES.PRODUCT,
+        entityId: productId,
+        entityName: deleted.name ?? productId,
+        metadata: { name: deleted.name },
+      });
+    } catch { /* non-fatal */ }
 
     deps.revalidatePath(`/dashboard/${shopSlug}/products`);
     deps.redirect(`/dashboard/${shopSlug}/products`);

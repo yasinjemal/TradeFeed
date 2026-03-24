@@ -101,6 +101,7 @@ model Shop {
   referralRewardReceived ReferralReward? @relation("ReferredRewards") // Reward triggered when this shop upgraded
   whatsAppProductImports WhatsAppProductImport[] // Products imported via WhatsApp
   staffInvites StaffInvite[]                    // Pending staff invitations
+  activityLogs ShopActivityLog[]               // Shop-level audit trail
 
   @@index([slug])
   @@index([isActive])
@@ -1318,4 +1319,29 @@ model MagicLink {
 
   @@index([phoneNumber, createdAt])                // Rate-limiting queries
   @@index([token])
+}
+
+// ============================================================
+// SHOP ACTIVITY LOG: Audit trail for all shop-level mutations
+// Tracks who did what, when, and to which entity within a shop.
+// Used by shop owners/managers in Settings → Activity Logs.
+// ============================================================
+model ShopActivityLog {
+  id          String   @id @default(cuid())
+  shopId      String                               // Tenant isolation
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  userId      String                               // User who performed the action
+  userName    String                               // Display name snapshot (avoids joins)
+  action      String                               // e.g. "TEAM_MEMBER_INVITED", "PRODUCT_CREATED"
+  entityType  String                               // e.g. "TeamMember", "Product", "Order"
+  entityId    String                               // ID of the affected entity
+  entityName  String?                              // Human-readable name snapshot
+  metadata    String?                              // JSON with extra context / before-after
+
+  createdAt   DateTime @default(now())
+
+  @@index([shopId, createdAt])
+  @@index([shopId, action])
+  @@index([shopId, userId])
+  @@index([shopId, entityType])
 }
