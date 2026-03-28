@@ -12,6 +12,9 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Terms of Service — TradeFeed",
   description: "TradeFeed terms of service. Rules and conditions for using our digital catalog platform.",
+  alternates: {
+    canonical: "https://tradefeed.co.za/terms",
+  },
 };
 
 export default function TermsPage() {

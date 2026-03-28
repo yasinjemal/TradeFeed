@@ -11,6 +11,9 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy Policy — TradeFeed",
   description: "TradeFeed privacy policy. How we collect, use, and protect your personal information in compliance with POPIA.",
+  alternates: {
+    canonical: "https://tradefeed.co.za/privacy",
+  },
 };
 
 export default function PrivacyPage() {

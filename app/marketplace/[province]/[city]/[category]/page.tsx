@@ -77,9 +77,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${category.name} in ${city.name}, ${province.name} — Buy Wholesale & Retail | TradeFeed`;
   const description = `Buy ${category.name.toLowerCase()} from suppliers in ${city.name}, ${province.name}. Compare prices from verified sellers. Wholesale & retail. Order via WhatsApp on TradeFeed.`;
 
+  // noindex thin pages with zero products — saves crawl budget
+  const provinceName = provinceSlugToDbValue(pSlug);
+  const cityName = citySlugToDbValue(pSlug, cSlug);
+  const isParent = category.children && category.children.length > 0;
+  const { total } = await getMarketplaceProducts({
+    ...(isParent ? { parentCategory: catSlug } : { category: catSlug }),
+    province: provinceName,
+    city: cityName,
+    page: 1,
+    pageSize: 1,
+  });
+
   return {
     title,
     description,
+    ...(total === 0 && { robots: { index: false, follow: true } }),
     keywords: [
       `${category.name.toLowerCase()} ${city.name}`,
       `buy ${category.name.toLowerCase()} ${city.name}`,

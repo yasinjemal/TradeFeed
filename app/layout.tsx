@@ -107,13 +107,10 @@ export const metadata: Metadata = {
       "/api/og?title=Online+Marketplace+South+Africa&subtitle=Sell+Online+%E2%80%A2+Create+Your+Shop+%E2%80%A2+Free+to+Start",
     ],
   },
-  alternates: {
-    canonical: "https://tradefeed.co.za",
-    languages: {
-      "en": "https://tradefeed.co.za",
-      "x-default": "https://tradefeed.co.za",
-    },
-  },
+  // NOTE: canonical is intentionally NOT set here — it would propagate
+  // to all child pages via Next.js metadata merging, causing Google to
+  // treat every page as a duplicate of the homepage. Each page sets its
+  // own canonical in its own generateMetadata / metadata export.
 };
 
 export default async function RootLayout({

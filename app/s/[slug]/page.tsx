@@ -5,7 +5,7 @@
 // Redirects to the full catalog URL.
 // ============================================================
 
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 interface VanityPageProps {
   params: Promise<{ slug: string }>;
@@ -14,7 +14,7 @@ interface VanityPageProps {
 export default async function VanityRedirectPage({ params }: VanityPageProps) {
   const { slug } = await params;
   if (!slug || slug.trim() === "") {
-    redirect("/");
+    permanentRedirect("/");
   }
-  redirect(`/catalog/${encodeURIComponent(slug.trim())}`);
+  permanentRedirect(`/catalog/${encodeURIComponent(slug.trim())}`);
 }

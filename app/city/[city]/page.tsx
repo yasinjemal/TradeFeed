@@ -10,7 +10,7 @@
 //   /city/durban       → /marketplace/kwazulu-natal/durban
 // ============================================================
 
-import { redirect, notFound } from "next/navigation";
+import { permanentRedirect, notFound } from "next/navigation";
 import { getCityBySlug, SA_PROVINCES } from "@/lib/marketplace/locations";
 import type { Metadata } from "next";
 
@@ -46,5 +46,5 @@ export default async function CityRedirectPage({ params }: CityPageProps) {
     notFound();
   }
 
-  redirect(`/marketplace/${result.province.slug}/${result.city.slug}`);
+  permanentRedirect(`/marketplace/${result.province.slug}/${result.city.slug}`);
 }

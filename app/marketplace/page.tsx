@@ -70,7 +70,7 @@ export async function generateMetadata({
   if (categoryName) ogUrl.searchParams.set("category", categoryName);
 
   const canonicalUrl = category
-    ? `${APP_URL}/marketplace?category=${category}`
+    ? `${APP_URL}/marketplace/category/${category}`
     : `${APP_URL}/marketplace`;
 
   return {
