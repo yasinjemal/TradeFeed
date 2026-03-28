@@ -60,7 +60,7 @@ export async function GET() {
       slug: true,
       name: true,
       description: true,
-      images: { select: { url: true, key: true }, take: 1 },
+      images: { select: { url: true, key: true }, orderBy: { position: "asc" as const }, take: 10 },
       category: { select: { name: true } },
       shop: { select: { name: true, slug: true } },
       variants: {
@@ -86,7 +86,11 @@ export async function GET() {
     .map((p) => {
       const v = p.variants[0]!;
       const price = (v.priceInCents / 100).toFixed(2);
-      const imageUrl = toProxyImageUrl(p.images[0]?.url ?? "");
+      const primaryImage = toProxyImageUrl(p.images[0]?.url ?? "");
+      const additionalImageLinks = p.images
+        .slice(1, 10)
+        .map((img) => toProxyImageUrl(img.url))
+        .filter(Boolean);
       const link = `${APP_URL}/catalog/${p.shop.slug}/products/${p.slug ?? p.id}`;
       const availability = v.stock > 0 ? "in_stock" : "out_of_stock";
       const category = p.category?.name || "Apparel & Accessories";
@@ -96,7 +100,8 @@ export async function GET() {
       <title>${escapeXml(p.name)}</title>
       <description>${escapeXml(p.description || p.name)}</description>
       <link>${escapeXml(link)}</link>
-      <g:image_link>${escapeXml(imageUrl)}</g:image_link>
+      <g:image_link>${escapeXml(primaryImage)}</g:image_link>
+${additionalImageLinks.map((url) => `      <g:additional_image_link>${escapeXml(url)}</g:additional_image_link>`).join("\n")}
       <g:price>${price} ZAR</g:price>
       <g:availability>${availability}</g:availability>
       <g:condition>new</g:condition>

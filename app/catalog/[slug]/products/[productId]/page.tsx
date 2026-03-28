@@ -45,7 +45,11 @@ export async function generateMetadata({
 
   // Use actual product photo for OG image (WhatsApp shows real photos much better)
   // Fall back to dynamically generated branded card when no photo exists
-  const productImageUrl = product.images[0]?.url;
+  // Proxy UploadThing URLs through /api/img/[key] so Googlebot-Image can crawl them
+  const rawProductImageUrl = product.images[0]?.url;
+  const productImageUrl = rawProductImageUrl
+    ? (() => { const m = rawProductImageUrl.match(/\/f\/([a-zA-Z0-9_-]+)/); return m ? `${baseUrl}/api/img/${m[1]}` : rawProductImageUrl; })()
+    : undefined;
   const ogFallbackUrl = new URL("/api/og", baseUrl);
   ogFallbackUrl.searchParams.set("type", "product");
   ogFallbackUrl.searchParams.set("name", product.name);
@@ -84,7 +88,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${product.name} from ${minPrice} | ${shop.name} — TradeFeed`,
       description: product.description || `Buy ${product.name} from ${minPrice} at ${shop.name}. Order on WhatsApp.`,
-      type: "article",
+      type: "website",
       images: ogImages,
     },
     other: {

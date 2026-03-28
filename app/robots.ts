@@ -14,8 +14,17 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/catalog/", "/marketplace/", "/privacy", "/terms", "/contact"],
+        allow: ["/", "/catalog/", "/marketplace/", "/s/", "/privacy", "/terms", "/contact"],
         disallow: ["/dashboard/", "/admin/", "/create-shop", "/api/", "/sign-in", "/sign-up"],
+      },
+      {
+        userAgent: "Googlebot",
+        allow: ["/", "/catalog/", "/marketplace/", "/s/", "/privacy", "/terms", "/contact"],
+        disallow: ["/dashboard/", "/admin/", "/create-shop", "/api/", "/sign-in", "/sign-up"],
+      },
+      {
+        userAgent: "Googlebot-Image",
+        allow: ["/"],
       },
     ],
     sitemap: `${APP_URL}/sitemap.xml`,

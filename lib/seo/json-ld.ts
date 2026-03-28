@@ -18,6 +18,18 @@
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 /**
+ * Convert an UploadThing CDN URL to our image proxy URL.
+ * Googlebot can't reliably crawl raw UT URLs (redirects, wrong Content-Type).
+ * Our /api/img/[key] proxy serves guaranteed image/jpeg from our domain.
+ */
+function toProxiedImageUrl(rawUrl: string): string {
+  if (!rawUrl) return "";
+  const match = rawUrl.match(/\/f\/([a-zA-Z0-9_-]+)/);
+  if (!match) return rawUrl; // Not a UT URL — return as-is
+  return `${APP_URL}/api/img/${match[1]}`;
+}
+
+/**
  * JSON-LD for the root layout — renders once across the site.
  * Schema: Organization + WebSite with SearchAction (sitelinks search box)
  */
@@ -262,7 +274,7 @@ export function generateProductJsonLd(
     url: productUrl,
     ...(product.description && { description: product.description }),
     ...(product.images.length > 0 && {
-      image: product.images.map((img) => img.url),
+      image: product.images.map((img) => toProxiedImageUrl(img.url)).filter(Boolean),
     }),
     ...(product.category && { category: product.category.name }),
     brand: {
