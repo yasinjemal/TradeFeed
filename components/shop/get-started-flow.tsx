@@ -19,6 +19,7 @@ import {
   trackOnboardingCompleteAction,
   trackCatalogSharedAction,
 } from "@/app/actions/onboarding";
+import { WhatsAppCommunityBanner } from "@/components/community/whatsapp-community-banner";
 import { saveProductImagesAction } from "@/app/actions/image";
 import { useUploadThing } from "@/lib/uploadthing";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
@@ -868,6 +869,9 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
                 </svg>
                 View Your Shop
               </a>
+
+              {/* Community invite */}
+              <WhatsAppCommunityBanner variant="onboarding" />
 
               {/* Go to dashboard */}
               <Link

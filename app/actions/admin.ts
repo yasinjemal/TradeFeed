@@ -32,6 +32,10 @@ import {
   adminSetShopPlan,
 } from "@/lib/db/manual-payments";
 import { revalidatePath } from "next/cache";
+import { db } from "@/lib/db";
+import { sendEmail } from "@/lib/email/resend";
+import { reengagementEmailHtml, reengagementEmailText } from "@/lib/email/templates/reengagement";
+import { SITE_URL, WHATSAPP_COMMUNITY_URL } from "@/lib/config/site";
 
 type ActionResult = { success: true; message: string } | { success: false; error: string };
 
@@ -599,6 +603,115 @@ export async function adminSetShopPlanAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to change plan.",
+    };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Bulk Re-engagement Email
+// ══════════════════════════════════════════════════════════════
+
+export type ReengagementFilter = "all" | "no_products" | "no_activity";
+
+interface BulkEmailResult {
+  success: boolean;
+  sent: number;
+  skipped: number;
+  failed: number;
+  error?: string;
+}
+
+/**
+ * Send a re-engagement email to all sellers matching the filter.
+ * Rate-limited: sends one per 200ms to avoid Resend burst limits.
+ */
+export async function sendBulkReengagementAction(
+  filter: ReengagementFilter,
+  customMessage: string,
+): Promise<BulkEmailResult> {
+  try {
+    await requireAdmin();
+
+    // Build the shop query based on filter
+    const where =
+      filter === "no_products"
+        ? { isActive: true, products: { none: {} } }
+        : filter === "no_activity"
+          ? {
+              isActive: true,
+              analyticsEvents: undefined, // can't filter by this (no relation)
+              products: { none: {} },      // proxy: no products = no real activity
+            }
+          : { isActive: true };
+
+    const shops = await db.shop.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        users: {
+          where: { role: "OWNER" },
+          take: 1,
+          select: {
+            user: { select: { email: true, firstName: true, lastName: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    let sent = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    for (const shop of shops) {
+      const owner = shop.users[0]?.user;
+      if (!owner?.email) { skipped++; continue; }
+
+      const sellerName = [owner.firstName, owner.lastName].filter(Boolean).join(" ") || shop.name;
+      const catalogUrl = `${SITE_URL}/catalog/${shop.slug}`;
+      const dashboardUrl = `${SITE_URL}/dashboard/${shop.slug}`;
+
+      const result = await sendEmail({
+        to: owner.email,
+        subject: `Your ${shop.name} shop is waiting for its first buyer 🛍️`,
+        html: reengagementEmailHtml({
+          shopName: shop.name,
+          sellerName,
+          catalogUrl,
+          dashboardUrl,
+          communityUrl: WHATSAPP_COMMUNITY_URL,
+          customMessage: customMessage.trim() || undefined,
+        }),
+        text: reengagementEmailText({
+          shopName: shop.name,
+          sellerName,
+          catalogUrl,
+          dashboardUrl,
+          communityUrl: WHATSAPP_COMMUNITY_URL,
+          customMessage: customMessage.trim() || undefined,
+        }),
+      });
+
+      if (result.success) {
+        sent++;
+      } else {
+        failed++;
+      }
+
+      // Brief pause between sends to stay within Resend rate limits
+      await new Promise((r) => setTimeout(r, 200));
+    }
+
+    return { success: true, sent, skipped, failed };
+  } catch (error) {
+    return {
+      success: false,
+      sent: 0,
+      skipped: 0,
+      failed: 0,
+      error: error instanceof Error ? error.message : "Failed to send emails.",
     };
   }
 }

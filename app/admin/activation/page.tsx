@@ -11,6 +11,7 @@
 
 import Link from "next/link";
 import { getActivationStats, type FunnelPeriod } from "@/lib/db/activation";
+import { BulkEmailPanel } from "./bulk-email-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -234,6 +235,9 @@ export default async function ActivationPage({ searchParams }: PageProps) {
           </div>
         )}
       </div>
+
+      {/* ── Bulk re-engagement email ──────────────────────── */}
+      <BulkEmailPanel />
     </div>
   );
 }

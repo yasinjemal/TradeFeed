@@ -43,3 +43,10 @@ export const EMAIL_DOMAIN = "tradefeed.co.za";
  * Used in dashboard help widget, welcome emails, etc.
  */
 export const SUPPORT_EMAIL = "support@tradefeed.co.za";
+
+/**
+ * WhatsApp community group invite link.
+ * Shown in the seller dashboard and onboarding celebration screen.
+ * Update this if the group link changes.
+ */
+export const WHATSAPP_COMMUNITY_URL = "https://chat.whatsapp.com/GnGsJoU7jea2mYPUCr0MDz";

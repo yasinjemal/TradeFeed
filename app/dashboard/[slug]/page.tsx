@@ -20,6 +20,7 @@ import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { TrialBanner } from "@/components/billing/trial-banner";
+import { WhatsAppCommunityBanner } from "@/components/community/whatsapp-community-banner";
 
 interface DashboardPageProps {
   params: Promise<{ slug: string }>;
@@ -97,6 +98,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     <div className="space-y-8">
       {/* Trial Banner */}
       {trial.active && <TrialBanner daysLeft={trial.daysLeft} shopSlug={slug} />}
+
+      {/* Community Banner */}
+      <WhatsAppCommunityBanner />
 
       {/* ── Header ──────────────────────────────────── */}
       <div className="flex items-center gap-4">
