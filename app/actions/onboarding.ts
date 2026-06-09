@@ -231,3 +231,22 @@ export async function trackOnboardingCompleteAction(shopSlug: string): Promise<v
     // Non-fatal
   }
 }
+
+/**
+ * Track that the seller tapped the Share button on the celebration screen.
+ * This is the "catalog_shared" step of the activation funnel.
+ */
+export async function trackCatalogSharedAction(shopSlug: string): Promise<void> {
+  try {
+    const user = await requireAuth();
+    await db.onboardingEvent.create({
+      data: {
+        userId: user.id,
+        step: "catalog_shared",
+        metadata: { shopSlug, source: "get-started" },
+      },
+    });
+  } catch {
+    // Non-fatal
+  }
+}

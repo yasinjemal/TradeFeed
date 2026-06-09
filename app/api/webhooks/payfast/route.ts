@@ -22,6 +22,7 @@
 import { NextResponse } from "next/server";
 import { validatePayFastITN } from "@/lib/payfast";
 import { upgradeSubscription, cancelSubscription } from "@/lib/db/subscriptions";
+import { db } from "@/lib/db";
 import { parsePromotionPaymentId, calculatePromotionPrice, parseShopBoostPaymentId, calculateShopBoostPrice } from "@/lib/config/promotions";
 import { createPromotedListing } from "@/lib/db/promotions";
 import { activateShopBoost } from "@/lib/db/shops";
@@ -84,6 +85,7 @@ export async function POST(request: Request) {
     }
 
     // ── Route: Subscription payment ─────────────────────
+    // paymentId format: "{shopId}:{planSlug}" — parsed inside the handler
     return handleSubscriptionPayment(paymentId, paymentStatus, body);
   } catch (error) {
     await reportError("payfast-itn-post", error);
@@ -207,57 +209,69 @@ async function handleOrderPayment(
     return NextResponse.json({ received: true });
   }
 
+  // 1. Fetch order first so we can validate the amount before mutating state
+  const order = await getOrderForWebhook(orderId);
+  if (!order) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
+
+  // 2. Validate paid amount against stored order total
+  const receivedCents = Math.round(parseFloat(body["amount_gross"] ?? "0") * 100);
+  if (Math.abs(receivedCents - order.totalCents) > 100) {
+    await reportError("payfast-itn-order-amount-mismatch", new Error("Order amount mismatch"), {
+      orderId, expected: order.totalCents, received: receivedCents,
+    });
+    return NextResponse.json({ error: "Amount mismatch" }, { status: 400 });
+  }
+
   try {
-    // 1. Mark order as paid
+    // 3. Mark order as paid
     await markOrderPaid(orderId);
     console.log(`[PayFast ITN] Order marked paid: ${orderId}`);
 
-    // 2. Capture transaction fee
+    // 4. Capture transaction fee
     try {
-      const order = await getOrderForWebhook(orderId);
-      if (order) {
-        // Track payment completion (fire-and-forget)
-        void trackEvent({ type: "PAYMENT_COMPLETE", shopId: order.shopId });
+      // Track payment completion (fire-and-forget)
+      void trackEvent({ type: "PAYMENT_COMPLETE", shopId: order.shopId });
 
-        await createTransactionFee({
-          orderId: order.id,
-          shopId: order.shopId,
-          orderAmountCents: order.totalCents,
-          payfastPaymentId: body["pf_payment_id"],
-        });
-        console.log(`[PayFast ITN] Transaction fee captured for order ${orderId}`);
+      await createTransactionFee({
+        orderId: order.id,
+        shopId: order.shopId,
+        orderAmountCents: order.totalCents,
+        payfastPaymentId: body["pf_payment_id"],
+      });
+      console.log(`[PayFast ITN] Transaction fee captured for order ${orderId}`);
 
-        // 3. Notify seller via WhatsApp
-        try {
-          const { sendOrderStatusUpdate, sendTextMessage } = await import("@/lib/whatsapp/business-api");
-          const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tradefeed.co.za";
-          if (order.shop.whatsappNumber) {
-            await sendOrderStatusUpdate(
-              order.shop.whatsappNumber,
-              order.orderNumber,
-              order.shop.name,
-              "PAID",
-              `${appUrl}/dashboard/${order.shop.slug}/orders`,
-            );
-            console.log(`[PayFast ITN] Seller notified: ${order.shop.slug}`);
-          }
-
-          // 4. Notify buyer via WhatsApp (payment confirmation)
-          if (order.buyerPhone) {
-            const trackUrl = `${appUrl}/track/${encodeURIComponent(order.orderNumber)}`;
-            await sendTextMessage(
-              order.buyerPhone,
-              `✅ *Payment Received — ${order.orderNumber}*\n\n` +
-              `Your payment to *${order.shop.name}* has been confirmed.\n\n` +
-              `Track your order:\n${trackUrl}\n\n` +
-              `The seller will prepare your order shortly.`,
-            );
-            console.log(`[PayFast ITN] Buyer notified: ${order.orderNumber}`);
-          }
-        } catch (notifyErr) {
-          // Don't fail the webhook if notification fails
-          console.error("[PayFast ITN] Notification failed:", notifyErr);
+      // 5. Notify seller via WhatsApp
+      try {
+        const { sendOrderStatusUpdate, sendTextMessage } = await import("@/lib/whatsapp/business-api");
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tradefeed.co.za";
+        if (order.shop.whatsappNumber) {
+          await sendOrderStatusUpdate(
+            order.shop.whatsappNumber,
+            order.orderNumber,
+            order.shop.name,
+            "PAID",
+            `${appUrl}/dashboard/${order.shop.slug}/orders`,
+          );
+          console.log(`[PayFast ITN] Seller notified: ${order.shop.slug}`);
         }
+
+        // 6. Notify buyer via WhatsApp (payment confirmation)
+        if (order.buyerPhone) {
+          const trackUrl = `${appUrl}/track/${encodeURIComponent(order.orderNumber)}`;
+          await sendTextMessage(
+            order.buyerPhone,
+            `✅ *Payment Received — ${order.orderNumber}*\n\n` +
+            `Your payment to *${order.shop.name}* has been confirmed.\n\n` +
+            `Track your order:\n${trackUrl}\n\n` +
+            `The seller will prepare your order shortly.`,
+          );
+          console.log(`[PayFast ITN] Buyer notified: ${order.orderNumber}`);
+        }
+      } catch (notifyErr) {
+        // Don't fail the webhook if notification fails
+        console.error("[PayFast ITN] Notification failed:", notifyErr);
       }
     } catch (feeErr) {
       // Don't fail the webhook if fee capture fails — order is already paid
@@ -278,16 +292,36 @@ async function handleOrderPayment(
 // ── Subscription Payment Handler ─────────────────────────────
 
 async function handleSubscriptionPayment(
-  shopId: string,
+  paymentId: string,
   paymentStatus: string | undefined,
   body: Record<string, string>,
 ) {
+  // m_payment_id format: "{shopId}:{planSlug}" (colon-delimited)
+  // Legacy format (pre-hardening): plain shopId with no colon — handled gracefully
+  const colonIdx = paymentId.lastIndexOf(":");
+  const shopId = colonIdx !== -1 ? paymentId.slice(0, colonIdx) : paymentId;
+  const planSlug = colonIdx !== -1 ? paymentId.slice(colonIdx + 1) : null;
+
   const token = body["token"]; // PayFast subscription token
 
   switch (paymentStatus) {
     case "COMPLETE": {
-      await upgradeSubscription(shopId, "pro", token);
-      console.log(`[PayFast ITN] Subscription activated for shop ${shopId}`);
+      // Validate paid amount against the plan price
+      if (planSlug) {
+        const plan = await db.plan.findUnique({ where: { slug: planSlug }, select: { priceInCents: true } });
+        if (plan && plan.priceInCents > 0) {
+          const receivedCents = Math.round(parseFloat(body["amount_gross"] ?? "0") * 100);
+          if (Math.abs(receivedCents - plan.priceInCents) > 100) {
+            await reportError("payfast-itn-subscription-amount-mismatch", new Error("Subscription amount mismatch"), {
+              shopId, planSlug, expected: plan.priceInCents, received: receivedCents,
+            });
+            return NextResponse.json({ error: "Amount mismatch" }, { status: 400 });
+          }
+        }
+      }
+
+      await upgradeSubscription(shopId, planSlug ?? "pro", token);
+      console.log(`[PayFast ITN] Subscription activated: shop=${shopId} plan=${planSlug ?? "pro"}`);
 
       // Apply referral reward: if this shop was referred, extend referrer's sub
       try {

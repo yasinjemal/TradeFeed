@@ -1,4 +1,13 @@
+import { cache } from "react";
 import { getCatalogProduct, getCatalogShop, getSimilarProducts, getMoreFromSeller } from "@/lib/db/catalog";
+
+// ISR: revalidate product pages every 60 seconds
+export const revalidate = 60;
+
+// Deduplicate the two DB calls that generateMetadata and the page body both make.
+// React.cache() memoises within a single request — no cross-request state.
+const getCachedShop = cache(getCatalogShop);
+const getCachedProduct = cache(getCatalogProduct);
 import { trackEvent } from "@/lib/db/analytics";
 import { getProductReviews, getReviewAggregation } from "@/lib/db/reviews";
 import { getProductSoldCount } from "@/lib/db/orders";
@@ -33,10 +42,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string; productId: string }>;
 }): Promise<Metadata> {
   const { slug, productId } = await params;
-  const shop = await getCatalogShop(slug);
+  const shop = await getCachedShop(slug);
   if (!shop) return { title: "Not Found" };
 
-  const product = await getCatalogProduct(productId, shop.id);
+  const product = await getCachedProduct(productId, shop.id);
   if (!product) return { title: "Not Found" };
 
   const prices = product.variants.map((v) => v.priceInCents);
@@ -109,10 +118,10 @@ export async function generateMetadata({
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug, productId } = await params;
-  const shop = await getCatalogShop(slug);
+  const shop = await getCachedShop(slug);
   if (!shop) return notFound();
 
-  const product = await getCatalogProduct(productId, shop.id);
+  const product = await getCachedProduct(productId, shop.id);
   if (!product) return notFound();
 
   void trackEvent({ type: "PRODUCT_VIEW", shopId: shop.id, productId });

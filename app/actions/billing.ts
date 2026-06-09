@@ -50,6 +50,7 @@ export async function createCheckoutAction(
       shopId: access.shopId,
       shopSlug,
       planName: plan.name,
+      planSlug: plan.slug,
       amountInCents: plan.priceInCents,
       buyerEmail: user.email,
       buyerFirstName: user.firstName ?? undefined,

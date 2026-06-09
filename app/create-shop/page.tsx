@@ -11,8 +11,33 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { CreateShopForm } from "@/components/shop/create-shop-form";
+
+const AVATAR_GRADIENTS = [
+  "from-amber-400 to-orange-500",
+  "from-blue-400 to-indigo-500",
+  "from-pink-400 to-rose-500",
+  "from-emerald-400 to-teal-500",
+];
+
+const getCreateShopSocialProof = unstable_cache(
+  async () => {
+    const [sellers, totalCount] = await Promise.all([
+      db.shop.findMany({
+        where: { isActive: true, products: { some: { isActive: true } } },
+        select: { name: true, city: true },
+        orderBy: [{ isVerified: "desc" }, { createdAt: "asc" }],
+        take: 4,
+      }),
+      db.shop.count({ where: { isActive: true } }),
+    ]);
+    return { sellers, totalCount };
+  },
+  ["create-shop-social-proof"],
+  { revalidate: 600 }
+);
 
 export const metadata = {
   title: "Create Your Shop — TradeFeed",
@@ -41,6 +66,25 @@ export default async function CreateShopPage() {
     }
   }
   const t = await getTranslations("onboarding");
+  const { sellers, totalCount } = await getCreateShopSocialProof();
+
+  // Derive initials from real seller names (first letter of first two words)
+  const avatars = sellers.map((s, i) => ({
+    initials: s.name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() ?? "")
+      .join(""),
+    gradient: AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]!,
+  }));
+
+  // Format the seller count label: "50+" if over 50, exact number otherwise
+  const sellerLabel =
+    totalCount >= 50
+      ? `${Math.floor(totalCount / 10) * 10}+ SA sellers`
+      : `${totalCount} SA sellers`;
+
   return (
     <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col lg:flex-row">
       {/* ── Left Panel — Branding & Trust ──────────────── */}
@@ -99,17 +143,12 @@ export default async function CreateShopPage() {
           {/* Seller avatars */}
           <div className="flex items-center gap-3">
             <div className="flex -space-x-2.5">
-              {[
-                "from-amber-400 to-orange-500",
-                "from-blue-400 to-indigo-500",
-                "from-pink-400 to-rose-500",
-                "from-emerald-400 to-teal-500",
-              ].map((gradient, i) => (
+              {avatars.map((avatar, i) => (
                 <div
                   key={i}
-                  className={`w-8 h-8 rounded-full bg-gradient-to-br ${gradient} border-2 border-stone-950 flex items-center justify-center text-[10px] font-bold text-white`}
+                  className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatar.gradient} border-2 border-stone-950 flex items-center justify-center text-[10px] font-bold text-white`}
                 >
-                  {["JM", "TK", "NZ", "SM"][i]}
+                  {avatar.initials}
                 </div>
               ))}
             </div>
@@ -119,7 +158,7 @@ export default async function CreateShopPage() {
                   <svg key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                 ))}
               </div>
-              <p className="text-xs text-stone-500 mt-0.5">{t("trustedBy")}</p>
+              <p className="text-xs text-stone-500 mt-0.5">Trusted by {sellerLabel}</p>
             </div>
           </div>
 

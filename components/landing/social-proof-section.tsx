@@ -7,11 +7,12 @@ interface SocialProofSectionProps {
   shopCount: number;
   productCount: number;
   orderCount: number;
+  cityCount: number;
   labels: {
     activeSellers: string;
     productsListed: string;
     ordersProcessed: string;
-    provinces: string;
+    cities: string;
     ordersViaChat: string;
     title: string;
   };
@@ -21,6 +22,7 @@ export function SocialProofSection({
   shopCount,
   productCount,
   orderCount,
+  cityCount,
   labels,
 }: SocialProofSectionProps) {
   const stats = [
@@ -61,9 +63,9 @@ export function SocialProofSection({
       ),
     },
     {
-      value: 9,
-      suffix: "",
-      label: labels.provinces,
+      value: Math.max(cityCount, 1),
+      suffix: "+",
+      label: labels.cities,
       color: "text-amber-600",
       bg: "bg-amber-50",
       icon: (

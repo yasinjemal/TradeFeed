@@ -17,6 +17,7 @@ import {
   createShopOnboardingAction,
   createFirstProductAction,
   trackOnboardingCompleteAction,
+  trackCatalogSharedAction,
 } from "@/app/actions/onboarding";
 import { saveProductImagesAction } from "@/app/actions/image";
 import { useUploadThing } from "@/lib/uploadthing";
@@ -836,6 +837,7 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackCatalogSharedAction(shopSlug).catch(() => {})}
                 className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-bold bg-[#25D366] hover:bg-[#20BD5A] text-white shadow-lg transition-all"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

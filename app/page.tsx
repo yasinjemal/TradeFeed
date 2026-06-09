@@ -106,15 +106,36 @@ const FAQ_ITEMS = [
 //  13. Footer (extended)
 // ============================================================
 
-// Cache platform stats for 5 minutes — avoids 3 COUNT queries on every landing page hit
+// Cache platform stats for 5 minutes — avoids DB queries on every landing page hit
 const getPlatformStats = unstable_cache(
   async () => {
-    const [shopCount, productCount, orderCount] = await Promise.all([
+    const [shopCount, productCount, orderCount, cityRows] = await Promise.all([
       db.shop.count({ where: { isActive: true } }),
       db.product.count({ where: { isActive: true } }),
       db.order.count(),
+      db.shop.findMany({
+        where: { isActive: true, city: { not: null } },
+        select: { city: true },
+        distinct: ["city"],
+      }),
     ]);
-    return { shopCount, productCount, orderCount };
+
+    const cityCount = cityRows.length;
+
+    // Top cities by seller density — for the hero social proof line
+    const cityCounts = await db.shop.groupBy({
+      by: ["city"],
+      where: { isActive: true, city: { not: null } },
+      _count: { id: true },
+      orderBy: { _count: { id: "desc" } },
+      take: 3,
+    });
+    const topCities = cityCounts
+      .map((r) => r.city!)
+      .filter(Boolean)
+      .join(", ");
+
+    return { shopCount, productCount, orderCount, cityCount, topCities };
   },
   ["platform-stats"],
   { revalidate: 300 } // 5 minutes
@@ -190,7 +211,7 @@ export default async function HomePage() {
     : "/sign-up?redirect_url=/dashboard&ai=true";
 
   // ── Live platform stats (cached) + admin check + sellers (parallel) ──
-  const [{ shopCount, productCount, orderCount }, adminClerkId, featuredSellers] = await Promise.all([
+  const [{ shopCount, productCount, orderCount, cityCount, topCities }, adminClerkId, featuredSellers] = await Promise.all([
     getPlatformStats(),
     isAdmin(),
     getHomepageSellers(),
@@ -298,7 +319,7 @@ export default async function HomePage() {
           tLanding("hero.benefitWhatsApp"),
         ]}
         proofSellers={tLanding("hero.proofSellers")}
-        proofCities={tLanding("hero.proofCities")}
+        proofCities={topCities || tLanding("hero.proofCities")}
       />
 
       {/* ─────────────────────────────────────────────────────
@@ -308,12 +329,13 @@ export default async function HomePage() {
         shopCount={shopCount}
         productCount={productCount}
         orderCount={orderCount}
+        cityCount={cityCount}
         labels={{
           title: tLanding("trustedBy.title"),
           activeSellers: tLanding("trustedBy.activeSellers"),
           productsListed: tLanding("trustedBy.productsListed"),
           ordersProcessed: tLanding("trustedBy.ordersProcessed"),
-          provinces: tLanding("trustedBy.provinces"),
+          cities: tLanding("trustedBy.cities"),
           ordersViaChat: tLanding("trustedBy.ordersViaChat"),
         }}
       />

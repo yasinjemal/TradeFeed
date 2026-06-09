@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { cache } from "react";
 import {
   getMarketplaceProducts,
   getPromotedProducts,
@@ -10,6 +11,9 @@ import {
   getFeaturedShops,
   interleavePromotedProducts,
 } from "@/lib/db/marketplace";
+
+// Deduplicate getGlobalCategories called in both generateMetadata and the page body.
+const getCachedCategories = cache(getGlobalCategories);
 import { MarketplaceShell } from "@/components/marketplace/marketplace-shell";
 import { generateMarketplaceJsonLd } from "@/lib/seo/json-ld";
 import { expirePromotedListings } from "@/lib/db/promotions";
@@ -51,7 +55,7 @@ export async function generateMetadata({
   // Look up category display name if filtering
   let categoryName = "";
   if (category) {
-    const categories = await getGlobalCategories();
+    const categories = await getCachedCategories();
     const match = categories.find((c) => c.slug === category);
     categoryName = match?.name || category.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }

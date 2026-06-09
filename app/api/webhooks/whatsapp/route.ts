@@ -13,6 +13,7 @@
 // 3. Meta will send a GET request with the verify token
 // ============================================================
 
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { detectIntent, shouldAutoReply } from "@/lib/whatsapp/intent-detection";
 import { generateAutoReply } from "@/lib/whatsapp/auto-reply";
@@ -24,6 +25,26 @@ import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { db } from "@/lib/db";
 
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+const APP_SECRET = process.env.WHATSAPP_APP_SECRET;
+
+function verifySignature(rawBody: string, signatureHeader: string | null): boolean {
+  if (!APP_SECRET) {
+    // Fail closed in production; allow in dev so local testing works without Meta credentials
+    if (process.env.NODE_ENV === "production") {
+      console.error("[whatsapp-webhook] WHATSAPP_APP_SECRET not set — rejecting all POST requests");
+      return false;
+    }
+    return true;
+  }
+  if (!signatureHeader) return false;
+  const received = signatureHeader.startsWith("sha256=") ? signatureHeader.slice(7) : signatureHeader;
+  const expected = crypto.createHmac("sha256", APP_SECRET).update(rawBody).digest("hex");
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(received, "hex"));
+  } catch {
+    return false;
+  }
+}
 
 /**
  * GET /api/webhooks/whatsapp
@@ -74,14 +95,23 @@ interface WhatsAppWebhookEntry {
  * Handles incoming webhook events from WhatsApp.
  */
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+  const rawBody = await request.text();
 
-    if (body.object !== "whatsapp_business_account") {
+  if (!verifySignature(rawBody, request.headers.get("x-hub-signature-256"))) {
+    console.warn("[whatsapp-webhook] Signature verification failed — request rejected");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body: unknown = JSON.parse(rawBody);
+
+    const payload = body as { object: string; entry: WhatsAppWebhookEntry[] };
+
+    if (payload.object !== "whatsapp_business_account") {
       return NextResponse.json({ error: "Unknown object type" }, { status: 400 });
     }
 
-    const entries = body.entry as WhatsAppWebhookEntry[];
+    const entries = payload.entry;
 
     for (const entry of entries) {
       for (const change of entry.changes) {
@@ -93,7 +123,7 @@ export async function POST(request: NextRequest) {
             console.log("[whatsapp-webhook] Status update:", {
               messageId: status.id,
               status: status.status,
-              recipientId: status.recipient_id,
+              recipientSuffix: status.recipient_id.slice(-4), // last 4 digits only — POPIA
               timestamp: status.timestamp,
             });
           }
@@ -103,9 +133,9 @@ export async function POST(request: NextRequest) {
         if (value.messages) {
           for (const message of value.messages) {
             console.log("[whatsapp-webhook] Incoming message:", {
-              from: message.from,
+              fromSuffix: message.from.slice(-4), // last 4 digits only — POPIA
               type: message.type,
-              text: message.text?.body,
+              // message body intentionally omitted — personal data under POPIA
               timestamp: message.timestamp,
             });
 
@@ -183,7 +213,7 @@ async function handleAutoReply(
     });
 
     if (!recentOrder) {
-      console.log("[whatsapp-webhook] No shop found for buyer:", buyerPhone);
+      console.log("[whatsapp-webhook] No shop found for buyer suffix:", buyerPhone.slice(-4));
       return;
     }
 

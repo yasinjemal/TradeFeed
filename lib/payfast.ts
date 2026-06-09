@@ -33,18 +33,21 @@ interface PayFastConfig {
 function getConfig(): PayFastConfig {
   const merchantId = process.env.PAYFAST_MERCHANT_ID ?? "";
   const merchantKey = process.env.PAYFAST_MERCHANT_KEY ?? "";
+  const passphrase = process.env.PAYFAST_PASSPHRASE ?? "";
 
-  // Fail loudly in production if PayFast credentials are missing
-  if (process.env.NODE_ENV === "production" && (!merchantId || !merchantKey)) {
-    throw new Error(
-      "PayFast is not configured. Set PAYFAST_MERCHANT_ID and PAYFAST_MERCHANT_KEY in production."
-    );
+  if (process.env.NODE_ENV === "production") {
+    if (!merchantId || !merchantKey) {
+      throw new Error("PayFast is not configured. Set PAYFAST_MERCHANT_ID and PAYFAST_MERCHANT_KEY in production.");
+    }
+    if (!passphrase) {
+      throw new Error("PAYFAST_PASSPHRASE is required in production. Without it the ITN signature degrades to an unsalted MD5.");
+    }
   }
 
   return {
     merchantId,
     merchantKey,
-    passphrase: process.env.PAYFAST_PASSPHRASE ?? "",
+    passphrase,
     sandbox: process.env.NODE_ENV !== "production",
   };
 }
@@ -53,6 +56,7 @@ interface CheckoutParams {
   shopId: string;
   shopSlug: string;
   planName: string;
+  planSlug: string;
   amountInCents: number;
   buyerEmail: string;
   buyerFirstName?: string;
@@ -81,7 +85,7 @@ export function buildPayFastCheckoutUrl(params: CheckoutParams): string {
     name_first: params.buyerFirstName ?? "",
     name_last: params.buyerLastName ?? "",
     email_address: params.buyerEmail,
-    m_payment_id: params.shopId,
+    m_payment_id: `${params.shopId}:${params.planSlug}`,
     amount: amountInRands,
     item_name: `TradeFeed ${params.planName} Plan — Monthly`,
     item_description: `Monthly subscription for ${params.planName} plan`,

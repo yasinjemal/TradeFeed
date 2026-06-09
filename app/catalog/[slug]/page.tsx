@@ -12,12 +12,16 @@
 // components for interactive search/filter without round-trips.
 // ============================================================
 
+import { cache } from "react";
 import {
   getCatalogProducts,
   getCatalogShop,
   getCatalogCombos,
   getShopReviewHighlights,
 } from "@/lib/db/catalog";
+
+// Deduplicate the getCatalogShop call shared between generateMetadata and CatalogPage.
+const getCachedShop = cache(getCatalogShop);
 import { getSellerTierData } from "@/lib/db/shops";
 import { getShopDrops } from "@/lib/db/drops";
 import { trackEvent } from "@/lib/db/analytics";
@@ -46,7 +50,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export async function generateMetadata({ params }: CatalogPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const shop = await getCatalogShop(slug);
+  const shop = await getCachedShop(slug);
   if (!shop) return { title: "Shop Not Found — TradeFeed" };
 
   const location = [shop.city, shop.province].filter(Boolean).join(", ");
@@ -99,7 +103,7 @@ export async function generateMetadata({ params }: CatalogPageProps): Promise<Me
 
 export default async function CatalogPage({ params }: CatalogPageProps) {
   const { slug } = await params;
-  const shop = await getCatalogShop(slug);
+  const shop = await getCachedShop(slug);
   if (!shop) return notFound();
 
   const [products, combos, tierData, recentDrops, reviewHighlights] = await Promise.all([

@@ -20,7 +20,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireShopAccess } from "@/lib/auth";
 import { checkAiAccess, trackAiGeneration, FREE_AI_CREDITS, AI_DAILY_LIMIT } from "@/lib/db/ai";
-import { rateLimit } from "@/lib/rate-limit";
+import { checkRateLimit } from "@/lib/rate-limit-upstash";
 import { getSellerPreferences, buildSellerAIContext } from "@/lib/db/seller-preferences";
 import { aiGenerateRequestSchema, aiProductResponseSchema, applyAISafety } from "@/lib/validation/ai-product";
 import type { AiProductResponse } from "@/lib/validation/ai-product";
@@ -64,7 +64,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 3b. Daily safety cap — 50 generations per shop per day (even unlimited plans)
-    const dailyCheck = rateLimit(`ai-daily:${access.shopId}`, AI_DAILY_LIMIT, 86_400_000);
+    // Uses Upstash so the limit is global across all serverless instances.
+    const dailyCheck = await checkRateLimit("ai", access.shopId);
     if (!dailyCheck.allowed) {
       return NextResponse.json(
         {
