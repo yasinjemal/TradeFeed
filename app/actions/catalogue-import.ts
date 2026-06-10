@@ -29,8 +29,8 @@ import {
 } from "@/lib/imports/import-logic";
 import { buildProductPlan, isMappingError } from "@/lib/imports/publish-mapper";
 
-type ActionResult<T = Record<string, never>> =
-  | ({ success: true } & T)
+type ActionResult<T extends object | undefined = undefined> =
+  | ([T] extends [undefined] ? { success: true } : { success: true } & T)
   | { success: false; error: string };
 
 function flagGate(): { success: false; error: string } | null {

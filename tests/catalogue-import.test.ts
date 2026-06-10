@@ -118,7 +118,7 @@ describe("assessDraft", () => {
       hasTitle: true,
     });
     assert.ok(result.flags.includes("watermark_suspected"));
-    assert.ok(!result.flags.includes("made_up_flag"));
+    assert.ok(!(result.flags as string[]).includes("made_up_flag"));
     assert.equal(result.status, "NEEDS_REVIEW"); // any flag ⇒ review
   });
 });
