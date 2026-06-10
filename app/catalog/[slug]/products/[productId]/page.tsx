@@ -30,7 +30,9 @@ import { SimilarProducts } from "@/components/catalog/similar-products";
 import { MoreFromSeller } from "@/components/catalog/more-from-seller";
 import { StickyBuyBar } from "@/components/catalog/sticky-buy-bar";
 import { DeliveryEstimate } from "@/components/catalog/delivery-estimate";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
+import { getFreshTranslation } from "@/lib/ai/translate-listing";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -127,6 +129,26 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   void trackEvent({ type: "PRODUCT_VIEW", shopId: shop.id, productId });
 
   const t = await getTranslations("catalog");
+
+  // ── AI listing translation (Phase 3, flag-gated) ──────────
+  // Serve the buyer's language when a fresh translation exists;
+  // fall back to the seller's original (English) listing.
+  // WhatsApp messages + SEO metadata intentionally stay English.
+  let displayName = product.name;
+  let displayDescription = product.description;
+  if (FEATURE_FLAGS.LISTING_TRANSLATIONS) {
+    const locale = await getLocale();
+    const translation = await getFreshTranslation(
+      product.id,
+      locale,
+      product.name,
+      product.description
+    );
+    if (translation) {
+      displayName = translation.name;
+      displayDescription = translation.description ?? product.description;
+    }
+  }
 
   const prices = product.variants.map((v) => v.priceInCents);
   const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
@@ -239,7 +261,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                     {product.category.name}
                   </Link>
                 )}
-                <h1 className="text-xl font-bold leading-tight text-slate-900 sm:text-2xl">{product.name}</h1>
+                <h1 className="text-xl font-bold leading-tight text-slate-900 sm:text-2xl">{displayName}</h1>
 
                 {/* Star rating + sold count — social proof above the fold */}
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -343,8 +365,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 </div>
               )}
 
-              {product.description && (
-                <p className="text-sm leading-relaxed text-slate-600">{product.description}</p>
+              {displayDescription && (
+                <p className="text-sm leading-relaxed text-slate-600">{displayDescription}</p>
               )}
 
               {/* Share — moved below description, out of the purchase flow */}

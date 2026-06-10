@@ -311,7 +311,7 @@ export function MobileNav({
 
               {/* Trust badges */}
               <div className="flex items-center justify-center gap-3 pt-0.5 pb-1 text-[10px] text-slate-400">
-                {["No credit card", "Setup in 5 min", "10 products free"].map(
+                {["No credit card", "Setup in 5 min", "20 products free"].map(
                   (text) => (
                     <span key={text} className="flex items-center gap-1">
                       <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">

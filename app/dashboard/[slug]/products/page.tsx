@@ -14,6 +14,7 @@ import { IllustrationEmptyBox } from "@/components/ui/illustrations";
 import { ListingQualityScore } from "@/components/product/listing-quality-score";
 import { computeQualityProps } from "@/lib/utils/listing-quality";
 import { ProductUsageMeter } from "@/components/billing/product-usage-meter";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 
 interface ProductsPageProps {
   params: Promise<{ slug: string }>;
@@ -137,6 +138,27 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
             <p className="text-sm text-stone-500 mb-6">
               Upload a photo and let AI do the rest — or type it in manually. Buyers will see your products immediately.
             </p>
+
+            {/* Catalogue import — primary onboarding path (Phase 4) */}
+            {FEATURE_FLAGS.CATALOGUE_IMPORT && (
+              <Link
+                href={`/dashboard/${slug}/import`}
+                className="block rounded-xl border-2 border-emerald-300 bg-white p-4 mb-5 max-w-xs mx-auto text-left hover:border-emerald-400 hover:shadow-md transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl flex-shrink-0">📦</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-emerald-800">
+                      Already selling on WhatsApp?
+                    </p>
+                    <p className="text-xs text-stone-500 mt-0.5">
+                      Import your whole catalogue at once — AI writes every listing.
+                    </p>
+                  </div>
+                  <span className="text-emerald-500 flex-shrink-0">→</span>
+                </div>
+              </Link>
+            )}
 
             {/* What a great listing looks like */}
             <div className="rounded-xl border border-stone-200 bg-white p-3 mb-5 max-w-xs mx-auto text-left">

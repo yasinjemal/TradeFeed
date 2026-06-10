@@ -93,7 +93,7 @@ export function AddVariantForm({
 
             {/* Price in Rands */}
             <div className="space-y-2">
-              <Label htmlFor="priceInRands">Wholesale Price (ZAR) *</Label>
+              <Label htmlFor="priceInRands">Price (ZAR) *</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                   R

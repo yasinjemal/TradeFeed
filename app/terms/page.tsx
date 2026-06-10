@@ -104,7 +104,7 @@ export default function TermsPage() {
             </p>
             <ul className="list-disc pl-5 text-stone-600 space-y-1">
               <li>
-                <strong>Free Plan:</strong> Limited to 10 products. No payment required.
+                <strong>Free Plan:</strong> Limited to 20 products. No payment required.
               </li>
               <li>
                 <strong>Pro Plan:</strong> Unlimited products. Billed monthly at the listed

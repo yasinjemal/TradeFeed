@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { SITE_URL } from "@/lib/config/site";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 
 /**
  * GET /api/auth/whatsapp-verify?token=<token>
@@ -67,6 +68,22 @@ export async function GET(request: NextRequest) {
     where: { id: magicLink.id },
     data: { userId: clerkUserId },
   });
+
+  // ── Link/create BuyerProfile with the verified phone ─
+  // The phone is verified (the link arrived via WhatsApp),
+  // so it's safe to attach it to the buyer profile here.
+  if (FEATURE_FLAGS.BUYER_ACCOUNTS) {
+    try {
+      await db.buyerProfile.upsert({
+        where: { clerkId: clerkUserId },
+        create: { clerkId: clerkUserId, phone: magicLink.phoneNumber },
+        update: { phone: magicLink.phoneNumber },
+      });
+    } catch (err) {
+      // Non-fatal — profile is created lazily on first follow/save too
+      console.error("[whatsapp-verify] BuyerProfile upsert failed:", err);
+    }
+  }
 
   // ── Create a Clerk sign-in token ────────────────────
   try {

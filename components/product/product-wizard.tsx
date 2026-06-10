@@ -27,6 +27,8 @@ import { GlobalCategoryPicker } from "@/components/product/global-category-picke
 import { ImageUpload } from "@/components/product/image-upload";
 import { SellerTip } from "@/components/product/seller-tip";
 import { ListingQualityScore } from "@/components/product/listing-quality-score";
+import { PriceSuggestionHint } from "@/components/product/price-suggestion-hint";
+import { BgRemoveButton } from "@/components/product/bg-remove-button";
 import type { GlobalCategoryOption } from "@/lib/db/global-categories";
 import { suggestGlobalCategory } from "@/lib/config/category-suggest";
 import { getVariantLabels } from "@/lib/config/category-variants";
@@ -420,6 +422,21 @@ export function ProductWizard({
             </SellerTip>
           )}
 
+          {/* Background removal for the primary photo (Phase 3, flag-gated) */}
+          {wizardImages.length > 0 && wizardImages[0] && (
+            <div className="flex items-center gap-2">
+              <BgRemoveButton
+                shopSlug={shopSlug}
+                imageId={wizardImages[0].id}
+                onDone={(newUrl) =>
+                  setWizardImages((imgs) =>
+                    imgs.map((img, i) => (i === 0 ? { ...img, url: newUrl } : img))
+                  )
+                }
+              />
+            </div>
+          )}
+
           {/* AI auto-fill offer — appears after first image upload */}
           {wizardImages.length > 0 && !aiFilled && (
             <div className="rounded-xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 space-y-3">
@@ -585,6 +602,11 @@ export function ProductWizard({
               />
             </div>
             <SellerTip>This is the price buyers pay per unit.</SellerTip>
+            <PriceSuggestionHint
+              shopSlug={shopSlug}
+              globalCategoryId={data.globalCategoryId}
+              onPick={(price) => setData((d) => ({ ...d, priceInRands: price }))}
+            />
           </div>
 
           {/* Stock */}

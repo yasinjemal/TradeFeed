@@ -50,6 +50,16 @@ export async function verifyShopAction(shopId: string): Promise<ActionResult> {
   try {
     const admin = await requireAdmin();
     const shop = await setShopVerified(shopId, true);
+    // Keep the SellerVerification audit record in sync (Phase 2)
+    try {
+      const { adminDirectVerify } = await import("@/lib/db/verification");
+      await adminDirectVerify({
+        shopId,
+        shopName: shop.name,
+        adminId: admin.id,
+        adminEmail: admin.email,
+      });
+    } catch { /* non-fatal — flag is already set */ }
     await logAdminAction({
       adminId: admin.id, adminEmail: admin.email,
       action: "SHOP_VERIFY", entityType: "shop", entityId: shopId, entityName: shop.name,
@@ -72,6 +82,16 @@ export async function unverifyShopAction(shopId: string): Promise<ActionResult> 
   try {
     const admin = await requireAdmin();
     const shop = await setShopVerified(shopId, false);
+    // Keep the SellerVerification audit record in sync (Phase 2)
+    try {
+      const { revokeVerification } = await import("@/lib/db/verification");
+      await revokeVerification({
+        shopId,
+        adminId: admin.id,
+        adminEmail: admin.email,
+        decisionNote: "Badge removed by platform admin",
+      });
+    } catch { /* non-fatal — flag is already cleared */ }
     await logAdminAction({
       adminId: admin.id, adminEmail: admin.email,
       action: "SHOP_UNVERIFY", entityType: "shop", entityId: shopId, entityName: shop.name,

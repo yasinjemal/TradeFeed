@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 
 // ── Primary nav items (always visible with icon + label) ──
 const primaryItems = [
@@ -55,6 +56,21 @@ const moreItemGroups = [
   {
     label: "Products",
     items: [
+      // Catalogue import (Phase 4) — hidden when the flag is off
+      ...(FEATURE_FLAGS.CATALOGUE_IMPORT
+        ? [
+            {
+              label: "Import Catalogue",
+              href: (slug: string) => `/dashboard/${slug}/import`,
+              exact: false,
+              icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+              ),
+            },
+          ]
+        : []),
       {
         label: "Categories",
         href: (slug: string) => `/dashboard/${slug}/categories`,

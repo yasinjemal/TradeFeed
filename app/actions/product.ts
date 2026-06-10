@@ -249,6 +249,20 @@ export async function createProductAction(
       // Non-fatal — product creation succeeded
     }
 
+    // 5b. AI listing translations on publish (fire-and-forget, Phase 3)
+    try {
+      const { FEATURE_FLAGS } = await import("@/lib/config/feature-flags");
+      if (FEATURE_FLAGS.LISTING_TRANSLATIONS && parsed.data.isActive) {
+        import("@/lib/ai/translate-listing")
+          .then(({ upsertTranslationsForProduct }) =>
+            upsertTranslationsForProduct(product.id, access.shopId)
+          )
+          .catch(() => {});
+      }
+    } catch {
+      // Non-fatal
+    }
+
     // 6. Log activity (fire-and-forget)
     try {
       const { logShopActivity } = await import("@/lib/db/activity-logs");
@@ -334,6 +348,22 @@ export async function updateProductAction(
     // Revalidate the products page to show updated data
     deps.revalidatePath(`/dashboard/${shopSlug}/products`);
     deps.revalidatePath(`/dashboard/${shopSlug}/products/${productId}`);
+
+    // Refresh AI translations if the listing changed (fire-and-forget, Phase 3)
+    // upsertTranslationsForProduct() skips the API call when the
+    // source hash is unchanged, so this is cheap on no-op edits.
+    try {
+      const { FEATURE_FLAGS } = await import("@/lib/config/feature-flags");
+      if (FEATURE_FLAGS.LISTING_TRANSLATIONS && parsed.data.isActive) {
+        import("@/lib/ai/translate-listing")
+          .then(({ upsertTranslationsForProduct }) =>
+            upsertTranslationsForProduct(productId, access.shopId)
+          )
+          .catch(() => {});
+      }
+    } catch {
+      // Non-fatal
+    }
 
     // Log activity (fire-and-forget)
     try {

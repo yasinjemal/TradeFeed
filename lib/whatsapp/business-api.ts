@@ -177,6 +177,42 @@ export async function sendOrderStatusUpdate(
 }
 
 /**
+ * Send review request to buyer after delivery.
+ * Template: "review_request" (must be approved in Meta Business Manager)
+ * Body params: {{1}} shopName, {{2}} orderNumber
+ * Button: URL with review token path suffix
+ */
+export async function sendReviewRequest(
+  buyerPhone: string,
+  orderNumber: string,
+  shopName: string,
+  reviewUrl: string
+): Promise<SendMessageResult> {
+  return sendWhatsAppMessage(buyerPhone, {
+    type: "template",
+    template: {
+      name: "review_request",
+      language: { code: "en" },
+      components: [
+        {
+          type: "body",
+          parameters: [
+            { type: "text", text: shopName },
+            { type: "text", text: orderNumber },
+          ],
+        },
+        {
+          type: "button",
+          sub_type: "url",
+          index: 0,
+          parameters: [{ type: "text", text: reviewUrl }],
+        },
+      ],
+    },
+  });
+}
+
+/**
  * Send a simple text message (for free-form communication).
  * Only works within 24-hour customer service window.
  */

@@ -102,6 +102,9 @@ model Shop {
   whatsAppProductImports WhatsAppProductImport[] // Products imported via WhatsApp
   staffInvites StaffInvite[]                    // Pending staff invitations
   activityLogs ShopActivityLog[]               // Shop-level audit trail
+  followers    ShopFollow[]                    // Buyers following this shop
+  verification SellerVerification?             // Verification record backing isVerified
+  importJobs   ImportJob[]                     // Catalogue import jobs
 
   @@index([slug])
   @@index([isActive])
@@ -289,6 +292,7 @@ model Product {
   variants    ProductVariant[]                // Product variants with stock
   promotedListings PromotedListing[]          // Marketplace promotions for this product
   bulkDiscountTiers BulkDiscountTier[]        // Volume discount breakpoints
+  translations ProductTranslation[]           // AI listing translations (zu/xh/af/st)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -397,7 +401,7 @@ model Plan {
   name           String                      // "Free", "Pro", "Business"
   slug           String   @unique            // "free", "pro", "business"
   priceInCents   Int      @default(0)        // Monthly price in ZAR cents (0 = free)
-  productLimit   Int      @default(10)       // Max products (0 = unlimited)
+  productLimit   Int      @default(20)       // Max products (0 = unlimited) — matches Free plan
   staffLimit     Int      @default(1)        // Max staff members (1 = owner only)
   features       String?                     // JSON array of feature strings
   isActive       Boolean  @default(true)
@@ -617,6 +621,7 @@ model Order {
   // Relations
   items           OrderItem[]
   transactionFee  TransactionFee?
+  reviewRequest   ReviewRequest?
 
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -1173,6 +1178,7 @@ enum ProductSource {
   WHATSAPP                                     // Imported via WhatsApp photo
   CSV                                          // Bulk imported via CSV
   API                                          // Created via API
+  IMPORT                                       // Catalogue import flow (photos/text/csv → review grid)
 }
 
 // ============================================================
@@ -1319,6 +1325,240 @@ model MagicLink {
 
   @@index([phoneNumber, createdAt])                // Rate-limiting queries
   @@index([token])
+}
+
+// ============================================================
+// IMPORT JOB: Catalogue import session (Phase 4)
+// One job per import attempt. Drafts are created up-front so
+// the job survives closed tabs — processing resumes from the
+// DB state, never from client memory.
+// ============================================================
+model ImportJob {
+  id             String          @id @default(cuid())
+  shopId         String
+  shop           Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  source         ImportSource                   // PHOTOS | TEXT | CSV | WA_CATALOG (future)
+  status         ImportJobStatus @default(PROCESSING)
+
+  // Optional seller-pasted caption used as AI context for the
+  // whole batch. PII-adjacent — purged when the job completes (POPIA).
+  globalContext  String?
+
+  totalItems     Int             @default(0)
+  readyItems     Int             @default(0)    // Drafts processed (AI done or quota-skipped)
+  publishedItems Int             @default(0)
+  skippedItems   Int             @default(0)
+
+  drafts         DraftListing[]
+
+  createdAt      DateTime        @default(now())
+  completedAt    DateTime?
+
+  @@index([shopId, status])
+  @@index([shopId, createdAt])
+}
+
+enum ImportSource {
+  PHOTOS                                        // Bulk photo upload (primary)
+  TEXT                                          // Pasted WhatsApp captions
+  CSV                                           // Spreadsheet import
+  WA_CATALOG                                    // Meta catalog API (future)
+}
+
+enum ImportJobStatus {
+  PROCESSING                                    // Drafts being generated
+  REVIEW                                        // All drafts processed — seller reviewing
+  COMPLETED                                     // Seller finished (published/skipped everything)
+  FAILED                                        // Unrecoverable error
+}
+
+// ============================================================
+// DRAFT LISTING: One candidate product inside an import job
+// AI fields are suggestions only — the seller edits inline in
+// the review grid before publishing. Published drafts link to
+// the created Product.
+// ============================================================
+model DraftListing {
+  id                 String      @id @default(cuid())
+
+  importJobId        String
+  importJob          ImportJob   @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+  shopId             String                      // Denormalised tenant scope
+
+  status             DraftStatus @default(PROCESSING)
+
+  // ── AI suggestions ───────────────────────────────────
+  aiTitle            String?
+  aiDescription      String?
+  aiCategory         String?                     // Category name suggestion (not an FK)
+  aiPriceMinCents    Int?                        // Detected price range in ZAR cents
+  aiPriceMaxCents    Int?
+  aiAttributes       Json?                       // { sizes: [], colours: [], material: "" }
+  confidence         Float       @default(0)     // 0–1
+  flags              String[]                    // low_confidence | possible_duplicate | multi_item_photo | no_price_detected | watermark_suspected | ai_quota_exceeded
+
+  // ── Source material ──────────────────────────────────
+  originalCaption    String?                     // Pasted text for this item — purged on completion (POPIA)
+  photoUrls          String[]                    // UploadThing CDN URLs
+  photoKeys          String[]                    // UploadThing keys (cleanup of unpublished drafts)
+
+  publishedProductId String?                     // Product created on publish
+
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  @@index([importJobId, status])
+  @@index([shopId])
+}
+
+enum DraftStatus {
+  PROCESSING                                    // Awaiting AI generation
+  NEEDS_REVIEW                                  // Has flags or missing required fields
+  READY                                         // Looks publishable as-is
+  PUBLISHED                                     // Product created
+  SKIPPED                                       // Seller discarded
+}
+
+// ============================================================
+// PRODUCT TRANSLATION: AI listing translations (Phase 3)
+// Generated on publish into isiZulu (zu), isiXhosa (xh),
+// Afrikaans (af) and Sesotho (st). Served on the public
+// catalog based on the buyer's locale cookie.
+// Source-of-truth name/description stay on Product (English).
+// ============================================================
+model ProductTranslation {
+  id          String   @id @default(cuid())
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  locale      String                            // "zu" | "xh" | "af" | "st"
+  name        String                            // Translated product name
+  description String?                           // Translated description
+
+  // Staleness tracking: re-translate when the source changes
+  sourceHash  String?                           // Hash of source name+description at translation time
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([productId, locale])
+  @@index([productId])
+}
+
+// ============================================================
+// SELLER VERIFICATION: Record backing the Verified badge
+// Sellers submit business details; platform admin approves or
+// rejects. Shop.isVerified stays the fast denormalised flag —
+// this record is the audit trail behind it.
+// Document URLs are PII (POPIA) — admin-only, never public.
+// ============================================================
+model SellerVerification {
+  id                 String             @id @default(cuid())
+  shopId             String             @unique           // One record per shop
+  shop               Shop               @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  status             VerificationStatus @default(PENDING)
+
+  // ── Submission (from seller) ─────────────────────────
+  legalName          String                               // Registered business / owner name
+  registrationNumber String?                              // CIPC registration number
+  vatNumber          String?                              // SA VAT number (optional)
+  idDocumentUrl      String?                              // UploadThing URL (PII — admin only)
+  proofOfAddressUrl  String?                              // UploadThing URL (PII — admin only)
+  sellerNote         String?                              // Anything the seller wants to add
+
+  // ── Decision (from admin) ────────────────────────────
+  reviewedBy         String?                              // Admin Clerk user ID
+  reviewedByEmail    String?                              // Email snapshot for readability
+  decisionNote       String?                              // Why approved/rejected/revoked
+  verifiedAt         DateTime?                            // When approved
+  rejectedAt         DateTime?                            // When rejected
+
+  submittedAt        DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([status, submittedAt])
+}
+
+enum VerificationStatus {
+  PENDING                                                 // Awaiting admin review
+  APPROVED                                                // Verified badge granted
+  REJECTED                                                // Application denied (seller may resubmit)
+  REVOKED                                                 // Badge removed after being granted
+}
+
+// ============================================================
+// REVIEW REQUEST: Automated review ask after delivery
+// Created when an order is marked DELIVERED. The buyer gets a
+// WhatsApp message with a tokenized link to a review form.
+// Reviews submitted via the token are marked isVerified.
+// One request per order (idempotent).
+// ============================================================
+model ReviewRequest {
+  id          String    @id @default(cuid())
+
+  orderId     String    @unique                           // One request per order
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  shopId      String                                      // Denormalised for tenant queries
+  token       String    @unique @default(cuid())          // Review link token (/review/[token])
+  channel     String    @default("whatsapp")              // "whatsapp" | "email"
+
+  sentAt      DateTime?                                   // When the message was sent (null = failed/pending)
+  respondedAt DateTime?                                   // When the buyer submitted a review
+  reviewId    String?                                     // The Review created from this request
+
+  createdAt   DateTime  @default(now())
+
+  @@index([shopId])
+  @@index([token])
+}
+
+// ============================================================
+// BUYER PROFILE: Lightweight phone-based buyer account
+// Created on first WhatsApp login (existing MagicLink → Clerk
+// flow) or lazily on first follow/save. No password — identity
+// comes from the verified WhatsApp number.
+// Phone is PII (POPIA) — never expose publicly.
+// ============================================================
+model BuyerProfile {
+  id               String   @id @default(cuid())
+  clerkId          String   @unique              // Clerk user (WhatsApp magic-link login)
+  phone            String?  @unique              // Normalized E.164 (PII — POPIA)
+  displayName      String?                       // Optional name shown on reviews
+  language         String   @default("en")       // Preferred locale (en, zu, xh, af, st)
+  marketingConsent Boolean  @default(false)      // Opt-in for "new from shops you follow" WhatsApp pings
+
+  follows          ShopFollow[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([clerkId])
+  @@index([phone])
+}
+
+// ============================================================
+// SHOP FOLLOW: Buyer follows a shop
+// Powers the "new from shops you follow" feed and (future)
+// drop notifications. One follow per buyer per shop.
+// ============================================================
+model ShopFollow {
+  id        String       @id @default(cuid())
+
+  buyerId   String
+  buyer     BuyerProfile @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  shopId    String
+  shop      Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime     @default(now())
+
+  @@unique([buyerId, shopId])
+  @@index([shopId])
+  @@index([buyerId, createdAt])
 }
 
 // ============================================================

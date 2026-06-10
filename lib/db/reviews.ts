@@ -17,6 +17,8 @@ export interface CreateReviewInput {
   comment?: string;
   buyerName: string;
   buyerEmail?: string;
+  /** True when the review came from a tokenized post-delivery request */
+  isVerified?: boolean;
 }
 
 export interface ReviewWithMeta {
@@ -49,7 +51,7 @@ export async function createReview(input: CreateReviewInput) {
       buyerName: input.buyerName,
       buyerEmail: input.buyerEmail || null,
       isApproved: true, // Auto-approved — seller can delete unwanted reviews
-      isVerified: false,
+      isVerified: input.isVerified ?? false,
     },
   });
 }

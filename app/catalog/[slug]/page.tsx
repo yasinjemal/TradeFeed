@@ -30,6 +30,9 @@ import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ShopHero } from "@/components/catalog/shop-hero";
+import { SellerTrustStatsStrip } from "@/components/catalog/seller-trust-stats";
+import { getSellerTrustStats } from "@/lib/db/trust";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { ShopAboutSection } from "@/components/catalog/shop-about-section";
 import { ShopReviewHighlights } from "@/components/catalog/shop-review-highlights";
 import { IllustrationRocket } from "@/components/ui/illustrations";
@@ -106,12 +109,15 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   const shop = await getCachedShop(slug);
   if (!shop) return notFound();
 
-  const [products, combos, tierData, recentDrops, reviewHighlights] = await Promise.all([
+  const [products, combos, tierData, recentDrops, reviewHighlights, trustStats] = await Promise.all([
     getCatalogProducts(shop.id),
     getCatalogCombos(shop.id),
     getSellerTierData(shop.id, shop),
     getShopDrops(slug, 1),
     getShopReviewHighlights(shop.id),
+    FEATURE_FLAGS.TRUST_SYSTEM
+      ? getSellerTrustStats(shop.id)
+      : Promise.resolve(null),
   ]);
 
   // ── Detect viewer type (fire in parallel, lightweight) ──────
@@ -252,6 +258,11 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
     <div className="space-y-5">
       {/* ── Hero — Trust-first above the fold ────────────── */}
       <ShopHero shop={shop} tierBadge={tierData.tier} />
+
+      {/* ── Trust signals (Phase 2, flag-gated) ───────────── */}
+      {trustStats && (
+        <SellerTrustStatsStrip stats={trustStats} memberSince={shop.createdAt} />
+      )}
 
       {/* ── Search, Filter & Product Grid ─────────────────── */}
       <CatalogSearchFilter

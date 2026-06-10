@@ -147,9 +147,18 @@ export function SmartVariantCreator({
     const priceInCents = Math.round(parseFloat(price) * 100);
     const retailPriceInCents = retailPrice.trim() ? Math.round(parseFloat(retailPrice) * 100) : null;
     const stockNum = parseInt(stock, 10);
-    if (isNaN(priceInCents) || priceInCents <= 0) return;
-    if (isNaN(stockNum) || stockNum < 0) return;
-    if (retailPriceInCents !== null && (isNaN(retailPriceInCents) || retailPriceInCents <= 0)) return;
+    if (isNaN(priceInCents) || priceInCents <= 0) {
+      setResult({ success: false, message: "Enter a price first." });
+      return;
+    }
+    if (isNaN(stockNum) || stockNum < 0) {
+      setResult({ success: false, message: "Enter a valid stock quantity." });
+      return;
+    }
+    if (retailPriceInCents !== null && (isNaN(retailPriceInCents) || retailPriceInCents <= 0)) {
+      setResult({ success: false, message: "Enter a valid retail price or leave it empty." });
+      return;
+    }
 
     startTransition(async () => {
       const res = await batchCreateVariantsAction(
@@ -325,7 +334,7 @@ export function SmartVariantCreator({
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         <div>
           <label className="text-xs sm:text-sm font-medium text-stone-700 mb-1.5 block">
-            Wholesale Price
+            Price
           </label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-stone-400">
@@ -397,7 +406,7 @@ export function SmartVariantCreator({
       {/* ── Generate Button ─────────────────────────────── */}
       <button
         onClick={handleGenerate}
-        disabled={isPending || newCount === 0 || !price || !stock}
+        disabled={isPending || newCount === 0}
         className={`w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-300
           ${
             newCount > 0 && !isPending

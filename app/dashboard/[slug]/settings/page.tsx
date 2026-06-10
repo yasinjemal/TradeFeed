@@ -19,6 +19,9 @@ import { SettingsSidebar } from "@/components/shop/settings-sidebar";
 import { ThemePicker } from "@/components/shop/theme-picker";
 import { CodToggle } from "@/components/shop/cod-toggle";
 import { CustomDomainSettings } from "@/components/shop/custom-domain-settings";
+import { VerificationRequestCard } from "@/components/shop/verification-request-card";
+import { getVerificationForShop } from "@/lib/db/verification";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { db } from "@/lib/db";
 import Link from "next/link";
 
@@ -49,6 +52,10 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
   const staffLimit = subscription?.plan.staffLimit ?? 1;
 
   const memberCount = await db.shopUser.count({ where: { shopId: shop.id } });
+
+  const verification = FEATURE_FLAGS.TRUST_SYSTEM
+    ? await getVerificationForShop(shop.id)
+    : null;
 
   // Calculate profile completeness
   const checks = [
@@ -221,6 +228,33 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
               <CodToggle shopSlug={slug} initialEnabled={shop.codEnabled} />
             </div>
           </div>
+
+          {/* ── Get Verified (Trust System) ───────────── */}
+          {FEATURE_FLAGS.TRUST_SYSTEM && (
+            <div id="section-verification" className="scroll-mt-28 relative rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-200 rounded-l-2xl" />
+              <div className="pl-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <span>✅</span>
+                  <h3 className="text-lg font-bold text-slate-900">Get Verified</h3>
+                </div>
+                <p className="text-sm text-slate-500 mb-5">
+                  Verified shops get a badge on their catalog and rank better on the marketplace.
+                  Your details are reviewed by the TradeFeed team and never shown publicly.
+                </p>
+                <VerificationRequestCard
+                  shopSlug={slug}
+                  isVerified={shop.isVerified}
+                  verification={verification ? {
+                    status: verification.status,
+                    legalName: verification.legalName,
+                    decisionNote: verification.decisionNote,
+                    submittedAt: verification.submittedAt,
+                  } : null}
+                />
+              </div>
+            </div>
+          )}
 
           {/* ── Custom Domain ─────────────────────────── */}
           <div id="section-domain" className="scroll-mt-28 relative rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden">

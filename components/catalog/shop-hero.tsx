@@ -10,9 +10,11 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { SHIMMER_DARK } from "@/lib/image-placeholder";
 import { ShareShopButton } from "./share-shop-button";
+import { FollowShopButton } from "./follow-shop-button";
 
 interface ShopHeroProps {
   shop: {
+    id: string;
     name: string;
     slug: string;
     description: string | null;
@@ -190,6 +192,7 @@ export async function ShopHero({ shop, tierBadge }: ShopHeroProps) {
               </svg>
               {t("contact")}
             </a>
+            <FollowShopButton shopId={shop.id} />
             <ShareShopButton shopName={shop.name} shopSlug={shop.slug} />
           </div>
         </div>

@@ -361,6 +361,16 @@ export async function updateOrderStatusAction(
       });
     }
 
+    // 4c. Automated review request on delivery (fire-and-forget)
+    if (newStatus === "DELIVERED") {
+      const { FEATURE_FLAGS } = await import("@/lib/config/feature-flags");
+      if (FEATURE_FLAGS.REVIEW_REQUESTS) {
+        import("@/lib/reviews/review-requests")
+          .then(({ requestReviewForOrder }) => requestReviewForOrder(orderId, access.shopId))
+          .catch(() => {});
+      }
+    }
+
     // 5. Send WhatsApp status update to buyer (fire-and-forget)
     if (order.buyerPhone) {
       const { db: prismaDb } = await import("@/lib/db");

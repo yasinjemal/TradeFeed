@@ -5,10 +5,9 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Skip type-checking + linting during Vercel builds (already done in CI/locally)
+  // Skip type-checking during Vercel builds (already done in CI/locally)
   // Cuts ~30-60s off each build
   typescript: { ignoreBuildErrors: false },
-  eslint: { ignoreDuringBuilds: true },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
