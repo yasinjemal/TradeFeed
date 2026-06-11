@@ -257,7 +257,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
         aria-modal="true"
         aria-label={confirmation ? "Order placed" : "Your order"}
         tabIndex={-1}
-        className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-tf-surface shadow-tf-md outline-none"
+        className="tf-slide-in-right absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-tf-surface shadow-tf-md outline-none"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-tf-stone-200 bg-tf-raised px-4 py-3">

@@ -5,6 +5,7 @@ import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TfButton } from "@/components/tf/button";
 import { TfFonts } from "@/components/tf/tf-fonts";
 import { SA_PROVINCES } from "@/lib/marketplace/locations";
+import { TfReveal } from "@/components/tf/motion/tf-reveal";
 
 // ============================================================
 // SeoPageShell — shared frame for editorial money pages
@@ -144,12 +145,12 @@ export function SeoSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-10">
+    <TfReveal as="section" className="mt-10">
       <h2 className="font-tf-display text-2xl font-semibold tracking-tight">{title}</h2>
       <div className="mt-3 space-y-4 text-[15px] leading-relaxed text-tf-stone-600 [&_strong]:text-tf-ink">
         {children}
       </div>
-    </section>
+    </TfReveal>
   );
 }
 

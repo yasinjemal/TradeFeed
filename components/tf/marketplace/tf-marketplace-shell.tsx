@@ -12,6 +12,7 @@ import { TfEmptyState } from "@/components/tf/empty-state";
 import { TfProductCard } from "@/components/tf/product-card";
 import { TfProductCardSkeleton } from "@/components/tf/skeleton";
 import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { buildMarketplaceSearchParams } from "@/lib/marketplace/search-params";
 import { loadMoreProducts, trackMarketplaceClickAction, trackPromotedClickAction } from "@/app/actions/marketplace";
 import type { CategoryWithCount, MarketplaceProduct, MarketplaceSortBy } from "@/lib/db/marketplace";
@@ -282,7 +283,7 @@ export function TfMarketplaceShell({
             className="my-10"
           />
         ) : (
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+          <TfReveal as="ul" stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
             {allProducts.map((p) => (
               <li key={`${p.id}${p.promotion ? "-promo" : ""}`} onClick={() => onCardClick(p)}>
                 <TfProductCard {...toCard(p)} className="h-full" />
@@ -294,7 +295,7 @@ export function TfMarketplaceShell({
                   <TfProductCardSkeleton />
                 </li>
               ))}
-          </ul>
+          </TfReveal>
         )}
 
         {/* Infinite-scroll sentinel */}

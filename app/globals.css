@@ -625,12 +625,12 @@ h4, h5, h6 {
     animation: none;
   }
   .tf-stagger.tf-in > *:nth-child(1) { transition-delay: 0ms; }
-  .tf-stagger.tf-in > *:nth-child(2) { transition-delay: 60ms; }
-  .tf-stagger.tf-in > *:nth-child(3) { transition-delay: 120ms; }
-  .tf-stagger.tf-in > *:nth-child(4) { transition-delay: 180ms; }
-  .tf-stagger.tf-in > *:nth-child(5) { transition-delay: 240ms; }
-  .tf-stagger.tf-in > *:nth-child(6) { transition-delay: 300ms; }
-  .tf-stagger.tf-in > *:nth-child(n + 7) { transition-delay: 340ms; }
+  .tf-stagger.tf-in > *:nth-child(2) { transition-delay: 50ms; }
+  .tf-stagger.tf-in > *:nth-child(3) { transition-delay: 100ms; }
+  .tf-stagger.tf-in > *:nth-child(4) { transition-delay: 150ms; }
+  .tf-stagger.tf-in > *:nth-child(5) { transition-delay: 200ms; }
+  .tf-stagger.tf-in > *:nth-child(6) { transition-delay: 250ms; }
+  .tf-stagger.tf-in > *:nth-child(n + 7) { transition-delay: 290ms; }
 
   /* One-time swipe nudge on the gallery (runs after load settles) */
   @keyframes tf-nudge {
@@ -640,6 +640,15 @@ h4, h5, h6 {
   }
   .tf-nudge {
     animation: tf-nudge 900ms var(--tf-ease) 1100ms 1;
+  }
+
+  /* Cart/side panels enter from the right */
+  @keyframes tf-slide-in-right {
+    from { transform: translateX(24px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .tf-slide-in-right {
+    animation: tf-slide-in-right 320ms var(--tf-ease) both;
   }
 
   /* Sticky bars slide up once */

@@ -15,6 +15,7 @@ import { formatZAR } from "@/types";
 import { TfButton } from "@/components/tf/button";
 import { TfEmptyState } from "@/components/tf/empty-state";
 import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfShareCatalogue } from "./tf-share-catalogue";
 
 // ============================================================
@@ -133,7 +134,7 @@ export function TfDashboardHome({
       ) : (
         <>
           {/* ── Primary actions ────────────────────────── */}
-          <div className="grid grid-cols-3 gap-2">
+          <TfReveal stagger className="grid grid-cols-3 gap-2">
             <Link
               href={`/dashboard/${slug}/products/new?ai=true`}
               className="flex min-h-[84px] flex-col items-center justify-center gap-1.5 rounded-xl border border-tf-stone-200 bg-tf-raised p-3 text-center outline-none hover:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary"
@@ -160,15 +161,15 @@ export function TfDashboardHome({
                 </span>
               )}
             </Link>
-          </div>
+          </TfReveal>
 
           {/* ── Simple stats ───────────────────────────── */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <TfReveal stagger className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {metric("Views (7 days)", stats.viewsLast7Days.toLocaleString("en-ZA"))}
             {metric("Orders today", stats.ordersToday.toLocaleString("en-ZA"))}
             {metric("Revenue today", formatZAR(stats.revenueTodayCents))}
             {metric("Products", stats.productCount.toLocaleString("en-ZA"))}
-          </div>
+          </TfReveal>
           <p className="-mt-3 text-right">
             <Link
               href={`/dashboard/${slug}/analytics`}

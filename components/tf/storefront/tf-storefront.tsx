@@ -8,6 +8,7 @@ import { TfEmptyState } from "@/components/tf/empty-state";
 import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfTrustBar } from "@/components/tf/trust-bar";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
+import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import type { SellerTrustStats } from "@/lib/trust/seller-stats";
 import { TfStorefrontGrid, type TfGridProduct } from "./tf-product-grid";
 import { TfReviewsBlock, type TfReview } from "./tf-reviews";
@@ -70,6 +71,7 @@ export function TfStorefront({
       <TfFonts />
 
       {/* ── Hero: the Verified Seller card ─────────────── */}
+      <TfReveal>
       <TfVerifiedSellerCard
         variant="hero"
         name={shop.name}
@@ -80,10 +82,13 @@ export function TfStorefront({
         location={location}
         action={<FollowShopButton shopId={shop.id} />}
       />
+      </TfReveal>
 
       {/* Fulfilment proof, only when there's real data */}
       {trustStats && trustStats.ordersFulfilled > 0 && (
-        <TfTrustBar ordersFulfilled={trustStats.ordersFulfilled} compact />
+        <TfReveal delay={100}>
+          <TfTrustBar ordersFulfilled={trustStats.ordersFulfilled} compact />
+        </TfReveal>
       )}
 
       {/* ── Products ───────────────────────────────────── */}
@@ -112,7 +117,7 @@ export function TfStorefront({
 
       {/* ── About ──────────────────────────────────────── */}
       {about && (
-        <section
+        <TfReveal as="section"
           aria-label={`About ${shop.name}`}
           className="rounded-xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm"
         >
@@ -122,16 +127,18 @@ export function TfStorefront({
           <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-tf-stone-600">
             {about}
           </p>
-        </section>
+        </TfReveal>
       )}
 
       {/* ── Reviews ────────────────────────────────────── */}
+      <TfReveal>
       <TfReviewsBlock
         reviews={reviews}
         avgRating={avgRating}
         reviewCount={reviewCount}
         shopName={shop.name}
       />
+      </TfReveal>
 
       {/* ── Owner / recruitment footers ────────────────── */}
       {isOwner && ownerDashboardSlug && (

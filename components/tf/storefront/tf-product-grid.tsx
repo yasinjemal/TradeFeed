@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { TfButton } from "@/components/tf/button";
 import { TfEmptyState } from "@/components/tf/empty-state";
 import { TfProductCard } from "@/components/tf/product-card";
+import { TfReveal } from "@/components/tf/motion/tf-reveal";
 
 // ============================================================
 // TfStorefrontGrid — client-side search/filter/sort over the
@@ -159,7 +160,7 @@ export function TfStorefrontGrid({
           className="mt-4"
         />
       ) : (
-        <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+        <TfReveal as="ul" stagger className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
           {visible.map((p) => (
             <li key={p.id}>
               <TfProductCard
@@ -174,7 +175,7 @@ export function TfStorefrontGrid({
               />
             </li>
           ))}
-        </ul>
+        </TfReveal>
       )}
     </section>
   );

@@ -14,6 +14,8 @@ import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TfButton } from "@/components/tf/button";
 import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
+import { TfReveal } from "@/components/tf/motion/tf-reveal";
+import { TfCountUp } from "@/components/tf/motion/tf-count-up";
 import { TfPhoneMock } from "./phone-mock";
 import { TfLandingStickyCta } from "./sticky-cta";
 
@@ -138,7 +140,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
       {/* ── Hero ───────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-4 pb-14 pt-10 sm:px-6 sm:pb-20 sm:pt-16">
         <div className="grid items-center gap-10 lg:grid-cols-2">
-          <div>
+          <TfReveal stagger>
             <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-tf-verified-soft px-3 py-1 text-xs font-medium text-tf-deep">
               <BadgeCheck aria-hidden="true" className="size-3.5 text-tf-verified" />
               {n(stats.shopCount)} sellers live across {stats.cityCount} SA {stats.cityCount === 1 ? "city" : "cities"}
@@ -163,14 +165,16 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
               </TfButton>
             </div>
             <p className="mt-4 text-xs text-tf-stone-500">{reassurance}</p>
-          </div>
-          <TfPhoneMock />
+          </TfReveal>
+          <TfReveal delay={160}>
+            <TfPhoneMock />
+          </TfReveal>
         </div>
       </section>
 
       {/* ── Live numbers (real, never inflated) ────────── */}
       <section aria-label="Platform statistics" className="border-y border-tf-stone-200 bg-tf-raised">
-        <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-px px-4 py-6 text-center sm:grid-cols-4 sm:px-6">
+        <TfReveal as="div" stagger className="mx-auto grid max-w-6xl grid-cols-2 gap-px px-4 py-6 text-center sm:grid-cols-4 sm:px-6" role="list">
           {[
             [stats.shopCount, "live sellers"],
             [stats.productCount, "products listed"],
@@ -178,13 +182,13 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             [stats.cityCount, "SA cities"],
           ].map(([value, label]) => (
             <div key={label as string}>
-              <dt className="order-2 text-xs text-tf-stone-500">{label}</dt>
-              <dd className="font-tf-display text-2xl font-semibold tabular-nums text-tf-ink sm:text-3xl">
-                {n(value as number)}
-              </dd>
+              <p className="order-2 text-xs text-tf-stone-500">{label}</p>
+              <p className="font-tf-display text-2xl font-semibold tabular-nums text-tf-ink sm:text-3xl">
+                <TfCountUp value={value as number} />
+              </p>
             </div>
           ))}
-        </dl>
+        </TfReveal>
       </section>
 
       {/* ── How it works ───────────────────────────────── */}
@@ -196,7 +200,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
           No warehouse, no website builder, no monthly admin. If you can send a WhatsApp
           message, you can run a shop.
         </p>
-        <ol className="mt-8 grid gap-4 sm:grid-cols-3">
+        <TfReveal as="ul" stagger className="mt-8 grid gap-4 sm:grid-cols-3">
           {STEPS.map((step, i) => (
             <li key={step.title} className="rounded-xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm">
               <div className="mb-3 flex items-center gap-2.5">
@@ -209,7 +213,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
               <p className="mt-1.5 text-sm leading-relaxed text-tf-stone-600">{step.body}</p>
             </li>
           ))}
-        </ol>
+        </TfReveal>
       </section>
 
       {/* ── Trust: the Verified Seller card ────────────── */}
@@ -233,6 +237,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
               ))}
             </ul>
           </div>
+          <TfReveal delay={120}>
           <TfVerifiedSellerCard
             variant="hero"
             name="Thandi's Sneakers"
@@ -242,6 +247,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             memberSince={2024}
             location="Soweto, Johannesburg"
           />
+          </TfReveal>
         </div>
       </section>
 
@@ -255,12 +261,12 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             No stock photos — these are {sellers.length} of the {n(stats.shopCount)} sellers
             trading on TradeFeed today.
           </p>
-          <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <TfReveal as="ul" stagger className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {sellers.map((s) => (
               <li key={s.slug}>
                 <Link
                   href={`/catalog/${s.slug}`}
-                  className="flex h-full flex-col items-center gap-2 rounded-xl border border-tf-stone-200 bg-tf-raised p-4 text-center shadow-tf-sm outline-none transition-shadow motion-reduce:transition-none hover:shadow-tf-md focus-visible:ring-2 focus-visible:ring-tf-primary"
+                  className="tf-card-tactile flex h-full flex-col items-center gap-2 rounded-xl border border-tf-stone-200 bg-tf-raised p-4 text-center shadow-tf-sm outline-none hover:shadow-tf-md focus-visible:ring-2 focus-visible:ring-tf-primary"
                 >
                   <span className="relative flex size-12 items-center justify-center overflow-hidden rounded-full bg-tf-deep text-sm font-medium text-tf-surface">
                     {s.logoUrl ? (
@@ -281,7 +287,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                 </Link>
               </li>
             ))}
-          </ul>
+          </TfReveal>
         </section>
       )}
 
@@ -295,7 +301,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             Start free with 20 products and 10 AI listings a month. Upgrade when the
             orders say so. Cancel anytime.
           </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <TfReveal stagger className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {PLANS.map((plan) => (
               <div
                 key={plan.name}
@@ -329,13 +335,13 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                 </TfButton>
               </div>
             ))}
-          </div>
+          </TfReveal>
         </div>
       </section>
 
       {/* ── Final CTA ──────────────────────────────────── */}
       <section className="bg-tf-deep">
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-20">
+        <TfReveal className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-20">
           <Store aria-hidden="true" className="mx-auto mb-4 size-8 text-emerald-300" />
           <h2 className="font-tf-display text-3xl font-semibold text-tf-surface sm:text-4xl">
             Your shop could be live in under 3 minutes
@@ -347,7 +353,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             <Link href={ctaHref}>{ctaLabel}</Link>
           </TfButton>
           <p className="mt-4 text-xs text-emerald-100/70">{reassurance}</p>
-        </div>
+        </TfReveal>
       </section>
 
       {/* ── Footer ─────────────────────────────────────── */}
