@@ -27,50 +27,9 @@ import type { Metadata } from "next";
 // Landing Page SEO — targeted for "wholesale marketplace South Africa"
 // ============================================================
 export const metadata: Metadata = {
-  title: "Sell Online South Africa — Create Your Shop & WhatsApp Catalog in 2 Minutes | TradeFeed",
+  title: "TradeFeed — Sell Online in South Africa via WhatsApp",
   description:
-    "Turn your WhatsApp business into a professional online shop. Upload a photo, AI creates the listing in 10 seconds. Share your catalog link and get orders — no back-and-forth. Free forever. Join 100+ sellers in Johannesburg, Durban, Cape Town & all 9 provinces.",
-  keywords: [
-    // Primary high-volume
-    "sell online South Africa",
-    "how to sell online in South Africa",
-    "create online shop free South Africa",
-    "start online business South Africa",
-    "sell on WhatsApp South Africa",
-    // Wholesale (money keywords)
-    "wholesale Johannesburg",
-    "wholesale marketplace South Africa",
-    "buy wholesale South Africa",
-    "cheap wholesale South Africa",
-    "bulk buy South Africa",
-    "Jeppe Street wholesale",
-    "wholesale suppliers Johannesburg",
-    // Product-specific
-    "sell products online South Africa",
-    "buy products online South Africa",
-    "sell shoes online South Africa",
-    "wholesale South Africa",
-    "sell clothes online South Africa",
-    "sell electronics online South Africa",
-    // Intent-based
-    "online shop South Africa free",
-    "WhatsApp catalog South Africa",
-    "WhatsApp business South Africa",
-    "AI product listing",
-    // Reseller / hustle
-    "reseller South Africa",
-    "side hustle South Africa",
-    "sell from home South Africa",
-    "township business online",
-    "small business South Africa",
-    // City-specific
-    "sell online Johannesburg",
-    "sell online Cape Town",
-    "sell online Durban",
-    "wholesale Pretoria",
-    "wholesale Durban",
-    "wholesale Cape Town",
-  ],
+    "Turn your WhatsApp business into a real online shop. Photo in, AI listing out, one shareable catalogue link. Free for your first 20 products — no app, no coding.",
   alternates: {
     canonical: "https://tradefeed.co.za",
   },
@@ -326,7 +285,7 @@ export default async function HomePage() {
           SECTION 2 — HERO
       ───────────────────────────────────────────────────── */}
       <HeroSection
-        badge={tLanding("hero.badge", { shopCount: Math.max(shopCount, 50) })}
+        badge={tLanding("hero.badge", { shopCount })}
         title={tLanding("hero.title")}
         titleHighlight={tLanding("hero.titleHighlight")}
         subtitle={tLanding("hero.subtitle")}
@@ -955,7 +914,7 @@ export default async function HomePage() {
             <div>
               <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-4">For Sellers</h4>
               <ul className="space-y-2.5">
-                {[{ label: "Create a Shop", href: clerkId ? "/create-shop" : "/sign-up" }, { label: "Import WhatsApp Catalogue", href: "/import-whatsapp-catalogue" }, { label: "Sign In", href: "/sign-in" }, { label: "How It Works", href: "#how-it-works" }].map((l) => (
+                {[{ label: "Sell Online in South Africa", href: "/sell-online-south-africa" }, { label: "Sell on WhatsApp", href: "/sell-on-whatsapp" }, { label: "WhatsApp Catalogue for Business", href: "/whatsapp-catalog" }, { label: "Create an Online Shop", href: "/create-online-shop" }, { label: "Import WhatsApp Catalogue", href: "/import-whatsapp-catalogue" }, { label: "Pricing", href: "/pricing" }, { label: "Shopify Alternative (SA)", href: "/compare/shopify-alternative-south-africa" }, { label: "Sign In", href: "/sign-in" }].map((l) => (
                   <li key={l.label}><Link href={l.href} className="text-sm text-slate-400 hover:text-white transition-colors">{l.label}</Link></li>
                 ))}
               </ul>

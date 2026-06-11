@@ -28,57 +28,11 @@ export const metadata: Metadata = {
     template: "%s | TradeFeed — SA Online Marketplace",
   },
   description:
-    "South Africa's fastest-growing online marketplace. Create your free online shop, list products with AI, and get orders via WhatsApp. Buy wholesale & retail products from verified SA sellers in Johannesburg, Durban, Cape Town & all 9 provinces. Start selling online today — no app needed.",
+    "South Africa's WhatsApp-first marketplace. Create a free online shop, let AI write your listings, and take orders on WhatsApp.",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
   },
-  keywords: [
-    // Core marketplace terms
-    "online marketplace South Africa",
-    "sell online South Africa",
-    "buy online South Africa",
-    "SA marketplace",
-    "ecommerce South Africa",
-    // Shop creation (high intent)
-    "create online shop South Africa free",
-    "create online store South Africa",
-    "start online business South Africa",
-    "how to sell online in South Africa",
-    "free online shop South Africa",
-    // WhatsApp selling (unique to TradeFeed)
-    "sell on WhatsApp South Africa",
-    "WhatsApp catalog South Africa",
-    "WhatsApp business South Africa",
-    "WhatsApp selling",
-    "WhatsApp shop",
-    // Wholesale (huge SA market)
-    "wholesale South Africa",
-    "wholesale South Africa",
-    "cheap wholesale South Africa",
-    "buy wholesale South Africa",
-    "wholesale suppliers South Africa",
-    "bulk buy South Africa",
-    // City-specific wholesale (Jeppe, Durban, Cape Town)
-    "wholesale Johannesburg",
-    "Jeppe Street wholesale",
-    "wholesale Durban",
-    "wholesale Cape Town",
-    "wholesale Pretoria",
-    // Product categories (what buyers search)
-    "buy products online South Africa",
-    "sell products online South Africa",
-    "buy shoes online South Africa",
-    "buy wholesale South Africa online",
-    "sell clothes online South Africa",
-    "sell electronics online South Africa",
-    // Small business / reseller
-    "reseller South Africa",
-    "township business online",
-    "sell from home South Africa",
-    "side hustle South Africa",
-    "small business marketplace South Africa",
-  ],
   openGraph: {
     type: "website",
     siteName: "TradeFeed",

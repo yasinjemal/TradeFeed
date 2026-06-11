@@ -41,7 +41,7 @@ export function generateSiteJsonLd() {
     url: APP_URL,
     logo: `${APP_URL}/icon.svg`,
     description:
-      "TradeFeed is South Africa's free online marketplace where sellers create their own online shop, list wholesale & retail products, and receive orders via WhatsApp. Sell any product online across Johannesburg, Cape Town, Durban, Pretoria and all 9 provinces. No app download required.",
+      "TradeFeed is South Africa's WhatsApp-first commerce platform and marketplace. Sellers create a free online shop, AI writes their listings from a photo, and buyers order via WhatsApp.",
     sameAs: [],
     contactPoint: {
       "@type": "ContactPoint",

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { provinceIndexable, robotsFor } from "@/lib/seo/should-index";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -63,19 +64,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    keywords: [
-      `suppliers in ${province.name}`,
-      `suppliers ${province.name}`,
-      `wholesale ${province.name}`,
-      `wholesale products ${province.name}`,
-      `buy online ${province.name}`,
-      ...province.cities.slice(0, 4).map((c) => `suppliers ${c.name}`),
-      ...province.cities.slice(0, 4).map((c) => `wholesale ${c.name}`),
-      "suppliers South Africa",
-      "wholesale South Africa",
-      "TradeFeed",
-    ],
     alternates: { canonical: `${APP_URL}/marketplace/${slug}` },
+    ...robotsFor(await provinceIndexable(slug)),
     openGraph: {
       title,
       description,

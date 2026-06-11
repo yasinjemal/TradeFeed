@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cityIndexable, robotsFor } from "@/lib/seo/should-index";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -62,20 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    keywords: [
-      `suppliers in ${city.name}`,
-      `suppliers ${city.name}`,
-      `wholesale ${city.name}`,
-      `wholesale products ${city.name}`,
-      `buy online ${city.name}`,
-      `${city.name} shops`,
-      `${city.name} marketplace`,
-      ...city.aliases.map((a) => `wholesale ${a}`),
-      `suppliers ${province.name}`,
-      "wholesale South Africa",
-      "TradeFeed",
-    ],
     alternates: { canonical: `${APP_URL}/marketplace/${pSlug}/${cSlug}` },
+    ...robotsFor(await cityIndexable(city.name)),
     openGraph: {
       title,
       description,

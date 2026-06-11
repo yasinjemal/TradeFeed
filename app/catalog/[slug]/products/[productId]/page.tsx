@@ -35,6 +35,7 @@ import { getFreshTranslation } from "@/lib/ai/translate-listing";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { getSellerTrustStats } from "@/lib/db/trust";
 import { TfProductPage } from "@/components/tf/product/tf-product-page";
+import { productIndexable, robotsFor } from "@/lib/seo/should-index";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -86,18 +87,15 @@ export async function generateMetadata({
     description: product.description
       ? `${product.description.slice(0, 140)}. From ${minPrice} at ${shop.name}. Order via WhatsApp. Free online marketplace South Africa.`
       : `Buy ${product.name} from ${minPrice} at ${shop.name} on TradeFeed. South Africa's online marketplace. Order via WhatsApp — no app needed.`,
-    keywords: [
-      product.name.toLowerCase(),
-      `buy ${product.name.toLowerCase()} online`,
-      `buy ${product.name.toLowerCase()} South Africa`,
-      ...(product.category?.name ? [product.category.name.toLowerCase(), `${product.category.name.toLowerCase()} South Africa`] : []),
-      shop.name.toLowerCase(),
-      "buy online South Africa",
-      "TradeFeed",
-    ],
     alternates: {
       canonical: `${baseUrl}/catalog/${slug}/products/${product.slug ?? productId}`,
     },
+    ...robotsFor(
+      productIndexable({
+        imageCount: product.images.length,
+        description: product.description,
+      }),
+    ),
     openGraph: {
       title: `${product.name} from ${minPrice} | ${shop.name} — TradeFeed`,
       description: product.description || `Buy ${product.name} from ${minPrice} at ${shop.name}. Order on WhatsApp.`,

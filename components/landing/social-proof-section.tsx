@@ -27,7 +27,7 @@ export function SocialProofSection({
 }: SocialProofSectionProps) {
   const stats = [
     {
-      value: Math.max(shopCount, 50),
+      value: shopCount,
       suffix: "+",
       label: labels.activeSellers,
       color: "text-blue-600",
@@ -39,7 +39,7 @@ export function SocialProofSection({
       ),
     },
     {
-      value: Math.max(productCount, 200),
+      value: productCount,
       suffix: "+",
       label: labels.productsListed,
       color: "text-purple-600",
@@ -51,7 +51,7 @@ export function SocialProofSection({
       ),
     },
     {
-      value: Math.max(orderCount, 100),
+      value: orderCount,
       suffix: "+",
       label: labels.ordersProcessed,
       color: "text-emerald-600",
@@ -63,7 +63,7 @@ export function SocialProofSection({
       ),
     },
     {
-      value: Math.max(cityCount, 1),
+      value: cityCount,
       suffix: "+",
       label: labels.cities,
       color: "text-amber-600",

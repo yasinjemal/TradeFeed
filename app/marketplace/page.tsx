@@ -82,24 +82,6 @@ export async function generateMetadata({
   return {
     title,
     description,
-    keywords: [
-      "buy online South Africa",
-      "TradeFeed marketplace",
-      "wholesale South Africa",
-      "SA marketplace",
-      "buy wholesale online SA",
-      "cheap products South Africa",
-      "buy shoes online South Africa",
-      "fashion South Africa",
-      "online shopping South Africa",
-      ...(categoryName ? [
-        categoryName.toLowerCase(),
-        `buy ${categoryName.toLowerCase()} South Africa`,
-        `${categoryName.toLowerCase()} wholesale`,
-        `cheap ${categoryName.toLowerCase()} South Africa`,
-        `${categoryName.toLowerCase()} online South Africa`,
-      ] : []),
-    ],
     alternates: { canonical: canonicalUrl },
     openGraph: {
       title,
@@ -268,6 +250,24 @@ export default async function MarketplacePage({
                   </li>
                 ))}
             </ul>
+          </div>
+        </div>
+
+        {/* Sell on TradeFeed — seller-acquisition spine */}
+        <div className="mt-10 pt-8 border-t border-slate-200">
+          <h2 className="text-lg font-bold text-slate-800 mb-4">Sell on TradeFeed</h2>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {[
+              { label: "Sell online in South Africa", href: "/sell-online-south-africa" },
+              { label: "Create an online shop", href: "/create-online-shop" },
+              { label: "Sell on WhatsApp", href: "/sell-on-whatsapp" },
+              { label: "WhatsApp catalogue for business", href: "/whatsapp-catalog" },
+              { label: "Pricing", href: "/pricing" },
+            ].map((l) => (
+              <Link key={l.href} href={l.href} className="text-sm text-slate-500 hover:text-emerald-600 transition-colors">
+                {l.label} →
+              </Link>
+            ))}
           </div>
         </div>
 

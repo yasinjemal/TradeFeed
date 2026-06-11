@@ -355,6 +355,12 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm text-tf-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>© {new Date().getFullYear()} TradeFeed — South Africa&apos;s WhatsApp-first marketplace.</p>
           <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <Link href="/sell-online-south-africa" className="hover:text-tf-ink">Sell online in SA</Link>
+            <Link href="/sell-on-whatsapp" className="hover:text-tf-ink">Sell on WhatsApp</Link>
+            <Link href="/whatsapp-catalog" className="hover:text-tf-ink">WhatsApp catalogue</Link>
+            <Link href="/create-online-shop" className="hover:text-tf-ink">Create a shop</Link>
+            <Link href="/import-whatsapp-catalogue" className="hover:text-tf-ink">Import catalogue</Link>
+            <Link href="/pricing" className="hover:text-tf-ink">Pricing</Link>
             <Link href="/marketplace" className="hover:text-tf-ink">Marketplace</Link>
             <Link href="/privacy" className="hover:text-tf-ink">Privacy (POPIA)</Link>
             <Link href="/terms" className="hover:text-tf-ink">Terms</Link>

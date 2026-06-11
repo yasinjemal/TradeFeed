@@ -15,6 +15,7 @@ import { TrackingSearch } from "@/components/tracking/tracking-search";
 import { BuyerOrderList } from "@/components/orders/buyer-order-list";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: "My Orders | TradeFeed",
   description:
     "View all your TradeFeed orders in one place. Track status, see order details, and reorder.",

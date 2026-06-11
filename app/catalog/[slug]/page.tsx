@@ -37,6 +37,7 @@ import { ShopAboutSection } from "@/components/catalog/shop-about-section";
 import { ShopReviewHighlights } from "@/components/catalog/shop-review-highlights";
 import { IllustrationRocket } from "@/components/ui/illustrations";
 import { TfStorefront } from "@/components/tf/storefront/tf-storefront";
+import { shopIndexable, robotsFor } from "@/lib/seo/should-index";
 
 // ISR: revalidate catalog pages every 60 seconds for near-real-time updates
 export const revalidate = 60;
@@ -76,15 +77,6 @@ export async function generateMetadata({ params }: CatalogPageProps): Promise<Me
   return {
     title,
     description,
-    keywords: [
-      shop.name.toLowerCase(),
-      `${shop.name.toLowerCase()} shop`,
-      ...(shop.city ? [`buy online ${shop.city.toLowerCase()}`, `${shop.city.toLowerCase()} shops`] : []),
-      "buy online South Africa",
-      "WhatsApp shop",
-      "online marketplace South Africa",
-      "TradeFeed",
-    ],
     openGraph: {
       title,
       description,
@@ -102,6 +94,13 @@ export async function generateMetadata({ params }: CatalogPageProps): Promise<Me
     alternates: {
       canonical: `${APP_URL}/catalog/${shop.slug}`,
     },
+    ...robotsFor(
+      shopIndexable({
+        productCount: shop._count?.products ?? 0,
+        description: shop.description,
+        aboutText: shop.aboutText,
+      }),
+    ),
   };
 }
 
