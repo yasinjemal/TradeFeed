@@ -33,6 +33,8 @@ import { DeliveryEstimate } from "@/components/catalog/delivery-estimate";
 import { getTranslations, getLocale } from "next-intl/server";
 import { getFreshTranslation } from "@/lib/ai/translate-listing";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { getSellerTrustStats } from "@/lib/db/trust";
+import { TfProductPage } from "@/components/tf/product/tf-product-page";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -171,6 +173,88 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   const option1Label = product.option1Label ?? "Size";
   const option2Label = product.option2Label ?? "Color";
+
+  // ── TF redesign (FEATURE_FLAGS.UI_REDESIGN) — same data, new skin ──
+  if (FEATURE_FLAGS.UI_REDESIGN) {
+    const trustStats = await getSellerTrustStats(shop.id);
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
+    const mapStrip = (
+      items: { id: string; slug: string | null; name: string; images: { url: string }[]; variants: { priceInCents: number }[] }[],
+      shopMeta: { name: string; slug: string; isVerified: boolean },
+    ) =>
+      items.map((p) => ({
+        id: p.id,
+        slug: p.slug,
+        name: p.name,
+        imageUrl: p.images[0]?.url ?? null,
+        minPriceCents: p.variants[0]?.priceInCents ?? 0,
+        shopName: shopMeta.name,
+        shopSlug: shopMeta.slug,
+        shopVerified: shopMeta.isVerified,
+      }));
+
+    return (
+      <>
+        <RecentlyViewedTracker
+          shopSlug={slug}
+          productId={product.id}
+          productName={product.name}
+          imageUrl={product.images[0]?.url ?? null}
+          priceInCents={minPrice}
+        />
+        {generateProductJsonLd(shop, product, reviewAgg, reviews).map((schema, i) => (
+          <script key={`product-ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+        ))}
+        <TfProductPage
+          shop={{
+            slug: shop.slug,
+            name: shop.name,
+            isVerified: shop.isVerified,
+            logoUrl: shop.logoUrl,
+            city: shop.city,
+            province: shop.province,
+            whatsappNumber: shop.whatsappNumber,
+            createdAt: shop.createdAt,
+          }}
+          product={{
+            id: product.id,
+            slug: product.slug,
+            name: displayName,
+            description: displayDescription,
+            categoryName: product.category?.name ?? null,
+            categorySlug: product.category?.slug ?? null,
+            images: product.images.map((img) => ({ id: img.id, url: img.url, altText: img.altText })),
+            variants: product.variants.map((v) => ({
+              id: v.id,
+              size: v.size,
+              color: v.color,
+              priceInCents: v.priceInCents,
+              stock: v.stock,
+            })),
+            option1Label,
+            option2Label,
+          }}
+          productUrl={`${baseUrl}/catalog/${slug}/products/${product.slug ?? product.id}`}
+          soldCount={soldCount}
+          avgRating={reviewAgg.averageRating}
+          reviewCount={reviewAgg.totalReviews}
+          reviews={reviews}
+          trustStats={trustStats}
+          moreFromSeller={mapStrip(moreFromSeller, shop)}
+          similarProducts={similarProducts.map((p) => ({
+            id: p.id,
+            slug: p.slug,
+            name: p.name,
+            imageUrl: p.images[0]?.url ?? null,
+            minPriceCents: p.variants[0]?.priceInCents ?? 0,
+            shopName: p.shop.name,
+            shopSlug: p.shop.slug,
+            shopVerified: p.shop.isVerified,
+          }))}
+        />
+      </>
+    );
+  }
 
   const waMessage = encodeURIComponent(
     `Hi! I'm interested in *${product.name}*\n\n` +

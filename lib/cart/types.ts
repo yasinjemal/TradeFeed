@@ -67,6 +67,12 @@ export interface CartContextValue {
   shopProvince?: string;
   /** Shop city for shipping rate calculation */
   shopCity?: string;
+  /** Shop display name (TF redesign cart panel) */
+  shopName?: string;
+  /** Shop logo URL (TF redesign cart panel) */
+  shopLogoUrl?: string;
+  /** Verified seller flag (TF redesign cart panel) */
+  shopVerified?: boolean;
   /** Whether this shop accepts cash on delivery */
   codEnabled?: boolean;
 }

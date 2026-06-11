@@ -5,6 +5,10 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/cart-context";
 import { CartPanel } from "@/components/catalog/cart-panel";
+import { TfCartPanel } from "@/components/tf/checkout/tf-cart-panel";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+
+const Panel = FEATURE_FLAGS.UI_REDESIGN ? TfCartPanel : CartPanel;
 
 interface BottomNavProps {
   shopSlug: string;
@@ -144,7 +148,7 @@ export function BottomNav({ shopSlug }: BottomNavProps) {
       </nav>
 
       {/* Cart drawer */}
-      <CartPanel isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <Panel isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );
 }

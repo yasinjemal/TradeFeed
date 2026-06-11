@@ -21,6 +21,9 @@ import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { TrialBanner } from "@/components/billing/trial-banner";
 import { WhatsAppCommunityBanner } from "@/components/community/whatsapp-community-banner";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { getAnalyticsOverview } from "@/lib/db/analytics";
+import { TfDashboardHome } from "@/components/tf/dashboard/tf-dashboard-home";
 
 interface DashboardPageProps {
   params: Promise<{ slug: string }>;
@@ -92,6 +95,47 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       label: "Add your first product to start selling",
       href: `/dashboard/${slug}/products/new`,
     });
+  }
+
+  // ── TF redesign (FEATURE_FLAGS.UI_REDESIGN) — same data, new skin ──
+  if (FEATURE_FLAGS.UI_REDESIGN) {
+    const overview = await getAnalyticsOverview(shop.id, 7);
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
+
+    return (
+      <div className="space-y-5">
+        {trial.active && <TrialBanner daysLeft={trial.daysLeft} shopSlug={slug} />}
+        <TfDashboardHome
+          slug={slug}
+          shop={{
+            name: shop.name,
+            logoUrl: shop.logoUrl,
+            isVerified: shop.isVerified,
+            city: shop.city,
+          }}
+          catalogUrl={`${baseUrl}/catalog/${shop.slug}`}
+          stats={{
+            viewsLast7Days: overview.totalPageViews,
+            ordersToday: stats.ordersToday,
+            revenueTodayCents: stats.revenueTodayCents,
+            productCount: stats.productCount,
+          }}
+          pendingOrders={orderStats.pending}
+          priorities={priorities}
+          recentProducts={stats.recentProducts.map((product) => {
+            const prices = product.variants.map((v) => v.priceInCents);
+            return {
+              id: product.id,
+              name: product.name,
+              imageUrl: product.images[0]?.url ?? null,
+              minPriceCents: prices.length ? Math.min(...prices) : 0,
+              totalStock: product.variants.reduce((sum, v) => sum + v.stock, 0),
+              isActive: product.isActive,
+            };
+          })}
+        />
+      </div>
+    );
   }
 
   return (

@@ -17,6 +17,10 @@ import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/lib/cart/cart-context";
 import { formatZAR } from "@/types";
 import { CartPanel } from "./cart-panel";
+import { TfCartPanel } from "@/components/tf/checkout/tf-cart-panel";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+
+const Panel = FEATURE_FLAGS.UI_REDESIGN ? TfCartPanel : CartPanel;
 
 export function CartButton() {
   const { totalItems, totalPriceInCents } = useCart();
@@ -81,7 +85,7 @@ export function CartButton() {
       </div>
 
       {/* ── Cart Panel (Slide-out) ───────────────────────── */}
-      <CartPanel isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <Panel isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
   );
 }
