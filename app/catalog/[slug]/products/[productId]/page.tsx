@@ -178,16 +178,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   if (FEATURE_FLAGS.UI_REDESIGN) {
     const trustStats = await getSellerTrustStats(shop.id);
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
-    const mapStrip = (
-      items: { id: string; slug: string | null; name: string; images: { url: string }[]; variants: { priceInCents: number }[] }[],
+    const mapSellerStrip = (
+      items: { id: string; slug: string | null; name: string; imageUrl: string | null; minPriceCents: number }[],
       shopMeta: { name: string; slug: string; isVerified: boolean },
     ) =>
       items.map((p) => ({
         id: p.id,
         slug: p.slug,
         name: p.name,
-        imageUrl: p.images[0]?.url ?? null,
-        minPriceCents: p.variants[0]?.priceInCents ?? 0,
+        imageUrl: p.imageUrl,
+        minPriceCents: p.minPriceCents,
         shopName: shopMeta.name,
         shopSlug: shopMeta.slug,
         shopVerified: shopMeta.isVerified,
@@ -240,16 +240,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           reviewCount={reviewAgg.totalReviews}
           reviews={reviews}
           trustStats={trustStats}
-          moreFromSeller={mapStrip(moreFromSeller, shop)}
+          moreFromSeller={mapSellerStrip(moreFromSeller, shop)}
           similarProducts={similarProducts.map((p) => ({
-            id: p.id,
-            slug: p.slug,
-            name: p.name,
-            imageUrl: p.images[0]?.url ?? null,
-            minPriceCents: p.variants[0]?.priceInCents ?? 0,
-            shopName: p.shop.name,
-            shopSlug: p.shop.slug,
-            shopVerified: p.shop.isVerified,
+            ...p,
+            shopVerified: p.isVerified,
           }))}
         />
       </>
