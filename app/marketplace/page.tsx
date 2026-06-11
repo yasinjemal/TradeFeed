@@ -15,6 +15,8 @@ import {
 // Deduplicate getGlobalCategories called in both generateMetadata and the page body.
 const getCachedCategories = cache(getGlobalCategories);
 import { MarketplaceShell } from "@/components/marketplace/marketplace-shell";
+import { TfMarketplaceShell } from "@/components/tf/marketplace/tf-marketplace-shell";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { generateMarketplaceJsonLd } from "@/lib/seo/json-ld";
 import { expirePromotedListings } from "@/lib/db/promotions";
 import { SA_PROVINCES, POPULAR_CITIES } from "@/lib/marketplace/locations";
@@ -181,18 +183,29 @@ export default async function MarketplacePage({
         />
       ))}
 
-      <MarketplaceShell
-        products={interleavedProducts}
-        totalProducts={productsResult.total}
-        totalPages={productsResult.totalPages}
-        currentPage={productsResult.page}
-        categories={categories}
-        trendingProducts={trending}
-        newArrivals={newArrivals}
-        featuredShops={featuredShops}
-        promotedProducts={promoted}
-        currentFilters={filters}
-      />
+      {FEATURE_FLAGS.UI_REDESIGN ? (
+        <TfMarketplaceShell
+          products={interleavedProducts}
+          totalProducts={productsResult.total}
+          totalPages={productsResult.totalPages}
+          currentPage={productsResult.page}
+          categories={categories}
+          currentFilters={filters}
+        />
+      ) : (
+        <MarketplaceShell
+          products={interleavedProducts}
+          totalProducts={productsResult.total}
+          totalPages={productsResult.totalPages}
+          currentPage={productsResult.page}
+          categories={categories}
+          trendingProducts={trending}
+          newArrivals={newArrivals}
+          featuredShops={featuredShops}
+          promotedProducts={promoted}
+          currentFilters={filters}
+        />
+      )}
 
       {/* ── Internal linking for SEO ─────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 py-16 border-t border-slate-200">

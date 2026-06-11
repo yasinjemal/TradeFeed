@@ -8,12 +8,14 @@
 
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { useUploadThing } from "@/lib/uploadthing";
 import {
   updateDraftAction,
   publishDraftsAction,
   skipDraftsAction,
+  attachDraftPhotoAction,
   type ReviewDraft,
 } from "@/app/actions/catalogue-import";
 import { draftSortWeight } from "@/lib/imports/import-logic";
@@ -32,6 +34,8 @@ interface ImportReviewGridProps {
   jobId: string;
   initialDrafts: ReviewDraft[];
   onFinish: (publishedCount: number) => void;
+  /** Show per-card photo upload (text/CSV imports have no photos) */
+  allowPhotoAttach?: boolean;
 }
 
 export function ImportReviewGrid({
@@ -39,6 +43,7 @@ export function ImportReviewGrid({
   jobId,
   initialDrafts,
   onFinish,
+  allowPhotoAttach = false,
 }: ImportReviewGridProps) {
   const [drafts, setDrafts] = useState(initialDrafts);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -164,6 +169,13 @@ export function ImportReviewGrid({
             selected={selected.has(draft.id)}
             onToggle={() => toggle(draft.id)}
             onSave={(fields) => saveDraft(draft.id, fields)}
+            allowPhotoAttach={allowPhotoAttach}
+            shopSlug={shopSlug}
+            onPhotoAttached={(url) =>
+              setDrafts((prev) =>
+                prev.map((d) => (d.id === draft.id ? { ...d, photoUrl: url } : d))
+              )
+            }
           />
         ))}
       </div>
@@ -209,19 +221,50 @@ function DraftCard({
   selected,
   onToggle,
   onSave,
+  allowPhotoAttach,
+  shopSlug,
+  onPhotoAttached,
 }: {
   draft: ReviewDraft;
   selected: boolean;
   onToggle: () => void;
   onSave: (fields: { title?: string; priceInRands?: string; description?: string }) => void;
+  allowPhotoAttach: boolean;
+  shopSlug: string;
+  onPhotoAttached: (url: string) => void;
 }) {
   const [title, setTitle] = useState(draft.aiTitle ?? "");
   const [price, setPrice] = useState(
     draft.aiPriceMinCents ? (draft.aiPriceMinCents / 100).toFixed(2) : ""
   );
   const [dirty, setDirty] = useState(false);
+  const [attaching, setAttaching] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const { startUpload } = useUploadThing("bulkProductImageUploader");
 
   const inactive = draft.status === "PUBLISHED" || draft.status === "SKIPPED";
+
+  const handlePhotoPicked = async (list: FileList | null) => {
+    const file = list?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    setAttaching(true);
+    try {
+      const uploaded = await startUpload([file]);
+      const first = uploaded?.[0];
+      if (!first) {
+        toast.error("Upload failed — check your connection.");
+        return;
+      }
+      const res = await attachDraftPhotoAction(shopSlug, draft.id, {
+        url: first.serverData.url as string,
+        key: first.serverData.key as string,
+      });
+      if (res.success) onPhotoAttached(first.serverData.url as string);
+      else toast.error(res.error);
+    } finally {
+      setAttaching(false);
+    }
+  };
 
   return (
     <div
@@ -235,15 +278,35 @@ function DraftCard({
     >
       <div className="flex gap-3 p-3">
         {/* Photo + checkbox */}
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={inactive ? -1 : 0}
           onClick={inactive ? undefined : onToggle}
-          className="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-slate-100"
+          onKeyDown={(e) => {
+            if (!inactive && (e.key === "Enter" || e.key === " ")) onToggle();
+          }}
+          className="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-slate-100 cursor-pointer"
           aria-label={selected ? "Deselect" : "Select"}
         >
           {draft.photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={draft.photoUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
+          ) : allowPhotoAttach && !inactive ? (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                photoInputRef.current?.click();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") photoInputRef.current?.click();
+              }}
+              className="flex flex-col items-center justify-center w-full h-full text-emerald-600 hover:bg-emerald-50"
+            >
+              <span className="text-lg">{attaching ? "⏳" : "📷"}</span>
+              <span className="text-[9px] font-semibold">{attaching ? "Uploading" : "Add photo"}</span>
+            </span>
           ) : (
             <span className="flex items-center justify-center w-full h-full text-2xl">📦</span>
           )}
@@ -256,7 +319,7 @@ function DraftCard({
               {selected ? "✓" : ""}
             </span>
           )}
-        </button>
+        </div>
 
         {/* Fields */}
         <div className="flex-1 min-w-0 space-y-1.5">
@@ -323,6 +386,16 @@ function DraftCard({
           )}
         </div>
       </div>
+
+      {allowPhotoAttach && (
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => void handlePhotoPicked(e.target.files)}
+        />
+      )}
 
       {!inactive && dirty && (
         <div className="border-t border-slate-100 px-3 py-2">

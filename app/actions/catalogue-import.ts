@@ -92,6 +92,218 @@ export async function startPhotoImportAction(
   }
 }
 
+// ── Start: paste WhatsApp text (Flow B) ──────────────────────
+// One cheap AI text call parses the whole dump. Quota model:
+// 1 generation per 10 parsed products (rounded up). When the
+// seller lacks credits or AI fails, the free regex parser runs
+// instead — never blocked, never silent.
+
+export async function startTextImportAction(
+  shopSlug: string,
+  pastedText: string
+): Promise<ActionResult<{ jobId: string; itemCount: number; usedAi: boolean }>> {
+  const gate = flagGate();
+  if (gate) return gate;
+
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access) return { success: false, error: "Shop not found or access denied." };
+
+    const text = pastedText.trim();
+    if (text.length < 10) {
+      return { success: false, error: "Paste a few of your product captions first." };
+    }
+    if (text.length > 12000) {
+      return { success: false, error: "That's a lot of text! Paste up to ~50 products at a time." };
+    }
+
+    // Decide AI vs regex based on credits (text parsing is cheap:
+    // 1 credit per 10 products, estimated from the regex pre-split)
+    const { parseTextDumpFallback } = await import("@/lib/ai/parse-text-listings");
+    const estimate = parseTextDumpFallback(text).length || 1;
+    const creditsNeeded = Math.ceil(estimate / 10);
+
+    const aiAccess = await checkAiAccess(access.shopId);
+    const canUseAi =
+      aiAccess.hasUnlimitedAi || (aiAccess.creditsRemaining ?? 0) >= creditsNeeded;
+
+    let listings;
+    let usedAi = false;
+    if (canUseAi) {
+      const { parseTextListings } = await import("@/lib/ai/parse-text-listings");
+      const result = await parseTextListings(text);
+      listings = result.listings;
+      usedAi = result.usedAi;
+      if (usedAi) {
+        const charge = Math.ceil(listings.length / 10);
+        for (let i = 0; i < charge; i++) await trackAiGeneration(access.shopId);
+      }
+    } else {
+      listings = parseTextDumpFallback(text);
+    }
+
+    if (listings.length === 0) {
+      return { success: false, error: "Couldn't find any products in that text. Try pasting one caption per product." };
+    }
+
+    const job = await db.importJob.create({
+      data: {
+        shopId: access.shopId,
+        source: "TEXT",
+        status: "REVIEW", // no per-item processing loop needed
+        totalItems: listings.length,
+        readyItems: listings.length,
+        drafts: {
+          create: listings.map((listing) => {
+            const assessment = assessDraft({
+              confidence: listing.confidence,
+              modelFlags: listing.flags,
+              hasPrice: listing.priceMinCents !== null,
+              hasTitle: listing.title.length >= 2,
+            });
+            return {
+              shopId: access.shopId,
+              status: assessment.status,
+              aiTitle: listing.title,
+              aiDescription: listing.description || null,
+              aiCategory: listing.category || null,
+              aiPriceMinCents: listing.priceMinCents,
+              aiPriceMaxCents: listing.priceMaxCents,
+              aiAttributes: listing.attributes,
+              confidence: listing.confidence,
+              flags: assessment.flags,
+              originalCaption: listing.originalCaption || null,
+            };
+          }),
+        },
+      },
+      select: { id: true },
+    });
+
+    return { success: true, jobId: job.id, itemCount: listings.length, usedAi };
+  } catch (error) {
+    await reportError("startTextImportAction", error, { shopSlug });
+    return { success: false, error: "Failed to parse your text. Please try again." };
+  }
+}
+
+// ── Start: spreadsheet/CSV (Flow C) ──────────────────────────
+// Reuses the existing CSV parser + column auto-mapping, but
+// lands in the shared review grid instead of direct creation.
+
+export async function startCsvImportAction(
+  shopSlug: string,
+  csvText: string
+): Promise<ActionResult<{ jobId: string; itemCount: number; warnings: string[] }>> {
+  const gate = flagGate();
+  if (gate) return gate;
+
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access) return { success: false, error: "Shop not found or access denied." };
+
+    if (csvText.trim().length === 0) {
+      return { success: false, error: "That file looks empty." };
+    }
+    if (csvText.length > 500_000) {
+      return { success: false, error: "File too large — split it into batches of ~50 products." };
+    }
+
+    const { parseCsv, autoMapColumns } = await import("@/lib/csv/parser");
+    const parsed = parseCsv(csvText);
+    if (parsed.rows.length === 0) {
+      return { success: false, error: parsed.errors[0]?.message ?? "No rows found in the file." };
+    }
+
+    const { mapping, unmapped } = autoMapColumns(parsed.headers);
+    const mappedColumns = new Set(Object.values(mapping));
+    if (!mappedColumns.has("name")) {
+      return { success: false, error: 'Couldn\'t find a "name" column. Add a header row with at least: name, price.' };
+    }
+
+    const { csvRowsToDraftSeeds } = await import("@/lib/imports/csv-to-drafts");
+    const seeds = csvRowsToDraftSeeds(parsed.rows, mapping);
+    if (seeds.length === 0) {
+      return { success: false, error: "No products found — check that the name column has values." };
+    }
+
+    const job = await db.importJob.create({
+      data: {
+        shopId: access.shopId,
+        source: "CSV",
+        status: "REVIEW",
+        totalItems: seeds.length,
+        readyItems: seeds.length,
+        drafts: {
+          create: seeds.map((seed) => {
+            const flags: string[] = [];
+            if (seed.priceMinCents === null) flags.push("no_price_detected");
+            return {
+              shopId: access.shopId,
+              status: flags.length > 0 ? ("NEEDS_REVIEW" as const) : ("READY" as const),
+              aiTitle: seed.title,
+              aiDescription: seed.description,
+              aiPriceMinCents: seed.priceMinCents,
+              aiPriceMaxCents: seed.priceMinCents,
+              aiAttributes: { sizes: seed.sizes, colours: seed.colours, material: "" },
+              confidence: 1, // spreadsheet data is the seller's own truth
+              flags,
+            };
+          }),
+        },
+      },
+      select: { id: true },
+    });
+
+    const warnings: string[] = [];
+    if (unmapped.length > 0) warnings.push(`Ignored columns: ${unmapped.join(", ")}`);
+    if (parsed.errors.length > 0) warnings.push(`${parsed.errors.length} row(s) had errors and were skipped.`);
+
+    return { success: true, jobId: job.id, itemCount: seeds.length, warnings };
+  } catch (error) {
+    await reportError("startCsvImportAction", error, { shopSlug });
+    return { success: false, error: "Failed to read the file. Save it as CSV and try again." };
+  }
+}
+
+// ── Attach a photo to a draft (Flow B/C) ─────────────────────
+
+export async function attachDraftPhotoAction(
+  shopSlug: string,
+  draftId: string,
+  photo: { url: string; key: string }
+): Promise<ActionResult> {
+  const gate = flagGate();
+  if (gate) return gate;
+
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access) return { success: false, error: "Access denied." };
+
+    const parsed = z.object({ url: z.string().url(), key: z.string().min(1) }).safeParse(photo);
+    if (!parsed.success) return { success: false, error: "Invalid photo." };
+
+    const draft = await db.draftListing.findFirst({
+      where: { id: draftId, shopId: access.shopId, status: { notIn: ["PUBLISHED", "SKIPPED"] } },
+      select: { id: true, photoUrls: true, photoKeys: true },
+    });
+    if (!draft) return { success: false, error: "Draft not found." };
+
+    await db.draftListing.update({
+      where: { id: draft.id },
+      data: {
+        photoUrls: [...draft.photoUrls, parsed.data.url].slice(0, 8),
+        photoKeys: [...draft.photoKeys, parsed.data.key].slice(0, 8),
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    await reportError("attachDraftPhotoAction", error, { shopSlug, draftId });
+    return { success: false, error: "Failed to attach the photo." };
+  }
+}
+
 // ── Process: one chunk of AI generations ─────────────────────
 // Client calls this in a loop until done=true. Each call is
 // small (≤ IMPORT_CHUNK_SIZE vision calls) to stay inside

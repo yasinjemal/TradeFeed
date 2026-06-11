@@ -18,6 +18,8 @@ import { MobileNav } from "@/components/landing/mobile-nav";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { generateFaqJsonLd } from "@/lib/seo/json-ld";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { TfLanding } from "@/components/tf/landing/tf-landing";
 import { SA_PROVINCES } from "@/lib/marketplace/locations";
 import type { Metadata } from "next";
 
@@ -217,6 +219,26 @@ export default async function HomePage() {
     getHomepageSellers(),
   ]);
   const userIsAdmin = !!adminClerkId;
+
+  // ── TF redesign (FEATURE_FLAGS.UI_REDESIGN) — same data, new skin ──
+  if (FEATURE_FLAGS.UI_REDESIGN) {
+    return (
+      <TfLanding
+        ctaHref={ctaHref}
+        ctaLabel={ctaLabel}
+        stats={{ shopCount, productCount, orderCount, cityCount, topCities }}
+        sellers={featuredSellers.map((s) => ({
+          name: s.name,
+          slug: s.slug,
+          logoUrl: s.logoUrl,
+          city: s.city,
+          isVerified: s.isVerified,
+          productCount: s._count.products,
+        }))}
+      />
+    );
+  }
+
 
   return (
     <main className="min-h-screen bg-white text-slate-900 overflow-x-hidden">

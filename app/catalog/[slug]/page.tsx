@@ -36,6 +36,7 @@ import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { ShopAboutSection } from "@/components/catalog/shop-about-section";
 import { ShopReviewHighlights } from "@/components/catalog/shop-review-highlights";
 import { IllustrationRocket } from "@/components/ui/illustrations";
+import { TfStorefront } from "@/components/tf/storefront/tf-storefront";
 
 // ISR: revalidate catalog pages every 60 seconds for near-real-time updates
 export const revalidate = 60;
@@ -162,6 +163,54 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
 
   // ── Track page view (fire-and-forget — don't block render) ──
   void trackEvent({ type: "PAGE_VIEW", shopId: shop.id });
+
+  // ── TF redesign (FEATURE_FLAGS.UI_REDESIGN) — same data, new skin ──
+  if (FEATURE_FLAGS.UI_REDESIGN) {
+    const ratingAgg = await db.review.aggregate({
+      where: { shopId: shop.id, isApproved: true },
+      _avg: { rating: true },
+      _count: { id: true },
+    });
+
+    return (
+      <TfStorefront
+        shop={{
+          id: shop.id,
+          slug: shop.slug,
+          name: shop.name,
+          isVerified: shop.isVerified,
+          logoUrl: shop.logoUrl,
+          city: shop.city,
+          province: shop.province,
+          aboutText: shop.aboutText,
+          description: shop.description,
+          whatsappNumber: shop.whatsappNumber,
+          createdAt: shop.createdAt,
+        }}
+        products={products.map((p, index) => {
+          const prices = p.variants.map((v) => v.priceInCents);
+          return {
+            id: p.id,
+            slug: p.slug,
+            name: p.name,
+            imageUrl: p.images[0]?.url ?? null,
+            imageAlt: p.images[0]?.altText ?? null,
+            minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
+            categoryId: p.category?.id ?? null,
+            categoryName: p.category?.name ?? null,
+            position: index,
+          };
+        })}
+        trustStats={trustStats}
+        reviews={reviewHighlights}
+        avgRating={ratingAgg._avg.rating}
+        reviewCount={ratingAgg._count.id}
+        isOwner={isOwner}
+        ownerDashboardSlug={ownerDashboardSlug}
+        showRecruitment={showRecruitmentCTAs}
+      />
+    );
+  }
 
   // ── Empty State ────────────────────────────────────────
   if (products.length === 0) {

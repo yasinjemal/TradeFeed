@@ -38,4 +38,8 @@ export const FEATURE_FLAGS = {
   WA_IMPORT_PRIMARY: process.env.NEXT_PUBLIC_FF_WA_IMPORT_PRIMARY === "true",
   /** Catalogue import flow: bulk photos/text/csv → review grid → publish */
   CATALOGUE_IMPORT: process.env.NEXT_PUBLIC_FF_CATALOGUE_IMPORT === "true",
+
+  // ── Trust Redesign (2026) ────────────────────────────────────
+  /** New "Verified Seller" design system (components/tf). Live UI untouched while off. */
+  UI_REDESIGN: process.env.NEXT_PUBLIC_FF_UI_REDESIGN === "true",
 } as const;

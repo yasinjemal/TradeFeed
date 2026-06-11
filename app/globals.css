@@ -530,3 +530,47 @@ h1, h2, h3 {
 h4, h5, h6 {
   letter-spacing: -0.01em;
 }
+/* ═══ TF Redesign tokens (FEATURE_FLAGS.UI_REDESIGN) ═══
+   Warm, trust-first system. Only components/tf/* consume
+   these — the live UI never references tf-* utilities. */
+@theme {
+  /* Surfaces & text */
+  --color-tf-surface: #faf8f4;
+  --color-tf-raised: #ffffff;
+  --color-tf-ink: #1a1a17;
+
+  /* Brand */
+  --color-tf-primary: #047857;
+  --color-tf-primary-hover: #065f46;
+  --color-tf-deep: #064e3b;
+  --color-tf-accent: #f59e0b;
+  --color-tf-accent-ink: #92600a;
+  --color-tf-accent-soft: #fef3c7;
+
+  /* Semantic */
+  --color-tf-verified: #047857;
+  --color-tf-verified-soft: #ecfdf5;
+  --color-tf-success: #047857;
+  --color-tf-warning: #b45309;
+  --color-tf-error: #b91c1c;
+  --color-tf-error-soft: #fef2f2;
+
+  /* Warm stone neutrals (never cold slate) */
+  --color-tf-stone-50: #fafaf7;
+  --color-tf-stone-100: #f5f3ee;
+  --color-tf-stone-200: #e7e2d9;
+  --color-tf-stone-300: #d6d0c4;
+  --color-tf-stone-400: #a8a29e;
+  --color-tf-stone-500: #78716c;
+  --color-tf-stone-600: #57534e;
+  --color-tf-stone-700: #44403c;
+  --color-tf-stone-800: #292524;
+  --color-tf-stone-900: #1c1917;
+
+  /* Type — General Sans loaded by <TfFonts/> only when the flag is on */
+  --font-tf-display: "General Sans", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Restrained, warm-tinted elevation */
+  --shadow-tf-sm: 0 1px 2px 0 rgb(26 26 23 / 0.05), 0 1px 3px 0 rgb(26 26 23 / 0.06);
+  --shadow-tf-md: 0 4px 12px -2px rgb(26 26 23 / 0.08), 0 2px 4px -2px rgb(26 26 23 / 0.05);
+}
