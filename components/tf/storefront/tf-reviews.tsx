@@ -53,7 +53,16 @@ export function TfReviewsBlock({
     return (
       <section aria-label="Reviews" className={cn("rounded-xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm", className)}>
         <h2 className="font-tf-display text-lg font-semibold text-tf-ink">Reviews</h2>
-        <p className="mt-2 text-sm text-tf-stone-600">
+        <div className="mt-3 flex items-center gap-1" aria-hidden="true">
+          <Star className="size-5 fill-tf-accent text-tf-accent" />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Star key={i} className="size-5 text-tf-stone-300" />
+          ))}
+          <span className="ml-2 text-xs font-medium text-tf-stone-500">
+            This seat is reserved for the first buyer
+          </span>
+        </div>
+        <p className="mt-3 text-sm leading-relaxed text-tf-stone-600">
           No reviews yet — {shopName} is just getting started. Every review here comes
           from a confirmed TradeFeed order, so the first one will mean something.
         </p>

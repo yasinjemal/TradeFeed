@@ -102,7 +102,7 @@ function TfVerifiedSellerCard({
       {verified && (
         <BadgeCheck
           aria-hidden="true"
-          className={cn("ml-1 inline-block align-[-3px] text-tf-verified", hero ? "size-5" : "size-[18px]")}
+          className={cn("tf-pop ml-1 inline-block align-[-3px] text-tf-verified", hero ? "size-5" : "size-[18px]")}
         />
       )}
       {verified && <span className="sr-only">Verified seller</span>}

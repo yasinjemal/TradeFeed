@@ -56,8 +56,8 @@ function TfProductCard({
     <article
       data-slot="tf-product-card"
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-raised shadow-tf-sm",
-        "transition-shadow motion-reduce:transition-none hover:shadow-tf-md",
+        "group tf-card-tactile relative flex flex-col overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-raised shadow-tf-sm",
+        "hover:shadow-tf-md",
         "focus-within:ring-2 focus-within:ring-tf-primary focus-within:ring-offset-2 focus-within:ring-offset-tf-surface",
         className,
       )}
@@ -72,7 +72,7 @@ function TfProductCard({
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             loading={priority ? "eager" : "lazy"}
             priority={priority}
-            className="object-cover"
+            className="tf-card-img object-cover"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-tf-stone-400">

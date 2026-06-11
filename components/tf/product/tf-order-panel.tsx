@@ -227,7 +227,7 @@ export function TfOrderPanel({
       </div>
 
       {/* Sticky mobile bar — same wording, same promise */}
-      <div className="fixed inset-x-0 bottom-[3.5rem] z-30 border-t border-tf-stone-200 bg-tf-raised/95 px-4 py-2.5 backdrop-blur-sm lg:hidden">
+      <div className="tf-slide-up fixed inset-x-0 bottom-[3.5rem] z-30 border-t border-tf-stone-200 bg-tf-raised/95 px-4 py-2.5 backdrop-blur-sm lg:hidden">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate text-xs text-tf-stone-500">{productName}</p>

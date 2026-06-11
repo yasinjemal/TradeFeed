@@ -574,3 +574,138 @@ h4, h5, h6 {
   --shadow-tf-sm: 0 1px 2px 0 rgb(26 26 23 / 0.05), 0 1px 3px 0 rgb(26 26 23 / 0.06);
   --shadow-tf-md: 0 4px 12px -2px rgb(26 26 23 / 0.08), 0 2px 4px -2px rgb(26 26 23 / 0.05);
 }
+
+/* ═══ TF Motion system — "Counter-weight" ═══════════════════
+   One easing, three durations, transforms + opacity only.
+   Entrances 420ms · hovers 200ms · presses 120ms · stagger 60ms.
+   Everything motion-gated; reduced-motion users get instant,
+   fully-visible UI. A 1.6s auto-show failsafe protects slow-JS
+   phones from hidden content. */
+
+:root {
+  --tf-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Scroll/load reveal — hidden state ONLY when motion is allowed */
+@media (prefers-reduced-motion: no-preference) {
+  .tf-reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 420ms var(--tf-ease),
+      transform 420ms var(--tf-ease);
+    transition-delay: var(--tf-d, 0ms);
+    /* Failsafe: if JS never flips it, show anyway */
+    animation: tf-autoshow 0s 1.6s forwards;
+  }
+  .tf-reveal.tf-in {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  @keyframes tf-autoshow {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Stagger children of a revealed group */
+  .tf-stagger > * {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 420ms var(--tf-ease),
+      transform 420ms var(--tf-ease);
+    animation: tf-autoshow 0s 1.6s forwards;
+  }
+  .tf-stagger.tf-in > * {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .tf-stagger.tf-in > *:nth-child(1) { transition-delay: 0ms; }
+  .tf-stagger.tf-in > *:nth-child(2) { transition-delay: 60ms; }
+  .tf-stagger.tf-in > *:nth-child(3) { transition-delay: 120ms; }
+  .tf-stagger.tf-in > *:nth-child(4) { transition-delay: 180ms; }
+  .tf-stagger.tf-in > *:nth-child(5) { transition-delay: 240ms; }
+  .tf-stagger.tf-in > *:nth-child(6) { transition-delay: 300ms; }
+  .tf-stagger.tf-in > *:nth-child(n + 7) { transition-delay: 340ms; }
+
+  /* One-time swipe nudge on the gallery (runs after load settles) */
+  @keyframes tf-nudge {
+    0%, 100% { transform: translateX(0); }
+    35% { transform: translateX(-14px); }
+    65% { transform: translateX(4px); }
+  }
+  .tf-nudge {
+    animation: tf-nudge 900ms var(--tf-ease) 1100ms 1;
+  }
+
+  /* Sticky bars slide up once */
+  @keyframes tf-slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .tf-slide-up {
+    animation: tf-slide-up 360ms var(--tf-ease) both;
+  }
+
+  /* Verified tick settles in with a soft pop */
+  @keyframes tf-pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .tf-pop {
+    animation: tf-pop 420ms var(--tf-ease) 300ms both;
+  }
+}
+
+/* Tactile card behaviour — safe at all motion preferences is the
+   rest state; hover/press transforms only when motion allowed */
+.tf-card-tactile {
+  will-change: auto;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tf-card-tactile {
+    transition:
+      transform 200ms var(--tf-ease),
+      box-shadow 200ms var(--tf-ease);
+  }
+  @media (hover: hover) {
+    .tf-card-tactile:hover {
+      transform: translateY(-3px);
+    }
+  }
+  .tf-card-tactile:active {
+    transform: translateY(0) scale(0.985);
+    transition-duration: 120ms;
+  }
+  .tf-card-tactile .tf-card-img {
+    transition: transform 320ms var(--tf-ease);
+  }
+  @media (hover: hover) {
+    .tf-card-tactile:hover .tf-card-img {
+      transform: scale(1.045);
+    }
+  }
+}
+
+/* Horizontal rail edge fades — a visual "there's more" cue */
+.tf-rail {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 12px,
+    black calc(100% - 32px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 12px,
+    black calc(100% - 32px),
+    transparent
+  );
+}

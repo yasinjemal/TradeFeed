@@ -9,6 +9,7 @@ import { TfTrustBar } from "@/components/tf/trust-bar";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { TfReviewsBlock, type TfReview } from "@/components/tf/storefront/tf-reviews";
 import type { SellerTrustStats } from "@/lib/trust/seller-stats";
+import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfGallery } from "./tf-gallery";
 import { TfOrderPanel, type TfVariant } from "./tf-order-panel";
 
@@ -68,8 +69,10 @@ function ProductStrip({ title, products }: { title: string; products: TfStripPro
   if (products.length === 0) return null;
   return (
     <section aria-label={title}>
-      <h2 className="font-tf-display text-lg font-semibold text-tf-ink">{title}</h2>
-      <ul className="mt-3 flex snap-x gap-3 overflow-x-auto pb-1 scrollbar-hide">
+      <TfReveal>
+        <h2 className="font-tf-display text-lg font-semibold text-tf-ink">{title}</h2>
+      </TfReveal>
+      <TfReveal as="ul" stagger className="tf-rail mt-3 flex snap-x gap-3 overflow-x-auto pb-1 pr-6 scrollbar-hide">
         {products.map((p) => (
           <li key={p.id} className="w-40 shrink-0 snap-start sm:w-48">
             <TfProductCard
@@ -83,7 +86,7 @@ function ProductStrip({ title, products }: { title: string; products: TfStripPro
             />
           </li>
         ))}
-      </ul>
+      </TfReveal>
     </section>
   );
 }
@@ -117,14 +120,14 @@ export function TfProductPage({
       </Link>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
-        {/* Gallery */}
-        <div className="lg:sticky lg:top-4 lg:self-start">
+        {/* Gallery — leads the load choreography */}
+        <TfReveal className="lg:sticky lg:top-4 lg:self-start">
           <TfGallery images={product.images} productName={product.name} soldOut={totalStock === 0} />
-        </div>
+        </TfReveal>
 
-        {/* Info + order */}
+        {/* Info + order — settles in just behind the image */}
         <div className="space-y-5">
-          <div>
+          <TfReveal delay={80}>
             {product.categoryName && product.categorySlug && (
               <Link
                 href={`/marketplace?category=${encodeURIComponent(product.categorySlug)}`}
@@ -144,8 +147,9 @@ export function TfProductPage({
                 </span>
               )}
             </div>
-          </div>
+          </TfReveal>
 
+          <TfReveal delay={140}>
           <TfOrderPanel
             productName={product.name}
             productUrl={productUrl}
@@ -155,8 +159,10 @@ export function TfProductPage({
             option1Label={product.option1Label}
             option2Label={product.option2Label}
           />
+          </TfReveal>
 
           {/* Who you're buying from — before the fold of the order */}
+          <TfReveal delay={200}>
           <TfVerifiedSellerCard
             name={shop.name}
             verified={shop.isVerified}
@@ -166,26 +172,34 @@ export function TfProductPage({
             location={location}
             href={`/catalog/${shop.slug}`}
           />
+          </TfReveal>
 
-          <TfTrustBar ordersFulfilled={trustStats?.ordersFulfilled} compact />
+          <TfReveal>
+            <TfTrustBar ordersFulfilled={trustStats?.ordersFulfilled} compact />
+          </TfReveal>
 
           {product.description && (
-            <section aria-label="Description">
-              <h2 className="font-tf-display text-base font-semibold text-tf-ink">Details</h2>
-              <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-tf-stone-600">
+            <TfReveal as="section" aria-label="Description">
+              <h2 className="flex items-center gap-2 font-tf-display text-base font-semibold text-tf-ink">
+                <span aria-hidden="true" className="h-4 w-1 rounded-full bg-tf-primary" />
+                Details
+              </h2>
+              <p className="mt-2 whitespace-pre-line border-l-2 border-tf-stone-200 pl-3.5 text-sm leading-relaxed text-tf-stone-600">
                 {product.description}
               </p>
-            </section>
+            </TfReveal>
           )}
         </div>
       </div>
 
+      <TfReveal>
       <TfReviewsBlock
         reviews={reviews}
         avgRating={avgRating > 0 ? avgRating : null}
         reviewCount={reviewCount}
         shopName={shop.name}
       />
+      </TfReveal>
 
       <ProductStrip title={`More from ${shop.name}`} products={moreFromSeller} />
       <ProductStrip title="Related items" products={similarProducts} />
