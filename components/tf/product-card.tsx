@@ -7,12 +7,15 @@ import { cn } from "@/lib/utils";
 import { formatZAR } from "./format";
 import { TfRatingChip } from "./rating-chip";
 
-// ============================================================
-// TfProductCard — portrait 4:5 ratio, image zooms on hover,
-// card lifts on hover. Trust visible at glance: verified tick
-// in image corner, price bold and dominant, seller as muted
-// metadata. Discount percentage on sale items.
-// ============================================================
+// WhatsApp green SVG icon — inline so no extra icon dep needed
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.522 5.844L.057 23.882a.5.5 0 0 0 .61.61l6.04-1.465A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.003-1.37l-.359-.213-3.724.904.92-3.625-.234-.373A9.818 9.818 0 0 1 2.182 12c0-5.424 4.394-9.818 9.818-9.818 5.424 0 9.818 4.394 9.818 9.818 0 5.424-4.394 9.818-9.818 9.818z" />
+    </svg>
+  );
+}
 
 export interface TfProductCardProps extends React.ComponentProps<"article"> {
   href: string;
@@ -32,6 +35,10 @@ export interface TfProductCardProps extends React.ComponentProps<"article"> {
   priority?: boolean;
   /** Honest labelling for paid placements */
   promoted?: boolean;
+  /** Shop WhatsApp number — enables direct WhatsApp CTA */
+  whatsappNumber?: string;
+  /** Product listed within the last 7 days */
+  isNew?: boolean;
 }
 
 function TfProductCard({
@@ -48,6 +55,8 @@ function TfProductCard({
   location,
   priority = false,
   promoted = false,
+  whatsappNumber,
+  isNew = false,
   className,
   ...props
 }: TfProductCardProps) {
@@ -55,6 +64,10 @@ function TfProductCard({
   const discountPct = onSale
     ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
     : 0;
+
+  const waHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi! I'm interested in "${title}" — ${formatZAR(price)}`)}`
+    : null;
 
   return (
     <article
@@ -68,7 +81,7 @@ function TfProductCard({
       )}
       {...props}
     >
-      {/* ── Image — portrait 4:5 for editorial depth ──────── */}
+      {/* ── Image ──────────────────────────────────────── */}
       <div className="relative aspect-[4/5] overflow-hidden bg-tf-stone-100">
         {imageUrl ? (
           <Image
@@ -86,9 +99,14 @@ function TfProductCard({
           </div>
         )}
 
-        {/* Top-left: sale + promoted badges */}
-        {(onSale || promoted) && (
+        {/* Top-left: new + sale + promoted badges */}
+        {(isNew || onSale || promoted) && (
           <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
+            {isNew && !onSale && (
+              <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[11px] font-bold leading-none text-white shadow-sm">
+                New
+              </span>
+            )}
             {onSale && (
               <span className="rounded-full bg-tf-accent px-2 py-0.5 text-[11px] font-bold leading-none text-tf-ink shadow-sm">
                 -{discountPct}%
@@ -102,7 +120,7 @@ function TfProductCard({
           </div>
         )}
 
-        {/* Top-right: verified seller badge */}
+        {/* Top-right: verified badge */}
         {sellerVerified && (
           <span
             aria-label="Verified seller"
@@ -111,9 +129,29 @@ function TfProductCard({
             <BadgeCheck aria-hidden="true" className="size-3.5 text-tf-verified" />
           </span>
         )}
+
+        {/* Bottom overlay: WhatsApp CTA — appears on hover */}
+        {waHref && (
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Order "${title}" on WhatsApp`}
+            onClick={(e) => e.stopPropagation()}
+            className={cn(
+              "absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 py-2.5",
+              "bg-[#25D366] text-white text-[12px] font-semibold",
+              "translate-y-full transition-transform duration-200 group-hover:translate-y-0",
+              "focus-visible:translate-y-0 outline-none focus-visible:ring-2 focus-visible:ring-white",
+            )}
+          >
+            <WhatsAppIcon className="size-4 shrink-0" />
+            Order on WhatsApp
+          </a>
+        )}
       </div>
 
-      {/* ── Card body ──────────────────────────────────────── */}
+      {/* ── Card body ──────────────────────────────────── */}
       <div className="flex flex-1 flex-col gap-1 p-3">
         <h3 className="line-clamp-2 text-[13px] font-medium leading-snug text-tf-ink">
           <Link
@@ -133,7 +171,6 @@ function TfProductCard({
           )}
         </div>
 
-        {/* Meta row: seller name + rating or location */}
         <div className="mt-auto flex items-center justify-between gap-1.5 pt-0.5">
           {sellerName && (
             <p className="min-w-0 truncate text-[11px] text-tf-stone-400">{sellerName}</p>

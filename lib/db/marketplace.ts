@@ -75,6 +75,7 @@ export interface MarketplaceProduct {
     province: string | null;
     isVerified: boolean;
     logoUrl: string | null;
+    whatsappNumber: string;
     subscription: {
       status: string;
       plan: { slug: string; name: string };
@@ -435,6 +436,7 @@ export async function getMarketplaceProducts(
             province: true,
             isVerified: true,
             logoUrl: true,
+            whatsappNumber: true,
             subscription: {
               select: {
                 status: true,
@@ -575,6 +577,7 @@ export async function getPromotedProducts(
               province: true,
               isVerified: true,
               logoUrl: true,
+              whatsappNumber: true,
               subscription: {
                 select: {
                   status: true,
@@ -765,6 +768,7 @@ export async function getTrendingProducts(
           province: true,
           isVerified: true,
           logoUrl: true,
+          whatsappNumber: true,
           subscription: {
             select: {
               status: true,
@@ -857,6 +861,7 @@ export async function getNewArrivals(
           province: true,
           isVerified: true,
           logoUrl: true,
+          whatsappNumber: true,
           subscription: {
             select: {
               status: true,

@@ -23,6 +23,7 @@ function makeProduct(
       province: null,
       isVerified: false,
       logoUrl: null,
+      whatsappNumber: "27000000000",
       subscription: null,
     },
     globalCategory: null,
