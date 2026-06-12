@@ -187,22 +187,34 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                 {n(stats.shopCount)} sellers live &middot; {stats.cityCount} SA {stats.cityCount === 1 ? "city" : "cities"}
               </div>
 
-              {/* Kinetic headline — Clash Display for maximum impact */}
+              {/* Split-weight headline — ghost thin "One" vs bold word, gradient on WhatsApp */}
               <h1
-                className="mt-6 font-tf-hero font-semibold text-white"
+                className="mt-6 font-tf-hero"
                 style={{
                   fontSize: "clamp(3rem, 8vw, 6.75rem)",
                   lineHeight: "0.97",
                   letterSpacing: "-0.04em",
                 }}
               >
-                One photo.
+                <span style={{ fontWeight: 200, color: "rgba(255,255,255,0.32)" }}>One </span>
+                <span style={{ fontWeight: 700, color: "#ffffff" }}>photo.</span>
                 <br />
-                One link.
+                <span style={{ fontWeight: 200, color: "rgba(255,255,255,0.32)" }}>One </span>
+                <span style={{ fontWeight: 700, color: "#ffffff" }}>link.</span>
                 <br />
-                <span className="text-white">Orders on </span>
-                <span style={{ color: "#4ade80" }}>WhatsApp</span>
-                <span className="text-white">.</span>
+                <span style={{ fontWeight: 200, color: "rgba(255,255,255,0.32)" }}>Orders on </span>
+                <span
+                  style={{
+                    fontWeight: 700,
+                    background: "linear-gradient(120deg, #4ade80 0%, #22d3ee 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  WhatsApp
+                </span>
+                <span style={{ fontWeight: 700, color: "#ffffff" }}>.</span>
               </h1>
 
               <p className="mt-5 max-w-[26rem] text-base leading-relaxed text-white/55 sm:text-[1.05rem]">
@@ -296,7 +308,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
       <section aria-label="Platform statistics" className="bg-tf-surface">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <TfReveal>
-            <p className="mb-10 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-tf-stone-400">
+            <p className="mb-10 text-center text-[11px] font-medium uppercase tracking-[0.28em] text-tf-stone-400">
               Real numbers · updated every 5 minutes
             </p>
           </TfReveal>
@@ -312,10 +324,18 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
               { value: stats.cityCount, label: "SA cities" },
             ].map(({ value, label }) => (
               <div key={label}>
-                <p className="font-tf-display text-4xl font-semibold tabular-nums text-tf-ink sm:text-5xl">
+                <p
+                  className="font-tf-hero tabular-nums text-tf-ink"
+                  style={{
+                    fontSize: "clamp(3.5rem, 10vw, 6.5rem)",
+                    fontWeight: 700,
+                    lineHeight: "0.88",
+                    letterSpacing: "-0.045em",
+                  }}
+                >
                   <TfCountUp value={value} />
                 </p>
-                <p className="mt-2 text-sm text-tf-stone-500">{label}</p>
+                <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.22em] text-tf-stone-400">{label}</p>
               </div>
             ))}
           </TfReveal>
@@ -332,10 +352,21 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
       >
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <TfReveal>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-400/60">
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-400/60">
               How it works
             </p>
-            <h2 className="mt-2 font-tf-display text-4xl font-semibold text-white sm:text-5xl">
+            <h2
+              className="mt-2 font-tf-hero font-semibold"
+              style={{
+                fontSize: "clamp(2.5rem, 6vw, 4rem)",
+                lineHeight: "1.04",
+                letterSpacing: "-0.04em",
+                background: "linear-gradient(135deg, #ffffff 35%, #4ade80 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
               Three honest steps
             </h2>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/50">
@@ -380,8 +411,13 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                 {/* Large step number watermark */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-2 -top-4 select-none font-tf-display text-8xl font-semibold leading-none transition-colors duration-300 group-hover:text-emerald-500/12"
-                  style={{ color: "rgba(255,255,255,0.05)" }}
+                  className="pointer-events-none absolute -right-4 -top-8 select-none font-tf-hero leading-none"
+                  style={{
+                    fontSize: "clamp(7rem, 20vw, 14rem)",
+                    fontWeight: 700,
+                    letterSpacing: "-0.06em",
+                    color: "rgba(255,255,255,0.038)",
+                  }}
                 >
                   {step.number}
                 </span>
@@ -389,7 +425,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                 <span className="relative flex size-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
                   <step.icon aria-hidden="true" className="size-4.5" />
                 </span>
-                <h3 className="relative mt-4 font-tf-display text-lg font-semibold text-white">
+                <h3 className="relative mt-4 font-tf-hero text-xl font-semibold text-white">
                   {step.title}
                 </h3>
                 <p className="relative mt-2 text-sm leading-relaxed text-white/50">
@@ -407,11 +443,16 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
       <section className="bg-tf-surface">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <TfReveal>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-tf-stone-400">
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-tf-stone-400">
               Built for South African sellers
             </p>
-            <h2 className="mt-2 font-tf-display text-4xl font-semibold text-tf-ink sm:text-5xl">
-              Everything you need,<br className="hidden sm:block" /> nothing you don&apos;t
+            <h2
+              className="mt-2 font-tf-hero text-tf-ink"
+              style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)", lineHeight: "1.04", letterSpacing: "-0.04em", fontWeight: 700 }}
+            >
+              Everything you need,
+              <br className="hidden sm:block" />
+              {" "}<span style={{ fontWeight: 300, color: "rgba(7,26,15,0.35)" }}>nothing you don&apos;t</span>
             </h2>
           </TfReveal>
 
@@ -517,7 +558,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
               <span className="mb-5 flex size-10 items-center justify-center rounded-xl bg-white/10">
                 <Clock className="size-5 text-emerald-300" aria-hidden="true" />
               </span>
-              <h3 className="font-tf-display text-base font-semibold text-white">
+              <h3 className="font-tf-hero text-xl font-semibold text-white">
                 Live in under 3 minutes
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-white/55">
@@ -548,10 +589,21 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
         />
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2">
           <TfReveal>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-400/60">
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-400/60">
               Built-in trust
             </p>
-            <h2 className="mt-2 font-tf-display text-4xl font-semibold text-white sm:text-5xl">
+            <h2
+              className="mt-2 font-tf-hero font-semibold"
+              style={{
+                fontSize: "clamp(2.25rem, 5.5vw, 4rem)",
+                lineHeight: "1.04",
+                letterSpacing: "-0.04em",
+                background: "linear-gradient(135deg, #ffffff 30%, #4ade80 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
               Buyers see who they&apos;re buying from
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-white/50">
@@ -602,12 +654,16 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                 className="tf-presence inline-block size-2 rounded-full bg-tf-primary"
                 aria-hidden="true"
               />
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-tf-stone-400">
+              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-tf-stone-400">
                 Live right now
               </p>
             </div>
-            <h2 className="font-tf-display text-4xl font-semibold text-tf-ink sm:text-5xl">
-              Real shops, trading today
+            <h2
+              className="font-tf-hero text-tf-ink"
+              style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)", lineHeight: "1.04", letterSpacing: "-0.04em", fontWeight: 700 }}
+            >
+              Real shops,{" "}
+              <span style={{ fontWeight: 300, color: "rgba(7,26,15,0.35)" }}>trading today</span>
             </h2>
             <p className="mt-2 text-sm text-tf-stone-500">
               No stock photos — these are {sellers.length} of the{" "}
@@ -678,11 +734,15 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
       >
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <TfReveal>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-tf-stone-400">
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-tf-stone-400">
               No surprises
             </p>
-            <h2 className="mt-2 font-tf-display text-4xl font-semibold text-tf-ink sm:text-5xl">
-              Honest pricing, in Rand
+            <h2
+              className="mt-2 font-tf-hero text-tf-ink"
+              style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)", lineHeight: "1.04", letterSpacing: "-0.04em", fontWeight: 700 }}
+            >
+              Honest pricing,{" "}
+              <span style={{ fontWeight: 300, color: "rgba(7,26,15,0.35)" }}>in Rand</span>
             </h2>
             <p className="mt-2 text-sm text-tf-stone-500">
               Start free with 20 products and 10 AI listings a month. Upgrade
@@ -705,12 +765,15 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                     Most popular
                   </span>
                 )}
-                <h3 className="font-tf-display text-base font-semibold text-tf-ink">
+                <h3 className="font-tf-display text-lg font-semibold text-tf-ink">
                   {plan.name}
                 </h3>
                 <p className="mt-1 tabular-nums">
-                  <span className="font-tf-display text-3xl font-semibold text-tf-ink">
-                    R{plan.price}
+                  <span
+                    className="font-tf-hero"
+                    style={{ fontSize: "2.5rem", fontWeight: 700, letterSpacing: "-0.04em", color: "#071a0f" }}
+                  >
+                    <span style={{ fontWeight: 300, opacity: 0.45 }}>R</span>{plan.price}
                   </span>
                   <span className="text-sm text-tf-stone-500">/month</span>
                 </p>
@@ -775,11 +838,15 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             className="mx-auto mb-5 size-10 text-emerald-400"
           />
           <h2
-            className="font-tf-hero font-semibold text-white"
+            className="font-tf-hero font-semibold"
             style={{
               fontSize: "clamp(2.25rem, 6vw, 5rem)",
               lineHeight: "1.03",
               letterSpacing: "-0.04em",
+              background: "linear-gradient(135deg, #ffffff 20%, #4ade80 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
             }}
           >
             Your shop could be live
