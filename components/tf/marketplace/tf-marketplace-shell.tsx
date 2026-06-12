@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -193,6 +193,21 @@ export function TfMarketplaceShell({
               </span>
             )}
           </button>
+          {/* Sign in + Sell — desktop only */}
+          <div className="hidden items-center gap-1.5 md:flex">
+            <Link
+              href="/sign-in"
+              className="px-3 py-2 text-sm text-tf-stone-600 transition-colors hover:text-tf-ink"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/sign-up"
+              className="rounded-full bg-tf-deep px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-tf-deep/90"
+            >
+              Sell free
+            </Link>
+          </div>
         </div>
 
         {/* Category pills — horizontal scroll on mobile */}
@@ -204,10 +219,10 @@ export function TfMarketplaceShell({
                 onClick={() => navigate({ category: undefined })}
                 aria-pressed={!currentFilters.category}
                 className={cn(
-                  "min-h-9 whitespace-nowrap rounded-full border px-3.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
+                  "min-h-9 whitespace-nowrap rounded-full border px-4 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-tf-primary",
                   !currentFilters.category
-                    ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-deep"
-                    : "border-tf-stone-300 bg-tf-raised text-tf-stone-600",
+                    ? "border-tf-ink bg-tf-ink font-semibold text-white"
+                    : "border-tf-stone-200 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400 hover:text-tf-ink",
                 )}
               >
                 All
@@ -221,10 +236,10 @@ export function TfMarketplaceShell({
                   }
                   aria-pressed={currentFilters.category === c.slug}
                   className={cn(
-                    "min-h-9 whitespace-nowrap rounded-full border px-3.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
+                    "min-h-9 whitespace-nowrap rounded-full border px-4 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-tf-primary",
                     currentFilters.category === c.slug
-                      ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-deep"
-                      : "border-tf-stone-300 bg-tf-raised text-tf-stone-600",
+                      ? "border-tf-ink bg-tf-ink font-semibold text-white"
+                      : "border-tf-stone-200 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400 hover:text-tf-ink",
                   )}
                 >
                   {c.name}
@@ -238,19 +253,20 @@ export function TfMarketplaceShell({
       <main className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
         {/* ── Toolbar: count + verified toggle ───────────── */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm tabular-nums text-tf-stone-600" aria-live="polite">
-            {totalProducts.toLocaleString("en-ZA")} product{totalProducts === 1 ? "" : "s"}
-            {currentFilters.search ? ` for “${currentFilters.search}”` : ""}
+          <p className="text-sm tabular-nums text-tf-stone-500" aria-live="polite">
+            <span className="font-semibold text-tf-ink">{totalProducts.toLocaleString("en-ZA")}</span>
+            {" "}product{totalProducts === 1 ? "" : "s"}
+            {currentFilters.search ? ` for "${currentFilters.search}"` : ""}
           </p>
           <button
             type="button"
             onClick={() => navigate({ verified: currentFilters.verifiedOnly ? undefined : "true" })}
             aria-pressed={currentFilters.verifiedOnly}
             className={cn(
-              "flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
+              "flex min-h-9 items-center gap-1.5 rounded-full border px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
               currentFilters.verifiedOnly
-                ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-deep"
-                : "border-tf-stone-300 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400",
+                ? "border-tf-ink bg-tf-ink font-semibold text-white"
+                : "border-tf-stone-200 bg-tf-raised text-tf-stone-600 transition-colors hover:border-tf-stone-400 hover:text-tf-ink",
             )}
           >
             <BadgeCheck aria-hidden="true" className="size-4 text-tf-verified" />
@@ -265,7 +281,7 @@ export function TfMarketplaceShell({
             title="No products match"
             description={
               currentFilters.search
-                ? `Nothing found for “${currentFilters.search}”. Try a shorter search, or clear your filters.`
+                ? `Nothing found for "${currentFilters.search}". Try a shorter search, or clear your filters.`
                 : "Nothing matches these filters yet. Clear them to see everything on the marketplace."
             }
             action={
@@ -283,7 +299,7 @@ export function TfMarketplaceShell({
             className="my-10"
           />
         ) : (
-          <TfReveal as="ul" stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+          <TfReveal as="ul" stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
             {allProducts.map((p) => (
               <li key={`${p.id}${p.promotion ? "-promo" : ""}`} onClick={() => onCardClick(p)}>
                 <TfProductCard {...toCard(p)} className="h-full" />
@@ -301,8 +317,8 @@ export function TfMarketplaceShell({
         {/* Infinite-scroll sentinel */}
         {hasMore && <div ref={sentinelRef} aria-hidden="true" className="h-12" />}
         {!hasMore && allProducts.length > 0 && (
-          <p className="py-8 text-center text-xs text-tf-stone-400">
-            You&apos;ve seen everything that matches.
+          <p className="py-10 text-center text-[11px] font-medium uppercase tracking-[0.2em] text-tf-stone-400">
+            You&apos;ve seen everything that matches
           </p>
         )}
       </main>

@@ -58,8 +58,8 @@ function Chip({
       className={cn(
         "min-h-11 rounded-full border px-4 text-sm transition-colors motion-reduce:transition-none outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
         active
-          ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-deep"
-          : "border-tf-stone-300 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400",
+          ? "border-tf-ink bg-tf-ink font-semibold text-white"
+          : "border-tf-stone-200 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400 hover:text-tf-ink",
       )}
     >
       {children}

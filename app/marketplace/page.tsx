@@ -190,11 +190,11 @@ export default async function MarketplacePage({
       )}
 
       {/* ── Internal linking for SEO ─────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 py-16 border-t border-slate-200">
+      <section className="mx-auto max-w-6xl border-t border-tf-stone-200 px-4 py-16 sm:px-6">
         <div className="grid md:grid-cols-3 gap-12">
           {/* Browse by Province */}
           <div>
-            <h2 className="text-lg font-bold text-slate-800 mb-4">
+            <h2 className="mb-4 font-tf-display text-lg font-semibold text-tf-ink">
               {t("browseByProvince")}
             </h2>
             <ul className="grid grid-cols-1 gap-y-2">
@@ -202,7 +202,7 @@ export default async function MarketplacePage({
                 <li key={p.slug}>
                   <Link
                     href={`/marketplace/${p.slug}`}
-                    className="text-sm text-slate-500 hover:text-blue-600 transition-colors"
+                    className="text-sm text-tf-stone-500 transition-colors hover:text-tf-primary"
                   >
                     {t("suppliersIn", { name: p.name })}
                   </Link>
@@ -213,7 +213,7 @@ export default async function MarketplacePage({
 
           {/* Popular Cities */}
           <div>
-            <h2 className="text-lg font-bold text-slate-800 mb-4">
+            <h2 className="mb-4 font-tf-display text-lg font-semibold text-tf-ink">
               {t("popularCities")}
             </h2>
             <ul className="grid grid-cols-1 gap-y-2">
@@ -221,7 +221,7 @@ export default async function MarketplacePage({
                 <li key={`${province.slug}-${city.slug}`}>
                   <Link
                     href={`/marketplace/${province.slug}/${city.slug}`}
-                    className="text-sm text-slate-500 hover:text-blue-600 transition-colors"
+                    className="text-sm text-tf-stone-500 transition-colors hover:text-tf-primary"
                   >
                     {city.name}, {province.name} →
                   </Link>
@@ -232,7 +232,7 @@ export default async function MarketplacePage({
 
           {/* Browse by Category */}
           <div>
-            <h2 className="text-lg font-bold text-slate-800 mb-4">
+            <h2 className="mb-4 font-tf-display text-lg font-semibold text-tf-ink">
               {t("browseByCategory")}
             </h2>
             <ul className="grid grid-cols-1 gap-y-2">
@@ -243,7 +243,7 @@ export default async function MarketplacePage({
                   <li key={c.slug}>
                     <Link
                       href={`/marketplace/category/${c.slug}`}
-                      className="text-sm text-slate-500 hover:text-blue-600 transition-colors"
+                      className="text-sm text-tf-stone-500 transition-colors hover:text-tf-primary"
                     >
                       {c.name} →
                     </Link>
@@ -254,8 +254,8 @@ export default async function MarketplacePage({
         </div>
 
         {/* Sell on TradeFeed — seller-acquisition spine */}
-        <div className="mt-10 pt-8 border-t border-slate-200">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">Sell on TradeFeed</h2>
+        <div className="mt-10 pt-8 border-t border-tf-stone-200">
+          <h2 className="mb-4 font-tf-display text-lg font-semibold text-tf-ink">Sell on TradeFeed</h2>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             {[
               { label: "Sell online in South Africa", href: "/sell-online-south-africa" },
@@ -264,7 +264,7 @@ export default async function MarketplacePage({
               { label: "WhatsApp catalogue for business", href: "/whatsapp-catalog" },
               { label: "Pricing", href: "/pricing" },
             ].map((l) => (
-              <Link key={l.href} href={l.href} className="text-sm text-slate-500 hover:text-emerald-600 transition-colors">
+              <Link key={l.href} href={l.href} className="text-sm text-tf-stone-500 transition-colors hover:text-tf-primary">
                 {l.label} →
               </Link>
             ))}
@@ -272,7 +272,7 @@ export default async function MarketplacePage({
         </div>
 
         {/* WhatsApp Import CTA */}
-        <div className="mt-10 pt-8 border-t border-slate-200 text-center">
+        <div className="mt-10 pt-8 border-t border-tf-stone-200 text-center">
           <p className="text-sm text-slate-500">
             {t.rich("whatsappImportCta", {
               link: (chunks) => (

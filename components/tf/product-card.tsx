@@ -8,9 +8,10 @@ import { formatZAR } from "./format";
 import { TfRatingChip } from "./rating-chip";
 
 // ============================================================
-// TfProductCard — photo-first, square aspect, lazy image,
-// price in tabular figures, seller identity row with verified
-// tick, optional rating + location. Trust at the card level.
+// TfProductCard — portrait 4:5 ratio, image zooms on hover,
+// card lifts on hover. Trust visible at glance: verified tick
+// in image corner, price bold and dominant, seller as muted
+// metadata. Discount percentage on sale items.
 // ============================================================
 
 export interface TfProductCardProps extends React.ComponentProps<"article"> {
@@ -51,83 +52,101 @@ function TfProductCard({
   ...props
 }: TfProductCardProps) {
   const onSale = compareAtPrice != null && compareAtPrice > price;
+  const discountPct = onSale
+    ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
+    : 0;
 
   return (
     <article
       data-slot="tf-product-card"
       className={cn(
-        "group tf-card-tactile relative flex flex-col overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-raised shadow-tf-sm",
-        "hover:shadow-tf-md",
+        "group relative flex flex-col overflow-hidden rounded-2xl bg-tf-raised",
+        "border border-tf-stone-200 shadow-tf-sm",
+        "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-tf-md hover:border-tf-stone-300",
         "focus-within:ring-2 focus-within:ring-tf-primary focus-within:ring-offset-2 focus-within:ring-offset-tf-surface",
         className,
       )}
       {...props}
     >
-      <div className="relative aspect-square w-full bg-tf-stone-100">
+      {/* ── Image — portrait 4:5 for editorial depth ──────── */}
+      <div className="relative aspect-[4/5] overflow-hidden bg-tf-stone-100">
         {imageUrl ? (
           <Image
             src={imageUrl}
             alt={imageAlt ?? title}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             loading={priority ? "eager" : "lazy"}
             priority={priority}
-            className="tf-card-img object-cover"
+            className="object-cover transition-transform duration-500 will-change-transform group-hover:scale-[1.06]"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-tf-stone-400">
-            <ImageOff aria-hidden="true" className="size-7" />
+          <div className="flex h-full items-center justify-center text-tf-stone-300">
+            <ImageOff aria-hidden="true" className="size-8" />
           </div>
         )}
-        {onSale && (
-          <span className="absolute left-2 top-2 rounded-full bg-tf-accent-soft px-2.5 py-1 text-xs font-medium leading-none text-tf-accent-ink">
-            Sale
-          </span>
+
+        {/* Top-left: sale + promoted badges */}
+        {(onSale || promoted) && (
+          <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
+            {onSale && (
+              <span className="rounded-full bg-tf-accent px-2 py-0.5 text-[11px] font-bold leading-none text-tf-ink shadow-sm">
+                -{discountPct}%
+              </span>
+            )}
+            {promoted && (
+              <span className="rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium leading-none text-white">
+                Ad
+              </span>
+            )}
+          </div>
         )}
-        {promoted && (
-          <span className="absolute right-2 top-2 rounded-full bg-tf-stone-100/95 px-2 py-0.5 text-[10px] font-medium leading-none text-tf-stone-600">
-            Promoted
+
+        {/* Top-right: verified seller badge */}
+        {sellerVerified && (
+          <span
+            aria-label="Verified seller"
+            className="absolute right-2.5 top-2.5 flex size-[22px] items-center justify-center rounded-full bg-white shadow-sm"
+          >
+            <BadgeCheck aria-hidden="true" className="size-3.5 text-tf-verified" />
           </span>
         )}
       </div>
 
+      {/* ── Card body ──────────────────────────────────────── */}
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <h3 className="line-clamp-2 text-sm text-tf-ink">
-          <Link href={href} className="outline-none after:absolute after:inset-0 after:content-['']">
+        <h3 className="line-clamp-2 text-[13px] font-medium leading-snug text-tf-ink">
+          <Link
+            href={href}
+            className="outline-none after:absolute after:inset-0 after:content-['']"
+          >
             {title}
           </Link>
         </h3>
 
-        <p className="flex items-baseline gap-1.5 tabular-nums">
-          <span className="text-base font-semibold text-tf-ink">{formatZAR(price)}</span>
+        <div className="flex items-baseline gap-1.5 tabular-nums">
+          <span className="font-tf-display text-[15px] font-bold text-tf-ink">
+            {formatZAR(price)}
+          </span>
           {onSale && (
-            <s className="text-xs text-tf-stone-400">{formatZAR(compareAtPrice)}</s>
+            <s className="text-[11px] text-tf-stone-400">{formatZAR(compareAtPrice)}</s>
           )}
-        </p>
+        </div>
 
-        {sellerName && (
-          <p className="flex min-w-0 items-center gap-1 text-xs text-tf-stone-600">
-            <span className="truncate">{sellerName}</span>
-            {sellerVerified && (
-              <>
-                <BadgeCheck aria-hidden="true" className="size-3.5 shrink-0 text-tf-verified" />
-                <span className="sr-only">Verified seller</span>
-              </>
-            )}
-          </p>
-        )}
-
-        <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-          {rating != null ? (
-            <TfRatingChip rating={rating} count={ratingCount} bare />
-          ) : (
-            <span />
+        {/* Meta row: seller name + rating or location */}
+        <div className="mt-auto flex items-center justify-between gap-1.5 pt-0.5">
+          {sellerName && (
+            <p className="min-w-0 truncate text-[11px] text-tf-stone-400">{sellerName}</p>
           )}
-          {location && (
-            <span className="truncate rounded-full bg-tf-stone-100 px-2 py-0.5 text-[11px] text-tf-stone-600">
-              {location}
-            </span>
-          )}
+          <div className="flex shrink-0 items-center gap-1">
+            {rating != null ? (
+              <TfRatingChip rating={rating} count={ratingCount} bare />
+            ) : location ? (
+              <span className="shrink-0 rounded-full bg-tf-stone-100 px-1.5 py-0.5 text-[10px] text-tf-stone-500">
+                {location}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
     </article>

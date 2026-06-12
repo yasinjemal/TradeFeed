@@ -26,12 +26,12 @@ function TfProductCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex flex-col overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-raised",
+        "flex flex-col overflow-hidden rounded-2xl border border-tf-stone-200 bg-tf-raised",
         className,
       )}
       aria-hidden="true"
     >
-      <TfSkeleton className="aspect-square w-full rounded-none" />
+      <TfSkeleton className="aspect-[4/5] w-full rounded-none" />
       <div className="flex flex-col gap-2 p-3">
         <TfSkeleton className="h-4 w-4/5" />
         <TfSkeleton className="h-5 w-2/5" />
