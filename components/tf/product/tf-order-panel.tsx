@@ -52,8 +52,8 @@ function Pill({
       className={cn(
         "min-h-11 rounded-full border px-4 text-sm transition-colors motion-reduce:transition-none outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
         active
-          ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-deep"
-          : "border-tf-stone-300 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400",
+          ? "border-tf-ink bg-tf-ink font-medium text-white"
+          : "border-tf-stone-200 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400 hover:text-tf-ink",
         disabled && "cursor-not-allowed opacity-40 line-through",
       )}
     >
@@ -140,12 +140,15 @@ export function TfOrderPanel({
     <>
       <div className="space-y-4">
         {/* Price */}
-        <p className="flex items-baseline gap-2 tabular-nums">
-          <span className="font-tf-display text-3xl font-semibold text-tf-ink">
+        <p className="flex items-baseline gap-3 tabular-nums">
+          <span
+            className="font-tf-hero text-tf-ink"
+            style={{ fontSize: "clamp(2rem, 5vw, 3rem)", lineHeight: 1, letterSpacing: "-0.04em", fontWeight: 700 }}
+          >
             {formatZAR(unitCents / 100)}
           </span>
           {qty > 1 && (
-            <span className="text-sm text-tf-stone-500">× {qty} = {formatZAR(totalCents / 100)}</span>
+            <span className="text-sm text-tf-stone-500">× {qty} = <span className="font-semibold text-tf-ink">{formatZAR(totalCents / 100)}</span></span>
           )}
         </p>
 
@@ -218,11 +221,10 @@ export function TfOrderPanel({
           </div>
         )}
 
-        {/* Inline CTA (desktop & in-flow mobile) */}
+        {/* Inline CTA */}
         <div className="hidden lg:block">{cta(true)}</div>
-        <p className="text-xs text-tf-stone-500">
-          Opens WhatsApp with your order pre-filled — {shopName} confirms availability,
-          payment and delivery with you there.
+        <p className="text-xs text-tf-stone-400">
+          Opens WhatsApp pre-filled &mdash; {shopName} confirms availability &amp; delivery.
         </p>
       </div>
 

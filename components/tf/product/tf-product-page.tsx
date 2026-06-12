@@ -107,36 +107,39 @@ export function TfProductPage({
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 pb-28 lg:pb-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6 pb-28 lg:pb-6">
       <TfFonts />
 
       {/* Back to shop */}
       <Link
         href={`/catalog/${shop.slug}`}
-        className="inline-flex items-center gap-1 rounded text-sm text-tf-stone-600 outline-none hover:text-tf-ink focus-visible:ring-2 focus-visible:ring-tf-primary"
+        className="inline-flex items-center gap-1 rounded text-sm text-tf-stone-500 outline-none hover:text-tf-ink focus-visible:ring-2 focus-visible:ring-tf-primary"
       >
         <ChevronLeft aria-hidden="true" className="size-4" />
         {shop.name}
       </Link>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
-        {/* Gallery — leads the load choreography */}
-        <TfReveal className="lg:sticky lg:top-4 lg:self-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10">
+        {/* Gallery — sticky offset accounts for catalog header (~64px) */}
+        <TfReveal className="lg:sticky lg:top-[72px] lg:self-start">
           <TfGallery images={product.images} productName={product.name} soldOut={totalStock === 0} />
         </TfReveal>
 
-        {/* Info + order — settles in just behind the image */}
+        {/* Info + order */}
         <div className="space-y-5">
           <TfReveal delay={80}>
             {product.categoryName && product.categorySlug && (
               <Link
                 href={`/marketplace?category=${encodeURIComponent(product.categorySlug)}`}
-                className="mb-2 inline-block rounded-full bg-tf-stone-100 px-2.5 py-1 text-xs font-medium text-tf-stone-600 outline-none hover:bg-tf-stone-200 focus-visible:ring-2 focus-visible:ring-tf-primary"
+                className="mb-3 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-emerald-700 outline-none hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-tf-primary"
               >
                 {product.categoryName}
               </Link>
             )}
-            <h1 className="font-tf-display text-2xl font-semibold leading-tight text-tf-ink">
+            <h1
+              className="font-tf-hero text-tf-ink"
+              style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", lineHeight: "1.06", letterSpacing: "-0.03em", fontWeight: 700 }}
+            >
               {product.name}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-2">
