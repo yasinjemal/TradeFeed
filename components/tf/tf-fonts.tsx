@@ -13,9 +13,11 @@ export function TfFonts() {
     <>
       <link rel="preconnect" href="https://api.fontshare.com" />
       <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="anonymous" />
+      {/* Clash Display — ultra-high-contrast geometric for hero headlines */}
+      {/* General Sans — warm humanist for all UI & section headings      */}
       <link
         rel="stylesheet"
-        href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap"
+        href="https://api.fontshare.com/v2/css?f[]=clash-display@300,400,500,600,700&f[]=general-sans@300,400,500,600,700&display=swap"
       />
     </>
   );

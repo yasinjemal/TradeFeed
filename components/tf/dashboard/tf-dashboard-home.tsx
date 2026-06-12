@@ -91,7 +91,7 @@ export function TfDashboardHome({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate font-tf-display text-lg font-semibold">
+          <h1 className="truncate font-tf-display text-2xl font-semibold">
             {shop.name}
             {shop.isVerified && (
               <BadgeCheck

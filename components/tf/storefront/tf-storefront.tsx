@@ -121,7 +121,7 @@ export function TfStorefront({
           aria-label={`About ${shop.name}`}
           className="rounded-xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm"
         >
-          <h2 className="font-tf-display text-lg font-semibold text-tf-ink">
+          <h2 className="font-tf-display text-2xl font-semibold text-tf-ink">
             About {shop.name}
           </h2>
           <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-tf-stone-600">
@@ -155,7 +155,7 @@ export function TfStorefront({
       {showRecruitment && (
         <div className="rounded-xl bg-tf-deep p-6 text-center">
           <Store aria-hidden="true" className="mx-auto mb-2 size-6 text-emerald-300" />
-          <h2 className="font-tf-display text-lg font-semibold text-tf-surface">
+          <h2 className="font-tf-display text-2xl font-semibold text-tf-surface">
             Sell on TradeFeed too
           </h2>
           <p className="mx-auto mt-1 max-w-xs text-sm text-emerald-100/90">

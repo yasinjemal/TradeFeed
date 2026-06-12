@@ -146,7 +146,7 @@ export function SeoSection({
 }) {
   return (
     <TfReveal as="section" className="mt-10">
-      <h2 className="font-tf-display text-2xl font-semibold tracking-tight">{title}</h2>
+      <h2 className="font-tf-display text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h2>
       <div className="mt-3 space-y-4 text-[15px] leading-relaxed text-tf-stone-600 [&_strong]:text-tf-ink">
         {children}
       </div>

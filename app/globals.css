@@ -521,14 +521,23 @@ textarea[aria-valid="true"] {
   line-height: 1.5;
 }
 
-/* ── Typography Scale (Audit: §2 Typography) ──────────── */
+/* ── Typography Scale ──────────────────────────────────── */
 
-/* Heading letter-spacing refinement */
-h1, h2, h3 {
+/* Luxury heading rhythm — tighter tracking at larger sizes  */
+h1 {
+  letter-spacing: -0.04em;
+  line-height: 1.04;
+}
+h2 {
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+h3 {
   letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 h4, h5, h6 {
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 /* ═══ TF Redesign tokens (FEATURE_FLAGS.UI_REDESIGN) ═══
    Warm, trust-first system. Only components/tf/* consume
@@ -567,7 +576,10 @@ h4, h5, h6 {
   --color-tf-stone-800: #292524;
   --color-tf-stone-900: #1c1917;
 
-  /* Type — General Sans loaded by <TfFonts/> only when the flag is on */
+  /* Type — loaded by <TfFonts/> only when UI_REDESIGN is on             */
+  /* Hero headlines — Clash Display (ultra-high-contrast geometric)       */
+  --font-tf-hero: "Clash Display", "General Sans", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* UI headings  — General Sans (warm humanist)                          */
   --font-tf-display: "General Sans", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   /* Restrained, warm-tinted elevation */

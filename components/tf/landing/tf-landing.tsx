@@ -187,8 +187,15 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                 {n(stats.shopCount)} sellers live &middot; {stats.cityCount} SA {stats.cityCount === 1 ? "city" : "cities"}
               </div>
 
-              {/* Kinetic headline */}
-              <h1 className="mt-6 font-tf-display text-5xl font-semibold leading-[1.04] tracking-tight text-white sm:text-6xl lg:text-[4.25rem]">
+              {/* Kinetic headline — Clash Display for maximum impact */}
+              <h1
+                className="mt-6 font-tf-hero font-semibold text-white"
+                style={{
+                  fontSize: "clamp(3rem, 8vw, 6.75rem)",
+                  lineHeight: "0.97",
+                  letterSpacing: "-0.04em",
+                }}
+              >
                 One photo.
                 <br />
                 One link.
@@ -328,7 +335,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-400/60">
               How it works
             </p>
-            <h2 className="mt-2 font-tf-display text-3xl font-semibold text-white sm:text-4xl">
+            <h2 className="mt-2 font-tf-display text-4xl font-semibold text-white sm:text-5xl">
               Three honest steps
             </h2>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/50">
@@ -403,8 +410,8 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-tf-stone-400">
               Built for South African sellers
             </p>
-            <h2 className="mt-2 font-tf-display text-3xl font-semibold text-tf-ink sm:text-4xl">
-              Everything you need, nothing you don&apos;t
+            <h2 className="mt-2 font-tf-display text-4xl font-semibold text-tf-ink sm:text-5xl">
+              Everything you need,<br className="hidden sm:block" /> nothing you don&apos;t
             </h2>
           </TfReveal>
 
@@ -420,7 +427,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                   AI-powered
                 </span>
               </div>
-              <h3 className="font-tf-display text-xl font-semibold text-tf-ink">
+              <h3 className="font-tf-display text-2xl font-semibold text-tf-ink">
                 Listing written in 10 seconds
               </h3>
               <p className="mt-2 max-w-sm text-sm leading-relaxed text-tf-stone-500">
@@ -459,7 +466,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                   />
                 </svg>
               </span>
-              <h3 className="font-tf-display text-base font-semibold text-tf-ink">
+              <h3 className="font-tf-display text-xl font-semibold text-tf-ink">
                 WhatsApp checkout
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-tf-stone-500">
@@ -476,7 +483,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
               <span className="mb-5 flex size-10 items-center justify-center rounded-xl bg-tf-stone-100">
                 <BarChart3 className="size-5 text-tf-stone-600" aria-hidden="true" />
               </span>
-              <h3 className="font-tf-display text-base font-semibold text-tf-ink">
+              <h3 className="font-tf-display text-xl font-semibold text-tf-ink">
                 See what sells
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-tf-stone-500">
@@ -490,7 +497,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
               <span className="mb-5 flex size-10 items-center justify-center rounded-xl bg-emerald-50">
                 <Shield className="size-5 text-tf-primary" aria-hidden="true" />
               </span>
-              <h3 className="font-tf-display text-base font-semibold text-tf-ink">
+              <h3 className="font-tf-display text-xl font-semibold text-tf-ink">
                 Verified seller badge
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-tf-stone-500">
@@ -544,7 +551,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-400/60">
               Built-in trust
             </p>
-            <h2 className="mt-2 font-tf-display text-3xl font-semibold text-white sm:text-4xl">
+            <h2 className="mt-2 font-tf-display text-4xl font-semibold text-white sm:text-5xl">
               Buyers see who they&apos;re buying from
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-white/50">
@@ -599,7 +606,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                 Live right now
               </p>
             </div>
-            <h2 className="font-tf-display text-3xl font-semibold text-tf-ink sm:text-4xl">
+            <h2 className="font-tf-display text-4xl font-semibold text-tf-ink sm:text-5xl">
               Real shops, trading today
             </h2>
             <p className="mt-2 text-sm text-tf-stone-500">
@@ -674,7 +681,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-tf-stone-400">
               No surprises
             </p>
-            <h2 className="mt-2 font-tf-display text-3xl font-semibold text-tf-ink sm:text-4xl">
+            <h2 className="mt-2 font-tf-display text-4xl font-semibold text-tf-ink sm:text-5xl">
               Honest pricing, in Rand
             </h2>
             <p className="mt-2 text-sm text-tf-stone-500">
@@ -767,9 +774,16 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             aria-hidden="true"
             className="mx-auto mb-5 size-10 text-emerald-400"
           />
-          <h2 className="font-tf-display text-3xl font-semibold text-white sm:text-5xl">
+          <h2
+            className="font-tf-hero font-semibold text-white"
+            style={{
+              fontSize: "clamp(2.25rem, 6vw, 5rem)",
+              lineHeight: "1.03",
+              letterSpacing: "-0.04em",
+            }}
+          >
             Your shop could be live
-            <br className="hidden sm:block" /> in under 3 minutes
+            <br className="hidden sm:block" /> in under 3&nbsp;minutes
           </h2>
           <p className="mx-auto mt-4 max-w-md text-sm text-white/45">
             Join {n(stats.shopCount)} South African sellers already taking

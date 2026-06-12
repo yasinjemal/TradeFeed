@@ -40,7 +40,10 @@ const FAQ = [
 export default function PricingPage() {
   return (
     <SeoPageShell breadcrumb={{ name: "Pricing", path: "/pricing" }}>
-      <h1 className="font-tf-display text-4xl font-semibold leading-tight tracking-tight">
+      <h1
+        className="font-tf-hero font-semibold text-tf-ink"
+        style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", lineHeight: "1.05", letterSpacing: "-0.035em" }}
+      >
         Honest pricing, in rand
       </h1>
       <p className="mt-4 max-w-2xl text-lg leading-relaxed text-tf-stone-600">
@@ -63,9 +66,9 @@ export default function PricingPage() {
                 Most popular
               </span>
             )}
-            <h2 className="font-tf-display text-base font-semibold">{plan.name}</h2>
+            <h2 className="font-tf-display text-lg font-semibold">{plan.name}</h2>
             <p className="mt-1 tabular-nums">
-              <span className="font-tf-display text-3xl font-semibold">R{plan.price}</span>
+              <span className="font-tf-display text-4xl font-semibold">R{plan.price}</span>
               <span className="text-sm text-tf-stone-500">/month</span>
             </p>
             <p className="mt-1 text-xs text-tf-stone-500">{plan.blurb}</p>
