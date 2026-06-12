@@ -16,3 +16,7 @@ export { TfBottomNav, type TfBottomNavItem } from "./bottom-nav";
 export { TfSkeleton, TfProductCardSkeleton, TfSellerCardSkeleton } from "./skeleton";
 export { TfEmptyState } from "./empty-state";
 export { formatZAR, formatReplyTime } from "./format";
+export { TfReveal } from "./motion/tf-reveal";
+export { TfCountUp } from "./motion/tf-count-up";
+export { TfTilt } from "./motion/tf-tilt";
+export { TfLiveTicker } from "./motion/tf-live-ticker";

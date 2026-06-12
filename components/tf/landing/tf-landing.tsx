@@ -16,7 +16,10 @@ import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfCountUp } from "@/components/tf/motion/tf-count-up";
+import { TfTilt } from "@/components/tf/motion/tf-tilt";
+import { TfLiveTicker } from "@/components/tf/motion/tf-live-ticker";
 import { TfPhoneMock } from "./phone-mock";
+import { TfLandingHeader } from "./tf-header";
 import { TfLandingStickyCta } from "./sticky-cta";
 
 // ============================================================
@@ -116,15 +119,15 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
       <TfFonts />
 
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 border-b border-tf-stone-200 bg-tf-surface/95 backdrop-blur-sm">
+      <TfLandingHeader>
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link href="/" aria-label="TradeFeed home" className="shrink-0">
             <TradeFeedLogo size="sm" />
           </Link>
           <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-tf-stone-600 md:flex">
-            <Link href="#how-it-works" className="hover:text-tf-ink">How it works</Link>
-            <Link href="#pricing" className="hover:text-tf-ink">Pricing</Link>
-            <Link href="/marketplace" className="hover:text-tf-ink">Marketplace</Link>
+            <Link href="#how-it-works" className="tf-navlink hover:text-tf-ink">How it works</Link>
+            <Link href="#pricing" className="tf-navlink hover:text-tf-ink">Pricing</Link>
+            <Link href="/marketplace" className="tf-navlink hover:text-tf-ink">Marketplace</Link>
           </nav>
           <div className="flex items-center gap-2">
             <Link href="/sign-in" className="hidden px-3 py-2 text-sm text-tf-stone-600 hover:text-tf-ink sm:block">
@@ -135,11 +138,12 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             </TfButton>
           </div>
         </div>
-      </header>
+      </TfLandingHeader>
 
       {/* ── Hero ───────────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-4 pb-14 pt-10 sm:px-6 sm:pb-20 sm:pt-16">
-        <div className="grid items-center gap-10 lg:grid-cols-2">
+      <section className="relative mx-auto max-w-6xl px-4 pb-14 pt-10 sm:px-6 sm:pb-20 sm:pt-16">
+        <div aria-hidden="true" className="tf-ambient" />
+        <div className="relative grid items-center gap-10 lg:grid-cols-2">
           <TfReveal stagger>
             <p className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-tf-verified-soft px-3 py-1 text-xs font-medium text-tf-deep">
               <BadgeCheck aria-hidden="true" className="size-3.5 text-tf-verified" />
@@ -165,9 +169,20 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
               </TfButton>
             </div>
             <p className="mt-4 text-xs text-tf-stone-500">{reassurance}</p>
+            <TfLiveTicker
+              className="mt-5"
+              items={sellers
+                .filter((s) => s.city)
+                .slice(0, 6)
+                .map((s) => `${s.name} is live in ${s.city} right now`)}
+            />
           </TfReveal>
           <TfReveal delay={160}>
-            <TfPhoneMock />
+            <div className="tf-float">
+              <TfTilt>
+                <TfPhoneMock />
+              </TfTilt>
+            </div>
           </TfReveal>
         </div>
       </section>
@@ -238,15 +253,17 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
             </ul>
           </div>
           <TfReveal delay={120}>
-          <TfVerifiedSellerCard
-            variant="hero"
-            name="Thandi's Sneakers"
-            verified
-            ordersFulfilled={127}
-            avgReplyMinutes={8}
-            memberSince={2024}
-            location="Soweto, Johannesburg"
-          />
+          <TfTilt>
+            <TfVerifiedSellerCard
+              variant="hero"
+              name="Thandi's Sneakers"
+              verified
+              ordersFulfilled={127}
+              avgReplyMinutes={8}
+              memberSince={2024}
+              location="Soweto, Johannesburg"
+            />
+          </TfTilt>
           </TfReveal>
         </div>
       </section>

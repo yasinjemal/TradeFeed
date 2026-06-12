@@ -35,7 +35,7 @@ export function TfLandingStickyCta({ href, label, sentinelId }: TfLandingStickyC
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-tf-stone-200 bg-tf-raised/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm lg:hidden"
+      className="tf-slide-up fixed inset-x-0 bottom-0 z-40 border-t border-tf-stone-200 bg-tf-raised/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm lg:hidden"
       role="region"
       aria-label="Sign up"
     >

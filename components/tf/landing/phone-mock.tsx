@@ -22,7 +22,7 @@ export function TfPhoneMock() {
       </div>
 
       <div className="flex shrink-0 flex-col items-center gap-1 text-tf-primary">
-        <Sparkles aria-hidden="true" className="size-4" />
+        <Sparkles aria-hidden="true" className="size-4 motion-safe:animate-pulse" />
         <ArrowRight aria-hidden="true" className="size-5" />
         <span className="text-[10px] font-medium text-tf-stone-500">AI ~10s</span>
       </div>

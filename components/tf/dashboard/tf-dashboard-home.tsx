@@ -16,6 +16,7 @@ import { TfButton } from "@/components/tf/button";
 import { TfEmptyState } from "@/components/tf/empty-state";
 import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
+import { TfCountUp } from "@/components/tf/motion/tf-count-up";
 import { TfShareCatalogue } from "./tf-share-catalogue";
 
 // ============================================================
@@ -67,7 +68,7 @@ export function TfDashboardHome({
 }: TfDashboardHomeProps) {
   const isNewSeller = stats.productCount === 0;
 
-  const metric = (label: string, value: string) => (
+  const metric = (label: string, value: React.ReactNode) => (
     <div key={label} className="rounded-xl border border-tf-stone-200 bg-tf-raised p-4">
       <p className="text-xs text-tf-stone-500">{label}</p>
       <p className="mt-1 font-tf-display text-2xl font-semibold tabular-nums text-tf-ink">
@@ -137,21 +138,21 @@ export function TfDashboardHome({
           <TfReveal stagger className="grid grid-cols-3 gap-2">
             <Link
               href={`/dashboard/${slug}/products/new?ai=true`}
-              className="flex min-h-[84px] flex-col items-center justify-center gap-1.5 rounded-xl border border-tf-stone-200 bg-tf-raised p-3 text-center outline-none hover:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary"
+              className="tf-card-tactile flex min-h-[84px] flex-col items-center justify-center gap-1.5 rounded-xl border border-tf-stone-200 bg-tf-raised p-3 text-center shadow-tf-sm outline-none hover:border-tf-primary hover:shadow-tf-md focus-visible:ring-2 focus-visible:ring-tf-primary"
             >
               <PackagePlus aria-hidden="true" className="size-5 text-tf-primary" />
               <span className="text-xs font-medium">Add product</span>
             </Link>
             <Link
               href={`/dashboard/${slug}/import`}
-              className="flex min-h-[84px] flex-col items-center justify-center gap-1.5 rounded-xl border border-tf-stone-200 bg-tf-raised p-3 text-center outline-none hover:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary"
+              className="tf-card-tactile flex min-h-[84px] flex-col items-center justify-center gap-1.5 rounded-xl border border-tf-stone-200 bg-tf-raised p-3 text-center shadow-tf-sm outline-none hover:border-tf-primary hover:shadow-tf-md focus-visible:ring-2 focus-visible:ring-tf-primary"
             >
               <ImportIcon aria-hidden="true" className="size-5 text-tf-primary" />
               <span className="text-xs font-medium">Import catalogue</span>
             </Link>
             <Link
               href={`/dashboard/${slug}/orders`}
-              className="relative flex min-h-[84px] flex-col items-center justify-center gap-1.5 rounded-xl border border-tf-stone-200 bg-tf-raised p-3 text-center outline-none hover:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary"
+              className="tf-card-tactile relative flex min-h-[84px] flex-col items-center justify-center gap-1.5 rounded-xl border border-tf-stone-200 bg-tf-raised p-3 text-center shadow-tf-sm outline-none hover:border-tf-primary hover:shadow-tf-md focus-visible:ring-2 focus-visible:ring-tf-primary"
             >
               <ClipboardList aria-hidden="true" className="size-5 text-tf-primary" />
               <span className="text-xs font-medium">Orders</span>
@@ -165,10 +166,10 @@ export function TfDashboardHome({
 
           {/* ── Simple stats ───────────────────────────── */}
           <TfReveal stagger className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {metric("Views (7 days)", stats.viewsLast7Days.toLocaleString("en-ZA"))}
-            {metric("Orders today", stats.ordersToday.toLocaleString("en-ZA"))}
+            {metric("Views (7 days)", <TfCountUp value={stats.viewsLast7Days} />)}
+            {metric("Orders today", <TfCountUp value={stats.ordersToday} />)}
             {metric("Revenue today", formatZAR(stats.revenueTodayCents))}
-            {metric("Products", stats.productCount.toLocaleString("en-ZA"))}
+            {metric("Products", <TfCountUp value={stats.productCount} />)}
           </TfReveal>
           <p className="-mt-3 text-right">
             <Link

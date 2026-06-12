@@ -11,11 +11,12 @@ import { cn } from "@/lib/utils";
 // ============================================================
 
 const tfButtonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10px] font-medium transition-[color,background-color,border-color,transform] duration-200 motion-safe:active:scale-[0.97] motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-tf-primary focus-visible:ring-offset-2 focus-visible:ring-offset-tf-surface [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-5 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10px] font-medium transition-[color,background-color,border-color,transform,box-shadow] duration-200 motion-safe:active:scale-[0.97] motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-tf-primary focus-visible:ring-offset-2 focus-visible:ring-offset-tf-surface [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-5 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        primary: "bg-tf-primary text-white hover:bg-tf-primary-hover active:bg-tf-deep",
+        primary:
+          "bg-tf-primary text-white hover:bg-tf-primary-hover hover:shadow-tf-md motion-safe:hover:-translate-y-px active:bg-tf-deep active:shadow-none",
         secondary:
           "border border-tf-stone-300 bg-tf-raised text-tf-ink hover:border-tf-stone-400 hover:bg-tf-stone-50",
         ghost: "text-tf-primary hover:bg-tf-verified-soft",

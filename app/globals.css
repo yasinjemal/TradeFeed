@@ -701,6 +701,142 @@ h4, h5, h6 {
   }
 }
 
+/* ═══ TF Motion — "Alive" layer ═════════════════════════════
+   Scroll- and pointer-aware behaviours on top of Counter-weight.
+   Same rules: one easing, transforms + opacity only, everything
+   gated behind prefers-reduced-motion. */
+
+/* Self-aware landing header: flat at the top of the page, lifts
+   into glass once the user scrolls. Blur stays constant (it is
+   invisible over the flat hero top) so only paint properties
+   transition. */
+.tf-header {
+  border-bottom: 1px solid transparent;
+  background-color: transparent;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition:
+    background-color 300ms var(--tf-ease),
+    border-color 300ms var(--tf-ease),
+    box-shadow 300ms var(--tf-ease);
+}
+.tf-header[data-scrolled="true"] {
+  border-bottom-color: var(--color-tf-stone-200);
+  background-color: color-mix(in srgb, var(--color-tf-surface) 88%, transparent);
+  box-shadow: var(--shadow-tf-sm);
+}
+
+/* Nav links: hairline underline grows from the left on hover */
+.tf-navlink {
+  position: relative;
+}
+.tf-navlink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+@media (hover: hover) {
+  .tf-navlink:hover::after {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tf-navlink::after {
+    transition: transform 240ms var(--tf-ease);
+  }
+}
+
+/* Ambient hero life: two soft brand-tinted blobs drifting very
+   slowly behind the hero. Static (but present) under reduced
+   motion — depth without movement. */
+.tf-ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.tf-ambient::before,
+.tf-ambient::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+}
+.tf-ambient::before {
+  width: 480px;
+  height: 480px;
+  top: -160px;
+  right: -120px;
+  background: radial-gradient(circle, rgb(4 120 87 / 0.1), transparent 70%);
+}
+.tf-ambient::after {
+  width: 360px;
+  height: 360px;
+  bottom: -140px;
+  left: -100px;
+  background: radial-gradient(circle, rgb(245 158 11 / 0.08), transparent 70%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes tf-drift-a {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-40px, 30px) scale(1.08); }
+  }
+  @keyframes tf-drift-b {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(36px, -24px) scale(1.06); }
+  }
+  .tf-ambient::before {
+    animation: tf-drift-a 18s ease-in-out infinite;
+  }
+  .tf-ambient::after {
+    animation: tf-drift-b 22s ease-in-out infinite;
+  }
+
+  /* Gentle float for the hero phone mock — starts after the
+     entrance choreography settles */
+  @keyframes tf-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .tf-float {
+    animation: tf-float 7s ease-in-out 1.8s infinite;
+  }
+
+  /* Live ticker lines rise in as they rotate */
+  @keyframes tf-ticker-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  .tf-ticker-item {
+    animation: tf-ticker-in 420ms var(--tf-ease) both;
+  }
+
+  /* Breathing presence dot for "live right now" signals */
+  @keyframes tf-presence {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(4 120 87 / 0.35); }
+    50% { box-shadow: 0 0 0 5px rgb(4 120 87 / 0); }
+  }
+  .tf-presence {
+    animation: tf-presence 2.4s ease-in-out infinite;
+  }
+}
+
+/* Pointer-tilt stage (driven by TfTilt). The wrapper provides
+   perspective; the inner element receives the transform. */
+.tf-tilt {
+  perspective: 900px;
+}
+.tf-tilt-inner {
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
 /* Horizontal rail edge fades — a visual "there's more" cue */
 .tf-rail {
   -webkit-mask-image: linear-gradient(
