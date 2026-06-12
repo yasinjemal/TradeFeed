@@ -221,56 +221,64 @@ export function TfMarketplaceShell({
       <header className="sticky top-0 z-30">
 
         {/* Row 2: Search-dominant nav */}
-        <div className="border-b border-tf-stone-200 bg-tf-surface/98 backdrop-blur-md">
+        <div className="border-b border-tf-stone-200 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]">
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6">
-            <Link href="/" aria-label="TradeFeed home" className="hidden shrink-0 items-center gap-2 sm:flex">
-              <TradeFeedLogo size="sm" />
-              <span className="font-tf-display text-[13px] font-semibold text-tf-ink">Marketplace</span>
+
+            {/* Logo — icon + wordmark, proper dark variant */}
+            <Link href="/" aria-label="TradeFeed home" className="hidden shrink-0 sm:block">
+              <TradeFeedLogo size="sm" variant="dark" />
             </Link>
 
+            {/* Search bar — the dominant element */}
             <div className="relative flex-1">
-              <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-tf-stone-400" />
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-emerald-600"
+              />
               <input
                 type="search"
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Search products, sellers, brands..."
                 aria-label="Search the marketplace"
-                className="min-h-12 w-full rounded-xl border border-tf-stone-300 bg-tf-raised pl-11 pr-4 text-[15px] text-tf-ink shadow-sm placeholder:text-tf-stone-400 outline-none transition-shadow focus-visible:border-tf-primary focus-visible:shadow-md focus-visible:ring-2 focus-visible:ring-tf-primary/20"
+                className="min-h-[52px] w-full rounded-2xl border border-tf-stone-200 bg-tf-stone-50 pl-11 pr-4 text-[15px] text-tf-ink shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] placeholder:text-tf-stone-400 outline-none transition-all focus-visible:border-emerald-500 focus-visible:bg-white focus-visible:shadow-[0_0_0_3px_rgba(16,185,129,0.12),inset_0_1px_3px_rgba(0,0,0,0.04)]"
               />
             </div>
 
+            {/* Filters */}
             <button
               type="button"
               onClick={() => setSheetOpen(true)}
-              className="relative flex min-h-[46px] shrink-0 items-center gap-1.5 rounded-xl border border-tf-stone-300 bg-tf-raised px-4 text-sm font-medium text-tf-ink shadow-sm outline-none transition-all hover:border-tf-stone-400 hover:shadow-md focus-visible:ring-2 focus-visible:ring-tf-primary"
+              className="relative flex min-h-[48px] shrink-0 items-center gap-2 rounded-2xl border border-tf-stone-200 bg-tf-stone-50 px-4 text-sm font-medium text-tf-stone-700 outline-none transition-all hover:border-tf-stone-300 hover:bg-white hover:shadow-sm focus-visible:ring-2 focus-visible:ring-tf-primary"
             >
               <SlidersHorizontal aria-hidden="true" className="size-4" />
               <span className="hidden sm:inline">Filters</span>
               {activeFilterCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-tf-primary px-1 text-[10px] font-bold tabular-nums text-white shadow-sm">
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold tabular-nums text-white">
                   {activeFilterCount}
                 </span>
               )}
             </button>
 
-            <div className="hidden items-center gap-2 md:flex">
-              <Link href="/sign-in" className="px-3 py-2 text-sm text-tf-stone-600 transition-colors hover:text-tf-ink">
-                Sign in
-              </Link>
-              <Link href="/sign-up" className="inline-flex items-center gap-1.5 rounded-xl bg-tf-deep px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                Sell free
-                <ArrowRight aria-hidden="true" className="size-3.5" />
-              </Link>
-            </div>
+            {/* Sell free CTA — vibrant emerald, the conversion button */}
+            <Link
+              href="/sign-up"
+              className="hidden min-h-[48px] shrink-0 items-center gap-2 rounded-2xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-emerald-700 hover:shadow-md md:inline-flex"
+            >
+              Sell free
+              <ArrowRight aria-hidden="true" className="size-3.5" />
+            </Link>
           </div>
         </div>
 
         {/* Row 3: Category pills */}
         {topCategories.length > 0 && (
-          <nav aria-label="Browse by category" className="border-b border-tf-stone-200 bg-tf-raised/70 backdrop-blur-sm">
-            <div className="mx-auto max-w-6xl overflow-x-auto px-4 sm:px-6">
-              <div className="flex w-max items-center gap-2 py-2.5">
+          <nav aria-label="Browse by category" className="border-b border-tf-stone-200 bg-white">
+            <div className="relative mx-auto max-w-6xl">
+              {/* Fade mask — right edge signals more pills */}
+              <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-white to-transparent" aria-hidden="true" />
+              <div className="overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6">
+              <div className="flex w-max items-center gap-1.5 py-2.5">
                 <button
                   type="button"
                   onClick={() => navigate({ category: undefined })}
@@ -292,6 +300,7 @@ export function TfMarketplaceShell({
                   </button>
                 ))}
               </div>
+              </div>
             </div>
           </nav>
         )}
@@ -303,12 +312,15 @@ export function TfMarketplaceShell({
       <main className="mx-auto max-w-6xl px-4 pt-5 sm:px-6">
 
         {/* ── Toolbar ─────────────────────────────────── */}
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <p className="mr-auto text-sm text-tf-stone-500" aria-live="polite">
+        <div className="mb-4 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {/* Count — fixed left */}
+          <p className="shrink-0 text-sm text-tf-stone-500" aria-live="polite">
             <span className="font-semibold text-tf-ink">{totalProducts.toLocaleString("en-ZA")}</span>
             {" "}product{totalProducts === 1 ? "" : "s"}
             {currentFilters.search ? ` for "${currentFilters.search}"` : ""}
           </p>
+
+          <div className="mx-2 h-4 w-px shrink-0 bg-tf-stone-200" aria-hidden="true" />
 
           {/* Price quick-filters */}
           {PRICE_PRESETS.map((preset) => {
@@ -325,7 +337,7 @@ export function TfMarketplaceShell({
                 }
                 aria-pressed={isActive}
                 className={cn(
-                  "min-h-9 rounded-full border px-3.5 text-[13px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary",
+                  "min-h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-[12px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary",
                   isActive ? pillActive : pillIdle,
                 )}
               >
@@ -334,13 +346,15 @@ export function TfMarketplaceShell({
             );
           })}
 
+          <div className="mx-2 h-4 w-px shrink-0 bg-tf-stone-200" aria-hidden="true" />
+
           {/* Verified toggle */}
           <button
             type="button"
             onClick={() => navigate({ verified: currentFilters.verifiedOnly ? undefined : "true" })}
             aria-pressed={currentFilters.verifiedOnly}
             className={cn(
-              "flex min-h-9 items-center gap-1.5 rounded-full border px-4 text-[13px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary",
+              "flex min-h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary",
               currentFilters.verifiedOnly
                 ? "border-tf-ink bg-tf-ink text-white shadow-sm"
                 : "border-tf-stone-200 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400 hover:text-tf-ink",
@@ -348,9 +362,9 @@ export function TfMarketplaceShell({
           >
             <BadgeCheck
               aria-hidden="true"
-              className={cn("size-4", currentFilters.verifiedOnly ? "text-emerald-400" : "text-tf-verified")}
+              className={cn("size-3.5", currentFilters.verifiedOnly ? "text-emerald-400" : "text-tf-verified")}
             />
-            Verified
+            Verified sellers
           </button>
         </div>
 
