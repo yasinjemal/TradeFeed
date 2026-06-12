@@ -9,6 +9,7 @@
 
 import { useActionState, useState } from "react";
 import { createShopAction } from "@/app/actions/shop";
+import { ShopLocationFields } from "@/components/shop/shop-location-fields";
 
 export function CreateShopForm() {
   const [state, formAction, isPending] = useActionState(
@@ -145,6 +146,12 @@ export function CreateShopForm() {
             Buyers will send orders to this number via WhatsApp
           </p>
         </div>
+
+        {/* ── City + Province ── */}
+        <ShopLocationFields
+          disabled={isPending}
+          fieldErrors={state?.fieldErrors}
+        />
 
         {/* ── Description ── */}
         <div className="space-y-2">

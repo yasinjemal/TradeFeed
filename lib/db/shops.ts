@@ -70,6 +70,8 @@ export async function createShop(
         slug,
         description: input.description || null,
         whatsappNumber: input.whatsappNumber,
+        city: input.city,
+        province: input.province,
         referredBy: referredBySlug || null,
       },
     });

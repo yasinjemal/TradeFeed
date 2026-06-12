@@ -20,6 +20,7 @@ import {
   trackCatalogSharedAction,
 } from "@/app/actions/onboarding";
 import { WhatsAppCommunityBanner } from "@/components/community/whatsapp-community-banner";
+import { ShopLocationFields } from "@/components/shop/shop-location-fields";
 import { saveProductImagesAction } from "@/app/actions/image";
 import { useUploadThing } from "@/lib/uploadthing";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
@@ -299,7 +300,7 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
                 </span>
               </h1>
               <p className="mt-2 text-stone-400 text-sm">
-                Two quick details, then upload your first product.
+                A few quick details, then upload your first product.
               </p>
             </div>
 
@@ -386,6 +387,12 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
                   Buyers will order via this WhatsApp number
                 </p>
               </div>
+
+              {/* City + Province */}
+              <ShopLocationFields
+                disabled={shopPending}
+                fieldErrors={shopState?.fieldErrors}
+              />
 
               <button
                 type="submit"

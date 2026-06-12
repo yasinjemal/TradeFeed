@@ -46,3 +46,8 @@ prisma/migrations/**/migration_lock.toml
 # IDE
 .vscode/
 .idea/
+
+# Local dev artifacts
+*.log
+*.tsbuildinfo
+check-cols.js

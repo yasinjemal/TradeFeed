@@ -61,6 +61,8 @@ export async function createShopAction(
       name: formData.get("name") as string,
       description: formData.get("description") as string,
       whatsappNumber: formData.get("whatsappNumber") as string,
+      city: formData.get("city") as string,
+      province: formData.get("province") as string,
     };
 
     // 2. Validate with Zod — catches bad input before DB

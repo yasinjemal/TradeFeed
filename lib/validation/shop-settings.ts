@@ -20,6 +20,36 @@ export const SA_PROVINCES = [
 ] as const;
 
 /**
+ * Common SA cities → province auto-map.
+ * Shared by the shop creation and settings forms so a typed city
+ * auto-selects the province. Free-text cities outside this map are fine —
+ * the seller just picks the province manually.
+ */
+export const CITY_PROVINCE_MAP: Record<string, (typeof SA_PROVINCES)[number]> = {
+  "Johannesburg": "Gauteng",
+  "Pretoria": "Gauteng",
+  "Sandton": "Gauteng",
+  "Soweto": "Gauteng",
+  "Midrand": "Gauteng",
+  "Centurion": "Gauteng",
+  "Cape Town": "Western Cape",
+  "Stellenbosch": "Western Cape",
+  "Paarl": "Western Cape",
+  "Durban": "KwaZulu-Natal",
+  "Pietermaritzburg": "KwaZulu-Natal",
+  "Port Elizabeth": "Eastern Cape",
+  "East London": "Eastern Cape",
+  "Queenstown": "Eastern Cape",
+  "Bloemfontein": "Free State",
+  "Welkom": "Free State",
+  "Nelspruit": "Mpumalanga",
+  "Polokwane": "Limpopo",
+  "Kimberley": "Northern Cape",
+  "Rustenburg": "North West",
+  "Mahikeng": "North West",
+};
+
+/**
  * Days of the week for business hours.
  */
 export const DAYS_OF_WEEK = [

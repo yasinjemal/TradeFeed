@@ -8,9 +8,12 @@
 // - WhatsApp number must be SA format (+27XXXXXXXXX)
 // - Shop name: 2-100 chars, trimmed
 // - Description: optional, max 500 chars
+// - City + province: required — the marketplace city/province SEO
+//   pages can only index shops that have a location set
 // ============================================================
 
 import { z } from "zod";
+import { SA_PROVINCES } from "./shop-settings";
 
 /**
  * Normalize a South African phone number to +27 format.
@@ -77,6 +80,16 @@ export const shopCreateSchema = z.object({
           "Enter a valid SA WhatsApp number (e.g. 071 234 5678)"
         )
     ),
+
+  city: z
+    .string()
+    .trim()
+    .min(2, "Enter your city or town")
+    .max(100, "City name too long"),
+
+  province: z.enum(SA_PROVINCES, {
+    message: "Select your province",
+  }),
 });
 
 /**

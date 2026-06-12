@@ -44,6 +44,8 @@ export async function createShopOnboardingAction(
       name: (formData.get("name") as string) ?? "",
       whatsappNumber: (formData.get("whatsappNumber") as string) ?? "",
       description: "",
+      city: (formData.get("city") as string) ?? "",
+      province: (formData.get("province") as string) ?? "",
     };
 
     const parsed = shopCreateSchema.safeParse(rawInput);

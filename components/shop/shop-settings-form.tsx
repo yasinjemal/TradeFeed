@@ -24,36 +24,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   SA_PROVINCES,
+  CITY_PROVINCE_MAP,
   DAYS_OF_WEEK,
   DAY_LABELS,
   type BusinessHours,
   type DayKey,
 } from "@/lib/validation/shop-settings";
-
-/* ── SA Cities → Province auto-map ───────────────────────── */
-const CITY_PROVINCE_MAP: Record<string, string> = {
-  "Johannesburg": "Gauteng",
-  "Pretoria": "Gauteng",
-  "Sandton": "Gauteng",
-  "Soweto": "Gauteng",
-  "Midrand": "Gauteng",
-  "Centurion": "Gauteng",
-  "Cape Town": "Western Cape",
-  "Stellenbosch": "Western Cape",
-  "Paarl": "Western Cape",
-  "Durban": "KwaZulu-Natal",
-  "Pietermaritzburg": "KwaZulu-Natal",
-  "Port Elizabeth": "Eastern Cape",
-  "East London": "Eastern Cape",
-  "Queenstown": "Eastern Cape",
-  "Bloemfontein": "Free State",
-  "Welkom": "Free State",
-  "Nelspruit": "Mpumalanga",
-  "Polokwane": "Limpopo",
-  "Kimberley": "Northern Cape",
-  "Rustenburg": "North West",
-  "Mahikeng": "North West",
-};
 
 const SA_CITIES = Object.keys(CITY_PROVINCE_MAP);
 
