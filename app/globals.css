@@ -837,6 +837,26 @@ h4, h5, h6 {
   transform-style: preserve-3d;
 }
 
+/* ── Continuous seller name marquee ─────────────────── */
+@keyframes tf-marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.tf-marquee-track {
+  animation: tf-marquee-scroll var(--tf-marquee-duration, 40s) linear infinite;
+  will-change: transform;
+}
+@media (hover: hover) {
+  .tf-marquee-track:hover {
+    animation-play-state: paused;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tf-marquee-track {
+    animation: none;
+  }
+}
+
 /* Horizontal rail edge fades — a visual "there's more" cue */
 .tf-rail {
   -webkit-mask-image: linear-gradient(
