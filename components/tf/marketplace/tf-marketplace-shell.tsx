@@ -7,6 +7,7 @@ import { BadgeCheck, Search, SearchX, SlidersHorizontal, ArrowRight } from "luci
 
 import { cn } from "@/lib/utils";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
+import { SouthAfricanFlag } from "@/components/ui/south-african-flag";
 import { TfButton } from "@/components/tf/button";
 import { TfEmptyState } from "@/components/tf/empty-state";
 import { TfProductCard } from "@/components/tf/product-card";
@@ -187,23 +188,16 @@ export function TfMarketplaceShell({
       <div style={{ backgroundColor: "#071a0f" }}>
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2 sm:px-6">
           <div className="flex items-center gap-5 overflow-hidden">
-            <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-emerald-400/90">
-              <svg viewBox="0 0 20 14" width="18" height="13" aria-hidden="true" className="shrink-0">
-                <rect width="20" height="14" fill="#007A4D" />
-                <polygon points="0,0 7,7 0,14" fill="#FFB612" />
-                <polygon points="0,0 5,7 0,14" fill="#007A4D" />
-                <polygon points="1,0 6,7 1,14" fill="white" />
-                <rect y="5" width="20" height="4" fill="white" />
-                <rect y="5.7" width="20" height="2.6" fill="#DE3831" />
-              </svg>
+            <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-emerald-200">
+              <SouthAfricanFlag className="h-[13px] w-[19.5px] shrink-0" />
               South Africa
             </span>
-            <span className="hidden items-center gap-1.5 text-[11px] text-emerald-400/65 sm:flex">
+            <span className="hidden items-center gap-1.5 text-[11px] text-emerald-200/80 sm:flex">
               <BadgeCheck aria-hidden="true" className="size-3 shrink-0 text-emerald-400/80" />
               Verified sellers
             </span>
-            <span className="hidden text-[11px] text-emerald-400/50 md:block">No platform fees</span>
-            <span className="hidden text-[11px] text-emerald-400/50 lg:block">Orders direct via WhatsApp</span>
+            <span className="hidden text-[11px] text-emerald-100/65 md:block">No platform fees</span>
+            <span className="hidden text-[11px] text-emerald-100/65 lg:block">Orders direct via WhatsApp</span>
           </div>
           <div className="flex shrink-0 items-center gap-3 text-[11px]">
             <Link href="/sign-in" className="hidden text-emerald-400/70 transition-colors hover:text-emerald-300 sm:block">
