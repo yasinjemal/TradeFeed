@@ -18,12 +18,14 @@ import { DeleteShopButton } from "@/components/shop/delete-shop-button";
 import { SettingsSidebar } from "@/components/shop/settings-sidebar";
 import { ThemePicker } from "@/components/shop/theme-picker";
 import { CodToggle } from "@/components/shop/cod-toggle";
+import { ShopStatusCard } from "@/components/shop/shop-status-card";
 import { CustomDomainSettings } from "@/components/shop/custom-domain-settings";
 import { VerificationRequestCard } from "@/components/shop/verification-request-card";
 import { getVerificationForShop } from "@/lib/db/verification";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { TfFonts } from "@/components/tf/tf-fonts";
 
 interface SettingsPageProps {
   params: Promise<{ slug: string }>;
@@ -65,7 +67,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
     { key: "aboutText", label: "About story", icon: "💬", done: !!shop.aboutText },
     { key: "address", label: "Address", icon: "🏠", done: !!shop.address },
     { key: "city", label: "City", icon: "🏙️", done: !!shop.city },
-    { key: "map", label: "Map pin", icon: "📍", done: shop.latitude !== null },
+    { key: "map", label: "Map pin", icon: "📍", done: shop.latitude !== null && shop.longitude !== null },
     { key: "hours", label: "Business hours", icon: "🕐", done: !!shop.businessHours },
     { key: "social", label: "Social links", icon: "🔗", done: !!shop.instagram || !!shop.facebook || !!shop.tiktok },
   ];
@@ -74,7 +76,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
   const percentage = Math.round((completed / total) * 100);
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="mx-auto max-w-6xl">
+      <TfFonts />
       {/* ── Hero Header ──────────────────────────────────── */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-950 via-stone-900 to-emerald-950 p-8 sm:p-10">
         {/* Animated decorative orbs */}
@@ -156,7 +159,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <span className="hidden sm:inline">Preview</span>
-            <svg className="w-3 h-3 transition-transform group-hover:transtone-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+            <svg className="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
             </svg>
           </Link>
@@ -164,8 +167,15 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
       </div>
 
       {/* ── Content Grid ────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8 items-start mt-8">
-        <SettingsSidebar className="hidden lg:block sticky top-24" />
+      <div className="mt-6">
+        <ShopStatusCard shopSlug={slug} shopName={shop.name} initialIsActive={shop.isActive} />
+      </div>
+
+      <div className="grid grid-cols-1 items-start gap-8 mt-8 lg:grid-cols-[220px_1fr]">
+        <SettingsSidebar
+          className="hidden lg:block sticky top-24"
+          showVerification={FEATURE_FLAGS.TRUST_SYSTEM}
+        />
         <div className="space-y-6 min-w-0">
           {/* ── Form ───────────────────────────────────── */}
           <ShopSettingsForm

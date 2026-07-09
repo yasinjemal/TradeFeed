@@ -33,16 +33,6 @@ import {
 
 const SA_CITIES = Object.keys(CITY_PROVINCE_MAP);
 
-/* ── Map Presets for popular wholesale areas ──────────────── */
-const MAP_PRESETS = [
-  { label: "Jeppe St, JHB", lat: -26.2023, lng: 28.0436, emoji: "🏪" },
-  { label: "Fashion District", lat: -26.2050, lng: 28.0400, emoji: "👗" },
-  { label: "Oriental Plaza", lat: -26.2060, lng: 28.0255, emoji: "🏬" },
-  { label: "Cape Town CBD", lat: -33.9249, lng: 18.4241, emoji: "🌊" },
-  { label: "Durban CBD", lat: -29.8587, lng: 31.0218, emoji: "☀️" },
-  { label: "Pretoria CBD", lat: -25.7479, lng: 28.2293, emoji: "🏛️" },
-] as const;
-
 /* ── Business hour presets ────────────────────────────────── */
 const HOUR_PRESETS = [
   {
@@ -153,6 +143,7 @@ export function ShopSettingsForm({
     onClientUploadComplete: (results) => {
       if (!results?.[0]) return;
       setLogoUrl(results[0].serverData.url);
+      markDirty();
       setLogoUploading(false);
       toast.success("Profile picture uploaded!");
     },
@@ -166,6 +157,7 @@ export function ShopSettingsForm({
     onClientUploadComplete: (results) => {
       if (!results?.[0]) return;
       setBannerUrl(results[0].serverData.url);
+      markDirty();
       setBannerUploading(false);
       toast.success("Banner image uploaded!");
     },
@@ -208,18 +200,8 @@ export function ShopSettingsForm({
   const updateHour = (day: DayKey, value: string) => {
     setHours((prev) => ({ ...prev, [day]: value }));
     setActivePreset(null);
+    markDirty();
   };
-
-  const selectCity = useCallback((city: string) => {
-    setCityValue(city);
-    const province = CITY_PROVINCE_MAP[city];
-    if (province) setProvinceValue(province);
-    // Update actual inputs
-    const cityInput = document.getElementById("city") as HTMLInputElement | null;
-    const provInput = document.getElementById("province") as HTMLSelectElement | null;
-    if (cityInput) cityInput.value = city;
-    if (provInput && province) provInput.value = province;
-  }, []);
 
   const detectGPS = () => {
     if (!navigator.geolocation) {
@@ -234,6 +216,7 @@ export function ShopSettingsForm({
       (pos) => {
         setLat(pos.coords.latitude.toFixed(6));
         setLng(pos.coords.longitude.toFixed(6));
+        markDirty();
         setGpsStatus("success");
         setTimeout(() => setGpsStatus("idle"), 2000);
       },
@@ -242,7 +225,7 @@ export function ShopSettingsForm({
           err.code === 1
             ? "Permission denied \u2014 allow location in your browser settings"
             : err.code === 2
-              ? "Location unavailable \u2014 try a map preset below"
+              ? "Location unavailable \u2014 enter the coordinates from your map instead"
               : "Request timed out \u2014 check your connection and try again";
         setGpsError(msg);
         setGpsStatus("error");
@@ -250,11 +233,6 @@ export function ShopSettingsForm({
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
-  };
-
-  const selectMapPreset = (preset: { lat: number; lng: number }, index: number) => {
-    setLat(preset.lat.toString());
-    setLng(preset.lng.toString());
   };
 
   // ── Section component (always visible, scroll-targetable) ──
@@ -277,7 +255,7 @@ export function ShopSettingsForm({
   }) => {
     return (
       <section id={`section-${id}`} className="scroll-mt-28">
-        <div className="relative rounded-2xl border border-slate-200/50 bg-gradient-to-br from-white via-white to-slate-50/80 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.03),0_4px_16px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-500 group/card">
+        <div className="relative overflow-hidden rounded-2xl border border-tf-stone-200 bg-tf-raised shadow-tf-sm transition-shadow duration-300 hover:shadow-tf-md group/card">
           {/* Left accent stripe */}
           <div className={`absolute top-0 left-0 w-[3px] h-full ${iconBg} opacity-90 rounded-l-2xl`} />
 
@@ -288,10 +266,10 @@ export function ShopSettingsForm({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5">
-                <h2 className="font-semibold text-slate-800 text-[17px] tracking-tight">{title}</h2>
+                <h2 className="text-[17px] font-semibold tracking-tight text-tf-ink">{title}</h2>
                 {badge}
               </div>
-              <p className="text-[13px] text-slate-400 mt-0.5 tracking-wide">{subtitle}</p>
+              <p className="mt-0.5 text-[13px] tracking-wide text-tf-stone-500">{subtitle}</p>
             </div>
           </div>
 
@@ -305,7 +283,7 @@ export function ShopSettingsForm({
   };
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-6">
+    <form ref={formRef} action={formAction} className="space-y-6" onInput={markDirty}>
       {/* Hidden fields for serialized data */}
       <input type="hidden" name="businessHours" value={JSON.stringify(hours)} />
       <input type="hidden" name="latitude" value={lat} />
@@ -413,7 +391,7 @@ export function ShopSettingsForm({
                     {/* Remove overlay */}
                     <button
                       type="button"
-                      onClick={() => setLogoUrl("")}
+                      onClick={() => { setLogoUrl(""); markDirty(); }}
                       className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                       title="Remove logo"
                     >
@@ -486,7 +464,7 @@ export function ShopSettingsForm({
                   {/* Remove overlay */}
                   <button
                     type="button"
-                    onClick={() => setBannerUrl("")}
+                    onClick={() => { setBannerUrl(""); markDirty(); }}
                     className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all shadow-lg"
                     title="Remove banner"
                   >
@@ -694,32 +672,20 @@ export function ShopSettingsForm({
                 id="city"
                 name="city"
                 value={cityValue}
+                list="sa-city-options"
                 onChange={(e) => {
                   setCityValue(e.target.value);
                   const match = CITY_PROVINCE_MAP[e.target.value];
                   if (match) setProvinceValue(match);
                 }}
-                placeholder="e.g. Johannesburg"
+                placeholder="e.g. Komani or Johannesburg"
                 className="rounded-xl h-12 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
                 disabled={isPending}
               />
-              {/* Quick city select */}
-              <div className="flex flex-wrap gap-1">
-                {SA_CITIES.slice(0, 8).map((city) => (
-                  <button
-                    key={city}
-                    type="button"
-                    onClick={() => selectCity(city)}
-                    className={`text-[11px] px-2.5 py-1 rounded-full transition-all ${
-                      cityValue === city
-                        ? "bg-blue-100 text-blue-700 border border-blue-200 font-medium"
-                        : "bg-slate-50 text-slate-500 border border-slate-100 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
-                    }`}
-                  >
-                    {city}
-                  </button>
-                ))}
-              </div>
+              <datalist id="sa-city-options">
+                {SA_CITIES.map((city) => <option key={city} value={city} />)}
+              </datalist>
+              <p className="text-[11px] text-slate-400">Start typing to choose a recognised city, or enter your town and select its province.</p>
             </div>
 
             <div className="space-y-2">
@@ -792,26 +758,10 @@ export function ShopSettingsForm({
               </button>
             </div>
 
-            {/* Wholesale area presets */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {MAP_PRESETS.map((preset, i) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  onClick={() => selectMapPreset(preset, i)}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left text-xs transition-all ${
-                    lat === preset.lat.toString() && lng === preset.lng.toString()
-                      ? "border-blue-400 bg-blue-50 text-blue-700 shadow-sm shadow-blue-100"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:bg-blue-50/50"
-                  }`}
-                >
-                  <span className="text-base">{preset.emoji}</span>
-                  <span className="font-medium truncate">{preset.label}</span>
-                </button>
-              ))}
-            </div>
+            <p className="rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2.5 text-xs leading-relaxed text-blue-800">
+              Use your device location while you are at the shop, or enter the coordinates from Google Maps. The map pin should match the address buyers see.
+            </p>
 
-            {/* Lat/Lng inputs (compact) */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label htmlFor="lat-input" className="text-xs text-slate-400">Latitude</Label>
@@ -820,7 +770,7 @@ export function ShopSettingsForm({
                   type="number"
                   step="any"
                   value={lat}
-                  onChange={(e) => setLat(e.target.value)}
+                  onChange={(e) => { setLat(e.target.value); markDirty(); }}
                   placeholder="-26.2023"
                   className="rounded-xl text-sm h-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20"
                   disabled={isPending}
@@ -833,7 +783,7 @@ export function ShopSettingsForm({
                   type="number"
                   step="any"
                   value={lng}
-                  onChange={(e) => setLng(e.target.value)}
+                  onChange={(e) => { setLng(e.target.value); markDirty(); }}
                   placeholder="28.0436"
                   className="rounded-xl text-sm h-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20"
                   disabled={isPending}
@@ -899,6 +849,7 @@ export function ShopSettingsForm({
                 onClick={() => {
                   setHours(preset.hours);
                   setActivePreset(i);
+                  markDirty();
                 }}
                 className={`flex flex-col items-start gap-1 px-4 py-3 rounded-xl border text-left transition-all ${
                   activePreset === i
@@ -1095,17 +1046,17 @@ export function ShopSettingsForm({
 
       {/* ── Floating Save Bar ────────────────────────────── */}
       <div className="sticky bottom-6 z-40">
-        <div className="bg-white/95 backdrop-blur-2xl rounded-2xl border border-slate-200/50 shadow-2xl shadow-slate-900/[0.08] px-6 py-4 flex items-center justify-between gap-4 ring-1 ring-slate-900/[0.03]">
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-tf-stone-200 bg-tf-raised/95 px-6 py-4 shadow-tf-md backdrop-blur-2xl">
           <div className="flex items-center gap-3 text-sm min-w-0">
             {isDirty ? (
               <>
                 <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
-                <span className="truncate font-medium text-amber-600">Unsaved changes</span>
+                <span className="truncate font-medium text-tf-accent-ink">Unsaved changes</span>
               </>
             ) : (
               <>
                 <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
-                <span className="truncate font-medium text-slate-400">All changes saved</span>
+                <span className="truncate font-medium text-tf-stone-500">All changes saved</span>
               </>
             )}
           </div>

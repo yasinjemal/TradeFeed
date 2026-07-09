@@ -186,3 +186,32 @@ export async function toggleCodAction(
     return { success: false, error: "Something went wrong. Please try again." };
   }
 }
+
+/**
+ * Pause or publish a shop without deleting its catalogue. Paused shops are
+ * excluded from public catalogue and marketplace queries via `isActive`.
+ */
+export async function setShopVisibilityAction(
+  shopSlug: string,
+  isActive: boolean,
+): Promise<ActionResult> {
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access || !hasPermission(access.role, "settings:manage")) {
+      return { success: false, error: "You don't have permission to change store status." };
+    }
+
+    const { db } = await import("@/lib/db");
+    await db.shop.update({ where: { id: access.shopId }, data: { isActive } });
+
+    revalidatePath(`/dashboard/${shopSlug}`);
+    revalidatePath(`/dashboard/${shopSlug}/settings`);
+    revalidatePath(`/catalog/${shopSlug}`);
+    revalidatePath("/marketplace");
+
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("[setShopVisibilityAction] Error:", error);
+    return { success: false, error: "Could not update store status. Please try again." };
+  }
+}
