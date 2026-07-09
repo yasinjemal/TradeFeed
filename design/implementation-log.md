@@ -105,6 +105,29 @@ session; the working tree now mixes both. Review the diff as one unit before com
 - Verified: tsc + eslint clean. WhatsApp remains the primary promise; cart is the quieter
   second path, consistent with D-series decisions.
 
+## 2026-07-09 — Session 4c: add-product flow rebuilt photo-first (user request)
+
+- [create-product-form.tsx](../components/product/create-product-form.tsx) rewritten (v3):
+  the AI path is now the default path — **1) photo → "Write my listing for me" → 2) name &
+  price → Publish**, with everything else (description, categories, option labels, wholesale,
+  visibility) behind a single "More options" fold. Numbered steps, one emerald accent, all
+  emoji-as-UI replaced with lucide icons, sticky Publish bar above the mobile tab bar.
+- Fixed a shipped rendering bug: the dropzone showed the literal string `📷`
+  (double-escaped 📷) — now a Camera icon.
+- Behavior improvements without contract changes: the "stock 0 = sold out" warning only
+  appears when stock is actually 0 (was permanent noise); the 16-emoji tile grid became
+  quiet quick-pick text chips that appear only while the name is empty; the violet/emerald
+  dual theming for non-AI plans collapsed into one emerald system with a quiet credits badge;
+  upgrade prompts restyled to calm amber cards ("keep typing yourself, free forever" honesty).
+- Success screen restyled: check-pop confirmation, first-product WhatsApp share promoted to
+  the top ("first order 3× sooner"), photo upload, copyable catalogue link, add-another/edit.
+- Preserved contracts: `createProductAction` FormData field names, `/api/ai/generate-product`
+  request/response incl. PLAN_REQUIRED / CREDITS_EXHAUSTED gates and credit counts,
+  `GlobalCategoryPicker`, `ImageUpload` auto-upload of the AI photo, variant-label
+  auto-suggestion. `?wizard=true` and `?quick=true` variants untouched.
+- Verified: tsc + eslint clean. Route is auth-gated so not live-driven here — create one test
+  product (AI path and manual path) after deploy.
+
 ### Not done yet (next session, in roadmap order)
 1. Emoji→illustration/lucide swap inside dashboard nudge cards.
 2. `TfStat` + `TfTable` per concepts `b9a4466d`/`03acdfdf`.
