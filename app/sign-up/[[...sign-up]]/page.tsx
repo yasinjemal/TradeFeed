@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
+import { TfFonts } from "@/components/tf/tf-fonts";
 
 interface SignUpPageProps {
   searchParams: Promise<{ ref?: string }>;
@@ -40,9 +41,10 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
   }
 
   return (
-    <main className="flex min-h-screen flex-col lg:flex-row">
+    <main className="flex min-h-screen flex-col bg-tf-surface lg:flex-row">
+      <TfFonts />
       {/* ── Left panel — Value proposition ── */}
-      <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 px-8 py-10 text-white lg:w-1/2 lg:px-16 lg:py-16">
+      <div className="relative flex flex-col justify-between overflow-hidden bg-[#071a0f] px-8 py-10 text-white lg:w-1/2 lg:px-16 lg:py-16">
         {/* Background photo */}
         <Image
           src="/img/signup_panel.png"
@@ -129,7 +131,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
       </div>
 
       {/* ── Right panel — Clerk Sign Up form ── */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-gray-50 px-6 py-10 lg:px-12">
+      <div className="flex flex-1 flex-col items-center justify-center bg-tf-surface px-6 py-10 lg:px-12">
         {/* Mobile-only logo (hidden on desktop since left panel has it) */}
         <div className="mb-6 lg:hidden">
           <TradeFeedLogo size="md" variant="dark" />
@@ -137,10 +139,10 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
 
         <div className="w-full max-w-md">
           <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+            <h2 className="font-tf-display text-2xl font-semibold tracking-tight text-tf-ink">
               Create your account
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-tf-stone-600">
               Get your first AI listing live in under 5 minutes
             </p>
           </div>
@@ -157,11 +159,11 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
             By signing up, you agree to our{" "}
-            <a href="/terms" className="underline hover:text-gray-900">
+            <a href="/terms" className="underline hover:text-tf-ink">
               Terms
             </a>{" "}
             and{" "}
-            <a href="/privacy" className="underline hover:text-gray-900">
+            <a href="/privacy" className="underline hover:text-tf-ink">
               Privacy Policy
             </a>
           </p>

@@ -13,6 +13,9 @@ import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { getOrderByNumber } from "@/lib/db/tracking";
 import { OrderTimeline } from "@/components/tracking/order-timeline";
 import { TrackingSearch } from "@/components/tracking/tracking-search";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { TfOrderTracking } from "@/components/tf/buyer/tf-order-tracking";
+import { TfTrackingNotFound } from "@/components/tf/buyer/tf-tracking-landing";
 
 interface TrackingPageProps {
   params: Promise<{ orderNumber: string }>;
@@ -55,6 +58,8 @@ export default async function TrackingPage({ params, searchParams }: TrackingPag
   const order = await getOrderByNumber(decoded);
 
   if (!order) {
+    if (FEATURE_FLAGS.UI_REDESIGN) return <TfTrackingNotFound orderNumber={decoded} />;
+
     return (
       <div className="min-h-screen bg-stone-950 text-stone-100">
         {/* Header */}
@@ -148,6 +153,10 @@ export default async function TrackingPage({ params, searchParams }: TrackingPag
   };
 
   const currentStatus = statusConfig[order.status] ?? statusConfig["PENDING"]!;
+
+  if (FEATURE_FLAGS.UI_REDESIGN) {
+    return <TfOrderTracking order={order} payment={payment} />;
+  }
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100">

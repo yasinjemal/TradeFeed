@@ -9,6 +9,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { TrackingSearch } from "@/components/tracking/tracking-search";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { TfTrackingLanding } from "@/components/tf/buyer/tf-tracking-landing";
 
 export const metadata: Metadata = {
   title: "Track Your Order | TradeFeed",
@@ -17,6 +19,8 @@ export const metadata: Metadata = {
 
 export default async function TrackingLandingPage() {
   const t = await getTranslations("tracking");
+  if (FEATURE_FLAGS.UI_REDESIGN) return <TfTrackingLanding />;
+
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100">
       {/* Header */}

@@ -26,7 +26,4 @@ export interface ApiSuccessResponse<T> {
  * Format price from cents to ZAR display string.
  * e.g., 29999 → "R 299.99"
  */
-export function formatZAR(priceInCents: number): string {
-  const rands = priceInCents / 100;
-  return `R ${rands.toFixed(2)}`;
-}
+export { formatZARCents as formatZAR } from "@/lib/currency";

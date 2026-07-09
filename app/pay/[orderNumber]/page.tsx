@@ -12,6 +12,8 @@ import Link from "next/link";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { getOrderByNumber } from "@/lib/db/tracking";
 import { buildOrderPaymentUrl } from "@/lib/payfast";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { TfPaymentPage } from "@/components/tf/buyer/tf-payment-page";
 
 interface PayPageProps {
   params: Promise<{ orderNumber: string }>;
@@ -55,6 +57,10 @@ export default async function PayPage({ params, searchParams }: PayPageProps) {
           buyerName: order.buyerName ?? undefined,
         })
       : null;
+
+  if (FEATURE_FLAGS.UI_REDESIGN) {
+    return <TfPaymentPage order={order} paymentUrl={paymentUrl} status={status} isExpired={isExpired} />;
+  }
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100">

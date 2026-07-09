@@ -91,7 +91,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
       <TfLandingHeader>
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link href="/" aria-label="TradeFeed home" className="shrink-0">
-            <TradeFeedLogo size="sm" />
+            <TradeFeedLogo size="sm" variant="dark" />
           </Link>
           <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-tf-stone-600 md:flex">
             <Link href="#how-it-works" className="tf-navlink hover:text-tf-ink">How it works</Link>
