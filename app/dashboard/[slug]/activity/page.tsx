@@ -51,8 +51,8 @@ export default async function ActivityPage({ params, searchParams }: ActivityPag
     <div className="max-w-4xl mx-auto">
       {/* ── Header ──────────────────────────────────── */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Activity Log</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-bold text-stone-900 tracking-tight">Activity Log</h1>
+        <p className="text-sm text-stone-500 mt-1">
           Track all changes made to your shop by team members.
         </p>
       </div>

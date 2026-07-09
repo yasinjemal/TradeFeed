@@ -130,11 +130,11 @@ export function CatalogQrShare({ catalogPath, shopName }: CatalogQrShareProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900">Print-ready QR Code</h3>
+              <h3 className="font-bold text-stone-900">Print-ready QR Code</h3>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100"
                 aria-label="Close"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -192,14 +192,14 @@ export function CatalogQrShare({ catalogPath, shopName }: CatalogQrShareProps) {
 
             {/* URL + copy */}
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-slate-600 truncate flex-1">{fullUrl}</span>
+              <span className="font-mono text-xs text-stone-600 truncate flex-1">{fullUrl}</span>
               <CopyButton text={fullUrl} />
             </div>
 
             {/* Download button */}
             <button
               onClick={downloadPng}
-              className="block w-full py-2.5 rounded-xl text-center text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+              className="block w-full py-2.5 rounded-xl text-center text-sm font-semibold bg-stone-900 text-white hover:bg-stone-800 transition-colors"
             >
               Download A5 Print PNG (300 DPI)
             </button>

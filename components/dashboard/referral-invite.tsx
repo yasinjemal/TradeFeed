@@ -49,20 +49,20 @@ export function ReferralInvite({ referralCode, shopName, shopSlug }: ReferralInv
           </svg>
         </div>
         <div>
-          <h3 className="font-semibold text-slate-900">Invite Sellers</h3>
-          <p className="text-xs text-slate-500">Share this link in your WhatsApp groups</p>
+          <h3 className="font-semibold text-stone-900">Invite Sellers</h3>
+          <p className="text-xs text-stone-500">Share this link in your WhatsApp groups</p>
         </div>
       </div>
 
       {/* Invite URL */}
       <div className="flex items-center gap-2">
-        <div className="flex-1 bg-white rounded-xl px-4 py-2.5 border border-slate-200 font-mono text-sm text-slate-700 truncate">
+        <div className="flex-1 bg-white rounded-xl px-4 py-2.5 border border-stone-200 font-mono text-sm text-stone-700 truncate">
           {inviteUrl}
         </div>
         <button
           type="button"
           onClick={copyLink}
-          className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors flex-shrink-0"
+          className="px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors flex-shrink-0"
         >
           {copied ? (
             <span className="text-emerald-600">Copied! ✓</span>

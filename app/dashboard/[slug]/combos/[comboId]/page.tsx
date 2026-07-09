@@ -44,7 +44,7 @@ export default async function EditComboPage({ params }: EditComboPageProps) {
           href={`/dashboard/${slug}/combos`}
           className="text-sm text-stone-500 hover:text-stone-800 transition-colors inline-flex items-center gap-1 group"
         >
-          <span className="group-hover:-translate-x-0.5 transition-transform">←</span> Combos
+          <span className="group-hover:-transtone-x-0.5 transition-transform">←</span> Combos
         </Link>
         <DeleteComboButton shopSlug={slug} comboId={comboId} />
       </div>

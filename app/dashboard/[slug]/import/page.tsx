@@ -50,8 +50,8 @@ export default async function CatalogueImportPage({ params, searchParams }: Impo
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Import your catalogue</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-bold text-stone-900">Import your catalogue</h1>
+        <p className="text-sm text-stone-500 mt-1">
           Bring your whole WhatsApp catalogue into TradeFeed in one session — no retyping.
         </p>
       </div>
@@ -83,8 +83,8 @@ export default async function CatalogueImportPage({ params, searchParams }: Impo
             className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-5 hover:border-emerald-400 transition-colors"
           >
             <div className="text-2xl mb-2">📸</div>
-            <h2 className="text-sm font-bold text-slate-900">Photos</h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <h2 className="text-sm font-bold text-stone-900">Photos</h2>
+            <p className="text-xs text-stone-500 mt-1">
               Select up to 50 product photos. AI writes every listing.
             </p>
             <span className="inline-block mt-3 text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 rounded-full px-2 py-0.5">
@@ -93,13 +93,13 @@ export default async function CatalogueImportPage({ params, searchParams }: Impo
           </Link>
 
           {/* Paste — staged (Flow B) */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 opacity-60">
+          <div className="rounded-2xl border border-stone-200 bg-white p-5 opacity-60">
             <div className="text-2xl mb-2">💬</div>
-            <h2 className="text-sm font-bold text-slate-900">Paste from WhatsApp</h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <h2 className="text-sm font-bold text-stone-900">Paste from WhatsApp</h2>
+            <p className="text-xs text-stone-500 mt-1">
               Paste your captions — AI splits them into listings.
             </p>
-            <span className="inline-block mt-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 rounded-full px-2 py-0.5">
+            <span className="inline-block mt-3 text-[10px] font-bold uppercase tracking-wider text-stone-500 bg-stone-100 rounded-full px-2 py-0.5">
               Coming soon
             </span>
           </div>
@@ -107,11 +107,11 @@ export default async function CatalogueImportPage({ params, searchParams }: Impo
           {/* Spreadsheet — existing CSV import */}
           <Link
             href={`/dashboard/${slug}/products/import`}
-            className="rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-300 transition-colors"
+            className="rounded-2xl border border-stone-200 bg-white p-5 hover:border-emerald-300 transition-colors"
           >
             <div className="text-2xl mb-2">📊</div>
-            <h2 className="text-sm font-bold text-slate-900">Spreadsheet</h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <h2 className="text-sm font-bold text-stone-900">Spreadsheet</h2>
+            <p className="text-xs text-stone-500 mt-1">
               Upload a CSV with your products and stock.
             </p>
           </Link>

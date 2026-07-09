@@ -48,7 +48,7 @@ export default async function CombosPage({ params }: CombosPageProps) {
         </div>
         <Link
           href={`/dashboard/${slug}/combos/new`}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-300 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-300 hover:-transtone-y-0.5 active:transtone-y-0 transition-all duration-200"
         >
           + New Combo
         </Link>

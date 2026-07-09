@@ -77,7 +77,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           </div>
           <Link
             href={`/dashboard/${slug}/billing`}
-            className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition-all shadow-md shadow-emerald-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+            className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition-all shadow-md shadow-emerald-200 hover:shadow-lg hover:-transtone-y-0.5 active:transtone-y-0"
           >
             ⚡ Go Pro
           </Link>
@@ -113,7 +113,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           </Link>
           <Link
             href={`/dashboard/${slug}/products/new`}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-300 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-300 hover:-transtone-y-0.5 active:transtone-y-0 transition-all duration-200"
           >
             + Add Product
           </Link>
@@ -184,7 +184,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href={`/dashboard/${slug}/products/new?wizard=true`}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 hover:shadow-xl hover:-transtone-y-0.5 active:transtone-y-0 transition-all"
               >
                 🚀 Guided Setup
               </Link>
@@ -241,7 +241,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
                 href={`/dashboard/${slug}/products/${product.id}`}
                 className="group block"
               >
-                <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden transition-all duration-300 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-50 hover:-translate-y-0.5 h-full">
+                <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden transition-all duration-300 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-50 hover:-transtone-y-0.5 h-full">
                   {/* Image */}
                   {product.images.length > 0 ? (
                     <div className="aspect-square bg-stone-100 overflow-hidden relative">

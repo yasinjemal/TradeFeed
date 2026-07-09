@@ -55,7 +55,7 @@ export default async function NewProductPage({ params, searchParams }: NewProduc
           href={`/dashboard/${slug}/products`}
           className="text-sm text-stone-500 hover:text-stone-800 transition-colors inline-flex items-center gap-1 group"
         >
-          <span className="group-hover:-translate-x-0.5 transition-transform">←</span> Products
+          <span className="group-hover:-transtone-x-0.5 transition-transform">←</span> Products
         </Link>
         <UpgradeGate
           current={productLimit.current}
@@ -77,7 +77,7 @@ export default async function NewProductPage({ params, searchParams }: NewProduc
         href={`/dashboard/${slug}/products`}
         className="text-sm text-stone-500 hover:text-stone-800 transition-colors inline-flex items-center gap-1 group"
       >
-        <span className="group-hover:-translate-x-0.5 transition-transform">
+        <span className="group-hover:-transtone-x-0.5 transition-transform">
           ←
         </span>{" "}
         Products

@@ -59,9 +59,9 @@ export default async function DashboardLayout({
   const canManageCatalog = hasPermission(access.role, "catalog:manage");
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#faf8f4]">
       {/* ── Top Nav ─────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-[#faf8f4]/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           {/* Brand + Shop + Mobile Menu */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -69,7 +69,7 @@ export default async function DashboardLayout({
             <button
               type="button"
               id="mobile-nav-trigger"
-              className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl hover:bg-slate-100 transition-colors text-slate-600"
+              className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl hover:bg-stone-100 transition-colors text-stone-600"
               aria-label="Open navigation menu"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -85,7 +85,7 @@ export default async function DashboardLayout({
             </Link>
 
             <div className="hidden sm:flex items-center gap-2 ml-1">
-              <svg className="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="w-4 h-4 text-stone-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
               <ShopSwitcher
@@ -127,7 +127,7 @@ export default async function DashboardLayout({
                 Admin
               </Link>
             )}
-            <div className="pl-3 border-l border-slate-200">
+            <div className="pl-3 border-l border-stone-200">
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{
@@ -153,8 +153,8 @@ export default async function DashboardLayout({
         className="fixed bottom-6 left-4 z-50 md:bottom-6 md:left-6
           group flex items-center gap-2
           h-11 px-4 rounded-full
-          bg-white border border-slate-200 shadow-lg shadow-slate-200/50
-          text-slate-600 hover:text-emerald-600 hover:border-emerald-200 hover:shadow-emerald-100/50
+          bg-white border border-stone-200 shadow-lg shadow-stone-200/50
+          text-stone-600 hover:text-emerald-600 hover:border-emerald-200 hover:shadow-emerald-100/50
           transition-all duration-200"
         aria-label="Get help"
       >
@@ -170,11 +170,11 @@ export default async function DashboardLayout({
         href={`/dashboard/${slug}/products/new`}
         className="fixed bottom-[4.5rem] right-4 z-50 md:hidden
           w-14 h-14 rounded-full
-          bg-gradient-to-br from-emerald-500 to-emerald-600
-          text-white shadow-lg shadow-emerald-300/50
+          bg-emerald-700 hover:bg-emerald-800
+          text-white shadow-lg shadow-emerald-700/25
           flex items-center justify-center
-          hover:shadow-xl hover:scale-105
-          active:scale-95 transition-all duration-200"
+          hover:shadow-xl motion-safe:hover:scale-105
+          motion-safe:active:scale-95 transition-all duration-200"
         aria-label="Add product"
       >
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">

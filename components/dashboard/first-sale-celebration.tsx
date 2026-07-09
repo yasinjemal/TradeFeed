@@ -67,7 +67,7 @@ export function FirstSaleCelebration({
 
           {/* Modal */}
           <motion.div
-            className="relative bg-gradient-to-b from-slate-900 to-slate-950 rounded-3xl p-8 sm:p-10 max-w-md w-full border border-emerald-500/30 shadow-2xl shadow-emerald-900/30 text-center"
+            className="relative bg-gradient-to-b from-stone-900 to-stone-950 rounded-3xl p-8 sm:p-10 max-w-md w-full border border-emerald-500/30 shadow-2xl shadow-emerald-900/30 text-center"
             initial={{ scale: 0.8, y: 40 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
@@ -83,7 +83,7 @@ export function FirstSaleCelebration({
               {shopName} just got its first order!
             </p>
 
-            <p className="text-slate-400 mt-4 text-sm leading-relaxed">
+            <p className="text-stone-400 mt-4 text-sm leading-relaxed">
               You&apos;re officially selling on TradeFeed. Want to grow even
               faster? Get <span className="text-emerald-300 font-semibold">50% off Starter</span> for
               3 months.
@@ -99,7 +99,7 @@ export function FirstSaleCelebration({
               </Link>
               <button
                 onClick={dismiss}
-                className="block w-full rounded-xl bg-slate-800 text-slate-300 font-medium py-3 hover:bg-slate-700 transition-colors"
+                className="block w-full rounded-xl bg-stone-800 text-stone-300 font-medium py-3 hover:bg-stone-700 transition-colors"
               >
                 Maybe Later
               </button>

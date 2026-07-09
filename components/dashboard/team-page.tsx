@@ -245,17 +245,17 @@ export function TeamPage({
           ════════════════════════════════════════════ */}
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-semibold text-stone-900 tracking-tight">
             Team
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-stone-500 mt-1">
             Manage access and permissions for your shop
           </p>
         </div>
         {isOwner && (
           <button
             onClick={openInviteFlow}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-stone-900 text-white text-sm font-medium rounded-lg hover:bg-stone-800 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-900/20"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -268,9 +268,9 @@ export function TeamPage({
       {/* ════════════════════════════════════════════
           2. PLAN & USAGE BAR — Revenue Driver
           ════════════════════════════════════════════ */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 bg-slate-50/80 rounded-lg mb-6">
-        <span className="text-sm text-slate-500">Team Members</span>
-        <span className="text-sm font-semibold text-slate-900 tabular-nums">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 bg-stone-50/80 rounded-lg mb-6">
+        <span className="text-sm text-stone-500">Team Members</span>
+        <span className="text-sm font-semibold text-stone-900 tabular-nums">
           {memberCount} / {staffLimit}
         </span>
 
@@ -286,7 +286,7 @@ export function TeamPage({
                     : nearLimit
                       ? "bg-amber-400"
                       : "bg-emerald-500"
-                  : "bg-slate-200"
+                  : "bg-stone-200"
               }`}
             />
           ))}
@@ -304,7 +304,7 @@ export function TeamPage({
 
         {/* Plan badge + upgrade */}
         <div className="flex items-center gap-3 sm:ml-auto">
-          <span className="text-xs font-medium text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+          <span className="text-xs font-medium text-stone-500 bg-white px-2 py-0.5 rounded border border-stone-200">
             {planName}
           </span>
           {isOwner && (
@@ -352,16 +352,16 @@ export function TeamPage({
       {/* ════════════════════════════════════════════
           4. TEAM TABLE — Core Operational UI
           ════════════════════════════════════════════ */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
         {/* Table header — desktop only */}
-        <div className="hidden sm:grid grid-cols-[1fr_120px_80px_40px] gap-4 items-center px-4 py-2.5 border-b border-slate-100 bg-slate-50/50">
-          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+        <div className="hidden sm:grid grid-cols-[1fr_120px_80px_40px] gap-4 items-center px-4 py-2.5 border-b border-stone-100 bg-stone-50/50">
+          <span className="text-xs font-medium text-stone-500 uppercase tracking-wider">
             Member
           </span>
-          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+          <span className="text-xs font-medium text-stone-500 uppercase tracking-wider">
             Role
           </span>
-          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+          <span className="text-xs font-medium text-stone-500 uppercase tracking-wider">
             Status
           </span>
           <span />
@@ -383,7 +383,7 @@ export function TeamPage({
           return (
             <div
               key={m.user.id}
-              className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_120px_80px_40px] gap-x-4 items-center px-4 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50/40 transition-colors"
+              className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_120px_80px_40px] gap-x-4 items-center px-4 py-3 border-b border-stone-100 last:border-0 hover:bg-stone-50/40 transition-colors"
             >
               {/* Member info */}
               <div className="flex items-center gap-3 min-w-0">
@@ -394,24 +394,24 @@ export function TeamPage({
                     className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center text-xs font-semibold flex-shrink-0">
                     {initial}
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">
+                  <p className="text-sm font-medium text-stone-900 truncate">
                     {name}
                     {isMe && (
-                      <span className="text-slate-400 font-normal ml-1">(you)</span>
+                      <span className="text-stone-400 font-normal ml-1">(you)</span>
                     )}
                   </p>
-                  <p className="text-xs text-slate-500 truncate">{m.user.email}</p>
+                  <p className="text-xs text-stone-500 truncate">{m.user.email}</p>
                   {/* Mobile: role + status inline */}
                   <div className="flex items-center gap-2 mt-0.5 sm:hidden">
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-stone-400">
                       {ROLE_INFO[m.role]?.label ?? m.role}
                     </span>
-                    <span className="w-1 h-1 rounded-full bg-slate-300" />
+                    <span className="w-1 h-1 rounded-full bg-stone-300" />
                     <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       Active
@@ -432,13 +432,13 @@ export function TeamPage({
                       )
                     }
                     disabled={isPending}
-                    className="text-xs font-medium border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-700 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="text-xs font-medium border border-stone-200 rounded-md px-2 py-1 bg-white text-stone-700 hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400 transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     <option value="MANAGER">Manager</option>
                     <option value="STAFF">Staff</option>
                   </select>
                 ) : (
-                  <span className="text-xs font-medium text-slate-500">
+                  <span className="text-xs font-medium text-stone-500">
                     {ROLE_INFO[m.role]?.label ?? m.role}
                   </span>
                 )}
@@ -447,7 +447,7 @@ export function TeamPage({
               {/* Status — desktop */}
               <div className="hidden sm:flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="text-xs text-slate-600">Active</span>
+                <span className="text-xs text-stone-600">Active</span>
               </div>
 
               {/* Actions ⋯ */}
@@ -458,7 +458,7 @@ export function TeamPage({
                       onClick={() =>
                         setOpenMenu(openMenu === m.user.id ? null : m.user.id)
                       }
-                      className="w-8 h-8 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-md text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors"
                       aria-label="Member actions"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
@@ -468,7 +468,7 @@ export function TeamPage({
                       </svg>
                     </button>
                     {openMenu === m.user.id && (
-                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg border border-slate-200 shadow-lg shadow-slate-200/50 py-1 z-20">
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg border border-stone-200 shadow-lg shadow-stone-200/50 py-1 z-20">
                         <button
                           onClick={() => {
                             setConfirmRemove({
@@ -498,7 +498,7 @@ export function TeamPage({
           return (
             <div
               key={inv.id}
-              className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_120px_80px_40px] gap-x-4 items-center px-4 py-3 border-b border-slate-100 last:border-0 bg-slate-50/30"
+              className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_120px_80px_40px] gap-x-4 items-center px-4 py-3 border-b border-stone-100 last:border-0 bg-stone-50/30"
             >
               {/* Invite info */}
               <div className="flex items-center gap-3 min-w-0">
@@ -506,13 +506,13 @@ export function TeamPage({
                   {initial}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm text-slate-600 truncate">{inv.email}</p>
+                  <p className="text-sm text-stone-600 truncate">{inv.email}</p>
                   {/* Mobile: role + status inline */}
                   <div className="flex items-center gap-2 mt-0.5 sm:hidden">
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-stone-400">
                       {ROLE_INFO[inv.role]?.label ?? inv.role}
                     </span>
-                    <span className="w-1 h-1 rounded-full bg-slate-300" />
+                    <span className="w-1 h-1 rounded-full bg-stone-300" />
                     <span className="inline-flex items-center gap-1 text-xs text-amber-600">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                       Pending
@@ -523,7 +523,7 @@ export function TeamPage({
 
               {/* Role — desktop */}
               <div className="hidden sm:block">
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-stone-400">
                   {ROLE_INFO[inv.role]?.label ?? inv.role}
                 </span>
               </div>
@@ -542,7 +542,7 @@ export function TeamPage({
                       onClick={() =>
                         setOpenMenu(openMenu === inv.id ? null : inv.id)
                       }
-                      className="w-8 h-8 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-md text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors"
                       aria-label="Invite actions"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
@@ -552,7 +552,7 @@ export function TeamPage({
                       </svg>
                     </button>
                     {openMenu === inv.id && (
-                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg border border-slate-200 shadow-lg shadow-slate-200/50 py-1 z-20">
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg border border-stone-200 shadow-lg shadow-stone-200/50 py-1 z-20">
                         <button
                           onClick={() => {
                             setConfirmRemove({
@@ -578,13 +578,13 @@ export function TeamPage({
         {/* Empty state */}
         {members.length === 0 && invites.length === 0 && (
           <div className="py-16 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 flex items-center justify-center mb-3">
-              <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <div className="w-12 h-12 mx-auto rounded-full bg-stone-100 flex items-center justify-center mb-3">
+              <svg className="w-6 h-6 text-stone-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-slate-600">No team members yet</p>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-sm font-medium text-stone-600">No team members yet</p>
+            <p className="text-xs text-stone-400 mt-1">
               Invite people to help manage your shop
             </p>
           </div>
@@ -597,12 +597,12 @@ export function TeamPage({
       {currentRole !== "STAFF" && recentActivity.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-900">
+            <h2 className="text-sm font-semibold text-stone-900">
               Recent Activity
             </h2>
             <Link
               href={`/dashboard/${shopSlug}/activity`}
-              className="text-xs font-medium text-slate-500 hover:text-slate-700 transition-colors"
+              className="text-xs font-medium text-stone-500 hover:text-stone-700 transition-colors"
             >
               View all activity &rarr;
             </Link>
@@ -621,11 +621,11 @@ export function TeamPage({
                   key={entry.id}
                   className="flex items-center gap-3 py-2 group"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-slate-400 flex-shrink-0 transition-colors" />
-                  <p className="text-sm text-slate-600 flex-1 truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-stone-300 group-hover:bg-stone-400 flex-shrink-0 transition-colors" />
+                  <p className="text-sm text-stone-600 flex-1 truncate">
                     {message}
                   </p>
-                  <span className="text-xs text-slate-400 flex-shrink-0 tabular-nums">
+                  <span className="text-xs text-stone-400 flex-shrink-0 tabular-nums">
                     {relativeTime(entry.createdAt)}
                   </span>
                 </div>
@@ -649,7 +649,7 @@ export function TeamPage({
           <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-150">
             <button
               onClick={() => setShowInviteModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute top-4 right-4 text-stone-400 hover:text-stone-600 transition-colors"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -657,17 +657,17 @@ export function TeamPage({
               </svg>
             </button>
 
-            <h3 className="text-lg font-semibold text-slate-900 mb-1">
+            <h3 className="text-lg font-semibold text-stone-900 mb-1">
               Invite team member
             </h3>
-            <p className="text-sm text-slate-500 mb-6">
+            <p className="text-sm text-stone-500 mb-6">
               They&apos;ll receive an email invitation to join your shop.
             </p>
 
             <form onSubmit={handleInvite} className="space-y-4">
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">
                   Email address
                 </label>
                 <input
@@ -677,13 +677,13 @@ export function TeamPage({
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   required
-                  className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-colors"
+                  className="w-full text-sm border border-stone-200 rounded-lg px-3 py-2 bg-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:border-stone-400 transition-colors"
                 />
               </div>
 
               {/* Role */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-stone-700 mb-1.5">
                   Role
                 </label>
                 <div className="space-y-2">
@@ -692,8 +692,8 @@ export function TeamPage({
                       key={r}
                       className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                         inviteRole === r
-                          ? "border-slate-900 bg-slate-50"
-                          : "border-slate-200 hover:border-slate-300"
+                          ? "border-stone-900 bg-stone-50"
+                          : "border-stone-200 hover:border-stone-300"
                       }`}
                     >
                       <input
@@ -702,13 +702,13 @@ export function TeamPage({
                         value={r}
                         checked={inviteRole === r}
                         onChange={() => setInviteRole(r)}
-                        className="mt-0.5 accent-slate-900"
+                        className="mt-0.5 accent-stone-900"
                       />
                       <div>
-                        <p className="text-sm font-medium text-slate-900">
+                        <p className="text-sm font-medium text-stone-900">
                           {ROLE_INFO[r]?.label}
                         </p>
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs text-stone-500 mt-0.5">
                           {ROLE_INFO[r]?.description}
                         </p>
                       </div>
@@ -721,7 +721,7 @@ export function TeamPage({
               <button
                 type="submit"
                 disabled={isPending || !inviteEmail}
-                className="w-full py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                className="w-full py-2.5 rounded-lg bg-stone-900 text-white text-sm font-medium hover:bg-stone-800 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-900/20"
               >
                 {isPending ? "Sending invitation\u2026" : "Send invitation"}
               </button>
@@ -743,12 +743,12 @@ export function TeamPage({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-1">
+            <h3 className="text-lg font-semibold text-stone-900 mb-1">
               {confirmRemove.type === "member"
                 ? "Remove team member"
                 : "Revoke invitation"}
             </h3>
-            <p className="text-sm text-slate-500 mb-6">
+            <p className="text-sm text-stone-500 mb-6">
               {confirmRemove.type === "member"
                 ? `${confirmRemove.name} will lose access to this shop immediately.`
                 : `The invitation to ${confirmRemove.name} will be cancelled.`}
@@ -756,7 +756,7 @@ export function TeamPage({
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmRemove(null)}
-                className="flex-1 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                className="flex-1 py-2 rounded-lg border border-stone-200 text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors"
               >
                 Cancel
               </button>
@@ -792,7 +792,7 @@ export function TeamPage({
           <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 text-center animate-in fade-in zoom-in-95 duration-150">
             <button
               onClick={() => setShowUpgradeModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute top-4 right-4 text-stone-400 hover:text-stone-600 transition-colors"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -806,10 +806,10 @@ export function TeamPage({
               </svg>
             </div>
 
-            <h3 className="text-lg font-semibold text-slate-900 mb-1">
+            <h3 className="text-lg font-semibold text-stone-900 mb-1">
               {!isPro ? "Upgrade to add team members" : "Team limit reached"}
             </h3>
-            <p className="text-sm text-slate-500 mb-6">
+            <p className="text-sm text-stone-500 mb-6">
               {!isPro
                 ? "Team management is available on paid plans. Upgrade to invite and manage team members."
                 : `Your ${planName} plan supports ${staffLimit} team member${staffLimit !== 1 ? "s" : ""}. Upgrade to add more.`}
@@ -818,13 +818,13 @@ export function TeamPage({
             <div className="space-y-2">
               <Link
                 href={`/dashboard/${shopSlug}/billing`}
-                className="block w-full py-2.5 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors text-center"
+                className="block w-full py-2.5 rounded-lg bg-stone-900 text-white text-sm font-medium hover:bg-stone-800 transition-colors text-center"
               >
                 View plans
               </Link>
               <button
                 onClick={() => setShowUpgradeModal(false)}
-                className="w-full py-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                className="w-full py-2 text-sm text-stone-500 hover:text-stone-700 transition-colors"
               >
                 Maybe later
               </button>

@@ -186,7 +186,7 @@ export function QuickReplyTemplates({ shopSlug }: { shopSlug: string }) {
     <div className="space-y-6">
       {TEMPLATE_GROUPS.map((group) => (
         <div key={group.title} className="space-y-3">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-stone-700">
             <span>{group.icon}</span>
             {group.title}
           </h2>
@@ -201,12 +201,12 @@ export function QuickReplyTemplates({ shopSlug }: { shopSlug: string }) {
                   className={`group relative rounded-xl border-2 p-3 text-left transition-all duration-200 ${
                     isCopied
                       ? "border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100"
-                      : "border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/30 hover:shadow-sm active:scale-[0.98]"
+                      : "border-stone-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/30 hover:shadow-sm active:scale-[0.98]"
                   }`}
                 >
                   {/* Header */}
                   <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1.5 text-sm font-medium text-slate-800">
+                    <span className="flex items-center gap-1.5 text-sm font-medium text-stone-800">
                       <span>{template.emoji}</span>
                       {template.label}
                     </span>
@@ -214,14 +214,14 @@ export function QuickReplyTemplates({ shopSlug }: { shopSlug: string }) {
                       className={`flex-shrink-0 rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-all ${
                         isCopied
                           ? "bg-emerald-500 text-white"
-                          : "bg-slate-100 text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600"
+                          : "bg-stone-100 text-stone-400 group-hover:bg-emerald-100 group-hover:text-emerald-600"
                       }`}
                     >
                       {isCopied ? "✓ Copied!" : "TAP TO COPY"}
                     </span>
                   </div>
                   {/* Preview */}
-                  <p className="line-clamp-2 text-xs leading-relaxed text-slate-500">
+                  <p className="line-clamp-2 text-xs leading-relaxed text-stone-500">
                     {template.message}
                   </p>
                 </button>
@@ -233,8 +233,8 @@ export function QuickReplyTemplates({ shopSlug }: { shopSlug: string }) {
 
       {/* Tip */}
       <div className="rounded-xl border border-dashed border-emerald-200 bg-emerald-50/40 p-4 text-center">
-        <p className="text-xs text-slate-500">
-          💡 <span className="font-medium text-slate-700">Pro tip:</span> Replace the
+        <p className="text-xs text-stone-500">
+          💡 <span className="font-medium text-stone-700">Pro tip:</span> Replace the
           [BRACKETED] placeholders with your actual details before sending
         </p>
       </div>

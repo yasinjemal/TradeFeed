@@ -363,10 +363,10 @@ export function DashboardNav({ slug, role = "OWNER" }: { slug: string; role?: st
                 ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                 : isActive
                   ? "bg-emerald-50 text-emerald-700"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                  : "text-stone-500 hover:bg-stone-100 hover:text-stone-800"
             }`}
           >
-            <span className={isHighlight ? "text-emerald-600" : isActive ? "text-emerald-600" : "text-slate-400"}>
+            <span className={isHighlight ? "text-emerald-600" : isActive ? "text-emerald-600" : "text-stone-400"}>
               {item.icon}
             </span>
             {item.label}
@@ -383,12 +383,12 @@ export function DashboardNav({ slug, role = "OWNER" }: { slug: string; role?: st
             moreActive
               ? "bg-emerald-50 text-emerald-700"
               : moreOpen
-                ? "bg-slate-100 text-slate-800"
-                : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                ? "bg-stone-100 text-stone-800"
+                : "text-stone-500 hover:bg-stone-100 hover:text-stone-800"
           }`}
         >
           <svg
-            className={`w-4 h-4 ${moreActive ? "text-emerald-600" : "text-slate-400"}`}
+            className={`w-4 h-4 ${moreActive ? "text-emerald-600" : "text-stone-400"}`}
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
@@ -414,11 +414,11 @@ export function DashboardNav({ slug, role = "OWNER" }: { slug: string; role?: st
 
         {/* Dropdown Panel */}
         {moreOpen && (
-          <div className="absolute right-0 top-full mt-1.5 w-56 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="absolute right-0 top-full mt-1.5 w-56 bg-white rounded-xl border border-stone-200 shadow-xl shadow-stone-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
             {groups.map((group, gi) => (
               <div key={group.label}>
-                {gi > 0 && <div className="border-t border-slate-100 my-1.5" />}
-                <p className="px-3 pt-1.5 pb-1 text-[10px] uppercase tracking-wider font-semibold text-slate-400">
+                {gi > 0 && <div className="border-t border-stone-100 my-1.5" />}
+                <p className="px-3 pt-1.5 pb-1 text-[10px] uppercase tracking-wider font-semibold text-stone-400">
                   {group.label}
                 </p>
                 {group.items.map((item) => {
@@ -434,10 +434,10 @@ export function DashboardNav({ slug, role = "OWNER" }: { slug: string; role?: st
                       className={`flex items-center gap-2.5 mx-1.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-all ${
                         isActive
                           ? "bg-emerald-50 text-emerald-700"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                          : "text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                       }`}
                     >
-                      <span className={isActive ? "text-emerald-600" : "text-slate-400"}>
+                      <span className={isActive ? "text-emerald-600" : "text-stone-400"}>
                         {item.icon}
                       </span>
                       {item.label}

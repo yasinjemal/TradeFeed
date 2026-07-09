@@ -102,7 +102,7 @@ export function OrderNotificationSound({
       className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all ${
         enabled
           ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-          : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200"
+          : "bg-stone-100 text-stone-500 border border-stone-200 hover:bg-stone-200"
       }`}
       title={enabled ? "Order alerts ON — you'll hear a ding for new orders" : "Enable order sound alerts"}
     >

@@ -39,7 +39,7 @@ export default async function NewComboPage({ params }: NewComboPageProps) {
         href={`/dashboard/${slug}/combos`}
         className="text-sm text-stone-500 hover:text-stone-800 transition-colors inline-flex items-center gap-1 group"
       >
-        <span className="group-hover:-translate-x-0.5 transition-transform">←</span> Combos
+        <span className="group-hover:-transtone-x-0.5 transition-transform">←</span> Combos
       </Link>
 
       <div>
