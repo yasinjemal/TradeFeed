@@ -39,6 +39,15 @@ interface SendMessageResult {
   error?: string;
 }
 
+/**
+ * Whether the WhatsApp Cloud API is configured. When false, send
+ * functions log a mock and report success — callers with one-shot
+ * messages should check this to avoid burning their send state.
+ */
+export function isWhatsAppConfigured(): boolean {
+  return getConfig() !== null;
+}
+
 async function sendWhatsAppMessage(
   to: string,
   payload: Record<string, unknown>

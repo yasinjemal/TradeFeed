@@ -22,7 +22,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
-import { sendTextMessage } from "@/lib/whatsapp/business-api";
+import { sendTextMessage, isWhatsAppConfigured } from "@/lib/whatsapp/business-api";
 import { formatZAR } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://tradefeed.co.za";
@@ -312,7 +312,8 @@ export async function processSellerSequences(): Promise<SequenceResult> {
       // Location nudge (once ever) — legacy shops with products but no
       // city are invisible on marketplace city/province pages.
       // New signups can't hit this: city is required at shop creation.
-      if (shopAgeDays >= 7 && !shop.city && shop._count.products > 0 && !locationNudged.has(shop.id)) {
+      // Gated on real API config: the mock send would burn the one shot.
+      if (shopAgeDays >= 7 && !shop.city && shop._count.products > 0 && !locationNudged.has(shop.id) && isWhatsAppConfigured()) {
         await sendAndLog(shop.id, shop.whatsappNumber, "nudge_location", nudgeLocation(shop.name, shop.slug));
         result.sent++;
         continue;
