@@ -126,6 +126,22 @@ export function ShopSettingsForm({
     if (e.key === "Enter") e.preventDefault();
   }, []);
 
+  // A settings form should save only from its dedicated Save button. This
+  // prevents Enter/"Done" on desktop and mobile keyboards from submitting
+  // the whole page and resetting the seller's place in the form.
+  const preventAccidentalSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+    if (!(submitter instanceof HTMLButtonElement) || submitter.dataset.settingsSave !== "true") {
+      event.preventDefault();
+    }
+  }, []);
+
+  const preventEnterOutsideTextareas = useCallback((event: React.KeyboardEvent<HTMLFormElement>) => {
+    if (event.key === "Enter" && !(event.target instanceof HTMLTextAreaElement)) {
+      event.preventDefault();
+    }
+  }, []);
+
   // Track dirty state
   const markDirty = useCallback(() => {
     if (!isDirty) setIsDirty(true);
@@ -283,7 +299,14 @@ export function ShopSettingsForm({
   };
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-6" onInput={markDirty}>
+    <form
+      ref={formRef}
+      action={formAction}
+      className="space-y-6"
+      onInput={markDirty}
+      onKeyDown={preventEnterOutsideTextareas}
+      onSubmit={preventAccidentalSubmit}
+    >
       {/* Hidden fields for serialized data */}
       <input type="hidden" name="businessHours" value={JSON.stringify(hours)} />
       <input type="hidden" name="latitude" value={lat} />
@@ -1062,6 +1085,7 @@ export function ShopSettingsForm({
           </div>
           <Button
             type="submit"
+            data-settings-save="true"
             disabled={isPending}
             className="rounded-2xl px-8 sm:px-10 h-12 bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 hover:from-emerald-600 hover:via-emerald-600 hover:to-teal-600 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-300 active:scale-[0.97] flex-shrink-0"
           >

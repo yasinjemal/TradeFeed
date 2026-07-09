@@ -223,6 +223,7 @@ export function CustomDomainSettings({
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
+              type="button"
               onClick={handleHealthCheck}
               disabled={isPending}
               className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
@@ -232,6 +233,7 @@ export function CustomDomainSettings({
             </button>
             {!showSwap && (
               <button
+                type="button"
                 onClick={() => setShowSwap(true)}
                 className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
               >
@@ -261,6 +263,7 @@ export function CustomDomainSettings({
               onKeyDown={(e) => { if (e.key === "Enter" && domain.trim()) handleAdd(); }}
             />
             <button
+              type="button"
               onClick={handleAdd}
               disabled={isPending || !domain.trim()}
               className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -269,6 +272,7 @@ export function CustomDomainSettings({
             </button>
             {showSwap && (
               <button
+                type="button"
                 onClick={() => { setShowSwap(false); setDomain(currentDomain ?? ""); }}
                 className="px-3 py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
               >
@@ -324,6 +328,7 @@ export function CustomDomainSettings({
 
           <div className="flex items-center gap-2 pt-1">
             <button
+              type="button"
               onClick={handleVerify}
               disabled={isPending}
               className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -359,6 +364,7 @@ export function CustomDomainSettings({
         <div className="pt-2 border-t border-slate-100">
           {!showRemoveConfirm ? (
             <button
+              type="button"
               onClick={() => setShowRemoveConfirm(true)}
               className="text-xs text-red-400 hover:text-red-600 font-medium transition-colors"
             >
@@ -370,6 +376,7 @@ export function CustomDomainSettings({
                 This will disconnect {currentDomain} and revert to tradefeed.co.za/catalog/{shopSlug}
               </span>
               <button
+                type="button"
                 onClick={handleRemove}
                 disabled={isPending}
                 className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors"
@@ -377,6 +384,7 @@ export function CustomDomainSettings({
                 {isPending ? "Removing…" : "Yes, remove"}
               </button>
               <button
+                type="button"
                 onClick={() => setShowRemoveConfirm(false)}
                 className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
               >

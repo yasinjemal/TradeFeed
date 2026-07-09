@@ -30,6 +30,7 @@ export function DeleteShopButton({ shopSlug, shopName }: DeleteShopButtonProps) 
   if (!isOpen) {
     return (
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
         className="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
       >
@@ -64,6 +65,7 @@ export function DeleteShopButton({ shopSlug, shopName }: DeleteShopButtonProps) 
       </div>
       <div className="flex items-center gap-2">
         <button
+          type="button"
           onClick={handleDelete}
           disabled={!isMatch || isPending}
           className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -71,6 +73,7 @@ export function DeleteShopButton({ shopSlug, shopName }: DeleteShopButtonProps) 
           {isPending ? "Deleting…" : "Permanently Delete Shop"}
         </button>
         <button
+          type="button"
           onClick={() => {
             setIsOpen(false);
             setConfirmText("");

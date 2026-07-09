@@ -98,6 +98,7 @@ export function ThemePicker({ shopSlug, isPro, currentTheme }: ThemePickerProps)
             return (
               <button
                 key={preset.id}
+                type="button"
                 onClick={() => isPro && handlePresetSelect(preset)}
                 disabled={!isPro}
                 className={`relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all ${
@@ -166,6 +167,7 @@ export function ThemePicker({ shopSlug, isPro, currentTheme }: ThemePickerProps)
           {Object.entries(THEME_FONTS).map(([id, family]) => (
             <button
               key={id}
+              type="button"
               onClick={() => { if (isPro) { setSelectedFont(id); setSelectedPreset(null); } }}
               disabled={!isPro}
               className={`rounded-lg border px-3 py-2 text-sm transition-all ${
@@ -201,6 +203,7 @@ export function ThemePicker({ shopSlug, isPro, currentTheme }: ThemePickerProps)
               <div className="h-16 flex-1 rounded-lg bg-stone-100" />
             </div>
             <button
+              type="button"
               className="w-full rounded-lg py-2.5 text-sm font-semibold text-white"
               style={{ backgroundColor: customPrimary || activePreset?.primary }}
             >
@@ -214,6 +217,7 @@ export function ThemePicker({ shopSlug, isPro, currentTheme }: ThemePickerProps)
       {isPro && (
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={handleSave}
             disabled={isPending || !hasChanges}
             className="flex-1 rounded-xl bg-stone-900 py-3 text-sm font-semibold text-white transition-all hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -222,6 +226,7 @@ export function ThemePicker({ shopSlug, isPro, currentTheme }: ThemePickerProps)
           </button>
           {(currentTheme.themePreset || currentTheme.themePrimary) && (
             <button
+              type="button"
               onClick={handleReset}
               disabled={isPending}
               className="rounded-xl border border-stone-200 px-4 py-3 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50"
