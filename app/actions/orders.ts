@@ -378,11 +378,14 @@ export async function updateOrderStatusAction(
         .then((shop) => {
           if (!shop) return;
           const trackingUrl = `/track/${encodeURIComponent(order.orderNumber)}`;
+          const buyerStatus = newStatus === "SHIPPED" && order.shippingMethod === "COLLECTION"
+            ? "READY_FOR_COLLECTION"
+            : newStatus;
           return sendStatusWhatsApp(
             order.buyerPhone!,
             order.orderNumber,
             shop.name,
-            newStatus,
+            buyerStatus,
             trackingUrl,
           );
         })

@@ -391,7 +391,10 @@ function OrderCard({
   const [shipTracking, setShipTracking] = useState("");
   const router = useRouter();
 
-  const config = STATUS_CONFIG[order.status];
+  const isCollectionOrder = order.shippingMethod === "COLLECTION";
+  const config = order.status === "SHIPPED" && isCollectionOrder
+    ? { ...STATUS_CONFIG.SHIPPED, label: "Ready for collection", icon: "📍" }
+    : STATUS_CONFIG[order.status];
   const actions = STATUS_ACTIONS[order.status];
   const orderDate = new Date(order.createdAt).toLocaleDateString("en-ZA", {
     day: "numeric",
@@ -639,6 +642,12 @@ function OrderCard({
           )}
 
           {/* Shipping / Tracking Info */}
+          {(order.status === "SHIPPED" || order.status === "DELIVERED") && isCollectionOrder && (
+            <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs text-emerald-800">
+              <div className="font-medium">📍 Collection arrangement</div>
+              <div className="mt-1">The order is ready for the buyer to collect. Confirm the handover once collection is complete.</div>
+            </div>
+          )}
           {(order.status === "SHIPPED" || order.status === "DELIVERED") && order.courierName && (
             <div className="text-xs text-stone-600 bg-blue-50 border border-blue-100 rounded-lg p-3 space-y-1">
               <div className="font-medium text-blue-800">📦 Shipping Details</div>
@@ -666,7 +675,17 @@ function OrderCard({
           {actions.length > 0 && (
             <div className="space-y-2 pt-1">
               {/* Ship form for CONFIRMED orders instead of plain "Mark Shipped" */}
-              {order.status === "CONFIRMED" && (
+              {order.status === "CONFIRMED" && isCollectionOrder && (
+                <button
+                  type="button"
+                  onClick={() => handleStatusChange("SHIPPED")}
+                  disabled={isPending}
+                  className={`rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 ${isPending ? "cursor-not-allowed opacity-50" : ""}`}
+                >
+                  {isPending ? "Updating..." : "Mark ready for collection"}
+                </button>
+              )}
+              {order.status === "CONFIRMED" && !isCollectionOrder && (
                 <>
                   {!showShipForm ? (
                     <button
@@ -730,7 +749,11 @@ function OrderCard({
                       ${isPending ? "opacity-50 cursor-not-allowed" : ""}
                     `}
                   >
-                    {isPending ? "Updating..." : action.label}
+                    {isPending
+                      ? "Updating..."
+                      : isCollectionOrder && action.status === "DELIVERED"
+                        ? "Confirm collected"
+                        : action.label}
                   </button>
                 ))}
               </div>
