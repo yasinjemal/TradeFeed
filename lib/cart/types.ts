@@ -75,4 +75,12 @@ export interface CartContextValue {
   shopVerified?: boolean;
   /** Whether this shop accepts cash on delivery */
   codEnabled?: boolean;
+  /** Whether this shop offers courier delivery at checkout */
+  deliveryEnabled?: boolean;
+  /** Whether this shop offers collection at checkout */
+  collectionEnabled?: boolean;
+  /** Seller's typical dispatch timeframe */
+  dispatchWindow?: string;
+  /** Optional fulfilment note shown before checkout */
+  deliveryNote?: string;
 }

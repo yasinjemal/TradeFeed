@@ -511,7 +511,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <TrustMessaging isVerified={shop.isVerified} />
 
           {/* ── Section 5b: Delivery Estimate ── */}
-          <DeliveryEstimate />
+          <DeliveryEstimate
+            deliveryEnabled={shop.deliveryEnabled}
+            collectionEnabled={shop.collectionEnabled}
+            dispatchWindow={shop.dispatchWindow}
+            deliveryNote={shop.deliveryNote}
+            returnPolicy={shop.returnPolicy}
+          />
         </div>
       </div>
 

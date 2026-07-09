@@ -71,6 +71,10 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
     shopProvince,
     shopCity,
     codEnabled,
+    deliveryEnabled,
+    collectionEnabled,
+    dispatchWindow,
+    deliveryNote,
   } = useCart();
 
   const [isPending, startTransition] = useTransition();
@@ -103,7 +107,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
 
   // Fetch shipping rates when buyer selects a province
   useEffect(() => {
-    if (!showDelivery || !delivery.province || !shopProvince) {
+    if (!deliveryEnabled || !showDelivery || !delivery.province || !shopProvince) {
       setShippingRates([]);
       setSelectedShipping(null);
       return;
@@ -138,7 +142,14 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
       });
 
     return () => { cancelled = true; };
-  }, [showDelivery, delivery.province, delivery.city, shopProvince, shopCity]);
+  }, [deliveryEnabled, showDelivery, delivery.province, delivery.city, shopProvince, shopCity]);
+
+  useEffect(() => {
+    if (!deliveryEnabled) {
+      setShowDelivery(false);
+      setSelectedShipping(collectionEnabled ? "collection" : null);
+    }
+  }, [deliveryEnabled, collectionEnabled]);
 
   // Close on Escape + focus trap
   useEffect(() => {
@@ -564,7 +575,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
             </div>
 
             {/* ── Delivery Address Toggle ─────────────────── */}
-            <button
+            {deliveryEnabled && <button
               type="button"
               onClick={() => setShowDelivery((prev) => !prev)}
               className="flex items-center gap-2 w-full text-left text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors py-1"
@@ -583,10 +594,24 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
               </svg>
-            </button>
+            </button>}
+
+            {!deliveryEnabled && collectionEnabled && (
+              <p className="rounded-xl border border-emerald-100 bg-emerald-50/60 px-3 py-2.5 text-xs text-emerald-800">
+                Collection from the seller is available. Arrange a pickup time on WhatsApp after ordering.
+              </p>
+            )}
+
+            {(dispatchWindow || deliveryNote) && (
+              <p className="rounded-xl bg-stone-50 px-3 py-2 text-xs leading-relaxed text-stone-600">
+                {dispatchWindow && <span className="font-medium text-stone-800">Typical dispatch: {dispatchWindow}.</span>}
+                {dispatchWindow && deliveryNote && " "}
+                {deliveryNote}
+              </p>
+            )}
 
             {/* ── Delivery Address Form (Collapsible) ─────── */}
-            {showDelivery && (
+            {deliveryEnabled && showDelivery && (
               <div className="space-y-2.5 p-3 bg-stone-50 rounded-xl border border-stone-100 animate-in slide-in-from-top-2 duration-200">
                 <div>
                   <label htmlFor="delivery-address" className="block text-xs font-medium text-stone-500 mb-1">
@@ -652,7 +677,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
             )}
 
             {/* ── Shipping Options (after province selected) ── */}
-            {showDelivery && delivery.province && shopProvince && (
+            {deliveryEnabled && showDelivery && delivery.province && shopProvince && (
               <div className="space-y-2 p-3 bg-blue-50/50 rounded-xl border border-blue-100 animate-in slide-in-from-top-2 duration-200">
                 <p className="text-xs font-medium text-stone-600 flex items-center gap-1.5">
                   <svg className="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -669,7 +694,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                 ) : (
                   <div className="space-y-1.5">
                     {/* Collection option — always available */}
-                    <label className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition-all ${
+                    {collectionEnabled && <label className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition-all ${
                       selectedShipping === "collection" ? "border-blue-400 bg-blue-50" : "border-stone-200 bg-white hover:border-stone-300"
                     }`}>
                       <input
@@ -684,7 +709,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
                         <span className="text-xs font-medium text-stone-800">{t("collectFromSeller")}</span>
                       </div>
                       <span className="text-xs font-bold text-emerald-600">{t("free")}</span>
-                    </label>
+                    </label>}
 
                     {shippingRates.slice(0, 4).map((rate) => {
                       const key = `${rate.carrier}|${rate.service}`;

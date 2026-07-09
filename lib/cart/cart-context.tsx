@@ -91,6 +91,10 @@ interface CartProviderProps {
   shopProvince?: string;
   shopCity?: string;
   codEnabled?: boolean;
+  deliveryEnabled?: boolean;
+  collectionEnabled?: boolean;
+  dispatchWindow?: string;
+  deliveryNote?: string;
   shopName?: string;
   shopLogoUrl?: string;
   shopVerified?: boolean;
@@ -105,6 +109,10 @@ export function CartProvider({
   shopProvince,
   shopCity,
   codEnabled,
+  deliveryEnabled = true,
+  collectionEnabled = true,
+  dispatchWindow,
+  deliveryNote,
   shopName,
   shopLogoUrl,
   shopVerified,
@@ -232,6 +240,10 @@ export function CartProvider({
       shopProvince,
       shopCity,
       codEnabled,
+      deliveryEnabled,
+      collectionEnabled,
+      dispatchWindow,
+      deliveryNote,
       shopName,
       shopLogoUrl,
       shopVerified,
@@ -251,6 +263,10 @@ export function CartProvider({
       shopProvince,
       shopCity,
       codEnabled,
+      deliveryEnabled,
+      collectionEnabled,
+      dispatchWindow,
+      deliveryNote,
       shopName,
       shopLogoUrl,
       shopVerified,

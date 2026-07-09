@@ -59,6 +59,12 @@ export async function getCatalogShop(slug: string) {
       themeFont: true,
       // Cash on Delivery
       codEnabled: true,
+      // Buyer fulfilment promise
+      deliveryEnabled: true,
+      collectionEnabled: true,
+      dispatchWindow: true,
+      deliveryNote: true,
+      returnPolicy: true,
       // Trust
       createdAt: true,
       // Subscription (for Pro badge)

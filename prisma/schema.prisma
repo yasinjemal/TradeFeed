@@ -67,6 +67,14 @@ model Shop {
   // ── Cash on Delivery ──────────────────────────────────
   codEnabled      Boolean @default(false)       // Whether this shop accepts cash on delivery
 
+  // Buyer fulfilment promise. These settings control which choices appear
+  // in checkout and keep delivery claims grounded in seller operations.
+  deliveryEnabled   Boolean @default(true)
+  collectionEnabled Boolean @default(true)
+  dispatchWindow    String  @default("1-2 business days")
+  deliveryNote      String?
+  returnPolicy      String?
+
   // ── Storefront Theme ─────────────────────────────────
   themePreset     String?                      // Preset theme name: "classic" | "modern" | "bold" | "minimal" | "vibrant"
   themePrimary    String?                      // Primary color hex (e.g. "#10b981")

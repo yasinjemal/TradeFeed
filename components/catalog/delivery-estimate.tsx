@@ -4,21 +4,37 @@
  */
 import { getTranslations } from "next-intl/server";
 
-export async function DeliveryEstimate() {
+interface DeliveryEstimateProps {
+  deliveryEnabled: boolean;
+  collectionEnabled: boolean;
+  dispatchWindow: string;
+  deliveryNote: string | null;
+  returnPolicy: string | null;
+}
+
+export async function DeliveryEstimate({
+  deliveryEnabled,
+  collectionEnabled,
+  dispatchWindow,
+  deliveryNote,
+  returnPolicy,
+}: DeliveryEstimateProps) {
   const t = await getTranslations("catalog");
+  if (!deliveryEnabled && !collectionEnabled && !returnPolicy) return null;
+
   return (
     <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 space-y-2.5">
       <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t("delivery")}</p>
-      <div className="flex items-start gap-2.5 text-sm text-slate-700">
+      {deliveryEnabled && <div className="flex items-start gap-2.5 text-sm text-slate-700">
         <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H18.75M3.75 10.5V6.375a1.125 1.125 0 011.125-1.125h4.5V10.5m-6.375 0h6.375m0 0h6v-3.75m-6 3.75v-3.75m6 3.75h2.625M12 10.5V5.25h8.25a1.125 1.125 0 011.125 1.125v4.125" />
         </svg>
         <div>
           <p className="font-medium">{t("deliveryNationwide")}</p>
-          <p className="text-xs text-slate-500 mt-0.5">{t("deliveryMetro")}</p>
+          <p className="text-xs text-slate-500 mt-0.5">Typical dispatch: {dispatchWindow}</p>
         </div>
-      </div>
-      <div className="flex items-start gap-2.5 text-sm text-slate-700">
+      </div>}
+      {collectionEnabled && <div className="flex items-start gap-2.5 text-sm text-slate-700">
         <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
@@ -27,7 +43,9 @@ export async function DeliveryEstimate() {
           <p className="font-medium">{t("collectionAvailable")}</p>
           <p className="text-xs text-slate-500 mt-0.5">{t("collectionDetails")}</p>
         </div>
-      </div>
+      </div>}
+      {deliveryNote && <p className="border-t border-slate-200 pt-2 text-xs leading-relaxed text-slate-600">{deliveryNote}</p>}
+      {returnPolicy && <p className="text-xs leading-relaxed text-slate-600"><span className="font-medium text-slate-700">Returns & exchanges:</span> {returnPolicy}</p>}
     </div>
   );
 }

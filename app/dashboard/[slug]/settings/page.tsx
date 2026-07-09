@@ -18,6 +18,7 @@ import { DeleteShopButton } from "@/components/shop/delete-shop-button";
 import { SettingsSidebar } from "@/components/shop/settings-sidebar";
 import { ThemePicker } from "@/components/shop/theme-picker";
 import { CodToggle } from "@/components/shop/cod-toggle";
+import { ShopFulfillmentSettings } from "@/components/shop/shop-fulfillment-settings";
 import { ShopStatusCard } from "@/components/shop/shop-status-card";
 import { CustomDomainSettings } from "@/components/shop/custom-domain-settings";
 import { VerificationRequestCard } from "@/components/shop/verification-request-card";
@@ -199,6 +200,17 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
               tiktok: shop.tiktok,
               website: shop.website,
               whatsappGroupLink: shop.whatsappGroupLink,
+            }}
+          />
+
+          <ShopFulfillmentSettings
+            shopSlug={slug}
+            initialData={{
+              deliveryEnabled: shop.deliveryEnabled,
+              collectionEnabled: shop.collectionEnabled,
+              dispatchWindow: shop.dispatchWindow,
+              deliveryNote: shop.deliveryNote,
+              returnPolicy: shop.returnPolicy,
             }}
           />
 

@@ -215,3 +215,21 @@ export const shopSettingsSchema = z.object({
 });
 
 export type ShopSettingsInput = z.infer<typeof shopSettingsSchema>;
+
+export const DISPATCH_WINDOWS = [
+  "Same business day",
+  "1-2 business days",
+  "3-5 business days",
+  "Made to order - confirm with seller",
+] as const;
+
+/** The checkout promise a seller makes to buyers. */
+export const shopFulfillmentSchema = z.object({
+  deliveryEnabled: z.boolean(),
+  collectionEnabled: z.boolean(),
+  dispatchWindow: z.enum(DISPATCH_WINDOWS),
+  deliveryNote: z.string().trim().max(500, "Delivery note must be 500 characters or less").optional().or(z.literal("")),
+  returnPolicy: z.string().trim().max(1_000, "Returns policy must be 1,000 characters or less").optional().or(z.literal("")),
+});
+
+export type ShopFulfillmentInput = z.infer<typeof shopFulfillmentSchema>;

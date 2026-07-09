@@ -12,6 +12,7 @@ import {
   Settings2,
   ShieldCheck,
   Store,
+  Truck,
   UsersRound,
   Clock3,
 } from "lucide-react";
@@ -21,13 +22,15 @@ const SECTIONS = [
   { id: "images", label: "Shop images", icon: ImageIcon },
   { id: "basic", label: "Shop profile", icon: Settings2 },
   { id: "location", label: "Location", icon: MapPin },
+  { id: "delivery", label: "Delivery & collection", icon: Truck },
   { id: "hours", label: "Business hours", icon: Clock3 },
   { id: "social", label: "Social & links", icon: Link2 },
-  { id: "palette", label: "Theme & branding", icon: Palette },
+  { id: "theme", label: "Theme & branding", icon: Palette },
   { id: "verification", label: "Verification badge", icon: ShieldCheck },
   { id: "domain", label: "Custom domains", icon: Globe2 },
-  { id: "wholesale", label: "Wholesale settings", icon: Bot },
+  { id: "ai", label: "AI preferences", icon: Bot },
   { id: "payment", label: "Payment settings", icon: CreditCard },
+  { id: "gallery", label: "Gallery", icon: ImageIcon },
   { id: "team", label: "Team members", icon: UsersRound },
 ] as const;
 

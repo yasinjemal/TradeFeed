@@ -4,7 +4,7 @@
 
 "use server";
 
-import { shopSettingsSchema } from "@/lib/validation/shop-settings";
+import { shopFulfillmentSchema, shopSettingsSchema } from "@/lib/validation/shop-settings";
 import { updateShopSettings, getShopBySlug, updateShopTheme } from "@/lib/db/shops";
 import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { requireShopAccess, hasPermission } from "@/lib/auth";
@@ -184,6 +184,44 @@ export async function toggleCodAction(
   } catch (error: unknown) {
     console.error("[toggleCodAction] Error:", error);
     return { success: false, error: "Something went wrong. Please try again." };
+  }
+}
+
+/**
+ * Update the delivery, collection and customer-care promise shown to buyers.
+ */
+export async function updateShopFulfillmentAction(
+  shopSlug: string,
+  input: unknown,
+): Promise<ActionResult> {
+  try {
+    const access = await requireShopAccess(shopSlug);
+    if (!access || !hasPermission(access.role, "settings:manage")) {
+      return { success: false, error: "You don't have permission to update fulfilment settings." };
+    }
+
+    const parsed = shopFulfillmentSchema.safeParse(input);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "Please check the fulfilment details." };
+    }
+
+    const { db } = await import("@/lib/db");
+    await db.shop.update({
+      where: { id: access.shopId },
+      data: {
+        ...parsed.data,
+        deliveryNote: parsed.data.deliveryNote || null,
+        returnPolicy: parsed.data.returnPolicy || null,
+      },
+    });
+
+    revalidatePath(`/dashboard/${shopSlug}/settings`);
+    revalidatePath(`/catalog/${shopSlug}`);
+    revalidatePath(`/catalog/${shopSlug}/products/[productId]`, "page");
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("[updateShopFulfillmentAction] Error:", error);
+    return { success: false, error: "Could not update fulfilment settings. Please try again." };
   }
 }
 

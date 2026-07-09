@@ -81,6 +81,10 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
     shopProvince,
     shopCity,
     codEnabled,
+    deliveryEnabled,
+    collectionEnabled,
+    dispatchWindow,
+    deliveryNote,
     shopName,
     shopLogoUrl,
     shopVerified,
@@ -114,7 +118,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
 
   // Shipping rates lookup (same API as the live panel)
   React.useEffect(() => {
-    if (!showDelivery || !delivery.province || !shopProvince) {
+    if (!deliveryEnabled || !showDelivery || !delivery.province || !shopProvince) {
       setShippingRates([]);
       setSelectedShipping(null);
       return;
@@ -146,7 +150,14 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
     return () => {
       cancelled = true;
     };
-  }, [showDelivery, delivery.province, delivery.city, shopProvince, shopCity]);
+  }, [deliveryEnabled, showDelivery, delivery.province, delivery.city, shopProvince, shopCity]);
+
+  React.useEffect(() => {
+    if (!deliveryEnabled) {
+      setShowDelivery(false);
+      setSelectedShipping(collectionEnabled ? "collection" : null);
+    }
+  }, [deliveryEnabled, collectionEnabled]);
 
   // Escape to close + scroll lock
   React.useEffect(() => {
@@ -499,7 +510,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                   </div>
 
                   {/* Delivery toggle */}
-                  <button
+                  {deliveryEnabled && <button
                     type="button"
                     onClick={() => setShowDelivery((v) => !v)}
                     aria-expanded={showDelivery}
@@ -510,9 +521,23 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                       aria-hidden="true"
                       className={cn("size-4 text-tf-stone-400 transition-transform motion-reduce:transition-none", showDelivery && "rotate-180")}
                     />
-                  </button>
+                  </button>}
 
-                  {showDelivery && (
+                  {!deliveryEnabled && collectionEnabled && (
+                    <div className="rounded-lg border border-tf-primary/20 bg-tf-verified-soft px-3 py-2.5 text-sm text-tf-deep">
+                      Collection from the seller is available. We&apos;ll help you arrange a pickup time on WhatsApp.
+                    </div>
+                  )}
+
+                  {(dispatchWindow || deliveryNote) && (
+                    <p className="rounded-lg bg-tf-stone-50 px-3 py-2 text-xs leading-relaxed text-tf-stone-600">
+                      {dispatchWindow && <span className="font-medium text-tf-ink">Typical dispatch: {dispatchWindow}.</span>}
+                      {dispatchWindow && deliveryNote && " "}
+                      {deliveryNote}
+                    </p>
+                  )}
+
+                  {deliveryEnabled && showDelivery && (
                     <div className="space-y-3 rounded-lg bg-tf-stone-50 p-3">
                       <div>
                         <label htmlFor="tf-addr" className={labelCls}>Street address</label>
@@ -593,7 +618,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                                 </label>
                               );
                             })}
-                            <label
+                            {collectionEnabled && <label
                               className={cn(
                                 "flex min-h-11 cursor-pointer items-center gap-2 rounded-[10px] border px-3 text-sm",
                                 selectedShipping === "collection"
@@ -609,7 +634,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                                 className="accent-[#047857]"
                               />
                               I&apos;ll collect from the seller
-                            </label>
+                            </label>}
                           </div>
                         </fieldset>
                       )}

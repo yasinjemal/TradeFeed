@@ -103,7 +103,7 @@ export async function createShop(
  */
 export async function getShopBySlug(slug: string): Promise<ShopResult | null> {
   return db.shop.findUnique({
-    where: { slug, isActive: true },
+    where: { slug },
   });
 }
 
