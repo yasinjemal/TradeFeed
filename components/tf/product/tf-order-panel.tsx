@@ -1,11 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { MessageCircle, Minus, Plus } from "lucide-react";
+import { MessageCircle, Minus, Plus, ShoppingBag } from "lucide-react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { TfButton } from "@/components/tf/button";
 import { formatZAR } from "@/components/tf/format";
+import { useCart } from "@/lib/cart/cart-context";
+import { trackAddToCartAction } from "@/app/actions/analytics";
 
 // ============================================================
 // TfOrderPanel — variant selection + the order handoff.
@@ -23,13 +26,18 @@ export interface TfVariant {
 }
 
 interface TfOrderPanelProps {
+  productId: string;
   productName: string;
   productUrl: string;
+  shopId: string;
   shopName: string;
   whatsappNumber: string;
   variants: TfVariant[];
   option1Label: string;
   option2Label: string;
+  /** First product image — shown as the cart line thumbnail */
+  imageUrl?: string | null;
+  minWholesaleQty?: number;
 }
 
 function Pill({
@@ -63,14 +71,19 @@ function Pill({
 }
 
 export function TfOrderPanel({
+  productId,
   productName,
   productUrl,
+  shopId,
   shopName,
   whatsappNumber,
   variants,
   option1Label,
   option2Label,
+  imageUrl,
+  minWholesaleQty = 1,
 }: TfOrderPanelProps) {
+  const { addItem } = useCart();
   const sizes = React.useMemo(
     () => Array.from(new Set(variants.map((v) => v.size))),
     [variants],
@@ -119,6 +132,50 @@ export function TfOrderPanel({
     .filter((l) => l !== null)
     .join("\n");
   const waHref = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(waMessage)}`;
+
+  const canAddToCart = !soldOut && exactSelection && selected != null && selected.stock > 0;
+
+  const handleAddToCart = () => {
+    if (!canAddToCart || !selected) return;
+    addItem(
+      {
+        variantId: selected.id,
+        productId,
+        productName,
+        imageUrl: imageUrl ?? undefined,
+        size: selected.size,
+        color: selected.color,
+        option1Label,
+        option2Label,
+        priceInCents: selected.priceInCents,
+        maxStock: selected.stock,
+        minWholesaleQty,
+        orderType: "wholesale",
+      },
+      qty,
+    );
+    void trackAddToCartAction(shopId, productId);
+    toast.success(`${productName} added to cart`, {
+      description: `${qty}× ${selected.size}${selected.color ? ` / ${selected.color}` : ""} — ${formatZAR((selected.priceInCents * qty) / 100)}`,
+      duration: 2500,
+    });
+  };
+
+  const addToCartButton = (full: boolean) => (
+    <TfButton
+      type="button"
+      variant="secondary"
+      size={full ? "lg" : "icon"}
+      fullWidth={full}
+      onClick={handleAddToCart}
+      disabled={!canAddToCart}
+      aria-label={full ? undefined : "Add to cart"}
+      title={canAddToCart ? undefined : soldOut ? "Sold out" : `Choose a ${option1Label.toLowerCase()} first`}
+    >
+      <ShoppingBag aria-hidden="true" className="size-5" />
+      {full && "Add to cart"}
+    </TfButton>
+  );
 
   const cta = (full: boolean) => (
     <TfButton
@@ -221,8 +278,11 @@ export function TfOrderPanel({
           </div>
         )}
 
-        {/* Inline CTA */}
-        <div className="hidden lg:block">{cta(true)}</div>
+        {/* Inline CTAs — WhatsApp is the promise, cart is the second path */}
+        <div className="hidden space-y-2 lg:block">
+          {cta(true)}
+          {addToCartButton(true)}
+        </div>
         <p className="text-xs text-tf-stone-400">
           Opens WhatsApp pre-filled &mdash; {shopName} confirms availability &amp; delivery.
         </p>
@@ -237,7 +297,10 @@ export function TfOrderPanel({
               {formatZAR(totalCents / 100)}
             </p>
           </div>
-          <div className="shrink-0">{cta(false)}</div>
+          <div className="flex shrink-0 items-center gap-2">
+            {addToCartButton(false)}
+            {cta(false)}
+          </div>
         </div>
       </div>
     </>

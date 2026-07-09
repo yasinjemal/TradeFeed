@@ -34,6 +34,7 @@ export interface TfStripProduct {
 
 export interface TfProductPageProps {
   shop: {
+    id: string;
     slug: string;
     name: string;
     isVerified: boolean;
@@ -54,6 +55,7 @@ export interface TfProductPageProps {
     variants: TfVariant[];
     option1Label: string;
     option2Label: string;
+    minWholesaleQty?: number;
   };
   productUrl: string;
   soldCount: number;
@@ -154,13 +156,17 @@ export function TfProductPage({
 
           <TfReveal delay={140}>
           <TfOrderPanel
+            productId={product.id}
             productName={product.name}
             productUrl={productUrl}
+            shopId={shop.id}
             shopName={shop.name}
             whatsappNumber={shop.whatsappNumber}
             variants={product.variants}
             option1Label={product.option1Label}
             option2Label={product.option2Label}
+            imageUrl={product.images[0]?.url ?? null}
+            minWholesaleQty={product.minWholesaleQty}
           />
           </TfReveal>
 

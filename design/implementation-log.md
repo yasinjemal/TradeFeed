@@ -89,6 +89,22 @@ session; the working tree now mixes both. Review the diff as one unit before com
   user's running dev server (homepage 200 — the fetch happens before the flag branch).
   The visual section ships only where `UI_REDESIGN` is on (prod).
 
+## 2026-07-09 — Session 4b: Add to cart on the TF product page (user report)
+
+- The TF product page only offered "Order on WhatsApp" — no path into the existing cart
+  (which the bottom-nav Cart tab implies). Per concept `acdc9ce6` (WhatsApp primary, cart
+  secondary), [tf-order-panel.tsx](../components/tf/product/tf-order-panel.tsx) now plugs
+  into the existing `CartProvider`/`useCart` (already wrapping the catalog layout):
+  - Desktop: full-width secondary "Add to cart" under the WhatsApp CTA.
+  - Mobile sticky bar: ShoppingBag icon button beside the WhatsApp CTA (44px target).
+  - Disabled until an exact variant is chosen (title-text explains why); respects stock caps
+    and `minWholesaleQty` via the cart context's own rules; sonner toast confirms the add;
+    fires the same `trackAddToCartAction` analytics as the legacy panel.
+- Threaded `shop.id`, `product.minWholesaleQty`, and the first product image (cart thumbnail)
+  through `TfProductPage` → route page.
+- Verified: tsc + eslint clean. WhatsApp remains the primary promise; cart is the quieter
+  second path, consistent with D-series decisions.
+
 ### Not done yet (next session, in roadmap order)
 1. Emoji→illustration/lucide swap inside dashboard nudge cards.
 2. `TfStat` + `TfTable` per concepts `b9a4466d`/`03acdfdf`.

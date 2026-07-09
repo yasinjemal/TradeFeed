@@ -205,6 +205,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         ))}
         <TfProductPage
           shop={{
+            id: shop.id,
             slug: shop.slug,
             name: shop.name,
             isVerified: shop.isVerified,
@@ -231,6 +232,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             })),
             option1Label,
             option2Label,
+            minWholesaleQty: product.minWholesaleQty,
           }}
           productUrl={`${baseUrl}/catalog/${slug}/products/${product.slug ?? product.id}`}
           soldCount={soldCount}
