@@ -358,7 +358,9 @@
     "free": "Free",
     "namePlaceholder": "Your name",
     "orderNotesPlaceholder": "Any special instructions",
-    "shoppingCart": "Shopping cart"
+    "shoppingCart": "Shopping cart",
+    "payNow": "Pay Now",
+    "payOnlineNow": "Pay securely online now."
   },
   "wishlist": {
     "title": "Favourites",

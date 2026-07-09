@@ -358,7 +358,9 @@
     "free": "Simahla",
     "namePlaceholder": "Igama lakho",
     "orderNotesPlaceholder": "Naziphi na izalathiso ezikhethekileyo",
-    "shoppingCart": "Inqwelo yokuthenga"
+    "shoppingCart": "Inqwelo yokuthenga",
+    "payNow": "Hlawula Ngoku",
+    "payOnlineNow": "Hlawula ngokukhuselekileyo kwi-intanethi ngoku."
   },
   "wishlist": {
     "title": "Okuthandayo",

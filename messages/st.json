@@ -358,7 +358,9 @@
     "free": "Mahala",
     "namePlaceholder": "Lebitso la hao",
     "orderNotesPlaceholder": "Litaelo tse khethehileng leha e le life",
-    "shoppingCart": "Kariki ea ho reka"
+    "shoppingCart": "Kariki ea ho reka",
+    "payNow": "Lefa Hona Joale",
+    "payOnlineNow": "Lefa ka polokeho inthaneteng hona joale."
   },
   "wishlist": {
     "title": "Tse Ratwang",

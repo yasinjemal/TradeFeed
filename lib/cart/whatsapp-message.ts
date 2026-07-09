@@ -100,10 +100,14 @@ export function buildWhatsAppMessage(
     ? `\n\n📍 *Deliver to:*\n   ${delivery.address}\n   ${delivery.city}, ${delivery.province} ${delivery.postalCode}`
     : "";
 
-  // Payment method note
-  const paymentNote = paymentMethod === "COD"
-    ? `\n💳 *Payment: Cash on Delivery*`
-    : "";
+  // Payment method note. For online payment, drop the pay link straight
+  // into the chat so both buyer and seller can use it.
+  const paymentNote =
+    paymentMethod === "COD"
+      ? `\n💳 *Payment: Cash on Delivery*`
+      : paymentMethod === "PAYFAST" && orderNumber
+        ? `\n💳 *Pay online:* ${BASE_URL}/pay/${orderNumber}`
+        : "";
 
   // Include order number in header when available (for tracking)
   const header = orderNumber

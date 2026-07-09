@@ -92,6 +92,21 @@ function nudgeInactive(shopName: string, slug: string, daysSinceUpdate: number) 
   ].join("\n");
 }
 
+function nudgeLocation(shopName: string, slug: string) {
+  return [
+    `📍 ${shopName}, buyers near you can't find your shop!`,
+    "",
+    "Your shop has no city set, so it doesn't show up when buyers browse their area on the TradeFeed marketplace.",
+    "",
+    "Add your city in 20 seconds:",
+    `${BASE_URL}/dashboard/${slug}/settings`,
+    "",
+    "Shops with a location get found by local buyers searching their city.",
+    "",
+    "Reply STOP to opt out.",
+  ].join("\n");
+}
+
 function monthlySummary(
   shopName: string,
   slug: string,
@@ -202,6 +217,7 @@ export async function processSellerSequences(): Promise<SequenceResult> {
       id: true,
       name: true,
       slug: true,
+      city: true,
       whatsappNumber: true,
       createdAt: true,
       updatedAt: true,
@@ -209,6 +225,17 @@ export async function processSellerSequences(): Promise<SequenceResult> {
       _count: { select: { products: true, orders: true } },
     },
   });
+
+  // One-time location nudge dedup — one query for the whole run
+  // (SellerMessage log doubles as sent-state, no schema change needed)
+  const locationNudged = new Set(
+    (
+      await db.sellerMessage.findMany({
+        where: { messageType: "nudge_location", status: "sent" },
+        select: { shopId: true },
+      })
+    ).map((m) => m.shopId),
+  );
 
   for (const shop of shops) {
     result.processed++;
@@ -278,6 +305,15 @@ export async function processSellerSequences(): Promise<SequenceResult> {
           where: { shopId: shop.id },
           data: { nudgeInactiveSentAt: new Date() },
         });
+        result.sent++;
+        continue;
+      }
+
+      // Location nudge (once ever) — legacy shops with products but no
+      // city are invisible on marketplace city/province pages.
+      // New signups can't hit this: city is required at shop creation.
+      if (shopAgeDays >= 7 && !shop.city && shop._count.products > 0 && !locationNudged.has(shop.id)) {
+        await sendAndLog(shop.id, shop.whatsappNumber, "nudge_location", nudgeLocation(shop.name, shop.slug));
         result.sent++;
         continue;
       }

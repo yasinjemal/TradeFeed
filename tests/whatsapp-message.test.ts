@@ -66,3 +66,20 @@ test("buildWhatsAppMessage omits COD note for PAYFAST payment", () => {
   const message = buildWhatsAppMessage(items, null, "TF-PF-001", "shop", "PAYFAST");
   assert.doesNotMatch(message, /Cash on Delivery/);
 });
+
+test("buildWhatsAppMessage includes online pay link for PAYFAST orders", () => {
+  const message = buildWhatsAppMessage(items, null, "TF-20260709-P4Y1", "test-shop", "PAYFAST");
+  assert.match(message, /\*Pay online:\* .*tradefeed\.co\.za\/pay\/TF-20260709-P4Y1/);
+  assert.doesNotMatch(message, /Cash on Delivery/);
+});
+
+test("buildWhatsAppMessage omits pay link without an order number", () => {
+  const message = buildWhatsAppMessage(items, null, undefined, "test-shop", "PAYFAST");
+  assert.doesNotMatch(message, /Pay online/);
+});
+
+test("buildWhatsAppMessage keeps COD note and no pay link for COD orders", () => {
+  const message = buildWhatsAppMessage(items, null, "TF-20260709-C0D1", "test-shop", "COD");
+  assert.match(message, /Cash on Delivery/);
+  assert.doesNotMatch(message, /Pay online/);
+});

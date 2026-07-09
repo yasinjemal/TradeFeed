@@ -16,6 +16,7 @@ import { TrackingSearch } from "@/components/tracking/tracking-search";
 
 interface TrackingPageProps {
   params: Promise<{ orderNumber: string }>;
+  searchParams: Promise<{ payment?: string }>;
 }
 
 export async function generateMetadata({ params }: TrackingPageProps): Promise<Metadata> {
@@ -47,8 +48,9 @@ export async function generateMetadata({ params }: TrackingPageProps): Promise<M
   };
 }
 
-export default async function TrackingPage({ params }: TrackingPageProps) {
+export default async function TrackingPage({ params, searchParams }: TrackingPageProps) {
   const { orderNumber } = await params;
+  const { payment } = await searchParams;
   const decoded = decodeURIComponent(orderNumber);
   const order = await getOrderByNumber(decoded);
 
@@ -241,6 +243,53 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
             )}
           </div>
         </div>
+
+        {/* ── Payment Return Banner (from PayFast) ────────── */}
+        {payment === "success" && (
+          <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-5 text-center">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald-500/20 flex items-center justify-center">
+              <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-emerald-400 mb-1">Payment Successful!</h2>
+            <p className="text-sm text-stone-400">
+              {order.paidAt
+                ? "Your payment has been confirmed. The seller will process your order shortly."
+                : "Your payment is being processed — this page will show it as paid within a minute or two."}
+            </p>
+          </div>
+        )}
+        {payment === "cancelled" && !order.paidAt && (
+          <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-center">
+            <p className="text-sm text-amber-300 font-medium">
+              Payment was cancelled — you can try again below.
+            </p>
+          </div>
+        )}
+
+        {/* ── Pay Now (self-serve online payment) ─────────── */}
+        {!order.paidAt &&
+          order.status !== "CANCELLED" &&
+          order.paymentMethod !== "COD" &&
+          payment !== "success" && (
+            <div className="rounded-2xl bg-emerald-500/5 border border-emerald-500/15 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-center sm:text-left">
+                <h2 className="text-sm font-semibold text-stone-200">
+                  Pay {formatRand(order.totalCents)} online
+                </h2>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Secure card / instant EFT payment via PayFast
+                </p>
+              </div>
+              <Link
+                href={`/pay/${encodeURIComponent(order.orderNumber)}`}
+                className="flex-shrink-0 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-sm font-bold hover:from-emerald-500 hover:to-emerald-400 transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98]"
+              >
+                Pay Now →
+              </Link>
+            </div>
+          )}
 
         {/* ── Status Timeline ─────────────────────────────── */}
         <div className="rounded-2xl bg-stone-900/60 border border-stone-800/50 p-6">

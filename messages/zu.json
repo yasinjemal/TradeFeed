@@ -358,7 +358,9 @@
     "free": "Mahhala",
     "namePlaceholder": "Igama lakho",
     "orderNotesPlaceholder": "Noma yimiphi imiyalelo ekhethekile",
-    "shoppingCart": "Inqola yokuthenga"
+    "shoppingCart": "Inqola yokuthenga",
+    "payNow": "Khokha Manje",
+    "payOnlineNow": "Khokha ngokuphepha ku-inthanethi manje."
   },
   "wishlist": {
     "title": "Okuthandayo",

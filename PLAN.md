@@ -217,3 +217,22 @@ Multi-staff had shipped without authorization — any member (including view-onl
 - **Fixed unauthenticated endpoints:** wholesale admin actions (approve/reject/list buyer PII) now `requireAdmin()`; `getRestockAlertsAction` (returns buyer phone numbers) now requires shop membership.
 - Dashboard UI role-gated: desktop nav "More" groups, mobile drawer, mobile Add-Product FAB, products-page header buttons; team-page role descriptions corrected to match enforcement.
 - Tests: `tests/permissions.test.ts` pins the matrix and enforcement wiring. Full suite 259/259 green; lint and `tsc --noEmit` clean; production build passes.
+
+---
+
+### Buyer Self-Serve Order Payments (2026-07-09) — ✅ Complete
+
+Audit finding: the PayFast order-payment flow (pay page `/pay/[orderNumber]`, ITN webhook with `order_` routing, amount validation, transaction-fee capture, seller notification) was **already built** — the Phase 3 tracker said "NOT STARTED". The real gap was reach: buyers could only pay after the seller manually sent a link. Closed:
+
+- Checkout WhatsApp message now includes `💳 Pay online: /pay/{orderNumber}` for PAYFAST orders (`lib/cart/whatsapp-message.ts`) — the link lives in the chat both parties use.
+- Track page: self-serve "Pay Now" CTA for unpaid non-COD orders, plus payment success/cancelled banners (PayFast's return URL pointed at `/track?payment=…` but the page ignored it).
+- Post-checkout: classic cart toast offers "Pay Now" as the primary action for PAYFAST orders (new i18n keys `cart.payNow` / `cart.payOnlineNow` in all 5 locales); TF redesign confirmation panel gets a "Pay … online now" button.
+- Tests: 3 new message-builder cases (PAYFAST link, no-order-number, COD unchanged).
+
+### Seller City Backfill Nudge (2026-07-09) — ✅ Complete
+
+~74 pre-June-2026 sellers have no city, so they're invisible on marketplace city/province SEO pages.
+
+- Dashboard banner (`components/dashboard/location-nudge-banner.tsx`) on the overview page (both classic and TF skins) when `shop.city` is null — benefit-led copy, links to settings. Self-dismisses once city is saved.
+- One-time WhatsApp nudge (`nudge_location`) in the seller-sequences daily cron for shops ≥7 days old with products and no city. Deduped via the `SellerMessage` log (`status: "sent"`, so failures retry) — no schema migration needed. New signups can't hit it since city became required.
+- Verification: 262/262 tests, lint + tsc clean, build passes.

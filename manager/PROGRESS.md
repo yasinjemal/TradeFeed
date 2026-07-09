@@ -158,7 +158,7 @@ Goal: Build buyer confidence and streamline operations.
 
 | # | Feature | Status | Notes |
 |---|---------|--------|-------|
-| 1 | In-app payment processing (PayFast for orders) | NOT STARTED | PayFast exists for subscriptions only |
+| 1 | In-app payment processing (PayFast for orders) | DONE | Was already largely built (pay page, ITN webhook, transaction fees); 2026-07-09 closed the buyer self-serve gap: pay link in checkout WhatsApp message, Pay Now on track page + post-checkout, PayFast return banner |
 | 2 | SnapScan / Zapper integration | NOT STARTED | Popular SA payment methods |
 | 3 | Seller verification badges (CIPC check) | NOT STARTED | Trust is everything in informal trade |
 | 4 | Dispute resolution system | NOT STARTED | Required for marketplace scale |

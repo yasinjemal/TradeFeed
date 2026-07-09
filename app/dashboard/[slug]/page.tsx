@@ -21,6 +21,7 @@ import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { TrialBanner } from "@/components/billing/trial-banner";
 import { WhatsAppCommunityBanner } from "@/components/community/whatsapp-community-banner";
+import { LocationNudgeBanner } from "@/components/dashboard/location-nudge-banner";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { getAnalyticsOverview } from "@/lib/db/analytics";
 import { TfDashboardHome } from "@/components/tf/dashboard/tf-dashboard-home";
@@ -105,6 +106,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     return (
       <div className="space-y-5">
         {trial.active && <TrialBanner daysLeft={trial.daysLeft} shopSlug={slug} />}
+        {!shop.city && <LocationNudgeBanner shopSlug={slug} />}
         <TfDashboardHome
           slug={slug}
           shop={{
@@ -142,6 +144,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     <div className="space-y-8">
       {/* Trial Banner */}
       {trial.active && <TrialBanner daysLeft={trial.daysLeft} shopSlug={slug} />}
+
+      {/* Location Nudge — shop invisible on city pages until set */}
+      {!shop.city && <LocationNudgeBanner shopSlug={slug} />}
 
       {/* Community Banner */}
       <WhatsAppCommunityBanner />

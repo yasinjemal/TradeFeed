@@ -63,6 +63,7 @@ interface Confirmation {
   whatsappUrl: string;
   totalCents: number;
   itemCount: number;
+  paymentMethod: "PAYFAST" | "COD";
 }
 
 export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
@@ -229,6 +230,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
           whatsappUrl: url,
           totalCents: totalPriceInCents + shippingCents,
           itemCount: totalItems,
+          paymentMethod,
         });
         clearCart();
       } catch {
@@ -334,8 +336,20 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
             )}
 
             <div className="space-y-2">
-              {confirmation.trackingUrl && (
+              {confirmation.paymentMethod === "PAYFAST" && confirmation.orderNumber && (
                 <TfButton asChild fullWidth>
+                  <a href={`/pay/${encodeURIComponent(confirmation.orderNumber)}`}>
+                    <CheckCircle2 aria-hidden="true" />
+                    Pay {formatZAR(confirmation.totalCents)} online now
+                  </a>
+                </TfButton>
+              )}
+              {confirmation.trackingUrl && (
+                <TfButton
+                  asChild
+                  fullWidth
+                  variant={confirmation.paymentMethod === "PAYFAST" ? "ghost" : undefined}
+                >
                   <a href={confirmation.trackingUrl}>
                     <PackageCheck aria-hidden="true" />
                     Track this order

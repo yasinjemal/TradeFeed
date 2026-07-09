@@ -358,7 +358,9 @@
     "free": "Gratis",
     "namePlaceholder": "Jou naam",
     "orderNotesPlaceholder": "Enige spesiale instruksies",
-    "shoppingCart": "Inkopiemandjie"
+    "shoppingCart": "Inkopiemandjie",
+    "payNow": "Betaal Nou",
+    "payOnlineNow": "Betaal nou veilig aanlyn."
   },
   "wishlist": {
     "title": "Gunstelinge",

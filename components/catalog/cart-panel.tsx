@@ -256,15 +256,26 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
         // 5. Track checkout event (fire-and-forget)
         void trackWhatsAppCheckoutAction(shopId);
 
-        // 6. Show tracking notification
+        // 6. Show tracking notification.
+        // For online payment, the primary action is paying — the pay page
+        // links back to tracking. COD orders keep the track action.
         if (result.orderNumber) {
+          const payNow = paymentMethod === "PAYFAST";
           toast.success(t("orderPlaced"), {
-            description: `Order ${result.orderNumber} — ${t("trackYourOrder")}`,
-            action: result.trackingUrl ? {
-              label: t("trackOrder"),
-              onClick: () => window.open(result.trackingUrl!, "_self"),
-            } : undefined,
-            duration: 10000,
+            description: `Order ${result.orderNumber} — ${payNow ? t("payOnlineNow") : t("trackYourOrder")}`,
+            action: payNow
+              ? {
+                  label: t("payNow"),
+                  onClick: () =>
+                    window.open(`/pay/${encodeURIComponent(result.orderNumber!)}`, "_self"),
+                }
+              : result.trackingUrl
+                ? {
+                    label: t("trackOrder"),
+                    onClick: () => window.open(result.trackingUrl!, "_self"),
+                  }
+                : undefined,
+            duration: 15000,
           });
         }
 
