@@ -14,6 +14,9 @@ import { db } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { CreateShopForm } from "@/components/shop/create-shop-form";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfCreateShop } from "@/components/tf/onboarding/tf-create-shop";
 
 const AVATAR_GRADIENTS = [
   "from-amber-400 to-orange-500",
@@ -84,6 +87,16 @@ export default async function CreateShopPage() {
     totalCount >= 50
       ? `${Math.floor(totalCount / 10) * 10}+ SA sellers`
       : `${totalCount} SA sellers`;
+
+  // ── TF redesign (FEATURE_FLAGS.UI_REDESIGN) — same action, new flow ──
+  if (FEATURE_FLAGS.UI_REDESIGN) {
+    return (
+      <>
+        <TfFonts />
+        <TfCreateShop sellerLabel={sellerLabel} />
+      </>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col lg:flex-row">

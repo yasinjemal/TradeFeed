@@ -19,6 +19,8 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { generateFaqJsonLd } from "@/lib/seo/json-ld";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { PLAN_COMPARISON } from "@/lib/billing/plans";
+import { getMarketplaceProducts } from "@/lib/db/marketplace";
 import { TfLanding } from "@/components/tf/landing/tf-landing";
 import { SA_PROVINCES } from "@/lib/marketplace/locations";
 import type { Metadata } from "next";
@@ -128,6 +130,34 @@ const getHomepageSellers = unstable_cache(
   { revalidate: 600 } // 10 minutes
 );
 
+// Cache the homepage marketplace preview for 5 minutes — real products,
+// already mapped to TfProductCard props so the cache stores plain JSON.
+const getHomepageProducts = unstable_cache(
+  async () => {
+    const { products } = await getMarketplaceProducts({
+      sortBy: "quality",
+      page: 1,
+      pageSize: 8,
+    });
+    return products.map((p) => ({
+      href: `/catalog/${p.shop.slug}/products/${p.slug ?? p.id}`,
+      title: p.name,
+      price: p.minPriceCents / 100,
+      imageUrl: p.imageUrl,
+      sellerName: p.shop.name,
+      sellerVerified: p.shop.isVerified,
+      rating: p.avgRating ?? undefined,
+      ratingCount: p.reviewCount > 0 ? p.reviewCount : undefined,
+      location: p.shop.city ?? p.shop.province ?? undefined,
+      whatsappNumber: p.shop.whatsappNumber,
+      isNew:
+        Date.now() - new Date(p.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000,
+    }));
+  },
+  ["homepage-products"],
+  { revalidate: 300 } // 5 minutes
+);
+
 export default async function HomePage() {
   // ── i18n ──────────────────────────────────────────────
   const tNav = await getTranslations("nav");
@@ -172,10 +202,11 @@ export default async function HomePage() {
     : "/sign-up?redirect_url=/dashboard&ai=true";
 
   // ── Live platform stats (cached) + admin check + sellers (parallel) ──
-  const [{ shopCount, productCount, orderCount, cityCount, topCities }, adminClerkId, featuredSellers] = await Promise.all([
+  const [{ shopCount, productCount, orderCount, cityCount, topCities }, adminClerkId, featuredSellers, homeProducts] = await Promise.all([
     getPlatformStats(),
     isAdmin(),
     getHomepageSellers(),
+    getHomepageProducts(),
   ]);
   const userIsAdmin = !!adminClerkId;
 
@@ -194,6 +225,7 @@ export default async function HomePage() {
           isVerified: s.isVerified,
           productCount: s._count.products,
         }))}
+        products={homeProducts}
       />
     );
   }
@@ -449,7 +481,7 @@ export default async function HomePage() {
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
-                    { text: "✨ 10 free AI generations", highlight: true },
+                    { text: "✨ 10 AI listings a month", highlight: true },
                     "Up to 20 products",
                     "WhatsApp checkout",
                     "Public catalog page",
@@ -496,7 +528,7 @@ export default async function HomePage() {
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
                     { text: "Unlimited products", highlight: true },
-                    { text: "25 AI generations/month", highlight: true },
+                    { text: "25 AI listings a month", highlight: true },
                     { text: "Everything in Free", highlight: false },
                     { text: "Revenue dashboard", highlight: false },
                     { text: "Bulk product upload", highlight: false },
@@ -532,7 +564,7 @@ export default async function HomePage() {
                 </div>
                 <ul className="space-y-3.5 mb-8 flex-1">
                   {[
-                    { text: "Unlimited AI generations", highlight: true },
+                    { text: "Unlimited AI listings", highlight: true },
                     { text: "Custom domain (yourbrand.co.za)", highlight: true },
                     { text: "Everything in Starter", highlight: false },
                     { text: "Priority WhatsApp support", highlight: false },
@@ -611,24 +643,10 @@ export default async function HomePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {[
-                      { feature: "Products", free: "20", starter: "∞", pro: "∞", proAi: "∞" },
-                      { feature: "AI Generations", free: "10", starter: "25/mo", pro: "∞", proAi: "∞" },
-                      { feature: "AI Auto Title from Photo", free: "10 free", starter: "25/mo", pro: true, proAi: true },
-                      { feature: "AI Product Description", free: "10 free", starter: "25/mo", pro: true, proAi: true },
-                      { feature: "AI Category Suggestion", free: "10 free", starter: "25/mo", pro: true, proAi: true },
-                      { feature: "AI SEO Tags & Meta", free: "10 free", starter: "25/mo", pro: true, proAi: true },
-                      { feature: "WhatsApp Checkout", free: true, starter: true, pro: true, proAi: true },
-                      { feature: "Marketplace Listing", free: true, starter: true, pro: true, proAi: true },
-                      { feature: "Revenue Dashboard", free: false, starter: true, pro: true, proAi: true },
-                      { feature: "Promoted Listings", free: false, starter: true, pro: true, proAi: true },
-                      { feature: "Priority Support", free: false, starter: false, pro: true, proAi: true },
-                      { feature: "Custom Domain", free: false, starter: false, pro: true, proAi: true },
-                      { feature: "Team Accounts", free: false, starter: false, pro: "3 users", proAi: "3 users" },
-                    ].map((row) => (
-                      <tr key={row.feature} className={row.feature.startsWith("AI") && row.proAi === true ? "bg-violet-50/50" : undefined}>
+                    {PLAN_COMPARISON.map((row) => (
+                      <tr key={row.feature} className={row.feature.startsWith("AI") && row.values[3] === true ? "bg-violet-50/50" : undefined}>
                         <td className="px-5 py-3 text-slate-700 font-medium">{row.feature}</td>
-                        {[row.free, row.starter, row.pro, row.proAi].map((val, i) => (
+                        {row.values.map((val, i) => (
                           <td key={i} className="text-center px-3 py-3">
                             {val === true ? (
                               <span className="text-blue-500">✅</span>

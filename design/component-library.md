@@ -39,7 +39,7 @@ _Inventory of the `components/tf/*` system. New surfaces compose these; do not f
    see implementation-log.md).
 2. `TfTable` — dense order/product tables with status pills (Shopify-admin density).
 3. `TfStat` — revenue/orders stat tile with display-face number.
-4. `TfOnboardingStep` — centered card, progress dots, URL live-preview (create-shop).
+4. ~~`TfOnboardingStep`~~ — ✅ built as `tf/onboarding/tf-create-shop.tsx` (2026-07-09).
 5. `TfToast` — wrap sonner with tf tokens.
 6. `TfChart` — recharts/sparkline theme (emerald mono + stone grid).
 

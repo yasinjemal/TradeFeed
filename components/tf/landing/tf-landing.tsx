@@ -28,6 +28,8 @@ import { TfPhoneMock } from "./phone-mock";
 import { TfLandingHeader } from "./tf-header";
 import { TfLandingStickyCta } from "./sticky-cta";
 import { SA_PROVINCES } from "@/lib/marketplace/locations";
+import { PLANS } from "@/lib/billing/plans";
+import { TfProductCard } from "@/components/tf/product-card";
 
 export interface TfLandingProps {
   ctaHref: string;
@@ -47,6 +49,20 @@ export interface TfLandingProps {
     isVerified: boolean;
     productCount: number;
   }[];
+  /** Real marketplace products for the homepage grid (already card-shaped) */
+  products?: {
+    href: string;
+    title: string;
+    price: number;
+    imageUrl: string | null;
+    sellerName: string;
+    sellerVerified: boolean;
+    rating?: number;
+    ratingCount?: number;
+    location?: string;
+    whatsappNumber?: string;
+    isNew?: boolean;
+  }[];
 }
 
 const n = (v: number) => v.toLocaleString("en-ZA");
@@ -60,60 +76,11 @@ function initials(name: string) {
     .join("");
 }
 
-const PLANS = [
-  {
-    name: "Free",
-    price: 0,
-    blurb: "Everything you need to start selling today.",
-    features: [
-      "20 products free — forever",
-      "10 AI listings a month",
-      "Your own catalogue link",
-      "WhatsApp order messages",
-    ],
-    popular: false,
-  },
-  {
-    name: "Starter",
-    price: 99,
-    blurb: "For shops outgrowing 20 products.",
-    features: [
-      "Unlimited products",
-      "25 AI listings a month",
-      "Revenue dashboard",
-      "Everything in Free",
-    ],
-    popular: false,
-  },
-  {
-    name: "Pro",
-    price: 299,
-    blurb: "For sellers doing daily volume.",
-    features: [
-      "Unlimited AI listings",
-      "Team accounts",
-      "Priority support",
-      "Everything in Starter",
-    ],
-    popular: true,
-  },
-  {
-    name: "Pro AI",
-    price: 499,
-    blurb: "Full AI automation for serious shops.",
-    features: [
-      "Catalogue import",
-      "Background removal",
-      "Listing translations",
-      "Everything in Pro",
-    ],
-    popular: false,
-  },
-] as const;
+// Plan data comes from the canonical source — lib/billing/plans.ts
 
 const WHATSAPP_GREEN = "#25D366";
 
-export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps) {
+export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: TfLandingProps) {
   const reassurance = `20 products free · 10 AI listings a month · no credit card · set up in under 3 minutes`;
 
   return (
@@ -726,6 +693,55 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
       )}
 
       {/* ══════════════════════════════════════════════════
+          MARKETPLACE PREVIEW — real stock, browse more
+      ══════════════════════════════════════════════════ */}
+      {products.length > 0 && (
+        <section
+          aria-label="Fresh on the marketplace"
+          className="border-t border-tf-stone-200 bg-tf-surface"
+        >
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+            <TfReveal>
+              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-tf-stone-400">
+                Fresh stock
+              </p>
+              <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+                <h2 className="font-tf-display text-3xl font-semibold tracking-tight text-tf-ink sm:text-4xl">
+                  On the marketplace right now
+                </h2>
+                <Link
+                  href="/marketplace"
+                  className="hidden items-center gap-1.5 text-sm font-semibold text-tf-primary transition-colors hover:text-tf-primary-hover sm:inline-flex"
+                >
+                  Browse all
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              </div>
+            </TfReveal>
+
+            <TfReveal
+              stagger
+              className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
+            >
+              {products.slice(0, 8).map((p) => (
+                <TfProductCard key={p.href} {...p} className="h-full" />
+              ))}
+            </TfReveal>
+
+            <div className="mt-10 text-center">
+              <Link
+                href="/marketplace"
+                className="inline-flex items-center gap-2 rounded-xl border border-tf-stone-200 bg-tf-raised px-6 py-3 text-sm font-semibold text-tf-ink shadow-tf-sm transition-all hover:border-tf-primary/30 hover:shadow-tf-md"
+              >
+                Browse the marketplace
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══════════════════════════════════════════════════
           PRICING — Honest, in Rand
       ══════════════════════════════════════════════════ */}
       <section
@@ -773,7 +789,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                     className="font-tf-hero"
                     style={{ fontSize: "2.5rem", fontWeight: 700, letterSpacing: "-0.04em", color: "#071a0f" }}
                   >
-                    <span style={{ fontWeight: 300, opacity: 0.45 }}>R</span>{plan.price}
+                    <span style={{ fontWeight: 300, opacity: 0.45 }}>R</span>{plan.priceMonthly}
                   </span>
                   <span className="text-sm text-tf-stone-500">/month</span>
                 </p>
@@ -797,7 +813,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers }: TfLandingProps)
                       : "mt-6 block w-full rounded-xl border border-tf-stone-300 bg-tf-raised px-4 py-3 text-center text-sm font-semibold text-tf-ink transition-colors hover:border-tf-stone-400"
                   }
                 >
-                  {plan.price === 0 ? "Start free" : `Choose ${plan.name}`}
+                  {plan.priceMonthly === 0 ? "Start free" : `Choose ${plan.name}`}
                 </Link>
               </div>
             ))}
