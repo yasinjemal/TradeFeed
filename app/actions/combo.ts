@@ -48,7 +48,7 @@ export async function createComboCategoryAction(
   formData: FormData
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const raw = { name: formData.get("name") as string };
@@ -72,7 +72,7 @@ export async function deleteComboCategoryAction(
   categoryId: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const result = await deleteComboCategory(categoryId, access.shopId);
@@ -93,7 +93,7 @@ export async function createComboAction(
   data: Record<string, unknown>
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const parsed = comboCreateSchema.safeParse(data);
@@ -117,7 +117,7 @@ export async function updateComboAction(
   data: Record<string, unknown>
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const parsed = comboUpdateSchema.safeParse(data);
@@ -142,7 +142,7 @@ export async function deleteComboAction(
   comboId: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const combo = await deleteCombo(comboId, access.shopId);
@@ -178,7 +178,7 @@ export async function addComboImageAction(
   key?: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const image = await addComboImage(comboId, access.shopId, url, key);
@@ -198,7 +198,7 @@ export async function deleteComboImageAction(
   imageId: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const image = await deleteComboImage(imageId, comboId, access.shopId);

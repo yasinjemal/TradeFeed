@@ -73,8 +73,18 @@ export async function subscribeRestockAlertAction(data: {
 /**
  * Get pending restock alerts for a shop's products.
  * Used by the seller's dashboard to see which buyers want notifications.
+ * Returns buyer phone numbers — restricted to members of the shop.
  */
 export async function getRestockAlertsAction(shopId: string) {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return [];
+
+  const membership = await db.shopUser.findFirst({
+    where: { shopId, user: { clerkId } },
+    select: { id: true },
+  });
+  if (!membership) return [];
+
   const alerts = await db.wishlistItem.findMany({
     where: {
       shopId,

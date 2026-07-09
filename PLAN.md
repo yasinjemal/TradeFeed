@@ -191,8 +191,8 @@ Tracks progress on the 13 growth-plan features from `docs/TradeFeed — Cursor A
 
 | # | Feature | Status | Notes |
 |---|---------|--------|-------|
-| P10 | Weekly WhatsApp Sales Report | ❌ Not built | Cron infra exists; weekly digest endpoint + message builder needed |
-| P11 | Multi-Staff Accounts | ❌ Not built | Roles, invite flow, shared dashboard for Pro users |
+| P10 | Weekly WhatsApp Sales Report | ✅ Done | Commit `0e215ac` — weekly stats, WoW trends, top products in `lib/whatsapp/seller-sequences.ts` (daily cron, 7-day cadence per shop) |
+| P11 | Multi-Staff Accounts | ✅ Done | Invites/roles/team page shipped earlier; RBAC enforcement added 2026-07-09 — capability matrix in `lib/auth/permissions.ts`, enforced in all mutating server actions + role-gated dashboard UI |
 
 ### Bonus: SEO & Marketing
 
@@ -202,7 +202,18 @@ Tracks progress on the 13 growth-plan features from `docs/TradeFeed — Cursor A
 | P13 | SEO Meta Tags | ✅ Done | All pages: OG, Twitter, JSON-LD (Product, LocalBusiness, FAQ, etc.) |
 
 ### Summary
-- **Done**: 11 / 13 (P1, P2, P3, P4, P5, P6, P7, P8, P12, P13)
-- **Partial**: 0 / 13
-- **Not built**: 2 / 13 (P9, P10, P11)
-- **Next up**: P10 weekly sales report → P11 multi-staff
+- **Done**: 13 / 13 — all growth-plan features shipped
+- **Next up**: Phase 3 trust & transaction layer (in-app order payments, delivery integration) or seller city backfill for SEO pages
+
+---
+
+### Security: Role-Based Access Control Enforcement (2026-07-09) — ✅ Complete
+
+Multi-staff had shipped without authorization — any member (including view-only STAFF) could mutate anything, and two actions had **no auth at all**.
+
+- `lib/auth/permissions.ts` — capability matrix for OWNER / MANAGER / STAFF, single source of truth (see manager/DECISIONS.md D-015).
+- `requireShopAccess(slug, permission)` — optional capability check at the existing auth choke point; ~50 mutating call sites across 24 server-action files now pass the required capability (catalog, orders, reviews, settings, billing, team).
+- Pre-existing manual `role ===` checks (staff.ts, shop-settings.ts, manual-upgrade.ts, activity-logs.ts) converted to the shared matrix.
+- **Fixed unauthenticated endpoints:** wholesale admin actions (approve/reject/list buyer PII) now `requireAdmin()`; `getRestockAlertsAction` (returns buyer phone numbers) now requires shop membership.
+- Dashboard UI role-gated: desktop nav "More" groups, mobile drawer, mobile Add-Product FAB, products-page header buttons; team-page role descriptions corrected to match enforcement.
+- Tests: `tests/permissions.test.ts` pins the matrix and enforcement wiring. Full suite 259/259 green; lint and `tsc --noEmit` clean; production build passes.

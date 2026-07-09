@@ -130,7 +130,7 @@ async function resolveShopAccess(
   deps: ProductActionDeps
 ): Promise<{ shopId: string; userId: string } | null> {
   try {
-    const access = await deps.requireShopAccess(shopSlug);
+    const access = await deps.requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return null;
     return { shopId: access.shopId, userId: access.userId };
   } catch {

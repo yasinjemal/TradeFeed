@@ -536,7 +536,7 @@ export function GetStartedFlow({ suggestedShopName }: Props) {
 
               {imagePreview ? (
                 <div className="relative aspect-square max-h-64 mx-auto">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  { }
                   <img
                     src={imagePreview}
                     alt="Product preview"

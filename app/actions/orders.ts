@@ -300,7 +300,7 @@ export async function updateOrderStatusAction(
 ): Promise<ActionResult> {
   try {
     // 1. Verify seller access
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "orders:update");
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }
@@ -413,7 +413,7 @@ export async function createOrderPaymentLinkAction(
   orderId: string,
 ): Promise<PaymentLinkResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "orders:finance");
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }
@@ -498,7 +498,7 @@ export async function shipOrderAction(
   trackingNumber?: string,
 ): Promise<ShipOrderResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "orders:update");
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }
@@ -583,7 +583,7 @@ export async function confirmCodPaymentAction(
   orderId: string,
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "orders:finance");
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }

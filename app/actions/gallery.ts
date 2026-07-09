@@ -46,7 +46,7 @@ export async function addGalleryItemAction(
   caption?: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     await addGalleryItem(access.shopId, { url, key, type, caption });
@@ -69,7 +69,7 @@ export async function updateGalleryCaptionAction(
   caption: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     await updateGalleryCaption(itemId, access.shopId, caption);
@@ -90,7 +90,7 @@ export async function deleteGalleryItemAction(
   itemId: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const deleted = await deleteGalleryItem(itemId, access.shopId);

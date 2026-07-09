@@ -7,7 +7,7 @@
 import { shopSettingsSchema } from "@/lib/validation/shop-settings";
 import { updateShopSettings, getShopBySlug, updateShopTheme } from "@/lib/db/shops";
 import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
-import { requireShopAccess } from "@/lib/auth";
+import { requireShopAccess, hasPermission } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { THEME_PRESETS, THEME_FONTS } from "@/lib/config/themes";
 
@@ -36,7 +36,7 @@ export async function updateShopSettingsAction(
     }
 
     // Only OWNER and MANAGER can update settings
-    if (access.role !== "OWNER" && access.role !== "MANAGER") {
+    if (!hasPermission(access.role, "settings:manage")) {
       return { success: false, error: "You don't have permission to update settings." };
     }
 
@@ -115,7 +115,7 @@ export async function updateShopThemeAction(
 ): Promise<ActionResult> {
   try {
     const access = await requireShopAccess(shopSlug);
-    if (!access || (access.role !== "OWNER" && access.role !== "MANAGER")) {
+    if (!access || !hasPermission(access.role, "settings:manage")) {
       return { success: false, error: "Access denied." };
     }
 
@@ -167,7 +167,7 @@ export async function toggleCodAction(
 ): Promise<ActionResult> {
   try {
     const access = await requireShopAccess(shopSlug);
-    if (!access || (access.role !== "OWNER" && access.role !== "MANAGER")) {
+    if (!access || !hasPermission(access.role, "settings:manage")) {
       return { success: false, error: "Access denied." };
     }
 

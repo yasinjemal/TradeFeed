@@ -38,7 +38,7 @@ export function BulkEmailPanel() {
       <div>
         <h2 className="text-sm font-bold text-stone-300">Re-engage Inactive Sellers</h2>
         <p className="text-xs text-stone-600 mt-0.5">
-          Send a personalised email + WhatsApp community invite to sellers who haven't activated yet.
+          Send a personalised email + WhatsApp community invite to sellers who haven&apos;t activated yet.
         </p>
       </div>
 

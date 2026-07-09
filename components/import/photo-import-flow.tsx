@@ -225,7 +225,7 @@ export function PhotoImportFlow({ shopSlug, resumeJob }: PhotoImportFlowProps) {
           <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
             {previews.map((src, i) => (
               <div key={src} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                { }
                 <img src={src} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
                 <button
                   type="button"

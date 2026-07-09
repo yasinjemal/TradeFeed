@@ -46,7 +46,7 @@ export async function submitVerificationAction(
   }
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "billing:manage");
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }

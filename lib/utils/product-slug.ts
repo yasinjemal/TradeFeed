@@ -47,7 +47,7 @@ export async function generateUniqueProductSlug(
   let candidate = base;
   let attempt = 1;
 
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     const existing = await db.product.findFirst({
       where: {

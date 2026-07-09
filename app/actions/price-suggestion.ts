@@ -26,7 +26,7 @@ export async function getPriceSuggestionAction(
   }
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) {
       return { success: false, error: "Access denied." };
     }

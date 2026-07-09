@@ -44,7 +44,7 @@ export async function createDropAction(
   data: Record<string, unknown>
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const parsed = dropCreateSchema.safeParse(data);
@@ -69,7 +69,7 @@ export async function updateDropAction(
   data: Record<string, unknown>
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const parsed = dropUpdateSchema.safeParse(data);
@@ -96,7 +96,7 @@ export async function publishDropAction(
   dropId: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const result = await publishDrop(dropId, access.shopId);
@@ -118,7 +118,7 @@ export async function archiveDropAction(
   dropId: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const result = await archiveDrop(dropId, access.shopId);
@@ -139,7 +139,7 @@ export async function deleteDropAction(
   dropId: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const result = await deleteDrop(dropId, access.shopId);

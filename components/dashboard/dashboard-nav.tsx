@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { hasPermission, type Permission } from "@/lib/auth/permissions";
 
 // ── Primary nav items (always visible with icon + label) ──
 const primaryItems = [
@@ -61,6 +62,7 @@ const moreItemGroups = [
         ? [
             {
               label: "Import Catalogue",
+        permission: "catalog:manage" as Permission,
               href: (slug: string) => `/dashboard/${slug}/import`,
               exact: false,
               icon: (
@@ -73,6 +75,7 @@ const moreItemGroups = [
         : []),
       {
         label: "Categories",
+        permission: "catalog:manage" as Permission,
         href: (slug: string) => `/dashboard/${slug}/categories`,
         exact: false,
         icon: (
@@ -84,6 +87,7 @@ const moreItemGroups = [
       },
       {
         label: "Combos",
+        permission: "catalog:manage" as Permission,
         href: (slug: string) => `/dashboard/${slug}/combos`,
         exact: false,
         icon: (
@@ -94,6 +98,7 @@ const moreItemGroups = [
       },
       {
         label: "Stock Drops",
+        permission: "catalog:manage" as Permission,
         href: (slug: string) => `/dashboard/${slug}/drops`,
         exact: false,
         icon: (
@@ -105,6 +110,7 @@ const moreItemGroups = [
       },
       {
         label: "Marketplace",
+        permission: "catalog:manage" as Permission,
         href: (slug: string) => `/dashboard/${slug}/marketplace-categories`,
         exact: false,
         icon: (
@@ -140,6 +146,7 @@ const moreItemGroups = [
       },
       {
         label: "Billing",
+        permission: "billing:manage" as Permission,
         href: (slug: string) => `/dashboard/${slug}/billing`,
         exact: false,
         icon: (
@@ -155,6 +162,7 @@ const moreItemGroups = [
     items: [
       {
         label: "Promote",
+        permission: "billing:manage" as Permission,
         href: (slug: string) => `/dashboard/${slug}/promote`,
         exact: false,
         icon: (
@@ -165,6 +173,7 @@ const moreItemGroups = [
       },
       {
         label: "Boost Shop",
+        permission: "billing:manage" as Permission,
         href: (slug: string) => `/dashboard/${slug}/boost`,
         exact: false,
         icon: (
@@ -220,6 +229,7 @@ const moreItemGroups = [
       },
       {
         label: "Notifications",
+        permission: "settings:manage" as Permission,
         href: (slug: string) => `/dashboard/${slug}/notifications`,
         exact: false,
         icon: (
@@ -250,6 +260,7 @@ const moreItemGroups = [
       },
       {
         label: "Settings",
+        permission: "settings:manage" as Permission,
         href: (slug: string) => `/dashboard/${slug}/settings`,
         exact: false,
         icon: (
@@ -261,6 +272,7 @@ const moreItemGroups = [
       },
       {
         label: "Activity Log",
+        permission: "activity:view" as Permission,
         href: (slug: string) => `/dashboard/${slug}/activity`,
         exact: false,
         icon: (
@@ -273,9 +285,21 @@ const moreItemGroups = [
   },
 ];
 
+// Helper: drop items the member's role can't use, and drop empty groups
+function visibleGroups(role: string) {
+  return moreItemGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) => !("permission" in item) || !item.permission || hasPermission(role, item.permission),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
+}
+
 // Helper: check if any item in the "more" groups is active
-function isMoreActive(slug: string, pathname: string): boolean {
-  return moreItemGroups.some((group) =>
+function isMoreActive(groups: ReturnType<typeof visibleGroups>, slug: string, pathname: string): boolean {
+  return groups.some((group) =>
     group.items.some((item) => {
       const href = item.href(slug);
       return item.exact ? pathname === href : pathname.startsWith(href);
@@ -283,10 +307,11 @@ function isMoreActive(slug: string, pathname: string): boolean {
   );
 }
 
-export function DashboardNav({ slug }: { slug: string }) {
+export function DashboardNav({ slug, role = "OWNER" }: { slug: string; role?: string }) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const groups = visibleGroups(role);
 
   // Close on outside click
   useEffect(() => {
@@ -315,7 +340,7 @@ export function DashboardNav({ slug }: { slug: string }) {
     setMoreOpen(false);
   }, [pathname]);
 
-  const moreActive = isMoreActive(slug, pathname);
+  const moreActive = isMoreActive(groups, slug, pathname);
 
   return (
     <nav className="hidden md:flex items-center gap-0.5">
@@ -390,7 +415,7 @@ export function DashboardNav({ slug }: { slug: string }) {
         {/* Dropdown Panel */}
         {moreOpen && (
           <div className="absolute right-0 top-full mt-1.5 w-56 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-            {moreItemGroups.map((group, gi) => (
+            {groups.map((group, gi) => (
               <div key={group.label}>
                 {gi > 0 && <div className="border-t border-slate-100 my-1.5" />}
                 <p className="px-3 pt-1.5 pb-1 text-[10px] uppercase tracking-wider font-semibold text-slate-400">

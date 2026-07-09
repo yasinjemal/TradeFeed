@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { getShopBySlug, getShopsForUser } from "@/lib/db/shops";
-import { requireShopAccess } from "@/lib/auth";
+import { requireShopAccess, hasPermission } from "@/lib/auth";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { isAdmin } from "@/lib/auth/admin";
 import { notFound, redirect } from "next/navigation";
@@ -56,6 +56,7 @@ export default async function DashboardLayout({
     notFound();
   }
   const userIsAdmin = !!adminId;
+  const canManageCatalog = hasPermission(access.role, "catalog:manage");
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -100,7 +101,7 @@ export default async function DashboardLayout({
           </div>
 
           {/* Desktop Nav */}
-          <DashboardNav slug={slug} />
+          <DashboardNav slug={slug} role={access.role} />
 
           {/* Right: User */}
           <div className="flex items-center gap-3">
@@ -141,7 +142,7 @@ export default async function DashboardLayout({
       </header>
 
       {/* Mobile nav rendered OUTSIDE header to avoid backdrop-blur containing block */}
-      <DashboardMobileNav slug={slug} shopName={shop.name} />
+      <DashboardMobileNav slug={slug} shopName={shop.name} role={access.role} />
 
       {/* ── Page Content ────────────────────────────────── */}
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8">{children}</main>
@@ -164,6 +165,7 @@ export default async function DashboardLayout({
       </a>
 
       {/* ── Floating Add Product Button (mobile) ────────── */}
+      {canManageCatalog && (
       <a
         href={`/dashboard/${slug}/products/new`}
         className="fixed bottom-[4.5rem] right-4 z-50 md:hidden
@@ -179,6 +181,7 @@ export default async function DashboardLayout({
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
       </a>
+      )}
 
       {/* ── Mobile Bottom Tab Bar ───────────────────────── */}
       <MobileBottomNav slug={slug} />

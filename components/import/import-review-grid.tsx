@@ -289,7 +289,7 @@ function DraftCard({
           aria-label={selected ? "Deselect" : "Select"}
         >
           {draft.photoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
+             
             <img src={draft.photoUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
           ) : allowPhotoAttach && !inactive ? (
             <span

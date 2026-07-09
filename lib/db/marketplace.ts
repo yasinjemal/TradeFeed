@@ -633,7 +633,7 @@ export async function getPromotedProducts(
     };
   });
 
-  let enriched = await enrichWithReviewStats(products);
+  const enriched = await enrichWithReviewStats(products);
   return enrichWithSoldCounts(enriched);
 }
 
@@ -819,7 +819,7 @@ export async function getTrendingProducts(
       };
     });
 
-  let enrichedTrending = await enrichWithReviewStats(trendingProducts);
+  const enrichedTrending = await enrichWithReviewStats(trendingProducts);
   return enrichWithSoldCounts(enrichedTrending);
 }
 
@@ -906,7 +906,7 @@ export async function getNewArrivals(
     };
   });
 
-  let enrichedMapped = await enrichWithReviewStats(mapped);
+  const enrichedMapped = await enrichWithReviewStats(mapped);
   return enrichWithSoldCounts(enrichedMapped);
 }
 

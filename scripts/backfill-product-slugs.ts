@@ -40,7 +40,7 @@ async function main() {
     let attempt = 1;
 
     // Find unique slug within this shop
-    // eslint-disable-next-line no-constant-condition
+     
     while (true) {
       const existing = await db.product.findFirst({
         where: {

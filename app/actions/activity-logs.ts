@@ -4,7 +4,7 @@
 
 "use server";
 
-import { requireShopAccess } from "@/lib/auth";
+import { requireShopAccess, hasPermission } from "@/lib/auth";
 import {
   getShopActivityLogs,
   getShopActivityActionTypes,
@@ -23,7 +23,7 @@ export async function getActivityLogsAction(
   if (!access) return { logs: [], total: 0, page: 1, totalPages: 0 };
 
   // Only OWNER and MANAGER can view activity logs
-  if (access.role === "STAFF") {
+  if (!hasPermission(access.role, "activity:view")) {
     return { logs: [], total: 0, page: 1, totalPages: 0 };
   }
 
@@ -37,7 +37,7 @@ export async function getActivityLogsAction(
 
 export async function getActivityFiltersAction(shopSlug: string) {
   const access = await requireShopAccess(shopSlug);
-  if (!access || access.role === "STAFF") {
+  if (!access || !hasPermission(access.role, "activity:view")) {
     return { actionTypes: [], users: [] };
   }
 

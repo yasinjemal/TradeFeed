@@ -58,7 +58,7 @@ export async function startPhotoImportAction(
   if (gate) return gate;
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Shop not found or access denied." };
 
     const parsed = startSchema.safeParse(input);
@@ -106,7 +106,7 @@ export async function startTextImportAction(
   if (gate) return gate;
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Shop not found or access denied." };
 
     const text = pastedText.trim();
@@ -199,7 +199,7 @@ export async function startCsvImportAction(
   if (gate) return gate;
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Shop not found or access denied." };
 
     if (csvText.trim().length === 0) {
@@ -277,7 +277,7 @@ export async function attachDraftPhotoAction(
   if (gate) return gate;
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const parsed = z.object({ url: z.string().url(), key: z.string().min(1) }).safeParse(photo);
@@ -325,7 +325,7 @@ export async function processImportChunkAction(
   if (gate) return gate;
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Shop not found or access denied." };
 
     const job = await db.importJob.findUnique({
@@ -528,7 +528,7 @@ export async function updateDraftAction(
   if (gate) return gate;
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const parsed = editSchema.safeParse(input);
@@ -595,7 +595,7 @@ export async function publishDraftsAction(
   if (gate) return gate;
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     if (draftIds.length === 0) {
@@ -700,7 +700,7 @@ export async function skipDraftsAction(
   if (gate) return gate;
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     await db.draftListing.updateMany({
@@ -731,7 +731,7 @@ export async function completeImportJobAction(
   if (gate) return gate;
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     // Delete uploaded photos of drafts that were never published

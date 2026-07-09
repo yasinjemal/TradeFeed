@@ -9,6 +9,7 @@ import {
   rejectWholesaleBuyer,
 } from "@/lib/db/wholesale";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/auth/admin";
 
 // ── Validation ─────────────────────────────────────────
 
@@ -143,12 +144,18 @@ export async function getWholesaleBuyersAction(filter?: {
   status?: "PENDING" | "VERIFIED" | "REJECTED";
   page?: number;
 }) {
+  await requireAdmin();
   return getWholesaleBuyers(filter);
 }
 
 // ── Admin: Approve ─────────────────────────────────────
 
 export async function approveWholesaleBuyerAction(buyerId: string): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { success: false, error: "Admin access required." };
+  }
   await approveWholesaleBuyer(buyerId);
   revalidatePath("/admin/wholesale");
   return { success: true };
@@ -160,6 +167,11 @@ export async function rejectWholesaleBuyerAction(
   buyerId: string,
   reason: string
 ): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+  } catch {
+    return { success: false, error: "Admin access required." };
+  }
   if (!reason.trim()) {
     return { success: false, error: "Rejection reason is required." };
   }

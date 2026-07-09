@@ -119,7 +119,7 @@ export default async function CatalogLayout({
     <WishlistProvider shopSlug={slug} shopId={shop.id}>
       {/* Google Fonts for custom theme fonts */}
       {themeFont && !themeFont.includes("Inter") && (
-        // eslint-disable-next-line @next/next/no-page-custom-font
+         
         <link
           rel="stylesheet"
           href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(themeFont.split("'")[1] ?? "Inter")}:wght@400;500;600;700;800&display=swap`}

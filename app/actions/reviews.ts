@@ -108,7 +108,7 @@ export async function deleteReviewAction(
   reviewId: string,
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "reviews:moderate");
     if (!access) return { success: false, error: "Access denied." };
 
     await deleteReview(reviewId, access.shopId);

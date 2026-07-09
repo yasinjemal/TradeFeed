@@ -27,7 +27,7 @@ export async function createCheckoutAction(
   planSlug: string,
 ): Promise<BillingActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "billing:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     // Get the target plan
@@ -71,7 +71,7 @@ export async function cancelSubscriptionAction(
   shopSlug: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "billing:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const subscription = await getShopSubscription(access.shopId);
@@ -95,7 +95,7 @@ export async function purchaseShopBoostAction(
   weeks: number,
 ): Promise<BillingActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "billing:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     // Validate duration

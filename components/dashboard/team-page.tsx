@@ -64,8 +64,8 @@ interface TeamPageProps {
 
 const ROLE_INFO: Record<string, { label: string; description: string }> = {
   OWNER: { label: "Owner", description: "Full access to all shop settings and billing" },
-  MANAGER: { label: "Manager", description: "Can edit products, manage orders, and invite members" },
-  STAFF: { label: "Staff", description: "Can view orders and update assigned tasks" },
+  MANAGER: { label: "Manager", description: "Can edit products, manage orders, moderate reviews, and change settings" },
+  STAFF: { label: "Staff", description: "Can view the dashboard and update order status" },
 };
 
 // ── Helpers ────────────────────────────────────────────────

@@ -5,7 +5,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { requireShopAccess } from "@/lib/auth";
+import { requireShopAccess, hasPermission } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { sendEmail } from "@/lib/email/resend";
 import { staffInviteEmailHtml, staffInviteEmailText } from "@/lib/email/templates/staff-invite";
@@ -61,7 +61,7 @@ export async function inviteStaffAction(
   try {
     const access = await requireShopAccess(shopSlug);
     if (!access) return { success: false, error: "Access denied." };
-    if (access.role !== "OWNER") {
+    if (!hasPermission(access.role, "team:manage")) {
       return { success: false, error: "Only the shop owner can invite staff." };
     }
 
@@ -286,7 +286,7 @@ export async function revokeInviteAction(
   try {
     const access = await requireShopAccess(shopSlug);
     if (!access) return { success: false, error: "Access denied." };
-    if (access.role !== "OWNER") {
+    if (!hasPermission(access.role, "team:manage")) {
       return { success: false, error: "Only the shop owner can revoke invitations." };
     }
 
@@ -338,7 +338,7 @@ export async function removeStaffAction(
   try {
     const access = await requireShopAccess(shopSlug);
     if (!access) return { success: false, error: "Access denied." };
-    if (access.role !== "OWNER") {
+    if (!hasPermission(access.role, "team:manage")) {
       return { success: false, error: "Only the shop owner can remove staff." };
     }
 
@@ -411,7 +411,7 @@ export async function updateStaffRoleAction(
   try {
     const access = await requireShopAccess(shopSlug);
     if (!access) return { success: false, error: "Access denied." };
-    if (access.role !== "OWNER") {
+    if (!hasPermission(access.role, "team:manage")) {
       return { success: false, error: "Only the shop owner can change roles." };
     }
 

@@ -210,3 +210,16 @@ Variant → has → Stock
 ```
 
 **Rule:** Business logic NEVER lives in UI components. Components call functions from `/lib`.
+
+---
+
+## D-015: Capability-Based RBAC for Shop Roles
+
+**Decision:** Shop-role authorization is expressed as capabilities (`catalog:manage`, `orders:update`, `orders:finance`, `reviews:moderate`, `settings:manage`, `billing:manage`, `team:manage`, `activity:view`) in a single matrix at `lib/auth/permissions.ts`. Server actions enforce it by passing the required capability to `requireShopAccess(slug, permission)`; membership without the capability behaves exactly like no membership (null → "Access denied").
+
+**Why:**
+- Multi-staff shipped with invites but without authorization — any STAFF member could delete products, change prices, and cancel billing. Scattering `role === "OWNER"` checks per action is unauditable and drifts.
+- One matrix means one place to audit, one place to test, and the same source of truth for UI gating (nav items and buttons are filtered with `hasPermission`, which is client-safe).
+- Role semantics: OWNER = everything; MANAGER = runs the shop day-to-day (catalog, orders, reviews, settings); STAFF = fulfilment only (view dashboard, update order status).
+
+**Rule:** Never check `access.role === "..."` inside an action. Add or reuse a capability in the matrix. Server enforcement is the security boundary; UI hiding is UX only.

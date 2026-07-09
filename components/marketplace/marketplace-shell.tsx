@@ -264,6 +264,7 @@ export function MarketplaceShell({
     [categories, trendingProducts]
   );
 
+  // eslint-disable-next-line react-hooks/refs -- false positive: onRemove callbacks capture refs but only read .current when invoked, not during render
   const activeFilters = [
     currentFilters.category
       ? {

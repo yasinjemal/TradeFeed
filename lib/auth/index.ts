@@ -23,6 +23,10 @@
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import { hasPermission, type Permission } from "@/lib/auth/permissions";
+
+export { hasPermission, permissionDeniedMessage } from "@/lib/auth/permissions";
+export type { Permission, ShopRole } from "@/lib/auth/permissions";
 
 // ============================================================
 // Types
@@ -195,9 +199,15 @@ export async function requireAuth(): Promise<AuthUser> {
  *
  * MULTI-TENANT: This is THE gatekeeper. Every shop mutation must go through this.
  * Checks the ShopUser join table to verify membership.
+ *
+ * AUTHORIZATION: pass a `permission` to also require the member's role
+ * to grant that capability (see lib/auth/permissions.ts). Membership
+ * without the capability returns null, same as no membership — callers
+ * already treat null as "Access denied".
  */
 export async function requireShopAccess(
-  shopSlug: string
+  shopSlug: string,
+  permission?: Permission
 ): Promise<ShopAccess | null> {
   const user = await requireAuth();
 
@@ -218,6 +228,10 @@ export async function requireShopAccess(
   });
 
   if (!membership) return null;
+
+  if (permission && !hasPermission(membership.role, permission)) {
+    return null;
+  }
 
   return {
     userId: user.id,

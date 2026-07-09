@@ -15,6 +15,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { usePathname } from "next/navigation";
+import { hasPermission, type Permission } from "@/lib/auth/permissions";
 
 const navItems = [
   {
@@ -49,6 +50,7 @@ const navItems = [
   },
   {
     label: "Categories",
+    permission: "catalog:manage" as Permission,
     href: (slug: string) => `/dashboard/${slug}/categories`,
     exact: false,
     icon: (
@@ -60,6 +62,7 @@ const navItems = [
   },
   {
     label: "Combos",
+    permission: "catalog:manage" as Permission,
     href: (slug: string) => `/dashboard/${slug}/combos`,
     exact: false,
     icon: (
@@ -90,6 +93,7 @@ const navItems = [
   },
   {
     label: "Marketplace",
+    permission: "catalog:manage" as Permission,
     href: (slug: string) => `/dashboard/${slug}/marketplace-categories`,
     exact: false,
     icon: (
@@ -100,6 +104,7 @@ const navItems = [
   },
   {
     label: "Promote",
+    permission: "billing:manage" as Permission,
     href: (slug: string) => `/dashboard/${slug}/promote`,
     exact: false,
     icon: (
@@ -120,6 +125,7 @@ const navItems = [
   },
   {
     label: "Notifications",
+    permission: "settings:manage" as Permission,
     href: (slug: string) => `/dashboard/${slug}/notifications`,
     exact: false,
     icon: (
@@ -150,6 +156,7 @@ const navItems = [
   },
   {
     label: "Settings",
+    permission: "settings:manage" as Permission,
     href: (slug: string) => `/dashboard/${slug}/settings`,
     exact: false,
     icon: (
@@ -161,6 +168,7 @@ const navItems = [
   },
   {
     label: "Activity Log",
+    permission: "activity:view" as Permission,
     href: (slug: string) => `/dashboard/${slug}/activity`,
     exact: false,
     icon: (
@@ -171,6 +179,7 @@ const navItems = [
   },
   {
     label: "Billing",
+    permission: "billing:manage" as Permission,
     href: (slug: string) => `/dashboard/${slug}/billing`,
     exact: false,
     icon: (
@@ -184,9 +193,13 @@ const navItems = [
 interface MobileNavProps {
   slug: string;
   shopName: string;
+  role?: string;
 }
 
-export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
+export function DashboardMobileNav({ slug, shopName, role = "OWNER" }: MobileNavProps) {
+  const visibleItems = navItems.filter(
+    (item) => !("permission" in item) || !item.permission || hasPermission(role, item.permission),
+  );
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -281,7 +294,7 @@ export function DashboardMobileNav({ slug, shopName }: MobileNavProps) {
               </div>
 
               <div className="space-y-0.5">
-                {navItems.map((item) => {
+                {visibleItems.map((item) => {
                   const href = item.href(slug);
                   const isActive = item.exact
                     ? pathname === href

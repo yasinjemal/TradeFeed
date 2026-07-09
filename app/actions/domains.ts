@@ -30,7 +30,7 @@ import { revalidatePath } from "next/cache";
 const DOMAIN_RE = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
 
 async function requireProAccess(shopSlug: string) {
-  const access = await requireShopAccess(shopSlug);
+  const access = await requireShopAccess(shopSlug, "billing:manage");
   if (!access) throw new Error("Unauthorized");
 
   const shop = await db.shop.findUnique({

@@ -27,7 +27,7 @@ export async function setProductGlobalCategoryAction(
   globalCategoryId: string | null
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) {
       return { success: false, error: "Access denied." };
     }
@@ -66,7 +66,7 @@ export async function bulkSetGlobalCategoryAction(
   globalCategoryId: string | null
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) {
       return { success: false, error: "Access denied." };
     }

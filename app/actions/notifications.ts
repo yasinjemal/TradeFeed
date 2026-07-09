@@ -27,7 +27,7 @@ export async function updateNotificationPrefsAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "settings:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const rawInput = {

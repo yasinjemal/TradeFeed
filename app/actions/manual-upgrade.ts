@@ -7,7 +7,7 @@
 
 "use server";
 
-import { requireShopAccess } from "@/lib/auth";
+import { requireShopAccess, hasPermission } from "@/lib/auth";
 import { getShopSubscription } from "@/lib/db/subscriptions";
 import { submitUpgradeRequest } from "@/lib/db/manual-payments";
 import { db } from "@/lib/db";
@@ -37,7 +37,7 @@ export async function submitUpgradeRequestAction(
     if (!access) return { success: false, error: "Access denied." };
 
     // Only OWNER can request upgrades
-    if (access.role !== "OWNER") {
+    if (!hasPermission(access.role, "billing:manage")) {
       return { success: false, error: "Only the shop owner can request an upgrade." };
     }
 

@@ -35,7 +35,7 @@ export async function removeImageBackgroundAction(
   }
 
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) {
       return { success: false, error: "Access denied." };
     }

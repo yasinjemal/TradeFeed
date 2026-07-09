@@ -176,7 +176,7 @@ export function CatalogQrShare({ catalogPath, shopName }: CatalogQrShareProps) {
               <p className="font-bold text-base">{shopName}</p>
               <div className="flex justify-center">
                 <div className="bg-white rounded-lg p-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  { }
                   <img
                     src={qrImageUrl}
                     alt={`QR code for ${shopName} catalog`}

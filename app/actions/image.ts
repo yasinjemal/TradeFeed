@@ -45,7 +45,7 @@ export async function saveProductImagesAction(
   images: UploadedImage[]
 ): Promise<ImageActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const product = await db.product.findFirst({
@@ -102,7 +102,7 @@ export async function deleteProductImageAction(
   imageId: string
 ): Promise<ImageActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const image = await db.productImage.findFirst({

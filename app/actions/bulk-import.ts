@@ -157,7 +157,7 @@ export async function bulkImportAction(
 ): Promise<ImportResult> {
   try {
     // 1. Auth check
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) {
       return { success: false, error: "Shop not found or access denied." };
     }

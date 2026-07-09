@@ -5,6 +5,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getShopBySlug } from "@/lib/db/shops";
+import { requireShopAccess, hasPermission } from "@/lib/auth";
 import { getProducts } from "@/lib/db/products";
 import { countUnmappedProducts } from "@/lib/db/global-categories";
 import { checkProductLimit } from "@/lib/db/subscriptions";
@@ -24,6 +25,9 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
   const { slug } = await params;
   const shop = await getShopBySlug(slug);
   if (!shop) notFound();
+
+  const access = await requireShopAccess(slug);
+  const canManageCatalog = !!access && hasPermission(access.role, "catalog:manage");
 
   const products = await getProducts(shop.id);
   const mappingStats = await countUnmappedProducts(shop.id);
@@ -99,6 +103,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
             </a>
           </p>
         </div>
+        {canManageCatalog && (
         <div className="flex items-center gap-3">
           <Link
             href={`/dashboard/${slug}/products/import`}
@@ -113,6 +118,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
             + Add Product
           </Link>
         </div>
+        )}
       </div>
 
       {/* ── Product Usage Meter (compact) ───────────────── */}

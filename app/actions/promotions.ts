@@ -47,7 +47,7 @@ export async function purchasePromotionAction(
 ): Promise<PromotionActionResult> {
   try {
     // Auth
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "billing:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     // Validate tier
@@ -134,7 +134,7 @@ export async function cancelPromotionAction(
   promotionId: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "billing:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const cancelled = await cancelPromotion(promotionId, access.shopId);

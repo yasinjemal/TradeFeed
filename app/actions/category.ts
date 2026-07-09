@@ -31,7 +31,7 @@ export async function createCategoryAction(
   formData: FormData
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const raw = { name: formData.get("name") as string };
@@ -63,7 +63,7 @@ export async function updateCategoryAction(
   formData: FormData
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const raw = { name: formData.get("name") as string };
@@ -93,7 +93,7 @@ export async function deleteCategoryAction(
   categoryId: string
 ): Promise<ActionResult> {
   try {
-    const access = await requireShopAccess(shopSlug);
+    const access = await requireShopAccess(shopSlug, "catalog:manage");
     if (!access) return { success: false, error: "Access denied." };
 
     const result = await deleteCategory(categoryId, access.shopId);
