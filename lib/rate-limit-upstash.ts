@@ -29,7 +29,7 @@ export interface RateLimitResult {
   retryAfterSeconds: number;
 }
 
-export type LimiterName = "catalog" | "api" | "checkout" | "review" | "analytics" | "ai";
+export type LimiterName = "catalog" | "api" | "checkout" | "review" | "analytics" | "ai" | "message";
 
 // ── Config per limiter ──────────────────────────────────────
 
@@ -40,6 +40,7 @@ const LIMITER_CONFIG: Record<LimiterName, { limit: number; windowSeconds: number
   review:    { limit: 3,   windowSeconds: 60 },
   analytics: { limit: 100, windowSeconds: 60 },
   ai:        { limit: 50,  windowSeconds: 86400 }, // 50 AI generations per shop per day
+  message:   { limit: 12,  windowSeconds: 60 },
 };
 
 // ── Upstash instances (lazy singleton per limiter) ──────────

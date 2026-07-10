@@ -98,6 +98,7 @@ model Shop {
   subscription Subscription?                  // Current billing subscription
   promotedListings PromotedListing[]          // Marketplace promoted listings
   orders      Order[]                         // Orders placed at this shop
+  orderMessages OrderMessage[]                // Buyer-seller messages scoped to shop orders
   reviews     Review[]                        // Reviews for this shop's products
   gallery     ShopGalleryItem[]               // Shop profile images & videos
   drops       Drop[]                          // Stock drop announcements
@@ -630,6 +631,7 @@ model Order {
   items           OrderItem[]
   transactionFee  TransactionFee?
   reviewRequest   ReviewRequest?
+  messages        OrderMessage[]
 
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -679,6 +681,31 @@ enum OrderStatus {
   SHIPPED                                           // Order dispatched / ready for collection
   DELIVERED                                         // Buyer received order
   CANCELLED                                         // Order cancelled by buyer or seller
+}
+
+enum OrderMessageSender {
+  BUYER
+  SELLER
+}
+
+// Private buyer-seller conversation attached to a real order. The shopId is
+// duplicated intentionally so every seller query can enforce tenant isolation.
+model OrderMessage {
+  id          String             @id @default(cuid())
+  orderId     String
+  order       Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shopId      String
+  shop        Shop               @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  senderType  OrderMessageSender
+  senderId    String             // Buyer Clerk ID or internal seller User ID; never shown publicly
+  senderName  String             // Display-name snapshot
+  body        String             @db.VarChar(1500)
+  readAt      DateTime?          // Set when the receiving side opens the thread
+  createdAt   DateTime           @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([shopId, createdAt])
+  @@index([shopId, senderType, readAt])
 }
 
 enum ShippingMethod {

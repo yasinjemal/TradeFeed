@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, CheckCheck, Package, RefreshCw, Store } from "lucide-react";
+import { Bell, CheckCheck, MessageCircle, Package, RefreshCw, Store } from "lucide-react";
 import { useState, useTransition } from "react";
 
 import {
@@ -89,7 +89,7 @@ export function BuyerNotificationCentre({
             <p className="mt-1 text-xs text-stone-500">Order updates and alerts from saved products will appear here.</p>
           </div>
         ) : notifications.map((item) => {
-          const Icon = item.kind === "ORDER" ? Package : item.kind === "SHOP_DROP" ? Store : RefreshCw;
+          const Icon = item.kind === "ORDER" ? Package : item.kind === "SHOP_DROP" ? Store : item.kind === "MESSAGE" ? MessageCircle : RefreshCw;
           const content = <NotificationContent Icon={Icon} item={item} />;
           const classes = `flex gap-3 rounded-xl border p-4 transition-colors ${item.readAt ? "border-stone-800/40 bg-stone-900/25" : "border-emerald-500/20 bg-emerald-500/5"}`;
 

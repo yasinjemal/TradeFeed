@@ -15,6 +15,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getShopBySlug, getDashboardStats, getSellerHealthMetrics } from "@/lib/db/shops";
 import { getOrderStats } from "@/lib/db/orders";
+import { getShopUnreadMessageCount } from "@/lib/db/order-messages";
 import { computeSellerHealth } from "@/lib/intelligence";
 import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
@@ -35,11 +36,12 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const shop = await getShopBySlug(slug);
   if (!shop) notFound();
 
-  const [stats, healthMetrics, orderStats, subscription] = await Promise.all([
+  const [stats, healthMetrics, orderStats, subscription, unreadMessages] = await Promise.all([
     getDashboardStats(shop.id),
     getSellerHealthMetrics(shop.id),
     getOrderStats(shop.id),
     getShopSubscription(shop.id),
+    getShopUnreadMessageCount(shop.id),
   ]);
   const health = computeSellerHealth(healthMetrics);
   const trial = isTrialActive(subscription);
@@ -62,6 +64,13 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
   // Build priority attention items (red = urgent, yellow = action needed)
   const priorities: { level: "red" | "yellow"; label: string; href: string }[] = [];
+  if (unreadMessages > 0) {
+    priorities.push({
+      level: "red",
+      label: `${unreadMessages} unread buyer message${unreadMessages !== 1 ? "s" : ""}`,
+      href: `/dashboard/${slug}/orders`,
+    });
+  }
   if (stats.outOfStockCount > 0) {
     priorities.push({
       level: "red",

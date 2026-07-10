@@ -12,6 +12,7 @@
 
 import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { updateOrderStatusAction, createOrderPaymentLinkAction, shipOrderAction, confirmCodPaymentAction } from "@/app/actions/orders";
 import type { OrderStatus } from "@prisma/client";
 import { ExportButtons } from "@/components/export/export-buttons";
@@ -66,6 +67,7 @@ interface Order {
   // Payment method
   paymentMethod?: string | null;
   codConfirmedAt?: string | null;
+  messages?: { id: string }[];
 }
 
 interface OrderStats {
@@ -529,6 +531,15 @@ function OrderCard({
       {/* ── Expanded Details ─────────────────────────── */}
       {expanded && (
         <div className="px-4 pb-4 border-t border-stone-100 pt-3 space-y-3">
+          <div className="flex items-center justify-between rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2.5">
+            <div>
+              <p className="text-sm font-medium text-emerald-900">Buyer conversation</p>
+              <p className="text-xs text-emerald-700">Keep order questions and arrangements in one place.</p>
+            </div>
+            <Link href={`/dashboard/${shopSlug}/orders/${order.id}/messages`} className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">
+              {order.messages?.length ? `${order.messages.length} new` : "Open chat"}
+            </Link>
+          </div>
           {/* Line Items */}
           <div className="space-y-2">
             {order.items.map((item) => (

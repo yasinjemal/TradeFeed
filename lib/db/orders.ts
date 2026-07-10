@@ -257,6 +257,10 @@ export async function listOrders(
     },
     include: {
       items: true,
+      messages: {
+        where: { senderType: "BUYER", readAt: null },
+        select: { id: true },
+      },
     },
     orderBy: { createdAt: "desc" },
     take: limit,
