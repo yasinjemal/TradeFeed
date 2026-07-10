@@ -12,14 +12,15 @@ This repo has TWO design systems. Check which one you're in before writing a lin
 1. **TF system** (`components/tf/**`) — the canonical system being shipped. Warm trust-first palette, `tf-*` tokens, Clash Display/General Sans, CSS-only motion. All new buyer-facing UI is TF.
 2. **Legacy system** (`components/landing`, `components/marketplace`, `components/catalog`, most of `components/dashboard`) — emerald/luxury styling, framer-motion, scheduled for deletion after the TF flip. Do not invest in legacy unless fixing a live bug.
 
-The switch is `FEATURE_FLAGS.UI_REDESIGN` in `lib/config/feature-flags.ts` (build-time env `NEXT_PUBLIC_FF_UI_REDESIGN`). Grep for the flag before editing a page — most buyer pages branch on it and you must edit the correct branch.
+The switch is `FEATURE_FLAGS.UI_REDESIGN` in `lib/config/feature-flags.ts` (build-time env `NEXT_PUBLIC_FF_UI_REDESIGN`) for BUYER surfaces, and `FEATURE_FLAGS.UI_REDESIGN_DASHBOARD` for SELLER surfaces (dashboard home, create-shop) — split so the buyer flip ships independently. Grep for the flag before editing a page — most pages branch on it and you must edit the correct branch.
 
 ## Tokens (source of truth: `app/globals.css`)
 
 Tailwind v4 CSS-first config — there is **no tailwind.config file**. All tokens live in `app/globals.css`:
 
 - **TF tokens** (`@theme` block, search `--color-tf-`): `tf-surface`, `tf-raised`, `tf-ink`, `tf-primary` (emerald #047857), `tf-primary-hover`, `tf-deep`, `tf-deepest`, `tf-accent` (amber), `tf-accent-ink/-soft`, `tf-verified/-soft`, `tf-success/warning/error/-soft`, `tf-stone-50…900`, `--shadow-tf-sm/md`, fonts `--font-tf-hero` (Clash Display) / `--font-tf-display` (General Sans).
-- **Dark mode**: class strategy via `@custom-variant dark` + next-themes. TF dark values live in a `.dark { --color-tf-*: … }` block. Never hardcode hex colors in `components/tf/**` — a hardcoded `#047857` or `bg-white` breaks dark mode. Use `bg-tf-surface`, `text-tf-ink`, `accent-tf-primary`, etc.
+- **Dark mode**: class strategy via `@custom-variant dark` + next-themes (`ThemeProvider` in app/layout.tsx; forced light while `UI_REDESIGN` is off so legacy prod is untouched; toggle = `TfThemeToggle`). TF dark values live in a `.dark { --color-tf-*: … }` block. Never hardcode hex colors in `components/tf/**` — a hardcoded `#047857` or `bg-white` breaks dark mode. Use `bg-tf-surface`, `text-tf-ink`, `accent-tf-primary`, etc. Known traps: `text-white` on `bg-tf-ink` must be `text-tf-surface`; `text-tf-deep` on `bg-tf-verified-soft` must be `text-tf-verified` (tf-deep/deepest stay dark by design — they're for permanently-dark hero sections).
+- **CTA indirection**: TfButton `primary` paints with `--tf-cta`/`--tf-cta-hover`/`--tf-cta-text` (globals.css). Pro shop themes retint CTAs via `[data-shop-themed]` on the catalog content wrapper — shop colors tint interactive accents ONLY, never surfaces or body text.
 - **Legacy/shadcn tokens**: standard shadcn oklch vars (`--background`, `--primary`, …) plus brand vars (`--color-whatsapp #25D366`).
 - **Per-shop Pro themes**: `lib/config/themes.ts` + `buildThemeCssVars` inject `--shop-primary/--shop-accent/--shop-font` in `app/catalog/[slug]/layout.tsx`. Rule: shop theme vars tint **interactive accents only** (buttons, active pills) — never surfaces or body text. In dark mode, lift with `color-mix(in oklab, var(--shop-primary) 85%, white)`.
 
