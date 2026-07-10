@@ -160,17 +160,22 @@ export default async function HomePage() {
   let dashboardSlug: string | null = null;
 
   if (clerkId) {
-    const user = await db.user.findUnique({
-      where: { clerkId },
-      select: {
-        shops: {
-          select: { shop: { select: { slug: true } } },
-          take: 1,
-          orderBy: { createdAt: "asc" },
+    try {
+      const user = await db.user.findUnique({
+        where: { clerkId },
+        select: {
+          shops: {
+            select: { shop: { select: { slug: true } } },
+            take: 1,
+            orderBy: { createdAt: "asc" },
+          },
         },
-      },
-    });
-    dashboardSlug = user?.shops[0]?.shop.slug ?? null;
+      });
+      dashboardSlug = user?.shops[0]?.shop.slug ?? null;
+    } catch {
+      // DB unreachable — degrade to the generic CTA rather than 500
+      dashboardSlug = null;
+    }
   }
 
   const ctaHref = clerkId
@@ -192,11 +197,19 @@ export default async function HomePage() {
     : "/sign-up?redirect_url=/dashboard&ai=true";
 
   // ── Live platform stats (cached) + admin check + sellers (parallel) ──
+  // Every source is individually failure-safe: a DB blip must degrade
+  // the landing page (zero stats, empty rails), never error-boundary it.
   const [{ shopCount, productCount, orderCount, cityCount, topCities }, adminClerkId, featuredSellers, homeProducts] = await Promise.all([
-    getPlatformStats(),
-    isAdmin(),
-    getHomepageSellers(),
-    getHomepageProducts(),
+    getPlatformStats().catch(() => ({
+      shopCount: 0,
+      productCount: 0,
+      orderCount: 0,
+      cityCount: 0,
+      topCities: "",
+    })),
+    isAdmin().catch(() => null),
+    getHomepageSellers().catch(() => []),
+    getHomepageProducts().catch(() => []),
   ]);
   const userIsAdmin = !!adminClerkId;
 

@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tradefeed-tf",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": [
+        "-Command",
+        "$env:NEXT_PUBLIC_FF_UI_REDESIGN='true'; npm run dev"
+      ],
+      "port": 3000,
+      "autoPort": true
+    }
+  ]
+}
