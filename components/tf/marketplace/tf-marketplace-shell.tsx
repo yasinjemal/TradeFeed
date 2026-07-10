@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BadgeCheck, Search, SearchX, SlidersHorizontal, ArrowRight } from "lucide-react";
+import { BadgeCheck, Search, SearchX, SlidersHorizontal, ArrowRight, Bookmark } from "lucide-react";
+import { UserButton, useUser } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
@@ -97,6 +98,7 @@ export function TfMarketplaceShell({
 }: TfMarketplaceShellProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isSignedIn } = useUser();
 
   const [search, setSearch] = React.useState(currentFilters.search ?? "");
   const [sheetOpen, setSheetOpen] = React.useState(false);
@@ -272,9 +274,7 @@ export function TfMarketplaceShell({
             <span className="hidden text-[11px] text-emerald-100/65 lg:block">Orders direct via WhatsApp</span>
           </div>
           <div className="flex shrink-0 items-center gap-3 text-[11px]">
-            <Link href="/sign-in" className="hidden text-emerald-400/70 transition-colors hover:text-emerald-300 sm:block">
-              Sign in
-            </Link>
+            {isSignedIn ? <Link href="/me" className="hidden text-emerald-300 transition-colors hover:text-white sm:block">My TradeFeed</Link> : <Link href="/sign-in" className="hidden text-emerald-400/70 transition-colors hover:text-emerald-300 sm:block">Sign in</Link>}
             <Link href="/sign-up" className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-3 py-1 font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/30">
               Sell free
               <ArrowRight aria-hidden="true" className="size-3" />
@@ -391,13 +391,20 @@ export function TfMarketplaceShell({
             <TfThemeToggle className="hidden sm:inline-flex" />
 
             {/* Sell free CTA — vibrant emerald, the conversion button */}
-            <Link
-              href="/sign-up"
-              className="hidden min-h-[48px] shrink-0 items-center gap-2 rounded-2xl bg-tf-primary px-5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-tf-primary-hover hover:shadow-md md:inline-flex"
-            >
-              Sell free
-              <ArrowRight aria-hidden="true" className="size-3.5" />
-            </Link>
+            {isSignedIn ? (
+              <div className="flex shrink-0 items-center gap-1.5">
+                <Link href="/me" aria-label="Open My TradeFeed" className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-sm font-semibold text-tf-stone-600 transition-colors hover:bg-tf-stone-100 hover:text-tf-primary">
+                  <Bookmark className="size-4" />
+                  <span className="hidden lg:inline">My TradeFeed</span>
+                </Link>
+                <UserButton afterSignOutUrl="/marketplace" appearance={{ elements: { avatarBox: "size-9" } }} />
+              </div>
+            ) : (
+              <Link href="/sign-up" className="hidden min-h-[48px] shrink-0 items-center gap-2 rounded-2xl bg-tf-primary px-5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-tf-primary-hover hover:shadow-md md:inline-flex">
+                Sell free
+                <ArrowRight aria-hidden="true" className="size-3.5" />
+              </Link>
+            )}
           </div>
         </div>
 

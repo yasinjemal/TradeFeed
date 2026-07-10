@@ -21,6 +21,7 @@ import { MarketplaceFilterSheet } from "./marketplace-filter-sheet";
 import { MarketplaceFilterSidebar } from "./marketplace-filter-sidebar";
 import { MarketplaceProductCard, MarketplaceProductCardSkeleton } from "./marketplace-product-card";
 import { MarketplaceSearchBar } from "./search-bar";
+import { Bookmark } from "lucide-react";
 
 interface MarketplaceShellProps {
   products: MarketplaceProduct[];
@@ -317,6 +318,13 @@ export function MarketplaceShell({
             </div>
             {isSignedIn ? (
               <>
+                <Link
+                  href="/me"
+                  className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-50"
+                >
+                  <Bookmark className="size-4" />
+                  <span className="hidden md:inline">My TradeFeed</span>
+                </Link>
                 <Link
                   href="/dashboard"
                   className="hidden px-4 py-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 sm:inline-flex"

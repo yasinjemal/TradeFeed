@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart/cart-context";
 import { CartPanel } from "@/components/catalog/cart-panel";
 import { TfCartPanel } from "@/components/tf/checkout/tf-cart-panel";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { useUser } from "@clerk/nextjs";
 
 const Panel = FEATURE_FLAGS.UI_REDESIGN ? TfCartPanel : CartPanel;
 
@@ -31,6 +32,7 @@ interface BottomNavProps {
 
 export function BottomNav({ shopSlug }: BottomNavProps) {
   const pathname = usePathname();
+  const { isSignedIn } = useUser();
   const { totalItems } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -61,7 +63,7 @@ export function BottomNav({ shopSlug }: BottomNavProps) {
     },
     {
       key: "orders",
-      href: "/track",
+      href: isSignedIn ? "/orders" : "/track",
       label: "Orders",
       isActive: pathname.startsWith("/track"),
       icon: (
@@ -73,9 +75,10 @@ export function BottomNav({ shopSlug }: BottomNavProps) {
     },
     {
       key: "account",
-      href: "/sign-in",
+      href: isSignedIn ? "/me" : "/sign-in",
       label: "Account",
       isActive:
+        pathname.startsWith("/me") ||
         pathname.startsWith("/sign-in") ||
         pathname.startsWith("/sign-up") ||
         pathname.startsWith("/dashboard") ||

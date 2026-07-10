@@ -43,9 +43,9 @@ export function GlobalBottomNav() {
   // Hide on routes that already have their own bottom navigation
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null;
 
-  const accountHref = isSignedIn ? "/dashboard" : "/sign-in";
+  const accountHref = isSignedIn ? "/me/account" : "/sign-in";
   const accountActive = isSignedIn
-    ? pathname.startsWith("/dashboard") || pathname.startsWith("/create-shop")
+    ? pathname.startsWith("/me/account") || pathname.startsWith("/me/security")
     : pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 
   const tabs = [
@@ -96,6 +96,17 @@ export function GlobalBottomNav() {
             </svg>
           ),
         },
+    ...(isSignedIn ? [{
+      key: "buyer-home",
+      href: "/me",
+      label: "My Feed",
+      isActive: pathname === "/me" || pathname.startsWith("/me/notifications") || pathname.startsWith("/me/activity"),
+      icon: (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.9} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+        </svg>
+      ),
+    }] : []),
     {
       key: "account",
       href: accountHref,
@@ -119,7 +130,7 @@ export function GlobalBottomNav() {
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Main navigation"
       >
-        <div className="mx-auto grid h-16 max-w-xl grid-cols-4 px-1">
+        <div className={`mx-auto grid h-16 max-w-xl px-1 ${isSignedIn ? "grid-cols-5" : "grid-cols-4"}`}>
           {tabs.map((tab) => (
             <Link
               key={tab.key}
