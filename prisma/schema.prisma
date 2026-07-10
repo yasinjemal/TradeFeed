@@ -1538,14 +1538,34 @@ model BuyerProfile {
   displayName      String?                       // Optional name shown on reviews
   language         String   @default("en")       // Preferred locale (en, zu, xh, af, st)
   marketingConsent Boolean  @default(false)      // Opt-in for "new from shops you follow" WhatsApp pings
+  orderUpdates     Boolean  @default(true)       // In-app order and delivery updates
+  restockAlerts    Boolean  @default(true)       // Back-in-stock alerts for saved products
+  shopUpdates      Boolean  @default(true)       // New drops from followed shops
 
   follows          ShopFollow[]
+  notifications    BuyerNotification[]
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   @@index([clerkId])
   @@index([phone])
+}
+
+// Buyer-owned in-app inbox. Content is short, scoped, and never exposed to sellers.
+model BuyerNotification {
+  id        String       @id @default(cuid())
+  buyerId   String
+  buyer     BuyerProfile @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  kind      String       // ORDER | RESTOCK | SHOP_DROP | MESSAGE
+  title     String
+  body      String
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime     @default(now())
+
+  @@index([buyerId, createdAt])
+  @@index([buyerId, readAt])
 }
 
 // ============================================================

@@ -371,6 +371,40 @@ export async function updateOrderStatusAction(
       }
     }
 
+    // 4d. Keep the buyer's in-app inbox in sync with the order lifecycle.
+    // This is deliberately non-fatal: a seller should never be blocked from
+    // fulfilling an order because an optional alert could not be created.
+    if (order.buyerClerkId) {
+      try {
+        const { db: prismaDb } = await import("@/lib/db");
+        const buyer = await prismaDb.buyerProfile.findUnique({
+          where: { clerkId: order.buyerClerkId },
+          select: { id: true, orderUpdates: true },
+        });
+        if (buyer?.orderUpdates) {
+          const statusCopy: Record<OrderStatus, { title: string; body: string }> = {
+            PENDING: { title: "Order received", body: "Your order is waiting for the seller to confirm it." },
+            CONFIRMED: { title: "Order confirmed", body: "The seller has confirmed your order and will prepare it next." },
+            SHIPPED: order.shippingMethod === "COLLECTION"
+              ? { title: "Ready for collection", body: "Your order is ready for you to collect." }
+              : { title: "Order dispatched", body: "Your order is on its way." },
+            DELIVERED: { title: "Order delivered", body: "Your order has been marked as delivered." },
+            CANCELLED: { title: "Order cancelled", body: "This order has been cancelled. Contact the seller if you need help." },
+          };
+          const copy = statusCopy[newStatus];
+          await prismaDb.buyerNotification.create({
+            data: {
+              buyerId: buyer.id,
+              kind: "ORDER",
+              title: copy.title,
+              body: `${order.orderNumber} · ${copy.body}`,
+              href: `/track/${encodeURIComponent(order.orderNumber)}`,
+            },
+          });
+        }
+      } catch { /* non-fatal */ }
+    }
+
     // 5. Send WhatsApp status update to buyer (fire-and-forget)
     if (order.buyerPhone) {
       const { db: prismaDb } = await import("@/lib/db");

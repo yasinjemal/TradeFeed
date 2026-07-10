@@ -20,6 +20,7 @@ import {
   getOrCreateBuyerProfile,
   getFollowedShops,
   getFollowedFeed,
+  getBuyerSavedProducts,
 } from "@/lib/db/buyers";
 import { formatZAR } from "@/lib/config/promotions";
 
@@ -65,9 +66,10 @@ export default async function BuyerHomePage() {
 
   // ── Signed-in buyer ─────────────────────────────────────
   const buyer = await getOrCreateBuyerProfile(userId);
-  const [shops, feed] = await Promise.all([
+  const [shops, feed, savedProducts] = await Promise.all([
     getFollowedShops(buyer.id),
     getFollowedFeed(buyer.id),
+    getBuyerSavedProducts(userId),
   ]);
 
   return (
@@ -89,9 +91,49 @@ export default async function BuyerHomePage() {
         </Link>
       </div>
 
+      <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Link href="/orders" className="rounded-2xl border border-stone-800/50 bg-stone-900/40 p-4 transition-colors hover:border-emerald-500/30">
+          <p className="text-xs font-medium text-stone-400">Orders</p>
+          <p className="mt-1 text-sm font-semibold text-stone-100">Track purchases</p>
+        </Link>
+        <a href="#saved" className="rounded-2xl border border-stone-800/50 bg-stone-900/40 p-4 transition-colors hover:border-emerald-500/30">
+          <p className="text-xs font-medium text-stone-400">Saved</p>
+          <p className="mt-1 text-sm font-semibold text-stone-100">{savedProducts.length} product{savedProducts.length === 1 ? "" : "s"}</p>
+        </a>
+        <a href="#following" className="col-span-2 rounded-2xl border border-stone-800/50 bg-stone-900/40 p-4 transition-colors hover:border-emerald-500/30 sm:col-span-1">
+          <p className="text-xs font-medium text-stone-400">Following</p>
+          <p className="mt-1 text-sm font-semibold text-stone-100">{shops.length} shop{shops.length === 1 ? "" : "s"}</p>
+        </a>
+        <Link href="/me/notifications" className="col-span-2 rounded-2xl border border-stone-800/50 bg-stone-900/40 p-4 transition-colors hover:border-emerald-500/30 sm:col-span-1">
+          <p className="text-xs font-medium text-stone-400">Notifications</p>
+          <p className="mt-1 text-sm font-semibold text-stone-100">Manage alerts</p>
+        </Link>
+      </div>
+
+      <section id="saved" className="mb-10">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-stone-400">Saved products</h2>
+          {savedProducts.length > 0 && <span className="text-xs text-stone-500">Across your shops</span>}
+        </div>
+        {savedProducts.length === 0 ? (
+          <div className="rounded-2xl border border-stone-800/30 bg-stone-900/30 px-4 py-5 text-sm text-stone-500">Tap the heart on a product to save it here.</div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {savedProducts.map((product) => (
+              <Link key={product.id} href={`/catalog/${product.shop.slug}/products/${product.slug ?? product.id}`} className="overflow-hidden rounded-2xl border border-stone-800/40 bg-stone-900/60 transition-colors hover:border-emerald-500/30">
+                <div className="relative aspect-square bg-stone-900">
+                  {product.imageUrl ? <Image src={product.imageUrl} alt={product.name} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" /> : <div className="flex size-full items-center justify-center text-2xl text-stone-700">♡</div>}
+                </div>
+                <div className="p-3"><p className="truncate text-xs font-medium text-stone-200">{product.name}</p><p className="mt-0.5 truncate text-[11px] text-stone-500">{product.shop.name}</p><p className="mt-1 text-sm font-semibold text-emerald-400">{formatZAR(product.minPriceCents)}</p></div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* ── Followed shops strip ───────────────────────────── */}
       {shops.length > 0 && (
-        <div className="mb-10">
+        <div id="following" className="mb-10">
           <h2 className="text-sm font-semibold text-stone-400 mb-3">Shops you follow</h2>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
             {shops.map((shop) => (

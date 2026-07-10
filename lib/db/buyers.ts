@@ -42,6 +42,39 @@ export async function getBuyerProfile(clerkId: string) {
   return db.buyerProfile.findUnique({ where: { clerkId } });
 }
 
+/** Saved products across every shop for the signed-in buyer. */
+export async function getBuyerSavedProducts(clerkId: string, limit = 12) {
+  const saved = await db.wishlistItem.findMany({
+    where: { userId: clerkId },
+    select: { productId: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+  if (saved.length === 0) return [];
+
+  const products = await db.product.findMany({
+    where: {
+      id: { in: saved.map((item) => item.productId) },
+      isActive: true,
+      shop: { isActive: true },
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      minPriceCents: true,
+      images: { orderBy: { position: "asc" }, take: 1, select: { url: true } },
+      shop: { select: { name: true, slug: true, isVerified: true } },
+    },
+  });
+
+  const byProductId = new Map(products.map((product) => [product.id, product]));
+  return saved.flatMap((item) => {
+    const product = byProductId.get(item.productId);
+    return product ? [{ ...product, savedAt: item.createdAt, imageUrl: product.images[0]?.url ?? null }] : [];
+  });
+}
+
 // ── Follows ──────────────────────────────────────────────────
 
 /**
