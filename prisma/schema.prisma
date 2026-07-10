@@ -1573,12 +1573,35 @@ model BuyerProfile {
 
   follows          ShopFollow[]
   notifications    BuyerNotification[]
+  addresses        BuyerAddress[]
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   @@index([clerkId])
   @@index([phone])
+}
+
+// Private saved delivery destinations owned by one buyer account.
+model BuyerAddress {
+  id                   String       @id @default(cuid())
+  buyerId              String
+  buyer                BuyerProfile @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  label                 String       @default("Home")
+  recipientName         String
+  phone                 String?      // Optional delivery contact in E.164 format (PII — POPIA)
+  addressLine1          String
+  addressLine2          String?
+  city                  String
+  province              String
+  postalCode            String
+  deliveryInstructions  String?
+  isDefault             Boolean      @default(false)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  @@index([buyerId, isDefault])
+  @@index([buyerId, updatedAt])
 }
 
 // Buyer-owned in-app inbox. Content is short, scoped, and never exposed to sellers.

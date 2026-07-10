@@ -42,6 +42,87 @@ export async function getBuyerProfile(clerkId: string) {
   return db.buyerProfile.findUnique({ where: { clerkId } });
 }
 
+export async function getBuyerAddresses(buyerId: string) {
+  return db.buyerAddress.findMany({
+    where: { buyerId },
+    orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }],
+  });
+}
+
+export async function getBuyerRecentActivity(clerkId: string, buyerId: string, limit = 30) {
+  const [orders, saves, follows, notifications] = await Promise.all([
+    db.order.findMany({
+      where: { buyerClerkId: clerkId, deletedAt: null },
+      select: { id: true, orderNumber: true, status: true, createdAt: true, shop: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    db.wishlistItem.findMany({
+      where: { userId: clerkId },
+      select: { productId: true, productName: true, createdAt: true, shopId: true },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    db.shopFollow.findMany({
+      where: { buyerId },
+      select: { createdAt: true, shop: { select: { name: true, slug: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    db.buyerNotification.findMany({
+      where: { buyerId },
+      select: { id: true, kind: true, title: true, body: true, href: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+  ]);
+
+  const productIds = saves.map((save) => save.productId);
+  const products = productIds.length > 0 ? await db.product.findMany({
+    where: { id: { in: productIds }, isActive: true },
+    select: { id: true, name: true, slug: true, shop: { select: { name: true, slug: true } } },
+  }) : [];
+  const productsById = new Map(products.map((product) => [product.id, product]));
+
+  return [
+    ...orders.map((order) => ({
+      id: `order-${order.id}`,
+      type: "ORDER" as const,
+      title: `Order ${order.orderNumber}`,
+      detail: `${order.shop.name} · ${order.status.toLowerCase().replaceAll("_", " ")}`,
+      href: `/orders`,
+      createdAt: order.createdAt,
+    })),
+    ...saves.map((save) => {
+      const product = productsById.get(save.productId);
+      return {
+        id: `save-${save.productId}-${save.createdAt.getTime()}`,
+        type: "SAVED" as const,
+        title: `Saved ${product?.name ?? save.productName ?? "a product"}`,
+        detail: product?.shop.name ?? "Saved product",
+        href: product ? `/catalog/${product.shop.slug}/products/${product.slug ?? product.id}` : "/me#saved",
+        createdAt: save.createdAt,
+      };
+    }),
+    ...follows.map((follow) => ({
+      id: `follow-${follow.shop.slug}-${follow.createdAt.getTime()}`,
+      type: "FOLLOW" as const,
+      title: `Followed ${follow.shop.name}`,
+      detail: "New drops from this shop can now reach your inbox.",
+      href: `/catalog/${follow.shop.slug}`,
+      createdAt: follow.createdAt,
+    })),
+    ...notifications.map((notification) => ({
+      id: `notification-${notification.id}`,
+      type: "NOTIFICATION" as const,
+      title: notification.title,
+      detail: notification.body,
+      href: notification.href ?? "/me/notifications",
+      createdAt: notification.createdAt,
+    })),
+  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, limit);
+}
+
 /** Saved products across every shop for the signed-in buyer. */
 export async function getBuyerSavedProducts(clerkId: string, limit = 12) {
   const saved = await db.wishlistItem.findMany({

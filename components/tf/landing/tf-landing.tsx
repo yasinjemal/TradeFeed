@@ -37,6 +37,8 @@ import { TfProductCard } from "@/components/tf/product-card";
 export interface TfLandingProps {
   ctaHref: string;
   ctaLabel: string;
+  /** Whether the viewer has a Clerk session — hides "Sign in" and the like */
+  isSignedIn?: boolean;
   stats: {
     shopCount: number;
     productCount: number;
@@ -85,7 +87,7 @@ function initials(name: string) {
 
 const WHATSAPP_GREEN = "#25D366";
 
-export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [], faqItems = [] }: TfLandingProps) {
+export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, sellers, products = [], faqItems = [] }: TfLandingProps) {
   const reassurance = `20 products free · 10 AI listings a month · no credit card · set up in under 3 minutes`;
 
   return (
@@ -96,7 +98,8 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [], fa
       <TfLandingHeader>
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link href="/" aria-label="TradeFeed home" className="shrink-0">
-            <TradeFeedLogo size="sm" variant="auto" />
+            <span className="tf-over-hero"><TradeFeedLogo size="sm" variant="light" /></span>
+            <span className="tf-over-surface"><TradeFeedLogo size="sm" variant="auto" /></span>
           </Link>
           <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-tf-stone-600 md:flex">
             <Link href="#how-it-works" className="tf-navlink hover:text-tf-ink">How it works</Link>
@@ -106,12 +109,15 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [], fa
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <TfThemeToggle />
-            <Link
-              href="/sign-in"
-              className="hidden px-3 py-2 text-sm text-tf-stone-600 hover:text-tf-ink sm:block transition-colors"
-            >
-              Sign in
-            </Link>
+            {/* Auth-aware: signed-in users already have the dashboard CTA */}
+            {!isSignedIn && (
+              <Link
+                href="/sign-in"
+                className="hidden px-3 py-2 text-sm text-tf-stone-600 hover:text-tf-ink sm:block transition-colors"
+              >
+                Sign in
+              </Link>
+            )}
             <TfButton asChild size="sm">
               <Link href={ctaHref}>{ctaLabel}</Link>
             </TfButton>

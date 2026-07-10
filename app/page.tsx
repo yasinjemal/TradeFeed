@@ -221,6 +221,7 @@ export default async function HomePage() {
         <TfLanding
           ctaHref={ctaHref}
           ctaLabel={ctaLabel}
+          isSignedIn={!!clerkId}
           stats={{ shopCount, productCount, orderCount, cityCount, topCities }}
           sellers={featuredSellers.map((s) => ({
             name: s.name,

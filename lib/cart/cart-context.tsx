@@ -26,7 +26,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { CartContextValue, CartItem } from "./types";
+import type { BuyerCheckoutDefaults, CartContextValue, CartItem } from "./types";
 
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -98,6 +98,7 @@ interface CartProviderProps {
   shopName?: string;
   shopLogoUrl?: string;
   shopVerified?: boolean;
+  buyerDefaults?: BuyerCheckoutDefaults;
 }
 
 export function CartProvider({
@@ -116,6 +117,7 @@ export function CartProvider({
   shopName,
   shopLogoUrl,
   shopVerified,
+  buyerDefaults,
 }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -247,6 +249,7 @@ export function CartProvider({
       shopName,
       shopLogoUrl,
       shopVerified,
+      buyerDefaults,
     }),
     [
       items,
@@ -270,6 +273,7 @@ export function CartProvider({
       shopName,
       shopLogoUrl,
       shopVerified,
+      buyerDefaults,
     ]
   );
 

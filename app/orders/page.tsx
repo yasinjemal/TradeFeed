@@ -13,6 +13,7 @@ import { getBuyerOrders } from "@/lib/db/orders";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TrackingSearch } from "@/components/tracking/tracking-search";
 import { BuyerOrderList } from "@/components/orders/buyer-order-list";
+import { BuyerAccountShell } from "@/components/buyer/buyer-account-shell";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -30,22 +31,7 @@ export default async function BuyerOrdersPage() {
     const orders = await getBuyerOrders(userId);
 
     return (
-      <div className="min-h-screen bg-stone-950 text-stone-100">
-        <header className="border-b border-stone-800/50 bg-stone-950/80 backdrop-blur-xl">
-          <div className="max-w-3xl mx-auto flex items-center justify-between px-5 h-14">
-            <Link href="/" className="flex items-center gap-2">
-              <TradeFeedLogo size="sm" />
-            </Link>
-            <Link
-              href="/marketplace"
-              className="text-xs text-stone-500 hover:text-stone-300 transition-colors"
-            >
-              Marketplace →
-            </Link>
-          </div>
-        </header>
-
-        <main className="max-w-2xl mx-auto px-5 py-10">
+      <BuyerAccountShell width="max-w-2xl">
           <h1 className="text-2xl font-extrabold tracking-tight mb-1">
             {t("myOrders")}
           </h1>
@@ -93,8 +79,7 @@ export default async function BuyerOrdersPage() {
             </h2>
             <TrackingSearch />
           </div>
-        </main>
-      </div>
+      </BuyerAccountShell>
     );
   }
 

@@ -810,6 +810,27 @@ h4, h5, h6 {
   box-shadow: var(--shadow-tf-sm);
 }
 
+/* Unscrolled, the landing header floats transparent over the
+   tf-deepest hero — which is dark in BOTH color modes. Lift the
+   text tokens its children use to light values so nav links and
+   controls stay legible in light mode too. */
+.tf-header[data-scrolled="false"] {
+  --color-tf-ink: #f2f0ea;
+  --color-tf-stone-600: #cfc9be;
+  --color-tf-stone-100: rgb(255 255 255 / 0.12);
+}
+/* Logo swap: light wordmark over the hero, theme-aware once the
+   header lifts onto the surface. */
+.tf-header .tf-over-hero {
+  display: none;
+}
+.tf-header[data-scrolled="false"] .tf-over-hero {
+  display: inline-flex;
+}
+.tf-header[data-scrolled="false"] .tf-over-surface {
+  display: none;
+}
+
 /* Nav links: hairline underline grows from the left on hover */
 .tf-navlink {
   position: relative;

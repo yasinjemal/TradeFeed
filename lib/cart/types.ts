@@ -38,6 +38,15 @@ export interface CartState {
   shopSlug: string;
 }
 
+export interface BuyerCheckoutDefaults {
+  name?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+}
+
 /**
  * Cart context value exposed to components.
  */
@@ -83,4 +92,6 @@ export interface CartContextValue {
   dispatchWindow?: string;
   /** Optional fulfilment note shown before checkout */
   deliveryNote?: string;
+  /** Signed-in buyer defaults used to prefill checkout without exposing them publicly */
+  buyerDefaults?: BuyerCheckoutDefaults;
 }

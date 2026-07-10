@@ -14,7 +14,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
+import { BuyerAccountShell } from "@/components/buyer/buyer-account-shell";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import {
   getOrCreateBuyerProfile,
@@ -220,22 +220,5 @@ export default async function BuyerHomePage() {
 }
 
 function PageShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-stone-950 text-stone-100">
-      <header className="border-b border-stone-800/50 bg-stone-950/80 backdrop-blur-xl">
-        <div className="max-w-3xl mx-auto flex items-center justify-between px-5 h-14">
-          <Link href="/" className="flex items-center gap-2">
-            <TradeFeedLogo size="sm" />
-          </Link>
-          <Link
-            href="/marketplace"
-            className="text-xs text-stone-500 hover:text-stone-300 transition-colors"
-          >
-            Marketplace →
-          </Link>
-        </div>
-      </header>
-      <main className="max-w-2xl mx-auto px-5 py-10">{children}</main>
-    </div>
-  );
+  return <BuyerAccountShell width="max-w-2xl">{children}</BuyerAccountShell>;
 }

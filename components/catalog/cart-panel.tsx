@@ -75,20 +75,21 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
     collectionEnabled,
     dispatchWindow,
     deliveryNote,
+    buyerDefaults,
   } = useCart();
 
   const [isPending, startTransition] = useTransition();
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [buyerName, setBuyerName] = useState("");
-  const [buyerPhone, setBuyerPhone] = useState("");
+  const [buyerName, setBuyerName] = useState(buyerDefaults?.name ?? "");
+  const [buyerPhone, setBuyerPhone] = useState(buyerDefaults?.phone ?? "");
   const [buyerNote, setBuyerNote] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
-  const [showDelivery, setShowDelivery] = useState(false);
+  const [showDelivery, setShowDelivery] = useState(Boolean(buyerDefaults?.address));
   const [delivery, setDelivery] = useState<DeliveryAddress>({
-    address: "",
-    city: "",
-    province: "",
-    postalCode: "",
+    address: buyerDefaults?.address ?? "",
+    city: buyerDefaults?.city ?? "",
+    province: buyerDefaults?.province ?? "",
+    postalCode: buyerDefaults?.postalCode ?? "",
   });
 
   // Shipping rate state

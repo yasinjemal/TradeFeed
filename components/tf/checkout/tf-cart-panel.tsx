@@ -88,21 +88,22 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
     shopName,
     shopLogoUrl,
     shopVerified,
+    buyerDefaults,
   } = useCart();
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = React.useState<string | null>(null);
   const [confirmation, setConfirmation] = React.useState<Confirmation | null>(null);
-  const [buyerName, setBuyerName] = React.useState("");
-  const [buyerPhone, setBuyerPhone] = React.useState("");
+  const [buyerName, setBuyerName] = React.useState(buyerDefaults?.name ?? "");
+  const [buyerPhone, setBuyerPhone] = React.useState(buyerDefaults?.phone ?? "");
   const [buyerNote, setBuyerNote] = React.useState("");
   const [marketingConsent, setMarketingConsent] = React.useState(false);
-  const [showDelivery, setShowDelivery] = React.useState(false);
+  const [showDelivery, setShowDelivery] = React.useState(Boolean(buyerDefaults?.address));
   const [delivery, setDelivery] = React.useState<DeliveryAddress>({
-    address: "",
-    city: "",
-    province: "",
-    postalCode: "",
+    address: buyerDefaults?.address ?? "",
+    city: buyerDefaults?.city ?? "",
+    province: buyerDefaults?.province ?? "",
+    postalCode: buyerDefaults?.postalCode ?? "",
   });
   const [shippingRates, setShippingRates] = React.useState<ShippingRate[]>([]);
   const [selectedShipping, setSelectedShipping] = React.useState<string | null>(null);

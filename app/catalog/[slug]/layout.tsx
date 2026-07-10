@@ -30,6 +30,8 @@ import { CatalogAppShell } from "@/components/ui/catalog-app-shell";
 import { OfflineBanner } from "@/components/catalog/offline-banner";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { TfCatalogHeader, TfCatalogFooter } from "@/components/tf/storefront/tf-catalog-chrome";
+import { auth } from "@clerk/nextjs/server";
+import { db } from "@/lib/db";
 
 interface CatalogLayoutProps {
   children: React.ReactNode;
@@ -104,6 +106,25 @@ export default async function CatalogLayout({
 
   if (!shop) return notFound();
 
+  const { userId } = await auth();
+  const buyer = userId ? await db.buyerProfile.findUnique({
+    where: { clerkId: userId },
+    select: {
+      displayName: true,
+      phone: true,
+      addresses: { orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }], take: 1 },
+    },
+  }) : null;
+  const defaultAddress = buyer?.addresses[0];
+  const buyerDefaults = buyer ? {
+    name: buyer.displayName ?? defaultAddress?.recipientName ?? undefined,
+    phone: defaultAddress?.phone ?? buyer.phone ?? undefined,
+    address: defaultAddress ? [defaultAddress.addressLine1, defaultAddress.addressLine2].filter(Boolean).join(", ") : undefined,
+    city: defaultAddress?.city,
+    province: defaultAddress?.province,
+    postalCode: defaultAddress?.postalCode,
+  } : undefined;
+
   // Compute seller tier for trust badges
   const tierData = await getSellerTierData(shop.id, shop);
 
@@ -128,7 +149,7 @@ export default async function CatalogLayout({
   };
 
   return (
-    <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined} shopProvince={shop.province ?? undefined} shopCity={shop.city ?? undefined} codEnabled={shop.codEnabled} deliveryEnabled={shop.deliveryEnabled} collectionEnabled={shop.collectionEnabled} dispatchWindow={shop.dispatchWindow} deliveryNote={shop.deliveryNote ?? undefined} shopName={shop.name} shopLogoUrl={shop.logoUrl ?? undefined} shopVerified={shop.isVerified}>
+    <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined} shopProvince={shop.province ?? undefined} shopCity={shop.city ?? undefined} codEnabled={shop.codEnabled} deliveryEnabled={shop.deliveryEnabled} collectionEnabled={shop.collectionEnabled} dispatchWindow={shop.dispatchWindow} deliveryNote={shop.deliveryNote ?? undefined} shopName={shop.name} shopLogoUrl={shop.logoUrl ?? undefined} shopVerified={shop.isVerified} buyerDefaults={buyerDefaults}>
     <WhatsAppCTAProvider>
     <WishlistProvider shopSlug={slug} shopId={shop.id}>
       {/* Google Fonts for custom theme fonts */}

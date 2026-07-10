@@ -1,10 +1,15 @@
 import * as React from "react";
-import { ArrowRight, BadgeCheck, Camera, Link2, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, BadgeCheck, Link2, Sparkles } from "lucide-react";
 
 // ============================================================
 // TfPhoneMock — the hero proof: photo → AI listing → one
-// shareable catalogue link. Pure CSS, no JS, no stock photos.
+// shareable catalogue link. The same product photo appears as
+// the raw "Your photo" input and inside the finished listing,
+// so the before→after story reads at a glance.
 // ============================================================
+
+const DEMO_PHOTO = "/landing/demo-sneakers.webp";
 
 export function TfPhoneMock() {
   return (
@@ -15,8 +20,14 @@ export function TfPhoneMock() {
     >
       {/* Step: the photo */}
       <div className="flex w-24 shrink-0 flex-col items-center gap-2 sm:w-32">
-        <div className="flex aspect-square w-full items-center justify-center rounded-xl border border-tf-stone-200 bg-tf-raised shadow-tf-sm">
-          <Camera aria-hidden="true" className="size-8 text-tf-stone-400" />
+        <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-raised shadow-tf-sm">
+          <Image
+            src={DEMO_PHOTO}
+            alt=""
+            fill
+            sizes="128px"
+            className="object-cover"
+          />
         </div>
         <span className="text-xs text-tf-stone-600">Your photo</span>
       </div>
@@ -44,11 +55,17 @@ export function TfPhoneMock() {
           {/* Listing written by AI */}
           <div className="space-y-2 p-2.5">
             <div className="rounded-lg border border-tf-stone-200 bg-tf-raised p-2">
-              <div className="mb-1.5 flex aspect-[2/1] items-center justify-center rounded-md bg-tf-stone-100">
-                <Camera aria-hidden="true" className="size-4 text-tf-stone-300" />
+              <div className="relative mb-1.5 aspect-[2/1] overflow-hidden rounded-md bg-tf-stone-100">
+                <Image
+                  src={DEMO_PHOTO}
+                  alt=""
+                  fill
+                  sizes="230px"
+                  className="object-cover object-[center_68%]"
+                />
               </div>
               <p className="text-[11px] font-medium leading-tight text-tf-ink">
-                Nike Air Max 90 — size 6 to 10
+                Retro runners — size 6 to 10
               </p>
               <p className="text-[12px] font-semibold tabular-nums text-tf-ink">R1 899</p>
               <p className="text-[9px] leading-snug text-tf-stone-500">
