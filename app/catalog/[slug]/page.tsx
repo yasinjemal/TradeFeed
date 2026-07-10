@@ -185,6 +185,11 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
           description: shop.description,
           whatsappNumber: shop.whatsappNumber,
           createdAt: shop.createdAt,
+          deliveryEnabled: shop.deliveryEnabled,
+          collectionEnabled: shop.collectionEnabled,
+          dispatchWindow: shop.dispatchWindow,
+          deliveryNote: shop.deliveryNote,
+          returnPolicy: shop.returnPolicy,
         }}
         products={products.map((p, index) => {
           const prices = p.variants.map((v) => v.priceInCents);
@@ -467,4 +472,3 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
     </div>
   );
 }
-

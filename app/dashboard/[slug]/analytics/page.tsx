@@ -38,7 +38,7 @@ export default async function AnalyticsPage({
 
   let access: Awaited<ReturnType<typeof requireShopAccess>>;
   try {
-    access = await requireShopAccess(slug);
+    access = await requireShopAccess(slug, "analytics:view");
   } catch {
     return redirect("/sign-in");
   }

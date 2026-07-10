@@ -214,6 +214,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             province: shop.province,
             whatsappNumber: shop.whatsappNumber,
             createdAt: shop.createdAt,
+            deliveryEnabled: shop.deliveryEnabled,
+            collectionEnabled: shop.collectionEnabled,
+            dispatchWindow: shop.dispatchWindow,
+            deliveryNote: shop.deliveryNote,
+            returnPolicy: shop.returnPolicy,
           }}
           product={{
             id: product.id,

@@ -9,7 +9,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
-import { getShopBySlug } from "@/lib/db/shops";
+import { requireShopAccess } from "@/lib/auth";
 import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
@@ -27,13 +27,13 @@ export const metadata: Metadata = {
 
 export default async function CustomersPage({ params }: CustomersPageProps) {
   const { slug } = await params;
-  const shop = await getShopBySlug(slug);
-  if (!shop) notFound();
+  const access = await requireShopAccess(slug, "customers:view");
+  if (!access) notFound();
 
   // Aggregate customers from orders (group by buyerPhone)
   const [customerData, restockAlerts, subscription] = await Promise.all([
     db.order.findMany({
-      where: { shopId: shop.id, buyerPhone: { not: null } },
+      where: { shopId: access.shopId, buyerPhone: { not: null } },
       select: {
         buyerName: true,
         buyerPhone: true,
@@ -44,7 +44,7 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
       orderBy: { createdAt: "desc" },
     }),
     db.wishlistItem.findMany({
-      where: { shopId: shop.id, notifyPhone: { not: null } },
+      where: { shopId: access.shopId, notifyPhone: { not: null } },
       select: {
         productName: true,
         notifyPhone: true,
@@ -53,7 +53,7 @@ export default async function CustomersPage({ params }: CustomersPageProps) {
       },
       orderBy: { createdAt: "desc" },
     }),
-    getShopSubscription(shop.id),
+    getShopSubscription(access.shopId),
   ]);
 
   // Group orders by phone

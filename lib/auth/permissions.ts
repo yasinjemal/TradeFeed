@@ -18,6 +18,8 @@ export type Permission =
   | "orders:update"    // order status changes, fulfilment notes
   | "orders:finance"   // confirm COD cash received, payment-side order actions
   | "reviews:moderate" // approve / reject / reply to reviews
+  | "analytics:view"   // conversion and revenue performance
+  | "customers:view"   // buyer contact details and marketing consent
   | "settings:manage"  // shop profile, payment options, notifications, preferences
   | "billing:manage"   // subscriptions, upgrades, promoted listings, domains, verification
   | "team:manage"      // invite, remove, change roles
@@ -31,6 +33,8 @@ const ROLE_PERMISSIONS: Record<ShopRole, ReadonlySet<Permission>> = {
     "orders:update",
     "orders:finance",
     "reviews:moderate",
+    "analytics:view",
+    "customers:view",
     "settings:manage",
     "billing:manage",
     "team:manage",
@@ -41,6 +45,8 @@ const ROLE_PERMISSIONS: Record<ShopRole, ReadonlySet<Permission>> = {
     "orders:update",
     "orders:finance",
     "reviews:moderate",
+    "analytics:view",
+    "customers:view",
     "settings:manage",
     "activity:view",
   ]),

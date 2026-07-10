@@ -25,6 +25,12 @@ interface TfOrderTrackingProps { order: Order; payment?: string }
 
 export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
   const current = statusIndex[order.status] ?? 0;
+  const isCollection = order.shippingMethod === "COLLECTION";
+  const orderSteps = isCollection
+    ? steps.map((step) => step.key === "SHIPPED"
+      ? { ...step, label: "Ready for collection", detail: "Arrange a pickup time with the seller on WhatsApp." }
+      : step)
+    : steps;
   const location = [order.shop.city, order.shop.province].filter(Boolean).join(", ") || undefined;
   const waNumber = order.shop.whatsappNumber.replace(/\D/g, "");
   const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi, I have a question about order ${order.orderNumber}.`)}`;
@@ -46,10 +52,10 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
           <div className="mt-2 flex items-start justify-between gap-4">
             <div>
               <h1 className="font-tf-hero text-3xl font-semibold tracking-tight">
-                {isCancelled ? "Order cancelled" : steps[current]?.label}
+                {isCancelled ? "Order cancelled" : orderSteps[current]?.label}
               </h1>
               <p className="mt-2 text-sm leading-relaxed text-white/70">
-                {isCancelled ? "Contact the seller on WhatsApp if you need help." : steps[current]?.detail}
+                {isCancelled ? "Contact the seller on WhatsApp if you need help." : orderSteps[current]?.detail}
               </p>
             </div>
             <PackageCheck aria-hidden="true" className="size-7 shrink-0 text-emerald-300" />
@@ -68,7 +74,7 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
           <ol className="mt-5 space-y-0">
             {isCancelled ? (
               <li className="flex gap-3 text-sm text-tf-stone-600"><CircleHelp aria-hidden="true" className="size-5 text-tf-error" />This order was cancelled.</li>
-            ) : steps.map((step, index) => {
+            ) : orderSteps.map((step, index) => {
               const complete = index < current;
               const active = index === current;
               return <li key={step.key} className="flex gap-3">
@@ -86,6 +92,7 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
           </div>
         )}
         {order.paymentMethod === "COD" && !order.paidAt && <div className="rounded-xl border border-tf-accent/30 bg-tf-accent-soft p-4 text-sm">Cash on delivery: pay {formatZARCents(order.totalCents)} when you receive your order.</div>}
+        {isCollection && (order.status === "SHIPPED" || order.status === "DELIVERED") && <div className="flex gap-3 rounded-xl border border-tf-primary/20 bg-tf-verified-soft p-4 text-sm"><MapPin aria-hidden="true" className="size-5 shrink-0 text-tf-primary" /><div><p className="font-medium">Collection from seller</p><p className="mt-0.5 text-tf-stone-600">{order.status === "SHIPPED" ? "Your order is ready. Contact the seller to arrange your pickup time." : "Collection has been confirmed."}</p></div></div>}
         {(order.courierName || order.trackingNumber) && <div className="flex gap-3 rounded-xl border border-tf-stone-200 bg-tf-raised p-4 text-sm"><Truck aria-hidden="true" className="size-5 shrink-0 text-tf-primary" /><div><p className="font-medium">Delivery details</p><p className="mt-0.5 text-tf-stone-600">{[order.courierName, order.trackingNumber].filter(Boolean).join(" · ")}</p></div></div>}
 
         <section className="overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-raised shadow-tf-sm">

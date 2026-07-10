@@ -12,6 +12,7 @@ import type { SellerTrustStats } from "@/lib/trust/seller-stats";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfGallery } from "./tf-gallery";
 import { TfOrderPanel, type TfVariant } from "./tf-order-panel";
+import { TfFulfillmentPromise } from "@/components/tf/fulfillment-promise";
 
 // ============================================================
 // TfProductPage — gallery first, price in tabular figures,
@@ -43,6 +44,11 @@ export interface TfProductPageProps {
     province: string | null;
     whatsappNumber: string;
     createdAt: Date;
+    deliveryEnabled: boolean;
+    collectionEnabled: boolean;
+    dispatchWindow: string;
+    deliveryNote: string | null;
+    returnPolicy: string | null;
   };
   product: {
     id: string;
@@ -185,6 +191,17 @@ export function TfProductPage({
 
           <TfReveal>
             <TfTrustBar ordersFulfilled={trustStats?.ordersFulfilled} compact />
+          </TfReveal>
+
+          <TfReveal>
+            <TfFulfillmentPromise
+              compact
+              deliveryEnabled={shop.deliveryEnabled}
+              collectionEnabled={shop.collectionEnabled}
+              dispatchWindow={shop.dispatchWindow}
+              deliveryNote={shop.deliveryNote}
+              returnPolicy={shop.returnPolicy}
+            />
           </TfReveal>
 
           {product.description && (

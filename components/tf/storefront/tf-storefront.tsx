@@ -12,6 +12,7 @@ import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import type { SellerTrustStats } from "@/lib/trust/seller-stats";
 import { TfStorefrontGrid, type TfGridProduct } from "./tf-product-grid";
 import { TfReviewsBlock, type TfReview } from "./tf-reviews";
+import { TfFulfillmentPromise } from "@/components/tf/fulfillment-promise";
 
 // ============================================================
 // TfStorefront — the Verified Seller card is the hero here.
@@ -36,6 +37,11 @@ export interface TfStorefrontProps {
     description: string | null;
     whatsappNumber: string;
     createdAt: Date;
+    deliveryEnabled: boolean;
+    collectionEnabled: boolean;
+    dispatchWindow: string;
+    deliveryNote: string | null;
+    returnPolicy: string | null;
   };
   products: TfGridProduct[];
   trustStats: SellerTrustStats | null;
@@ -90,6 +96,16 @@ export function TfStorefront({
           <TfTrustBar ordersFulfilled={trustStats.ordersFulfilled} compact />
         </TfReveal>
       )}
+
+      <TfReveal delay={130}>
+        <TfFulfillmentPromise
+          deliveryEnabled={shop.deliveryEnabled}
+          collectionEnabled={shop.collectionEnabled}
+          dispatchWindow={shop.dispatchWindow}
+          deliveryNote={shop.deliveryNote}
+          returnPolicy={shop.returnPolicy}
+        />
+      </TfReveal>
 
       {/* ── Products ───────────────────────────────────── */}
       {products.length === 0 ? (

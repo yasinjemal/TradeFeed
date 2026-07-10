@@ -61,6 +61,13 @@ function formatDate(date: Date | string): string {
   });
 }
 
+function getStatusConfig(order: BuyerOrder) {
+  const config = STATUS_CONFIG[order.status] ?? { label: order.status, color: "text-stone-400", bg: "bg-stone-500/10" };
+  return order.status === "SHIPPED" && order.shippingMethod === "COLLECTION"
+    ? { ...config, label: "Ready for collection" }
+    : config;
+}
+
 export function BuyerOrderList({ orders }: { orders: BuyerOrder[] }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("ALL");
@@ -169,7 +176,7 @@ function OrderCard({
   expanded: boolean;
   onToggle: () => void;
 }) {
-  const statusCfg = STATUS_CONFIG[order.status] ?? { label: order.status, color: "text-stone-400", bg: "bg-stone-500/10" };
+  const statusCfg = getStatusConfig(order);
 
   return (
     <div className="rounded-2xl border border-stone-800/40 bg-stone-900/30 overflow-hidden">
@@ -265,6 +272,12 @@ function OrderCard({
           </div>
 
           {/* Shipping info */}
+          {order.shippingMethod === "COLLECTION" && (order.status === "SHIPPED" || order.status === "DELIVERED") && (
+            <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/10 p-3">
+              <p className="text-xs font-medium text-emerald-400">Collection from seller</p>
+              <p className="mt-1 text-xs text-stone-400">{order.status === "SHIPPED" ? "Your order is ready. Contact the seller to arrange collection." : "Collection confirmed."}</p>
+            </div>
+          )}
           {order.courierName && (
             <div className="rounded-xl bg-stone-800/30 border border-stone-800/20 p-3">
               <p className="text-xs text-stone-500 mb-1">Shipping</p>

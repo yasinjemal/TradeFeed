@@ -81,6 +81,34 @@ export function AnalyticsDashboard({
     overview.totalProductViews > 0 ||
     overview.totalWhatsAppClicks > 0;
 
+  const recommendation = !hasData
+    ? {
+        title: "Share your catalogue to start learning",
+        detail: "Views, product interest, and WhatsApp handoffs appear here once buyers visit your shop.",
+        href: `/dashboard/${shopSlug}`,
+        action: "Open dashboard",
+      }
+    : overview.totalProductViews > 0 && overview.totalWhatsAppClicks === 0
+      ? {
+          title: "Buyers are looking, but not contacting you yet",
+          detail: "Check your strongest product photos, prices, and delivery promise. Clear fulfilment details reduce hesitation.",
+          href: `/dashboard/${shopSlug}/settings#section-delivery`,
+          action: "Review delivery settings",
+        }
+      : overview.totalWhatsAppClicks > 0 && overview.totalCheckouts === 0
+        ? {
+            title: "Interest is strong — make the handoff easier",
+            detail: "Review your payment options and reply speed so buyers can complete the conversation with confidence.",
+            href: `/dashboard/${shopSlug}/settings#section-payment`,
+            action: "Review payment settings",
+          }
+        : {
+            title: "Your shop is converting interest into orders",
+            detail: "Keep your best-performing products in stock and share their links again to maintain momentum.",
+            href: `/dashboard/${shopSlug}/products`,
+            action: "Manage products",
+          };
+
   return (
     <div className="space-y-6">
       {/* ── Period Toggle ────────────────────────────────── */}
@@ -157,6 +185,17 @@ export function AnalyticsDashboard({
           subtitle="views → WhatsApp"
         />
       </div>
+
+      <section className="flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">Recommended next step</p>
+          <h2 className="mt-1 text-sm font-semibold text-stone-900">{recommendation.title}</h2>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-stone-600">{recommendation.detail}</p>
+        </div>
+        <Link href={recommendation.href} className="inline-flex shrink-0 items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700">
+          {recommendation.action}
+        </Link>
+      </section>
 
       {/* ── Daily Trend Chart ────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-stone-200/60 p-5">
