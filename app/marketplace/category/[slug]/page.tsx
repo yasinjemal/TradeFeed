@@ -11,7 +11,7 @@ import {
   interleavePromotedProducts,
   type CategoryWithCount,
 } from "@/lib/db/marketplace";
-import { MarketplaceShell } from "@/components/marketplace/marketplace-shell";
+import { MarketplaceShellSwitch } from "@/components/marketplace/marketplace-shell-switch";
 import { generateMarketplaceJsonLd, generateCategoryPageJsonLd } from "@/lib/seo/json-ld";
 import { expirePromotedListings } from "@/lib/db/promotions";
 
@@ -245,7 +245,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      <MarketplaceShell
+      <MarketplaceShellSwitch
         products={interleavedProducts}
         totalProducts={productsResult.total}
         totalPages={productsResult.totalPages}

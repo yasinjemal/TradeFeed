@@ -5,6 +5,7 @@ import {
   BadgeCheck,
   Camera,
   Check,
+  ChevronDown,
   MessageCircle,
   Share2,
   Store,
@@ -15,8 +16,10 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TfButton } from "@/components/tf/button";
+import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
@@ -49,6 +52,8 @@ export interface TfLandingProps {
     isVerified: boolean;
     productCount: number;
   }[];
+  /** FAQ entries — must match the FAQPage JSON-LD emitted by the page */
+  faqItems?: { question: string; answer: string }[];
   /** Real marketplace products for the homepage grid (already card-shaped) */
   products?: {
     href: string;
@@ -80,7 +85,7 @@ function initials(name: string) {
 
 const WHATSAPP_GREEN = "#25D366";
 
-export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: TfLandingProps) {
+export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [], faqItems = [] }: TfLandingProps) {
   const reassurance = `20 products free · 10 AI listings a month · no credit card · set up in under 3 minutes`;
 
   return (
@@ -91,7 +96,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
       <TfLandingHeader>
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link href="/" aria-label="TradeFeed home" className="shrink-0">
-            <TradeFeedLogo size="sm" variant="dark" />
+            <TradeFeedLogo size="sm" variant="auto" />
           </Link>
           <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-tf-stone-600 md:flex">
             <Link href="#how-it-works" className="tf-navlink hover:text-tf-ink">How it works</Link>
@@ -99,6 +104,8 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
             <Link href="/marketplace" className="tf-navlink hover:text-tf-ink">Marketplace</Link>
           </nav>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <TfThemeToggle />
             <Link
               href="/sign-in"
               className="hidden px-3 py-2 text-sm text-tf-stone-600 hover:text-tf-ink sm:block transition-colors"
@@ -118,7 +125,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
       <section
         id="tf-hero"
         className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden"
-        style={{ backgroundColor: "#071a0f" }}
+        style={{ backgroundColor: "var(--color-tf-deepest)" }}
       >
         {/* Layered ambient glow */}
         <div
@@ -196,7 +203,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
                   href={ctaHref}
                   className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
                   style={{
-                    backgroundColor: "#047857",
+                    backgroundColor: "var(--color-tf-primary)",
                     boxShadow: "0 8px 24px rgba(4,120,87,0.35)",
                   }}
                 >
@@ -250,7 +257,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
         <div
           aria-hidden="true"
           className="pointer-events-none absolute bottom-0 left-0 right-0 h-20"
-          style={{ background: "linear-gradient(to bottom, transparent, #faf8f4)" }}
+          style={{ background: "linear-gradient(to bottom, transparent, var(--color-tf-surface))" }}
         />
       </section>
 
@@ -315,7 +322,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
       <section
         id="how-it-works"
         className="scroll-mt-16"
-        style={{ backgroundColor: "#064e3b" }}
+        style={{ backgroundColor: "var(--color-tf-deep)" }}
       >
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <TfReveal>
@@ -518,7 +525,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
             <div
               className="rounded-2xl p-7 shadow-tf-sm transition-all duration-300 hover:shadow-tf-md"
               style={{
-                background: "#064e3b",
+                background: "var(--color-tf-deep)",
                 border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
@@ -547,7 +554,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
       {/* ══════════════════════════════════════════════════
           TRUST — Verified Seller card (dark)
       ══════════════════════════════════════════════════ */}
-      <section style={{ backgroundColor: "#071a0f" }}>
+      <section style={{ backgroundColor: "var(--color-tf-deepest)" }}>
         {/* Top grain */}
         <div
           aria-hidden="true"
@@ -787,7 +794,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
                 <p className="mt-1 tabular-nums">
                   <span
                     className="font-tf-hero"
-                    style={{ fontSize: "2.5rem", fontWeight: 700, letterSpacing: "-0.04em", color: "#071a0f" }}
+                    style={{ fontSize: "2.5rem", fontWeight: 700, letterSpacing: "-0.04em", color: "var(--color-tf-ink)" }}
                   >
                     <span style={{ fontWeight: 300, opacity: 0.45 }}>R</span>{plan.priceMonthly}
                   </span>
@@ -826,11 +833,49 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
       </section>
 
       {/* ══════════════════════════════════════════════════
+          FAQ — mirrors the FAQPage JSON-LD emitted by the page
+      ══════════════════════════════════════════════════ */}
+      {faqItems.length > 0 && (
+        <section id="faq" aria-label="Frequently asked questions" className="bg-tf-surface">
+          <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
+            <TfReveal>
+              <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-tf-primary">
+                FAQ
+              </p>
+              <h2
+                className="mt-2 text-center font-tf-hero font-semibold text-tf-ink"
+                style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", lineHeight: 1.1, letterSpacing: "-0.03em" }}
+              >
+                Questions, answered
+              </h2>
+            </TfReveal>
+            <TfReveal stagger className="mt-8 space-y-3">
+              {faqItems.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="group rounded-xl border border-tf-stone-200 bg-tf-raised open:shadow-tf-sm"
+                >
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-medium text-tf-ink outline-none focus-visible:ring-2 focus-visible:ring-tf-primary [&::-webkit-details-marker]:hidden">
+                    {faq.question}
+                    <ChevronDown
+                      aria-hidden="true"
+                      className="size-4 shrink-0 text-tf-stone-400 transition-transform duration-200 motion-reduce:transition-none group-open:rotate-180"
+                    />
+                  </summary>
+                  <p className="px-5 pb-4 text-sm leading-relaxed text-tf-stone-600">{faq.answer}</p>
+                </details>
+              ))}
+            </TfReveal>
+          </div>
+        </section>
+      )}
+
+      {/* ══════════════════════════════════════════════════
           FINAL CTA — Full-height dark closer
       ══════════════════════════════════════════════════ */}
       <section
         className="relative overflow-hidden"
-        style={{ backgroundColor: "#071a0f" }}
+        style={{ backgroundColor: "var(--color-tf-deepest)" }}
       >
         <div
           aria-hidden="true"
@@ -876,7 +921,7 @@ export function TfLanding({ ctaHref, ctaLabel, stats, sellers, products = [] }: 
             href={ctaHref}
             className="mt-8 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
             style={{
-              backgroundColor: "#047857",
+              backgroundColor: "var(--color-tf-primary)",
               boxShadow: "0 8px 32px rgba(4,120,87,0.40)",
             }}
           >

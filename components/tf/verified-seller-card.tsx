@@ -147,7 +147,7 @@ function TfVerifiedSellerCard({
       {action ? (
         <div className="shrink-0 self-center">{action}</div>
       ) : verified ? (
-        <span className="inline-flex shrink-0 items-center gap-1 self-center rounded-full bg-tf-verified-soft px-2.5 py-1 text-xs font-medium leading-none text-tf-deep">
+        <span className="inline-flex shrink-0 items-center gap-1 self-center rounded-full bg-tf-verified-soft px-2.5 py-1 text-xs font-medium leading-none text-tf-verified">
           <BadgeCheck aria-hidden="true" className="size-3.5" />
           Verified
         </span>

@@ -88,8 +88,8 @@ export default async function CreateShopPage() {
       ? `${Math.floor(totalCount / 10) * 10}+ SA sellers`
       : `${totalCount} SA sellers`;
 
-  // ── TF redesign (FEATURE_FLAGS.UI_REDESIGN) — same action, new flow ──
-  if (FEATURE_FLAGS.UI_REDESIGN) {
+  // ── TF redesign (seller flag — split from the buyer-path flip) ──
+  if (FEATURE_FLAGS.UI_REDESIGN_DASHBOARD) {
     return (
       <>
         <TfFonts />

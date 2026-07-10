@@ -4,6 +4,7 @@ import { BadgeCheck, CreditCard, MapPin, PackageCheck, TriangleAlert } from "luc
 import { formatZARCents } from "@/lib/currency";
 import { TfButton } from "@/components/tf/button";
 import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import { TfTrustBar } from "@/components/tf/trust-bar";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
@@ -39,8 +40,11 @@ export function TfPaymentPage({ order, paymentUrl, status, isExpired }: TfPaymen
       <TfFonts />
       <header className="border-b border-tf-stone-200 bg-tf-raised/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-5">
-          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="dark" /></Link>
-          <span className="font-mono text-xs text-tf-stone-500">{order.orderNumber}</span>
+          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="auto" /></Link>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-tf-stone-500">{order.orderNumber}</span>
+            <TfThemeToggle className="size-9" />
+          </div>
         </div>
       </header>
       <section className="mx-auto max-w-xl space-y-4 px-5 py-8 sm:py-12">
@@ -51,7 +55,7 @@ export function TfPaymentPage({ order, paymentUrl, status, isExpired }: TfPaymen
         </div>
 
         {status === "success" && !alreadyPaid && (
-          <div className="rounded-xl border border-tf-verified/25 bg-tf-verified-soft p-4 text-sm text-tf-deep">
+          <div className="rounded-xl border border-tf-verified/25 bg-tf-verified-soft p-4 text-sm text-tf-verified">
             Payment is being confirmed. This page will update once PayFast completes the payment.
           </div>
         )}

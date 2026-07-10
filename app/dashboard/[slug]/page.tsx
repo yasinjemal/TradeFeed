@@ -98,8 +98,8 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     });
   }
 
-  // ── TF redesign (FEATURE_FLAGS.UI_REDESIGN) — same data, new skin ──
-  if (FEATURE_FLAGS.UI_REDESIGN) {
+  // ── TF redesign (seller flag — split from the buyer-path flip) ──
+  if (FEATURE_FLAGS.UI_REDESIGN_DASHBOARD) {
     const overview = await getAnalyticsOverview(shop.id, 7);
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 

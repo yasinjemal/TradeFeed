@@ -10,6 +10,21 @@ import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 
 const Panel = FEATURE_FLAGS.UI_REDESIGN ? TfCartPanel : CartPanel;
 
+// Build-time flag: TF skin swaps the fixed stone/emerald palette
+// for theme-aware tf-* tokens so the nav follows light/dark mode.
+const TF = FEATURE_FLAGS.UI_REDESIGN;
+const navShellCls = TF
+  ? "fixed bottom-0 left-0 right-0 z-50 border-t border-tf-stone-200 bg-tf-raised/90 backdrop-blur-2xl"
+  : "fixed bottom-0 left-0 right-0 z-50 border-t border-stone-100 bg-white/80 backdrop-blur-2xl shadow-[0_-4px_30px_rgba(0,0,0,0.04)]";
+const tabActiveCls = TF ? "text-tf-primary" : "text-emerald-600";
+const tabIdleCls = TF
+  ? "text-tf-stone-400 hover:text-tf-stone-600 active:scale-95"
+  : "text-stone-400 hover:text-stone-600 active:scale-95";
+const indicatorCls = TF ? "bg-tf-primary" : "bg-emerald-500";
+const cartBadgeCls = TF
+  ? "bg-tf-primary text-white ring-2 ring-tf-raised"
+  : "bg-emerald-500 text-white ring-2 ring-white";
+
 interface BottomNavProps {
   shopSlug: string;
 }
@@ -76,7 +91,7 @@ export function BottomNav({ shopSlug }: BottomNavProps) {
   return (
     <>
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 border-t border-stone-100 bg-white/80 backdrop-blur-2xl shadow-[0_-4px_30px_rgba(0,0,0,0.04)]"
+        className={navShellCls}
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Primary"
       >
@@ -87,13 +102,11 @@ export function BottomNav({ shopSlug }: BottomNavProps) {
               key={tab.key}
               href={tab.href}
               className={`relative flex min-h-[44px] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-[10px] font-semibold transition-all duration-200 ${
-                tab.isActive
-                  ? "text-emerald-600"
-                  : "text-stone-400 hover:text-stone-600 active:scale-95"
+                tab.isActive ? tabActiveCls : tabIdleCls
               }`}
             >
               {tab.isActive && (
-                <span className="absolute top-1 h-[3px] w-5 rounded-full bg-emerald-500" />
+                <span className={`absolute top-1 h-[3px] w-5 rounded-full ${indicatorCls}`} />
               )}
               {tab.icon}
               <span className="leading-none">{tab.label}</span>
@@ -105,20 +118,18 @@ export function BottomNav({ shopSlug }: BottomNavProps) {
             type="button"
             onClick={() => setCartOpen(true)}
             className={`relative flex min-h-[44px] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-[10px] font-semibold transition-all duration-200 ${
-              cartOpen
-                ? "text-emerald-600"
-                : "text-stone-400 hover:text-stone-600 active:scale-95"
+              cartOpen ? tabActiveCls : tabIdleCls
             }`}
           >
             {cartOpen && (
-              <span className="absolute top-1 h-[3px] w-5 rounded-full bg-emerald-500" />
+              <span className={`absolute top-1 h-[3px] w-5 rounded-full ${indicatorCls}`} />
             )}
             <div className="relative">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.9} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
               </svg>
               {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-500 px-1 text-[8px] font-bold text-white ring-2 ring-white">
+                <span className={`absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[8px] font-bold ${cartBadgeCls}`}>
                   {totalItems > 99 ? "99+" : totalItems}
                 </span>
               )}
@@ -132,13 +143,11 @@ export function BottomNav({ shopSlug }: BottomNavProps) {
               key={tab.key}
               href={tab.href}
               className={`relative flex min-h-[44px] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-[10px] font-semibold transition-all duration-200 ${
-                tab.isActive
-                  ? "text-emerald-600"
-                  : "text-stone-400 hover:text-stone-600 active:scale-95"
+                tab.isActive ? tabActiveCls : tabIdleCls
               }`}
             >
               {tab.isActive && (
-                <span className="absolute top-1 h-[3px] w-5 rounded-full bg-emerald-500" />
+                <span className={`absolute top-1 h-[3px] w-5 rounded-full ${indicatorCls}`} />
               )}
               {tab.icon}
               <span className="leading-none">{tab.label}</span>

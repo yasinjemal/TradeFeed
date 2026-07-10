@@ -19,6 +19,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/cart/cart-context";
+import { effectiveUnitPriceCents } from "@/lib/cart/pricing";
 import { formatZAR } from "@/types";
 import { toast } from "sonner";
 import { trackAddToCartAction } from "@/app/actions/analytics";
@@ -136,18 +137,13 @@ export function AddToCart({
     if (!selectedVariant || !canAdd) return;
 
     const isRetail = orderType === "retail";
-    let unitPrice = isRetail && selectedVariant.retailPriceCents
-      ? selectedVariant.retailPriceCents
-      : selectedVariant.priceInCents;
-
-    // Apply bulk discount for wholesale orders
-    if (!isRetail && bulkDiscountTiers.length > 0) {
-      const sorted = [...bulkDiscountTiers].sort((a, b) => a.minQuantity - b.minQuantity);
-      const applied = sorted.filter((t) => quantity >= t.minQuantity).pop();
-      if (applied) {
-        unitPrice = Math.round(unitPrice * (1 - applied.discountPercent / 100));
-      }
-    }
+    const unitPrice = effectiveUnitPriceCents({
+      orderType,
+      wholesalePriceCents: selectedVariant.priceInCents,
+      retailPriceCents: selectedVariant.retailPriceCents,
+      quantity,
+      bulkDiscountTiers,
+    });
 
     addItem({
       variantId: selectedVariant.id,

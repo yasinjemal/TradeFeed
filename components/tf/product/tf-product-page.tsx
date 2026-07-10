@@ -1,14 +1,20 @@
 import * as React from "react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Factory, FileText } from "lucide-react";
 
+import { RestockAlert } from "@/components/catalog/restock-alert";
+import { ShareProduct } from "@/components/catalog/share-product";
+import { TfButton } from "@/components/tf/button";
 import { TfFonts } from "@/components/tf/tf-fonts";
+import { formatZAR } from "@/components/tf/format";
 import { TfProductCard } from "@/components/tf/product-card";
 import { TfRatingChip } from "@/components/tf/rating-chip";
 import { TfTrustBar } from "@/components/tf/trust-bar";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { TfReviewsBlock, type TfReview } from "@/components/tf/storefront/tf-reviews";
+import { TfReviewForm } from "@/components/tf/storefront/tf-review-form";
 import type { SellerTrustStats } from "@/lib/trust/seller-stats";
+import type { BulkDiscountTier } from "@/lib/cart/pricing";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfGallery } from "./tf-gallery";
 import { TfOrderPanel, type TfVariant } from "./tf-order-panel";
@@ -62,12 +68,15 @@ export interface TfProductPageProps {
     option1Label: string;
     option2Label: string;
     minWholesaleQty?: number;
+    wholesaleOnly?: boolean;
+    bulkDiscountTiers?: BulkDiscountTier[];
   };
   productUrl: string;
   soldCount: number;
   avgRating: number;
   reviewCount: number;
   reviews: TfReview[];
+  reviewDistribution?: { rating: number; count: number }[];
   trustStats: SellerTrustStats | null;
   moreFromSeller: TfStripProduct[];
   similarProducts: TfStripProduct[];
@@ -107,12 +116,43 @@ export function TfProductPage({
   avgRating,
   reviewCount,
   reviews,
+  reviewDistribution,
   trustStats,
   moreFromSeller,
   similarProducts,
 }: TfProductPageProps) {
   const location = [shop.city, shop.province].filter(Boolean).join(", ") || undefined;
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0);
+  const soldOut = totalStock === 0;
+  const minPriceCents =
+    product.variants.length > 0 ? Math.min(...product.variants.map((v) => v.priceInCents)) : 0;
+  const tiers = product.bulkDiscountTiers ?? [];
+  const minWholesaleQty = product.minWholesaleQty ?? 1;
+  const showRfq = Boolean(product.wholesaleOnly) || tiers.length > 0 || minWholesaleQty > 1;
+
+  // Structured wholesale quote request — mirrors the legacy RFQ message
+  const rfqMessage = [
+    `*Wholesale Inquiry — ${product.name}*`,
+    "",
+    "I'd like to request a wholesale quote.",
+    "",
+    `Product: ${product.name}`,
+    `Listed price: ${formatZAR(minPriceCents / 100)}/unit`,
+    minWholesaleQty > 1 ? `Min. order: ${minWholesaleQty} units` : null,
+    tiers.length > 0
+      ? `Volume tiers: ${tiers.map((t) => `${t.minQuantity}+ → ${t.discountPercent}% off`).join(", ")}`
+      : null,
+    "",
+    "Please share:",
+    "• Bulk pricing for larger quantities",
+    "• Lead times & availability",
+    "• Delivery options",
+    "",
+    "Thank you!",
+  ]
+    .filter((l) => l !== null)
+    .join("\n");
+  const rfqHref = `https://wa.me/${shop.whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(rfqMessage)}`;
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 pb-28 lg:pb-6">
@@ -135,11 +175,32 @@ export function TfProductPage({
 
         {/* Info + order */}
         <div className="space-y-5">
+          {/* Wholesale-only banner */}
+          {product.wholesaleOnly && (
+            <TfReveal>
+              <div className="flex items-start gap-3 rounded-xl border border-tf-accent/30 bg-tf-accent-soft px-4 py-3">
+                <Factory aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-tf-accent-ink" />
+                <div>
+                  <p className="text-sm font-semibold text-tf-ink">Wholesale only</p>
+                  <p className="mt-0.5 text-xs text-tf-stone-600">
+                    This product is exclusive to registered wholesale buyers.{" "}
+                    <Link
+                      href="/marketplace/wholesale-register"
+                      className="font-semibold text-tf-accent-ink underline underline-offset-2 hover:opacity-80"
+                    >
+                      Register as a wholesale buyer
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            </TfReveal>
+          )}
+
           <TfReveal delay={80}>
             {product.categoryName && product.categorySlug && (
               <Link
                 href={`/marketplace?category=${encodeURIComponent(product.categorySlug)}`}
-                className="mb-3 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-emerald-700 outline-none hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-tf-primary"
+                className="mb-3 inline-flex items-center rounded-full border border-tf-verified/25 bg-tf-verified-soft px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-tf-verified outline-none hover:border-tf-verified/40 focus-visible:ring-2 focus-visible:ring-tf-primary"
               >
                 {product.categoryName}
               </Link>
@@ -173,8 +234,45 @@ export function TfProductPage({
             option2Label={product.option2Label}
             imageUrl={product.images[0]?.url ?? null}
             minWholesaleQty={product.minWholesaleQty}
+            bulkDiscountTiers={tiers}
           />
           </TfReveal>
+
+          {/* Sold out → capture demand instead of losing the buyer */}
+          {soldOut && (
+            <TfReveal>
+              <RestockAlert productId={product.id} productName={product.name} shopId={shop.id} />
+            </TfReveal>
+          )}
+
+          {/* Custom quote for bulk buyers */}
+          {showRfq && (
+            <TfReveal>
+              <div className="rounded-xl border border-tf-stone-200 bg-tf-stone-50 p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold text-tf-ink">
+                  <FileText aria-hidden="true" className="size-4 text-tf-primary" />
+                  Need a custom quote?
+                </p>
+                <p className="mb-3 mt-1 text-xs text-tf-stone-600">
+                  Ordering larger quantities? Ask {shop.name} for volume pricing, lead times and
+                  delivery options.
+                </p>
+                <TfButton asChild variant="secondary" size="sm">
+                  <a href={rfqHref} target="_blank" rel="noopener noreferrer">
+                    Request wholesale quote
+                  </a>
+                </TfButton>
+              </div>
+            </TfReveal>
+          )}
+
+          {/* Share */}
+          <ShareProduct
+            productName={product.name}
+            productUrl={productUrl}
+            price={formatZAR(minPriceCents / 100)}
+            shopName={shop.name}
+          />
 
           {/* Who you're buying from — before the fold of the order */}
           <TfReveal delay={200}>
@@ -224,6 +322,8 @@ export function TfProductPage({
         avgRating={avgRating > 0 ? avgRating : null}
         reviewCount={reviewCount}
         shopName={shop.name}
+        distribution={reviewDistribution}
+        action={<TfReviewForm shopId={shop.id} shopSlug={shop.slug} productId={product.id} />}
       />
       </TfReveal>
 

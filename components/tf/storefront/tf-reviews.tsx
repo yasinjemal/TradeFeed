@@ -23,6 +23,10 @@ interface TfReviewsBlockProps {
   avgRating: number | null;
   reviewCount: number;
   shopName: string;
+  /** Rating distribution bars (product page) — omit to hide */
+  distribution?: { rating: number; count: number }[];
+  /** Slot for a review form / write-review affordance */
+  action?: React.ReactNode;
   className?: string;
 }
 
@@ -47,6 +51,8 @@ export function TfReviewsBlock({
   avgRating,
   reviewCount,
   shopName,
+  distribution,
+  action,
   className,
 }: TfReviewsBlockProps) {
   if (reviewCount === 0 || avgRating == null) {
@@ -66,6 +72,7 @@ export function TfReviewsBlock({
           No reviews yet — {shopName} is just getting started. Every review here comes
           from a confirmed TradeFeed order, so the first one will mean something.
         </p>
+        {action && <div className="mt-4">{action}</div>}
       </section>
     );
   }
@@ -74,7 +81,7 @@ export function TfReviewsBlock({
 
   return (
     <section aria-label="Reviews" className={cn("rounded-xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm", className)}>
-      <div className="flex items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="font-tf-display text-lg font-semibold text-tf-ink">Reviews</h2>
           <div className="mt-1 flex items-center gap-2">
@@ -89,7 +96,32 @@ export function TfReviewsBlock({
             </div>
           </div>
         </div>
+
+        {/* Rating distribution */}
+        {distribution && reviewCount > 0 && (
+          <div className="w-full max-w-[240px] space-y-1" aria-label="Rating breakdown">
+            {[5, 4, 3, 2, 1].map((rating) => {
+              const count = distribution.find((d) => d.rating === rating)?.count ?? 0;
+              const percent = (count / reviewCount) * 100;
+              return (
+                <div key={rating} className="flex items-center gap-2 text-xs tabular-nums">
+                  <span className="w-3 text-tf-stone-500">{rating}</span>
+                  <Star aria-hidden="true" className="size-3 fill-tf-accent text-tf-accent" />
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-tf-stone-100">
+                    <div
+                      className="h-full rounded-full bg-tf-accent"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+                  <span className="w-6 text-right text-tf-stone-400">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {action && <div className="mt-4">{action}</div>}
 
       <ul className={cn("mt-4 grid gap-3", !single && "sm:grid-cols-2")}>
         {reviews.map((r) => (
@@ -114,7 +146,7 @@ export function TfReviewsBlock({
               <Stars rating={r.rating} className="[&_svg]:size-3.5" />
               <span className="font-medium">{r.buyerName ?? "TradeFeed buyer"}</span>
               {r.isVerified && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-tf-verified-soft px-2 py-0.5 font-medium leading-none text-tf-deep">
+                <span className="inline-flex items-center gap-1 rounded-full bg-tf-verified-soft px-2 py-0.5 font-medium leading-none text-tf-verified">
                   <BadgeCheck aria-hidden="true" className="size-3" />
                   Verified purchase
                 </span>

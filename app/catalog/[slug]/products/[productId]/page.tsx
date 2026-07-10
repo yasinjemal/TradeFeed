@@ -233,17 +233,21 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               size: v.size,
               color: v.color,
               priceInCents: v.priceInCents,
+              retailPriceCents: v.retailPriceCents,
               stock: v.stock,
             })),
             option1Label,
             option2Label,
             minWholesaleQty: product.minWholesaleQty,
+            wholesaleOnly: product.wholesaleOnly,
+            bulkDiscountTiers: product.bulkDiscountTiers ?? [],
           }}
           productUrl={`${baseUrl}/catalog/${slug}/products/${product.slug ?? product.id}`}
           soldCount={soldCount}
           avgRating={reviewAgg.averageRating}
           reviewCount={reviewAgg.totalReviews}
           reviews={reviews}
+          reviewDistribution={reviewAgg.distribution}
           trustStats={trustStats}
           moreFromSeller={mapSellerStrip(moreFromSeller, shop)}
           similarProducts={similarProducts.map((p) => ({
@@ -251,6 +255,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             shopVerified: p.isVerified,
           }))}
         />
+        <div className="mx-auto w-full max-w-5xl">
+          <RecentlyViewedStrip shopSlug={slug} excludeProductId={product.id} />
+        </div>
       </>
     );
   }

@@ -11,7 +11,7 @@ import {
   getFeaturedShops,
   interleavePromotedProducts,
 } from "@/lib/db/marketplace";
-import { MarketplaceShell } from "@/components/marketplace/marketplace-shell";
+import { MarketplaceShellSwitch } from "@/components/marketplace/marketplace-shell-switch";
 import { generateMarketplaceJsonLd, generateLocationPageJsonLd } from "@/lib/seo/json-ld";
 import { expirePromotedListings } from "@/lib/db/promotions";
 import {
@@ -225,7 +225,7 @@ export default async function CityPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      <MarketplaceShell
+      <MarketplaceShellSwitch
         products={interleavedProducts}
         totalProducts={productsResult.total}
         totalPages={productsResult.totalPages}

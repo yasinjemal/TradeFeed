@@ -108,9 +108,9 @@ export function TfStorefrontGrid({
               onClick={() => setCategory(null)}
               aria-pressed={!category}
               className={cn(
-                "min-h-9 whitespace-nowrap rounded-full border px-3.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
+                "min-h-10 whitespace-nowrap rounded-full border px-3.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
                 !category
-                  ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-deep"
+                  ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-verified"
                   : "border-tf-stone-300 bg-tf-raised text-tf-stone-600",
               )}
             >
@@ -123,9 +123,9 @@ export function TfStorefrontGrid({
                 onClick={() => setCategory(category === c.id ? null : c.id)}
                 aria-pressed={category === c.id}
                 className={cn(
-                  "min-h-9 whitespace-nowrap rounded-full border px-3.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
+                  "min-h-10 whitespace-nowrap rounded-full border px-3.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-tf-primary",
                   category === c.id
-                    ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-deep"
+                    ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-verified"
                     : "border-tf-stone-300 bg-tf-raised text-tf-stone-600",
                 )}
               >

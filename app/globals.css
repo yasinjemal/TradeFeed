@@ -552,6 +552,7 @@ h4, h5, h6 {
   --color-tf-primary: #047857;
   --color-tf-primary-hover: #065f46;
   --color-tf-deep: #064e3b;
+  --color-tf-deepest: #071a0f;
   --color-tf-accent: #f59e0b;
   --color-tf-accent-ink: #92600a;
   --color-tf-accent-soft: #fef3c7;
@@ -587,6 +588,52 @@ h4, h5, h6 {
   --shadow-tf-md: 0 4px 12px -2px rgb(26 26 23 / 0.08), 0 2px 4px -2px rgb(26 26 23 / 0.05);
 }
 
+/* ═══ TF dark mode ═══════════════════════════════════════════
+   Warm charcoal, not cold black — the same trust-first feel
+   after sunset. tf-* utilities compile to var(--color-tf-*),
+   so overriding the vars under .dark re-skins every TF surface.
+   The stone ramp inverts (50 stays "closest to surface"), so
+   existing `text-tf-stone-600`-style contrast pairings keep
+   their meaning in both modes. Brand greens lift one step
+   (#10b981) to hold AA contrast on dark surfaces. */
+.dark {
+  /* Surfaces & text */
+  --color-tf-surface: #131311;
+  --color-tf-raised: #1d1c19;
+  --color-tf-ink: #f2f0ea;
+
+  /* Brand */
+  --color-tf-primary: #10b981;
+  --color-tf-primary-hover: #34d399;
+  --color-tf-accent: #fbbf24;
+  --color-tf-accent-ink: #fcd34d;
+  --color-tf-accent-soft: rgba(251, 191, 36, 0.12);
+
+  /* Semantic */
+  --color-tf-verified: #10b981;
+  --color-tf-verified-soft: rgba(16, 185, 129, 0.12);
+  --color-tf-success: #10b981;
+  --color-tf-warning: #fbbf24;
+  --color-tf-error: #f87171;
+  --color-tf-error-soft: rgba(248, 113, 113, 0.12);
+
+  /* Warm stone neutrals — inverted ramp */
+  --color-tf-stone-50: #191815;
+  --color-tf-stone-100: #211f1c;
+  --color-tf-stone-200: #2e2b27;
+  --color-tf-stone-300: #3f3b35;
+  --color-tf-stone-400: #6f6a61;
+  --color-tf-stone-500: #8f897e;
+  --color-tf-stone-600: #b3ada2;
+  --color-tf-stone-700: #cfc9be;
+  --color-tf-stone-800: #e5e0d6;
+  --color-tf-stone-900: #f2f0ea;
+
+  /* Depth reads as darkness, not tint */
+  --shadow-tf-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4), 0 1px 3px 0 rgb(0 0 0 / 0.35);
+  --shadow-tf-md: 0 4px 12px -2px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.35);
+}
+
 /* ═══ TF Motion system — "Counter-weight" ═══════════════════
    One easing, three durations, transforms + opacity only.
    Entrances 420ms · hovers 200ms · presses 120ms · stagger 60ms.
@@ -596,6 +643,31 @@ h4, h5, h6 {
 
 :root {
   --tf-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* CTA indirection: TF buttons paint with --tf-cta so Pro shop
+     themes can tint them without touching surfaces or text.
+     --tf-cta-text pairs with it: white on the deep light-mode
+     greens, near-black on the lifted dark-mode greens (white on
+     #10b981 is only ~2.5:1 — fails AA). */
+  --tf-cta: var(--color-tf-primary);
+  --tf-cta-hover: var(--color-tf-primary-hover);
+  --tf-cta-text: #ffffff;
+}
+
+.dark {
+  --tf-cta-text: #06281c;
+}
+
+/* Pro shop themes (--shop-primary injected by the catalog layout)
+   tint interactive accents ONLY — never surfaces or body text.
+   Under .dark the brand color is lifted toward white so it keeps
+   AA contrast on dark surfaces. */
+[data-shop-themed] {
+  --tf-cta: var(--shop-primary, var(--color-tf-primary));
+  --tf-cta-hover: color-mix(in oklab, var(--shop-primary, var(--color-tf-primary)) 82%, black);
+}
+.dark [data-shop-themed] {
+  --tf-cta: color-mix(in oklab, var(--shop-primary, var(--color-tf-primary)) 85%, white);
+  --tf-cta-hover: color-mix(in oklab, var(--shop-primary, var(--color-tf-primary)) 70%, white);
 }
 
 /* Scroll/load reveal — hidden state ONLY when motion is allowed */

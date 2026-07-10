@@ -5,11 +5,13 @@ import { headers } from "next/headers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 import { CookieConsent } from "@/components/cookie-consent";
 import { FloatingWhatsApp } from "@/components/floating-whatsapp";
 import { GlobalBottomNav } from "@/components/ui/global-bottom-nav";
-import { Toaster } from "sonner";
+import { AppToaster } from "@/components/ui/app-toaster";
 import { generateSiteJsonLd } from "@/lib/seo/json-ld";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -86,7 +88,7 @@ export default async function RootLayout({
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
     >
-      <html lang={locale} className={inter.variable}>
+      <html lang={locale} className={inter.variable} suppressHydrationWarning>
         <head>
           {/* Google Merchant Center verification */}
           <meta name="google-site-verification" content="t7VN3FQbd8ShLmh9D_6FGqAgNepY9Dm5CwUZLagBhXs" />
@@ -121,27 +123,23 @@ export default async function RootLayout({
           >
             Skip to content
           </a>
-          <NextIntlClientProvider messages={messages}>
-            <main id="main-content">{children}</main>
-            <GlobalBottomNav />
-            <FloatingWhatsApp />
-            <Toaster
-            position="top-center"
-            toastOptions={{
-              style: {
-                background: "#1c1917",
-                color: "#fafaf9",
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "13px",
-                padding: "12px 16px",
-              },
-            }}
-            expand={false}
-            richColors
-          />
-            <CookieConsent />
-          </NextIntlClientProvider>
+          {/* Dark mode rides the TF redesign flag: while UI_REDESIGN is off,
+              force light so the live legacy UI is untouched; when the flag
+              flips, users get their system preference + the TfThemeToggle. */}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            forcedTheme={FEATURE_FLAGS.UI_REDESIGN ? undefined : "light"}
+          >
+            <NextIntlClientProvider messages={messages}>
+              <main id="main-content">{children}</main>
+              <GlobalBottomNav />
+              <FloatingWhatsApp />
+              <AppToaster />
+              <CookieConsent />
+            </NextIntlClientProvider>
+          </ThemeProvider>
           {/* Register Service Worker for PWA */}
           <Script id="sw-register" strategy="afterInteractive" nonce={nonce}>
             {`if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`}

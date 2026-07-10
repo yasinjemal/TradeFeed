@@ -32,7 +32,9 @@
 
 import type { CartItem } from "./types";
 
-const BASE_URL = "https://tradefeed.co.za";
+// Env-driven so staging/preview builds don't emit production links
+// in order messages. NEXT_PUBLIC_ is inlined client-side at build.
+const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za").replace(/\/$/, "");
 
 export interface DeliveryAddress {
   address: string;

@@ -42,4 +42,10 @@ export const FEATURE_FLAGS = {
   // ── Trust Redesign (2026) ────────────────────────────────────
   /** New "Verified Seller" design system (components/tf). Live UI untouched while off. */
   UI_REDESIGN: process.env.NEXT_PUBLIC_FF_UI_REDESIGN === "true",
+  /**
+   * Seller-facing TF surfaces (dashboard home, create-shop flow).
+   * Split from UI_REDESIGN so the buyer-path flip can ship without
+   * dragging half-finished seller surfaces along with it.
+   */
+  UI_REDESIGN_DASHBOARD: process.env.NEXT_PUBLIC_FF_UI_REDESIGN_DASHBOARD === "true",
 } as const;

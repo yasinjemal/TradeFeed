@@ -8,6 +8,13 @@ import { cn } from "@/lib/utils";
 import { TfButton } from "@/components/tf/button";
 import { formatZAR } from "@/components/tf/format";
 import { useCart } from "@/lib/cart/cart-context";
+import {
+  applicableTier,
+  effectiveUnitPriceCents,
+  nextTierNudge,
+  type BulkDiscountTier,
+  type OrderType,
+} from "@/lib/cart/pricing";
 import { trackAddToCartAction } from "@/app/actions/analytics";
 
 // ============================================================
@@ -22,6 +29,7 @@ export interface TfVariant {
   size: string;
   color: string | null;
   priceInCents: number;
+  retailPriceCents: number | null;
   stock: number;
 }
 
@@ -38,6 +46,7 @@ interface TfOrderPanelProps {
   /** First product image — shown as the cart line thumbnail */
   imageUrl?: string | null;
   minWholesaleQty?: number;
+  bulkDiscountTiers?: BulkDiscountTier[];
 }
 
 function Pill({
@@ -82,6 +91,7 @@ export function TfOrderPanel({
   option2Label,
   imageUrl,
   minWholesaleQty = 1,
+  bulkDiscountTiers = [],
 }: TfOrderPanelProps) {
   const { addItem } = useCart();
   const sizes = React.useMemo(
@@ -89,10 +99,20 @@ export function TfOrderPanel({
     [variants],
   );
   const hasColors = variants.some((v) => v.color);
+  // Retail availability is driven by product data, not shop config
+  const hasRetail = variants.some((v) => v.retailPriceCents != null && v.retailPriceCents > 0);
 
   const [size, setSize] = React.useState<string | null>(sizes.length === 1 ? sizes[0]! : null);
   const [color, setColor] = React.useState<string | null>(null);
-  const [qty, setQty] = React.useState(1);
+  const [orderType, setOrderType] = React.useState<OrderType>("wholesale");
+  const minQty = orderType === "retail" ? 1 : Math.max(1, minWholesaleQty);
+  const [qty, setQty] = React.useState(Math.max(1, minWholesaleQty));
+
+  const switchOrderType = (type: OrderType) => {
+    setOrderType(type);
+    const nextMin = type === "retail" ? 1 : Math.max(1, minWholesaleQty);
+    setQty((q) => Math.max(nextMin, q));
+  };
 
   const colorsForSize = React.useMemo(() => {
     if (!hasColors) return [];
@@ -109,7 +129,16 @@ export function TfOrderPanel({
   }, [variants, size, color, hasColors]);
 
   const exactSelection = size != null && (!hasColors || colorsForSize.length === 0 || color != null);
-  const unitCents = selected?.priceInCents ?? Math.min(...variants.map((v) => v.priceInCents));
+  const baseWholesaleCents = selected?.priceInCents ?? Math.min(...variants.map((v) => v.priceInCents));
+  const unitCents = effectiveUnitPriceCents({
+    orderType,
+    wholesalePriceCents: baseWholesaleCents,
+    retailPriceCents: selected?.retailPriceCents ?? null,
+    quantity: qty,
+    bulkDiscountTiers,
+  });
+  const activeTier = orderType === "wholesale" ? applicableTier(qty, bulkDiscountTiers) : null;
+  const tierNudge = orderType === "wholesale" ? nextTierNudge(qty, bulkDiscountTiers) : null;
   const maxQty = exactSelection && selected ? Math.max(1, selected.stock) : 99;
   const totalCents = unitCents * qty;
   const totalStock = variants.reduce((s, v) => s + v.stock, 0);
@@ -124,8 +153,9 @@ export function TfOrderPanel({
     `*${productName}*`,
     size ? `${option1Label}: ${size}` : null,
     color ? `${option2Label}: ${color}` : null,
+    hasRetail ? `Order type: ${orderType === "retail" ? "Retail" : "Wholesale"}` : null,
     `Quantity: ${qty}`,
-    `Price: ${formatZAR(unitCents / 100)} each — ${formatZAR(totalCents / 100)} total`,
+    `Price: ${formatZAR(unitCents / 100)} each — ${formatZAR(totalCents / 100)} total${activeTier ? ` (${activeTier.discountPercent}% bulk discount)` : ""}`,
     "",
     productUrl,
   ]
@@ -137,6 +167,13 @@ export function TfOrderPanel({
 
   const handleAddToCart = () => {
     if (!canAddToCart || !selected) return;
+    const lineUnitCents = effectiveUnitPriceCents({
+      orderType,
+      wholesalePriceCents: selected.priceInCents,
+      retailPriceCents: selected.retailPriceCents,
+      quantity: qty,
+      bulkDiscountTiers,
+    });
     addItem(
       {
         variantId: selected.id,
@@ -147,16 +184,16 @@ export function TfOrderPanel({
         color: selected.color,
         option1Label,
         option2Label,
-        priceInCents: selected.priceInCents,
+        priceInCents: lineUnitCents,
         maxStock: selected.stock,
         minWholesaleQty,
-        orderType: "wholesale",
+        orderType,
       },
       qty,
     );
     void trackAddToCartAction(shopId, productId);
     toast.success(`${productName} added to cart`, {
-      description: `${qty}× ${selected.size}${selected.color ? ` / ${selected.color}` : ""} — ${formatZAR((selected.priceInCents * qty) / 100)}`,
+      description: `${qty}× ${selected.size}${selected.color ? ` / ${selected.color}` : ""} — ${formatZAR((lineUnitCents * qty) / 100)}${orderType === "retail" ? " (retail)" : ""}`,
       duration: 2500,
     });
   };
@@ -196,6 +233,40 @@ export function TfOrderPanel({
   return (
     <>
       <div className="space-y-4">
+        {/* Wholesale / retail toggle — only when the product carries both prices */}
+        {hasRetail && (
+          <fieldset>
+            <legend className="sr-only">Order type</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {(
+                [
+                  ["wholesale", `Wholesale${minWholesaleQty > 1 ? ` (min ${minWholesaleQty})` : ""}`],
+                  ["retail", "Retail (single items)"],
+                ] as const
+              ).map(([value, label]) => (
+                <label
+                  key={value}
+                  className={cn(
+                    "flex min-h-11 cursor-pointer items-center justify-center rounded-[10px] border px-2 text-sm transition-colors motion-reduce:transition-none",
+                    orderType === value
+                      ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-verified"
+                      : "border-tf-stone-300 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="tf-order-type"
+                    checked={orderType === value}
+                    onChange={() => switchOrderType(value)}
+                    className="sr-only"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+
         {/* Price */}
         <p className="flex items-baseline gap-3 tabular-nums">
           <span
@@ -204,10 +275,36 @@ export function TfOrderPanel({
           >
             {formatZAR(unitCents / 100)}
           </span>
+          {activeTier && (
+            <span className="rounded-full bg-tf-verified-soft px-2 py-0.5 text-xs font-medium text-tf-verified">
+              {activeTier.discountPercent}% bulk discount
+            </span>
+          )}
           {qty > 1 && (
             <span className="text-sm text-tf-stone-500">× {qty} = <span className="font-semibold text-tf-ink">{formatZAR(totalCents / 100)}</span></span>
           )}
         </p>
+
+        {/* Bulk tiers — quiet chips, wholesale only */}
+        {orderType === "wholesale" && bulkDiscountTiers.length > 0 && (
+          <div className="flex flex-wrap gap-1.5" aria-label="Bulk discounts">
+            {[...bulkDiscountTiers]
+              .sort((a, b) => a.minQuantity - b.minQuantity)
+              .map((tier) => (
+                <span
+                  key={tier.minQuantity}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1 text-[11px] font-medium tabular-nums",
+                    activeTier?.minQuantity === tier.minQuantity
+                      ? "border-tf-verified/40 bg-tf-verified-soft text-tf-verified"
+                      : "border-tf-stone-200 bg-tf-stone-50 text-tf-stone-600",
+                  )}
+                >
+                  {tier.minQuantity}+ units · {tier.discountPercent}% off
+                </span>
+              ))}
+          </div>
+        )}
 
         {/* Option 1 */}
         {sizes.length > 1 && (
@@ -247,33 +344,43 @@ export function TfOrderPanel({
 
         {/* Quantity */}
         {!soldOut && (
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-tf-ink">Quantity</span>
-            <div className="flex items-center rounded-full border border-tf-stone-300 bg-tf-raised">
-              <button
-                type="button"
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-                aria-label="Decrease quantity"
-                className="flex size-11 items-center justify-center rounded-full text-tf-stone-600 outline-none hover:bg-tf-stone-100 focus-visible:ring-2 focus-visible:ring-tf-primary disabled:opacity-40"
-                disabled={qty <= 1}
-              >
-                <Minus className="size-4" />
-              </button>
-              <span className="min-w-8 text-center text-sm font-medium tabular-nums">{qty}</span>
-              <button
-                type="button"
-                onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
-                aria-label="Increase quantity"
-                className="flex size-11 items-center justify-center rounded-full text-tf-stone-600 outline-none hover:bg-tf-stone-100 focus-visible:ring-2 focus-visible:ring-tf-primary disabled:opacity-40"
-                disabled={qty >= maxQty}
-              >
-                <Plus className="size-4" />
-              </button>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-tf-ink">Quantity</span>
+              <div className="flex items-center rounded-full border border-tf-stone-300 bg-tf-raised">
+                <button
+                  type="button"
+                  onClick={() => setQty((q) => Math.max(minQty, q - 1))}
+                  aria-label="Decrease quantity"
+                  className="flex size-11 items-center justify-center rounded-full text-tf-stone-600 outline-none hover:bg-tf-stone-100 focus-visible:ring-2 focus-visible:ring-tf-primary disabled:opacity-40"
+                  disabled={qty <= minQty}
+                >
+                  <Minus className="size-4" />
+                </button>
+                <span className="min-w-8 text-center text-sm font-medium tabular-nums">{qty}</span>
+                <button
+                  type="button"
+                  onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
+                  aria-label="Increase quantity"
+                  className="flex size-11 items-center justify-center rounded-full text-tf-stone-600 outline-none hover:bg-tf-stone-100 focus-visible:ring-2 focus-visible:ring-tf-primary disabled:opacity-40"
+                  disabled={qty >= maxQty}
+                >
+                  <Plus className="size-4" />
+                </button>
+              </div>
+              {exactSelection && selected && selected.stock > 0 && selected.stock <= 5 && (
+                <span className="text-xs font-medium tabular-nums text-tf-accent-ink">
+                  Only {selected.stock} left
+                </span>
+              )}
             </div>
-            {exactSelection && selected && selected.stock > 0 && selected.stock <= 5 && (
-              <span className="text-xs font-medium tabular-nums text-tf-accent-ink">
-                Only {selected.stock} left
-              </span>
+            {orderType === "wholesale" && minWholesaleQty > 1 && (
+              <p className="text-xs text-tf-stone-500">Minimum order: {minWholesaleQty} units</p>
+            )}
+            {tierNudge && qty < maxQty && (
+              <p className="text-xs font-medium text-tf-verified" aria-live="polite">
+                Add {tierNudge.addMore} more for {tierNudge.discountPercent}% off
+              </p>
             )}
           </div>
         )}

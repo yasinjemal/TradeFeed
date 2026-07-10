@@ -163,6 +163,52 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   // ── Track page view (fire-and-forget — don't block render) ──
   void trackEvent({ type: "PAGE_VIEW", shopId: shop.id });
 
+  // ── Shared derived data (both skins) ───────────────────
+  // Fallback products for new visitors (when recently-viewed is empty)
+  const fallbackProducts = products.slice(0, 8).map((p) => ({
+    productId: p.id,
+    productName: p.name,
+    imageUrl: p.images[0]?.url ?? null,
+    priceInCents:
+      p.variants.length > 0
+        ? Math.min(...p.variants.map((v) => v.priceInCents))
+        : 0,
+  }));
+
+  // Offline-cache shapes for IndexedDB. cachedAt is set client-side
+  // by the cache manager to avoid impure Date.now() in server render.
+  const cachedShop = {
+    id: shop.id,
+    slug,
+    name: shop.name,
+    description: shop.description ?? null,
+    logoUrl: shop.logoUrl ?? null,
+    bannerUrl: shop.bannerUrl ?? null,
+    whatsappNumber: shop.whatsappNumber,
+    cachedAt: 0,
+  };
+
+  const cachedProducts = products.map((p) => {
+    const prices = p.variants.map((v) => v.priceInCents);
+    return {
+      id: p.id,
+      shopId: shop.id,
+      name: p.name,
+      description: p.description ?? null,
+      imageUrl: p.images[0]?.url ?? null,
+      minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
+      maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
+      variants: p.variants.map((v) => ({
+        id: v.id,
+        size: v.size,
+        color: v.color ?? null,
+        priceInCents: v.priceInCents,
+        stock: v.stock,
+      })),
+      cachedAt: 0,
+    };
+  });
+
   // ── TF redesign (FEATURE_FLAGS.UI_REDESIGN) — same data, new skin ──
   if (FEATURE_FLAGS.UI_REDESIGN) {
     const ratingAgg = await db.review.aggregate({
@@ -172,6 +218,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
     });
 
     return (
+      <>
       <TfStorefront
         shop={{
           id: shop.id,
@@ -179,6 +226,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
           name: shop.name,
           isVerified: shop.isVerified,
           logoUrl: shop.logoUrl,
+          bannerUrl: shop.bannerUrl,
           city: shop.city,
           province: shop.province,
           aboutText: shop.aboutText,
@@ -205,6 +253,27 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
             position: index,
           };
         })}
+        combos={combos.map((c) => ({
+          id: c.id,
+          name: c.name,
+          description: c.description,
+          priceCents: c.priceCents,
+          retailPriceCents: c.retailPriceCents,
+          stock: c.stock,
+          items: c.items,
+          images: c.images,
+        }))}
+        drop={
+          recentDrops[0]
+            ? {
+                id: recentDrops[0].id,
+                title: recentDrops[0].title,
+                itemCount: recentDrops[0]._count.items,
+              }
+            : null
+        }
+        fallbackProducts={fallbackProducts}
+        shareUrl={`${APP_URL}/catalog/${slug}`}
         trustStats={trustStats}
         reviews={reviewHighlights}
         avgRating={ratingAgg._avg.rating}
@@ -213,6 +282,9 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
         ownerDashboardSlug={ownerDashboardSlug}
         showRecruitment={showRecruitmentCTAs}
       />
+      {/* Offline cache manager (silent — renders nothing) */}
+      <CatalogCacheManager shop={cachedShop} products={cachedProducts} />
+      </>
     );
   }
 
@@ -260,52 +332,6 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
         .map((p) => [p.category!.id, p.category!])
     ).values()
   );
-
-  // ── Fallback products for new visitors (when recently-viewed is empty)
-  const fallbackProducts = products.slice(0, 8).map((p) => ({
-    productId: p.id,
-    productName: p.name,
-    imageUrl: p.images[0]?.url ?? null,
-    priceInCents:
-      p.variants.length > 0
-        ? Math.min(...p.variants.map((v) => v.priceInCents))
-        : 0,
-  }));
-
-  // ── Map to offline-cache shapes for IndexedDB ──────────
-  // NOTE: cachedAt is set client-side by the cache manager to avoid
-  // impure Date.now() calls during server render.
-  const cachedShop = {
-    id: shop.id,
-    slug,
-    name: shop.name,
-    description: shop.description ?? null,
-    logoUrl: shop.logoUrl ?? null,
-    bannerUrl: shop.bannerUrl ?? null,
-    whatsappNumber: shop.whatsappNumber,
-    cachedAt: 0,
-  };
-
-  const cachedProducts = products.map((p) => {
-    const prices = p.variants.map((v) => v.priceInCents);
-    return {
-      id: p.id,
-      shopId: shop.id,
-      name: p.name,
-      description: p.description ?? null,
-      imageUrl: p.images[0]?.url ?? null,
-      minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
-      maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
-      variants: p.variants.map((v) => ({
-        id: v.id,
-        size: v.size,
-        color: v.color ?? null,
-        priceInCents: v.priceInCents,
-        stock: v.stock,
-      })),
-      cachedAt: 0,
-    };
-  });
 
   return (
     <div className="space-y-5">

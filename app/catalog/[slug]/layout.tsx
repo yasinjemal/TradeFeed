@@ -28,6 +28,8 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CatalogAppShell } from "@/components/ui/catalog-app-shell";
 import { OfflineBanner } from "@/components/catalog/offline-banner";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { TfCatalogHeader, TfCatalogFooter } from "@/components/tf/storefront/tf-catalog-chrome";
 
 interface CatalogLayoutProps {
   children: React.ReactNode;
@@ -113,6 +115,18 @@ export default async function CatalogLayout({
   const hasTheme = Object.keys(themeCssVars).length > 0;
   const themeFont = hasTheme ? themeCssVars["--shop-font"] : undefined;
 
+  const useTf = FEATURE_FLAGS.UI_REDESIGN;
+  const tfChromeShop = {
+    slug,
+    name: shop.name,
+    logoUrl: shop.logoUrl,
+    isVerified: shop.isVerified,
+    city: shop.city,
+    productCount: shop._count.products,
+    isPro,
+    tierLabel: tierData.tier.key !== "new" ? tierData.tier.label : undefined,
+  };
+
   return (
     <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined} shopProvince={shop.province ?? undefined} shopCity={shop.city ?? undefined} codEnabled={shop.codEnabled} deliveryEnabled={shop.deliveryEnabled} collectionEnabled={shop.collectionEnabled} dispatchWindow={shop.dispatchWindow} deliveryNote={shop.deliveryNote ?? undefined} shopName={shop.name} shopLogoUrl={shop.logoUrl ?? undefined} shopVerified={shop.isVerified}>
     <WhatsAppCTAProvider>
@@ -139,6 +153,9 @@ export default async function CatalogLayout({
 
       <CatalogAppShell
         header={
+          useTf ? (
+            <TfCatalogHeader shop={tfChromeShop} />
+          ) : (
           <div
             className={`px-3 py-2.5 sm:px-4 sm:py-3 ${
               isPro && shop.isVerified && (tierData.tier.key === "top" || tierData.tier.key === "established")
@@ -248,15 +265,20 @@ export default async function CatalogLayout({
               </div>
             </div>
           </div>
+          )
         }
         bottomNav={<BottomNav shopSlug={slug} />}
       >
         <div
           className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-3 py-4 sm:px-4"
+          data-shop-themed={hasTheme ? "" : undefined}
           style={hasTheme ? { ...themeCssVars, fontFamily: themeFont } as React.CSSProperties : undefined}
         >
           {children}
 
+          {useTf ? (
+            <TfCatalogFooter shop={tfChromeShop} />
+          ) : (
           <footer className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-stone-50 via-stone-50 to-stone-100 px-5 py-6 text-center space-y-4">
             {/* Subtle deco */}
             <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-100/40 blur-2xl" />
@@ -303,9 +325,12 @@ export default async function CatalogLayout({
               </div>
             </div>
           </footer>
+          )}
         </div>
 
-        <WishlistButton shopSlug={slug} />
+        {/* Floating wishlist is legacy-styled; hidden under TF until
+            TfProductCard ships its own wishlist affordance. */}
+        {!useTf && <WishlistButton shopSlug={slug} />}
       </CatalogAppShell>
     </WishlistProvider>
     </WhatsAppCTAProvider>

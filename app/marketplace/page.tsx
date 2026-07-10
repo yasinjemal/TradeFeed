@@ -122,14 +122,17 @@ export default async function MarketplacePage({
   // M5.4 — Expire stale promotions before fetching (fast updateMany)
   await expirePromotedListings();
 
-  // Fetch all data in parallel
+  // Fetch all data in parallel. The TF shell renders a compact
+  // featured-sellers rail but no trending/new-arrivals sections,
+  // so skip those queries entirely when the redesign is on.
+  const useTf = FEATURE_FLAGS.UI_REDESIGN;
   const [productsResult, promoted, categories, trending, newArrivals, featuredShops] =
     await Promise.all([
       getMarketplaceProducts(filters),
       getPromotedProducts(12),
       getGlobalCategories(),
-      getTrendingProducts(12),
-      getNewArrivals(8),
+      useTf ? Promise.resolve([]) : getTrendingProducts(12),
+      useTf ? Promise.resolve([]) : getNewArrivals(8),
       getFeaturedShops(8),
     ]);
 
@@ -165,13 +168,15 @@ export default async function MarketplacePage({
         />
       ))}
 
-      {FEATURE_FLAGS.UI_REDESIGN ? (
+      {useTf ? (
         <TfMarketplaceShell
           products={interleavedProducts}
           totalProducts={productsResult.total}
           totalPages={productsResult.totalPages}
           currentPage={productsResult.page}
           categories={categories}
+          featuredShops={featuredShops}
+          promotedProducts={promoted}
           currentFilters={filters}
         />
       ) : (

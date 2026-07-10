@@ -5,6 +5,7 @@ import { getOrderByNumber } from "@/lib/db/tracking";
 import { formatZARCents } from "@/lib/currency";
 import { TfButton } from "@/components/tf/button";
 import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import { TfTrustBar } from "@/components/tf/trust-bar";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
@@ -42,8 +43,11 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
       <TfFonts />
       <header className="border-b border-tf-stone-200 bg-tf-raised/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-5">
-          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="dark" /></Link>
-          <span className="font-mono text-xs text-tf-stone-500">{order.orderNumber}</span>
+          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="auto" /></Link>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-tf-stone-500">{order.orderNumber}</span>
+            <TfThemeToggle className="size-9" />
+          </div>
         </div>
       </header>
       <section className="mx-auto max-w-xl space-y-4 px-5 py-8 sm:py-12">
@@ -63,7 +67,7 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
         </div>
 
         {payment === "success" && (
-          <div className="rounded-xl border border-tf-verified/25 bg-tf-verified-soft p-4 text-sm text-tf-deep">
+          <div className="rounded-xl border border-tf-verified/25 bg-tf-verified-soft p-4 text-sm text-tf-verified">
             {order.paidAt ? "Payment received. The seller will process your order shortly." : "Your payment is being confirmed by PayFast."}
           </div>
         )}
@@ -98,8 +102,68 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
         <section className="overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-raised shadow-tf-sm">
           <h2 className="border-b border-tf-stone-200 px-5 py-4 font-tf-display font-semibold">Your order</h2>
           <ul className="divide-y divide-tf-stone-100">{order.items.map((item) => <li key={item.id} className="flex justify-between gap-4 px-5 py-3"><div className="min-w-0"><p className="truncate text-sm font-medium">{item.productName}</p><p className="text-xs text-tf-stone-500">Qty {item.quantity}</p></div><span className="shrink-0 text-sm tabular-nums">{formatZARCents(item.priceInCents * item.quantity)}</span></li>)}</ul>
-          <div className="flex justify-between border-t border-tf-stone-200 bg-tf-stone-50 px-5 py-4 font-semibold"><span>Total</span><span className="tabular-nums">{formatZARCents(order.totalCents)}</span></div>
+          <div className="border-t border-tf-stone-200 bg-tf-stone-50 px-5 py-4">
+            {order.shippingCostCents > 0 && (
+              <div className="mb-1 flex justify-between text-xs text-tf-stone-500">
+                <span>
+                  Shipping ({order.shippingMethod === "COLLECTION" ? "Collection" : order.courierName ?? "Courier"})
+                </span>
+                <span className="tabular-nums">{formatZARCents(order.shippingCostCents)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-semibold"><span>Total</span><span className="tabular-nums">{formatZARCents(order.totalCents)}</span></div>
+          </div>
         </section>
+
+        {/* Buyer details — as captured at checkout */}
+        {(order.buyerName || order.buyerPhone || order.buyerNote) && (
+          <section className="rounded-xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm">
+            <h2 className="font-tf-display text-sm font-semibold">Buyer details</h2>
+            <dl className="mt-3 space-y-1.5 text-sm text-tf-stone-600">
+              {order.buyerName && (
+                <div className="flex gap-2">
+                  <dt className="w-14 shrink-0 text-tf-stone-400">Name</dt>
+                  <dd>{order.buyerName}</dd>
+                </div>
+              )}
+              {order.buyerPhone && (
+                <div className="flex gap-2">
+                  <dt className="w-14 shrink-0 text-tf-stone-400">Phone</dt>
+                  <dd className="font-mono">
+                    {order.buyerPhone} <span className="text-[10px] text-tf-stone-400">(masked)</span>
+                  </dd>
+                </div>
+              )}
+              {order.buyerNote && (
+                <div className="flex gap-2">
+                  <dt className="w-14 shrink-0 text-tf-stone-400">Note</dt>
+                  <dd className="whitespace-pre-line">{order.buyerNote}</dd>
+                </div>
+              )}
+            </dl>
+          </section>
+        )}
+
+        {/* Post-delivery review prompt — reviews are the trust engine */}
+        {order.status === "DELIVERED" && (
+          <section className="rounded-xl border border-tf-accent/30 bg-tf-accent-soft p-4">
+            <p className="text-sm font-semibold text-tf-ink">How was your order?</p>
+            <p className="mt-0.5 text-xs text-tf-stone-600">
+              Your review helps {order.shop.name} and guides other buyers.
+            </p>
+            <TfButton asChild variant="secondary" size="sm" className="mt-3">
+              <a
+                href={`https://wa.me/${waNumber}?text=${encodeURIComponent(
+                  `Hi ${order.shop.name}, I'd like to leave a review for my order ${order.orderNumber}.`,
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Leave a review via WhatsApp
+              </a>
+            </TfButton>
+          </section>
+        )}
 
         <TfVerifiedSellerCard name={order.shop.name} verified={order.shop.isVerified} avatarUrl={order.shop.logoUrl} location={location} href={`/catalog/${order.shop.slug}`} />
         <TfButton asChild variant="whatsapp" fullWidth><a href={waLink} target="_blank" rel="noopener noreferrer"><MessageCircle aria-hidden="true" />Contact seller on WhatsApp</a></TfButton>

@@ -12,11 +12,19 @@ import { TfButton } from "@/components/tf/button";
 import { TfEmptyState } from "@/components/tf/empty-state";
 import { TfProductCard } from "@/components/tf/product-card";
 import { TfProductCardSkeleton } from "@/components/tf/skeleton";
+import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
+import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { buildMarketplaceSearchParams } from "@/lib/marketplace/search-params";
-import { loadMoreProducts, trackMarketplaceClickAction, trackPromotedClickAction } from "@/app/actions/marketplace";
-import type { CategoryWithCount, MarketplaceProduct, MarketplaceSortBy } from "@/lib/db/marketplace";
+import {
+  loadMoreProducts,
+  trackMarketplaceClickAction,
+  trackMarketplaceViewAction,
+  trackPromotedClickAction,
+  trackPromotedImpressionsAction,
+} from "@/app/actions/marketplace";
+import type { CategoryWithCount, FeaturedShop, MarketplaceProduct, MarketplaceSortBy } from "@/lib/db/marketplace";
 import { TfFilterSheet, type TfFilterState } from "./tf-filter-sheet";
 
 interface TfMarketplaceShellProps {
@@ -25,6 +33,8 @@ interface TfMarketplaceShellProps {
   totalPages: number;
   currentPage: number;
   categories: CategoryWithCount[];
+  featuredShops: FeaturedShop[];
+  promotedProducts: MarketplaceProduct[];
   currentFilters: {
     category?: string;
     search?: string;
@@ -68,12 +78,21 @@ const PRICE_PRESETS = [
   { label: "R500+", min: 500, max: undefined },
 ] as const;
 
+interface Suggestions {
+  products: { name: string; slug: string }[];
+  categories: { name: string; slug: string }[];
+}
+
+const NO_SUGGESTIONS: Suggestions = { products: [], categories: [] };
+
 export function TfMarketplaceShell({
   products,
   totalProducts,
   totalPages,
   currentPage,
   categories,
+  featuredShops,
+  promotedProducts,
   currentFilters,
 }: TfMarketplaceShellProps) {
   const router = useRouter();
@@ -85,7 +104,10 @@ export function TfMarketplaceShell({
   const [nextPage, setNextPage] = React.useState(currentPage + 1);
   const [hasMore, setHasMore] = React.useState(currentPage < totalPages);
   const [loadingMore, setLoadingMore] = React.useState(false);
+  const [suggestions, setSuggestions] = React.useState<Suggestions>(NO_SUGGESTIONS);
+  const [suggestionsOpen, setSuggestionsOpen] = React.useState(false);
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autocompleteRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const sentinelRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -93,6 +115,20 @@ export function TfMarketplaceShell({
     setNextPage(currentPage + 1);
     setHasMore(currentPage < totalPages);
   }, [products, currentPage, totalPages]);
+
+  // Marketplace view + promoted-impression telemetry — these feed
+  // seller analytics and promoted-listing billing. Removing them
+  // silently corrupts both (parity with the legacy shell).
+  React.useEffect(() => {
+    trackMarketplaceViewAction();
+  }, []);
+
+  React.useEffect(() => {
+    const promotedIds = promotedProducts
+      .filter((p) => p.promotion)
+      .map((p) => p.promotion!.promotedListingId);
+    if (promotedIds.length > 0) trackPromotedImpressionsAction(promotedIds);
+  }, [promotedProducts]);
 
   const navigate = React.useCallback(
     (updates: Record<string, string | undefined>) => {
@@ -106,6 +142,42 @@ export function TfMarketplaceShell({
     setSearch(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => navigate({ search: value || undefined }), 400);
+
+    // Typeahead — separate, faster debounce than the URL update
+    if (autocompleteRef.current) clearTimeout(autocompleteRef.current);
+    const trimmed = value.trim();
+    if (trimmed.length < 2) {
+      setSuggestions(NO_SUGGESTIONS);
+      setSuggestionsOpen(false);
+      return;
+    }
+    autocompleteRef.current = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/search/autocomplete?q=${encodeURIComponent(trimmed)}`);
+        if (response.ok) {
+          const data: Suggestions = await response.json();
+          setSuggestions(data);
+          setSuggestionsOpen(data.products.length > 0 || data.categories.length > 0);
+        }
+      } catch {
+        setSuggestions(NO_SUGGESTIONS);
+        setSuggestionsOpen(false);
+      }
+    }, 200);
+  };
+
+  const selectSuggestion = (value: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearch(value);
+    setSuggestionsOpen(false);
+    navigate({ search: value });
+  };
+
+  const selectCategorySuggestion = (slug: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearch("");
+    setSuggestionsOpen(false);
+    navigate({ category: slug, search: undefined });
   };
 
   React.useEffect(() => {
@@ -175,17 +247,17 @@ export function TfMarketplaceShell({
   );
 
   const pillBase =
-    "min-h-8 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary";
-  const pillActive = "border-tf-ink bg-tf-ink text-white shadow-sm";
+    "min-h-10 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary";
+  const pillActive = "border-tf-ink bg-tf-ink text-tf-surface shadow-sm";
   const pillIdle =
-    "border-tf-stone-200 bg-white text-tf-stone-600 hover:border-tf-stone-400 hover:text-tf-ink";
+    "border-tf-stone-200 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400 hover:text-tf-ink";
 
   return (
     <div className="min-h-screen bg-tf-surface pb-20 text-tf-ink">
       <TfFonts />
 
       {/* ── Row 1: Announcement strip — static, scrolls away ── */}
-      <div style={{ backgroundColor: "#071a0f" }}>
+      <div className="bg-tf-deepest">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2 sm:px-6">
           <div className="flex items-center gap-5 overflow-hidden">
             <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-emerald-200">
@@ -215,49 +287,113 @@ export function TfMarketplaceShell({
       <header className="sticky top-0 z-30">
 
         {/* Row 2: Search-dominant nav */}
-        <div className="border-b border-tf-stone-200 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]">
+        <div className="border-b border-tf-stone-200 bg-tf-raised shadow-[0_1px_0_0_rgba(0,0,0,0.06)]">
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6">
 
             {/* Logo — icon + wordmark, proper dark variant */}
             <Link href="/" aria-label="TradeFeed home" className="hidden shrink-0 sm:block">
-              <TradeFeedLogo size="sm" variant="dark" />
+              <TradeFeedLogo size="sm" variant="auto" />
             </Link>
 
             {/* Search bar — the dominant element */}
-            <div className="relative flex-1">
+            <div
+              className="relative flex-1"
+              onBlur={(e) => {
+                // Close the typeahead only when focus leaves the whole search area
+                if (!e.currentTarget.contains(e.relatedTarget)) setSuggestionsOpen(false);
+              }}
+            >
               <Search
                 aria-hidden="true"
-                className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-emerald-600"
+                className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-tf-primary"
               />
               <input
                 type="search"
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
+                onFocus={() => {
+                  if (suggestions.products.length > 0 || suggestions.categories.length > 0) {
+                    setSuggestionsOpen(true);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setSuggestionsOpen(false);
+                }}
                 placeholder="Search products, sellers, brands..."
                 aria-label="Search the marketplace"
-                className="min-h-[52px] w-full rounded-2xl border border-tf-stone-200 bg-tf-stone-50 pl-11 pr-4 text-[15px] text-tf-ink shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] placeholder:text-tf-stone-400 outline-none transition-all focus-visible:border-emerald-500 focus-visible:bg-white focus-visible:shadow-[0_0_0_3px_rgba(16,185,129,0.12),inset_0_1px_3px_rgba(0,0,0,0.04)]"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={suggestionsOpen}
+                aria-controls="tf-search-suggestions"
+                className="min-h-[52px] w-full rounded-2xl border border-tf-stone-200 bg-tf-stone-50 pl-11 pr-4 text-[15px] text-tf-ink shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] placeholder:text-tf-stone-400 outline-none transition-all focus-visible:border-tf-primary focus-visible:bg-tf-raised focus-visible:shadow-[0_0_0_3px_rgba(16,185,129,0.12),inset_0_1px_3px_rgba(0,0,0,0.04)]"
               />
+
+              {/* Typeahead suggestions */}
+              {suggestionsOpen && (
+                <div
+                  id="tf-search-suggestions"
+                  className="absolute inset-x-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-tf-stone-200 bg-tf-raised shadow-tf-md"
+                >
+                  {suggestions.categories.length > 0 && (
+                    <ul aria-label="Matching categories" className="border-b border-tf-stone-100 py-1">
+                      {suggestions.categories.map((c) => (
+                        <li key={`cat-${c.slug}`}>
+                          <button
+                            type="button"
+                            onClick={() => selectCategorySuggestion(c.slug)}
+                            className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 px-4 text-left text-sm text-tf-stone-600 outline-none transition-colors hover:bg-tf-stone-50 hover:text-tf-ink focus-visible:bg-tf-stone-50"
+                          >
+                            <SlidersHorizontal aria-hidden="true" className="size-3.5 shrink-0 text-tf-stone-400" />
+                            <span className="truncate">
+                              Browse <span className="font-medium text-tf-ink">{c.name}</span>
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {suggestions.products.length > 0 && (
+                    <ul aria-label="Matching products" className="py-1">
+                      {suggestions.products.map((p) => (
+                        <li key={`prod-${p.slug}`}>
+                          <button
+                            type="button"
+                            onClick={() => selectSuggestion(p.name)}
+                            className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 px-4 text-left text-sm text-tf-stone-600 outline-none transition-colors hover:bg-tf-stone-50 hover:text-tf-ink focus-visible:bg-tf-stone-50"
+                          >
+                            <Search aria-hidden="true" className="size-3.5 shrink-0 text-tf-stone-400" />
+                            <span className="truncate">{p.name}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Filters */}
             <button
               type="button"
               onClick={() => setSheetOpen(true)}
-              className="relative flex min-h-[48px] shrink-0 items-center gap-2 rounded-2xl border border-tf-stone-200 bg-tf-stone-50 px-4 text-sm font-medium text-tf-stone-700 outline-none transition-all hover:border-tf-stone-300 hover:bg-white hover:shadow-sm focus-visible:ring-2 focus-visible:ring-tf-primary"
+              className="relative flex min-h-[48px] shrink-0 items-center gap-2 rounded-2xl border border-tf-stone-200 bg-tf-stone-50 px-4 text-sm font-medium text-tf-stone-700 outline-none transition-all hover:border-tf-stone-300 hover:bg-tf-raised hover:shadow-sm focus-visible:ring-2 focus-visible:ring-tf-primary"
             >
               <SlidersHorizontal aria-hidden="true" className="size-4" />
               <span className="hidden sm:inline">Filters</span>
               {activeFilterCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold tabular-nums text-white">
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-tf-primary px-1 text-[10px] font-bold tabular-nums text-white">
                   {activeFilterCount}
                 </span>
               )}
             </button>
 
+            {/* Theme toggle — desktop only; mobile follows system preference */}
+            <TfThemeToggle className="hidden sm:inline-flex" />
+
             {/* Sell free CTA — vibrant emerald, the conversion button */}
             <Link
               href="/sign-up"
-              className="hidden min-h-[48px] shrink-0 items-center gap-2 rounded-2xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-emerald-700 hover:shadow-md md:inline-flex"
+              className="hidden min-h-[48px] shrink-0 items-center gap-2 rounded-2xl bg-tf-primary px-5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-tf-primary-hover hover:shadow-md md:inline-flex"
             >
               Sell free
               <ArrowRight aria-hidden="true" className="size-3.5" />
@@ -267,10 +403,10 @@ export function TfMarketplaceShell({
 
         {/* Row 3: Category pills */}
         {topCategories.length > 0 && (
-          <nav aria-label="Browse by category" className="border-b border-tf-stone-200 bg-white">
+          <nav aria-label="Browse by category" className="border-b border-tf-stone-200 bg-tf-raised">
             <div className="relative mx-auto max-w-6xl">
               {/* Fade mask — right edge signals more pills */}
-              <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-white to-transparent" aria-hidden="true" />
+              <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-tf-raised to-transparent" aria-hidden="true" />
               <div className="overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6">
               <div className="flex w-max items-center gap-1.5 py-2.5">
                 <button
@@ -305,6 +441,31 @@ export function TfMarketplaceShell({
       ══════════════════════════════════════════════════ */}
       <main className="mx-auto max-w-6xl px-4 pt-5 sm:px-6">
 
+        {/* ── Featured sellers rail — clean browse only ── */}
+        {featuredShops.length > 0 && activeFilterCount === 0 && !currentFilters.search && currentPage === 1 && (
+          <section aria-label="Featured sellers" className="mb-5">
+            <h2 className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-tf-stone-500">
+              Featured sellers
+            </h2>
+            <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6">
+              <ul className="flex w-max gap-3">
+                {featuredShops.map((s) => (
+                  <li key={s.id} className="w-[260px] shrink-0">
+                    <TfVerifiedSellerCard
+                      name={s.name}
+                      verified={s.isVerified}
+                      avatarUrl={s.logoUrl}
+                      location={s.city ?? s.province ?? undefined}
+                      href={`/catalog/${s.slug}`}
+                      className="h-full"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
+
         {/* ── Toolbar ─────────────────────────────────── */}
         <div className="mb-4 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {/* Count — fixed left */}
@@ -331,7 +492,7 @@ export function TfMarketplaceShell({
                 }
                 aria-pressed={isActive}
                 className={cn(
-                  "min-h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-[12px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary",
+                  "min-h-10 shrink-0 whitespace-nowrap rounded-full border px-3 text-[12px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary",
                   isActive ? pillActive : pillIdle,
                 )}
               >
@@ -348,9 +509,9 @@ export function TfMarketplaceShell({
             onClick={() => navigate({ verified: currentFilters.verifiedOnly ? undefined : "true" })}
             aria-pressed={currentFilters.verifiedOnly}
             className={cn(
-              "flex min-h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary",
+              "flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium outline-none transition-all focus-visible:ring-2 focus-visible:ring-tf-primary",
               currentFilters.verifiedOnly
-                ? "border-tf-ink bg-tf-ink text-white shadow-sm"
+                ? "border-tf-ink bg-tf-ink text-tf-surface shadow-sm"
                 : "border-tf-stone-200 bg-tf-raised text-tf-stone-600 hover:border-tf-stone-400 hover:text-tf-ink",
             )}
           >
@@ -422,8 +583,11 @@ export function TfMarketplaceShell({
         )}
 
         {hasMore && <div ref={sentinelRef} aria-hidden="true" className="h-16" />}
+        <p aria-live="polite" className="sr-only">
+          {loadingMore ? "Loading more products…" : ""}
+        </p>
         {!hasMore && allProducts.length > 0 && (
-          <p className="py-10 text-center text-[11px] font-medium uppercase tracking-[0.22em] text-tf-stone-400">
+          <p className="py-10 text-center text-[11px] font-medium uppercase tracking-[0.22em] text-tf-stone-500">
             You&apos;ve seen everything that matches
           </p>
         )}

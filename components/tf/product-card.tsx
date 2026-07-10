@@ -105,7 +105,7 @@ function TfProductCard({
         {(isNew || onSale || promoted) && (
           <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
             {isNew && !onSale && (
-              <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[11px] font-bold leading-none text-white shadow-sm">
+              <span className="rounded-full bg-tf-primary px-2 py-0.5 text-[11px] font-bold leading-none text-white shadow-sm">
                 New
               </span>
             )}
@@ -142,7 +142,7 @@ function TfProductCard({
             onClick={(e) => e.stopPropagation()}
             className={cn(
               "absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 py-2.5",
-              "bg-[#25D366] text-white text-[12px] font-semibold",
+              "bg-whatsapp text-white text-[12px] font-semibold",
               "translate-y-full transition-transform duration-200 group-hover:translate-y-0",
               "focus-visible:translate-y-0 outline-none focus-visible:ring-2 focus-visible:ring-white",
             )}

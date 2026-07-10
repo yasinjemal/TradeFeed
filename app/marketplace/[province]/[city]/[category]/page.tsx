@@ -11,7 +11,7 @@ import {
   interleavePromotedProducts,
   type CategoryWithCount,
 } from "@/lib/db/marketplace";
-import { MarketplaceShell } from "@/components/marketplace/marketplace-shell";
+import { MarketplaceShellSwitch } from "@/components/marketplace/marketplace-shell-switch";
 import {
   generateMarketplaceJsonLd,
   generateCityCategoryPageJsonLd,
@@ -320,7 +320,7 @@ export default async function CityCategoryPage({
         </div>
       </div>
 
-      <MarketplaceShell
+      <MarketplaceShellSwitch
         products={interleavedProducts}
         totalProducts={productsResult.total}
         totalPages={productsResult.totalPages}

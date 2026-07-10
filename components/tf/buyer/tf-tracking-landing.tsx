@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PackageSearch, ShieldCheck } from "lucide-react";
 
 import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TfTrackingSearch } from "./tf-tracking-search";
 
@@ -11,8 +12,11 @@ export function TfTrackingLanding() {
       <TfFonts />
       <header className="border-b border-tf-stone-200 bg-tf-raised/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
-          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="dark" /></Link>
-          <Link href="/marketplace" className="text-sm text-tf-stone-600 hover:text-tf-ink">Marketplace</Link>
+          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="auto" /></Link>
+          <div className="flex items-center gap-1">
+            <Link href="/marketplace" className="px-2 text-sm text-tf-stone-600 hover:text-tf-ink">Marketplace</Link>
+            <TfThemeToggle />
+          </div>
         </div>
       </header>
       <section className="mx-auto max-w-xl px-5 py-16 sm:py-24">
@@ -42,8 +46,11 @@ export function TfTrackingNotFound({ orderNumber }: { orderNumber: string }) {
       <TfFonts />
       <header className="border-b border-tf-stone-200 bg-tf-raised/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
-          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="dark" /></Link>
-          <Link href="/marketplace" className="text-sm text-tf-stone-600 hover:text-tf-ink">Marketplace</Link>
+          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="auto" /></Link>
+          <div className="flex items-center gap-1">
+            <Link href="/marketplace" className="px-2 text-sm text-tf-stone-600 hover:text-tf-ink">Marketplace</Link>
+            <TfThemeToggle />
+          </div>
         </div>
       </header>
       <section className="mx-auto max-w-xl px-5 py-16 sm:py-24">

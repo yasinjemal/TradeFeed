@@ -16,7 +16,7 @@ const tfButtonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-tf-primary text-white hover:bg-tf-primary-hover hover:shadow-tf-md motion-safe:hover:-translate-y-px active:bg-tf-deep active:shadow-none",
+          "bg-(--tf-cta) text-(--tf-cta-text) hover:bg-(--tf-cta-hover) hover:shadow-tf-md motion-safe:hover:-translate-y-px active:bg-(--tf-cta-hover) active:shadow-none",
         secondary:
           "border border-tf-stone-300 bg-tf-raised text-tf-ink hover:border-tf-stone-400 hover:bg-tf-stone-50",
         ghost: "text-tf-primary hover:bg-tf-verified-soft",

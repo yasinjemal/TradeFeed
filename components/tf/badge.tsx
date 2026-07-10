@@ -14,7 +14,7 @@ const tfBadgeVariants = cva(
   {
     variants: {
       variant: {
-        verified: "bg-tf-verified-soft text-tf-deep",
+        verified: "bg-tf-verified-soft text-tf-verified",
         sale: "bg-tf-accent-soft text-tf-accent-ink",
         urgency: "bg-tf-accent-soft text-tf-accent-ink",
         neutral: "bg-tf-stone-100 text-tf-stone-600",

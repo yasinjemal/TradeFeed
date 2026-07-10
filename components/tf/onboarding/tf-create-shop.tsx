@@ -99,7 +99,7 @@ export function TfCreateShop({ sellerLabel }: TfCreateShopProps) {
       {/* ── Header ── */}
       <header className="flex items-center justify-between px-6 py-5 sm:px-10">
         <Link href="/" aria-label="TradeFeed home">
-          <TradeFeedLogo variant="dark" />
+          <TradeFeedLogo variant="auto" />
         </Link>
         <span className="text-sm text-tf-stone-500">Step {step + 1} of 3</span>
       </header>

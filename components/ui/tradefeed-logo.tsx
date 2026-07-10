@@ -12,6 +12,8 @@
 //   <TradeFeedLogo iconOnly />           — icon only, no text
 //   <TradeFeedLogo variant="light" />    — for dark backgrounds (default)
 //   <TradeFeedLogo variant="dark" />     — for light backgrounds
+//   <TradeFeedLogo variant="auto" />     — follows light/dark theme
+//                                          (use on theme-aware TF surfaces)
 // ============================================================
 
 interface TradeFeedLogoProps {
@@ -19,8 +21,12 @@ interface TradeFeedLogoProps {
   size?: "sm" | "md" | "lg";
   /** Hide the wordmark, show only the icon */
   iconOnly?: boolean;
-  /** "light" text for dark bg (default), "dark" text for light bg */
-  variant?: "light" | "dark";
+  /**
+   * "light" text for permanently dark bg (default), "dark" text for
+   * permanently light bg, "auto" for theme-aware surfaces that flip
+   * with the .dark class (TF pages).
+   */
+  variant?: "light" | "dark" | "auto";
   /** Additional className for the wrapper */
   className?: string;
 }
@@ -38,7 +44,18 @@ export function TradeFeedLogo({
   className = "",
 }: TradeFeedLogoProps) {
   const s = sizeMap[size];
-  const isDark = variant === "dark";
+  const tradeClass =
+    variant === "auto"
+      ? "text-stone-900 dark:text-stone-100"
+      : variant === "dark"
+        ? "text-stone-900"
+        : "text-white";
+  const feedClass =
+    variant === "auto"
+      ? "text-emerald-600 dark:text-emerald-400"
+      : variant === "dark"
+        ? "text-emerald-600"
+        : "text-emerald-400";
 
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
@@ -96,8 +113,8 @@ export function TradeFeedLogo({
       {/* Wordmark */}
       {!iconOnly && (
         <span className={`font-bold ${s.text} tracking-tight`}>
-          <span className={isDark ? "text-stone-900" : "text-white"}>Trade</span>
-          <span className={isDark ? "text-emerald-600" : "text-emerald-400"}>Feed</span>
+          <span className={tradeClass}>Trade</span>
+          <span className={feedClass}>Feed</span>
         </span>
       )}
     </span>

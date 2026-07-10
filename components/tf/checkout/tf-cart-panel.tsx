@@ -159,16 +159,46 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
     }
   }, [deliveryEnabled, collectionEnabled]);
 
-  // Escape to close + scroll lock
+  // Escape to close, Tab focus trap, scroll lock, focus restore.
+  // The drawer is a modal dialog: focus must cycle inside it and
+  // return to whatever opened it (the cart tab) on close.
   React.useEffect(() => {
     if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const opener = document.activeElement as HTMLElement | null;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusables = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusables.length === 0) return;
+      const first = focusables[0]!;
+      const last = focusables[focusables.length - 1]!;
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || active === panel)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     panelRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      opener?.focus?.();
     };
   }, [isOpen, onClose]);
 
@@ -285,7 +315,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                 <ShoppingBag aria-hidden="true" className="size-5 text-tf-primary" />
                 Your order
                 {totalItems > 0 && (
-                  <span className="rounded-full bg-tf-verified-soft px-2 py-0.5 text-xs font-medium tabular-nums text-tf-deep">
+                  <span className="rounded-full bg-tf-verified-soft px-2 py-0.5 text-xs font-medium tabular-nums text-tf-verified">
                     {totalItems}
                   </span>
                 )}
@@ -421,17 +451,33 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                         </p>
                         <div className="mt-1.5 flex items-center justify-between gap-2">
                           <div className="flex items-center rounded-full border border-tf-stone-300">
+                            {/* Below the wholesale minimum the line is removed
+                                (cart-context enforces this) — say so up front */}
                             <button
                               type="button"
-                              aria-label={`Decrease quantity of ${item.productName}`}
+                              aria-label={
+                                item.quantity <=
+                                (item.orderType === "retail" ? 1 : (item.minWholesaleQty ?? 1))
+                                  ? `Remove ${item.productName}`
+                                  : `Decrease quantity of ${item.productName}`
+                              }
+                              title={
+                                item.quantity <=
+                                (item.orderType === "retail" ? 1 : (item.minWholesaleQty ?? 1))
+                                  ? "Remove from cart"
+                                  : "Decrease quantity"
+                              }
                               onClick={() =>
-                                item.quantity > 1
-                                  ? updateQuantity(item.variantId, item.quantity - 1, item.orderType)
-                                  : removeItem(item.variantId, item.orderType)
+                                updateQuantity(item.variantId, item.quantity - 1, item.orderType)
                               }
                               className="flex size-8 items-center justify-center rounded-full text-tf-stone-600 outline-none hover:bg-tf-stone-100 focus-visible:ring-2 focus-visible:ring-tf-primary"
                             >
-                              <Minus className="size-3.5" />
+                              {item.quantity <=
+                              (item.orderType === "retail" ? 1 : (item.minWholesaleQty ?? 1)) ? (
+                                <Trash2 className="size-3.5 text-tf-error" />
+                              ) : (
+                                <Minus className="size-3.5" />
+                              )}
                             </button>
                             <span className="min-w-7 text-center text-xs font-medium tabular-nums">
                               {item.quantity}
@@ -456,6 +502,11 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                             {formatZAR(item.priceInCents * item.quantity)}
                           </span>
                         </div>
+                        {item.orderType !== "retail" && (item.minWholesaleQty ?? 1) > 1 && (
+                          <p className="mt-1 text-[10px] text-tf-accent-ink">
+                            Wholesale minimum: {item.minWholesaleQty} units
+                          </p>
+                        )}
                       </div>
                       <button
                         type="button"
@@ -524,7 +575,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                   </button>}
 
                   {!deliveryEnabled && collectionEnabled && (
-                    <div className="rounded-lg border border-tf-primary/20 bg-tf-verified-soft px-3 py-2.5 text-sm text-tf-deep">
+                    <div className="rounded-lg border border-tf-primary/20 bg-tf-verified-soft px-3 py-2.5 text-sm text-tf-verified">
                       Collection from the seller is available. We&apos;ll help you arrange a pickup time on WhatsApp.
                     </div>
                   )}
@@ -600,7 +651,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                                   className={cn(
                                     "flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-[10px] border px-3 text-sm",
                                     selectedShipping === key
-                                      ? "border-tf-primary bg-tf-verified-soft text-tf-deep"
+                                      ? "border-tf-primary bg-tf-verified-soft text-tf-verified"
                                       : "border-tf-stone-300 bg-tf-raised text-tf-stone-600",
                                   )}
                                 >
@@ -610,7 +661,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                                       name="tf-shipping"
                                       checked={selectedShipping === key}
                                       onChange={() => setSelectedShipping(key)}
-                                      className="accent-[#047857]"
+                                      className="accent-tf-primary"
                                     />
                                     {r.carrier} — {r.service}
                                   </span>
@@ -622,7 +673,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                               className={cn(
                                 "flex min-h-11 cursor-pointer items-center gap-2 rounded-[10px] border px-3 text-sm",
                                 selectedShipping === "collection"
-                                  ? "border-tf-primary bg-tf-verified-soft text-tf-deep"
+                                  ? "border-tf-primary bg-tf-verified-soft text-tf-verified"
                                   : "border-tf-stone-300 bg-tf-raised text-tf-stone-600",
                               )}
                             >
@@ -631,7 +682,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                                 name="tf-shipping"
                                 checked={selectedShipping === "collection"}
                                 onChange={() => setSelectedShipping("collection")}
-                                className="accent-[#047857]"
+                                className="accent-tf-primary"
                               />
                               I&apos;ll collect from the seller
                             </label>}
@@ -657,7 +708,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                             className={cn(
                               "flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-[10px] border px-2 text-sm",
                               paymentMethod === value
-                                ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-deep"
+                                ? "border-tf-primary bg-tf-verified-soft font-medium text-tf-verified"
                                 : "border-tf-stone-300 bg-tf-raised text-tf-stone-600",
                             )}
                           >
@@ -680,7 +731,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                       type="checkbox"
                       checked={marketingConsent}
                       onChange={(e) => setMarketingConsent(e.target.checked)}
-                      className="mt-0.5 accent-[#047857]"
+                      className="mt-0.5 accent-tf-primary"
                     />
                     The seller may message me about new stock (POPIA: you can opt out anytime).
                   </label>

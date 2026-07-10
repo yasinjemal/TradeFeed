@@ -2,13 +2,13 @@ import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 
 // ============================================================
 // TfFonts — loads General Sans (display face) from Fontshare.
-// Renders nothing while UI_REDESIGN is off, so the live site
+// Renders nothing while both TF flags are off, so the live site
 // never pays the extra font request. Inter (already loaded via
 // next/font) is the fallback in --font-tf-display.
 // ============================================================
 
 export function TfFonts() {
-  if (!FEATURE_FLAGS.UI_REDESIGN) return null;
+  if (!FEATURE_FLAGS.UI_REDESIGN && !FEATURE_FLAGS.UI_REDESIGN_DASHBOARD) return null;
   return (
     <>
       <link rel="preconnect" href="https://api.fontshare.com" />

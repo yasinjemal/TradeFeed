@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 
 // ============================================================
 // Global Mobile Bottom Navigation
@@ -23,6 +24,17 @@ const HIDDEN_PREFIXES = [
   "/sign-up",
   "/create-shop",
 ];
+
+// Build-time flag: TF skin follows light/dark mode via tf-* tokens;
+// legacy keeps the fixed near-black bar until deletion.
+const TF = FEATURE_FLAGS.UI_REDESIGN;
+const navShellCls = TF
+  ? "fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-tf-stone-200 bg-tf-raised/95 backdrop-blur-xl shadow-tf-md"
+  : "fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-stone-800/60 bg-stone-950/95 backdrop-blur-xl shadow-[0_-8px_24px_rgba(0,0,0,0.3)]";
+const tabActiveCls = TF ? "text-tf-primary" : "text-emerald-400";
+const tabIdleCls = TF
+  ? "text-tf-stone-500 hover:text-tf-stone-700"
+  : "text-stone-500 hover:text-stone-300";
 
 export function GlobalBottomNav() {
   const pathname = usePathname();
@@ -103,7 +115,7 @@ export function GlobalBottomNav() {
       <div className="h-20 md:hidden" aria-hidden="true" />
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-stone-800/60 bg-stone-950/95 backdrop-blur-xl shadow-[0_-8px_24px_rgba(0,0,0,0.3)]"
+        className={navShellCls}
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Main navigation"
       >
@@ -113,9 +125,7 @@ export function GlobalBottomNav() {
               key={tab.key}
               href={tab.href}
               className={`flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition-colors duration-200 ${
-                tab.isActive
-                  ? "text-emerald-400"
-                  : "text-stone-500 hover:text-stone-300"
+                tab.isActive ? tabActiveCls : tabIdleCls
               }`}
             >
               {tab.icon}
