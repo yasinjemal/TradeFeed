@@ -94,18 +94,36 @@ export async function updateDrop(
 
 /** Publish a drop (DRAFT → PUBLISHED) */
 export async function publishDrop(dropId: string, shopId: string) {
-  const existing = await db.drop.findFirst({
-    where: { id: dropId, shopId, isActive: true, status: "DRAFT" },
-  });
-  if (!existing) return null;
+  return db.$transaction(async (tx) => {
+    const claimed = await tx.drop.updateMany({
+      where: { id: dropId, shopId, isActive: true, status: "DRAFT" },
+      data: { status: "PUBLISHED", publishedAt: new Date() },
+    });
+    if (claimed.count === 0) return null;
 
-  return db.drop.update({
-    where: { id: dropId },
-    data: {
-      status: "PUBLISHED",
-      publishedAt: new Date(),
-    },
-    include: { items: true },
+    const published = await tx.drop.findUnique({
+      where: { id: dropId },
+      include: { items: true, shop: { select: { name: true, slug: true } } },
+    });
+    if (!published) return null;
+
+    const followers = await tx.shopFollow.findMany({
+      where: { shopId, buyer: { shopUpdates: true } },
+      select: { buyerId: true },
+    });
+    if (followers.length > 0) {
+      await tx.buyerNotification.createMany({
+        data: followers.map((follower) => ({
+          buyerId: follower.buyerId,
+          kind: "SHOP_DROP",
+          title: published.title,
+          body: `${published.shop.name} published ${published.items.length} new item${published.items.length === 1 ? "" : "s"}.`,
+          href: `/catalog/${published.shop.slug}/drops/${published.id}`,
+        })),
+      });
+    }
+
+    return published;
   });
 }
 

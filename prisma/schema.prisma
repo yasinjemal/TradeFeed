@@ -764,6 +764,7 @@ model WishlistItem {
 
   // Back-in-stock alert
   notifyPhone String?                               // WhatsApp number for restock alert
+  restockNotifiedAt DateTime?                       // Null means armed while product is out of stock
 
   createdAt  DateTime @default(now())
 
@@ -773,6 +774,7 @@ model WishlistItem {
   @@index([userId])
   @@index([shopId])
   @@index([productId, notifyPhone])                 // For restock alert queries
+  @@index([productId, restockNotifiedAt])           // Find armed signed-in buyers on restock
 }
 
 // ============================================================

@@ -12,6 +12,7 @@ import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { createHash } from "crypto";
+import { normalizeToE164, whatsappLoginSchema } from "@/lib/validation/auth";
 
 async function getVisitorId(): Promise<string> {
   const hdrs = await headers();
@@ -33,30 +34,60 @@ export async function subscribeRestockAlertAction(data: {
   const { userId } = await auth();
   const visitorId = userId ? null : await getVisitorId();
 
-  // Normalize phone
-  const phone = data.phone.replace(/\s+/g, "").replace(/^0/, "+27");
+  const parsedPhone = whatsappLoginSchema.safeParse({ phoneNumber: data.phone });
+  if (!parsedPhone.success) {
+    return { success: false, error: "Enter a valid South African WhatsApp number" };
+  }
+  const phone = normalizeToE164(parsedPhone.data.phoneNumber);
 
   try {
+    const product = await db.product.findFirst({
+      where: {
+        id: data.productId,
+        shopId: data.shopId,
+        isActive: true,
+        shop: { isActive: true },
+      },
+      select: {
+        id: true,
+        name: true,
+        shopId: true,
+        variants: { where: { isActive: true }, select: { stock: true } },
+      },
+    });
+    if (!product) return { success: false, error: "Product not found" };
+    const inStock = product.variants.some((variant) => variant.stock > 0);
+
     // Upsert: create wishlist entry with notifyPhone, or update existing
     if (userId) {
+      await db.buyerProfile.upsert({
+        where: { clerkId: userId },
+        create: { clerkId: userId },
+        update: {},
+      });
       await db.wishlistItem.upsert({
-        where: { productId_userId: { productId: data.productId, userId } },
+        where: { productId_userId: { productId: product.id, userId } },
         create: {
-          productId: data.productId,
-          shopId: data.shopId,
-          productName: data.productName,
+          productId: product.id,
+          shopId: product.shopId,
+          productName: product.name,
           userId,
           notifyPhone: phone,
+          restockNotifiedAt: inStock ? new Date() : null,
         },
-        update: { notifyPhone: phone, productName: data.productName },
+        update: {
+          notifyPhone: phone,
+          productName: product.name,
+          restockNotifiedAt: inStock ? new Date() : null,
+        },
       });
     } else if (visitorId) {
       await db.wishlistItem.upsert({
-        where: { productId_visitorId: { productId: data.productId, visitorId } },
+        where: { productId_visitorId: { productId: product.id, visitorId } },
         create: {
-          productId: data.productId,
-          shopId: data.shopId,
-          productName: data.productName,
+          productId: product.id,
+          shopId: product.shopId,
+          productName: product.name,
           visitorId,
           notifyPhone: phone,
         },

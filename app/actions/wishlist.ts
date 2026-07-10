@@ -42,10 +42,36 @@ export async function addToWishlistAction(data: {
   const visitorId = userId ? null : await getVisitorId();
 
   try {
+    const product = await db.product.findFirst({
+      where: {
+        id: data.productId,
+        shopId: data.shopId,
+        isActive: true,
+        shop: { isActive: true },
+      },
+      select: {
+        id: true,
+        name: true,
+        shopId: true,
+        variants: { where: { isActive: true }, select: { stock: true } },
+      },
+    });
+    if (!product) return { success: false, error: "Product not found" };
+
+    const inStock = product.variants.some((variant) => variant.stock > 0);
+    if (userId) {
+      await db.buyerProfile.upsert({
+        where: { clerkId: userId },
+        create: { clerkId: userId },
+        update: {},
+      });
+    }
     await db.wishlistItem.create({
       data: {
-        productId: data.productId,
-        shopId: data.shopId,
+        productId: product.id,
+        shopId: product.shopId,
+        productName: product.name,
+        restockNotifiedAt: inStock ? new Date() : null,
         ...(userId ? { userId } : { visitorId }),
       },
     });

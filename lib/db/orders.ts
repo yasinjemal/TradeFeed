@@ -13,6 +13,7 @@
 
 import { db } from "@/lib/db";
 import type { OrderStatus, Order, OrderItem, ShippingMethod, PaymentMethod } from "@prisma/client";
+import { syncProductRestockAlerts } from "@/lib/notifications/buyer-alerts";
 
 // ── Order Number Generator ──────────────────────────────────
 
@@ -227,6 +228,17 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
 
     return created;
   });
+
+  // A checkout can move a product to zero stock, which re-arms saved-product
+  // alerts for the next genuine restock. The order remains successful if this
+  // optional notification sync is temporarily unavailable.
+  for (const productId of new Set(verifiedItems.map((item) => item.productId))) {
+    try {
+      await syncProductRestockAlerts(productId);
+    } catch (error) {
+      console.error("[restock-alerts] Failed to sync after checkout", productId, error);
+    }
+  }
 
   return { success: true, order };
 }

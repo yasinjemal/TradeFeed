@@ -104,6 +104,7 @@ export async function publishDropAction(
 
     revalidatePath(`/dashboard/${shopSlug}/drops`);
     revalidatePath(`/catalog/${shopSlug}/drops/${dropId}`);
+    revalidatePath("/me/notifications");
     return { success: true, data: { id: result.id } };
   } catch (error) {
     console.error("[publishDrop]", error);

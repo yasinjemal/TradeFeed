@@ -13,6 +13,15 @@
 import { db } from "@/lib/db";
 import type { VariantCreateInput, VariantUpdateInput } from "@/lib/validation/product";
 import { generateSku } from "@/lib/utils/sku";
+import { syncProductRestockAlerts } from "@/lib/notifications/buyer-alerts";
+
+async function syncRestockState(productId: string): Promise<void> {
+  try {
+    await syncProductRestockAlerts(productId);
+  } catch (error) {
+    console.error("[restock-alerts] Failed to sync product", productId, error);
+  }
+}
 
 // ── Price Denormalization ──────────────────────────────────
 // After every variant create/update/delete, recalculate the
@@ -99,6 +108,7 @@ export async function createVariant(
 
   // Keep denormalized price range in sync
   await syncProductPriceRange(productId);
+  await syncRestockState(productId);
 
   return variant;
 }
@@ -146,6 +156,7 @@ export async function updateVariant(
   if (input.priceInRands !== undefined) {
     await syncProductPriceRange(variant.productId);
   }
+  await syncRestockState(variant.productId);
 
   return updated;
 }
@@ -175,6 +186,7 @@ export async function deleteVariant(variantId: string, shopId: string) {
 
   // Keep denormalized price range in sync
   await syncProductPriceRange(variant.productId);
+  await syncRestockState(variant.productId);
 
   return deleted;
 }
@@ -211,6 +223,7 @@ export async function batchCreateVariants(
 
   // Keep denormalized price range in sync
   await syncProductPriceRange(productId);
+  await syncRestockState(productId);
 
   return result;
 }
