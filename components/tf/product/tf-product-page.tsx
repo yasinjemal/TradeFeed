@@ -1,6 +1,6 @@
 import * as React from "react";
 import Link from "next/link";
-import { ChevronLeft, Factory, FileText } from "lucide-react";
+import { BadgeCheck, ChevronLeft, Factory, FileText, LockKeyhole, RotateCcw, ShieldCheck } from "lucide-react";
 
 import { RestockAlert } from "@/components/catalog/restock-alert";
 import { ShareProduct } from "@/components/catalog/share-product";
@@ -18,6 +18,7 @@ import type { BulkDiscountTier } from "@/lib/cart/pricing";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfGallery } from "./tf-gallery";
 import { TfOrderPanel, type TfVariant } from "./tf-order-panel";
+import { TfProductFavourite } from "./tf-product-favourite";
 import { TfFulfillmentPromise } from "@/components/tf/fulfillment-promise";
 
 // ============================================================
@@ -87,7 +88,7 @@ function ProductStrip({ title, products }: { title: string; products: TfStripPro
   return (
     <section aria-label={title}>
       <TfReveal>
-        <h2 className="font-tf-display text-lg font-semibold text-tf-ink">{title}</h2>
+        <h2 className="font-tf-editorial text-2xl font-medium tracking-[-0.02em] text-tf-ink sm:text-3xl">{title}</h2>
       </TfReveal>
       <TfReveal as="ul" stagger className="tf-rail mt-3 flex snap-x gap-3 overflow-x-auto pb-1 pr-6 scrollbar-hide">
         {products.map((p) => (
@@ -105,6 +106,19 @@ function ProductStrip({ title, products }: { title: string; products: TfStripPro
         ))}
       </TfReveal>
     </section>
+  );
+}
+
+function Assurance({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div className="flex min-w-0 flex-col items-center gap-1.5 text-center text-tf-primary sm:flex-row sm:text-left">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-tf-verified-soft">
+        {icon}
+      </span>
+      <span className="text-[10px] font-semibold leading-tight text-tf-stone-600 sm:text-[11px]">
+        {label}
+      </span>
+    </div>
   );
 }
 
@@ -155,26 +169,26 @@ export function TfProductPage({
   const rfqHref = `https://wa.me/${shop.whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(rfqMessage)}`;
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 pb-28 lg:pb-6">
+    <div className="mx-auto w-full max-w-6xl space-y-10 pb-28 lg:pb-8">
       <TfFonts />
 
       {/* Back to shop */}
       <Link
         href={`/catalog/${shop.slug}`}
-        className="inline-flex items-center gap-1 rounded text-sm text-tf-stone-500 outline-none hover:text-tf-ink focus-visible:ring-2 focus-visible:ring-tf-primary"
+        className="inline-flex items-center gap-1.5 rounded-full border border-tf-stone-200/80 bg-tf-raised px-3 py-2 text-xs font-semibold text-tf-stone-500 shadow-tf-sm outline-none transition hover:border-tf-primary/25 hover:text-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary"
       >
         <ChevronLeft aria-hidden="true" className="size-4" />
         {shop.name}
       </Link>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.08fr_.92fr] lg:gap-14 xl:gap-16">
         {/* Gallery — sticky offset accounts for catalog header (~64px) */}
         <TfReveal className="lg:sticky lg:top-[72px] lg:self-start">
           <TfGallery images={product.images} productName={product.name} soldOut={totalStock === 0} />
         </TfReveal>
 
         {/* Info + order */}
-        <div className="space-y-5">
+        <div className="space-y-6 lg:pt-2">
           {/* Wholesale-only banner */}
           {product.wholesaleOnly && (
             <TfReveal>
@@ -197,24 +211,35 @@ export function TfProductPage({
           )}
 
           <TfReveal delay={80}>
-            {product.categoryName && product.categorySlug && (
-              <Link
-                href={`/marketplace?category=${encodeURIComponent(product.categorySlug)}`}
-                className="mb-3 inline-flex items-center rounded-full border border-tf-verified/25 bg-tf-verified-soft px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-tf-verified outline-none hover:border-tf-verified/40 focus-visible:ring-2 focus-visible:ring-tf-primary"
-              >
-                {product.categoryName}
-              </Link>
-            )}
-            <h1
-              className="font-tf-hero text-tf-ink"
-              style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", lineHeight: "1.06", letterSpacing: "-0.03em", fontWeight: 700 }}
-            >
+            <div className="mb-5 flex items-center justify-between gap-3">
+              {product.categoryName && product.categorySlug ? (
+                <Link
+                  href={`/marketplace?category=${encodeURIComponent(product.categorySlug)}`}
+                  className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-tf-primary outline-none hover:text-tf-primary-hover focus-visible:ring-2 focus-visible:ring-tf-primary"
+                >
+                  <span className="h-px w-7 bg-tf-primary/55" aria-hidden="true" />
+                  {product.categoryName}
+                </Link>
+              ) : <span />}
+              <TfProductFavourite
+                productId={product.id}
+                productName={product.name}
+                imageUrl={product.images[0]?.url ?? null}
+                priceInCents={minPriceCents}
+              />
+            </div>
+            <h1 className="max-w-[15ch] font-tf-editorial text-[2.65rem] font-medium leading-[0.94] tracking-[-0.035em] text-tf-ink sm:text-[3.5rem] lg:text-[4rem]">
               {product.name}
             </h1>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+            <p className="mt-4 max-w-xl font-tf-display text-sm leading-6 text-tf-stone-500">
+              Offered by <Link href={`/catalog/${shop.slug}`} className="font-semibold text-tf-ink underline decoration-tf-primary/30 underline-offset-4 hover:text-tf-primary">{shop.name}</Link>
+              {location ? ` in ${location}` : ""}.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-y border-tf-stone-200/70 py-3">
+              {shop.isVerified && <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-tf-verified"><BadgeCheck className="size-4" /> Verified seller</span>}
               {avgRating > 0 && <TfRatingChip rating={avgRating} count={reviewCount} />}
               {soldCount > 0 && (
-                <span className="text-sm font-medium tabular-nums text-tf-primary">
+                <span className="text-xs font-semibold tabular-nums text-tf-stone-500">
                   {soldCount >= 100 ? "100+" : soldCount} sold
                 </span>
               )}
@@ -222,7 +247,8 @@ export function TfProductPage({
           </TfReveal>
 
           <TfReveal delay={140}>
-          <TfOrderPanel
+          <div className="rounded-[1.75rem] border border-tf-stone-200/80 bg-tf-raised p-5 shadow-[0_24px_70px_rgba(20,20,16,0.08)] sm:p-6">
+            <TfOrderPanel
             productId={product.id}
             productName={product.name}
             productUrl={productUrl}
@@ -235,7 +261,13 @@ export function TfProductPage({
             imageUrl={product.images[0]?.url ?? null}
             minWholesaleQty={product.minWholesaleQty}
             bulkDiscountTiers={tiers}
-          />
+            />
+            <div className="mt-5 grid grid-cols-3 gap-2 border-t border-tf-stone-200/70 pt-4">
+              <Assurance icon={<LockKeyhole className="size-4" />} label="Secure payment" />
+              <Assurance icon={<ShieldCheck className="size-4" />} label="Verified seller" />
+              <Assurance icon={<RotateCcw className="size-4" />} label="Clear policies" />
+            </div>
+          </div>
           </TfReveal>
 
           {/* Sold out → capture demand instead of losing the buyer */}
@@ -248,7 +280,7 @@ export function TfProductPage({
           {/* Custom quote for bulk buyers */}
           {showRfq && (
             <TfReveal>
-              <div className="rounded-xl border border-tf-stone-200 bg-tf-stone-50 p-4">
+              <div className="rounded-2xl border border-tf-accent/25 bg-gradient-to-br from-tf-accent-soft/70 to-tf-raised p-5">
                 <p className="flex items-center gap-2 text-sm font-semibold text-tf-ink">
                   <FileText aria-hidden="true" className="size-4 text-tf-primary" />
                   Need a custom quote?
@@ -303,12 +335,12 @@ export function TfProductPage({
           </TfReveal>
 
           {product.description && (
-            <TfReveal as="section" aria-label="Description">
-              <h2 className="flex items-center gap-2 font-tf-display text-base font-semibold text-tf-ink">
-                <span aria-hidden="true" className="h-4 w-1 rounded-full bg-tf-primary" />
-                Details
+            <TfReveal as="section" aria-label="Description" className="rounded-[1.5rem] border border-tf-stone-200/70 bg-tf-stone-50/60 p-5 sm:p-6">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-tf-primary">The piece</p>
+              <h2 className="mt-2 font-tf-editorial text-3xl font-medium tracking-[-0.02em] text-tf-ink">
+                Product details
               </h2>
-              <p className="mt-2 whitespace-pre-line border-l-2 border-tf-stone-200 pl-3.5 text-sm leading-relaxed text-tf-stone-600">
+              <p className="mt-3 whitespace-pre-line text-[15px] leading-7 text-tf-stone-600">
                 {product.description}
               </p>
             </TfReveal>

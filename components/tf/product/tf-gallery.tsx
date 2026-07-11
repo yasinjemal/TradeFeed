@@ -43,19 +43,19 @@ export function TfGallery({ images, productName, soldOut = false }: TfGalleryPro
 
   if (images.length === 0) {
     return (
-      <div className="flex aspect-square w-full items-center justify-center rounded-xl border border-tf-stone-200 bg-tf-stone-100 text-tf-stone-400">
+      <div className="flex aspect-square w-full items-center justify-center rounded-[1.75rem] border border-tf-stone-200 bg-tf-stone-100 text-tf-stone-400">
         <ImageOff aria-hidden="true" className="size-10" />
       </div>
     );
   }
 
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden rounded-[1.75rem] shadow-[0_28px_80px_rgba(20,20,16,0.14)] ring-1 ring-tf-stone-200/80">
       <ul
         ref={trackRef}
         onScroll={onScroll}
         className={cn(
-          "flex snap-x snap-mandatory gap-2 overflow-x-auto rounded-xl scrollbar-hide",
+          "flex snap-x snap-mandatory gap-2 overflow-x-auto rounded-[1.75rem] scrollbar-hide",
           multi && "tf-nudge",
         )}
         aria-label={`${productName} photos — ${active + 1} of ${images.length}`}
@@ -63,7 +63,7 @@ export function TfGallery({ images, productName, soldOut = false }: TfGalleryPro
         {images.map((img, i) => (
           <li
             key={img.id}
-            className="group/frame relative aspect-square w-full shrink-0 snap-center overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-stone-100"
+            className="group/frame relative aspect-[4/5] w-full shrink-0 snap-center overflow-hidden rounded-[1.75rem] bg-tf-stone-100 sm:aspect-square"
           >
             <Image
               src={img.url}

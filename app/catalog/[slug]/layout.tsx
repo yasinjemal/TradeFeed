@@ -291,7 +291,7 @@ export default async function CatalogLayout({
         bottomNav={<BottomNav shopSlug={slug} />}
       >
         <div
-          className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-3 py-4 sm:px-4"
+          className={`mx-auto flex w-full flex-col gap-5 px-3 py-4 sm:px-4 ${useTf ? "max-w-6xl" : "max-w-5xl"}`}
           data-shop-themed={hasTheme ? "" : undefined}
           style={hasTheme ? { ...themeCssVars, fontFamily: themeFont } as React.CSSProperties : undefined}
         >
