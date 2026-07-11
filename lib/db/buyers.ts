@@ -49,6 +49,22 @@ export async function getBuyerAddresses(buyerId: string) {
   });
 }
 
+export async function getBuyerHomeSummary(clerkId: string, buyerId: string) {
+  const [activeOrders, unreadNotifications, savedProducts] = await Promise.all([
+    db.order.count({
+      where: {
+        buyerClerkId: clerkId,
+        deletedAt: null,
+        status: { in: ["PENDING", "CONFIRMED", "SHIPPED"] },
+      },
+    }),
+    db.buyerNotification.count({ where: { buyerId, readAt: null } }),
+    db.wishlistItem.count({ where: { userId: clerkId } }),
+  ]);
+
+  return { activeOrders, unreadNotifications, savedProducts };
+}
+
 export async function getBuyerRecentActivity(clerkId: string, buyerId: string, limit = 30) {
   const [orders, saves, follows, notifications] = await Promise.all([
     db.order.findMany({

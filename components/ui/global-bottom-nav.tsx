@@ -40,6 +40,18 @@ export function GlobalBottomNav() {
   const pathname = usePathname();
   const { isSignedIn } = useUser();
 
+  const buyerArea =
+    pathname === "/me" ||
+    pathname.startsWith("/me/") ||
+    pathname.startsWith("/orders");
+  const shellClass = buyerArea
+    ? "fixed bottom-0 left-0 right-0 z-50 border-t border-stone-800/80 bg-[#0b0d0c]/95 shadow-[0_-12px_35px_rgba(0,0,0,0.42)] backdrop-blur-2xl md:hidden"
+    : navShellCls;
+  const activeClass = buyerArea ? "text-emerald-400" : tabActiveCls;
+  const idleClass = buyerArea
+    ? "text-stone-500 hover:text-stone-300"
+    : tabIdleCls;
+
   // Hide on routes that already have their own bottom navigation
   if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null;
 
@@ -126,7 +138,7 @@ export function GlobalBottomNav() {
       <div className="h-20 md:hidden" aria-hidden="true" />
 
       <nav
-        className={navShellCls}
+        className={shellClass}
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Main navigation"
       >
@@ -136,7 +148,7 @@ export function GlobalBottomNav() {
               key={tab.key}
               href={tab.href}
               className={`flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition-colors duration-200 ${
-                tab.isActive ? tabActiveCls : tabIdleCls
+                tab.isActive ? activeClass : idleClass
               }`}
             >
               {tab.icon}
