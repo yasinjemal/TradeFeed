@@ -17,6 +17,7 @@ import { getProvince } from "@/lib/marketplace/locations";
 export const INDEX_GATES = {
   province: { minSellers: 5, minProducts: 30 },
   city: { minSellers: 3, minProducts: 15 },
+  category: { minProducts: 5 },
   cityCategory: { minProducts: 8 },
   shop: { minProducts: 3, minDescriptionWords: 40 },
   product: { minDescriptionWords: 30 },
@@ -57,6 +58,17 @@ export async function cityIndexable(cityName: string): Promise<boolean> {
   return (
     sellers >= INDEX_GATES.city.minSellers && products >= INDEX_GATES.city.minProducts
   );
+}
+
+/**
+ * Category page (/marketplace/category/[slug]): ≥5 active products.
+ * Pass the rolled-up count from getGlobalCategories() — parents include
+ * children — so the gate matches the count the page displays. Stricter
+ * than the shop gate (3) because a national category page aggregates
+ * all sellers; looser than cityCategory (8) which is a narrower combo.
+ */
+export function categoryIndexable(input: { productCount: number }): boolean {
+  return input.productCount >= INDEX_GATES.category.minProducts;
 }
 
 /**

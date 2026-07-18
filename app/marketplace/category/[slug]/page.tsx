@@ -13,6 +13,7 @@ import {
 } from "@/lib/db/marketplace";
 import { MarketplaceShellSwitch } from "@/components/marketplace/marketplace-shell-switch";
 import { generateMarketplaceJsonLd, generateCategoryPageJsonLd } from "@/lib/seo/json-ld";
+import { categoryIndexable, robotsFor } from "@/lib/seo/should-index";
 import { expirePromotedListings } from "@/lib/db/promotions";
 
 // ============================================================
@@ -84,6 +85,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "wholesale South Africa",
       "TradeFeed",
     ],
+    ...robotsFor(categoryIndexable(category)),
     alternates: { canonical: `${APP_URL}/marketplace/category/${slug}` },
     openGraph: {
       title,

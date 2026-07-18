@@ -7,7 +7,7 @@
 // URLS:
 //   - / (home)
 //   - /marketplace (marketplace hub)
-//   - /marketplace/category/[slug] (each category — canonical path)
+//   - /marketplace/category/[slug] (categories passing the inventory gate)
 //   - /marketplace/[province] (each province)
 //   - /marketplace/[province]/[city] (each city)
 //   - /marketplace/[province]/[city]/[category] (popular city+category combos)
@@ -25,7 +25,8 @@ import {
   getCity,
 } from "@/lib/marketplace/locations";
 import { getProvince } from "@/lib/marketplace/locations";
-import { shopIndexable, productIndexable, INDEX_GATES } from "@/lib/seo/should-index";
+import { shopIndexable, productIndexable, categoryIndexable, INDEX_GATES } from "@/lib/seo/should-index";
+import { getGlobalCategories } from "@/lib/db/marketplace";
 
 // Generate sitemap at runtime — DB queries can't run at build time,
 // and URL count scales with data so static export is not viable.
@@ -162,9 +163,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const [allCategories, shops, products] = await Promise.all([
-      db.globalCategory.findMany({
-        select: { slug: true, updatedAt: true, parentId: true },
-      }),
+      getGlobalCategories(),
       db.shop.findMany({
         where: { isActive: true },
         select: {
@@ -191,12 +190,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // ── Category pages — canonical /marketplace/category/[slug] paths only.
     // (The old ?category= URLs 301-redirect via middleware, so exclude them.)
-    categoryPathPages = allCategories.map((cat) => ({
-      url: `${APP_URL}/marketplace/category/${cat.slug}`,
-      lastModified: cat.updatedAt,
-      changeFrequency: "daily" as const,
-      priority: cat.parentId ? 0.7 : 0.8,
-    }));
+    // Inventory-gated (blueprint §5) like every other page type: counts come
+    // from getGlobalCategories() so the sitemap and the page's noindex agree
+    // (parents include children's products). Thin categories stay routable
+    // + noindexed and re-enter here automatically once they pass the gate.
+    categoryPathPages = allCategories
+      .flatMap((parent) => [parent, ...parent.children])
+      .filter((cat) => categoryIndexable(cat))
+      .map((cat) => ({
+        url: `${APP_URL}/marketplace/category/${cat.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: cat.parentId ? 0.7 : 0.8,
+      }));
 
     // ── City + Category combos — only for POPULAR_CITIES (top 12)
     // to keep URL count manageable and function fast.

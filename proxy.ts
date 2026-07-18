@@ -51,6 +51,27 @@ const isPublicRoute = createRouteMatcher([
   "/contact",                       // Contact / help center
   "/sitemap.xml",                   // SEO sitemap
   "/robots.txt",                    // SEO robots
+  // ── SEO money pages + info pages (must be crawlable: Googlebot and
+  // link-preview scrapers don't send browser headers, and auth.protect()
+  // returns 404 to non-page requests) ─────────────────────
+  "/pricing",
+  "/sell-online-south-africa",
+  "/sell-on-whatsapp",
+  "/whatsapp-catalog",
+  "/create-online-shop",
+  "/compare/(.*)",
+  "/city/(.*)",                     // Legacy city pages (308 → /marketplace/[province]/[city])
+  "/faq",
+  "/how-it-works",
+  // ── Anonymous-reachable app routes (each page enforces its own auth:
+  // /get-started redirects to sign-in, /invite + /review validate tokens,
+  // /pay + /whatsapp-login are buyer-facing with zero auth by design) ──
+  "/create-shop",
+  "/get-started",
+  "/invite/(.*)",
+  "/pay/(.*)",
+  "/review/(.*)",
+  "/whatsapp-login(.*)",
 ]);
 
 // Routes that should be rate-limited
@@ -143,19 +164,19 @@ export default clerkMiddleware(async (auth, request) => {
       }
     }
 
-    // Auth protection
-    if (!isPublicRoute(request)) {
-      await auth.protect();
-    }
   } catch (err: unknown) {
-    // Re-throw Clerk / Next.js redirect errors (auth.protect() throws
-    // NEXT_HTTP_ERROR_FALLBACK to trigger the sign-in redirect).
-    // Swallowing it would let unauthenticated users into protected routes.
-    if (err instanceof Error && (err as Error & { digest?: string }).digest?.includes("NEXT_HTTP_ERROR_FALLBACK")) {
-      throw err;
-    }
-    // Fail open only for truly unexpected errors (rate-limit failures, etc.)
+    // Fail open only for infra errors in the sections above (custom-domain
+    // lookup, rate limiting). Auth runs below, outside this try, so its
+    // control-flow errors always reach clerkMiddleware intact.
     console.error("[middleware] invocation error, failing open", err);
+  }
+
+  // Auth protection — deliberately OUTSIDE the try/catch. auth.protect()
+  // communicates by throwing (redirect to sign-in for page requests, 404
+  // for non-page requests); a catch here used to swallow the redirect and
+  // fail open, leaving page-level auth() checks as the only real guard.
+  if (!isPublicRoute(request)) {
+    await auth.protect();
   }
 
   // ── Security headers ──────────────────────────────────────
