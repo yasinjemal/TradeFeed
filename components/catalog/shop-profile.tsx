@@ -11,6 +11,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { SHIMMER_DARK } from "@/lib/image-placeholder";
+import { hasPaidEntitlement } from "@/lib/billing/subscription-status";
 import type { BusinessHours, DayKey } from "@/lib/validation/shop-settings";
 import { DAY_LABELS, DAYS_OF_WEEK } from "@/lib/validation/shop-settings";
 
@@ -37,7 +38,7 @@ interface ShopProfileProps {
     retailWhatsappNumber: string | null;
     createdAt: Date;
     avgRating: number;
-    subscription?: { status: string; plan: { slug: string; name: string } } | null;
+    subscription?: { status: string; currentPeriodEnd?: Date | null; plan: { slug: string; name: string } } | null;
     gallery?: { id: string; url: string; type: string; caption: string | null; position: number }[];
     _count: { products: number; orders: number; reviews: number };
   };
@@ -49,7 +50,7 @@ interface ShopProfileProps {
 type LuxuryTier = "standard" | "verified" | "pro" | "elite";
 
 function getLuxuryTier(shop: ShopProfileProps["shop"], tierKey?: string): LuxuryTier {
-  const isPro = shop.subscription?.status === "ACTIVE" && shop.subscription.plan.slug !== "free";
+  const isPro = hasPaidEntitlement(shop.subscription);
   const isTop = tierKey === "top";
   const isEstablished = tierKey === "established";
 
@@ -179,7 +180,7 @@ export function ShopProfile({ shop, tierBadge }: ShopProfileProps) {
 
   const luxuryTier = getLuxuryTier(shop, tierBadge?.key);
   const frame = FRAME_STYLES[luxuryTier];
-  const isPro = shop.subscription?.status === "ACTIVE" && shop.subscription.plan.slug !== "free";
+  const isPro = hasPaidEntitlement(shop.subscription);
 
   return (
     <div className={`relative rounded-2xl border ${frame.cardBorder} ${frame.cardBg} overflow-hidden luxury-fade-in`}>

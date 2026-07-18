@@ -61,23 +61,33 @@ export async function GET(request: NextRequest) {
     }
 
     // ── Find expired subscriptions ────────────────────────────
-    // Two groups:
-    //   1. No PayFast token (admin-granted): expired if currentPeriodEnd < now
-    //   2. PayFast token (recurring): expired if currentPeriodEnd < 3 days ago
+    // Three groups:
+    //   1. ACTIVE, no PayFast token (admin-granted): expired if currentPeriodEnd < now
+    //   2. ACTIVE, PayFast token (recurring): expired if currentPeriodEnd < 3 days ago
+    //   3. CANCELLED: not renewing, so no grace — downgraded to Free
+    //      once the period the seller already paid for ends (or right
+    //      away if there is no period end recorded). Without this,
+    //      cancelled rows kept their paid plan forever.
     const expired = await db.subscription.findMany({
       where: {
-        status: "ACTIVE",
         plan: { slug: { not: "free" } }, // only paid plans need downgrading
         OR: [
           // Manual/admin-approved — no grace period
           {
+            status: "ACTIVE",
             payfastToken: null,
             currentPeriodEnd: { lt: now },
           },
           // PayFast recurring — 3-day grace period
           {
+            status: "ACTIVE",
             payfastToken: { not: null },
             currentPeriodEnd: { lt: graceCutoff },
+          },
+          // Cancelled — ends at the period the seller paid through
+          {
+            status: "CANCELLED",
+            OR: [{ currentPeriodEnd: { lt: now } }, { currentPeriodEnd: null }],
           },
         ],
       },

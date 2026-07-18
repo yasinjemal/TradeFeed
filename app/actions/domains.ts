@@ -16,6 +16,7 @@
 import { db } from "@/lib/db";
 import { requireShopAccess } from "@/lib/auth";
 import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
+import { hasPaidEntitlement } from "@/lib/billing/subscription-status";
 import {
   addDomainToProject,
   removeDomainFromProject,
@@ -40,10 +41,10 @@ async function requireProAccess(shopSlug: string) {
   if (!shop) throw new Error("Shop not found");
 
   const subscription = await getShopSubscription(shop.id);
+  // Pro-and-above, and only while the subscription is entitled
+  // (ACTIVE, or CANCELLED but paid through the current period)
   const isPro =
-    (!!subscription?.plan.slug &&
-      subscription.plan.slug !== "free" &&
-      subscription.plan.slug !== "starter") ||
+    (hasPaidEntitlement(subscription) && subscription!.plan.slug !== "starter") ||
     isTrialActive(subscription).active;
 
   if (!isPro) throw new Error("Pro plan required");

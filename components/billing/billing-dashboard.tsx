@@ -80,8 +80,9 @@ export function BillingDashboard({
             </p>
           </div>
           {!isFreePlan && subscription?.currentPeriodEnd && (
-            <p className="text-xs text-slate-400">
-              Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString("en-ZA", {
+            <p className={`text-xs ${subscription.status === "CANCELLED" ? "text-amber-600 font-medium" : "text-slate-400"}`}>
+              {subscription.status === "CANCELLED" ? "Ends" : "Renews"}{" "}
+              {new Date(subscription.currentPeriodEnd).toLocaleDateString("en-ZA", {
                 day: "numeric",
                 month: "short",
                 year: "numeric",
@@ -319,16 +320,36 @@ function PlanCard({
       )}
 
       {canUpgrade && (
-        <Link
-          href={`/dashboard/${shopSlug}/billing/upgrade?plan=${plan.slug}`}
-          className={`block w-full text-center text-white text-sm font-medium py-2.5 rounded-xl transition-all active:scale-[0.98] ${
-            isAiPlan
-              ? "bg-violet-600 hover:bg-violet-700"
-              : "bg-emerald-600 hover:bg-emerald-700"
-          }`}
-        >
-          Upgrade to {plan.name}
-        </Link>
+        <div className="space-y-2">
+          {/* Instant path: PayFast hosted checkout (card/EFT/etc.),
+              auto-activated by the ITN webhook — no waiting. */}
+          <button
+            type="button"
+            onClick={handleUpgrade}
+            disabled={isPending}
+            className={`block w-full text-center text-white text-sm font-medium py-2.5 rounded-xl transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed ${
+              isAiPlan
+                ? "bg-violet-600 hover:bg-violet-700"
+                : "bg-emerald-600 hover:bg-emerald-700"
+            }`}
+          >
+            {isPending ? "Opening secure checkout…" : `Upgrade to ${plan.name}`}
+          </button>
+
+          {/* Fallback for sellers without cards: manual EFT + admin review */}
+          <Link
+            href={`/dashboard/${shopSlug}/billing/upgrade?plan=${plan.slug}`}
+            className="block w-full text-center text-xs text-slate-500 hover:text-slate-700 py-1 transition-colors"
+          >
+            Pay by manual EFT instead
+          </Link>
+
+          {error && (
+            <p role="alert" className="text-xs text-red-600 text-center">
+              {error} You can still upgrade via manual EFT above.
+            </p>
+          )}
+        </div>
       )}
 
       {isCurrent && plan.priceInCents === 0 && (

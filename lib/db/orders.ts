@@ -323,6 +323,7 @@ export async function getOrderForWebhook(orderId: string) {
       orderNumber: true,
       shopId: true,
       totalCents: true,
+      paidAt: true,
       buyerPhone: true,
       shop: {
         select: {

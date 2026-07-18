@@ -66,27 +66,47 @@ export async function POST(request: Request) {
       );
     }
 
-    // ── Route: Promotion payment ────────────────────────
+    // ── Idempotency: skip already-processed notifications ──
+    // PayFast retries ITNs when a 200 is lost in transit, and a
+    // captured ITN could be replayed. Each (pf_payment_id, status)
+    // pair is processed exactly once; the record is written only
+    // AFTER successful processing so a failed attempt (non-200)
+    // still gets retried by PayFast.
+    const pfPaymentId = body["pf_payment_id"];
+    if (pfPaymentId && paymentStatus) {
+      const seen = await db.payfastNotification.findUnique({
+        where: { pfPaymentId_paymentStatus: { pfPaymentId, paymentStatus } },
+        select: { id: true },
+      });
+      if (seen) {
+        console.log(`[PayFast ITN] Duplicate ignored: ${pfPaymentId} (${paymentStatus})`);
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+    }
+
+    // ── Route by payment type ───────────────────────────
     const promoData = parsePromotionPaymentId(paymentId);
+    const boostData = promoData ? null : parseShopBoostPaymentId(paymentId);
 
-    if (promoData) {
-      return handlePromotionPayment(promoData, paymentStatus, body);
+    const response = promoData
+      ? await handlePromotionPayment(promoData, paymentStatus, body)
+      : boostData
+        ? await handleShopBoostPayment(boostData, paymentStatus, body)
+        : paymentId.startsWith("order_")
+          ? await handleOrderPayment(paymentId, paymentStatus, body)
+          : // paymentId format: "{shopId}:{planSlug}" — parsed inside the handler
+            await handleSubscriptionPayment(paymentId, paymentStatus, body);
+
+    // Record success so retries/replays of this notification are no-ops.
+    if (response.ok && pfPaymentId && paymentStatus) {
+      await db.payfastNotification
+        .create({ data: { pfPaymentId, paymentStatus, mPaymentId: paymentId } })
+        .catch(() => {
+          // Unique violation from a concurrent retry — already recorded.
+        });
     }
 
-    // ── Route: Shop Boost payment ────────────────────────
-    const boostData = parseShopBoostPaymentId(paymentId);
-    if (boostData) {
-      return handleShopBoostPayment(boostData, paymentStatus, body);
-    }
-
-    // ── Route: Order payment ────────────────────────────
-    if (paymentId.startsWith("order_")) {
-      return handleOrderPayment(paymentId, paymentStatus, body);
-    }
-
-    // ── Route: Subscription payment ─────────────────────
-    // paymentId format: "{shopId}:{planSlug}" — parsed inside the handler
-    return handleSubscriptionPayment(paymentId, paymentStatus, body);
+    return response;
   } catch (error) {
     await reportError("payfast-itn-post", error);
     return NextResponse.json(
@@ -123,6 +143,20 @@ async function handlePromotionPayment(
       { error: "Amount mismatch" },
       { status: 400 },
     );
+  }
+
+  // Defense in depth: skip if this exact payment already produced a
+  // listing (covers pre-ledger notifications and race windows).
+  const pfId = body["pf_payment_id"];
+  if (pfId) {
+    const existing = await db.promotedListing.findFirst({
+      where: { payfastPaymentId: pfId },
+      select: { id: true },
+    });
+    if (existing) {
+      console.log(`[PayFast ITN] Promotion already created for ${pfId} — skipping`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
   }
 
   // Create the promoted listing
@@ -213,6 +247,14 @@ async function handleOrderPayment(
   const order = await getOrderForWebhook(orderId);
   if (!order) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
+
+  // Already paid → duplicate/replayed notification. Bail before
+  // markOrderPaid, which would regress a SHIPPED order to CONFIRMED
+  // and re-send WhatsApp notifications.
+  if (order.paidAt) {
+    console.log(`[PayFast ITN] Order ${orderId} already paid — skipping duplicate`);
+    return NextResponse.json({ received: true, duplicate: true });
   }
 
   // 2. Validate paid amount against stored order total

@@ -7,6 +7,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { effectivePlanSlug } from "@/lib/billing/subscription-status";
 
 /** Plan slugs that include unlimited AI product generation */
 const AI_UNLIMITED_PLANS = ["pro", "pro-ai", "business"];
@@ -36,7 +37,11 @@ export async function checkAiAccess(shopId: string): Promise<{
   const [subscription, shop] = await Promise.all([
     db.subscription.findUnique({
       where: { shopId },
-      include: { plan: { select: { slug: true } } },
+      select: {
+        status: true,
+        currentPeriodEnd: true,
+        plan: { select: { slug: true } },
+      },
     }),
     db.shop.findUnique({
       where: { id: shopId },
@@ -44,7 +49,9 @@ export async function checkAiAccess(shopId: string): Promise<{
     }),
   ]);
 
-  const planSlug = subscription?.plan.slug ?? "free";
+  // Paid AI allowances only while the subscription is entitled —
+  // a cancelled/lapsed paid plan falls back to Free credits.
+  const planSlug = effectivePlanSlug(subscription);
   const hasUnlimitedAi = AI_UNLIMITED_PLANS.includes(planSlug);
   const creditsUsed = shop?.aiGenerationsUsed ?? 0;
 

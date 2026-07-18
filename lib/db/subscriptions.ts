@@ -17,6 +17,10 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { hasPaidEntitlement } from "@/lib/billing/subscription-status";
+
+/** Free-plan defaults enforced when a shop has no paid entitlement. */
+const FREE_PRODUCT_LIMIT = 20;
 
 /**
  * Get or create the Free plan (idempotent).
@@ -160,9 +164,12 @@ export async function checkProductLimit(shopId: string) {
     db.product.count({ where: { shopId } }),
   ]);
 
-  // No subscription = use default free limits
-  const limit = subscription?.plan.productLimit ?? 20;
-  const planName = subscription?.plan.name ?? "Free";
+  // Paid limits apply only while the subscription is entitled
+  // (ACTIVE, or CANCELLED but paid through the current period).
+  // A lapsed/cancelled paid plan falls back to Free limits.
+  const entitled = hasPaidEntitlement(subscription);
+  const limit = entitled ? subscription!.plan.productLimit : FREE_PRODUCT_LIMIT;
+  const planName = entitled ? subscription!.plan.name : "Free";
 
   // Check for active trial — trial gives unlimited products
   const trial = isTrialActive(subscription);

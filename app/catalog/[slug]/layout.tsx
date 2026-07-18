@@ -29,6 +29,7 @@ import { BottomNav } from "@/components/ui/bottom-nav";
 import { CatalogAppShell } from "@/components/ui/catalog-app-shell";
 import { OfflineBanner } from "@/components/catalog/offline-banner";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { hasPaidEntitlement } from "@/lib/billing/subscription-status";
 import { TfCatalogHeader, TfCatalogFooter } from "@/components/tf/storefront/tf-catalog-chrome";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
@@ -129,7 +130,7 @@ export default async function CatalogLayout({
   const tierData = await getSellerTierData(shop.id, shop);
 
   // Determine premium status for luxury styling
-  const isPro = shop.subscription?.status === "ACTIVE" && shop.subscription.plan.slug !== "free";
+  const isPro = hasPaidEntitlement(shop.subscription);
 
   // Build storefront theme CSS variables (Pro feature)
   const themeCssVars = isPro ? buildThemeCssVars(shop) : {};

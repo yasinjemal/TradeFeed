@@ -67,10 +67,12 @@ export async function getCatalogShop(slug: string) {
       returnPolicy: true,
       // Trust
       createdAt: true,
-      // Subscription (for Pro badge)
+      // Subscription (for Pro badge) — currentPeriodEnd lets gates
+      // honour a cancelled-but-paid-through period
       subscription: {
         select: {
           status: true,
+          currentPeriodEnd: true,
           plan: { select: { slug: true, name: true } },
         },
       },

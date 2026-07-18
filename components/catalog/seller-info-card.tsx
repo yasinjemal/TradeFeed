@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { TrustBadge } from "@/components/ui/trust-badge";
+import { hasPaidEntitlement } from "@/lib/billing/subscription-status";
 
 interface SellerInfoCardProps {
   shop: {
@@ -19,6 +20,7 @@ interface SellerInfoCardProps {
     };
     subscription?: {
       status: string;
+      currentPeriodEnd?: Date | null;
       plan: { slug: string; name: string };
     } | null;
   };
@@ -27,7 +29,7 @@ interface SellerInfoCardProps {
 export function SellerInfoCard({ shop }: SellerInfoCardProps) {
   const location = [shop.city, shop.province].filter(Boolean).join(", ") || "South Africa";
   const memberSince = shop.createdAt.toLocaleDateString("en-ZA", { month: "long", year: "numeric" });
-  const isPro = shop.subscription?.status === "ACTIVE" && shop.subscription.plan.slug !== "free";
+  const isPro = hasPaidEntitlement(shop.subscription);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/60">

@@ -747,6 +747,28 @@ model TransactionFee {
 }
 
 // ============================================================
+// PAYFAST NOTIFICATION: ITN idempotency ledger.
+// PayFast retries ITNs when it doesn't receive a timely 200, and a
+// captured notification could be replayed. Each successfully
+// processed (pf_payment_id, payment_status) pair is recorded here;
+// the webhook skips any pair it has already processed. Without this,
+// a retried ITN creates duplicate promoted listings, grants free
+// boost weeks, or re-extends subscription periods.
+// ============================================================
+model PayfastNotification {
+  id            String   @id @default(cuid())
+
+  pfPaymentId   String                     // PayFast pf_payment_id
+  paymentStatus String                     // COMPLETE / CANCELLED / ...
+  mPaymentId    String                     // Our m_payment_id (for reconciliation)
+
+  processedAt   DateTime @default(now())
+
+  @@unique([pfPaymentId, paymentStatus])   // One processing per payment+status
+  @@index([processedAt])
+}
+
+// ============================================================
 // WISHLIST ITEM: Buyer favourites (optional — logged-in buyers)
 // Phase 9 — saved products for later.
 // Uses visitorId (hashed) for anonymous, userId for logged-in.
