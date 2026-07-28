@@ -5,6 +5,7 @@ import { Copy, ExternalLink, Eye, EyeOff, Loader2, PauseCircle, Store, TriangleA
 import { toast } from "sonner";
 
 import { setShopVisibilityAction } from "@/app/actions/shop-settings";
+import { trackCatalogSharedAction } from "@/app/actions/onboarding";
 import { TfButton } from "@/components/tf/button";
 
 interface ShopStatusCardProps {
@@ -20,7 +21,10 @@ export function ShopStatusCard({ shopSlug, shopName, initialIsActive }: ShopStat
   function copyCatalogLink() {
     const catalogUrl = `${window.location.origin}/catalog/${shopSlug}`;
     navigator.clipboard.writeText(catalogUrl)
-      .then(() => toast.success("Catalog link copied"))
+      .then(() => {
+        void trackCatalogSharedAction(shopSlug, "settings");
+        toast.success("Catalog link copied");
+      })
       .catch(() => toast.error("Couldn’t copy the catalog link"));
   }
 

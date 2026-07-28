@@ -30,7 +30,7 @@ export default function PrivacyPage() {
           </Link>
           <h1 className="text-3xl font-bold text-stone-900">Privacy Policy</h1>
           <p className="text-stone-500 text-sm mt-2">
-            Last updated: February 2026
+            Last updated: July 2026
           </p>
         </div>
       </div>
@@ -69,12 +69,21 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong>Usage Analytics:</strong> Anonymised page views, product views, and
-                WhatsApp click counts. We do not track individual buyer identities.
+                WhatsApp click counts when you accept analytics. These may be associated with a
+                random first-party visitor identifier. We do not derive that identifier from your
+                IP address or store a buyer&apos;s real-world identity in analytics events.
               </li>
               <li>
                 <strong>Payment Information:</strong> Billing is processed by PayFast (a South
                 African payment gateway). We do not store credit card details — PayFast handles
                 all payment data securely.
+              </li>
+              <li>
+                <strong>Voluntary Research and Support Responses:</strong> If you choose to use a
+                TradeFeed research or setup-help form, we collect the answers you submit and your
+                contact details only when you ask us to follow up. Do not submit passwords,
+                one-time codes, payment details, customer information, or private WhatsApp
+                messages.
               </li>
             </ul>
           </section>
@@ -90,6 +99,10 @@ export default function PrivacyPage() {
               <li>To provide analytics about your catalog performance.</li>
               <li>To process subscription payments via PayFast.</li>
               <li>To send service-related communications (no marketing without consent).</li>
+              <li>
+                To respond to voluntary setup-help or catalogue-import requests and understand why
+                sellers stop using TradeFeed.
+              </li>
               <li>To improve our platform and fix technical issues.</li>
             </ul>
           </section>
@@ -102,16 +115,16 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc pl-5 text-stone-600 space-y-1">
               <li>
-                <strong>Consent:</strong> You provide consent when creating an account and
-                setting up your shop.
+                <strong>Consent:</strong> We ask separately before enabling non-essential
+                analytics. Creating an account does not grant analytics consent.
               </li>
               <li>
                 <strong>Contract:</strong> Processing is necessary to provide our catalog
                 services to you.
               </li>
               <li>
-                <strong>Legitimate Interest:</strong> Anonymised analytics to improve the
-                platform.
+                <strong>Legitimate Interest:</strong> Security, fraud prevention, and
+                privacy-filtered error reporting needed to keep the service reliable.
               </li>
             </ul>
           </section>
@@ -135,11 +148,54 @@ export default function PrivacyPage() {
               <li>
                 <strong>Neon:</strong> Database hosting provider (PostgreSQL).
               </li>
+              <li>
+                <strong>Vercel:</strong> Application hosting, delivery, and operational logs
+                required to run and secure TradeFeed. Vercel&apos;s optional product analytics
+                remain disabled until you accept analytics.
+              </li>
+              <li>
+                <strong>Upstash:</strong> Redis-based abuse prevention and rate limiting. Before
+                a network identifier is sent, TradeFeed converts it with a server-keyed,
+                pseudonymous HMAC; vendor analytics are disabled and rate-limit keys expire with their short
+                enforcement window.
+              </li>
+              <li>
+                <strong>Google Analytics:</strong> Aggregate traffic analytics, enabled only
+                after you accept analytics.
+              </li>
+              <li>
+                <strong>Sentry:</strong> Privacy-filtered error reporting required to diagnose
+                failures. Browser performance tracing is enabled only after
+                you accept analytics; Session Replay is disabled.
+              </li>
+              <li>
+                <strong>Tally:</strong> Form processor for voluntary seller research, setup-help,
+                catalogue-import, and stopped-using responses. These forms do not use advertising
+                pixels or request file uploads at launch.
+              </li>
+              <li>
+                <strong>Geoapify:</strong> Optional address-autocomplete provider. We send the
+                address text a seller deliberately types after editing the location field; simply
+                opening settings does not send an already-saved address.
+              </li>
+              <li>
+                <strong>OpenStreetMap:</strong> Optional shop-location map preview. It loads only
+                after a seller chooses to load it and receives the exact map pin plus normal
+                connection data such as an IP address.
+              </li>
+              <li>
+                <strong>Google Maps:</strong> Optional external directions and map links. Google
+                receives the destination and normal connection data only when a person chooses
+                one of those links.
+              </li>
             </ul>
             <p className="text-stone-600 leading-relaxed">
               All service providers are bound by data protection agreements. Your shop&apos;s public
               catalog information (shop name, products, WhatsApp number) is intentionally made public
-              as this is the core service — connecting buyers with sellers.
+              as this is the core service — connecting buyers with sellers. If a seller confirms
+              a business, collection, or showroom location, its street address and exact map pin
+              are also public in the catalogue, directions links, and search metadata. Sellers
+              should not enter a home address unless they are comfortable publishing it.
             </p>
           </section>
 
@@ -150,6 +206,12 @@ export default function PrivacyPage() {
               We retain your personal information for as long as your account is active. If you
               delete your account, we will remove your personal data within 30 days, except where
               retention is required by law (e.g., financial records for SARS compliance).
+            </p>
+            <p className="text-stone-600 leading-relaxed">
+              Raw voluntary research-form responses are deleted within 90 days. Contact details in
+              those responses are deleted when the requested follow-up is complete or within 90
+              days, whichever comes first. We may retain de-identified themes and aggregate counts
+              for product planning.
             </p>
           </section>
 
@@ -187,13 +249,29 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-stone-900">8. Cookies & Analytics</h2>
             <p className="text-stone-600 leading-relaxed">
-              TradeFeed uses essential cookies for authentication (Clerk session management) and
-              anonymised, first-party analytics to track catalog page views and WhatsApp click
-              counts. We also use Google Analytics 4 (GA4) to understand aggregate traffic
-              patterns, page popularity, and user flow. GA4 uses cookies to distinguish unique
-              visitors but we have IP anonymisation enabled and do not enable Google advertising
-              features. No Facebook Pixel or other third-party tracking scripts are used.
-              We do not track individual buyers across sessions or share data with advertisers.
+              TradeFeed uses essential cookies for authentication and security. These remain
+              available when you reject analytics. If you save a product or request a restock
+              alert while signed out, we also create a separate random buyer-feature cookie for
+              up to 90 days so only your saved items and alert request can be found again. It is
+              created on demand, is never used for analytics, and is not shared with advertisers.
+              Error reports may still be sent to Sentry so we can diagnose failures, but
+              identifying request data, cookies, request bodies, query strings, and arbitrary
+              form values are removed from those reports.
+            </p>
+            <p className="text-stone-600 leading-relaxed">
+              Non-essential measurement is denied by default. If you accept analytics, we enable
+              our first-party catalogue analytics, Google Analytics 4 (GA4), Vercel Analytics,
+              Vercel Speed Insights, and Sentry browser performance tracing. Sentry Session Replay
+              remains disabled. Google advertising storage and personalisation remain disabled.
+              Analytics URLs exclude query strings.
+            </p>
+            <p className="text-stone-600 leading-relaxed">
+              With consent, our httpOnly random visitor cookie can persist for up to 12 months so
+              repeat anonymous visits can be counted consistently. It is not derived from your IP
+              address and is not shared with advertisers. Rejecting or later withdrawing analytics
+              consent removes this identifier and analytics cookies without clearing authentication
+              data. You can reopen the choice at any time with the &ldquo;Privacy choices&rdquo;
+              button shown on TradeFeed.
             </p>
           </section>
 

@@ -2,21 +2,52 @@
 // Data Access — Public Order Tracking
 // ============================================================
 // Public lookup by orderNumber — no auth required.
-// Only returns safe, non-PII data for display.
+// This projection is deliberately capability-safe: never add buyer identity,
+// contact, notes, or delivery-address fields to the public response.
 // ============================================================
 
 import { db } from "@/lib/db";
 
 /**
- * Fetch order by its public order number (e.g. TF-20260224-A1B2).
- * Returns non-sensitive data only — buyer phone is masked.
+ * Fetch order by its public order number.
+ * Returns order status/commerce data only; all buyer PII stays private.
  */
 export async function getOrderByNumber(orderNumber: string) {
   const order = await db.order.findUnique({
     where: { orderNumber: orderNumber.toUpperCase().trim() },
-    include: {
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      paymentRequestedAt: true,
+      paymentLinkExpiresAt: true,
+      paidAt: true,
+      totalCents: true,
+      itemCount: true,
+      createdAt: true,
+      updatedAt: true,
+      shippingMethod: true,
+      shippingCostCents: true,
+      courierName: true,
+      trackingNumber: true,
+      trackingUrl: true,
+      shippedAt: true,
+      deliveredAt: true,
+      estimatedDelivery: true,
+      paymentMethod: true,
+      codConfirmedAt: true,
       items: {
         orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          productName: true,
+          option1Label: true,
+          option1Value: true,
+          option2Label: true,
+          option2Value: true,
+          priceInCents: true,
+          quantity: true,
+        },
       },
       shop: {
         select: {
@@ -34,11 +65,6 @@ export async function getOrderByNumber(orderNumber: string) {
 
   if (!order) return null;
 
-  // Mask phone number for privacy (POPIA) — show last 4 digits only
-  const maskedPhone = order.buyerPhone
-    ? `***${order.buyerPhone.slice(-4)}`
-    : null;
-
   return {
     id: order.id,
     orderNumber: order.orderNumber,
@@ -46,13 +72,6 @@ export async function getOrderByNumber(orderNumber: string) {
     paymentRequestedAt: order.paymentRequestedAt,
     paymentLinkExpiresAt: order.paymentLinkExpiresAt,
     paidAt: order.paidAt,
-    buyerName: order.buyerName,
-    buyerPhone: maskedPhone,
-    buyerNote: order.buyerNote,
-    deliveryAddress: order.deliveryAddress,
-    deliveryCity: order.deliveryCity,
-    deliveryProvince: order.deliveryProvince,
-    deliveryPostalCode: order.deliveryPostalCode,
     totalCents: order.totalCents,
     itemCount: order.itemCount,
     createdAt: order.createdAt,

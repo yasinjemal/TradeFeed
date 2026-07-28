@@ -110,7 +110,7 @@ export function BoostDashboard({
         <div className="grid sm:grid-cols-2 gap-3">
           {[
             { icon: "🏪", text: "Featured in the marketplace shop showcase" },
-            { icon: "📈", text: "Higher visibility to thousands of buyers" },
+            { icon: "📈", text: "Higher placement in relevant marketplace results" },
             { icon: "⭐", text: "Featured badge on your shop profile" },
             { icon: "🔝", text: "Priority placement in search results" },
           ].map((benefit) => (

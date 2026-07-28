@@ -27,6 +27,7 @@ import { cookies } from "next/headers";
 import { sendEmail } from "@/lib/email/resend";
 import { welcomeEmailHtml, welcomeEmailText } from "@/lib/email/templates/welcome";
 import { SITE_URL } from "@/lib/config/site";
+import { recordSellerMilestone } from "@/lib/analytics/seller-lifecycle";
 
 /**
  * Server action result type.
@@ -124,6 +125,14 @@ export async function createShopAction(
 
     // 4. Create shop via data access layer (NOT direct Prisma call)
     const shop = await createShop(parsed.data, userId, referrerSlug);
+
+    await recordSellerMilestone({
+      userId,
+      step: "shop_created",
+      source: "create-shop",
+      shopId: shop.id,
+      shopSlug: shop.slug,
+    }).catch(() => {});
 
     // 5. Auto-assign Free subscription to new shop
     const { createFreeSubscription } = await import("@/lib/db/subscriptions");

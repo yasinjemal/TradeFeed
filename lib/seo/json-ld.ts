@@ -60,7 +60,7 @@ export function generateSiteJsonLd() {
     name: "TradeFeed",
     url: APP_URL,
     description:
-      "Buy and sell online South Africa — browse wholesale & retail products from local sellers across all categories. Create your own free online shop and sell via WhatsApp across all 9 provinces.",
+      "Buy and sell online in South Africa. Browse wholesale and retail products from local sellers, or create a free catalogue and take orders via WhatsApp.",
     inLanguage: "en-ZA",
     potentialAction: {
       "@type": "SearchAction",
@@ -151,6 +151,54 @@ export function generateShopJsonLd(shop: {
  * Follows Google's Product structured data requirements:
  * https://developers.google.com/search/docs/appearance/structured-data/product
  */
+/**
+ * VideoObject for the Product schema. Google requires name,
+ * description, thumbnailUrl and uploadDate — when no thumbnail is
+ * available (an upload/direct video on an image-less product) we
+ * omit the block entirely: an invalid VideoObject is worse than none.
+ * YouTube videos use embedUrl; hosted/direct files use contentUrl.
+ */
+function buildProductVideoLd(product: {
+  name: string;
+  description: string | null;
+  images: { url: string }[];
+  videos?: {
+    url: string;
+    source: "UPLOAD" | "YOUTUBE" | "DIRECT";
+    thumbnailUrl: string | null;
+    createdAt: Date;
+  }[];
+}): Record<string, unknown> {
+  const video = product.videos?.[0];
+  if (!video) return {};
+
+  const thumbnailUrl =
+    video.thumbnailUrl ??
+    (product.images[0]?.url ? toProxiedImageUrl(product.images[0].url) : null);
+  if (!thumbnailUrl) return {};
+
+  const embed =
+    video.source === "YOUTUBE"
+      ? (() => {
+          const match = video.url.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+          return match
+            ? { embedUrl: `https://www.youtube-nocookie.com/embed/${match[1]}` }
+            : { contentUrl: video.url };
+        })()
+      : { contentUrl: video.url };
+
+  return {
+    video: {
+      "@type": "VideoObject",
+      name: product.name,
+      description: product.description || product.name,
+      thumbnailUrl: [thumbnailUrl],
+      uploadDate: video.createdAt.toISOString(),
+      ...embed,
+    },
+  };
+}
+
 export function generateProductJsonLd(
   shop: { name: string; slug: string },
   product: {
@@ -159,6 +207,13 @@ export function generateProductJsonLd(
     name: string;
     description: string | null;
     images: { url: string }[];
+    /** Optional showcase video (first ProductVideo row) */
+    videos?: {
+      url: string;
+      source: "UPLOAD" | "YOUTUBE" | "DIRECT";
+      thumbnailUrl: string | null;
+      createdAt: Date;
+    }[];
     variants: {
       id: string;
       size: string;
@@ -276,6 +331,7 @@ export function generateProductJsonLd(
     ...(product.images.length > 0 && {
       image: product.images.map((img) => toProxiedImageUrl(img.url)).filter(Boolean),
     }),
+    ...buildProductVideoLd(product),
     ...(product.category && { category: product.category.name }),
     brand: {
       "@type": "Brand",

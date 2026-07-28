@@ -24,6 +24,7 @@ import {
   X,
 } from "lucide-react";
 import { createProductAction } from "@/app/actions/product";
+import { trackCatalogSharedAction } from "@/app/actions/onboarding";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -226,6 +227,9 @@ export function CreateProductForm({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => {
+                void trackCatalogSharedAction(shopSlug, "dashboard");
+              }}
               className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-whatsapp text-base font-semibold text-white transition-colors hover:bg-whatsapp-hover"
             >
               <WhatsAppIcon className="size-5" />
@@ -261,6 +265,7 @@ export function CreateProductForm({
               type="button"
               onClick={() => {
                 navigator.clipboard.writeText(catalogUrl);
+                void trackCatalogSharedAction(shopSlug, "dashboard");
                 toast.success("Link copied");
               }}
               className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-xs font-semibold text-stone-700 transition-colors hover:border-stone-400 hover:bg-stone-50"
@@ -272,6 +277,9 @@ export function CreateProductForm({
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  void trackCatalogSharedAction(shopSlug, "dashboard");
+                }}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-whatsapp px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-whatsapp-hover"
               >
                 <WhatsAppIcon className="size-3.5" />

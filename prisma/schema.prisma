@@ -42,6 +42,9 @@ model Shop {
   postalCode  String?                         // Postal code (e.g. "2001")
   latitude    Float?                          // GPS latitude for map pin
   longitude   Float?                          // GPS longitude for map pin
+  locationProvider String?                    // geoapify | device | manual
+  locationGeocodedAt DateTime?                // Provider selection timestamp
+  locationPublishedAt DateTime?               // Seller confirmed public display
 
   // ── Profile ──────────────────────────────────────────
   aboutText   String?                         // Extended about/bio for seller profile
@@ -298,6 +301,7 @@ model Product {
 
   // Relations
   images      ProductImage[]                  // Product images (URLs only)
+  videos      ProductVideo[]                  // Product videos (upload/YouTube/direct link)
   variants    ProductVariant[]                // Product variants with stock
   promotedListings PromotedListing[]          // Marketplace promotions for this product
   bulkDiscountTiers BulkDiscountTier[]        // Volume discount breakpoints
@@ -331,6 +335,35 @@ model ProductImage {
   createdAt DateTime @default(now())
 
   @@index([productId])
+}
+
+// ============================================================
+// PRODUCT VIDEO: One showcase video per product (v1 cap).
+// Three sources: UploadThing-hosted upload (Starter+ plans),
+// YouTube link (canonical watch URL stored; embed derived), or
+// a direct https video-file link. Schema supports multiple via
+// position for future expansion.
+// ============================================================
+model ProductVideo {
+  id           String      @id @default(cuid())
+  url          String                          // Playback URL: UT CDN url, direct file url, or canonical YouTube watch URL
+  source       VideoSource
+  key          String?                         // UploadThing file key (UPLOAD only — for deletion)
+  thumbnailUrl String?                         // Poster (i.ytimg.com for YouTube; null for uploads v1)
+  position     Int         @default(0)         // Display order (multi-video ready; v1 caps at 1)
+
+  productId    String
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime    @default(now())     // Also feeds VideoObject uploadDate in JSON-LD
+
+  @@index([productId])
+}
+
+enum VideoSource {
+  UPLOAD
+  YOUTUBE
+  DIRECT
 }
 
 // ============================================================
@@ -374,10 +407,8 @@ model AnalyticsEvent {
   shopId    String                           // Tenant scope
   productId String?                          // Optional — null for catalog-level events
   
-  // Visitor metadata (no PII — just anonymised fingerprint)
-  visitorId String?                          // Hashed IP or anonymous session ID
-  userAgent String?                          // Browser user-agent (for device stats)
-  referrer  String?                          // Where the visitor came from
+  // Consent-dependent random ID only. Request headers are never persisted.
+  visitorId String?                          // Random first-party anonymous visitor ID
 
   createdAt DateTime @default(now())
 
@@ -771,7 +802,7 @@ model PayfastNotification {
 // ============================================================
 // WISHLIST ITEM: Buyer favourites (optional — logged-in buyers)
 // Phase 9 — saved products for later.
-// Uses visitorId (hashed) for anonymous, userId for logged-in.
+// Uses a random on-demand feature ID for anonymous, userId for logged-in.
 // ============================================================
 model WishlistItem {
   id         String  @id @default(cuid())
@@ -780,8 +811,8 @@ model WishlistItem {
   shopId     String                                 // Denormalised for fast queries
   productName String?                               // Denormalised for notifications
 
-  // Visitor tracking (anonymous buyers)
-  visitorId  String?                                // Hashed IP/fingerprint for anonymous
+  // Anonymous feature persistence (separate from analytics consent/identity)
+  visitorId  String?                                // Random on-demand buyer feature ID
   userId     String?                                // Clerk userId for logged-in buyers
 
   // Back-in-stock alert
@@ -1358,6 +1389,7 @@ model OnboardingEvent {
   userId    String
   step      String                           // "started" | "shop_created" | "product_created" | "completed"
   metadata  Json?                            // Optional context (e.g. time spent, source)
+  dedupeKey String?  @unique                 // Atomic idempotency for canonical lifecycle milestones
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

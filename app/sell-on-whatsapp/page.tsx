@@ -98,8 +98,8 @@ export default function SellOnWhatsappPage() {
         <p>
           Payment happens where the trust is — in the chat. EFT with proof of payment, PayFast
           for cards, or cash on delivery locally. Nothing is paid until you and the buyer agree,
-          and the written record protects both sides. Your WhatsApp number is never shown
-          publicly on TradeFeed; it&apos;s only used when a buyer places an order.
+          and the written record protects both sides. Use a business WhatsApp number:
+          TradeFeed places it in the order link so buyers can contact you directly.
         </p>
       </SeoSection>
 

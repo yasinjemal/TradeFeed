@@ -24,8 +24,16 @@ export function FloatingWhatsApp() {
     return () => clearTimeout(t);
   }, []);
 
-  // Hide on dashboard, admin, and catalog pages
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin") || pathname.startsWith("/catalog")) {
+  // Keep conversion and transactional surfaces free of a competing floating CTA.
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/catalog") ||
+    pathname.startsWith("/marketplace") ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/create-shop")
+  ) {
     return null;
   }
 

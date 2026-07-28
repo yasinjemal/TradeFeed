@@ -32,8 +32,13 @@ const envSchema = z.object({
   ADMIN_USER_IDS: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
-  NEXT_PUBLIC_GA_ID: z.string().optional(),
+  NEXT_PUBLIC_GA_ID: z
+    .string()
+    .regex(/^G-[A-Z0-9]+$/, "NEXT_PUBLIC_GA_ID must look like G-XXXXXXXXXX")
+    .optional(),
+  NEXT_PUBLIC_GA_MEASUREMENT_REVIEWED: z.literal("true").optional(),
   CRON_SECRET: z.string().optional(),
+  GEOAPIFY_API_KEY: z.string().optional(),
 
   // PayFast — required in production, optional in dev
   PAYFAST_MERCHANT_ID: z.string().optional(),
@@ -43,6 +48,7 @@ const envSchema = z.object({
   // Upstash Redis — used for distributed rate limiting on Vercel
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  RATE_LIMIT_HASH_SECRET: z.string().min(32).optional(),
 
   // Vercel — used for custom domain management (Pro sellers)
   VERCEL_API_TOKEN: z.string().optional(),

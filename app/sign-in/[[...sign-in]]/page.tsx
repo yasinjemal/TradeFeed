@@ -19,7 +19,7 @@ export default function SignInPage() {
   return (
     <main className="flex min-h-screen flex-col lg:flex-row">
       {/* ── Left panel — Welcome back ── */}
-      <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 px-8 py-10 text-white lg:w-1/2 lg:px-16 lg:py-16">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 px-8 py-10 text-white lg:flex lg:w-1/2 lg:px-16 lg:py-16">
         {/* Background photo */}
         <Image
           src="/img/signin_panel.png"
@@ -98,22 +98,13 @@ export default function SignInPage() {
       </div>
 
       {/* ── Right panel — Clerk Sign In form ── */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-gray-50 px-6 py-10 lg:px-12">
+      <div className="flex min-h-screen flex-1 flex-col items-center justify-center bg-gray-50 px-6 py-6 sm:py-10 lg:min-h-0 lg:px-12">
         {/* Mobile-only logo (hidden on desktop since left panel has it) */}
         <div className="mb-6 lg:hidden">
           <TradeFeedLogo size="md" variant="dark" />
         </div>
 
         <div className="w-full max-w-md">
-          <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-              Sign in to your account
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Pick up right where you left off
-            </p>
-          </div>
-
           <ClerkLoading>
             <div className="w-full rounded-xl border border-stone-200 bg-white p-8 text-center text-sm text-stone-500 shadow-sm">
               <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-emerald-600" />

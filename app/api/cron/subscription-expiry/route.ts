@@ -20,6 +20,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { queueCronHeartbeat } from "@/lib/monitoring/better-stack";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +58,7 @@ export async function GET(request: NextRequest) {
 
     if (!freePlan) {
       console.error("[subscription-expiry] Free plan not found in DB — aborting");
+      queueCronHeartbeat("subscription-expiry", "failure");
       return NextResponse.json({ error: "Free plan missing" }, { status: 500 });
     }
 
@@ -103,6 +105,7 @@ export async function GET(request: NextRequest) {
 
     if (expired.length === 0) {
       console.log("[subscription-expiry] No expired subscriptions found");
+      queueCronHeartbeat("subscription-expiry", "success");
       return NextResponse.json({ status: "ok", expired: 0, timestamp: now.toISOString() });
     }
 
@@ -152,9 +155,14 @@ export async function GET(request: NextRequest) {
     };
 
     console.log("[subscription-expiry] Done:", JSON.stringify(summary));
+    queueCronHeartbeat(
+      "subscription-expiry",
+      failed > 0 ? "failure" : "success",
+    );
     return NextResponse.json(summary, { status: 200 });
   } catch (error) {
     console.error("[subscription-expiry] Error:", error);
+    queueCronHeartbeat("subscription-expiry", "failure");
     return NextResponse.json(
       { status: "error", timestamp: new Date().toISOString(), error: String(error) },
       { status: 500 }

@@ -20,6 +20,9 @@ export interface TfGridProduct {
   name: string;
   imageUrl: string | null;
   imageAlt: string | null;
+  /** Showcase video preview (upload/direct autoplays; youtube = badge) */
+  videoUrl?: string | null;
+  videoKind?: "upload" | "direct" | "youtube" | null;
   minPriceCents: number;
   categoryId: string | null;
   categoryName: string | null;
@@ -169,6 +172,8 @@ export function TfStorefrontGrid({
                 price={p.minPriceCents / 100}
                 imageUrl={p.imageUrl}
                 imageAlt={p.imageAlt ?? p.name}
+                videoPreviewUrl={p.videoUrl}
+                videoKind={p.videoKind}
                 sellerName={sellerName}
                 sellerVerified={sellerVerified}
                 className="h-full"

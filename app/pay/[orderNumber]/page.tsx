@@ -54,7 +54,6 @@ export default async function PayPage({ params, searchParams }: PayPageProps) {
           orderNumber: order.orderNumber,
           shopSlug: order.shop.slug,
           amountInCents: order.totalCents,
-          buyerName: order.buyerName ?? undefined,
         })
       : null;
 

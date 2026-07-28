@@ -10,16 +10,8 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { headers } from "next/headers";
-import { createHash } from "crypto";
+import { getOrCreateBuyerFeatureId } from "@/lib/buyer/feature-identity";
 import { normalizeToE164, whatsappLoginSchema } from "@/lib/validation/auth";
-
-async function getVisitorId(): Promise<string> {
-  const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const ua = hdrs.get("user-agent") ?? "unknown";
-  return createHash("sha256").update(`${ip}:${ua}`).digest("hex").slice(0, 16);
-}
 
 /**
  * Subscribe to back-in-stock alert for a product.
@@ -32,7 +24,6 @@ export async function subscribeRestockAlertAction(data: {
   phone: string;
 }) {
   const { userId } = await auth();
-  const visitorId = userId ? null : await getVisitorId();
 
   const parsedPhone = whatsappLoginSchema.safeParse({ phoneNumber: data.phone });
   if (!parsedPhone.success) {
@@ -57,6 +48,7 @@ export async function subscribeRestockAlertAction(data: {
     });
     if (!product) return { success: false, error: "Product not found" };
     const inStock = product.variants.some((variant) => variant.stock > 0);
+    const visitorId = userId ? null : await getOrCreateBuyerFeatureId();
 
     // Upsert: create wishlist entry with notifyPhone, or update existing
     if (userId) {

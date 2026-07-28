@@ -11,6 +11,9 @@
     "test": "tsx --test tests/**/*.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "monitoring:list": "checkly test --list",
+    "monitoring:test": "checkly test --env-file .env.checkly.local",
+    "monitoring:deploy": "checkly deploy",
     "db:generate": "prisma generate",
     "db:push": "prisma db push && npx tsx scripts/db-health-check.ts",
     "db:push:unsafe": "prisma db push",
@@ -61,6 +64,7 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
+    "checkly": "^8.18.0",
     "eslint": "^9.39.3",
     "eslint-config-next": "^16.1.6",
     "postcss": "^8.5.6",

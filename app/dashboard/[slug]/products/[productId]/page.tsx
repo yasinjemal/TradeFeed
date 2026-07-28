@@ -19,6 +19,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ImageUpload } from "@/components/product/image-upload";
+import { VideoManager } from "@/components/product/video-manager";
+import { checkVideoUploadAccess } from "@/lib/db/subscriptions";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
+import { db } from "@/lib/db";
 import { EditProductForm } from "@/components/product/edit-product-form";
 import { ListingQualityScore } from "@/components/product/listing-quality-score";
 import { computeQualityProps } from "@/lib/utils/listing-quality";
@@ -58,9 +62,19 @@ export default async function ProductDetailPage({
   if (!product) return notFound();
 
   // ── Fetch categories for edit form ──────────────────────
-  const [categories, globalCategories] = await Promise.all([
+  const [categories, globalCategories, productVideo, videoUploadAccess] = await Promise.all([
     getCategories(shop.id),
     getGlobalCategoryTree(),
+    FEATURE_FLAGS.PRODUCT_VIDEO
+      ? db.productVideo.findFirst({
+          where: { productId: product.id },
+          orderBy: { position: "asc" },
+          select: { id: true, url: true, source: true, thumbnailUrl: true },
+        })
+      : Promise.resolve(null),
+    FEATURE_FLAGS.PRODUCT_VIDEO
+      ? checkVideoUploadAccess(shop.id)
+      : Promise.resolve({ allowed: false, planSlug: "free" }),
   ]);
 
   // ── Computed stats ───────────────────────────────────────
@@ -118,7 +132,7 @@ export default async function ProductDetailPage({
       {/* ── Two Column: Images + Stats ──────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
         {/* Left: Image Gallery + Upload (3 cols) */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 space-y-4">
           <ImageUpload
             images={product.images.map((img) => ({
               id: img.id,
@@ -129,6 +143,14 @@ export default async function ProductDetailPage({
             shopSlug={slug}
             productId={product.id}
           />
+          {FEATURE_FLAGS.PRODUCT_VIDEO && (
+            <VideoManager
+              shopSlug={slug}
+              productId={product.id}
+              initialVideo={productVideo}
+              canUpload={videoUploadAccess.allowed}
+            />
+          )}
         </div>
 
         {/* Right: Stats + Info (2 cols) */}

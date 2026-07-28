@@ -40,8 +40,12 @@ export async function GET() {
         },
       }
     );
-  } catch (error) {
+  } catch {
     const elapsed = Date.now() - start;
+
+    // The endpoint is public. Do not return the database driver's exception:
+    // it can contain hostnames, query details, or other infrastructure data.
+    console.error("[health] Database connectivity check failed");
 
     return NextResponse.json(
       {
@@ -51,7 +55,6 @@ export async function GET() {
         db: {
           status: "disconnected",
           latencyMs: elapsed,
-          error: error instanceof Error ? error.message : "Unknown error",
         },
       },
       {

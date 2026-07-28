@@ -22,6 +22,11 @@ import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email/resend";
 import { welcomeEmailHtml, welcomeEmailText } from "@/lib/email/templates/welcome";
 import { SITE_URL } from "@/lib/config/site";
+import {
+  isSellerMilestoneSource,
+  recordSellerMilestone,
+  type SellerMilestoneSource,
+} from "@/lib/analytics/seller-lifecycle";
 
 type OnboardingResult = {
   success: boolean;
@@ -114,9 +119,12 @@ export async function createShopOnboardingAction(
       }).catch(() => {});
     }
 
-    // Track onboarding event
-    await db.onboardingEvent.create({
-      data: { userId: user.id, step: "shop_created", metadata: { source: "get-started" } },
+    await recordSellerMilestone({
+      userId: user.id,
+      step: "shop_created",
+      source: "get-started",
+      shopId: shop.id,
+      shopSlug: shop.slug,
     }).catch(() => {});
 
     return { success: true, shopSlug: shop.slug };
@@ -199,13 +207,13 @@ export async function createFirstProductAction(
       await createVariant(product.id, shop.id, variantInput.data, productName);
     }
 
-    // Track onboarding event
-    await db.onboardingEvent.create({
-      data: {
-        userId: user.id,
-        step: "product_created",
-        metadata: { shopSlug, productId: product.id, source: "get-started" },
-      },
+    await recordSellerMilestone({
+      userId: user.id,
+      step: "product_created",
+      source: "get-started",
+      shopId: shop.id,
+      shopSlug,
+      productId: product.id,
     }).catch(() => {});
 
     return { success: true, shopSlug: shop.slug, productId: product.id };
@@ -222,12 +230,22 @@ export async function createFirstProductAction(
 export async function trackOnboardingCompleteAction(shopSlug: string): Promise<void> {
   try {
     const user = await requireAuth();
-    await db.onboardingEvent.create({
-      data: {
+    const membership = await db.shopUser.findFirst({
+      where: {
         userId: user.id,
-        step: "completed",
-        metadata: { shopSlug, source: "get-started" },
+        role: "OWNER",
+        shop: { slug: shopSlug },
       },
+      select: { shopId: true },
+    });
+    if (!membership) return;
+
+    await recordSellerMilestone({
+      userId: user.id,
+      step: "completed",
+      source: "get-started",
+      shopId: membership.shopId,
+      shopSlug,
     });
   } catch {
     // Non-fatal
@@ -238,15 +256,30 @@ export async function trackOnboardingCompleteAction(shopSlug: string): Promise<v
  * Track that the seller tapped the Share button on the celebration screen.
  * This is the "catalog_shared" step of the activation funnel.
  */
-export async function trackCatalogSharedAction(shopSlug: string): Promise<void> {
+export async function trackCatalogSharedAction(
+  shopSlug: string,
+  source: SellerMilestoneSource = "get-started",
+): Promise<void> {
+  if (!isSellerMilestoneSource(source)) return;
+
   try {
     const user = await requireAuth();
-    await db.onboardingEvent.create({
-      data: {
+    const membership = await db.shopUser.findFirst({
+      where: {
         userId: user.id,
-        step: "catalog_shared",
-        metadata: { shopSlug, source: "get-started" },
+        role: "OWNER",
+        shop: { slug: shopSlug },
       },
+      select: { shopId: true },
+    });
+    if (!membership) return;
+
+    await recordSellerMilestone({
+      userId: user.id,
+      step: "catalog_shared",
+      source,
+      shopId: membership.shopId,
+      shopSlug,
     });
   } catch {
     // Non-fatal

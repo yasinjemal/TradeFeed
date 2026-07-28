@@ -16,6 +16,7 @@ import { TfStorefrontGrid, type TfGridProduct } from "./tf-product-grid";
 import { TfReviewsBlock, type TfReview } from "./tf-reviews";
 import { TfComboRail, type TfCombo } from "./tf-combo-rail";
 import { TfFulfillmentPromise } from "@/components/tf/fulfillment-promise";
+import { TrackedWhatsAppLink } from "@/components/analytics/tracked-whatsapp-link";
 
 // ============================================================
 // TfStorefront — the Verified Seller card is the hero here.
@@ -185,10 +186,15 @@ export function TfStorefront({
           description="Their catalogue is on its way. Ask on WhatsApp — they may have stock that isn't listed yet."
           action={
             <TfButton asChild variant="whatsapp">
-              <a href={waHref} target="_blank" rel="noopener noreferrer">
+              <TrackedWhatsAppLink
+                href={waHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                shopId={shop.id}
+              >
                 <MessageCircle aria-hidden="true" />
                 Ask on WhatsApp
-              </a>
+              </TrackedWhatsAppLink>
             </TfButton>
           }
         />
@@ -272,10 +278,15 @@ export function TfStorefront({
       {products.length > 0 && (
         <div className="fixed inset-x-0 bottom-[3.5rem] z-30 px-4 pb-2 lg:hidden">
           <TfButton asChild variant="whatsapp" fullWidth size="lg" className="shadow-tf-md">
-            <a href={waHref} target="_blank" rel="noopener noreferrer">
+            <TrackedWhatsAppLink
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              shopId={shop.id}
+            >
               <MessageCircle aria-hidden="true" />
               Message {shop.name} on WhatsApp
-            </a>
+            </TrackedWhatsAppLink>
           </TfButton>
         </div>
       )}

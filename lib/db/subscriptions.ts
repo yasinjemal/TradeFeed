@@ -17,7 +17,8 @@
 // ============================================================
 
 import { db } from "@/lib/db";
-import { hasPaidEntitlement } from "@/lib/billing/subscription-status";
+import { effectivePlanSlug, hasPaidEntitlement } from "@/lib/billing/subscription-status";
+import { recordShopSubscriptionStarted } from "@/lib/analytics/seller-lifecycle";
 
 /** Free-plan defaults enforced when a shop has no paid entitlement. */
 const FREE_PRODUCT_LIMIT = 20;
@@ -121,7 +122,7 @@ export async function upgradeSubscription(
   const periodEnd = new Date();
   periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-  return db.subscription.upsert({
+  const subscription = await db.subscription.upsert({
     where: { shopId },
     update: {
       planId: plan.id,
@@ -139,6 +140,12 @@ export async function upgradeSubscription(
       currentPeriodEnd: periodEnd,
     },
   });
+
+  if (plan.slug !== "free" && plan.priceInCents > 0) {
+    await recordShopSubscriptionStarted(shopId, "payfast").catch(() => false);
+  }
+
+  return subscription;
 }
 
 /**
@@ -184,5 +191,23 @@ export async function checkProductLimit(shopId: string) {
     limit,
     unlimited,
     planName: trial.active ? `${planName} (Trial)` : planName,
+  };
+}
+
+/**
+ * Can this shop UPLOAD hosted product videos?
+ * Link videos (YouTube/direct) are free for every plan; hosted
+ * uploads cost us storage/bandwidth and require a paid plan.
+ * Trial shops count as paid (same semantics as the AI gate).
+ */
+export async function checkVideoUploadAccess(shopId: string): Promise<{
+  allowed: boolean;
+  planSlug: string;
+}> {
+  const subscription = await getShopSubscription(shopId);
+  const trial = isTrialActive(subscription);
+  return {
+    allowed: hasPaidEntitlement(subscription) || trial.active,
+    planSlug: effectivePlanSlug(subscription),
   };
 }

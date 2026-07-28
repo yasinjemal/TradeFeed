@@ -11,6 +11,7 @@ import { getPlans, getShopSubscription } from "@/lib/db/subscriptions";
 import { getActivePaymentMethods } from "@/lib/db/manual-payments";
 import { UpgradeForm } from "@/components/billing/upgrade-form";
 import Link from "next/link";
+import { recordSellerMilestone } from "@/lib/analytics/seller-lifecycle";
 
 interface UpgradePageProps {
   params: Promise<{ slug: string }>;
@@ -36,6 +37,14 @@ export default async function UpgradePage({
   if (access.role !== "OWNER") {
     return redirect(`/dashboard/${slug}/billing`);
   }
+
+  await recordSellerMilestone({
+    userId: access.userId,
+    step: "upgrade_viewed",
+    source: "upgrade-page",
+    shopId: access.shopId,
+    shopSlug: slug,
+  }).catch(() => false);
 
   const [plans, subscription, paymentMethods] = await Promise.all([
     getPlans(),

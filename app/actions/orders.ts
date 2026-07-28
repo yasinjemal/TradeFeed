@@ -5,7 +5,7 @@
 // order status management (from seller dashboard).
 //
 // FLOW:
-//   Buyer: checkout → validateStock → createOrder → WhatsApp
+//   Buyer: checkout → createOrder authoritative transaction → WhatsApp
 //   Seller: view orders → update status
 // ============================================================
 
@@ -13,7 +13,6 @@
 
 import { revalidatePath } from "next/cache";
 import {
-  validateStock,
   createOrder,
   updateOrderStatus,
   getOrder,
@@ -28,7 +27,7 @@ import { checkoutSchema } from "@/lib/validation/checkout";
 import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
 import { sendOrderConfirmation, sendOrderStatusUpdate as sendStatusWhatsApp, sendBuyerPaymentLink } from "@/lib/whatsapp/business-api";
 import { formatZAR } from "@/types";
-import { trackEvent } from "@/lib/db/analytics";
+import { trackRequestEvent } from "@/lib/analytics/server";
 import type { OrderStatus, ShippingMethod, PaymentMethod } from "@prisma/client";
 
 type ActionResult = {
@@ -48,10 +47,10 @@ type PaymentLinkResult = {
 
 /**
  * Create an order from cart items.
- * Called right before opening WhatsApp — validates stock first.
+ * Called right before opening WhatsApp; all commerce checks happen server-side.
  *
  * NOTE: No auth required — buyers aren't logged in.
- * The shopId comes from the public catalog context.
+ * The shop identity comes from public catalog context and is verified in the DB.
  */
 export async function checkoutAction(
   shopId: string,
@@ -67,9 +66,8 @@ export async function checkoutAction(
   deliveryPostalCode?: string,
   marketingConsent?: boolean,
   shippingMethod?: "SELLER_ARRANGED" | "COLLECTION" | "PLATFORM_COURIER",
-  shippingCostCents?: number,
-  courierName?: string,
-  paymentMethod?: "PAYFAST" | "COD" | "MANUAL",
+  shippingRateKey?: string,
+  paymentMethod?: "PAYFAST" | "COD",
 ): Promise<ActionResult> {
   // Retry wrapper for transient DB connection failures (Neon cold starts)
   const MAX_RETRIES = 2;
@@ -80,7 +78,7 @@ export async function checkoutAction(
       buyerName, buyerPhone, buyerNote,
       deliveryAddress, deliveryCity, deliveryProvince, deliveryPostalCode,
       marketingConsent,
-      shippingMethod, shippingCostCents, courierName,
+      shippingMethod, shippingRateKey,
       paymentMethod,
     );
 
@@ -123,9 +121,8 @@ async function _attemptCheckout(
   deliveryPostalCode?: string,
   marketingConsent?: boolean,
   shippingMethod?: "SELLER_ARRANGED" | "COLLECTION" | "PLATFORM_COURIER",
-  shippingCostCents?: number,
-  courierName?: string,
-  paymentMethod?: "PAYFAST" | "COD" | "MANUAL",
+  shippingRateKey?: string,
+  paymentMethod?: "PAYFAST" | "COD",
 ): Promise<InternalResult> {
   try {
     // Rate limit: 10 checkouts/min per IP
@@ -135,8 +132,12 @@ async function _attemptCheckout(
       return { success: false, error: "Too many checkout attempts. Please wait a moment." };
     }
 
-    // Track checkout start (fire-and-forget)
-    void trackEvent({ type: "CHECKOUT_START", shopId });
+    // Track checkout start with the same anonymous visitor identity used by
+    // the catalog and WhatsApp handoff.
+    await trackRequestEvent(
+      { type: "CHECKOUT_START", shopId },
+      { excludeSignedInShopOwners: true },
+    );
 
     // 0. Validate & sanitize all inputs
     const parsed = checkoutSchema.safeParse({
@@ -152,6 +153,9 @@ async function _attemptCheckout(
       deliveryProvince,
       deliveryPostalCode,
       marketingConsent,
+      shippingMethod,
+      shippingRateKey,
+      paymentMethod,
     });
 
     if (!parsed.success) {
@@ -162,34 +166,14 @@ async function _attemptCheckout(
 
     const input = parsed.data;
 
-    // 1. Validate stock
-    const stockCheck = await validateStock(
-      input.items.map((i) => ({
-        variantId: i.variantId,
-        productName: i.productName,
-        quantity: i.quantity,
-      })),
-    );
-
-    if (!stockCheck.valid) {
-      const outOfStock = stockCheck.errors
-        .map(
-          (e) =>
-            `${e.productName}: only ${e.available} left (you requested ${e.requested})`,
-        )
-        .join("; ");
-      return {
-        success: false,
-        error: `Some items are out of stock: ${outOfStock}`,
-      };
-    }
-
-    // 2. Create order (prices are re-verified server-side in createOrder)
+    // Create the order using server-authoritative tenant, price, fulfilment,
+    // payment, and stock checks in one transaction.
     // Attach buyer identity if signed in (optional — buyers can be guests)
     const { userId: buyerClerkId } = await auth();
 
     const orderResult = await createOrder({
       shopId: input.shopId,
+      shopSlug: input.shopSlug,
       items: input.items,
       buyerClerkId: buyerClerkId ?? undefined,
       buyerName: input.buyerName || undefined,
@@ -201,10 +185,9 @@ async function _attemptCheckout(
       deliveryPostalCode: input.deliveryPostalCode || undefined,
       whatsappMessage: input.whatsappMessage,
       marketingConsent: input.marketingConsent ?? false,
-      shippingMethod: shippingMethod as CreateOrderInput["shippingMethod"],
-      shippingCostCents: shippingCostCents ?? 0,
-      courierName,
-      paymentMethod: paymentMethod as CreateOrderInput["paymentMethod"],
+      shippingMethod: input.shippingMethod,
+      shippingRateKey: input.shippingRateKey,
+      paymentMethod: input.paymentMethod,
     });
 
     if (!orderResult.success) {

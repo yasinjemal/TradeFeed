@@ -14,6 +14,7 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
+import { queueCronHeartbeat } from "@/lib/monitoring/better-stack";
 import { processSellerSequences } from "@/lib/whatsapp/seller-sequences";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +40,14 @@ export async function GET(request: NextRequest) {
     const result = await processSellerSequences();
 
     console.log("[seller-sequences] Complete:", result);
+    if (result.failed > 0) {
+      console.error(
+        `[seller-sequences] ${result.failed} sequence(s) failed; reporting the run as failed to monitoring.`,
+      );
+      queueCronHeartbeat("seller-sequences", "failure");
+    } else {
+      queueCronHeartbeat("seller-sequences", "success");
+    }
 
     return NextResponse.json({
       success: true,
@@ -46,6 +55,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("[seller-sequences] Failed:", error);
+    queueCronHeartbeat("seller-sequences", "failure");
     return NextResponse.json(
       { error: "Sequence processing failed", details: error instanceof Error ? error.message : String(error) },
       { status: 500 },

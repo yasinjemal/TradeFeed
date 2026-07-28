@@ -108,7 +108,9 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
           </nav>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
-            <TfThemeToggle />
+            <span className="hidden sm:inline-flex">
+              <TfThemeToggle />
+            </span>
             {/* Auth-aware: signed-in users already have the dashboard CTA */}
             {!isSignedIn && (
               <Link
@@ -119,7 +121,10 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               </Link>
             )}
             <TfButton asChild size="sm">
-              <Link href={ctaHref}>{ctaLabel}</Link>
+              <Link href={ctaHref}>
+                <span className="hidden sm:inline">{ctaLabel}</span>
+                <span className="sm:hidden">{isSignedIn ? "Open" : "Start free"}</span>
+              </Link>
             </TfButton>
           </div>
         </div>
@@ -300,7 +305,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             {[
               { value: stats.shopCount, label: "live sellers" },
               { value: stats.productCount, label: "products listed" },
-              { value: stats.orderCount, label: "orders placed" },
+              { value: stats.orderCount, label: "orders created" },
               { value: stats.cityCount, label: "SA cities" },
             ].map(({ value, label }) => (
               <div key={label}>
@@ -595,7 +600,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               {[
                 "Verification backed by real seller checks",
                 "Order count and reply time from actual activity",
-                "Your WhatsApp number stays private until a buyer orders",
+                "Orders go directly to the business WhatsApp number you choose",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-2.5 text-sm text-white/60">
                   <Check
@@ -608,17 +613,22 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             </ul>
           </TfReveal>
           <TfReveal delay={120}>
-            <TfTilt>
-              <TfVerifiedSellerCard
-                variant="hero"
-                name="Thandi's Sneakers"
-                verified
-                ordersFulfilled={127}
-                avgReplyMinutes={8}
-                memberSince={2024}
-                location="Soweto, Johannesburg"
-              />
-            </TfTilt>
+            <div>
+              <p className="mb-2 text-center text-[10px] font-medium uppercase tracking-[0.2em] text-white/35">
+                Illustrative example
+              </p>
+              <TfTilt>
+                <TfVerifiedSellerCard
+                  variant="hero"
+                  name="Thandi's Sneakers"
+                  verified
+                  ordersFulfilled={127}
+                  avgReplyMinutes={8}
+                  memberSince={2024}
+                  location="Soweto, Johannesburg"
+                />
+              </TfTilt>
+            </div>
           </TfReveal>
         </div>
       </section>

@@ -16,6 +16,8 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import type { AnalyticsRequestContext } from "@/lib/analytics/visitor";
+import { trackEvent } from "@/lib/db/analytics";
 import type { Prisma } from "@prisma/client";
 import { searchProductIds } from "@/lib/db/search";
 import { calculateTierPoints, getTierForPoints, type TierMetrics } from "@/lib/reputation/tiers";
@@ -64,6 +66,9 @@ export interface MarketplaceProduct {
   name: string;
   description: string | null;
   imageUrl: string | null;
+  /** Showcase video (first ProductVideo row), for card previews */
+  videoUrl: string | null;
+  videoSource: "UPLOAD" | "YOUTUBE" | "DIRECT" | null;
   minPriceCents: number;
   maxPriceCents: number;
   variantCount: number;
@@ -450,6 +455,11 @@ export async function getMarketplaceProducts(
           select: { url: true },
           take: 1,
         },
+        videos: {
+          select: { url: true, source: true },
+          orderBy: { position: "asc" },
+          take: 1,
+        },
         variants: {
           where: { isActive: true },
           select: { priceInCents: true },
@@ -474,6 +484,8 @@ export async function getMarketplaceProducts(
       name: p.name,
       description: p.description,
       imageUrl: p.images[0]?.url ?? null,
+      videoUrl: p.videos[0]?.url ?? null,
+      videoSource: p.videos[0]?.source ?? null,
       minPriceCents: minP,
       maxPriceCents: maxP,
       variantCount: p.variants.length,
@@ -591,6 +603,11 @@ export async function getPromotedProducts(
             select: { url: true },
             take: 1,
           },
+          videos: {
+            select: { url: true, source: true },
+            orderBy: { position: "asc" },
+            take: 1,
+          },
           variants: {
             where: { isActive: true },
             select: { priceInCents: true },
@@ -616,6 +633,8 @@ export async function getPromotedProducts(
       name: p.name,
       description: p.description,
       imageUrl: p.images[0]?.url ?? null,
+      videoUrl: p.videos[0]?.url ?? null,
+      videoSource: p.videos[0]?.source ?? null,
       minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
       maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
       variantCount: p.variants.length,
@@ -782,6 +801,11 @@ export async function getTrendingProducts(
         select: { url: true },
         take: 1,
       },
+      videos: {
+        select: { url: true, source: true },
+        orderBy: { position: "asc" },
+        take: 1,
+      },
       variants: {
         where: { isActive: true },
         select: { priceInCents: true },
@@ -805,6 +829,8 @@ export async function getTrendingProducts(
         name: p.name,
         description: p.description,
         imageUrl: p.images[0]?.url ?? null,
+        videoUrl: p.videos[0]?.url ?? null,
+        videoSource: p.videos[0]?.source ?? null,
         minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
         maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
         variantCount: p.variants.length,
@@ -875,6 +901,11 @@ export async function getNewArrivals(
         select: { url: true },
         take: 1,
       },
+      videos: {
+        select: { url: true, source: true },
+        orderBy: { position: "asc" },
+        take: 1,
+      },
       variants: {
         where: { isActive: true },
         select: { priceInCents: true },
@@ -892,6 +923,8 @@ export async function getNewArrivals(
       name: p.name,
       description: p.description,
       imageUrl: p.images[0]?.url ?? null,
+      videoUrl: p.videos[0]?.url ?? null,
+      videoSource: p.videos[0]?.source ?? null,
       minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
       maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
       variantCount: p.variants.length,
@@ -1050,15 +1083,47 @@ export async function searchMarketplace(
  * can show several promoted products).
  */
 export async function trackPromotedImpressions(
-  promotedListingIds: string[]
+  promotedListingIds: string[],
+  analytics: AnalyticsRequestContext,
 ): Promise<void> {
   if (promotedListingIds.length === 0) return;
 
   try {
+    const now = new Date();
+    const activeListings = await db.promotedListing.findMany({
+      where: {
+        id: { in: promotedListingIds },
+        status: "ACTIVE",
+        startsAt: { lte: now },
+        expiresAt: { gt: now },
+      },
+      select: { id: true, shopId: true, productId: true },
+    });
+    if (activeListings.length === 0) return;
+
     await db.promotedListing.updateMany({
-      where: { id: { in: promotedListingIds } },
+      where: {
+        id: { in: activeListings.map((listing) => listing.id) },
+        status: "ACTIVE",
+        startsAt: { lte: now },
+        expiresAt: { gt: now },
+      },
       data: { impressions: { increment: 1 } },
     });
+
+    // The cumulative listing counter powers seller operations, while one
+    // canonical event per validated listing gives the admin dashboard honest
+    // period-based impression metrics.
+    await Promise.all(
+      activeListings.map((listing) =>
+        trackEvent({
+          type: "PROMOTED_IMPRESSION",
+          shopId: listing.shopId,
+          productId: listing.productId,
+          visitorId: analytics.visitorId,
+        }),
+      ),
+    );
   } catch (err) {
     // Never let tracking failures break the page
     console.error("[marketplace] Failed to track impressions:", err);
@@ -1074,24 +1139,31 @@ export async function trackPromotedImpressions(
 export async function trackPromotedClick(
   promotedListingId: string,
   shopId: string,
-  productId: string
+  productId: string,
+  analytics: AnalyticsRequestContext,
 ): Promise<void> {
   try {
-    await Promise.all([
-      // Increment click counter on the promotion itself
-      db.promotedListing.update({
-        where: { id: promotedListingId },
-        data: { clicks: { increment: 1 } },
-      }),
-      // Fire analytics event for reporting
-      db.analyticsEvent.create({
-        data: {
-          type: "PROMOTED_CLICK",
-          shopId,
-          productId,
-        },
-      }),
-    ]);
+    const now = new Date();
+    const result = await db.promotedListing.updateMany({
+      where: {
+        id: promotedListingId,
+        shopId,
+        productId,
+        status: "ACTIVE",
+        startsAt: { lte: now },
+        expiresAt: { gt: now },
+      },
+      data: { clicks: { increment: 1 } },
+    });
+
+    if (result.count !== 1) return;
+
+    await trackEvent({
+      type: "PROMOTED_CLICK",
+      shopId,
+      productId,
+      visitorId: analytics.visitorId,
+    });
   } catch (err) {
     console.error("[marketplace] Failed to track promoted click:", err);
   }

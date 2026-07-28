@@ -6,6 +6,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { recordShopSubscriptionStarted } from "@/lib/analytics/seller-lifecycle";
 
 // ══════════════════════════════════════════════════════════════
 // Manual Payment Methods (Admin CRUD)
@@ -146,7 +147,7 @@ export async function approveUpgradeRequest(
   const periodEnd = new Date();
   periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-  return db.subscription.update({
+  const approvedSubscription = await db.subscription.update({
     where: { id: subscriptionId },
     data: {
       // Activate the new plan
@@ -164,6 +165,15 @@ export async function approveUpgradeRequest(
       plan: { select: { name: true } },
     },
   });
+
+  if (targetPlan.slug !== "free" && targetPlan.priceInCents > 0) {
+    await recordShopSubscriptionStarted(
+      subscription.shopId,
+      "manual-upgrade",
+    ).catch(() => false);
+  }
+
+  return approvedSubscription;
 }
 
 /** Reject an upgrade request (admin action) */
@@ -208,7 +218,7 @@ export async function adminSetShopPlan(
   periodEnd.setMonth(periodEnd.getMonth() + 1);
 
   // Upsert — create subscription if it doesn't exist, update if it does
-  return db.subscription.upsert({
+  const updatedSubscription = await db.subscription.upsert({
     where: { shopId },
     create: {
       id: `sub_${shopId}_${Date.now()}`,
@@ -238,4 +248,10 @@ export async function adminSetShopPlan(
       plan: { select: { name: true, slug: true } },
     },
   });
+
+  if (targetPlan.slug !== "free" && targetPlan.priceInCents > 0) {
+    await recordShopSubscriptionStarted(shopId, "admin").catch(() => false);
+  }
+
+  return updatedSubscription;
 }

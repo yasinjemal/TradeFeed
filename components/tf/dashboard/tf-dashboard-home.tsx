@@ -107,7 +107,11 @@ export function TfDashboardHome({
       </div>
 
       {/* ── Share — the #1 action, always up top ───────── */}
-      <TfShareCatalogue catalogUrl={catalogUrl} shopName={shop.name} />
+      <TfShareCatalogue
+        catalogUrl={catalogUrl}
+        shopName={shop.name}
+        shopSlug={slug}
+      />
 
       {/* ── New-seller empty state: straight into import ── */}
       {isNewSeller ? (

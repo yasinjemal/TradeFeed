@@ -9,6 +9,7 @@ import { requireShopAccess } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getPlans, getShopSubscription, checkProductLimit } from "@/lib/db/subscriptions";
 import { BillingDashboard } from "@/components/billing/billing-dashboard";
+import { recordSellerMilestone } from "@/lib/analytics/seller-lifecycle";
 
 interface BillingPageProps {
   params: Promise<{ slug: string }>;
@@ -35,6 +36,19 @@ export default async function BillingPage({
     getShopSubscription(access.shopId),
     checkProductLimit(access.shopId),
   ]);
+
+  if (
+    access.role === "OWNER" &&
+    (!subscription || subscription.plan.slug === "free")
+  ) {
+    await recordSellerMilestone({
+      userId: access.userId,
+      step: "upgrade_viewed",
+      source: "billing",
+      shopId: access.shopId,
+      shopSlug: slug,
+    }).catch(() => false);
+  }
 
   return (
     <div className="space-y-6">

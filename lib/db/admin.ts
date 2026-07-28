@@ -787,8 +787,8 @@ export async function getMarketplaceAnalytics(days: number = 30): Promise<Market
   }
   topProvinces.sort((a, b) => b.shopCount - a.shopCount);
 
-  // Search terms — extracted from MARKETPLACE_VIEW events with referrer data
-  // For MVP, we return empty. Real search tracking needs a SearchLog model.
+  // Search terms are intentionally not inferred from referrer headers.
+  // Real search tracking needs a consented, bounded SearchLog model.
   const searchTerms: MarketplaceAnalytics["searchTerms"] = [];
 
   return {

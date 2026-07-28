@@ -44,6 +44,8 @@ export async function getCatalogShop(slug: string) {
       province: true,
       latitude: true,
       longitude: true,
+      locationProvider: true,
+      locationPublishedAt: true,
       // Profile
       aboutText: true,
       businessHours: true,
@@ -112,8 +114,14 @@ export async function getCatalogShop(slug: string) {
     _avg: { rating: true },
   });
 
+  const { locationPublishedAt, ...publicShop } = shop;
+  const exactLocationIsPublished = locationPublishedAt !== null;
+
   return {
-    ...shop,
+    ...publicShop,
+    address: exactLocationIsPublished ? shop.address : null,
+    latitude: exactLocationIsPublished ? shop.latitude : null,
+    longitude: exactLocationIsPublished ? shop.longitude : null,
     avgRating: reviewAgg._avg.rating ?? 0,
   };
 }
@@ -182,6 +190,11 @@ export async function getCatalogProducts(shopId: string) {
         },
         take: 1,
       },
+      videos: {
+        select: { url: true, source: true },
+        orderBy: { position: "asc" as const },
+        take: 1,
+      },
       variants: {
         where: { isActive: true },
         select: {
@@ -244,6 +257,11 @@ export async function getCatalogProduct(slugOrId: string, shopId: string) {
     images: {
       select: { id: true, url: true, altText: true, position: true },
       orderBy: { position: "asc" as const },
+    },
+    videos: {
+      select: { id: true, url: true, source: true, thumbnailUrl: true, createdAt: true },
+      orderBy: { position: "asc" as const },
+      take: 1,
     },
     variants: {
       where: { isActive: true },

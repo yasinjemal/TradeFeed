@@ -5,29 +5,32 @@
 // from actions — always go through this layer.
 //
 // ORDER FLOW:
-//   Cart → validateStock() → createOrder() → WhatsApp
+//   Cart → createOrder() authoritative transaction → WhatsApp
 //   Seller: listOrders() → updateOrderStatus()
 //
-// ORDER NUMBER FORMAT: TF-YYYYMMDD-XXXX (e.g. TF-20260224-A1B2)
+// ORDER NUMBER FORMAT: TF-YYYYMMDD-<20 HEX> (80 random bits)
 // ============================================================
 
+import { randomBytes } from "node:crypto";
+import { Prisma, type OrderStatus, type Order, type OrderItem, type ShippingMethod } from "@prisma/client";
 import { db } from "@/lib/db";
-import type { OrderStatus, Order, OrderItem, ShippingMethod, PaymentMethod } from "@prisma/client";
 import { syncProductRestockAlerts } from "@/lib/notifications/buyer-alerts";
+import { getSpecificRate } from "@/lib/shipping/rates";
+import {
+  aggregateCheckoutItems,
+  aggregateStockQuantities,
+  CheckoutPolicyError,
+  deriveCheckoutUnitPrice,
+} from "@/lib/orders/checkout-policy";
 
 // ── Order Number Generator ──────────────────────────────────
 
-function generateOrderNumber(): string {
-  const date = new Date();
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  // 4-char random alphanumeric suffix
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // No 0/O/1/I confusion
-  let suffix = "";
-  for (let i = 0; i < 4; i++) {
-    suffix += chars[Math.floor(Math.random() * chars.length)];
-  }
+export function generateOrderNumber(date = new Date()): string {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  // 80 bits of CSPRNG entropy prevents practical enumeration of public URLs.
+  const suffix = randomBytes(10).toString("hex").toUpperCase();
   return `TF-${y}${m}${d}-${suffix}`;
 }
 
@@ -35,6 +38,7 @@ function generateOrderNumber(): string {
 
 export interface CreateOrderInput {
   shopId: string;
+  shopSlug: string;
   items: {
     productId: string;
     variantId: string;
@@ -45,6 +49,7 @@ export interface CreateOrderInput {
     option2Value: string | null;
     priceInCents: number;
     quantity: number;
+    orderType?: "wholesale" | "retail";
   }[];
   buyerName?: string;
   buyerPhone?: string;
@@ -55,60 +60,11 @@ export interface CreateOrderInput {
   deliveryPostalCode?: string;
   whatsappMessage?: string;
   marketingConsent?: boolean;
-  // Shipping fields
+  // Buyer-selected fulfilment. Rates and courier details are derived server-side.
   shippingMethod?: ShippingMethod;
-  shippingCostCents?: number;
-  courierName?: string;
-  estimatedDelivery?: Date;
+  shippingRateKey?: string;
   buyerClerkId?: string;
-  // Payment method
-  paymentMethod?: PaymentMethod;
-}
-
-export interface StockValidationResult {
-  valid: boolean;
-  errors: { variantId: string; productName: string; requested: number; available: number }[];
-}
-
-// ── Stock Validation ────────────────────────────────────────
-
-/**
- * Validate that all requested items have sufficient stock.
- * Returns errors for any items that are out of stock or insufficient.
- */
-export async function validateStock(
-  items: { variantId: string; productName: string; quantity: number }[],
-): Promise<StockValidationResult> {
-  const variantIds = items.map((i) => i.variantId);
-
-  const variants = await db.productVariant.findMany({
-    where: { id: { in: variantIds }, isActive: true },
-    select: { id: true, stock: true },
-  });
-
-  const stockMap = new Map(variants.map((v) => [v.id, v.stock]));
-  const errors: StockValidationResult["errors"] = [];
-
-  for (const item of items) {
-    const available = stockMap.get(item.variantId);
-    if (available === undefined) {
-      errors.push({
-        variantId: item.variantId,
-        productName: item.productName,
-        requested: item.quantity,
-        available: 0,
-      });
-    } else if (available < item.quantity) {
-      errors.push({
-        variantId: item.variantId,
-        productName: item.productName,
-        requested: item.quantity,
-        available,
-      });
-    }
-  }
-
-  return { valid: errors.length === 0, errors };
+  paymentMethod?: "PAYFAST" | "COD";
 }
 
 // ── Create Order ────────────────────────────────────────────
@@ -117,130 +73,398 @@ export type CreateOrderResult =
   | { success: true; order: Order & { items: OrderItem[] } }
   | { success: false; error: string };
 
+const MAX_DATABASE_INT = 2_147_483_647;
+const ORDER_TRANSACTION_ATTEMPTS = 3;
+
+function wholesaleBuyerPhoneCandidates(phone: string | undefined): string[] {
+  if (!phone) return [];
+
+  const candidates = new Set([phone]);
+  if (phone.startsWith("+27") && phone.length === 12) {
+    candidates.add(`0${phone.slice(3)}`);
+    candidates.add(phone.slice(1));
+  } else if (phone.startsWith("27") && phone.length === 11) {
+    candidates.add(`+${phone}`);
+    candidates.add(`0${phone.slice(2)}`);
+  } else if (phone.startsWith("0") && phone.length === 10) {
+    candidates.add(`+27${phone.slice(1)}`);
+    candidates.add(`27${phone.slice(1)}`);
+  }
+  return [...candidates];
+}
+
+function parseShippingRateKey(
+  key: string | undefined,
+): { carrier: string; service: string } | null {
+  if (!key) return null;
+  const separator = key.indexOf("|");
+  if (separator < 1 || separator === key.length - 1) return null;
+  return {
+    carrier: key.slice(0, separator),
+    service: key.slice(separator + 1),
+  };
+}
+
+function isRetryableOrderTransactionError(error: unknown): boolean {
+  if (!error || typeof error !== "object" || !("code" in error)) return false;
+  const code = String(error.code);
+  return code === "P2034" || code === "P2002";
+}
+
 /**
  * Create an order with line items in a single transaction.
- * Also decrements stock for each variant ordered.
- * Prices are re-fetched from the DB to prevent client-side tampering.
+ * The transaction is the authority for shop/product/variant membership,
+ * prices, fulfilment, payment policy, and conditional stock decrements.
  *
  * Returns a result object instead of throwing so callers get
  * actionable error messages (e.g. "variant no longer available").
  */
 export async function createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
-  // Re-fetch actual prices + stock inside a single read to minimise
-  // the race window between validation and creation.
-  const variantIds = input.items.map((i) => i.variantId);
-  const variants = await db.productVariant.findMany({
-    where: { id: { in: variantIds }, isActive: true },
-    select: { id: true, priceInCents: true, stock: true },
-  });
-  const variantMap = new Map(variants.map((v) => [v.id, v]));
-
-  // Validate every variant is still available + has sufficient stock
-  const errors: string[] = [];
-  const verifiedItems = input.items.map((item) => {
-    const dbVariant = variantMap.get(item.variantId);
-    if (!dbVariant) {
-      errors.push(`"${item.productName}" is no longer available.`);
-      return { ...item, priceInCents: 0 };
+  let requestedItems;
+  try {
+    requestedItems = aggregateCheckoutItems(
+      input.items.map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        orderType: item.orderType ?? "wholesale",
+        quantity: item.quantity,
+      })),
+    );
+    if (requestedItems.length === 0) {
+      throw new CheckoutPolicyError("Cart is empty.");
     }
-    if (dbVariant.stock < item.quantity) {
-      errors.push(
-        `"${item.productName}": only ${dbVariant.stock} left (you requested ${item.quantity}).`,
-      );
+  } catch (error) {
+    if (error instanceof CheckoutPolicyError) {
+      return { success: false, error: error.message };
     }
-    return { ...item, priceInCents: dbVariant.priceInCents };
-  });
-
-  if (errors.length > 0) {
-    return { success: false, error: errors.join(" ") };
+    throw error;
   }
 
-  const totalCents = verifiedItems.reduce(
-    (sum, item) => sum + item.priceInCents * item.quantity,
-    0,
-  );
-  const itemCount = verifiedItems.reduce(
-    (sum, item) => sum + item.quantity,
-    0,
-  );
-
-  // Generate unique order number (retry on collision)
-  let orderNumber = generateOrderNumber();
-  let retries = 0;
-  while (retries < 5) {
-    const existing = await db.order.findUnique({
-      where: { orderNumber },
-      select: { id: true },
-    });
-    if (!existing) break;
-    orderNumber = generateOrderNumber();
-    retries++;
-  }
-
-  // Transaction: create order + decrement stock atomically
-  const order = await db.$transaction(async (tx) => {
-    // 1. Create order with items
-    const created = await tx.order.create({
-      data: {
-        orderNumber,
-        shopId: input.shopId,
-        buyerClerkId: input.buyerClerkId,
-        buyerName: input.buyerName,
-        buyerPhone: input.buyerPhone,
-        buyerNote: input.buyerNote,
-        deliveryAddress: input.deliveryAddress,
-        deliveryCity: input.deliveryCity,
-        deliveryProvince: input.deliveryProvince,
-        deliveryPostalCode: input.deliveryPostalCode,
-        totalCents: totalCents + (input.shippingCostCents ?? 0),
-        itemCount,
-        whatsappMessage: input.whatsappMessage,
-        marketingConsent: input.marketingConsent ?? false,
-        shippingMethod: input.shippingMethod ?? "SELLER_ARRANGED",
-        shippingCostCents: input.shippingCostCents ?? 0,
-        courierName: input.courierName,
-        estimatedDelivery: input.estimatedDelivery,
-        paymentMethod: input.paymentMethod ?? "PAYFAST",
-        items: {
-          create: verifiedItems.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId,
-            productName: item.productName,
-            option1Label: item.option1Label,
-            option1Value: item.option1Value,
-            option2Label: item.option2Label,
-            option2Value: item.option2Value,
-            priceInCents: item.priceInCents,
-            quantity: item.quantity,
-          })),
-        },
-      },
-      include: { items: true },
-    });
-
-    // 2. Decrement stock for each variant
-    for (const item of verifiedItems) {
-      await tx.productVariant.update({
-        where: { id: item.variantId },
-        data: { stock: { decrement: item.quantity } },
-      });
-    }
-
-    return created;
-  });
-
-  // A checkout can move a product to zero stock, which re-arms saved-product
-  // alerts for the next genuine restock. The order remains successful if this
-  // optional notification sync is temporarily unavailable.
-  for (const productId of new Set(verifiedItems.map((item) => item.productId))) {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < ORDER_TRANSACTION_ATTEMPTS; attempt++) {
+    const orderNumber = generateOrderNumber();
     try {
-      await syncProductRestockAlerts(productId);
+      const transactionResult = await db.$transaction(
+        async (tx) => {
+          const shop = await tx.shop.findFirst({
+            where: {
+              id: input.shopId,
+              slug: input.shopSlug,
+              isActive: true,
+            },
+            select: {
+              id: true,
+              codEnabled: true,
+              deliveryEnabled: true,
+              collectionEnabled: true,
+              province: true,
+              city: true,
+            },
+          });
+          if (!shop) {
+            throw new CheckoutPolicyError("This shop is not available.");
+          }
+
+          const variantIds = [...new Set(requestedItems.map((item) => item.variantId))].sort();
+          const variants = await tx.productVariant.findMany({
+            where: {
+              id: { in: variantIds },
+              isActive: true,
+              product: {
+                is: {
+                  shopId: shop.id,
+                  isActive: true,
+                },
+              },
+            },
+            select: {
+              id: true,
+              size: true,
+              color: true,
+              priceInCents: true,
+              retailPriceCents: true,
+              stock: true,
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  option1Label: true,
+                  option2Label: true,
+                  minWholesaleQty: true,
+                  wholesaleOnly: true,
+                  bulkDiscountTiers: {
+                    orderBy: { minQuantity: "asc" },
+                    select: {
+                      minQuantity: true,
+                      discountPercent: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+          if (variants.length !== variantIds.length) {
+            throw new CheckoutPolicyError(
+              "One or more cart items are no longer available from this shop.",
+            );
+          }
+
+          const variantMap = new Map(variants.map((variant) => [variant.id, variant]));
+          const verifiedItems = requestedItems.map((requested) => {
+            const variant = variantMap.get(requested.variantId);
+            if (!variant || variant.product.id !== requested.productId) {
+              throw new CheckoutPolicyError(
+                "One or more cart items do not match this shop's catalogue.",
+              );
+            }
+
+            const priceInCents = deriveCheckoutUnitPrice({
+              orderType: requested.orderType,
+              productName: variant.product.name,
+              wholesaleOnly: variant.product.wholesaleOnly,
+              minWholesaleQty: variant.product.minWholesaleQty,
+              wholesalePriceCents: variant.priceInCents,
+              retailPriceCents: variant.retailPriceCents,
+              quantity: requested.quantity,
+              bulkDiscountTiers: variant.product.bulkDiscountTiers,
+            });
+
+            return {
+              productId: variant.product.id,
+              variantId: variant.id,
+              productName: variant.product.name,
+              option1Label: variant.product.option1Label,
+              option1Value: variant.size,
+              option2Label: variant.product.option2Label,
+              option2Value: variant.color,
+              priceInCents,
+              quantity: requested.quantity,
+              orderType: requested.orderType,
+            };
+          });
+
+          if (verifiedItems.some((item) => variantMap.get(item.variantId)?.product.wholesaleOnly)) {
+            const phones = wholesaleBuyerPhoneCandidates(input.buyerPhone);
+            const verifiedBuyer = phones.length
+              ? await tx.wholesaleBuyer.findFirst({
+                  where: {
+                    phone: { in: phones },
+                    status: "VERIFIED",
+                  },
+                  select: { id: true },
+                })
+              : null;
+            if (!verifiedBuyer) {
+              throw new CheckoutPolicyError(
+                "A verified wholesale buyer phone number is required for this order.",
+              );
+            }
+          }
+
+          const itemCount = verifiedItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          );
+          const merchandiseTotalCents = verifiedItems.reduce(
+            (sum, item) => sum + item.priceInCents * item.quantity,
+            0,
+          );
+          if (
+            !Number.isSafeInteger(merchandiseTotalCents) ||
+            merchandiseTotalCents < 0 ||
+            merchandiseTotalCents > MAX_DATABASE_INT
+          ) {
+            throw new CheckoutPolicyError("Order total is invalid.");
+          }
+
+          let shippingMethod: ShippingMethod;
+          if (input.shippingMethod) {
+            shippingMethod = input.shippingMethod;
+          } else if (shop.collectionEnabled && !input.deliveryAddress) {
+            shippingMethod = "COLLECTION";
+          } else if (shop.deliveryEnabled) {
+            shippingMethod = "SELLER_ARRANGED";
+          } else if (shop.collectionEnabled) {
+            shippingMethod = "COLLECTION";
+          } else {
+            throw new CheckoutPolicyError("This shop has no available fulfilment method.");
+          }
+
+          let shippingCostCents = 0;
+          let courierName: string | null = null;
+          if (shippingMethod === "COLLECTION") {
+            if (!shop.collectionEnabled) {
+              throw new CheckoutPolicyError("Collection is not available from this shop.");
+            }
+          } else if (shippingMethod === "SELLER_ARRANGED") {
+            if (!shop.deliveryEnabled) {
+              throw new CheckoutPolicyError("Delivery is not available from this shop.");
+            }
+          } else if (shippingMethod === "PLATFORM_COURIER") {
+            if (
+              !shop.deliveryEnabled ||
+              !shop.province ||
+              !input.deliveryProvince ||
+              !input.deliveryAddress
+            ) {
+              throw new CheckoutPolicyError(
+                "A valid delivery address is required for courier shipping.",
+              );
+            }
+            const rateChoice = parseShippingRateKey(input.shippingRateKey);
+            if (!rateChoice) {
+              throw new CheckoutPolicyError("Select a valid courier option.");
+            }
+            const rate = getSpecificRate(
+              {
+                originProvince: shop.province,
+                originCity: shop.city ?? undefined,
+                destinationProvince: input.deliveryProvince,
+                destinationCity: input.deliveryCity,
+                itemCount,
+              },
+              rateChoice.carrier,
+              rateChoice.service,
+            );
+            if (!rate) {
+              throw new CheckoutPolicyError("The selected courier option is not available.");
+            }
+            shippingCostCents = rate.priceCents;
+            courierName = `${rate.carrier} — ${rate.service}`;
+          } else {
+            throw new CheckoutPolicyError("Invalid fulfilment method.");
+          }
+
+          const requestedPaymentMethod: string = input.paymentMethod ?? "PAYFAST";
+          if (requestedPaymentMethod !== "PAYFAST" && requestedPaymentMethod !== "COD") {
+            throw new CheckoutPolicyError("Invalid payment method.");
+          }
+          if (requestedPaymentMethod === "COD" && !shop.codEnabled) {
+            throw new CheckoutPolicyError("Cash on delivery is not available from this shop.");
+          }
+
+          const totalCents = merchandiseTotalCents + shippingCostCents;
+          if (
+            !Number.isSafeInteger(totalCents) ||
+            totalCents < 0 ||
+            totalCents > MAX_DATABASE_INT
+          ) {
+            throw new CheckoutPolicyError("Order total is invalid.");
+          }
+
+          const stockQuantities = aggregateStockQuantities(verifiedItems);
+          for (const [variantId, quantity] of [...stockQuantities].sort(([a], [b]) =>
+            a.localeCompare(b),
+          )) {
+            const stockUpdate = await tx.productVariant.updateMany({
+              where: {
+                id: variantId,
+                isActive: true,
+                stock: { gte: quantity },
+                product: {
+                  is: {
+                    shopId: shop.id,
+                    isActive: true,
+                  },
+                },
+              },
+              data: {
+                stock: { decrement: quantity },
+              },
+            });
+            if (stockUpdate.count !== 1) {
+              const productName =
+                variantMap.get(variantId)?.product.name ?? "An item";
+              throw new CheckoutPolicyError(
+                `"${productName}" does not have enough stock for this order.`,
+              );
+            }
+          }
+
+          const authoritativeMessage = [
+            `Order ${orderNumber}`,
+            ...verifiedItems.map(
+              (item) =>
+                `${item.quantity} × ${item.productName} (${item.orderType}, ${item.option1Value}${item.option2Value ? ` / ${item.option2Value}` : ""}) — R${(item.priceInCents / 100).toFixed(2)} each`,
+            ),
+            `Total: R${(totalCents / 100).toFixed(2)}`,
+          ].join("\n");
+
+          const order = await tx.order.create({
+            data: {
+              orderNumber,
+              shopId: shop.id,
+              buyerClerkId: input.buyerClerkId,
+              buyerName: input.buyerName,
+              buyerPhone: input.buyerPhone,
+              buyerNote: input.buyerNote,
+              deliveryAddress: input.deliveryAddress,
+              deliveryCity: input.deliveryCity,
+              deliveryProvince: input.deliveryProvince,
+              deliveryPostalCode: input.deliveryPostalCode,
+              totalCents,
+              itemCount,
+              whatsappMessage: authoritativeMessage,
+              marketingConsent: input.marketingConsent ?? false,
+              shippingMethod,
+              shippingCostCents,
+              courierName,
+              paymentMethod: requestedPaymentMethod,
+              items: {
+                create: verifiedItems.map((item) => ({
+                  productId: item.productId,
+                  variantId: item.variantId,
+                  productName: item.productName,
+                  option1Label: item.option1Label,
+                  option1Value: item.option1Value,
+                  option2Label: item.option2Label,
+                  option2Value: item.option2Value,
+                  priceInCents: item.priceInCents,
+                  quantity: item.quantity,
+                })),
+              },
+            },
+            include: { items: true },
+          });
+
+          return {
+            order,
+            productIds: [...new Set(verifiedItems.map((item) => item.productId))],
+          };
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+          maxWait: 5_000,
+          timeout: 10_000,
+        },
+      );
+
+      // This optional sync must not turn a committed checkout into an error.
+      for (const productId of transactionResult.productIds) {
+        try {
+          await syncProductRestockAlerts(productId);
+        } catch (error) {
+          console.error("[restock-alerts] Failed to sync after checkout", productId, error);
+        }
+      }
+
+      return { success: true, order: transactionResult.order };
     } catch (error) {
-      console.error("[restock-alerts] Failed to sync after checkout", productId, error);
+      if (error instanceof CheckoutPolicyError) {
+        return { success: false, error: error.message };
+      }
+      lastError = error;
+      if (
+        attempt < ORDER_TRANSACTION_ATTEMPTS - 1 &&
+        isRetryableOrderTransactionError(error)
+      ) {
+        continue;
+      }
+      throw error;
     }
   }
 
-  return { success: true, order };
+  throw lastError;
 }
 
 // ── List Orders ─────────────────────────────────────────────

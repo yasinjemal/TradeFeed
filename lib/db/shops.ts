@@ -118,6 +118,12 @@ export async function getShopBySlug(slug: string): Promise<ShopResult | null> {
 export async function updateShopSettings(
   shopId: string,
   input: ShopSettingsInput,
+  locationUpdate?: {
+    changed: boolean;
+    provider: "geoapify" | "device" | "manual" | null;
+    geocodedAt?: Date | null;
+    publishedAt: Date | null;
+  },
 ): Promise<ShopResult> {
   return db.shop.update({
     where: { id: shopId },
@@ -144,9 +150,19 @@ export async function updateShopSettings(
       ...(input.address !== undefined && { address: input.address || null }),
       ...(input.city !== undefined && { city: input.city || null }),
       ...(input.province !== undefined && { province: input.province || null }),
+      ...(input.postalCode !== undefined && {
+        postalCode: input.postalCode || null,
+      }),
       ...(input.latitude !== undefined && { latitude: input.latitude ?? null }),
       ...(input.longitude !== undefined && {
         longitude: input.longitude ?? null,
+      }),
+      ...(locationUpdate?.changed && {
+        locationProvider: locationUpdate.provider,
+        ...(locationUpdate.geocodedAt !== undefined && {
+          locationGeocodedAt: locationUpdate.geocodedAt,
+        }),
+        locationPublishedAt: locationUpdate.publishedAt,
       }),
       ...(input.businessHours !== undefined && {
         businessHours: input.businessHours || null,

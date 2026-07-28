@@ -12,9 +12,16 @@ import { GlobalBottomNav } from "@/components/ui/global-bottom-nav";
 import { AppToaster } from "@/components/ui/app-toaster";
 import { generateSiteJsonLd } from "@/lib/seo/json-ld";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
+import { env } from "@/lib/env";
+import { ConsentManagedAnalytics } from "@/components/analytics/consent-managed-analytics";
 import "./globals.css";
+
+const GOOGLE_ANALYTICS_ID =
+  env.NEXT_PUBLIC_GA_MEASUREMENT_REVIEWED === "true"
+    ? env.NEXT_PUBLIC_GA_ID
+    : undefined;
+const GOOGLE_ANALYTICS_COOKIE_ID =
+  env.NEXT_PUBLIC_GA_ID ?? "G-DISABLED";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -106,15 +113,13 @@ export default async function RootLayout({
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="apple-mobile-web-app-title" content="TradeFeed" />
-          {/* Google Analytics 4 — in <head> for Google Merchant Center verification */}
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || "G-TL499XE6KR"}`}
-            strategy="afterInteractive"
+          {/* Deny analytics by default before any measurement vendor can load. */}
+          <script
             nonce={nonce}
+            dangerouslySetInnerHTML={{
+              __html: `window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};window[${JSON.stringify(`ga-disable-${GOOGLE_ANALYTICS_COOKIE_ID}`)}]=true;window.gtag("consent","default",{analytics_storage:"denied",ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",wait_for_update:500});`,
+            }}
           />
-          <Script id="ga4-init" strategy="afterInteractive" nonce={nonce}>
-            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${process.env.NEXT_PUBLIC_GA_ID || "G-TL499XE6KR"}');`}
-          </Script>
         </head>
         <body>
           <a
@@ -137,15 +142,17 @@ export default async function RootLayout({
               <GlobalBottomNav />
               <FloatingWhatsApp />
               <AppToaster />
-              <CookieConsent />
+              <CookieConsent googleAnalyticsId={GOOGLE_ANALYTICS_COOKIE_ID} />
             </NextIntlClientProvider>
           </ThemeProvider>
           {/* Register Service Worker for PWA */}
           <Script id="sw-register" strategy="afterInteractive" nonce={nonce}>
             {`if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`}
           </Script>
-          <SpeedInsights />
-          <Analytics />
+          <ConsentManagedAnalytics
+            googleAnalyticsId={GOOGLE_ANALYTICS_ID}
+            nonce={nonce}
+          />
         </body>
       </html>
     </ClerkProvider>

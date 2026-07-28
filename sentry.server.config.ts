@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { sanitizeSentryEvent } from "@/lib/telemetry-privacy";
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -8,4 +9,7 @@ Sentry.init({
 
   // Only send errors when DSN is configured
   enabled: !!(process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN),
+  sendDefaultPii: false,
+  beforeSend: (event) => sanitizeSentryEvent(event),
+  beforeSendTransaction: (event) => sanitizeSentryEvent(event),
 });

@@ -16,7 +16,7 @@ import { TfReviewForm } from "@/components/tf/storefront/tf-review-form";
 import type { SellerTrustStats } from "@/lib/trust/seller-stats";
 import type { BulkDiscountTier } from "@/lib/cart/pricing";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
-import { TfGallery } from "./tf-gallery";
+import { TfGallery, type TfGalleryVideo } from "./tf-gallery";
 import { TfOrderPanel, type TfVariant } from "./tf-order-panel";
 import { TfProductFavourite } from "./tf-product-favourite";
 import { TfFulfillmentPromise } from "@/components/tf/fulfillment-promise";
@@ -65,6 +65,8 @@ export interface TfProductPageProps {
     categoryName: string | null;
     categorySlug: string | null;
     images: { id: string; url: string; altText: string | null }[];
+    /** Optional showcase video — rendered as the second gallery slide */
+    video?: TfGalleryVideo | null;
     variants: TfVariant[];
     option1Label: string;
     option2Label: string;
@@ -184,7 +186,7 @@ export function TfProductPage({
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.08fr_.92fr] lg:gap-14 xl:gap-16">
         {/* Gallery — sticky offset accounts for catalog header (~64px) */}
         <TfReveal className="lg:sticky lg:top-[72px] lg:self-start">
-          <TfGallery images={product.images} productName={product.name} soldOut={totalStock === 0} />
+          <TfGallery images={product.images} video={product.video} productName={product.name} soldOut={totalStock === 0} />
         </TfReveal>
 
         {/* Info + order */}

@@ -29,6 +29,7 @@ export const checkoutItemSchema = z.object({
   option2Value: z.string().trim().max(100).nullable(),
   priceInCents: z.number().int().min(0),
   quantity: z.number().int().min(1, "Quantity must be at least 1").max(1000, "Quantity too large"),
+  orderType: z.enum(["wholesale", "retail"]).default("wholesale"),
 });
 
 export const checkoutSchema = z.object({
@@ -77,6 +78,11 @@ export const checkoutSchema = z.object({
     .optional()
     .or(z.literal("")),
   marketingConsent: z.boolean().optional().default(false),
+  shippingMethod: z
+    .enum(["SELLER_ARRANGED", "COLLECTION", "PLATFORM_COURIER"])
+    .optional(),
+  shippingRateKey: z.string().trim().max(200, "Invalid shipping option").optional(),
+  paymentMethod: z.enum(["PAYFAST", "COD"]).optional().default("PAYFAST"),
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

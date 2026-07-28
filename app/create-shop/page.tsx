@@ -51,22 +51,26 @@ export default async function CreateShopPage() {
   // If the user is signed in and already has a shop, redirect to dashboard
   const { userId: clerkId } = await auth();
 
-  if (clerkId) {
-    const user = await db.user.findUnique({
-      where: { clerkId },
-      select: {
-        shops: {
-          select: { shop: { select: { slug: true } } },
-          take: 1,
-          orderBy: { createdAt: "asc" },
-        },
-      },
-    });
+  // The form action requires authentication. Do not let anonymous visitors
+  // spend time completing a form that can only fail on submission.
+  if (!clerkId) {
+    redirect("/sign-up?redirect_url=/create-shop");
+  }
 
-    const existingSlug = user?.shops[0]?.shop.slug;
-    if (existingSlug) {
-      redirect(`/dashboard/${existingSlug}`);
-    }
+  const user = await db.user.findUnique({
+    where: { clerkId },
+    select: {
+      shops: {
+        select: { shop: { select: { slug: true } } },
+        take: 1,
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+
+  const existingSlug = user?.shops[0]?.shop.slug;
+  if (existingSlug) {
+    redirect(`/dashboard/${existingSlug}`);
   }
   const t = await getTranslations("onboarding");
   const { sellers, totalCount } = await getCreateShopSocialProof();
@@ -101,7 +105,7 @@ export default async function CreateShopPage() {
   return (
     <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col lg:flex-row">
       {/* ── Left Panel — Branding & Trust ──────────────── */}
-      <div className="relative lg:w-[48%] flex flex-col justify-between p-8 lg:p-12 xl:p-16 overflow-hidden">
+      <div className="relative hidden lg:w-[48%] lg:flex flex-col justify-between p-8 lg:p-12 xl:p-16 overflow-hidden">
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-950/40 via-stone-950 to-stone-950" />
         <div className="pointer-events-none absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-500/8 blur-[120px]" />
@@ -184,7 +188,7 @@ export default async function CreateShopPage() {
       </div>
 
       {/* ── Right Panel — Form ─────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12 relative">
+      <div className="relative flex min-h-screen flex-1 items-center justify-center p-6 sm:p-8 lg:min-h-0 lg:p-12">
         {/* Subtle grid pattern */}
         <div className="pointer-events-none absolute inset-0 bg-stone-900/50" />
         <div

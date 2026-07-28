@@ -23,6 +23,7 @@ import { computeProductQuality } from "@/lib/intelligence/product-quality";
 import type { ProductRankingMetrics } from "@/lib/intelligence/product-quality";
 import { computeSellerHealth } from "@/lib/intelligence/seller-health";
 import { getSellerHealthMetrics } from "@/lib/db/shops";
+import { queueCronHeartbeat } from "@/lib/monitoring/better-stack";
 import { calculateTierPoints } from "@/lib/reputation/tiers";
 import type { TierMetrics } from "@/lib/reputation/tiers";
 
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (products.length === 0) {
+      queueCronHeartbeat("ranking-computation", "success");
       return NextResponse.json({ message: "No active products", productsScored: 0, shopsScored: 0 });
     }
 
@@ -236,6 +238,7 @@ export async function GET(request: NextRequest) {
     });
 
     console.log(`[ranking] Scored ${productsUpdated} products, ${shopsUpdated} shops. Purged ${purged.count} old audit rows.`);
+    queueCronHeartbeat("ranking-computation", "success");
 
     return NextResponse.json({
       success: true,
@@ -246,6 +249,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("[ranking] Cron failed:", error);
+    queueCronHeartbeat("ranking-computation", "failure");
     return NextResponse.json(
       { error: "Ranking computation failed" },
       { status: 500 }

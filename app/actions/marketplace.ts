@@ -9,6 +9,7 @@
 
 "use server";
 
+import { z } from "zod";
 import {
   trackPromotedClick,
   trackPromotedImpressions,
@@ -18,8 +19,36 @@ import {
   type MarketplaceProduct,
   type MarketplaceSortBy,
 } from "@/lib/db/marketplace";
-import { trackEvent } from "@/lib/db/analytics";
+import {
+  getAnalyticsRequestContext,
+  trackRequestEvent,
+} from "@/lib/analytics/server";
+import {
+  checkRateLimit,
+  getActionClientIp,
+} from "@/lib/rate-limit-upstash";
 import { reportError } from "@/lib/telemetry";
+
+const cuidSchema = z.string().cuid();
+const promotedClickSchema = z.object({
+  promotedListingId: cuidSchema,
+  shopId: cuidSchema,
+  productId: cuidSchema,
+});
+const marketplaceClickSchema = z.object({
+  shopId: cuidSchema,
+  productId: cuidSchema,
+});
+const MAX_PROMOTED_IMPRESSIONS_PER_BATCH = 24;
+const promotedImpressionIdsSchema = z
+  .array(cuidSchema)
+  .max(MAX_PROMOTED_IMPRESSIONS_PER_BATCH)
+  .transform((ids) => [...new Set(ids)]);
+
+async function canTrackAnonymousAnalytics(): Promise<boolean> {
+  const ip = await getActionClientIp();
+  return (await checkRateLimit("analytics", ip)).allowed;
+}
 
 // ── Infinite Scroll — Load More Products ────────────────────
 
@@ -76,13 +105,26 @@ export async function trackPromotedClickAction(
   shopId: string,
   productId: string
 ) {
+  const parsed = promotedClickSchema.safeParse({
+    promotedListingId,
+    shopId,
+    productId,
+  });
+  if (!parsed.success) return;
+
   try {
-    await trackPromotedClick(promotedListingId, shopId, productId);
+    if (!(await canTrackAnonymousAnalytics())) return;
+    const context = await getAnalyticsRequestContext();
+    if (!context) return;
+    await trackPromotedClick(
+      parsed.data.promotedListingId,
+      parsed.data.shopId,
+      parsed.data.productId,
+      context,
+    );
   } catch (error) {
     await reportError("trackPromotedClickAction", error, {
-      promotedListingId,
-      shopId,
-      productId,
+      ...parsed.data,
     });
   }
 }
@@ -94,11 +136,18 @@ export async function trackPromotedClickAction(
 export async function trackPromotedImpressionsAction(
   promotedListingIds: string[]
 ) {
+  const parsed = promotedImpressionIdsSchema.safeParse(promotedListingIds);
+  if (!parsed.success || parsed.data.length === 0) return;
+
   try {
-    await trackPromotedImpressions(promotedListingIds);
+    if (!(await canTrackAnonymousAnalytics())) return;
+    // Do not increment billable-looking promotion metrics for obvious bots.
+    const context = await getAnalyticsRequestContext();
+    if (!context) return;
+    await trackPromotedImpressions(parsed.data, context);
   } catch (error) {
     await reportError("trackPromotedImpressionsAction", error, {
-      promotedListingCount: promotedListingIds.length,
+      promotedListingCount: parsed.data.length,
     });
   }
 }
@@ -108,7 +157,8 @@ export async function trackPromotedImpressionsAction(
  */
 export async function trackMarketplaceViewAction() {
   try {
-    await trackEvent({
+    if (!(await canTrackAnonymousAnalytics())) return;
+    await trackRequestEvent({
       type: "MARKETPLACE_VIEW",
       shopId: "platform", // Platform-level event, not shop-specific
     });
@@ -124,13 +174,17 @@ export async function trackMarketplaceClickAction(
   shopId: string,
   productId: string
 ) {
+  const parsed = marketplaceClickSchema.safeParse({ shopId, productId });
+  if (!parsed.success) return;
+
   try {
-    await trackEvent({
+    if (!(await canTrackAnonymousAnalytics())) return;
+    await trackRequestEvent({
       type: "MARKETPLACE_CLICK",
-      shopId,
-      productId,
+      shopId: parsed.data.shopId,
+      productId: parsed.data.productId,
     });
   } catch (error) {
-    await reportError("trackMarketplaceClickAction", error, { shopId, productId });
+    await reportError("trackMarketplaceClickAction", error, parsed.data);
   }
 }

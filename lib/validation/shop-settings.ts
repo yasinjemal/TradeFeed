@@ -3,6 +3,7 @@
 // ============================================================
 
 import { z } from "zod";
+import { normalizeCityName } from "@/lib/location/south-africa";
 
 /**
  * SA Province enum for dropdown.
@@ -79,6 +80,23 @@ export const DAY_LABELS: Record<DayKey, string> = {
  */
 export type BusinessHours = Partial<Record<DayKey, string>>;
 
+function optionalCoordinate(
+  minimum: number,
+  maximum: number,
+  message: string,
+) {
+  return z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim() === "" ? null : value,
+    z.coerce
+      .number()
+      .min(minimum, message)
+      .max(maximum, message)
+      .nullable()
+      .optional(),
+  );
+}
+
 /**
  * Schema for updating a shop's profile settings.
  * All fields optional — partial update.
@@ -149,27 +167,29 @@ export const shopSettingsSchema = z.object({
     .trim()
     .max(100, "City name too long")
     .optional()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .transform((value) => (value ? normalizeCityName(value) : value)),
 
-  province: z
+  province: z.union([z.enum(SA_PROVINCES), z.literal("")]).optional(),
+
+  postalCode: z
     .string()
     .trim()
+    .regex(/^\d{4}$/, "Enter a 4-digit South African postal code")
     .optional()
     .or(z.literal("")),
 
-  latitude: z.coerce
-    .number()
-    .min(-90)
-    .max(90)
-    .optional()
-    .or(z.literal("").transform(() => undefined)),
+  latitude: optionalCoordinate(
+    -90,
+    90,
+    "Latitude must be between -90 and 90",
+  ),
 
-  longitude: z.coerce
-    .number()
-    .min(-180)
-    .max(180)
-    .optional()
-    .or(z.literal("").transform(() => undefined)),
+  longitude: optionalCoordinate(
+    -180,
+    180,
+    "Longitude must be between -180 and 180",
+  ),
 
   // Business hours (JSON string)
   businessHours: z
@@ -212,6 +232,18 @@ export const shopSettingsSchema = z.object({
     .max(300)
     .optional()
     .or(z.literal("")),
+}).superRefine((value, context) => {
+  const hasLatitude = typeof value.latitude === "number";
+  const hasLongitude = typeof value.longitude === "number";
+
+  if (hasLatitude === hasLongitude) return;
+
+  const missingField = hasLatitude ? "longitude" : "latitude";
+  context.addIssue({
+    code: "custom",
+    path: [missingField],
+    message: "Enter both latitude and longitude, or clear both map-pin fields",
+  });
 });
 
 export type ShopSettingsInput = z.infer<typeof shopSettingsSchema>;

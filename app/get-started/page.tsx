@@ -13,6 +13,7 @@ import { redirect } from "next/navigation";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { GetStartedFlow } from "@/components/shop/get-started-flow";
+import { recordSellerMilestone } from "@/lib/analytics/seller-lifecycle";
 
 export const metadata = {
   title: "Get Started — List Your First Product | TradeFeed",
@@ -49,8 +50,10 @@ export default async function GetStartedPage() {
 
   // Track that user started onboarding
   if (user) {
-    await db.onboardingEvent.create({
-      data: { userId: user.id, step: "started", metadata: { source: "get-started" } },
+    await recordSellerMilestone({
+      userId: user.id,
+      step: "started",
+      source: "get-started",
     }).catch(() => {});
   }
 

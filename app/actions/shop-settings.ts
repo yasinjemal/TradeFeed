@@ -10,12 +10,26 @@ import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { requireShopAccess, hasPermission } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { THEME_PRESETS, THEME_FONTS } from "@/lib/config/themes";
+import { z } from "zod";
 
 type ActionResult = {
   success: boolean;
   error?: string;
   fieldErrors?: Record<string, string[]>;
 };
+
+const locationSourceSchema = z.enum(["geoapify", "device", "manual"]);
+
+function nullableText(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function nullableCoordinate(value: unknown): number | null {
+  const text = nullableText(value);
+  if (text === null) return null;
+  const number = Number(text);
+  return Number.isFinite(number) ? number : null;
+}
 
 /**
  * Update shop settings/profile.
@@ -57,6 +71,7 @@ export async function updateShopSettingsAction(
       address: formData.get("address") as string,
       city: formData.get("city") as string,
       province: formData.get("province") as string,
+      postalCode: formData.get("postalCode") as string,
       latitude: formData.get("latitude") as string,
       longitude: formData.get("longitude") as string,
       businessHours: formData.get("businessHours") as string,
@@ -81,8 +96,78 @@ export async function updateShopSettingsAction(
       return { success: false, error: "Please fix the errors below.", fieldErrors };
     }
 
+    const locationChanged =
+      nullableText(rawInput.address) !== shop.address ||
+      nullableText(rawInput.city) !== shop.city ||
+      nullableText(rawInput.province) !== shop.province ||
+      nullableText(rawInput.postalCode) !== shop.postalCode ||
+      nullableCoordinate(rawInput.latitude) !== shop.latitude ||
+      nullableCoordinate(rawInput.longitude) !== shop.longitude;
+    const hasPublicLocation = Boolean(
+      parsed.data.address ||
+        parsed.data.city ||
+        parsed.data.province ||
+        typeof parsed.data.latitude === "number" ||
+        typeof parsed.data.longitude === "number",
+    );
+
+    const requiresPublicLocationConfirmation =
+      hasPublicLocation && (locationChanged || !shop.locationPublishedAt);
+
+    if (
+      requiresPublicLocationConfirmation &&
+      formData.get("publishLocationConfirmed") !== "yes"
+    ) {
+      return {
+        success: false,
+        error: "Confirm that you want to publish this location.",
+        fieldErrors: {
+          publishLocationConfirmed: [
+            "Confirm that this business location and map pin may be shown publicly.",
+          ],
+        },
+      };
+    }
+
+    const locationSource = locationSourceSchema.safeParse(
+      formData.get("locationSource"),
+    );
+    const existingLocationSource = locationSourceSchema.safeParse(
+      shop.locationProvider,
+    );
+    const updateInput = locationChanged
+      ? parsed.data
+      : {
+          ...parsed.data,
+          address: undefined,
+          city: undefined,
+          province: undefined,
+          postalCode: undefined,
+          latitude: undefined,
+          longitude: undefined,
+        };
+
     // 4. Update
-    await updateShopSettings(shop.id, parsed.data);
+    await updateShopSettings(shop.id, updateInput, {
+      changed: locationChanged || requiresPublicLocationConfirmation,
+      provider:
+        hasPublicLocation
+          ? locationChanged
+            ? locationSource.success
+              ? locationSource.data
+              : "manual"
+            : existingLocationSource.success
+              ? existingLocationSource.data
+              : "manual"
+          : null,
+      geocodedAt:
+        locationChanged && locationSource.success
+          ? locationSource.data === "geoapify"
+            ? new Date()
+            : null
+          : undefined,
+      publishedAt: hasPublicLocation ? new Date() : null,
+    });
 
     // 5. Revalidate pages
     revalidatePath(`/dashboard/${shopSlug}`);

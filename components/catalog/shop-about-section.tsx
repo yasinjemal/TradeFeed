@@ -22,6 +22,7 @@ interface ShopAboutSectionProps {
     province: string | null;
     latitude: number | null;
     longitude: number | null;
+    locationProvider: string | null;
     businessHours: string | null;
     instagram: string | null;
     facebook: string | null;
@@ -91,6 +92,7 @@ export function ShopAboutSection({ shop }: ShopAboutSectionProps) {
             province={shop.province}
             lat={shop.latitude}
             lng={shop.longitude}
+            locationProvider={shop.locationProvider}
           />
         )}
       </div>
@@ -302,12 +304,14 @@ function LocationCard({
   province,
   lat,
   lng,
+  locationProvider,
 }: {
   address: string | null;
   city: string | null;
   province: string | null;
   lat: number | null;
   lng: number | null;
+  locationProvider: string | null;
 }) {
   const locationText = [address, city, province]
     .filter(Boolean)
@@ -370,6 +374,28 @@ function LocationCard({
             />
           </svg>
         </a>
+      )}
+      {locationProvider === "geoapify" && (
+        <p className="mt-2 text-[10px] text-slate-400">
+          Location data by{" "}
+          <a
+            href="https://www.geoapify.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Geoapify
+          </a>
+          {" · "}
+          <a
+            href="https://www.openstreetmap.org/copyright"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            © OpenStreetMap contributors
+          </a>
+        </p>
       )}
     </div>
   );

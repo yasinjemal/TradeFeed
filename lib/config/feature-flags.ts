@@ -48,4 +48,8 @@ export const FEATURE_FLAGS = {
    * dragging half-finished seller surfaces along with it.
    */
   UI_REDESIGN_DASHBOARD: process.env.NEXT_PUBLIC_FF_UI_REDESIGN_DASHBOARD === "true",
+
+  // ── Product Videos (2026) ────────────────────────────────────
+  /** Product videos: YouTube/direct links free for all plans, hosted uploads Starter+ */
+  PRODUCT_VIDEO: process.env.NEXT_PUBLIC_FF_PRODUCT_VIDEO === "true",
 } as const;

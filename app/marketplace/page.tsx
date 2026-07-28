@@ -67,8 +67,8 @@ export async function generateMetadata({
     : "Buy Online South Africa — Wholesale & Retail Products | TradeFeed Marketplace";
 
   const description = categoryName
-    ? `Shop ${categoryName.toLowerCase()} from verified South African sellers on TradeFeed. Wholesale & retail prices. Free delivery options. Order via WhatsApp. Browse ${categoryName.toLowerCase()} from Johannesburg, Durban, Cape Town & more.`
-    : "Browse thousands of products from verified South African sellers. Wholesale & retail prices across all categories. Compare prices, order via WhatsApp. Sellers in all 9 provinces.";
+    ? `Shop ${categoryName.toLowerCase()} from South African sellers on TradeFeed. Browse wholesale and retail prices, compare options, and enquire or order via WhatsApp. Delivery and collection options vary by seller.`
+    : "Browse wholesale and retail products from South African sellers. Compare prices, inspect seller details, and enquire or order directly via WhatsApp.";
 
   // Build OG image URL
   const ogUrl = new URL("/api/og", APP_URL);
@@ -80,7 +80,9 @@ export async function generateMetadata({
     : `${APP_URL}/marketplace`;
 
   return {
-    title,
+    // This title already contains the TradeFeed brand; mark it absolute so
+    // the root metadata template does not append the brand a second time.
+    title: { absolute: title },
     description,
     alternates: { canonical: canonicalUrl },
     openGraph: {

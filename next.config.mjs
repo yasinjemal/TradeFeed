@@ -31,6 +31,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.ufs.sh",
       },
+      {
+        // YouTube thumbnails for product-video lite embeds
+        protocol: "https",
+        hostname: "i.ytimg.com",
+      },
     ],
   },
 };

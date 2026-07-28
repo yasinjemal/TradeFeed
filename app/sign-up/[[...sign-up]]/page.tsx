@@ -7,7 +7,7 @@
 // so the referral code survives the Clerk auth redirect.
 // ============================================================
 
-import { SignUp } from "@clerk/nextjs";
+import { ClerkLoaded, ClerkLoading, SignUp } from "@clerk/nextjs";
 import Image from "next/image";
 import { cookies } from "next/headers";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
@@ -44,7 +44,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
     <main className="flex min-h-screen flex-col bg-tf-surface lg:flex-row">
       <TfFonts />
       {/* ── Left panel — Value proposition ── */}
-      <div className="relative flex flex-col justify-between overflow-hidden bg-[#071a0f] px-8 py-10 text-white lg:w-1/2 lg:px-16 lg:py-16">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-[#071a0f] px-8 py-10 text-white lg:flex lg:w-1/2 lg:px-16 lg:py-16">
         {/* Background photo */}
         <Image
           src="/img/signup_panel.png"
@@ -131,31 +131,32 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
       </div>
 
       {/* ── Right panel — Clerk Sign Up form ── */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-tf-surface px-6 py-10 lg:px-12">
+      <div className="flex min-h-screen flex-1 flex-col items-center justify-center bg-tf-surface px-6 py-6 sm:py-10 lg:min-h-0 lg:px-12">
         {/* Mobile-only logo (hidden on desktop since left panel has it) */}
         <div className="mb-6 lg:hidden">
           <TradeFeedLogo size="md" variant="dark" />
         </div>
 
         <div className="w-full max-w-md">
-          <div className="mb-6 text-center">
-            <h2 className="font-tf-display text-2xl font-semibold tracking-tight text-tf-ink">
-              Create your account
-            </h2>
-            <p className="mt-2 text-sm text-tf-stone-600">
-              Get your first AI listing live in under 5 minutes
-            </p>
-          </div>
+          <ClerkLoading>
+            <div className="w-full rounded-xl border border-stone-200 bg-white p-8 text-center text-sm text-stone-500 shadow-sm">
+              <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-emerald-600" />
+              Loading secure registration…
+            </div>
+          </ClerkLoading>
 
-          <SignUp
-            appearance={{
-              elements: {
-                rootBox: "mx-auto w-full",
-                cardBox: "shadow-lg rounded-xl border-0 w-full",
-                card: "shadow-none",
-              },
-            }}
-          />
+          <ClerkLoaded>
+            <SignUp
+              fallbackRedirectUrl="/create-shop"
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto w-full",
+                  cardBox: "shadow-lg rounded-xl border-0 w-full",
+                  card: "shadow-none",
+                },
+              }}
+            />
+          </ClerkLoaded>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
             By signing up, you agree to our{" "}

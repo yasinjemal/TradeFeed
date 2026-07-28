@@ -4,6 +4,7 @@ import * as React from "react";
 import { Check, Copy, ExternalLink } from "lucide-react";
 
 import { TfButton } from "@/components/tf/button";
+import { trackCatalogSharedAction } from "@/app/actions/onboarding";
 
 // ============================================================
 // TfShareCatalogue — the seller's #1 job: get the link out.
@@ -13,14 +14,20 @@ import { TfButton } from "@/components/tf/button";
 interface TfShareCatalogueProps {
   catalogUrl: string;
   shopName: string;
+  shopSlug: string;
 }
 
-export function TfShareCatalogue({ catalogUrl, shopName }: TfShareCatalogueProps) {
+export function TfShareCatalogue({
+  catalogUrl,
+  shopName,
+  shopSlug,
+}: TfShareCatalogueProps) {
   const [copied, setCopied] = React.useState(false);
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(catalogUrl);
+      void trackCatalogSharedAction(shopSlug, "dashboard");
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -40,7 +47,12 @@ export function TfShareCatalogue({ catalogUrl, shopName }: TfShareCatalogueProps
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <TfButton variant="whatsapp" size="sm" asChild>
-          <a href={waShare} target="_blank" rel="noopener noreferrer">
+          <a
+            href={waShare}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => void trackCatalogSharedAction(shopSlug, "dashboard")}
+          >
             Share on WhatsApp
           </a>
         </TfButton>

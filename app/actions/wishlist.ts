@@ -15,19 +15,10 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { headers } from "next/headers";
-import { createHash } from "crypto";
-
-/**
- * Generate a stable visitor ID from request headers.
- * Uses a hash of IP + user-agent for anonymous visitors.
- */
-async function getVisitorId(): Promise<string> {
-  const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const ua = hdrs.get("user-agent") ?? "unknown";
-  return createHash("sha256").update(`${ip}:${ua}`).digest("hex").slice(0, 16);
-}
+import {
+  getBuyerFeatureId,
+  getOrCreateBuyerFeatureId,
+} from "@/lib/buyer/feature-identity";
 
 /**
  * Add a product to the server-side wishlist.
@@ -39,7 +30,6 @@ export async function addToWishlistAction(data: {
   imageUrl: string | null;
 }) {
   const { userId } = await auth();
-  const visitorId = userId ? null : await getVisitorId();
 
   try {
     const product = await db.product.findFirst({
@@ -66,6 +56,7 @@ export async function addToWishlistAction(data: {
         update: {},
       });
     }
+    const visitorId = userId ? null : await getOrCreateBuyerFeatureId();
     await db.wishlistItem.create({
       data: {
         productId: product.id,
@@ -95,7 +86,7 @@ export async function addToWishlistAction(data: {
  */
 export async function removeFromWishlistAction(productId: string) {
   const { userId } = await auth();
-  const visitorId = userId ? null : await getVisitorId();
+  const visitorId = userId ? null : await getBuyerFeatureId();
 
   try {
     if (userId) {
@@ -119,9 +110,13 @@ export async function removeFromWishlistAction(productId: string) {
  */
 export async function getWishlistItemsAction(shopId: string) {
   const { userId } = await auth();
-  const visitorId = userId ? null : await getVisitorId();
+  const visitorId = userId ? null : await getBuyerFeatureId();
 
   try {
+    if (!userId && !visitorId) {
+      return { success: true, productIds: [] };
+    }
+
     const items = await db.wishlistItem.findMany({
       where: {
         shopId,

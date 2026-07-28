@@ -115,35 +115,6 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
           </div>
         </section>
 
-        {/* Buyer details — as captured at checkout */}
-        {(order.buyerName || order.buyerPhone || order.buyerNote) && (
-          <section className="rounded-xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm">
-            <h2 className="font-tf-display text-sm font-semibold">Buyer details</h2>
-            <dl className="mt-3 space-y-1.5 text-sm text-tf-stone-600">
-              {order.buyerName && (
-                <div className="flex gap-2">
-                  <dt className="w-14 shrink-0 text-tf-stone-400">Name</dt>
-                  <dd>{order.buyerName}</dd>
-                </div>
-              )}
-              {order.buyerPhone && (
-                <div className="flex gap-2">
-                  <dt className="w-14 shrink-0 text-tf-stone-400">Phone</dt>
-                  <dd className="font-mono">
-                    {order.buyerPhone} <span className="text-[10px] text-tf-stone-400">(masked)</span>
-                  </dd>
-                </div>
-              )}
-              {order.buyerNote && (
-                <div className="flex gap-2">
-                  <dt className="w-14 shrink-0 text-tf-stone-400">Note</dt>
-                  <dd className="whitespace-pre-line">{order.buyerNote}</dd>
-                </div>
-              )}
-            </dl>
-          </section>
-        )}
-
         {/* Post-delivery review prompt — reviews are the trust engine */}
         {order.status === "DELIVERED" && (
           <section className="rounded-xl border border-tf-accent/30 bg-tf-accent-soft p-4">

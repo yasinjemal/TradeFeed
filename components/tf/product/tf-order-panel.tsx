@@ -15,7 +15,10 @@ import {
   type BulkDiscountTier,
   type OrderType,
 } from "@/lib/cart/pricing";
-import { trackAddToCartAction } from "@/app/actions/analytics";
+import {
+  trackAddToCartAction,
+  trackWhatsAppClickAction,
+} from "@/app/actions/analytics";
 
 // ============================================================
 // TfOrderPanel — variant selection + the order handoff.
@@ -223,7 +226,14 @@ export function TfOrderPanel({
       aria-disabled={soldOut}
       className={cn(soldOut && "pointer-events-none opacity-50")}
     >
-      <a href={soldOut ? undefined : waHref} target="_blank" rel="noopener noreferrer">
+      <a
+        href={soldOut ? undefined : waHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => {
+          if (!soldOut) void trackWhatsAppClickAction(shopId, productId);
+        }}
+      >
         <MessageCircle aria-hidden="true" />
         Order on WhatsApp
       </a>

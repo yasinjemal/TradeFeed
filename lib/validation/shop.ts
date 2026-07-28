@@ -14,6 +14,7 @@
 
 import { z } from "zod";
 import { SA_PROVINCES } from "./shop-settings";
+import { normalizeCityName } from "@/lib/location/south-africa";
 
 /**
  * Normalize a South African phone number to +27 format.
@@ -85,7 +86,8 @@ export const shopCreateSchema = z.object({
     .string()
     .trim()
     .min(2, "Enter your city or town")
-    .max(100, "City name too long"),
+    .max(100, "City name too long")
+    .transform(normalizeCityName),
 
   province: z.enum(SA_PROVINCES, {
     message: "Select your province",

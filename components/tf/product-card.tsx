@@ -3,9 +3,11 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BadgeCheck, ImageOff } from "lucide-react";
+import { BadgeCheck, ImageOff, Play } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useInView } from "@/lib/hooks/use-in-view";
+import { shouldAutoplay } from "@/lib/video/autoplay";
 import { formatZAR } from "./format";
 import { TfRatingChip } from "./rating-chip";
 
@@ -41,6 +43,10 @@ export interface TfProductCardProps extends React.ComponentProps<"article"> {
   whatsappNumber?: string;
   /** Product listed within the last 7 days */
   isNew?: boolean;
+  /** Showcase video URL — upload/direct autoplay muted in view */
+  videoPreviewUrl?: string | null;
+  /** youtube shows a play badge only (no iframe in grids) */
+  videoKind?: "upload" | "direct" | "youtube" | null;
 }
 
 function TfProductCard({
@@ -59,6 +65,8 @@ function TfProductCard({
   promoted = false,
   whatsappNumber,
   isNew = false,
+  videoPreviewUrl,
+  videoKind,
   className,
   ...props
 }: TfProductCardProps) {
@@ -70,6 +78,45 @@ function TfProductCard({
   const waHref = whatsappNumber
     ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi! I'm interested in "${title}" — ${formatZAR(price)}`)}`
     : null;
+
+  // ── Smart autoplay preview (upload/direct only) ──────────
+  // Data discipline for SA mobile: the <video> has no src until the
+  // card is actually visible, and we drop the src again once it has
+  // been off-screen a while (frees decoders in long grids). Save-Data
+  // and reduced-motion opt out entirely — the still image stays.
+  const playsInline = videoKind === "upload" || videoKind === "direct";
+  const hasVideo = Boolean(videoPreviewUrl) && videoKind != null;
+  const { ref: mediaRef, inView } = useInView<HTMLDivElement>({ threshold: 0.5 });
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [videoSrc, setVideoSrc] = React.useState<string | null>(null);
+  const [videoReady, setVideoReady] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!playsInline || !videoPreviewUrl) return;
+    if (inView) {
+      if (!shouldAutoplay()) return;
+      setVideoSrc(videoPreviewUrl);
+      const el = videoRef.current;
+      if (el) {
+        el.muted = true;
+        el.play().catch(() => {});
+      }
+      return;
+    }
+
+    const el = videoRef.current;
+    el?.pause();
+    // Release the decoder + buffered data after it stays off-screen
+    const timer = setTimeout(() => {
+      setVideoSrc(null);
+      setVideoReady(false);
+      if (el) {
+        el.removeAttribute("src");
+        el.load();
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [inView, playsInline, videoPreviewUrl]);
 
   return (
     <article
@@ -83,8 +130,8 @@ function TfProductCard({
       )}
       {...props}
     >
-      {/* ── Image ──────────────────────────────────────── */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-tf-stone-100">
+      {/* ── Image (+ video preview) ────────────────────── */}
+      <div ref={mediaRef} className="relative aspect-[4/5] overflow-hidden bg-tf-stone-100">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -99,6 +146,40 @@ function TfProductCard({
           <div className="flex h-full items-center justify-center text-tf-stone-300">
             <ImageOff aria-hidden="true" className="size-8" />
           </div>
+        )}
+
+        {/* Muted looping preview layered over the still. The image acts
+            as the poster, and the video only fades in once it's actually
+            playing so a black decode frame never flashes. */}
+        {playsInline && videoSrc && (
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            muted
+            loop
+            playsInline
+            preload="none"
+            aria-hidden="true"
+            onPlaying={() => setVideoReady(true)}
+            className={cn(
+              "pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-500",
+              videoReady ? "opacity-100" : "opacity-0",
+            )}
+          />
+        )}
+
+        {/* Video affordance — the only signal on YouTube cards.
+            Sits under the verified tick when both are shown. */}
+        {hasVideo && (
+          <span
+            aria-hidden="true"
+            className={cn(
+              "absolute right-2.5 z-10 flex size-7 items-center justify-center rounded-full bg-tf-ink/60 backdrop-blur-sm",
+              sellerVerified ? "top-[2.4rem]" : "top-2.5",
+            )}
+          >
+            <Play className="ml-0.5 size-3.5 fill-white text-white" />
+          </span>
         )}
 
         {/* Top-left: new + sale + promoted badges */}

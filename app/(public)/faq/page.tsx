@@ -121,8 +121,8 @@ const FAQ_CATEGORIES = [
         a: "WhatsApp posts get buried in 10 minutes. With TradeFeed, your products live on a permanent, searchable, shareable catalog page. Customers can browse anytime, filter by category, sort by price, and send you organized orders with exact sizes, colours, and quantities.",
       },
       {
-        q: "Is my WhatsApp number safe?",
-        a: "Absolutely. Your WhatsApp number is only used to receive orders. When a customer taps the order button, it opens their WhatsApp with a pre-filled message. We never share your number with third parties, and it's protected by our POPIA-compliant privacy policy.",
+        q: "How is my WhatsApp number used?",
+        a: "Use a business WhatsApp number. TradeFeed places it in order links so buyers can contact you directly, which means it may be visible to buyers and automated tools. We do not sell it or use it for unrelated marketing. See our privacy policy for full details.",
       },
       {
         q: "Can buyers track their orders?",
@@ -160,7 +160,7 @@ const FAQ_CATEGORIES = [
       },
       {
         q: "What is the TradeFeed Marketplace?",
-        a: "The marketplace is a public directory where buyers from across all 9 South African provinces browse and discover products from TradeFeed sellers. Your listed products appear there automatically, giving you free exposure to new customers 24/7.",
+        a: "The marketplace is a public directory where buyers browse products from TradeFeed sellers. Eligible active listings can appear there, giving buyers another way to discover your catalogue.",
       },
       {
         q: "Can my buyers leave reviews?",

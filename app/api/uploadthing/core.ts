@@ -52,6 +52,29 @@ export const ourFileRouter = {
     }),
 
   /**
+   * Product video uploader (one showcase video per product).
+   * - 1 video per upload, max 32MB
+   * - Plan gating (Starter+) is enforced in saveProductVideoUploadAction —
+   *   the middleware has no shop context, and the save action also
+   *   verifies the CDN hostname, so an unsaved orphan file is the
+   *   worst case here.
+   */
+  productVideoUploader: f({
+    video: { maxFileSize: "32MB", maxFileCount: 1 },
+  })
+    .middleware(async () => {
+      const { userId } = await auth();
+      if (!userId) throw new Error("Unauthorized");
+      return { userId };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      const fileUrl = file.ufsUrl ?? file.url;
+      console.log("[UploadThing] Product video upload complete for user:", metadata.userId);
+      console.log("[UploadThing] File URL:", fileUrl);
+      return { url: fileUrl, key: file.key, name: file.name };
+    }),
+
+  /**
    * Shop gallery uploader (images + videos).
    * - Max 4 files per batch
    * - Max 8MB each (images + short videos)

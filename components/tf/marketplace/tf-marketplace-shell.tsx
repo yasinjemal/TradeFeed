@@ -17,6 +17,7 @@ import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
+import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { buildMarketplaceSearchParams } from "@/lib/marketplace/search-params";
 import {
   loadMoreProducts,
@@ -55,7 +56,18 @@ function isNewProduct(createdAt: Date) {
   return Date.now() - new Date(createdAt).getTime() < SEVEN_DAYS_MS;
 }
 
+const VIDEO_KIND: Record<"UPLOAD" | "YOUTUBE" | "DIRECT", "upload" | "youtube" | "direct"> = {
+  UPLOAD: "upload",
+  YOUTUBE: "youtube",
+  DIRECT: "direct",
+};
+
 function toCard(p: MarketplaceProduct) {
+  const video =
+    FEATURE_FLAGS.PRODUCT_VIDEO && p.videoUrl && p.videoSource
+      ? { videoPreviewUrl: p.videoUrl, videoKind: VIDEO_KIND[p.videoSource] }
+      : {};
+
   return {
     href: `/catalog/${p.shop.slug}/products/${p.slug ?? p.id}`,
     title: p.name,
@@ -69,6 +81,7 @@ function toCard(p: MarketplaceProduct) {
     promoted: p.promotion != null,
     whatsappNumber: p.shop.whatsappNumber,
     isNew: isNewProduct(p.createdAt),
+    ...video,
   };
 }
 

@@ -216,7 +216,7 @@ export function TfCreateShop({ sellerLabel }: TfCreateShopProps) {
                 </p>
               )}
               <p id="whatsapp-help" className="text-sm text-tf-stone-500">
-                Buyers send their orders to this number on WhatsApp. We never share it.
+                Buyers use this business number when they tap an order link on your catalogue.
               </p>
             </div>
           </div>

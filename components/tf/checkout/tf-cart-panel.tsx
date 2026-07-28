@@ -116,6 +116,21 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
       ? shippingRates.find((r) => `${r.carrier}|${r.service}` === selectedShipping) ?? null
       : null;
   const shippingCents = selectedShippingRate?.priceCents ?? 0;
+  const previewCheckoutNumber =
+    items.some((item) => item.orderType === "retail") && retailWhatsappNumber
+      ? retailWhatsappNumber
+      : whatsappNumber;
+  const checkoutUrlPreview =
+    items.length > 0
+      ? buildWhatsAppCheckoutUrl(
+          previewCheckoutNumber,
+          items,
+          null,
+          undefined,
+          shopSlug,
+          paymentMethod,
+        )
+      : undefined;
 
   // Shipping rates lookup (same API as the live panel)
   React.useEffect(() => {
@@ -221,6 +236,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
           option2Value: item.color,
           priceInCents: item.priceInCents,
           quantity: item.quantity,
+          orderType: item.orderType,
         }));
 
         const result = await checkoutAction(
@@ -241,8 +257,9 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
             : selectedShippingRate
               ? "PLATFORM_COURIER"
               : "SELLER_ARRANGED",
-          selectedShippingRate?.priceCents ?? 0,
-          selectedShippingRate?.carrier ?? undefined,
+          selectedShippingRate
+            ? `${selectedShippingRate.carrier}|${selectedShippingRate.service}`
+            : undefined,
           paymentMethod,
         );
 
@@ -781,6 +798,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                 fullWidth
                 onClick={handleCheckout}
                 disabled={isPending}
+                data-checkly-checkout-url-preview={checkoutUrlPreview}
               >
                 <MessageCircle aria-hidden="true" />
                 {isPending ? "Placing your order…" : "Order on WhatsApp"}

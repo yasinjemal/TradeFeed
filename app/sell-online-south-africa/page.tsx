@@ -103,8 +103,8 @@ export default function SellOnlineSouthAfricaPage() {
         <p>
           Confirm payment before you ship — EFT with proof, PayFast for card payments, or cash
           on delivery for local orders. Because the conversation happens on WhatsApp, you keep a
-          written record of every agreement. Your number stays private on TradeFeed until a
-          buyer actually places an order (POPIA-compliant by design).
+          written record of every agreement. Use a business WhatsApp number because TradeFeed
+          places it in the order link buyers tap to contact you.
         </p>
       </SeoSection>
 

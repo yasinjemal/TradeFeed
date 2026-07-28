@@ -6,7 +6,7 @@
 // DESIGN:
 // - Fire-and-forget tracking (don't block page renders)
 // - Aggregation queries for seller dashboard
-// - No PII stored — only hashed visitor fingerprint
+// - No IP-derived identity — browser events use a random first-party ID
 //
 // EVENTS:
 // - PAGE_VIEW: Catalog page load (server-side)
@@ -16,16 +16,10 @@
 // ============================================================
 
 import { db } from "@/lib/db";
-import type { EventType } from "@prisma/client";
-
-interface TrackEventInput {
-  type: EventType;
-  shopId: string;
-  productId?: string;
-  visitorId?: string;
-  userAgent?: string;
-  referrer?: string;
-}
+import {
+  buildAnalyticsEventRecord,
+  type AnalyticsEventInput,
+} from "@/lib/analytics/event-policy";
 
 /**
  * Record an analytics event. Fire-and-forget.
@@ -33,17 +27,10 @@ interface TrackEventInput {
  * PERF: This is intentionally NOT awaited in page renders.
  * We call it without `await` so it doesn't block SSR.
  */
-export async function trackEvent(input: TrackEventInput): Promise<void> {
+export async function trackEvent(input: AnalyticsEventInput): Promise<void> {
   try {
     await db.analyticsEvent.create({
-      data: {
-        type: input.type,
-        shopId: input.shopId,
-        productId: input.productId ?? null,
-        visitorId: input.visitorId ?? null,
-        userAgent: input.userAgent ?? null,
-        referrer: input.referrer ?? null,
-      },
+      data: buildAnalyticsEventRecord(input),
     });
   } catch (err) {
     // Never let analytics failures break the app

@@ -12,6 +12,8 @@ function makeProduct(
     name: `Product ${id}`,
     description: null,
     imageUrl: null,
+    videoUrl: null,
+    videoSource: null,
     minPriceCents: 1000,
     maxPriceCents: 2000,
     variantCount: 1,

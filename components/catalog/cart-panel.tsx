@@ -102,6 +102,24 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
   const selectedShippingRate = selectedShipping && selectedShipping !== "collection"
     ? shippingRates.find((r) => `${r.carrier}|${r.service}` === selectedShipping) ?? null
     : null;
+  // Read-only synthetic monitoring can validate the exact cart message/URL
+  // without invoking checkoutAction and creating a production Order. Exclude
+  // buyer-entered delivery/contact values from this preview.
+  const previewCheckoutNumber =
+    items.some((item) => item.orderType === "retail") && retailWhatsappNumber
+      ? retailWhatsappNumber
+      : whatsappNumber;
+  const checkoutUrlPreview =
+    items.length > 0
+      ? buildWhatsAppCheckoutUrl(
+          previewCheckoutNumber,
+          items,
+          null,
+          undefined,
+          shopSlug,
+          paymentMethod,
+        )
+      : undefined;
 
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -217,6 +235,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
           option2Value: item.color,
           priceInCents: item.priceInCents,
           quantity: item.quantity,
+          orderType: item.orderType,
         }));
 
         // 3. Create order (validates stock + saves to DB)
@@ -239,8 +258,9 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
             : selectedShippingRate
               ? "PLATFORM_COURIER"
               : "SELLER_ARRANGED",
-          selectedShippingRate?.priceCents ?? 0,
-          selectedShippingRate?.carrier ?? undefined,
+          selectedShippingRate
+            ? `${selectedShippingRate.carrier}|${selectedShippingRate.service}`
+            : undefined,
           // Payment method
           paymentMethod,
         );
@@ -830,6 +850,7 @@ export function CartPanel({ isOpen, onClose }: CartPanelProps) {
             <button
               onClick={handleCheckout}
               disabled={isPending}
+              data-checkly-checkout-url-preview={checkoutUrlPreview}
               className="flex items-center justify-center gap-2.5 w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-wait text-white py-4 rounded-2xl text-base font-semibold transition-all duration-200 hover:shadow-xl hover:shadow-emerald-200 active:scale-[0.98]"
             >
               <svg

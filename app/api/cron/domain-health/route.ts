@@ -15,6 +15,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { queueCronHeartbeat } from "@/lib/monitoring/better-stack";
 import { NextRequest, NextResponse } from "next/server";
 import { checkDomainHealth } from "@/lib/vercel/domains";
 import { sendTextMessage } from "@/lib/whatsapp/business-api";
@@ -53,6 +54,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (shops.length === 0) {
+      queueCronHeartbeat("domain-health", "success");
       return NextResponse.json({ checked: 0, transitions: [] });
     }
 
@@ -116,12 +118,14 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(`[domain-health] Checked ${shops.length} domains, ${transitions.length} transitions`);
+    queueCronHeartbeat("domain-health", "success");
     return NextResponse.json({
       checked: shops.length,
       transitions,
     });
   } catch (err) {
     console.error("[domain-health] Cron failed:", err);
+    queueCronHeartbeat("domain-health", "failure");
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

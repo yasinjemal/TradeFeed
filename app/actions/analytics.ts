@@ -11,7 +11,7 @@
 "use server";
 
 import { z } from "zod";
-import { trackEvent } from "@/lib/db/analytics";
+import { trackRequestEvent } from "@/lib/analytics/server";
 import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
 
 const shopIdSchema = z.string().min(1).max(100);
@@ -33,11 +33,11 @@ export async function trackWhatsAppClickAction(
   const parsedProduct = productIdSchema.safeParse(productId);
   if (!parsedShop.success) return;
 
-  void trackEvent({
+  await trackRequestEvent({
     type: "WHATSAPP_CLICK",
     shopId: parsedShop.data,
     productId: parsedProduct.success ? parsedProduct.data : undefined,
-  });
+  }, { excludeSignedInShopOwners: true });
 }
 
 /**
@@ -54,10 +54,10 @@ export async function trackWhatsAppCheckoutAction(
   const parsedShop = shopIdSchema.safeParse(shopId);
   if (!parsedShop.success) return;
 
-  void trackEvent({
+  await trackRequestEvent({
     type: "WHATSAPP_CHECKOUT",
     shopId: parsedShop.data,
-  });
+  }, { excludeSignedInShopOwners: true });
 }
 
 /**
@@ -75,11 +75,11 @@ export async function trackAddToCartAction(
   const parsedProduct = z.string().min(1).max(100).safeParse(productId);
   if (!parsedShop.success || !parsedProduct.success) return;
 
-  void trackEvent({
+  await trackRequestEvent({
     type: "ADD_TO_CART",
     shopId: parsedShop.data,
     productId: parsedProduct.data,
-  });
+  }, { excludeSignedInShopOwners: true });
 }
 
 /**
@@ -95,8 +95,8 @@ export async function trackCheckoutStartAction(
   const parsedShop = shopIdSchema.safeParse(shopId);
   if (!parsedShop.success) return;
 
-  void trackEvent({
+  await trackRequestEvent({
     type: "CHECKOUT_START",
     shopId: parsedShop.data,
-  });
+  }, { excludeSignedInShopOwners: true });
 }

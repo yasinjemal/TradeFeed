@@ -15,6 +15,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { queueCronHeartbeat } from "@/lib/monitoring/better-stack";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -117,10 +118,12 @@ export async function GET(request: NextRequest) {
     };
 
     console.log("[data-retention] Purge complete:", JSON.stringify(summary));
+    queueCronHeartbeat("data-retention", "success");
 
     return NextResponse.json(summary, { status: 200 });
   } catch (error) {
     console.error("[data-retention] Error:", error);
+    queueCronHeartbeat("data-retention", "failure");
 
     return NextResponse.json(
       {

@@ -452,42 +452,10 @@ export default async function TrackingPage({ params, searchParams }: TrackingPag
         <div className="grid sm:grid-cols-2 gap-4">
           {/* Buyer Info */}
           <div className="rounded-2xl bg-stone-900/60 border border-stone-800/50 p-5">
-            <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3">Buyer Details</h3>
-            <div className="space-y-2">
-              {order.buyerName && (
-                <div className="flex items-center gap-2.5">
-                  <svg className="w-4 h-4 text-stone-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-                  <span className="text-sm text-stone-300">{order.buyerName}</span>
-                </div>
-              )}
-              {order.buyerPhone && (
-                <div className="flex items-center gap-2.5">
-                  <svg className="w-4 h-4 text-stone-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>
-                  <span className="text-sm text-stone-300 font-mono">{order.buyerPhone}</span>
-                  <span className="text-[10px] text-stone-600">(masked)</span>
-                </div>
-              )}
-              {order.buyerNote && (
-                <div className="flex items-start gap-2.5">
-                  <svg className="w-4 h-4 text-stone-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
-                  <span className="text-sm text-stone-400 italic">&ldquo;{order.buyerNote}&rdquo;</span>
-                </div>
-              )}
-              {order.deliveryAddress && (
-                <div className="flex items-start gap-2.5">
-                  <svg className="w-4 h-4 text-stone-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
-                  <span className="text-sm text-stone-300">
-                    {order.deliveryAddress}
-                    {order.deliveryCity ? `, ${order.deliveryCity}` : ""}
-                    {order.deliveryProvince ? `, ${order.deliveryProvince}` : ""}
-                    {order.deliveryPostalCode ? ` ${order.deliveryPostalCode}` : ""}
-                  </span>
-                </div>
-              )}
-              {!order.buyerName && !order.buyerPhone && !order.buyerNote && !order.deliveryAddress && (
-                <p className="text-sm text-stone-600">No buyer details provided.</p>
-              )}
-            </div>
+            <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3">Private by design</h3>
+            <p className="text-sm leading-relaxed text-stone-500">
+              Buyer contact, notes, and delivery-address details are never shown on public tracking pages.
+            </p>
           </div>
 
           {/* Shop Info */}

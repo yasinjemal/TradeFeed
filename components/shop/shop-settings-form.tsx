@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { LocationAutocomplete } from "@/components/shop/location-autocomplete";
 import { toast } from "sonner";
 import {
   SA_PROVINCES,
@@ -77,8 +78,10 @@ interface ShopSettingsFormProps {
     address: string | null;
     city: string | null;
     province: string | null;
+    postalCode: string | null;
     latitude: number | null;
     longitude: number | null;
+    locationPublished: boolean;
     businessHours: string | null;
     instagram: string | null;
     facebook: string | null;
@@ -100,8 +103,33 @@ export function ShopSettingsForm({
   const [lng, setLng] = useState(initialData.longitude?.toString() ?? "");
   const [gpsStatus, setGpsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [gpsError, setGpsError] = useState("");
+  const [addressValue, setAddressValue] = useState(initialData.address ?? "");
   const [cityValue, setCityValue] = useState(initialData.city ?? "");
   const [provinceValue, setProvinceValue] = useState(initialData.province ?? "");
+  const [postalCodeValue, setPostalCodeValue] = useState(
+    initialData.postalCode ?? "",
+  );
+  const [locationChanged, setLocationChanged] = useState(false);
+  const [locationSource, setLocationSource] = useState<
+    "geoapify" | "device" | "manual"
+  >("manual");
+  const [publishLocationConfirmed, setPublishLocationConfirmed] =
+    useState(false);
+  const [locationPublished, setLocationPublished] = useState(
+    initialData.locationPublished,
+  );
+  const [showMapPreview, setShowMapPreview] = useState(false);
+  const submittedLocationStateRef = useRef({
+    changed: false,
+    publishConfirmed: false,
+  });
+
+  const clearMapPin = () => {
+    setLat("");
+    setLng("");
+    setGpsStatus("idle");
+    setGpsError("");
+  };
 
   // ── Business hours state ────────────────────────────────
   const initialHours: BusinessHours = initialData.businessHours
@@ -133,8 +161,13 @@ export function ShopSettingsForm({
     const submitter = (event.nativeEvent as SubmitEvent).submitter;
     if (!(submitter instanceof HTMLButtonElement) || submitter.dataset.settingsSave !== "true") {
       event.preventDefault();
+      return;
     }
-  }, []);
+    submittedLocationStateRef.current = {
+      changed: locationChanged,
+      publishConfirmed: publishLocationConfirmed,
+    };
+  }, [locationChanged, publishLocationConfirmed]);
 
   const preventEnterOutsideTextareas = useCallback((event: React.KeyboardEvent<HTMLFormElement>) => {
     if (event.key === "Enter" && !(event.target instanceof HTMLTextAreaElement)) {
@@ -146,6 +179,15 @@ export function ShopSettingsForm({
   const markDirty = useCallback(() => {
     if (!isDirty) setIsDirty(true);
   }, [isDirty]);
+
+  const markLocationChanged = (
+    source: "geoapify" | "device" | "manual",
+  ) => {
+    setLocationChanged(true);
+    setLocationSource(source);
+    setPublishLocationConfirmed(false);
+    markDirty();
+  };
 
   // ── Image upload state ──────────────────────────────────
   const [logoUrl, setLogoUrl] = useState(initialData.logoUrl ?? "");
@@ -204,13 +246,24 @@ export function ShopSettingsForm({
   // Scroll to top on success + reset dirty state
   useEffect(() => {
     if (state?.success) {
+      const submittedLocation = submittedLocationStateRef.current;
       setShowSuccess(true);
       setIsDirty(false);
+      setLocationPublished((current) =>
+        submittedLocation.publishConfirmed
+          ? true
+          : submittedLocation.changed
+            ? false
+            : current,
+      );
+      setLocationChanged(false);
+      setPublishLocationConfirmed(false);
+      setShowMapPreview(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
       const t = setTimeout(() => setShowSuccess(false), 3000);
       return () => clearTimeout(t);
     }
-  }, [state?.success]);
+  }, [state]);
 
   // ── Helpers ─────────────────────────────────────────────
   const updateHour = (day: DayKey, value: string) => {
@@ -232,7 +285,7 @@ export function ShopSettingsForm({
       (pos) => {
         setLat(pos.coords.latitude.toFixed(6));
         setLng(pos.coords.longitude.toFixed(6));
-        markDirty();
+        markLocationChanged("device");
         setGpsStatus("success");
         setTimeout(() => setGpsStatus("idle"), 2000);
       },
@@ -311,6 +364,7 @@ export function ShopSettingsForm({
       <input type="hidden" name="businessHours" value={JSON.stringify(hours)} />
       <input type="hidden" name="latitude" value={lat} />
       <input type="hidden" name="longitude" value={lng} />
+      <input type="hidden" name="locationSource" value={locationSource} />
       <input type="hidden" name="logoUrl" value={logoUrl} />
       <input type="hidden" name="bannerUrl" value={bannerUrl} />
 
@@ -676,13 +730,23 @@ export function ShopSettingsForm({
           {/* Address */}
           <div className="space-y-2">
             <Label htmlFor="address" className="text-sm font-medium">Street Address</Label>
-            <Input
-              id="address"
-              name="address"
-              defaultValue={initialData.address ?? ""}
-              placeholder="e.g. Shop 42, Marble Tower, 62 Jeppe St"
-              className="rounded-xl h-12 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
-              onKeyDown={preventEnterSubmit}
+            <LocationAutocomplete
+              value={addressValue}
+              onValueChange={(value) => {
+                setAddressValue(value);
+                clearMapPin();
+                markLocationChanged("manual");
+              }}
+              onSelect={(suggestion) => {
+                setAddressValue(suggestion.address);
+                setCityValue(suggestion.city);
+                setProvinceValue(suggestion.province);
+                setPostalCodeValue(suggestion.postalCode);
+                setLat(suggestion.latitude.toFixed(6));
+                setLng(suggestion.longitude.toFixed(6));
+                markLocationChanged("geoapify");
+              }}
+              inputClassName="w-full rounded-xl h-12 border border-slate-200 bg-background px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all"
               disabled={isPending}
             />
           </div>
@@ -700,6 +764,8 @@ export function ShopSettingsForm({
                   setCityValue(e.target.value);
                   const match = CITY_PROVINCE_MAP[e.target.value];
                   if (match) setProvinceValue(match);
+                  clearMapPin();
+                  markLocationChanged("manual");
                 }}
                 placeholder="e.g. Komani or Johannesburg"
                 className="rounded-xl h-12 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
@@ -717,7 +783,11 @@ export function ShopSettingsForm({
                 id="province"
                 name="province"
                 value={provinceValue}
-                onChange={(e) => setProvinceValue(e.target.value)}
+                onChange={(e) => {
+                  setProvinceValue(e.target.value);
+                  clearMapPin();
+                  markLocationChanged("manual");
+                }}
                 className="flex h-12 w-full rounded-xl border border-slate-200 bg-background px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all"
                 disabled={isPending}
               >
@@ -735,6 +805,32 @@ export function ShopSettingsForm({
                 </p>
               )}
             </div>
+          </div>
+
+          <div className="space-y-2 sm:max-w-xs">
+            <Label htmlFor="postalCode" className="text-sm font-medium">
+              Postal Code
+            </Label>
+            <Input
+              id="postalCode"
+              name="postalCode"
+              inputMode="numeric"
+              maxLength={4}
+              value={postalCodeValue}
+              onChange={(event) => {
+                setPostalCodeValue(event.target.value.replace(/\D/g, ""));
+                clearMapPin();
+                markLocationChanged("manual");
+              }}
+              placeholder="e.g. 2001"
+              className="rounded-xl h-12 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all"
+              disabled={isPending}
+            />
+            {state?.fieldErrors?.postalCode && (
+              <p className="text-xs text-red-600">
+                {state.fieldErrors.postalCode[0]}
+              </p>
+            )}
           </div>
 
           {/* GPS + Map Presets */}
@@ -793,7 +889,10 @@ export function ShopSettingsForm({
                   type="number"
                   step="any"
                   value={lat}
-                  onChange={(e) => { setLat(e.target.value); markDirty(); }}
+                  onChange={(e) => {
+                    setLat(e.target.value);
+                    markLocationChanged("manual");
+                  }}
                   placeholder="-26.2023"
                   className="rounded-xl text-sm h-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20"
                   disabled={isPending}
@@ -806,7 +905,10 @@ export function ShopSettingsForm({
                   type="number"
                   step="any"
                   value={lng}
-                  onChange={(e) => { setLng(e.target.value); markDirty(); }}
+                  onChange={(e) => {
+                    setLng(e.target.value);
+                    markLocationChanged("manual");
+                  }}
                   placeholder="28.0436"
                   className="rounded-xl text-sm h-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20"
                   disabled={isPending}
@@ -815,7 +917,21 @@ export function ShopSettingsForm({
             </div>
 
             {/* Live map preview */}
-            {lat && lng && (
+            {lat && lng && !showMapPreview && (
+              <button
+                type="button"
+                onClick={() => setShowMapPreview(true)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                Load map preview
+                <span className="mt-1 block text-[11px] font-normal text-slate-500">
+                  This sends the map pin and your network address to
+                  OpenStreetMap.
+                </span>
+              </button>
+            )}
+
+            {lat && lng && showMapPreview && (
               <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
                 <iframe
                   title="Shop Location Preview"
@@ -840,6 +956,38 @@ export function ShopSettingsForm({
                 </div>
               </div>
             )}
+
+            {(locationChanged || !locationPublished) &&
+              Boolean(addressValue || cityValue || provinceValue || lat || lng) && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                  <label className="flex items-start gap-2.5 text-xs leading-relaxed text-amber-950">
+                    <input
+                      type="checkbox"
+                      name="publishLocationConfirmed"
+                      value="yes"
+                      checked={publishLocationConfirmed}
+                      onChange={(event) =>
+                        setPublishLocationConfirmed(event.target.checked)
+                      }
+                      required
+                      className="mt-0.5 size-4 rounded border-amber-400 text-blue-600"
+                    />
+                    <span>
+                      I confirm this is a business, collection, or showroom
+                      location I want buyers to see publicly. The street
+                      address and exact map pin may appear on my catalogue,
+                      in directions links, and in search metadata. I will not
+                      publish a home address unless I am comfortable making
+                      it public.
+                    </span>
+                  </label>
+                  {state?.fieldErrors?.publishLocationConfirmed && (
+                    <p className="mt-2 text-xs text-red-600">
+                      {state.fieldErrors.publishLocationConfirmed[0]}
+                    </p>
+                  )}
+                </div>
+              )}
           </div>
         </div>
       </Section>

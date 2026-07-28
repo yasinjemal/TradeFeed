@@ -10,6 +10,7 @@
 //   - checkout:  10 req / 60s (action — order creation)
 //   - review:     3 req / 60s (action — review submission)
 //   - analytics: 100 req / 60s (action — event tracking)
+//   - tracking:   20 req / 60s (middleware — public track/pay pages)
 //
 // FALLBACK:
 //   When UPSTASH_REDIS_REST_URL is missing (local dev) the old
@@ -29,7 +30,15 @@ export interface RateLimitResult {
   retryAfterSeconds: number;
 }
 
-export type LimiterName = "catalog" | "api" | "checkout" | "review" | "analytics" | "ai" | "message";
+export type LimiterName =
+  | "catalog"
+  | "api"
+  | "checkout"
+  | "review"
+  | "analytics"
+  | "ai"
+  | "message"
+  | "tracking";
 
 // ── Config per limiter ──────────────────────────────────────
 
@@ -41,6 +50,7 @@ const LIMITER_CONFIG: Record<LimiterName, { limit: number; windowSeconds: number
   analytics: { limit: 100, windowSeconds: 60 },
   ai:        { limit: 50,  windowSeconds: 86400 }, // 50 AI generations per shop per day
   message:   { limit: 12,  windowSeconds: 60 },
+  tracking:  { limit: 20,  windowSeconds: 60 },
 };
 
 // ── Upstash instances (lazy singleton per limiter) ──────────
@@ -70,7 +80,7 @@ function getUpstashLimiter(name: LimiterName): Ratelimit | null {
     redis: r,
     limiter: Ratelimit.slidingWindow(cfg.limit, `${cfg.windowSeconds} s`),
     prefix: `rl:${name}`,
-    analytics: true,
+    analytics: false,
   });
 
   upstashLimiters.set(name, limiter);
@@ -121,7 +131,25 @@ export async function checkRateLimit(
 
     // ── Upstash path (production) ─────────────────────────────
     if (upstash) {
-      const { success, remaining, reset } = await upstash.limit(identifier);
+      const encoder = new TextEncoder();
+      const payload = encoder.encode(`${name}:${identifier}`);
+      const secret =
+        process.env.RATE_LIMIT_HASH_SECRET ??
+        process.env.UPSTASH_REDIS_REST_TOKEN!;
+      const hmacKey = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(secret),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"],
+      );
+      const digest = await crypto.subtle.sign("HMAC", hmacKey, payload);
+      const pseudonymousIdentifier = Array.from(new Uint8Array(digest))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+      const { success, remaining, reset } = await upstash.limit(
+        pseudonymousIdentifier,
+      );
       const resetAt = reset; // epoch ms
       const retryAfter = success ? 0 : Math.ceil((resetAt - Date.now()) / 1000);
       return { allowed: success, remaining, resetAt, retryAfterSeconds: Math.max(retryAfter, 0) };

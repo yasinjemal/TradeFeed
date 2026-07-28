@@ -8,7 +8,7 @@ export const revalidate = 60;
 // React.cache() memoises within a single request — no cross-request state.
 const getCachedShop = cache(getCatalogShop);
 const getCachedProduct = cache(getCatalogProduct);
-import { trackEvent } from "@/lib/db/analytics";
+import { trackRequestEvent } from "@/lib/analytics/server";
 import { getProductReviews, getReviewAggregation } from "@/lib/db/reviews";
 import { getProductSoldCount } from "@/lib/db/orders";
 import { formatZAR } from "@/types";
@@ -35,7 +35,9 @@ import { getFreshTranslation } from "@/lib/ai/translate-listing";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { getSellerTrustStats } from "@/lib/db/trust";
 import { TfProductPage } from "@/components/tf/product/tf-product-page";
+import { toGalleryVideo } from "@/lib/video/display";
 import { productIndexable, robotsFor } from "@/lib/seo/should-index";
+import { TrackedWhatsAppLink } from "@/components/analytics/tracked-whatsapp-link";
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string; productId: string }>;
@@ -126,7 +128,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const product = await getCachedProduct(productId, shop.id);
   if (!product) return notFound();
 
-  void trackEvent({ type: "PRODUCT_VIEW", shopId: shop.id, productId });
+  await trackRequestEvent(
+    { type: "PRODUCT_VIEW", shopId: shop.id, productId: product.id },
+    { excludeSignedInShopOwners: true, defer: true },
+  );
 
   const t = await getTranslations("catalog");
 
@@ -176,6 +181,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   if (FEATURE_FLAGS.UI_REDESIGN) {
     const trustStats = await getSellerTrustStats(shop.id);
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
+    const galleryVideo = FEATURE_FLAGS.PRODUCT_VIDEO
+      ? toGalleryVideo(product.videos?.[0] ?? null)
+      : null;
     const mapSellerStrip = (
       items: { id: string; slug: string | null; name: string; imageUrl: string | null; minPriceCents: number }[],
       shopMeta: { name: string; slug: string; isVerified: boolean },
@@ -228,6 +236,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             categoryName: product.category?.name ?? null,
             categorySlug: product.category?.slug ?? null,
             images: product.images.map((img) => ({ id: img.id, url: img.url, altText: img.altText })),
+            video: galleryVideo,
             variants: product.variants.map((v) => ({
               id: v.id,
               size: v.size,
@@ -487,9 +496,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 ) : (
                   <div className="flex flex-col items-center gap-3 py-3">
                     <p className="text-sm font-medium text-slate-500">{t("soldOut")}</p>
-                    <a href={waLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700">
+                    <TrackedWhatsAppLink
+                      href={waLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      shopId={shop.id}
+                      productId={product.id}
+                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
+                    >
                       {t("askRestock")}
-                    </a>
+                    </TrackedWhatsAppLink>
                     <div className="w-full border-t border-slate-100 pt-3">
                       <RestockAlert productId={product.id} productName={product.name} shopId={shop.id} />
                     </div>
@@ -501,15 +517,17 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   <div className="mt-4 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4">
                     <p className="mb-1 text-sm font-bold text-amber-900">📋 {t("customQuote")}</p>
                     <p className="mb-3 text-xs text-amber-700">{t("customQuoteDesc")}</p>
-                    <a
+                    <TrackedWhatsAppLink
                       href={wholesaleRfqLink}
                       target="_blank"
                       rel="noopener noreferrer"
+                      shopId={shop.id}
+                      productId={product.id}
                       className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
                       {t("requestQuote")}
-                    </a>
+                    </TrackedWhatsAppLink>
                   </div>
                 )}
               </div>
