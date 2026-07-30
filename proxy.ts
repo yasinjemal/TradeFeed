@@ -154,9 +154,9 @@ export default clerkMiddleware(async (auth, request) => {
     const csp = [
       `default-src 'self'`,
       `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://vercel.live https://*.clerk.accounts.dev https://*.tradefeed.co.za https://*.clerk.com https://challenges.cloudflare.com https://translate.google.com https://translate.googleapis.com`,
-      `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com`,
+      `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com https://api.fontshare.com`,
       `img-src 'self' data: blob: https://images.unsplash.com https://utfs.io https://*.ufs.sh https://vercel.live https://vercel.com https://img.clerk.com https://*.clerk.com https://i.ytimg.com`,
-      `font-src 'self' data: https://vercel.live https://fonts.gstatic.com`,
+      `font-src 'self' data: https://vercel.live https://fonts.gstatic.com https://cdn.fontshare.com`,
       // media-src https: is deliberate — sellers may attach product videos
       // as direct file links from any https host (media only; scripts and
       // frames stay locked down).

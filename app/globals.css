@@ -589,6 +589,12 @@ h4, h5, h6 {
   --shadow-tf-md: 0 4px 12px -2px rgb(26 26 23 / 0.08), 0 2px 4px -2px rgb(26 26 23 / 0.05);
 }
 
+/* Clash Display has a narrow space glyph. Keep multi-word display
+   headlines clearly separated at every viewport size. */
+.font-tf-hero {
+  word-spacing: 0.14em;
+}
+
 /* ═══ TF dark mode ═══════════════════════════════════════════
    Warm charcoal, not cold black — the same trust-first feel
    after sunset. tf-* utilities compile to var(--color-tf-*),

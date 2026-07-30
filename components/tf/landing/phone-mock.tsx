@@ -14,12 +14,12 @@ const DEMO_PHOTO = "/landing/demo-sneakers.webp";
 export function TfPhoneMock() {
   return (
     <div
-      className="flex items-center justify-center gap-3 sm:gap-5"
+      className="flex items-center justify-center gap-2 sm:gap-4 lg:gap-5"
       role="img"
       aria-label="A product photo becomes an AI-written listing inside a shareable WhatsApp catalogue"
     >
       {/* Step: the photo */}
-      <div className="flex w-24 shrink-0 flex-col items-center gap-2 sm:w-32">
+      <div className="flex w-[72px] shrink-0 flex-col items-center gap-2 sm:w-28 lg:w-32">
         <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-raised shadow-tf-sm">
           <Image
             src={DEMO_PHOTO}
@@ -39,7 +39,7 @@ export function TfPhoneMock() {
       </div>
 
       {/* Step: the catalogue on a phone */}
-      <div className="w-[210px] shrink-0 rounded-[28px] border border-tf-stone-300 bg-tf-ink p-2 shadow-tf-md sm:w-[230px]">
+      <div className="w-[172px] shrink-0 rounded-[24px] border border-tf-stone-300 bg-tf-ink p-1.5 shadow-tf-md sm:w-[220px] sm:rounded-[28px] sm:p-2 lg:w-[250px]">
         <div className="overflow-hidden rounded-[20px] bg-tf-surface">
           {/* Shop header */}
           <div className="bg-tf-deep px-3 pb-2.5 pt-3">

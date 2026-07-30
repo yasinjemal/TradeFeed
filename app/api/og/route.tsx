@@ -350,6 +350,8 @@ function generateMarketplaceOG(params: URLSearchParams) {
   const category = params.get("category") || "";
   const productCount = params.get("productCount") || "1,000+";
   const sellerCount = params.get("sellerCount") || "";
+  const footer =
+    params.get("footer") || "South Africa's Wholesale Marketplace";
 
   // Allow direct title/subtitle overrides (used by tracking page, etc.)
   const titleOverride = params.get("title");
@@ -512,7 +514,7 @@ function generateMarketplaceOG(params: URLSearchParams) {
             </div>
           )}
           <span style={{ color: "#78716c", fontSize: "18px" }}>
-            South Africa&apos;s Wholesale Marketplace
+            {footer}
           </span>
         </div>
       </div>

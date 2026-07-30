@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     url: "https://tradefeed.co.za",
     images: [
       {
-        url: "/api/og?title=Online+Marketplace+South+Africa&subtitle=Sell+Online+%E2%80%A2+Create+Your+Shop+%E2%80%A2+Free+to+Start",
+        url: "/api/og?type=marketplace&title=Online+Marketplace+South+Africa&subtitle=Sell+Online+%E2%80%A2+Create+Your+Shop+%E2%80%A2+Free+to+Start",
         width: 1200,
         height: 630,
         alt: "TradeFeed — Online Marketplace South Africa for Sellers & Buyers",
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     description:
       "Create your free online shop. List products with AI. Sell on WhatsApp. Buy wholesale & retail products from verified SA sellers.",
     images: [
-      "/api/og?title=Online+Marketplace+South+Africa&subtitle=Sell+Online+%E2%80%A2+Create+Your+Shop+%E2%80%A2+Free+to+Start",
+      "/api/og?type=marketplace&title=Online+Marketplace+South+Africa&subtitle=Sell+Online+%E2%80%A2+Create+Your+Shop+%E2%80%A2+Free+to+Start",
     ],
   },
   // NOTE: canonical is intentionally NOT set here — it would propagate

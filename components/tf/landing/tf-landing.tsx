@@ -90,9 +90,13 @@ const WHATSAPP_GREEN = "#25D366";
 
 export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, sellers, products = [], faqItems = [] }: TfLandingProps) {
   const reassurance = `20 products free · 10 AI listings a month · no credit card · set up in under 3 minutes`;
+  const liveShopHref = sellers[0]
+    ? `/catalog/${sellers[0].slug}`
+    : "/marketplace";
+  const proofSeller = sellers.find((seller) => seller.isVerified) ?? sellers[0] ?? null;
 
   return (
-    <main className="bg-tf-surface text-tf-ink overflow-x-hidden">
+    <div className="overflow-x-hidden bg-tf-surface text-tf-ink">
       <TfFonts />
 
       {/* ── Sticky header ──────────────────────────────── */}
@@ -105,11 +109,13 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
           <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-tf-stone-600 md:flex">
             <Link href="#how-it-works" className="tf-navlink hover:text-tf-ink">How it works</Link>
             <Link href="#pricing" className="tf-navlink hover:text-tf-ink">Pricing</Link>
-            <Link href="/growth" className="tf-navlink hover:text-tf-ink">Growth</Link>
+            <Link href="/growth" className="tf-navlink hover:text-tf-ink">Done-for-you</Link>
             <Link href="/marketplace" className="tf-navlink hover:text-tf-ink">Marketplace</Link>
           </nav>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            <span className="hidden sm:inline-flex">
+              <LanguageSwitcher />
+            </span>
             <span className="hidden sm:inline-flex">
               <TfThemeToggle />
             </span>
@@ -160,61 +166,64 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
           }}
         />
 
-        <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-20 pt-24 sm:px-6 sm:pb-28 sm:pt-32">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-14 pt-24 sm:px-6 sm:pb-16 sm:pt-28">
+          <div className="grid items-center gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10">
 
             {/* ── Left: Headline + CTAs ─── */}
-            <TfReveal stagger>
-              {/* Live badge */}
+            <div className="min-w-0">
+              {/* Real seller footprint */}
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400">
                 <span
                   className="tf-presence inline-block size-2 rounded-full bg-emerald-400"
                   aria-hidden="true"
                 />
-                {n(stats.shopCount)} sellers live &middot; {stats.cityCount} SA {stats.cityCount === 1 ? "city" : "cities"}
+                {n(stats.shopCount)} active seller shops &middot; {stats.cityCount} SA {stats.cityCount === 1 ? "city" : "cities"}
               </div>
 
-              {/* Split-weight headline — ghost thin "One" vs bold word, gradient on WhatsApp */}
+              {/* Concise seller-first promise: readable, searchable, and above the fold. */}
               <h1
-                className="mt-6 font-tf-hero"
+                className="mt-5 font-tf-hero"
                 style={{
-                  fontSize: "clamp(3rem, 8vw, 6.75rem)",
-                  lineHeight: "0.97",
+                  fontSize: "clamp(2.45rem, 12vw, 4.75rem)",
+                  lineHeight: "0.96",
                   letterSpacing: "-0.04em",
                 }}
               >
-                <span style={{ fontWeight: 200, color: "rgba(255,255,255,0.32)" }}>One </span>
-                <span style={{ fontWeight: 700, color: "#ffffff" }}>photo.</span>
+                <span className="font-bold text-white">Sell online.</span>
                 <br />
-                <span style={{ fontWeight: 200, color: "rgba(255,255,255,0.32)" }}>One </span>
-                <span style={{ fontWeight: 700, color: "#ffffff" }}>link.</span>
+                <span className="font-medium text-white/70">One link.</span>
                 <br />
-                <span style={{ fontWeight: 200, color: "rgba(255,255,255,0.32)" }}>Orders on </span>
                 <span
                   style={{
                     fontWeight: 700,
+                    display: "inline-block",
+                    fontSize: "0.82em",
+                    whiteSpace: "nowrap",
                     background: "linear-gradient(120deg, #4ade80 0%, #22d3ee 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
                   }}
                 >
-                  WhatsApp
+                  WhatsApp{" "}
+                  <span>orders.</span>
                 </span>
-                <span style={{ fontWeight: 700, color: "#ffffff" }}>.</span>
               </h1>
 
-              <p className="mt-5 max-w-[26rem] text-base leading-relaxed text-white/55 sm:text-[1.05rem]">
-                Take a photo — AI writes the listing in 10&nbsp;seconds. Share your
-                catalogue link and take orders where your customers already are.
-                No app for them, no website for you.
+              <p className="mt-4 max-w-[32rem] text-base leading-relaxed text-white/70 sm:text-[1.05rem]">
+                TradeFeed turns one product photo into a professional online shop.
+                AI writes the listing, you share one catalogue link, and customers
+                send organised orders to your WhatsApp.
               </p>
 
               {/* CTAs */}
-              <div id="tf-hero-cta" className="mt-8 flex flex-wrap items-center gap-3">
+              <div
+                id="tf-hero-cta"
+                className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:items-center"
+              >
                 <Link
                   href={ctaHref}
-                  className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
                   style={{
                     backgroundColor: "var(--color-tf-primary)",
                     boxShadow: "0 8px 24px rgba(4,120,87,0.35)",
@@ -224,30 +233,40 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
                 <Link
-                  href="/marketplace"
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-6 py-3.5 text-sm font-medium text-white/65 transition-all duration-200 hover:border-white/30 hover:text-white"
+                  href={liveShopHref}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 px-6 py-3.5 text-sm font-medium text-white/75 transition-all duration-200 hover:border-white/35 hover:text-white"
                 >
-                  Browse the marketplace
+                  See a live shop
                 </Link>
               </div>
 
-              <p className="mt-4 text-xs text-white/30">{reassurance}</p>
+              <ul
+                aria-label="Free plan benefits"
+                className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-white/60"
+              >
+                {["20 products free", "No credit card", "Live in under 3 minutes"].map((item) => (
+                  <li key={item} className="inline-flex items-center gap-1.5">
+                    <Check className="size-3.5 text-emerald-400" aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
 
               {/* Live activity ticker */}
               {sellers.filter((s) => s.city).length > 0 && (
                 <TfLiveTicker
-                  className="mt-6"
+                  className="mt-5"
                   items={sellers
                     .filter((s) => s.city)
                     .slice(0, 6)
-                    .map((s) => `${s.name} is live in ${s.city} right now`)}
+                    .map((s) => `${s.name} has an active shop in ${s.city}`)}
                 />
               )}
-            </TfReveal>
+            </div>
 
             {/* ── Right: Phone mockup ─── */}
-            <TfReveal delay={200}>
-              <div className="tf-float flex items-center justify-center">
+            <div>
+              <div className="tf-float flex items-center justify-center lg:justify-end">
                 <TfTilt>
                   <div className="relative">
                     {/* Halo glow behind phone */}
@@ -262,7 +281,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                   </div>
                 </TfTilt>
               </div>
-            </TfReveal>
+            </div>
           </div>
         </div>
 
@@ -305,7 +324,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             className="grid grid-cols-2 gap-8 text-center sm:grid-cols-4"
           >
             {[
-              { value: stats.shopCount, label: "live sellers" },
+              { value: stats.shopCount, label: "active sellers" },
               { value: stats.productCount, label: "products listed" },
               { value: stats.orderCount, label: "orders created" },
               { value: stats.cityCount, label: "SA cities" },
@@ -356,7 +375,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             >
               Three honest steps
             </h2>
-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/50">
+            <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/70">
               No warehouse, no website builder, no monthly admin. If you can
               send a WhatsApp message, you can run a shop.
             </p>
@@ -415,7 +434,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                 <h3 className="relative mt-4 font-tf-hero text-xl font-semibold text-white">
                   {step.title}
                 </h3>
-                <p className="relative mt-2 text-sm leading-relaxed text-white/50">
+                <p className="relative mt-2 text-sm leading-relaxed text-white/70">
                   {step.body}
                 </p>
               </li>
@@ -439,7 +458,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             >
               Everything you need,
               <br className="hidden sm:block" />
-              {" "}<span style={{ fontWeight: 300, color: "rgba(7,26,15,0.35)" }}>nothing you don&apos;t</span>
+              {" "}<span className="font-light text-tf-stone-400">nothing you don&apos;t</span>
             </h2>
           </TfReveal>
 
@@ -548,7 +567,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               <h3 className="font-tf-hero text-xl font-semibold text-white">
                 Live in under 3 minutes
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/55">
+              <p className="mt-2 text-sm leading-relaxed text-white/70">
                 Name, WhatsApp number, first product photo. Your shop is live
                 and sharing on your very first day.
               </p>
@@ -593,7 +612,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             >
               Buyers see who they&apos;re buying from
             </h2>
-            <p className="mt-3 max-w-md text-sm leading-relaxed text-white/50">
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-white/70">
               Every storefront, product page, and checkout carries your Verified
               Seller card — your verification, orders fulfilled, reply time, and
               location. Small shop, real-store trust.
@@ -614,24 +633,24 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               ))}
             </ul>
           </TfReveal>
-          <TfReveal delay={120}>
-            <div>
-              <p className="mb-2 text-center text-[10px] font-medium uppercase tracking-[0.2em] text-white/35">
-                Illustrative example
-              </p>
-              <TfTilt>
-                <TfVerifiedSellerCard
-                  variant="hero"
-                  name="Thandi's Sneakers"
-                  verified
-                  ordersFulfilled={127}
-                  avgReplyMinutes={8}
-                  memberSince={2024}
-                  location="Soweto, Johannesburg"
-                />
-              </TfTilt>
-            </div>
-          </TfReveal>
+          {proofSeller && (
+            <TfReveal delay={120}>
+              <div>
+                <p className="mb-2 text-center text-[10px] font-medium uppercase tracking-[0.2em] text-white/60">
+                  Featured seller on TradeFeed
+                </p>
+                <TfTilt>
+                  <TfVerifiedSellerCard
+                    variant="hero"
+                    name={proofSeller.name}
+                    verified={proofSeller.isVerified}
+                    avatarUrl={proofSeller.logoUrl}
+                    location={proofSeller.city ?? undefined}
+                  />
+                </TfTilt>
+              </div>
+            </TfReveal>
+          )}
         </div>
       </section>
 
@@ -647,7 +666,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                 aria-hidden="true"
               />
               <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-tf-stone-400">
-                Live right now
+                Active seller shops
               </p>
             </div>
             <h2
@@ -655,11 +674,11 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)", lineHeight: "1.04", letterSpacing: "-0.04em", fontWeight: 700 }}
             >
               Real shops,{" "}
-              <span style={{ fontWeight: 300, color: "rgba(7,26,15,0.35)" }}>trading today</span>
+              <span className="font-light text-tf-stone-400">selling online</span>
             </h2>
             <p className="mt-2 text-sm text-tf-stone-500">
               No stock photos — these are {sellers.length} of the{" "}
-              {n(stats.shopCount)} sellers on TradeFeed right now.
+              {n(stats.shopCount)} active seller shops on TradeFeed.
             </p>
           </TfReveal>
 
@@ -785,7 +804,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               style={{ fontSize: "clamp(2.25rem, 6vw, 4rem)", lineHeight: "1.04", letterSpacing: "-0.04em", fontWeight: 700 }}
             >
               Honest pricing,{" "}
-              <span style={{ fontWeight: 300, color: "rgba(7,26,15,0.35)" }}>in Rand</span>
+              <span className="font-light text-tf-stone-400">in Rand</span>
             </h2>
             <p className="mt-2 text-sm text-tf-stone-500">
               Start free with 20 products and 10 AI listings a month. Upgrade
@@ -933,7 +952,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             Your shop could be live
             <br className="hidden sm:block" /> in under 3&nbsp;minutes
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-sm text-white/45">
+          <p className="mx-auto mt-4 max-w-md text-sm text-white/70">
             Join {n(stats.shopCount)} South African sellers already taking
             orders on WhatsApp.
           </p>
@@ -948,7 +967,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             {ctaLabel}
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
-          <p className="mt-4 text-xs text-white/25">{reassurance}</p>
+          <p className="mt-4 text-xs text-white/60">{reassurance}</p>
         </TfReveal>
       </section>
 
@@ -1070,6 +1089,6 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
         label={ctaLabel}
         sentinelId="tf-hero-cta"
       />
-    </main>
+    </div>
   );
 }

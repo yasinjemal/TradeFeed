@@ -26,15 +26,45 @@ import { SA_PROVINCES } from "@/lib/marketplace/locations";
 import { GrowthSpotlight } from "@/components/growth/growth-spotlight";
 import type { Metadata } from "next";
 
-// ============================================================
-// Landing Page SEO — targeted for "wholesale marketplace South Africa"
-// ============================================================
+const HOME_TITLE = "Sell Online via WhatsApp in South Africa | TradeFeed";
+const HOME_DESCRIPTION =
+  "Create a free online shop in South Africa. Add a product photo, let AI write the listing, share one catalogue link and take organised WhatsApp orders.";
+const HOME_SOCIAL_IMAGE =
+  "/api/og?type=marketplace&title=Sell+Online+via+WhatsApp&subtitle=Create+a+free+online+shop+from+one+product+photo+with+AI&productCount=20+free&footer=Built+for+South+African+sellers";
+
+// Homepage intent: help South African sellers create an online shop
+// and turn catalogue views into organised WhatsApp orders.
 export const metadata: Metadata = {
-  title: "TradeFeed — Sell Online in South Africa via WhatsApp",
-  description:
-    "Turn your WhatsApp business into a real online shop. Photo in, AI listing out, one shareable catalogue link. Free for your first 20 products — no app, no coding.",
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
   alternates: {
-    canonical: "https://tradefeed.co.za",
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "TradeFeed",
+    locale: "en_ZA",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    images: [
+      {
+        url: HOME_SOCIAL_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "TradeFeed helps South African sellers create an online shop and take WhatsApp orders",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    images: [HOME_SOCIAL_IMAGE],
   },
 };
 
@@ -188,7 +218,7 @@ export default async function HomePage() {
     ? dashboardSlug
       ? "Go to Dashboard"
       : "Create Your Shop"
-    : "Get Your Catalog Link";
+    : "Create My Free Shop";
 
   // ── AI CTA — deep-links to product creation with AI pre-opened ──
   const aiCtaHref = clerkId

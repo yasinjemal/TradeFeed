@@ -53,8 +53,11 @@ export function GlobalBottomNav() {
     ? "text-stone-500 hover:text-stone-300"
     : tabIdleCls;
 
-  // Hide on routes that already have their own bottom navigation
-  if (HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) return null;
+  // The homepage owns a dedicated conversion CTA; avoid covering it with
+  // app navigation. Other listed routes already provide their own nav.
+  if (pathname === "/" || HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) {
+    return null;
+  }
 
   const accountHref = isSignedIn ? "/me/account" : "/sign-in";
   const accountActive = isSignedIn

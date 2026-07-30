@@ -32,7 +32,10 @@ export function TfLandingHeader({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <header className="tf-header sticky top-0 z-30" data-scrolled={scrolled}>
+    <header
+      className="tf-header fixed inset-x-0 top-0 z-30"
+      data-scrolled={scrolled}
+    >
       {children}
     </header>
   );

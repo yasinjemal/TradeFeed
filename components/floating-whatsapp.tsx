@@ -26,6 +26,7 @@ export function FloatingWhatsApp() {
 
   // Keep conversion and transactional surfaces free of a competing floating CTA.
   if (
+    pathname === "/" ||
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/catalog") ||
