@@ -22,8 +22,7 @@ import {
 
 // ============================================================
 // TfOrderPanel — variant selection + the order handoff.
-// One promise, stated twice with the same words: the inline
-// CTA and the sticky mobile bar both say "Order on WhatsApp",
+// The inline and sticky actions share the same ordering state,
 // and the pre-filled message repeats exactly what was chosen.
 // ============================================================
 
@@ -150,6 +149,11 @@ export function TfOrderPanel({
   const sizeInStock = (s: string) =>
     variants.some((v) => v.size === s && v.stock > 0);
 
+  const colorInStock = (c: string) =>
+    variants.some(
+      (v) => (!size || v.size === size) && v.color === c && v.stock > 0,
+    );
+
   const waMessage = [
     `Hi ${shopName}! I'd like to order:`,
     "",
@@ -167,6 +171,27 @@ export function TfOrderPanel({
   const waHref = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(waMessage)}`;
 
   const canAddToCart = !soldOut && exactSelection && selected != null && selected.stock > 0;
+  const missingOptionLabel =
+    size == null
+      ? option1Label
+      : hasColors && colorsForSize.length > 0 && color == null
+        ? option2Label
+        : null;
+  const selectionSummary = exactSelection
+    ? [
+        size ? `${option1Label}: ${size}` : null,
+        color ? `${option2Label}: ${color}` : null,
+        `Qty ${qty}`,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : `Choose ${missingOptionLabel?.toLowerCase() ?? "options"}`;
+
+  const scrollToOptions = () => {
+    document
+      .getElementById(`tf-order-options-${productId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   const handleAddToCart = () => {
     if (!canAddToCart || !selected) return;
@@ -201,7 +226,7 @@ export function TfOrderPanel({
     });
   };
 
-  const addToCartButton = (full: boolean) => (
+  const addToCartButton = (full: boolean, compact = false) => (
     <TfButton
       type="button"
       variant="secondary"
@@ -210,21 +235,31 @@ export function TfOrderPanel({
       onClick={handleAddToCart}
       disabled={!canAddToCart}
       aria-label={full ? undefined : "Add to cart"}
-      title={canAddToCart ? undefined : soldOut ? "Sold out" : `Choose a ${option1Label.toLowerCase()} first`}
+      title={
+        canAddToCart
+          ? undefined
+          : soldOut
+            ? "Sold out"
+            : `Choose ${missingOptionLabel?.toLowerCase() ?? "options"} first`
+      }
+      className={cn(compact && "px-3 text-sm")}
     >
       <ShoppingBag aria-hidden="true" className="size-5" />
       {full && "Add to cart"}
     </TfButton>
   );
 
-  const cta = (full: boolean) => (
+  const cta = (full: boolean, compact = false) => (
     <TfButton
       asChild
       variant="whatsapp"
       size="lg"
       fullWidth={full}
       aria-disabled={soldOut}
-      className={cn(soldOut && "pointer-events-none opacity-50")}
+      className={cn(
+        soldOut && "pointer-events-none opacity-50",
+        compact && "px-3 text-sm",
+      )}
     >
       <a
         href={soldOut ? undefined : waHref}
@@ -235,14 +270,31 @@ export function TfOrderPanel({
         }}
       >
         <MessageCircle aria-hidden="true" />
-        Order on WhatsApp
+        {exactSelection ? "Order on WhatsApp" : "Ask on WhatsApp"}
       </a>
+    </TfButton>
+  );
+
+  const mobileCartAction = canAddToCart ? (
+    addToCartButton(true, true)
+  ) : (
+    <TfButton
+      type="button"
+      variant="secondary"
+      size="lg"
+      fullWidth
+      onClick={scrollToOptions}
+      disabled={soldOut}
+      className="px-3 text-sm"
+    >
+      <ShoppingBag aria-hidden="true" className="size-5" />
+      {soldOut ? "Sold out" : "Choose options"}
     </TfButton>
   );
 
   return (
     <>
-      <div className="space-y-4">
+      <div id={`tf-order-options-${productId}`} className="space-y-4">
         {/* Wholesale / retail toggle — only when the product carries both prices */}
         {hasRetail && (
           <fieldset>
@@ -344,7 +396,12 @@ export function TfOrderPanel({
             <legend className="mb-2 text-sm font-medium text-tf-ink">{option2Label}</legend>
             <div className="flex flex-wrap gap-2">
               {colorsForSize.map((c) => (
-                <Pill key={c} active={color === c} onClick={() => setColor(color === c ? null : c)}>
+                <Pill
+                  key={c}
+                  active={color === c}
+                  disabled={!colorInStock(c)}
+                  onClick={() => setColor(color === c ? null : c)}
+                >
                   {c}
                 </Pill>
               ))}
@@ -405,18 +462,20 @@ export function TfOrderPanel({
         </p>
       </div>
 
-      {/* Sticky mobile bar — same wording, same promise */}
-      <div className="tf-slide-up fixed inset-x-0 bottom-[3.5rem] z-30 border-t border-tf-stone-200 bg-tf-raised/95 px-4 py-2.5 backdrop-blur-sm lg:hidden">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="truncate text-xs text-tf-stone-500">{productName}</p>
-            <p className="text-base font-semibold tabular-nums text-tf-ink">
+      {/* Sticky mobile bar — selected options plus two explicit purchase paths */}
+      <div className="tf-slide-up fixed inset-x-0 bottom-[3.75rem] z-30 border-t border-tf-stone-200 bg-tf-raised/95 px-3 py-2.5 shadow-[0_-8px_24px_rgba(20,20,16,0.08)] backdrop-blur-sm lg:hidden">
+        <div className="mx-auto max-w-xl">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="min-w-0 truncate text-xs font-medium text-tf-stone-600">
+              {selectionSummary}
+            </p>
+            <p className="shrink-0 text-sm font-semibold tabular-nums text-tf-ink">
               {formatZAR(totalCents / 100)}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {addToCartButton(false)}
-            {cta(false)}
+          <div className="grid grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] gap-2">
+            {mobileCartAction}
+            {cta(true, true)}
           </div>
         </div>
       </div>

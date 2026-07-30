@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import {
+  ANALYTICS_CONSENT_OPEN_EVENT,
   readAnalyticsConsentCookie,
   serializeAnalyticsConsentCookie,
   type AnalyticsConsent,
@@ -73,6 +74,13 @@ export function CookieConsent({ googleAnalyticsId }: CookieConsentProps) {
     setReady(true);
   }, [googleAnalyticsId]);
 
+  useEffect(() => {
+    const openPreferences = () => setEditing(true);
+    window.addEventListener(ANALYTICS_CONSENT_OPEN_EVENT, openPreferences);
+    return () =>
+      window.removeEventListener(ANALYTICS_CONSENT_OPEN_EVENT, openPreferences);
+  }, []);
+
   function savePreference(nextConsent: AnalyticsConsent) {
     document.cookie = serializeAnalyticsConsentCookie(
       nextConsent,
@@ -104,17 +112,10 @@ export function CookieConsent({ googleAnalyticsId }: CookieConsentProps) {
 
   const showChoices = consent === null || editing;
 
-  if (!showChoices) {
-    return (
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className="fixed bottom-20 left-4 z-[70] rounded-lg border border-stone-300 bg-white/95 px-3 py-2 text-xs font-medium text-stone-700 shadow-sm backdrop-blur transition-colors hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 sm:bottom-4"
-      >
-        Privacy choices
-      </button>
-    );
-  }
+  // The first unresolved choice is shown once. After a preference is saved,
+  // no floating control competes with storefront purchase actions. People can
+  // still reopen this dialog from the normal-flow control on /privacy.
+  if (!showChoices) return null;
 
   return (
     <div

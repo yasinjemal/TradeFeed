@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AnalyticsPreferencesButton } from "@/components/privacy/analytics-preferences-button";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — TradeFeed",
@@ -270,9 +271,9 @@ export default function PrivacyPage() {
               repeat anonymous visits can be counted consistently. It is not derived from your IP
               address and is not shared with advertisers. Rejecting or later withdrawing analytics
               consent removes this identifier and analytics cookies without clearing authentication
-              data. You can reopen the choice at any time with the &ldquo;Privacy choices&rdquo;
-              button shown on TradeFeed.
+              data. You can change or withdraw your choice at any time below.
             </p>
+            <AnalyticsPreferencesButton />
           </section>
 
           {/* 9 */}

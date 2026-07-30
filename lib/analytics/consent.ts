@@ -9,6 +9,8 @@
 
 export const ANALYTICS_CONSENT_COOKIE = "tf_analytics_consent_v1";
 export const ANALYTICS_CONSENT_MAX_AGE_SECONDS = 365 * 24 * 60 * 60;
+export const ANALYTICS_CONSENT_OPEN_EVENT =
+  "tradefeed:open-analytics-preferences";
 
 export type AnalyticsConsent = "granted" | "denied";
 
