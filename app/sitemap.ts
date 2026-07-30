@@ -63,6 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       "whatsapp-catalog",
       "create-online-shop",
       "pricing",
+      "growth",
       "compare/shopify-alternative-south-africa",
       "compare/whatsapp-groups",
     ].map((path) => ({

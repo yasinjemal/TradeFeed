@@ -23,6 +23,7 @@ import { PLAN_COMPARISON } from "@/lib/billing/plans";
 import { getMarketplaceProducts } from "@/lib/db/marketplace";
 import { TfLanding } from "@/components/tf/landing/tf-landing";
 import { SA_PROVINCES } from "@/lib/marketplace/locations";
+import { GrowthSpotlight } from "@/components/growth/growth-spotlight";
 import type { Metadata } from "next";
 
 // ============================================================
@@ -270,6 +271,7 @@ export default async function HomePage() {
               { label: tNav("pricing"), href: "#pricing" },
               { label: tNav("faq"), href: "#faq" },
               { label: tNav("marketplace"), href: "/marketplace" },
+              { label: "Growth", href: "/growth" },
               { label: "Import Catalogue", href: "/import-whatsapp-catalogue" },
             ].map((link) => (
               <Link
@@ -474,6 +476,8 @@ export default async function HomePage() {
           { title: tLanding("howItWorks.step3Title"), description: tLanding("howItWorks.step3Desc") },
         ]}
       />
+
+      <GrowthSpotlight />
 
       {/* ─────────────────────────────────────────────────────
           SECTION 7 — PRICING
@@ -936,7 +940,7 @@ export default async function HomePage() {
             <div>
               <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-4">{tFooter("product")}</h4>
               <ul className="space-y-2.5">
-                {[{ label: tNav("features"), href: "#features" }, { label: tNav("pricing"), href: "#pricing" }, { label: tNav("marketplace"), href: "/marketplace" }, { label: tNav("faq"), href: "#faq" }].map((l) => (
+                {[{ label: tNav("features"), href: "#features" }, { label: tNav("pricing"), href: "#pricing" }, { label: "TradeFeed Growth", href: "/growth" }, { label: tNav("marketplace"), href: "/marketplace" }, { label: tNav("faq"), href: "#faq" }].map((l) => (
                   <li key={l.label}><Link href={l.href} className="text-sm text-slate-400 hover:text-white transition-colors">{l.label}</Link></li>
                 ))}
               </ul>

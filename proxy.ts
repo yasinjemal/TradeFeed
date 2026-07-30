@@ -61,6 +61,7 @@ const isPublicRoute = createRouteMatcher([
   "/privacy",                       // Privacy policy (POPIA)
   "/terms",                         // Terms of service
   "/contact",                       // Contact / help center
+  "/growth",                        // TradeFeed Growth managed-service landing page
   "/sitemap.xml",                   // SEO sitemap
   "/robots.txt",                    // SEO robots
   // ── SEO money pages + info pages (must be crawlable: Googlebot and

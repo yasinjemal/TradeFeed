@@ -33,6 +33,7 @@ import { TfLandingStickyCta } from "./sticky-cta";
 import { SA_PROVINCES } from "@/lib/marketplace/locations";
 import { PLANS } from "@/lib/billing/plans";
 import { TfProductCard } from "@/components/tf/product-card";
+import { GrowthSpotlight } from "@/components/growth/growth-spotlight";
 
 export interface TfLandingProps {
   ctaHref: string;
@@ -104,6 +105,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
           <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-tf-stone-600 md:flex">
             <Link href="#how-it-works" className="tf-navlink hover:text-tf-ink">How it works</Link>
             <Link href="#pricing" className="tf-navlink hover:text-tf-ink">Pricing</Link>
+            <Link href="/growth" className="tf-navlink hover:text-tf-ink">Growth</Link>
             <Link href="/marketplace" className="tf-navlink hover:text-tf-ink">Marketplace</Link>
           </nav>
           <div className="flex items-center gap-2">
@@ -764,6 +766,8 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
         </section>
       )}
 
+      <GrowthSpotlight />
+
       {/* ══════════════════════════════════════════════════
           PRICING — Honest, in Rand
       ══════════════════════════════════════════════════ */}
@@ -969,6 +973,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                 {[
                   { label: "How it works", href: "#how-it-works" },
                   { label: "Pricing", href: "#pricing" },
+                  { label: "TradeFeed Growth", href: "/growth" },
                   { label: "Marketplace", href: "/marketplace" },
                 ].map((l) => (
                   <li key={l.label}>

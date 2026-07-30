@@ -32,7 +32,8 @@ export function FloatingWhatsApp() {
     pathname.startsWith("/marketplace") ||
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
-    pathname.startsWith("/create-shop")
+    pathname.startsWith("/create-shop") ||
+    pathname.startsWith("/growth")
   ) {
     return null;
   }
