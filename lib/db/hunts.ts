@@ -76,22 +76,37 @@ export class HuntDailyLimitError extends Error {
   }
 }
 
+export class HuntDeviceDailyLimitError extends Error {
+  constructor() {
+    super("This browser already started three Hunts today.");
+    this.name = "HuntDeviceDailyLimitError";
+  }
+}
+
 export async function createHuntRecord(input: CreateHuntRecordInput) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
       return await db.$transaction(
         async (tx) => {
-          const recentHunts = await tx.huntPrivateData.count({
-            where: {
-              whatsappNumber: input.whatsappNumber,
-              createdAt: {
-                gte: new Date(
-                  input.consentAt.getTime() - 24 * 60 * 60 * 1_000,
-                ),
+          const since = new Date(
+            input.consentAt.getTime() - 24 * 60 * 60 * 1_000,
+          );
+          const [recentPhoneHunts, recentDeviceHunts] = await Promise.all([
+            tx.huntPrivateData.count({
+              where: {
+                whatsappNumber: input.whatsappNumber,
+                createdAt: { gte: since },
               },
-            },
-          });
-          if (recentHunts >= 3) throw new HuntDailyLimitError();
+            }),
+            tx.huntPrivateData.count({
+              where: {
+                ownerFeatureId: input.ownerFeatureId,
+                createdAt: { gte: since },
+              },
+            }),
+          ]);
+          if (recentPhoneHunts >= 3) throw new HuntDailyLimitError();
+          if (recentDeviceHunts >= 3) throw new HuntDeviceDailyLimitError();
 
           return tx.hunt.create({
             data: {
@@ -144,7 +159,12 @@ export async function createHuntRecord(input: CreateHuntRecordInput) {
         },
       );
     } catch (error) {
-      if (error instanceof HuntDailyLimitError) throw error;
+      if (
+        error instanceof HuntDailyLimitError ||
+        error instanceof HuntDeviceDailyLimitError
+      ) {
+        throw error;
+      }
       const retryable =
         error instanceof Prisma.PrismaClientKnownRequestError &&
         (error.code === "P2002" || error.code === "P2034");
@@ -261,6 +281,18 @@ export async function countRecentHuntsForPhone(
   return db.huntPrivateData.count({
     where: {
       whatsappNumber,
+      createdAt: { gte: since },
+    },
+  });
+}
+
+export async function countRecentHuntsForOwnerFeatureId(
+  ownerFeatureId: string,
+  since: Date,
+): Promise<number> {
+  return db.huntPrivateData.count({
+    where: {
+      ownerFeatureId,
       createdAt: { gte: since },
     },
   });

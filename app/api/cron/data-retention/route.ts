@@ -15,6 +15,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { cleanupExpiredHuntRateLimitBuckets } from "@/lib/db/hunt-rate-limit";
 import { processQueuedHuntMediaDeletions } from "@/lib/hunt/media-deletion";
 import { queueCronHeartbeat } from "@/lib/monitoring/better-stack";
 import { NextRequest, NextResponse } from "next/server";
@@ -166,6 +167,8 @@ export async function GET(request: NextRequest) {
         createdAt: { lte: huntAuditCutoff },
       },
     });
+    const huntRateLimitBucketsDeleted =
+      await cleanupExpiredHuntRateLimitBuckets(now);
 
     const summary = {
       status: "ok",
@@ -191,6 +194,7 @@ export async function GET(request: NextRequest) {
         failures: huntPurgeFailures,
         media: huntMedia,
         auditRowsDeleted: huntAuditResult.count,
+        rateLimitBucketsDeleted: huntRateLimitBucketsDeleted,
       },
     };
 

@@ -11,11 +11,14 @@ import {
 } from "@/lib/ai/analyze-hunt-reference";
 import { getOrCreateBuyerFeatureId } from "@/lib/buyer/feature-identity";
 import {
+  countRecentHuntsForOwnerFeatureId,
   countRecentHuntsForPhone,
   createHuntRecord,
   HuntDailyLimitError,
+  HuntDeviceDailyLimitError,
   joinPublicHunt,
 } from "@/lib/db/hunts";
+import { checkHuntCreateDatabaseRateLimit } from "@/lib/db/hunt-rate-limit";
 import {
   closeHuntForOwner,
   recordPublicHuntShare,
@@ -69,19 +72,6 @@ function zodFieldErrors(
 export async function createHuntAction(
   formData: FormData,
 ): Promise<HuntActionResult> {
-  const ip = await getActionClientIp();
-  const featureId = await getOrCreateBuyerFeatureId();
-  const [ipLimit, deviceLimit] = await Promise.all([
-    checkRateLimit("huntCreate", `ip:${ip}`),
-    checkRateLimit("huntCreate", `device:${featureId}`),
-  ]);
-  if (!ipLimit.allowed || !deviceLimit.allowed) {
-    return {
-      success: false,
-      error: "Too many Hunts were started from this device. Try again later.",
-    };
-  }
-
   const parsed = huntCreateFieldsSchema.safeParse({
     requestText: formString(formData, "requestText"),
     desiredVariant: formString(formData, "desiredVariant"),
@@ -113,18 +103,26 @@ export async function createHuntAction(
     };
   }
   const normalizedPhone = normalizeToE164(phone.data.phoneNumber);
+  const featureId = await getOrCreateBuyerFeatureId();
 
   try {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentHunts = await countRecentHuntsForPhone(
-      normalizedPhone,
-      oneDayAgo,
-    );
-    if (recentHunts >= 3) {
+    const [recentPhoneHunts, recentDeviceHunts] = await Promise.all([
+      countRecentHuntsForPhone(normalizedPhone, oneDayAgo),
+      countRecentHuntsForOwnerFeatureId(featureId, oneDayAgo),
+    ]);
+    if (recentPhoneHunts >= 3) {
       return {
         success: false,
         error:
           "This WhatsApp number already started three Hunts today. Try again tomorrow.",
+      };
+    }
+    if (recentDeviceHunts >= 3) {
+      return {
+        success: false,
+        error:
+          "This browser already started three Hunts today. Try again tomorrow.",
       };
     }
   } catch {
@@ -188,6 +186,31 @@ export async function createHuntAction(
       fieldErrors: {
         referenceImage: ["Safe image validation failed"],
       },
+    };
+  }
+
+  const attemptLimit = await checkHuntCreateDatabaseRateLimit({
+    deviceId: featureId,
+    ipAddress: await getActionClientIp(),
+  });
+  if (!attemptLimit.allowed) {
+    if (attemptLimit.reason === "unavailable") {
+      return {
+        success: false,
+        error: "HUNT is temporarily unavailable. Please try again shortly.",
+      };
+    }
+    if (attemptLimit.reason === "network") {
+      return {
+        success: false,
+        error:
+          "Too many HUNT attempts came from this network. Please try again later.",
+      };
+    }
+    return {
+      success: false,
+      error:
+        "Too many HUNT attempts came from this browser. Please try again later.",
     };
   }
 
@@ -299,6 +322,13 @@ export async function createHuntAction(
             "This WhatsApp number already started three Hunts today. Try again tomorrow.",
         };
       }
+      if (error instanceof HuntDeviceDailyLimitError) {
+        return {
+          success: false,
+          error:
+            "This browser already started three Hunts today. Try again tomorrow.",
+        };
+      }
       console.error(
         "[hunt] persistence failed:",
         error instanceof Error ? error.message : "unknown error",
@@ -342,11 +372,13 @@ export async function joinHuntAction(
 > {
   const ip = await getActionClientIp();
   const featureId = await getOrCreateBuyerFeatureId();
-  const [ipLimit, deviceLimit] = await Promise.all([
-    checkRateLimit("huntJoin", `ip:${ip}`),
+  const [networkLimit, deviceLimit] = await Promise.all([
+    ip === "unknown"
+      ? Promise.resolve(null)
+      : checkRateLimit("huntJoin", `ip:${ip}`),
     checkRateLimit("huntJoin", `device:${featureId}`),
   ]);
-  if (!ipLimit.allowed || !deviceLimit.allowed) {
+  if (!deviceLimit.allowed || (networkLimit && !networkLimit.allowed)) {
     return {
       success: false,
       error: "Too many join attempts. Try again in a little while.",
@@ -463,10 +495,12 @@ export async function reportHuntAction(
     getActionClientIp(),
   ]);
   const [ipLimit, deviceLimit] = await Promise.all([
-    checkRateLimit("huntReport", `ip:${ip}`),
+    ip === "unknown"
+      ? Promise.resolve(null)
+      : checkRateLimit("huntReport", `ip:${ip}`),
     checkRateLimit("huntReport", `device:${featureId}`),
   ]);
-  if (!ipLimit.allowed || !deviceLimit.allowed) {
+  if (!deviceLimit.allowed || (ipLimit && !ipLimit.allowed)) {
     return {
       success: false,
       error: "Too many reports were sent. Try again later.",
@@ -503,7 +537,12 @@ export async function trackHuntShareAction(
       getOrCreateBuyerFeatureId(),
       getActionClientIp(),
     ]);
-    const limit = await checkRateLimit("tracking", `hunt-share:${ip}`);
+    const limit = await checkRateLimit(
+      "tracking",
+      ip === "unknown"
+        ? `hunt-share-device:${featureId}`
+        : `hunt-share-ip:${ip}`,
+    );
     if (!limit.allowed) return;
     await recordPublicHuntShare({
       slug: parsedSlug.data,

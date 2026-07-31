@@ -103,6 +103,7 @@ export default async function RootLayout({
           {generateSiteJsonLd().map((schema, i) => (
             <script
               key={`site-ld-${i}`}
+              nonce={nonce}
               type="application/ld+json"
               dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
             />
@@ -132,6 +133,7 @@ export default async function RootLayout({
               force light so the live legacy UI is untouched; when the flag
               flips, users get their system preference + the TfThemeToggle. */}
           <ThemeProvider
+            nonce={nonce}
             attribute="class"
             defaultTheme="system"
             enableSystem

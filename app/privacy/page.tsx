@@ -174,10 +174,12 @@ export default function PrivacyPage() {
                 remain disabled until you accept analytics.
               </li>
               <li>
-                <strong>Upstash:</strong> Redis-based abuse prevention and rate limiting. Before
-                a network identifier is sent, TradeFeed converts it with a server-keyed,
-                pseudonymous HMAC; vendor analytics are disabled and rate-limit keys expire with their short
-                enforcement window.
+                <strong>Abuse prevention:</strong> Before a network or buyer-feature identifier is
+                used for HUNT rate limiting, TradeFeed converts it with a server-keyed,
+                pseudonymous HMAC. Short-lived counters are stored in TradeFeed&apos;s database
+                and may also be processed by Upstash when that service is configured. Raw
+                identifiers are not stored in those counters, vendor analytics are disabled, and
+                expired counters are deleted by the retention job.
               </li>
               <li>
                 <strong>Google Analytics:</strong> Aggregate traffic analytics, enabled only
@@ -239,6 +241,10 @@ export default function PrivacyPage() {
               after the HUNT begins. The scheduled cleanup may complete during the next retention
               cycle. We may retain de-identified funnel totals that cannot be used to contact or
               identify a requester.
+            </p>
+            <p className="text-stone-600 leading-relaxed">
+              Pseudonymous HUNT abuse-prevention counters expire after their short enforcement
+              window and are removed during a subsequent retention cycle.
             </p>
           </section>
 

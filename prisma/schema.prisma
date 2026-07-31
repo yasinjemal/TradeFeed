@@ -2075,3 +2075,24 @@ model HuntMediaDeletionJob {
 
   @@index([nextAttemptAt, createdAt])
 }
+
+// Privacy-safe fixed-window limiter for paid HUNT creation work. keyHash is an
+// HMAC digest; raw device and network identifiers must never be persisted.
+model HuntRateLimitBucket {
+  id          String             @id @default(cuid())
+  scope       HuntRateLimitScope
+  keyHash     String             @db.Char(64)
+  windowStart DateTime
+  windowEnd   DateTime
+  attempts    Int                @default(1)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@unique([scope, keyHash, windowStart])
+  @@index([windowEnd])
+}
+
+enum HuntRateLimitScope {
+  DEVICE
+  NETWORK
+}

@@ -12,10 +12,10 @@ in this file in the same change.
 |---|---|
 | Last updated | 2026-07-31 |
 | Product stage | Stage 0 — concierge pilot |
-| Build status | Public-beta release candidate verified; production migration applied |
+| Build status | Visible public Beta live; first-submission resilience fix deployed |
 | Pilot wedge | Fashion and sneakers in Johannesburg |
 | Public launch | Limited Beta discovery approved; broad campaign not yet approved |
-| Current engineering goal | Deploy the visible Beta and complete the first real concierge Hunts |
+| Current engineering goal | Verify the first real HUNT submission and complete the concierge loop |
 | Biggest unproven risk | Relevant sellers responding quickly with credible stock |
 | Next gate | Recruit opted-in sellers and complete five internal end-to-end Hunts |
 
@@ -291,6 +291,7 @@ fields.
 | 2026-07-30 | “Offers,” not “auctions.” | Public competitive bidding introduces avoidable legal and trust risk. |
 | 2026-07-30 | No global navigation link during the internal pilot. | A live feature requires seller coverage and an operating response process. |
 | 2026-07-31 | Add a visible `HUNT Beta` entry while withholding the broad social campaign. | The operations, moderation and genuine-offer loop now exist; limited discovery can validate buyer demand without pretending seller liquidity is proven. |
+| 2026-07-31 | Keep paid HUNT creation fail-closed on a privacy-safe PostgreSQL limiter. | Production must remain usable without an optional Redis provider while still bounding AI and storage work before it begins. |
 
 ## Open decisions
 
@@ -425,6 +426,28 @@ Production runtime requirements:
   `prisma/migrations/20260731120000_add_hunt_public_beta_operations/migration.sql`
   to the production Neon database through a verified temporary branch, then
   confirmed the migration ledger and operational tables on production.
+
+### 2026-07-31 — First-submission production incident diagnosed
+
+- Confirmed that production contained zero Hunts: the first real buyer had not
+  consumed a phone, browser, or database quota.
+- Found that HUNT creation had been made dependent on Upstash while the linked
+  production environment did not contain Upstash credentials. The fail-closed
+  infrastructure result was incorrectly displayed as a genuine device quota.
+- Replaced the single-provider creation gate with a fail-closed PostgreSQL
+  limiter: six attempts per pseudonymous browser and thirty per pseudonymous
+  network each hour. Only server-keyed HMAC digests are stored; raw browser and
+  network identifiers are never persisted.
+- Unknown or malformed network values no longer share one global `unknown`
+  bucket. A valid browser identity remains required and rate-limited.
+- Cheap field, phone, file-signature, and safe-image checks now run before an
+  attempt consumes the paid AI/storage quota.
+- Added a separate three-successful-Hunts-per-day browser limit alongside the
+  existing atomic WhatsApp-number limit.
+- Added retention cleanup for expired rate-limit buckets and updated the HUNT
+  privacy disclosure.
+- Fixed the missing request nonce on the theme bootstrap and root JSON-LD
+  scripts, removing the CSP violation visible during the first production try.
 
 ## Next three build moves
 

@@ -39,7 +39,6 @@ export type LimiterName =
   | "ai"
   | "message"
   | "tracking"
-  | "huntCreate"
   | "huntJoin"
   | "huntReport";
 
@@ -54,7 +53,6 @@ const LIMITER_CONFIG: Record<LimiterName, { limit: number; windowSeconds: number
   ai:        { limit: 50,  windowSeconds: 86400 }, // 50 AI generations per shop per day
   message:   { limit: 12,  windowSeconds: 60 },
   tracking:  { limit: 20,  windowSeconds: 60 },
-  huntCreate:{ limit: 6,   windowSeconds: 3600 },
   huntJoin:  { limit: 30,  windowSeconds: 60 },
   huntReport:{ limit: 3,   windowSeconds: 3600 },
 };
@@ -134,22 +132,6 @@ export async function checkRateLimit(
 
   try {
     const upstash = getUpstashLimiter(name);
-    if (
-      !upstash &&
-      process.env.NODE_ENV === "production" &&
-      name === "huntCreate"
-    ) {
-      console.error(
-        '[rate-limit] Distributed limiter unavailable for "huntCreate"; failing closed',
-      );
-      return {
-        allowed: false,
-        remaining: 0,
-        resetAt: Date.now() + cfg.windowSeconds * 1_000,
-        retryAfterSeconds: cfg.windowSeconds,
-      };
-    }
-
     // ── Upstash path (production) ─────────────────────────────
     if (upstash) {
       const encoder = new TextEncoder();
@@ -176,17 +158,9 @@ export async function checkRateLimit(
       return { allowed: success, remaining, resetAt, retryAfterSeconds: Math.max(retryAfter, 0) };
     }
   } catch (err) {
-    // Most low-cost interactions fail open. Paid public HUNT creation fails
-    // closed so a Redis outage cannot become an unbounded AI/storage bill.
+    // Low-cost interactions fail open. Paid HUNT creation uses its own
+    // fail-closed PostgreSQL limiter and never enters this fallback.
     console.warn(`[rate-limit] Redis error for "${name}", failing open:`, err instanceof Error ? err.message : err);
-    if (process.env.NODE_ENV === "production" && name === "huntCreate") {
-      return {
-        allowed: false,
-        remaining: 0,
-        resetAt: Date.now() + cfg.windowSeconds * 1_000,
-        retryAfterSeconds: cfg.windowSeconds,
-      };
-    }
     return { allowed: true, remaining: cfg.limit, resetAt: Date.now() + cfg.windowSeconds * 1000, retryAfterSeconds: 0 };
   }
 
@@ -198,9 +172,43 @@ export async function checkRateLimit(
  * Extract client IP from request headers.
  * Works for both middleware (Request) and server actions (headers()).
  */
+export function getClientIpFromHeaders(
+  headerSource: Pick<Headers, "get">,
+): string {
+  const candidates = [
+    headerSource.get("x-forwarded-for")?.split(",")[0],
+    headerSource.get("x-real-ip"),
+    headerSource.get("x-vercel-forwarded-for")?.split(",")[0],
+    headerSource.get("cf-connecting-ip"),
+  ];
+
+  for (const rawCandidate of candidates) {
+    const candidate = rawCandidate?.trim().toLowerCase();
+    if (!candidate || candidate === "unknown" || candidate.length > 64) {
+      continue;
+    }
+
+    const ipv4Parts = candidate.split(".");
+    const isIpv4 =
+      ipv4Parts.length === 4 &&
+      ipv4Parts.every(
+        (part) =>
+          /^\d{1,3}$/.test(part) &&
+          Number(part) >= 0 &&
+          Number(part) <= 255,
+      );
+    const isIpv6 =
+      candidate.includes(":") && /^[0-9a-f:.]+$/i.test(candidate);
+    if (isIpv4 || isIpv6) {
+      return candidate;
+    }
+  }
+
+  return "unknown";
+}
+
 export function getClientIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  return forwarded?.split(",")[0]?.trim() ?? "unknown";
+  return getClientIpFromHeaders(request.headers);
 }
 
 /**
@@ -210,6 +218,5 @@ export function getClientIp(request: Request): string {
 export async function getActionClientIp(): Promise<string> {
   const { headers } = await import("next/headers");
   const headersList = await headers();
-  const forwarded = headersList.get("x-forwarded-for");
-  return forwarded?.split(",")[0]?.trim() ?? "unknown";
+  return getClientIpFromHeaders(headersList);
 }
