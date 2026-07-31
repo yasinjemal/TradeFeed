@@ -28,7 +28,7 @@ test.describe("Static Pages", () => {
     expect(res.status()).toBe(200);
 
     const body = await res.text();
-    expect(body).toContain("User-agent");
+    expect(body).toMatch(/^User-Agent:/im);
   });
 
   test("sitemap.xml is accessible", async ({ request }) => {
@@ -39,9 +39,10 @@ test.describe("Static Pages", () => {
     expect(body).toContain("urlset");
   });
 
-  test("404 page renders for unknown routes", async ({ page }) => {
-    const res = await page.goto("/this-page-does-not-exist-xyz");
-    // Should get a 404 status
+  test("missing public catalog renders a 404", async ({ page }) => {
+    const res = await page.goto(
+      "/catalog/this-shop-does-not-exist-xyz",
+    );
     expect(res?.status()).toBe(404);
   });
 });

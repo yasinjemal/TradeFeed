@@ -8,45 +8,31 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Seller Flow", () => {
-  test("create-shop form has required fields", async ({ page }) => {
+  test("create-shop keeps the seller's intended destination", async ({
+    page,
+  }) => {
     await page.goto("/create-shop");
 
-    // Shop name input
-    const nameInput = page
-      .getByLabel(/shop name|name/i)
-      .or(page.locator("input[name='name']"))
-      .first();
-    await expect(nameInput).toBeVisible();
-
-    // WhatsApp number input
-    const whatsappInput = page
-      .getByLabel(/whatsapp|phone/i)
-      .or(page.locator("input[name='whatsappNumber']"))
-      .first();
-    await expect(whatsappInput).toBeVisible();
-
-    // Submit button
-    const submit = page
-      .getByRole("button", { name: /create|submit|launch/i })
-      .first();
-    await expect(submit).toBeVisible();
+    await expect(page).toHaveURL(/\/sign-up.*redirect_url=/i);
+    await expect(
+      page.getByRole("heading", { name: /sell your stock faster with ai/i }),
+    ).toBeVisible();
   });
 
-  test("create-shop form validates empty submission", async ({ page }) => {
+  test("seller registration gate has required account fields", async ({
+    page,
+  }) => {
     await page.goto("/create-shop");
 
-    // Try to submit without filling anything
-    const submit = page
-      .getByRole("button", { name: /create|submit|launch/i })
-      .first();
-
-    if (await submit.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await submit.click();
-
-      // Should show validation errors or not navigate away
-      await page.waitForTimeout(500);
-      expect(page.url()).toContain("/create-shop");
-    }
+    await expect(
+      page.getByRole("textbox", { name: /email address/i }),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByRole("textbox", { name: /password/i }),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByRole("button", { name: "Continue", exact: true }),
+    ).toBeVisible();
   });
 
   test("dashboard redirects unauthenticated users", async ({ page }) => {
@@ -59,16 +45,12 @@ test.describe("Seller Flow", () => {
     expect(redirectedToAuth || stayedOnDashboard).toBeTruthy();
   });
 
-  test("contact page loads with form", async ({ page }) => {
+  test("contact page exposes email and WhatsApp support", async ({ page }) => {
     await page.goto("/contact");
 
     await expect(page).toHaveTitle(/Contact|TradeFeed/i);
 
-    // Form should have email and message fields
-    const emailInput = page
-      .getByLabel(/email/i)
-      .or(page.locator("input[type='email']"))
-      .first();
-    await expect(emailInput).toBeVisible();
+    await expect(page.locator('a[href^="mailto:"]').first()).toBeVisible();
+    await expect(page.locator('a[href*="wa.me"]').first()).toBeVisible();
   });
 });

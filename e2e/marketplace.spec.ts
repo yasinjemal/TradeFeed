@@ -25,12 +25,14 @@ test.describe("Marketplace", () => {
     const search = page.getByPlaceholder(/search/i).first();
     await expect(search).toBeVisible();
 
-    // Type a search query — should update URL or filter results
+    // Type a search query and submit it — the URL is the shareable filter state.
     await search.fill("test product");
     await search.press("Enter");
 
-    // URL should contain the search param
-    await expect(page).toHaveURL(/q=test/i);
+    await expect(page).toHaveURL(
+      /[?&]search=test(?:\+|%20)product/i,
+      { timeout: 20_000 },
+    );
   });
 
   test("category filters are visible", async ({ page }) => {

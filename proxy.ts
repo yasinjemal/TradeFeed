@@ -185,8 +185,30 @@ export default clerkMiddleware(async (auth, request) => {
     return response;
   };
 
+  const withReferralCookie = (response: NextResponse): NextResponse => {
+    const referralCode =
+      request.nextUrl.pathname.startsWith("/sign-up")
+        ? request.nextUrl.searchParams.get("ref")
+        : null;
+
+    if (
+      referralCode &&
+      /^[A-Za-z0-9_-]{2,64}$/.test(referralCode)
+    ) {
+      response.cookies.set("tf_ref", referralCode, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 30,
+        path: "/",
+      });
+    }
+
+    return response;
+  };
+
   const finalizeResponse = (response: NextResponse): NextResponse =>
-    withVisitorCookie(withSecurityHeaders(response));
+    withReferralCookie(withVisitorCookie(withSecurityHeaders(response)));
 
   try {
     // ── Custom domain rewrite ───────────────────────────

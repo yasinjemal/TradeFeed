@@ -330,7 +330,14 @@ export function TfMarketplaceShell({
                   }
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === "Escape") setSuggestionsOpen(false);
+                  if (e.key === "Escape") {
+                    setSuggestionsOpen(false);
+                  } else if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (debounceRef.current) clearTimeout(debounceRef.current);
+                    setSuggestionsOpen(false);
+                    navigate({ search: search.trim() || undefined });
+                  }
                 }}
                 placeholder="Search products, sellers, brands..."
                 aria-label="Search the marketplace"

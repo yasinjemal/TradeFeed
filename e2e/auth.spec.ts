@@ -25,22 +25,23 @@ test.describe("Auth Pages", () => {
   test("sign-up page with referral code preserves ref param", async ({ page }) => {
     await page.goto("/sign-up?ref=TF-ABC123");
 
-    // Page should load without error
     await expect(page.locator("body")).toBeVisible();
-
-    // The ref param should be in the URL (Clerk may redirect, but initial load should have it)
-    // This verifies the cookie-setting logic fires on the server
+    await expect
+      .poll(async () => {
+        const referral = (await page.context().cookies()).find(
+          (cookie) => cookie.name === "tf_ref",
+        );
+        return referral?.value;
+      })
+      .toBe("TF-ABC123");
   });
 
-  test("create-shop page renders the form", async ({ page }) => {
+  test("create-shop redirects guests to registration", async ({ page }) => {
     await page.goto("/create-shop");
 
-    // Should see the "Create Your Shop" heading or branding
-    const heading = page.getByText(/create your shop|launch your/i).first();
-    await expect(heading).toBeVisible();
-
-    // Form elements should be present
-    const nameInput = page.getByLabel(/shop name|name/i).or(page.locator("input[name='name']")).first();
-    await expect(nameInput).toBeVisible();
+    await expect(page).toHaveURL(/\/sign-up.*redirect_url=/i);
+    await expect(
+      page.getByRole("heading", { name: /create your account/i }),
+    ).toBeVisible();
   });
 });

@@ -10,9 +10,9 @@ in this file in the same change.
 
 | Field | Value |
 |---|---|
-| Last updated | 2026-07-30 |
+| Last updated | 2026-07-31 |
 | Product stage | Stage 0 — concierge pilot |
-| Build status | First buyer vertical slice implemented locally; not deployed |
+| Build status | Hidden production route live; controlled internal create/join smoke passed |
 | Pilot wedge | Fashion and sneakers in Johannesburg |
 | Public launch | Not yet approved |
 | Current engineering goal | Build the private concierge operations queue and genuine seller-offer workflow |
@@ -88,7 +88,7 @@ Goal: prove that buyers will submit requests and relevant sellers will answer.
 - [x] Build screenshot-based Hunt creation.
 - [x] Build a durable public Hunt room.
 - [x] Let another buyer join a Hunt without exposing their number.
-- [ ] Apply the HUNT database migration and deploy the hidden pilot.
+- [x] Apply the HUNT database migration and deploy the hidden pilot.
 - [ ] Add a private operations view for the TradeFeed team.
 - [ ] Let the team manually route a Hunt to selected opted-in sellers.
 - [ ] Let the team enter a genuine seller offer.
@@ -335,11 +335,11 @@ fields.
 - Kept HUNT out of the main TradeFeed navigation until seller coverage and
   concierge operations are ready.
 
-Known deployment dependency:
+Production runtime requirements:
 
 - The migration in
-  `prisma/migrations/20260730120000_add_hunt_concierge_mvp/migration.sql` must
-  be applied before the new routes can serve real records.
+  `prisma/migrations/20260730120000_add_hunt_concierge_mvp/migration.sql` is
+  applied and recorded in the production Prisma migration ledger.
 - Production creation also requires working OpenAI, UploadThing, database, and
   rate-limit configuration. Missing image moderation fails closed; it never
   returns a fake Hunt.
@@ -360,10 +360,37 @@ Known deployment dependency:
 - No migration, deployment, navigation promotion, or seller alert was
   performed as part of this local checkpoint.
 
+### 2026-07-31 — Hidden production pilot verified
+
+- Applied only the additive HUNT migration to the production Neon database,
+  verified its tables, columns, indexes, constraints, and enum values, and
+  recorded it in the Prisma migration ledger.
+- Confirmed `https://tradefeed.co.za/hunt` serves the complete buyer-entry
+  experience in production.
+- Completed a controlled real create flow using an unbranded test image,
+  consented test details, live AI safety/extraction, UploadThing media, and
+  persisted production records.
+- Confirmed the public room exposes no private requester fields, uses clean
+  canonical metadata, remains `noindex`, and serves the uploaded image.
+- Joined the Hunt twice with the same anonymous participant and confirmed the
+  count increased once, proving the join mutation is idempotent.
+- Confirmed the UI showed the real count and an honest no-offer state; no
+  seller, response time, discount, or offer was fabricated.
+- Rejected and deleted the controlled Hunt, its private and participant
+  records, and its uploaded image. Production contains no smoke-test residue.
+- Added isolated PostgreSQL services and schema synchronisation to both CI
+  jobs so tests no longer depend on an unavailable localhost database.
+- Kept HUNT hidden from global navigation and marketing. The buyer vertical
+  slice is ready for controlled internal production testing, not a real-user
+  pilot or public promotion.
+- A real-user pilot remains blocked on the operations queue, seller offer and
+  order handoff, retention cleanup, HUNT privacy disclosures, and takedown
+  tooling.
+
 ## Next three build moves
 
 1. Build the private concierge operations queue with access-controlled buyer
    contact and moderation states.
 2. Add opted-in seller routing and capture genuine seller offers.
-3. Connect the chosen offer to WhatsApp ordering, then apply the migration to
-   a hidden pilot environment after the internal launch gates pass.
+3. Connect the chosen offer to the existing WhatsApp order flow, then complete
+   five internal end-to-end Hunts before any public campaign.
