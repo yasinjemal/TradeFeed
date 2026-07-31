@@ -46,10 +46,14 @@ test.describe("Marketplace", () => {
   });
 
   test("promoted badge appears on boosted products", async ({ page }) => {
-    await page.goto("/marketplace");
+    const response = await page.goto("/marketplace");
 
     // Page should load without errors — promoted products may or may not exist
     // This test verifies the page renders, not that promotions exist
-    await expect(page.locator("body")).not.toHaveText(/error|500|Internal Server/i);
+    expect(response?.status()).toBeLessThan(500);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(
+      /Application error|Internal Server Error/i,
+    );
   });
 });
