@@ -21,7 +21,9 @@ env:
   # Isolated CI database and dummy build values — real values are in Vercel
   DATABASE_URL: "postgresql://tradefeed:tradefeed@localhost:5432/tradefeed_test"
   NEXT_PUBLIC_APP_URL: "https://tradefeed.co.za"
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_dummy"
+  # Structurally valid offline key for Clerk's runtime parser; it does not
+  # identify or connect to a real Clerk application.
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_Y2xlcmsuZXhhbXBsZS5jb20k"
   CLERK_SECRET_KEY: "sk_test_dummy"
   UPLOADTHING_TOKEN: "dummy"
 
