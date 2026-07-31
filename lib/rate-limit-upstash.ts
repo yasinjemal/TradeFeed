@@ -38,7 +38,9 @@ export type LimiterName =
   | "analytics"
   | "ai"
   | "message"
-  | "tracking";
+  | "tracking"
+  | "huntCreate"
+  | "huntJoin";
 
 // ── Config per limiter ──────────────────────────────────────
 
@@ -51,6 +53,8 @@ const LIMITER_CONFIG: Record<LimiterName, { limit: number; windowSeconds: number
   ai:        { limit: 50,  windowSeconds: 86400 }, // 50 AI generations per shop per day
   message:   { limit: 12,  windowSeconds: 60 },
   tracking:  { limit: 20,  windowSeconds: 60 },
+  huntCreate:{ limit: 6,   windowSeconds: 3600 },
+  huntJoin:  { limit: 30,  windowSeconds: 60 },
 };
 
 // ── Upstash instances (lazy singleton per limiter) ──────────

@@ -24,6 +24,7 @@ const HIDDEN_PREFIXES = [
   "/sign-up",
   "/create-shop",
   "/growth",
+  "/hunt",
 ];
 
 // Build-time flag: TF skin follows light/dark mode via tf-* tokens;

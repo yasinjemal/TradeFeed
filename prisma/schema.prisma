@@ -1720,3 +1720,106 @@ model ShopActivityLog {
   @@index([shopId, userId])
   @@index([shopId, entityType])
 }
+
+// ============================================================
+// TRADEFEED HUNT: Buyer-led product discovery
+//
+// Public Hunt data is intentionally separated from private
+// requester data. Public pages must query Hunt with an explicit
+// select and must never include HuntPrivateData.
+// ============================================================
+model Hunt {
+  id               String               @id @default(cuid())
+  slug             String               @unique
+  status           HuntStatus           @default(LIVE)
+  moderationStatus HuntModerationStatus @default(APPROVED)
+
+  // Public, moderated request fields
+  publicTitle       String
+  publicDescription String
+  publicImageUrl    String
+  publicImageKey    String?
+  category          String?
+  desiredVariant    String?
+  desiredColor      String?
+  style             String?
+  matchPreference   HuntMatchPreference @default(SIMILAR_OK)
+  maxBudgetCents    Int?
+  city              String
+  province          String?
+  aiConfidence      Float?
+
+  // Publication and retention state
+  publishedAt   DateTime  @default(now())
+  expiresAt     DateTime
+  resolvedAt    DateTime?
+  seoApprovedAt DateTime?
+
+  privateData  HuntPrivateData?
+  participants HuntParticipant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([status, expiresAt])
+  @@index([moderationStatus, status, createdAt])
+  @@index([city, status, createdAt])
+  @@index([category, status, createdAt])
+}
+
+enum HuntStatus {
+  LIVE
+  FOUND
+  CLOSED
+  REJECTED
+  EXPIRED
+}
+
+enum HuntModerationStatus {
+  APPROVED
+  REVIEW_REQUIRED
+  REJECTED
+}
+
+enum HuntMatchPreference {
+  EXACT_ONLY
+  SIMILAR_OK
+}
+
+// Private operational data. Phone numbers and raw buyer text are PII
+// (POPIA) and must never be selected by a public Hunt query.
+model HuntPrivateData {
+  id     String @id @default(cuid())
+  huntId String @unique
+  hunt   Hunt   @relation(fields: [huntId], references: [id], onDelete: Cascade)
+
+  ownerFeatureId       String
+  whatsappNumber       String
+  buyerName            String?
+  rawRequestText       String
+  huntUpdatesConsentAt DateTime
+  publicImageConsentAt DateTime
+  termsAcceptedAt      DateTime
+  purgeAfter           DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerFeatureId, createdAt])
+  @@index([purgeAfter])
+}
+
+// Anonymous functional participation. This is soft interest only;
+// future quantity pricing must use verified reservations instead.
+model HuntParticipant {
+  id        String   @id @default(cuid())
+  huntId    String
+  hunt      Hunt     @relation(fields: [huntId], references: [id], onDelete: Cascade)
+  visitorId String
+  createdAt DateTime @default(now())
+
+  @@unique([huntId, visitorId])
+  @@index([visitorId, createdAt])
+  @@index([huntId, createdAt])
+}

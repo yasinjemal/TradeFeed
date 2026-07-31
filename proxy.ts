@@ -48,6 +48,7 @@ const isPublicRoute = createRouteMatcher([
   "/catalog/(.*)",                  // Public storefront (buyer-facing)
   "/s/(.*)",                        // Vanity short link → redirects to catalog
   "/marketplace(.*)",               // Public marketplace (discovery)
+  "/hunt(.*)",                      // HUNT pilot (buyer requests + public rooms)
   "/track(.*)",                     // Public order tracking (buyer-facing)
   "/orders",                        // Buyer order history (optional auth — shows sign-in CTA for guests)
   "/api/webhooks/(.*)",             // Clerk webhooks (server-to-server)
@@ -90,6 +91,7 @@ const isPublicRoute = createRouteMatcher([
 // Routes that should be rate-limited
 const isCatalogRoute = createRouteMatcher(["/catalog/(.*)"]);
 const isMarketplaceRoute = createRouteMatcher(["/marketplace(.*)"]);
+const isHuntRoute = createRouteMatcher(["/hunt(.*)"]);
 const isPublicOrderRoute = createRouteMatcher(["/track(.*)", "/pay/(.*)"]);
 const isApiRoute = createRouteMatcher(["/api/(.*)"]);
 const isSentryTunnelRoute = createRouteMatcher(["/monitoring"]);
@@ -276,7 +278,7 @@ export default clerkMiddleware(async (auth, request) => {
           }),
         );
       }
-    } else if (isCatalogRoute(request) || isMarketplaceRoute(request)) {
+    } else if (isCatalogRoute(request) || isMarketplaceRoute(request) || isHuntRoute(request)) {
       const result = await checkRateLimit("catalog", ip);
       if (!result.allowed) {
         console.warn("[middleware] rate_limit catalog", { limit: 60 });
