@@ -301,13 +301,18 @@ export default async function HomePage() {
               { label: tNav("pricing"), href: "#pricing" },
               { label: tNav("faq"), href: "#faq" },
               { label: tNav("marketplace"), href: "/marketplace" },
+              { label: "HUNT Beta", href: "/hunt#start-hunt" },
               { label: "Growth", href: "/growth" },
               { label: "Import Catalogue", href: "/import-whatsapp-catalogue" },
             ].map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="px-3.5 py-2 text-sm text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-all"
+                className={
+                  link.label === "HUNT Beta"
+                    ? "mx-1 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-emerald-700 transition-all hover:border-emerald-300 hover:bg-emerald-100"
+                    : "px-3.5 py-2 text-sm text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-all"
+                }
               >
                 {link.label}
               </Link>
@@ -970,7 +975,7 @@ export default async function HomePage() {
             <div>
               <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-4">{tFooter("product")}</h4>
               <ul className="space-y-2.5">
-                {[{ label: tNav("features"), href: "#features" }, { label: tNav("pricing"), href: "#pricing" }, { label: "TradeFeed Growth", href: "/growth" }, { label: tNav("marketplace"), href: "/marketplace" }, { label: tNav("faq"), href: "#faq" }].map((l) => (
+                {[{ label: "TradeFeed HUNT — Beta", href: "/hunt#start-hunt" }, { label: tNav("features"), href: "#features" }, { label: tNav("pricing"), href: "#pricing" }, { label: "TradeFeed Growth", href: "/growth" }, { label: tNav("marketplace"), href: "/marketplace" }, { label: tNav("faq"), href: "#faq" }].map((l) => (
                   <li key={l.label}><Link href={l.href} className="text-sm text-slate-400 hover:text-white transition-colors">{l.label}</Link></li>
                 ))}
               </ul>

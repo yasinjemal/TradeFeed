@@ -838,6 +838,37 @@ h4, h5, h6 {
   display: none;
 }
 
+/* HUNT must remain a clear, high-contrast product entry both over the dark
+   hero and after the header lifts onto a light or dark surface. */
+.tf-hunt-nav {
+  border-color: color-mix(in srgb, var(--color-tf-primary) 35%, transparent);
+  background-color: color-mix(in srgb, var(--color-tf-primary) 10%, transparent);
+  color: var(--color-tf-primary);
+}
+.tf-hunt-nav:hover {
+  border-color: color-mix(in srgb, var(--color-tf-primary) 58%, transparent);
+  background-color: color-mix(in srgb, var(--color-tf-primary) 18%, transparent);
+  color: var(--color-tf-primary-hover);
+}
+.tf-hunt-nav-badge {
+  background-color: var(--color-tf-primary);
+  color: white;
+}
+.tf-header[data-scrolled="false"] .tf-hunt-nav {
+  border-color: rgb(110 231 183 / 0.4);
+  background-color: rgb(52 211 153 / 0.12);
+  color: #a7f3d0;
+}
+.tf-header[data-scrolled="false"] .tf-hunt-nav:hover {
+  border-color: rgb(110 231 183 / 0.68);
+  background-color: rgb(52 211 153 / 0.22);
+  color: #d1fae5;
+}
+.tf-header[data-scrolled="false"] .tf-hunt-nav-badge {
+  background-color: #6ee7b7;
+  color: #022c22;
+}
+
 /* Nav links: hairline underline grows from the left on hover */
 .tf-navlink {
   position: relative;

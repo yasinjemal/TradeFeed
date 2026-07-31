@@ -117,6 +117,9 @@ model Shop {
   followers    ShopFollow[]                    // Buyers following this shop
   verification SellerVerification?             // Verification record backing isVerified
   importJobs   ImportJob[]                     // Catalogue import jobs
+  huntOffers   HuntOffer[]                     // Public-beta offers made against buyer Hunts
+  huntSellerRoutes HuntSellerRoute[]            // Manual HUNT routing history
+  huntSellerPreference HuntSellerPreference?    // Explicit seller opt-in and routing scope
 
   @@index([slug])
   @@index([isActive])
@@ -1733,6 +1736,8 @@ model Hunt {
   slug             String               @unique
   status           HuntStatus           @default(LIVE)
   moderationStatus HuntModerationStatus @default(APPROVED)
+  fulfillmentStatus HuntFulfillmentStatus @default(NONE)
+  selectedOfferId  String?              @unique
 
   // Public, moderated request fields
   publicTitle       String
@@ -1754,9 +1759,17 @@ model Hunt {
   expiresAt     DateTime
   resolvedAt    DateTime?
   seoApprovedAt DateTime?
+  handoffAt     DateTime?
+  fulfilledAt   DateTime?
 
-  privateData  HuntPrivateData?
-  participants HuntParticipant[]
+  privateData    HuntPrivateData?
+  participants   HuntParticipant[]
+  offers         HuntOffer[]       @relation("HuntOffers")
+  selectedOffer  HuntOffer?        @relation("SelectedHuntOffer", fields: [selectedOfferId], references: [id], onDelete: SetNull)
+  sellerRoutes   HuntSellerRoute[]
+  events         HuntEvent[]
+  reports        HuntReport[]
+  takedowns      HuntTakedown[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1787,6 +1800,13 @@ enum HuntMatchPreference {
   SIMILAR_OK
 }
 
+enum HuntFulfillmentStatus {
+  NONE
+  OFFER_SELECTED
+  HANDOFF_SENT
+  FULFILLED
+}
+
 // Private operational data. Phone numbers and raw buyer text are PII
 // (POPIA) and must never be selected by a public Hunt query.
 model HuntPrivateData {
@@ -1807,6 +1827,7 @@ model HuntPrivateData {
   updatedAt DateTime @updatedAt
 
   @@index([ownerFeatureId, createdAt])
+  @@index([whatsappNumber, createdAt])
   @@index([purgeAfter])
 }
 
@@ -1822,4 +1843,235 @@ model HuntParticipant {
   @@unique([huntId, visitorId])
   @@index([visitorId, createdAt])
   @@index([huntId, createdAt])
+}
+
+// A public seller response to a Hunt. Seller identity is snapshotted so a
+// published offer remains understandable if the shop profile later changes.
+// sellerWhatsappSnapshot is private and must never be part of a public select.
+model HuntOffer {
+  id        String             @id @default(cuid())
+  huntId    String
+  hunt      Hunt               @relation("HuntOffers", fields: [huntId], references: [id], onDelete: Cascade)
+  shopId    String
+  shop      Shop               @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  status    HuntOfferStatus    @default(DRAFT)
+  matchType HuntOfferMatchType
+
+  publicProductName       String
+  publicDescription       String?
+  publicVariant           String?
+  publicDeliveryEstimate  String
+  publicProofUrl          String?
+  publicProofCapturedAt   DateTime?
+  priceCents              Int
+  quantityAvailable       Int?
+
+  publicSellerNameSnapshot     String
+  publicShopSlugSnapshot       String
+  publicSellerLogoUrlSnapshot  String?
+  publicSellerVerifiedSnapshot Boolean @default(false)
+
+  // Nullable so retention can redact it without removing public offer history.
+  sellerWhatsappSnapshot String?
+  privateDataPurgeAfter   DateTime
+
+  publishedAt DateTime?
+  withdrawnAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  selectedBy Hunt?       @relation("SelectedHuntOffer")
+  events     HuntEvent[]
+
+  @@unique([huntId, shopId])
+  @@index([huntId, status, publishedAt])
+  @@index([shopId, status, createdAt])
+  @@index([status, publishedAt])
+  @@index([privateDataPurgeAfter])
+}
+
+enum HuntOfferStatus {
+  DRAFT
+  PUBLISHED
+  WITHDRAWN
+  REJECTED
+}
+
+enum HuntOfferMatchType {
+  EXACT
+  SIMILAR
+  UNCERTAIN
+}
+
+// Empty city/category arrays mean "all" within the supported pilot.
+model HuntSellerPreference {
+  id          String   @id @default(cuid())
+  shopId      String   @unique
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  isOptedIn   Boolean  @default(false)
+  cities      String[] @default([])
+  categories  String[] @default([])
+  consentedAt DateTime?
+  consentSource String?
+  consentedBy String?
+  pausedAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isOptedIn, pausedAt])
+}
+
+// Internal audit record for manually routing a live Hunt to an opted-in shop.
+model HuntSellerRoute {
+  id          String                @id @default(cuid())
+  huntId      String
+  hunt        Hunt                  @relation(fields: [huntId], references: [id], onDelete: Cascade)
+  shopId      String
+  shop        Shop                  @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  status      HuntSellerRouteStatus @default(ROUTED)
+  routedBy    String
+  note        String?
+  routedAt    DateTime              @default(now())
+  contactedAt DateTime?
+  respondedAt DateTime?
+  declinedAt  DateTime?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@unique([huntId, shopId])
+  @@index([huntId, status, routedAt])
+  @@index([shopId, status, routedAt])
+}
+
+enum HuntSellerRouteStatus {
+  ROUTED
+  CONTACTED
+  RESPONDED
+  DECLINED
+  CANCELLED
+}
+
+// Low-cardinality funnel telemetry. Request text, phone numbers and other PII
+// do not belong in this model.
+model HuntEvent {
+  id         String         @id @default(cuid())
+  huntId     String?
+  hunt       Hunt?          @relation(fields: [huntId], references: [id], onDelete: Cascade)
+  offerId    String?
+  offer      HuntOffer?     @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  type       HuntEventType
+  actor      HuntEventActor
+  visitorId  String?
+  source     String?
+  dedupeKey  String?        @unique
+  purgeAfter DateTime?
+  createdAt  DateTime       @default(now())
+
+  @@index([huntId, type, createdAt])
+  @@index([offerId, type, createdAt])
+  @@index([type, createdAt])
+  @@index([visitorId, createdAt])
+  @@index([purgeAfter])
+}
+
+enum HuntEventType {
+  VIEWED
+  CREATE_STARTED
+  CREATED
+  SHARED
+  JOINED
+  SELLER_ROUTED
+  SELLER_RESPONDED
+  OFFER_PUBLISHED
+  OFFER_WITHDRAWN
+  OFFER_SELECTED
+  WHATSAPP_HANDOFF
+  FULFILLED
+  CLOSED
+  REPORTED
+  TAKEN_DOWN
+}
+
+enum HuntEventActor {
+  BUYER
+  SELLER
+  ADMIN
+  SYSTEM
+}
+
+model HuntReport {
+  id                String           @id @default(cuid())
+  huntId            String
+  hunt              Hunt             @relation(fields: [huntId], references: [id], onDelete: Cascade)
+  reason            HuntReportReason
+  details           String?
+  status            HuntReportStatus @default(OPEN)
+  reporterFeatureId String?
+  purgeAfter        DateTime
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  resolutionNote    String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  takedowns HuntTakedown[]
+
+  @@unique([huntId, reporterFeatureId])
+  @@index([status, createdAt])
+  @@index([huntId, status, createdAt])
+  @@index([purgeAfter])
+}
+
+enum HuntReportReason {
+  SCAM_OR_FRAUD
+  PROHIBITED_ITEM
+  COPYRIGHT_OR_TRADEMARK
+  PRIVACY
+  MISLEADING
+  SPAM
+  OTHER
+}
+
+enum HuntReportStatus {
+  OPEN
+  REVIEWING
+  ACTIONED
+  DISMISSED
+}
+
+// Immutable audit trail. HIDDEN accompanies the transaction that immediately
+// removes a Hunt from every public query.
+model HuntTakedown {
+  id        String              @id @default(cuid())
+  huntId    String
+  hunt      Hunt                @relation(fields: [huntId], references: [id], onDelete: Cascade)
+  reportId  String?
+  report    HuntReport?         @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  action    HuntTakedownAction
+  reason    String
+  actorId   String
+  createdAt DateTime            @default(now())
+
+  @@index([huntId, createdAt])
+  @@index([reportId, createdAt])
+}
+
+enum HuntTakedownAction {
+  HIDDEN
+  RESTORED
+}
+
+// Durable outbox for reference media. HUNT records and requester PII can be
+// deleted on schedule even when the storage provider is temporarily down.
+model HuntMediaDeletionJob {
+  id            String   @id @default(cuid())
+  fileKey       String   @unique
+  reason        String
+  attempts      Int      @default(0)
+  lastError     String?
+  nextAttemptAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([nextAttemptAt, createdAt])
 }

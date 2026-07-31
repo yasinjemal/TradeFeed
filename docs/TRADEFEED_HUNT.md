@@ -12,12 +12,12 @@ in this file in the same change.
 |---|---|
 | Last updated | 2026-07-31 |
 | Product stage | Stage 0 — concierge pilot |
-| Build status | Hidden production route live; controlled internal create/join smoke passed |
+| Build status | Public-beta release candidate verified; production migration applied |
 | Pilot wedge | Fashion and sneakers in Johannesburg |
-| Public launch | Not yet approved |
-| Current engineering goal | Build the private concierge operations queue and genuine seller-offer workflow |
+| Public launch | Limited Beta discovery approved; broad campaign not yet approved |
+| Current engineering goal | Deploy the visible Beta and complete the first real concierge Hunts |
 | Biggest unproven risk | Relevant sellers responding quickly with credible stock |
-| Next gate | Run the first 20 concierge Hunts with opted-in sellers |
+| Next gate | Recruit opted-in sellers and complete five internal end-to-end Hunts |
 
 ## North-star goal
 
@@ -89,10 +89,10 @@ Goal: prove that buyers will submit requests and relevant sellers will answer.
 - [x] Build a durable public Hunt room.
 - [x] Let another buyer join a Hunt without exposing their number.
 - [x] Apply the HUNT database migration and deploy the hidden pilot.
-- [ ] Add a private operations view for the TradeFeed team.
-- [ ] Let the team manually route a Hunt to selected opted-in sellers.
-- [ ] Let the team enter a genuine seller offer.
-- [ ] Hand the chosen offer into the existing WhatsApp order flow.
+- [x] Add a private operations view for the TradeFeed team.
+- [x] Let the team manually route a Hunt to selected opted-in sellers.
+- [x] Let the team enter a genuine seller offer.
+- [x] Hand the chosen offer into the existing WhatsApp order flow.
 - [ ] Recruit 20–30 responsive pilot sellers.
 - [ ] Complete 20 concierge Hunts.
 - [ ] Complete 100 valid Hunts before funding the remarkable version.
@@ -114,15 +114,15 @@ Goal: automate the repeated work that the concierge pilot proves valuable.
 
 - [ ] Structured image and request extraction.
 - [ ] Existing-catalogue matching.
-- [ ] Seller opt-in and category/location preferences.
+- [x] Seller opt-in and category/location preferences.
 - [ ] Relevance-based seller routing with notification limits.
 - [ ] Seller response link for price, variants, quantity, and delivery.
-- [ ] Live offer updates.
-- [ ] Exact, Similar, and Uncertain match labels.
-- [ ] Offer selection and WhatsApp checkout handoff.
-- [ ] Hunt expiry, withdrawal, abuse reporting, and takedown tools.
+- [x] Live offer updates.
+- [x] Exact, Similar, and Uncertain match labels.
+- [x] Offer selection and WhatsApp checkout handoff.
+- [x] Hunt expiry, buyer closing, abuse reporting, and takedown tools.
 - [ ] Successful-result share card.
-- [ ] Real event instrumentation for the funnel.
+- [x] Real persisted funnel events from creation through confirmed fulfilment.
 
 ### Stage 2 — Proof of Now
 
@@ -217,40 +217,44 @@ empty
 - buyer and participant WhatsApp numbers;
 - raw request text that may contain personal information;
 - feature/session identifiers;
-- seller contact details before a buyer chooses an offer;
+- seller name, logo, contact details, and proof media before a buyer chooses
+  an offer during Beta;
 - internal routing and moderation notes; and
 - precise buyer location.
 
 ## Safety and legal gates
 
-- [ ] POPIA retention and deletion periods documented.
+- [x] POPIA retention and deletion periods documented.
 - [x] Explicit consent to display the uploaded reference publicly.
 - [x] Separate consent for Hunt-related WhatsApp updates.
 - [x] No unrelated marketing consent bundled into the Hunt flow.
 - [ ] Faces, usernames, and unrelated personal details can be reviewed or
       blurred before broad public promotion.
 - [x] Prohibited-content and unsafe-image moderation before publication.
-- [ ] Counterfeit and rights-holder report/takedown process.
-- [ ] Seller notifications only for opted-in, relevant sellers.
+- [x] Counterfeit and rights-holder report/takedown process.
+- [x] Seller notifications only for opted-in, relevant sellers.
 - [ ] No public auction mechanics without South African legal review.
 - [ ] Quantity prices shown only when committed by the seller.
-- [ ] Proof of Now described as evidence of recent possession, never an
-      authenticity guarantee.
+- [ ] Proof of Now remains disabled until dedicated consent, sanitization,
+      owned-key storage, and deletion controls exist; when enabled, it must be
+      described as evidence of recent possession, never authenticity.
 - [x] Active and empty Hunts remain `noindex`; only legitimate solved Hunts may
       become indexable.
 
 ## Launch readiness gates
 
-Do not link HUNT from the main navigation or promote `#CanTradeFeedFindIt`
-until all of these are true:
+HUNT may be linked as a clearly labelled, no-guarantee Beta so real demand can
+be measured. Do not run a broad `#CanTradeFeedFindIt` campaign until all of
+these are true:
 
 - [ ] At least 20 opted-in pilot sellers are ready.
 - [ ] A TradeFeed operator is assigned during published service hours.
-- [ ] Moderation and takedown paths work.
-- [ ] Empty Hunts do not imply that sellers were contacted when they were not.
+- [x] Moderation and takedown paths work.
+- [x] Empty Hunts do not imply that sellers were contacted when they were not.
 - [ ] At least five end-to-end internal Hunts have been completed.
-- [ ] Analytics distinguish starts, shares, joins, credible offers, selections,
-      orders, and confirmed fulfilment.
+- [x] Persisted events distinguish creations, shares, joins, seller routes,
+      credible offers, selections, WhatsApp handoffs, and confirmed
+      fulfilment.
 - [ ] The first public campaign uses real elapsed time or a clearly labelled
       time-lapse.
 
@@ -286,6 +290,7 @@ fields.
 | 2026-07-30 | Buyer contact data is structurally separated from public Hunt data. | This lowers the chance of accidental POPIA exposure. |
 | 2026-07-30 | “Offers,” not “auctions.” | Public competitive bidding introduces avoidable legal and trust risk. |
 | 2026-07-30 | No global navigation link during the internal pilot. | A live feature requires seller coverage and an operating response process. |
+| 2026-07-31 | Add a visible `HUNT Beta` entry while withholding the broad social campaign. | The operations, moderation and genuine-offer loop now exist; limited discovery can validate buyer demand without pretending seller liquidity is proven. |
 
 ## Open decisions
 
@@ -387,10 +392,44 @@ Production runtime requirements:
   order handoff, retention cleanup, HUNT privacy disclosures, and takedown
   tooling.
 
+### 2026-07-31 — Public-beta operating loop implemented
+
+- Added high-contrast `HUNT Beta` entry points to both homepage designs, mobile
+  navigation, the marketplace search bar, footers, and zero-result searches.
+- A failed marketplace search now becomes a pre-filled Hunt instead of a dead
+  end.
+- Added an admin-only concierge queue with requester details kept off every
+  public query.
+- Added explicit seller opt-in with city/category scope, anonymized-offer
+  publication consent, manual routing, and a pre-filled WhatsApp message.
+  TradeFeed does not auto-broadcast to sellers.
+- Added operator-published genuine offers. Public selects structurally omit
+  seller name, logo, shop slug, WhatsApp number, private retention fields, and
+  proof media; the owner-only handoff resolves the real seller privately.
+- Added Exact, Similar, and Uncertain labels, current-stock confirmation,
+  owner-only offer selection, and a structured WhatsApp confirmation handoff.
+- Public proof media is deliberately disabled for Beta until TradeFeed has a
+  dedicated sanitized upload, seller-publication consent, key ownership, and
+  deletion lifecycle. Privately supplied proof is for concierge review only.
+- Rebuilds every public buyer reference image server-side as a bounded WebP
+  before AI review and upload, stripping EXIF/XMP, GPS, device data, embedded
+  thumbnails, and unsupported payloads.
+- Added buyer closing, abuse/rights/privacy reporting, admin takedown, audit
+  logging, fulfilment confirmation, funnel events, and scheduled 180-day
+  deletion of Hunt records and reference media.
+- Updated the HUNT terms and privacy disclosures. The Beta continues to promise
+  no guaranteed offer, no auction, and no authenticity guarantee.
+- Verified the complete 439-test repository suite, focused lint, TypeScript,
+  Prisma validation, and the 124-route production build.
+- Applied only
+  `prisma/migrations/20260731120000_add_hunt_public_beta_operations/migration.sql`
+  to the production Neon database through a verified temporary branch, then
+  confirmed the migration ledger and operational tables on production.
+
 ## Next three build moves
 
-1. Build the private concierge operations queue with access-controlled buyer
-   contact and moderation states.
-2. Add opted-in seller routing and capture genuine seller offers.
-3. Connect the chosen offer to the existing WhatsApp order flow, then complete
-   five internal end-to-end Hunts before any public campaign.
+1. Recruit 20–30 responsive Johannesburg fashion and sneaker sellers and
+   record their explicit routing preferences.
+2. Assign the operator schedule and complete five internal end-to-end Hunts.
+3. Complete 20 concierge Hunts, compare response and conversion metrics with
+   the gates above, then decide whether to automate seller responses.

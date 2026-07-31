@@ -10,6 +10,7 @@ test("telemetry extras use a strict property allowlist", () => {
   assert.deepEqual(
     sanitizeTelemetryMeta({
       shopId: "shop_123",
+      huntMediaKey: "hunt_upload_key_123",
       itemCount: 3,
       token: "one-time-secret",
       email: "private@example.com",
@@ -18,6 +19,7 @@ test("telemetry extras use a strict property allowlist", () => {
     }),
     {
       shopId: "shop_123",
+      huntMediaKey: "hunt_upload_key_123",
       itemCount: 3,
     },
   );

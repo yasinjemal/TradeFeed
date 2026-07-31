@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BadgeCheck, Search, SearchX, SlidersHorizontal, ArrowRight, Bookmark } from "lucide-react";
+import { BadgeCheck, Search, SearchX, SlidersHorizontal, ArrowRight, Bookmark, ScanSearch } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
@@ -392,6 +392,16 @@ export function TfMarketplaceShell({
               )}
             </div>
 
+            {/* HUNT discovery — visible beside search on every viewport */}
+            <Link
+              href="/hunt#start-hunt"
+              aria-label="Start a TradeFeed HUNT"
+              className="inline-flex min-h-[48px] shrink-0 items-center gap-1.5 rounded-2xl border border-emerald-300/70 bg-emerald-50 px-3 text-xs font-bold text-emerald-800 outline-none transition-all hover:border-emerald-400 hover:bg-emerald-100 focus-visible:ring-2 focus-visible:ring-tf-primary dark:border-emerald-700/60 dark:bg-emerald-950/40 dark:text-emerald-300"
+            >
+              <ScanSearch aria-hidden="true" className="size-4" />
+              <span>HUNT</span>
+            </Link>
+
             {/* Filters */}
             <button
               type="button"
@@ -564,6 +574,15 @@ export function TfMarketplaceShell({
             }
             action={
               <div className="flex flex-wrap justify-center gap-2">
+                {currentFilters.search && (
+                  <Link
+                    href={`/hunt?request=${encodeURIComponent(currentFilters.search)}#start-hunt`}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-tf-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-tf-primary-hover hover:shadow-md"
+                  >
+                    <ScanSearch aria-hidden="true" className="size-4" />
+                    HUNT &ldquo;{currentFilters.search}&rdquo;
+                  </Link>
+                )}
                 {activeCategoryName && !currentFilters.search ? (
                   <Link
                     href="/sign-up"

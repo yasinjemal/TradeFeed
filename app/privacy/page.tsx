@@ -86,6 +86,13 @@ export default function PrivacyPage() {
                 one-time codes, payment details, customer information, or private WhatsApp
                 messages.
               </li>
+              <li>
+                <strong>TradeFeed HUNT requests:</strong> If you start a HUNT, we collect the
+                product reference image you choose, your request, requested variant, budget,
+                general city, WhatsApp number, optional first name, and your HUNT-specific
+                consents. The moderated image and product request are public only after you
+                explicitly agree. Your WhatsApp number, name, and original note remain private.
+              </li>
             </ul>
           </section>
 
@@ -103,6 +110,12 @@ export default function PrivacyPage() {
               <li>
                 To respond to voluntary setup-help or catalogue-import requests and understand why
                 sellers stop using TradeFeed.
+              </li>
+              <li>
+                To moderate and structure a HUNT request, match it with relevant sellers, publish
+                seller-approved anonymized offer details, notify the requester, and prepare a
+                buyer-chosen WhatsApp handoff. During Beta, the public HUNT room withholds seller
+                names, logos, WhatsApp numbers, shop links, and proof media.
               </li>
               <li>To improve our platform and fix technical issues.</li>
             </ul>
@@ -145,6 +158,12 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong>Uploadthing:</strong> Image hosting service for product photos.
+              </li>
+              <li>
+                <strong>OpenAI:</strong> Product-image and request analysis used to moderate and
+                structure HUNT submissions. TradeFeed sends the submitted reference image and
+                request text for this purpose; requester contact details are not included in that
+                analysis request.
               </li>
               <li>
                 <strong>Neon:</strong> Database hosting provider (PostgreSQL).
@@ -214,6 +233,13 @@ export default function PrivacyPage() {
               days, whichever comes first. We may retain de-identified themes and aggregate counts
               for product planning.
             </p>
+            <p className="text-stone-600 leading-relaxed">
+              HUNT requester details, the original request, participant identifiers, seller-routing
+              records, offers, and the public reference image are scheduled for deletion 180 days
+              after the HUNT begins. The scheduled cleanup may complete during the next retention
+              cycle. We may retain de-identified funnel totals that cannot be used to contact or
+              identify a requester.
+            </p>
           </section>
 
           {/* 7 */}
@@ -252,9 +278,11 @@ export default function PrivacyPage() {
             <p className="text-stone-600 leading-relaxed">
               TradeFeed uses essential cookies for authentication and security. These remain
               available when you reject analytics. If you save a product or request a restock
-              alert while signed out, we also create a separate random buyer-feature cookie for
-              up to 90 days so only your saved items and alert request can be found again. It is
-              created on demand, is never used for analytics, and is not shared with advertisers.
+              alert, start or join a HUNT while signed out, we also create a separate random
+              buyer-feature cookie for up to 90 days. It lets TradeFeed recognise the HUNT creator,
+              prevent duplicate joins, and find only that browser&apos;s saved items or requests.
+              It is created on demand, is never used for advertising analytics, and is not shared
+              with advertisers.
               Error reports may still be sent to Sentry so we can diagnose failures, but
               identifying request data, cookies, request bodies, query strings, and arbitrary
               form values are removed from those reports.

@@ -572,21 +572,33 @@ export function MarketplaceShell({
                     },
                   }}
                   footer={
-                    suggestedSearches.length > 0 ? (
-                      <div>
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Suggested searches</p>
-                        <div className="flex flex-wrap justify-center gap-2">
-                          {suggestedSearches.map((term) => (
-                            <button
-                              key={term}
-                              type="button"
-                              onClick={() => submitSearch(term)}
-                              className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                            >
-                              {term}
-                            </button>
-                          ))}
-                        </div>
+                    currentFilters.search || suggestedSearches.length > 0 ? (
+                      <div className="space-y-4">
+                        {currentFilters.search && (
+                          <Link
+                            href={`/hunt?request=${encodeURIComponent(currentFilters.search)}#start-hunt`}
+                            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
+                          >
+                            HUNT &ldquo;{currentFilters.search}&rdquo;
+                          </Link>
+                        )}
+                        {suggestedSearches.length > 0 && (
+                          <div>
+                            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Suggested searches</p>
+                            <div className="flex flex-wrap justify-center gap-2">
+                              {suggestedSearches.map((term) => (
+                                <button
+                                  key={term}
+                                  type="button"
+                                  onClick={() => submitSearch(term)}
+                                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                                >
+                                  {term}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : null
                   }

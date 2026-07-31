@@ -31,7 +31,7 @@ export default function TermsPage() {
           </Link>
           <h1 className="text-3xl font-bold text-stone-900">Terms of Service</h1>
           <p className="text-stone-500 text-sm mt-2">
-            Last updated: February 2026
+            Last updated: July 2026
           </p>
         </div>
       </div>
@@ -92,6 +92,39 @@ export default function TermsPage() {
               <li>
                 TradeFeed does not guarantee the quality, authenticity, or delivery of any
                 products listed on the platform.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-stone-900">4A. TradeFeed HUNT Beta</h2>
+            <p className="text-stone-600 leading-relaxed">
+              HUNT lets a buyer publish a product reference and request genuine offers from
+              relevant sellers. By starting a HUNT, you confirm that you may use the reference
+              image for product-search purposes and that you have removed faces, usernames,
+              private messages, addresses, contact details, and other unrelated personal
+              information.
+            </p>
+            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+              <li>HUNT is a beta service and does not guarantee that an offer will arrive.</li>
+              <li>
+                TradeFeed may use automated checks and human review, but a match label or
+                current-stock confirmation is not an authenticity guarantee. Public proof media
+                is disabled during Beta.
+              </li>
+              <li>
+                Seller offers must reflect genuine stock, price, variants, delivery terms, and
+                quantity at the time they are submitted. Public rooms show seller-approved offer
+                details anonymously; seller identity and contact remain private until the buyer
+                chooses an offer.
+              </li>
+              <li>
+                The buyer chooses whether to contact a seller. Any order, payment, delivery,
+                return, or dispute remains directly between the buyer and seller.
+              </li>
+              <li>
+                TradeFeed may close, reject, or remove a HUNT or offer for privacy, rights-holder,
+                counterfeit, safety, fraud, or legal concerns.
               </li>
             </ul>
           </section>

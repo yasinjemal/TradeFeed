@@ -8,6 +8,7 @@ import {
   Check,
   Clock3,
   Copy,
+  Flag,
   MapPin,
   MessageCircle,
   Radar,
@@ -15,10 +16,18 @@ import {
   Share2,
   ShieldCheck,
   Sparkles,
+  Store,
   Users,
+  X,
 } from "lucide-react";
 
-import { joinHuntAction } from "@/app/actions/hunts";
+import {
+  closeHuntAction,
+  joinHuntAction,
+  reportHuntAction,
+  selectHuntOfferAction,
+  trackHuntShareAction,
+} from "@/app/actions/hunts";
 import { TfBadge } from "@/components/tf/badge";
 import { TfButton } from "@/components/tf/button";
 import { TfEmptyState } from "@/components/tf/empty-state";
@@ -39,9 +48,36 @@ interface HuntLiveRoomProps {
     budgetLabel: string | null;
     participantCount: number;
     viewerJoined: boolean;
+    viewerIsOwner: boolean;
+    selectedOfferId: string | null;
+    fulfillmentStatus:
+      | "NONE"
+      | "OFFER_SELECTED"
+      | "HANDOFF_SENT"
+      | "FULFILLED";
+    offers: Array<{
+      id: string;
+      matchType: "EXACT" | "SIMILAR" | "UNCERTAIN";
+      publicProductName: string;
+      publicDescription: string | null;
+      publicVariant: string | null;
+      publicDeliveryEstimate: string;
+      priceCents: number;
+      quantityAvailable: number | null;
+      publicSellerVerifiedSnapshot: boolean;
+      publishedAt: string | null;
+    }>;
     publishedLabel: string;
     expiresLabel: string;
   };
+}
+
+function formatOfferPrice(cents: number): string {
+  return new Intl.NumberFormat("en-ZA", {
+    style: "currency",
+    currency: "ZAR",
+    maximumFractionDigits: cents % 100 === 0 ? 0 : 2,
+  }).format(cents / 100);
 }
 
 export function HuntLiveRoom({ hunt }: HuntLiveRoomProps) {
@@ -51,13 +87,26 @@ export function HuntLiveRoom({ hunt }: HuntLiveRoomProps) {
   );
   const [joined, setJoined] = React.useState(hunt.viewerJoined);
   const [joining, setJoining] = React.useState(false);
+  const [selectedOfferId, setSelectedOfferId] = React.useState(
+    hunt.selectedOfferId,
+  );
+  const [selectingOfferId, setSelectingOfferId] = React.useState<string | null>(
+    null,
+  );
+  const [reportOpen, setReportOpen] = React.useState(false);
+  const [reportReason, setReportReason] = React.useState("MISLEADING");
+  const [reportDetails, setReportDetails] = React.useState("");
+  const [reporting, setReporting] = React.useState(false);
+  const [closing, setClosing] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [error, setError] = React.useState("");
+  const canonicalHuntUrl = `https://tradefeed.co.za/hunt/${hunt.slug}`;
 
   React.useEffect(() => {
     setParticipantCount(hunt.participantCount);
     setJoined(hunt.viewerJoined);
-  }, [hunt.participantCount, hunt.viewerJoined]);
+    setSelectedOfferId(hunt.selectedOfferId);
+  }, [hunt.participantCount, hunt.selectedOfferId, hunt.viewerJoined]);
 
   React.useEffect(() => {
     if (hunt.status !== "LIVE") return;
@@ -68,10 +117,11 @@ export function HuntLiveRoom({ hunt }: HuntLiveRoomProps) {
   const shareText = `Can TradeFeed find this in ${hunt.city}? Join the Hunt:`;
 
   const copyLink = React.useCallback(async () => {
-    await navigator.clipboard.writeText(window.location.href);
+    await navigator.clipboard.writeText(canonicalHuntUrl);
+    void trackHuntShareAction(hunt.slug, "copy");
     setMessage("Hunt link copied");
     window.setTimeout(() => setMessage(""), 2_500);
-  }, []);
+  }, [canonicalHuntUrl, hunt.slug]);
 
   const share = async () => {
     if (navigator.share) {
@@ -79,8 +129,9 @@ export function HuntLiveRoom({ hunt }: HuntLiveRoomProps) {
         await navigator.share({
           title: `${hunt.title} — TradeFeed HUNT`,
           text: shareText,
-          url: window.location.href,
+          url: canonicalHuntUrl,
         });
+        void trackHuntShareAction(hunt.slug, "native");
         setMessage("Hunt shared");
         return;
       } catch (shareError) {
@@ -98,19 +149,86 @@ export function HuntLiveRoom({ hunt }: HuntLiveRoomProps) {
   const join = async () => {
     setJoining(true);
     setError("");
-    const result = await joinHuntAction(hunt.slug);
-    if (result.success) {
-      setParticipantCount(result.participantCount);
-      setJoined(true);
-      setMessage("You joined this Hunt");
-      router.refresh();
-    } else {
-      setError(result.error);
+    try {
+      const result = await joinHuntAction(hunt.slug);
+      if (result.success) {
+        setParticipantCount(result.participantCount);
+        setJoined(true);
+        setMessage("You joined this Hunt");
+        router.refresh();
+      } else {
+        setError(result.error);
+      }
+    } catch {
+      setError("This Hunt could not be joined. Please try again.");
+    } finally {
+      setJoining(false);
     }
-    setJoining(false);
   };
 
-  const canonicalHuntUrl = `https://tradefeed.co.za/hunt/${hunt.slug}`;
+  const chooseOffer = async (offerId: string) => {
+    setSelectingOfferId(offerId);
+    setError("");
+    try {
+      const result = await selectHuntOfferAction(hunt.slug, offerId);
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      setSelectedOfferId(offerId);
+      setMessage("Offer selected. Opening WhatsApp...");
+      window.location.assign(result.whatsappUrl);
+    } catch {
+      setError("The offer could not be selected. Please try again.");
+    } finally {
+      setSelectingOfferId(null);
+    }
+  };
+
+  const submitReport = async () => {
+    setReporting(true);
+    setError("");
+    try {
+      const result = await reportHuntAction({
+        huntSlug: hunt.slug,
+        reason: reportReason,
+        details: reportDetails,
+      });
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      setMessage("Report received. TradeFeed will review it.");
+      setReportOpen(false);
+      setReportDetails("");
+    } catch {
+      setError("The report could not be sent. Please try again.");
+    } finally {
+      setReporting(false);
+    }
+  };
+
+  const closeHunt = async () => {
+    if (!window.confirm("Close this Hunt? New buyers and offers will stop.")) {
+      return;
+    }
+    setClosing(true);
+    setError("");
+    try {
+      const result = await closeHuntAction(hunt.slug);
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      setMessage("Hunt closed");
+      router.refresh();
+    } catch {
+      setError("The Hunt could not be closed. Please try again.");
+    } finally {
+      setClosing(false);
+    }
+  };
+
   const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(
     `${shareText} ${canonicalHuntUrl}`,
   )}`;
@@ -302,23 +420,142 @@ export function HuntLiveRoom({ hunt }: HuntLiveRoomProps) {
                 aria-hidden="true"
               />
             </div>
-            <TfEmptyState
-              icon={<Sparkles />}
-              title="No verified offer has been published yet"
-              description="The pilot team matches requests manually. We will never invent a seller, price, stock claim, or response time to make this page look busy."
-              action={
-                <TfButton asChild variant="secondary">
-                  <a
-                    href={sellerResponseUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageCircle aria-hidden="true" />
-                    I am a seller with this item
-                  </a>
-                </TfButton>
-              }
-            />
+            {hunt.offers.length === 0 ? (
+              <TfEmptyState
+                icon={<Sparkles />}
+                title="No verified offer has been published yet"
+                description="The concierge team records only genuine responses from opted-in TradeFeed sellers. We never invent a seller, price, stock claim, or response time."
+                action={
+                  <TfButton asChild variant="secondary">
+                    <a
+                      href={sellerResponseUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MessageCircle aria-hidden="true" />
+                      I am a seller with this item
+                    </a>
+                  </TfButton>
+                }
+              />
+            ) : (
+              <div className="space-y-3">
+                {hunt.offers.map((offer) => {
+                  const selected = selectedOfferId === offer.id;
+                  const matchLabel =
+                    offer.matchType === "EXACT"
+                      ? "Exact match"
+                      : offer.matchType === "SIMILAR"
+                        ? "Similar option"
+                        : "Needs confirmation";
+
+                  return (
+                    <article
+                      key={offer.id}
+                      className={`rounded-2xl border p-4 transition-colors sm:p-5 ${
+                        selected
+                          ? "border-tf-primary bg-tf-verified-soft"
+                          : "border-tf-stone-200 bg-tf-stone-50"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-tf-stone-200 bg-tf-raised text-tf-primary">
+                          <Store className="size-5" aria-hidden="true" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-semibold text-tf-ink">
+                              TradeFeed seller
+                            </p>
+                            {offer.publicSellerVerifiedSnapshot && (
+                              <TfBadge variant="verified" icon>
+                                Verified seller
+                              </TfBadge>
+                            )}
+                            <TfBadge
+                              variant={
+                                offer.matchType === "EXACT"
+                                  ? "sale"
+                                  : "outline"
+                              }
+                            >
+                              {matchLabel}
+                            </TfBadge>
+                          </div>
+                          <h3 className="mt-2 font-tf-display text-lg font-semibold text-tf-ink">
+                            {offer.publicProductName}
+                          </h3>
+                          {offer.publicDescription && (
+                            <p className="mt-1 text-sm leading-relaxed text-tf-stone-600">
+                              {offer.publicDescription}
+                            </p>
+                          )}
+                        </div>
+                        <p className="shrink-0 font-tf-display text-xl font-semibold tabular-nums text-tf-ink">
+                          {formatOfferPrice(offer.priceCents)}
+                        </p>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2 text-xs text-tf-stone-600">
+                        {offer.publicVariant && (
+                          <span className="rounded-full bg-tf-raised px-3 py-1.5">
+                            {offer.publicVariant}
+                          </span>
+                        )}
+                        <span className="rounded-full bg-tf-raised px-3 py-1.5">
+                          {offer.publicDeliveryEstimate}
+                        </span>
+                        {offer.quantityAvailable != null && (
+                          <span className="rounded-full bg-tf-raised px-3 py-1.5">
+                            {offer.quantityAvailable} available when checked
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-3 text-xs leading-relaxed text-tf-stone-500">
+                        TradeFeed recorded the seller&apos;s current-stock
+                        confirmation. Public proof media is withheld during
+                        Beta; this is not an authenticity guarantee.
+                      </p>
+
+                      <div className="mt-4 border-t border-tf-stone-200 pt-4">
+                        {hunt.viewerIsOwner ? (
+                          hunt.status === "LIVE" ||
+                          (hunt.status === "FOUND" && selected) ? (
+                            <TfButton
+                              type="button"
+                              fullWidth
+                              variant={selected ? "whatsapp" : "primary"}
+                              onClick={() => void chooseOffer(offer.id)}
+                              disabled={Boolean(
+                                selectingOfferId &&
+                                  selectingOfferId !== offer.id,
+                              )}
+                            >
+                              <MessageCircle aria-hidden="true" />
+                              {selectingOfferId === offer.id
+                                ? "Opening WhatsApp..."
+                                : selected
+                                  ? "Continue with this seller"
+                                  : "Choose & confirm on WhatsApp"}
+                            </TfButton>
+                          ) : (
+                            <p className="text-xs leading-relaxed text-tf-stone-500">
+                              This Hunt is closed. No new seller can be chosen.
+                            </p>
+                          )
+                        ) : (
+                          <p className="text-xs leading-relaxed text-tf-stone-500">
+                            Only the Hunt creator can choose an offer. Seller
+                            contact details stay private until that choice.
+                          </p>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="rounded-2xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm sm:p-6">
@@ -339,6 +576,9 @@ export function HuntLiveRoom({ hunt }: HuntLiveRoomProps) {
                   href={whatsappShareUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    void trackHuntShareAction(hunt.slug, "whatsapp")
+                  }
                 >
                   <MessageCircle aria-hidden="true" />
                   WhatsApp
@@ -381,6 +621,82 @@ export function HuntLiveRoom({ hunt }: HuntLiveRoomProps) {
                 WhatsApp order.
               </li>
             </ol>
+          </div>
+
+          <div className="rounded-2xl border border-tf-stone-200 bg-tf-raised p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-tf-display text-base font-semibold text-tf-ink">
+                  Safety & control
+                </h2>
+                <p className="mt-1 text-xs leading-relaxed text-tf-stone-500">
+                  Report privacy, rights, counterfeit, scam, spam or misleading
+                  content. Reports go to the private operator queue.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <TfButton
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setReportOpen((open) => !open)}
+                >
+                  <Flag aria-hidden="true" />
+                  Report
+                </TfButton>
+                {hunt.viewerIsOwner && isLive && (
+                  <TfButton
+                    type="button"
+                    variant="danger"
+                    onClick={() => void closeHunt()}
+                    disabled={closing}
+                  >
+                    <X aria-hidden="true" />
+                    {closing ? "Closing..." : "Close my Hunt"}
+                  </TfButton>
+                )}
+              </div>
+            </div>
+
+            {reportOpen && (
+              <div className="mt-4 space-y-3 border-t border-tf-stone-200 pt-4">
+                <label className="block text-sm font-semibold text-tf-ink">
+                  Reason
+                  <select
+                    value={reportReason}
+                    onChange={(event) => setReportReason(event.target.value)}
+                    className="mt-1.5 min-h-11 w-full rounded-xl border border-tf-stone-300 bg-tf-raised px-3 text-sm text-tf-ink outline-none focus-visible:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary/25"
+                  >
+                    <option value="MISLEADING">Misleading information</option>
+                    <option value="SCAM_OR_FRAUD">Scam or fraud concern</option>
+                    <option value="PROHIBITED_ITEM">Prohibited item</option>
+                    <option value="COPYRIGHT_OR_TRADEMARK">
+                      Copyright or trademark concern
+                    </option>
+                    <option value="PRIVACY">Privacy concern</option>
+                    <option value="SPAM">Spam</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </label>
+                <label className="block text-sm font-semibold text-tf-ink">
+                  Details <span className="font-normal text-tf-stone-500">(optional)</span>
+                  <textarea
+                    value={reportDetails}
+                    onChange={(event) => setReportDetails(event.target.value)}
+                    maxLength={1_000}
+                    rows={3}
+                    placeholder="Explain what TradeFeed should review. Do not include passwords or payment details."
+                    className="mt-1.5 w-full resize-none rounded-xl border border-tf-stone-300 bg-tf-raised px-3 py-2.5 text-sm text-tf-ink outline-none focus-visible:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary/25"
+                  />
+                </label>
+                <TfButton
+                  type="button"
+                  onClick={() => void submitReport()}
+                  disabled={reporting}
+                >
+                  {reporting ? "Sending..." : "Send private report"}
+                </TfButton>
+              </div>
+            )}
           </div>
 
           <div className="text-center">

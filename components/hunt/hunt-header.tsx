@@ -81,7 +81,9 @@ export function HuntHeader({ overHero = false }: { overHero?: boolean }) {
             )}
           />
           <TfButton asChild size="sm">
-            <Link href="/hunt">Start a Hunt</Link>
+            <Link href={overHero ? "#start-hunt" : "/hunt#start-hunt"}>
+              Start a Hunt
+            </Link>
           </TfButton>
         </div>
       </div>

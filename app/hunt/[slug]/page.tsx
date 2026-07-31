@@ -101,6 +101,13 @@ export default async function HuntRoomPage({ params }: HuntRoomPageProps) {
           budgetLabel: formatHuntBudget(hunt.maxBudgetCents),
           participantCount: hunt._count.participants,
           viewerJoined: hunt.viewerJoined,
+          viewerIsOwner: hunt.viewerIsOwner,
+          selectedOfferId: hunt.selectedOffer?.id ?? null,
+          fulfillmentStatus: hunt.fulfillmentStatus,
+          offers: hunt.offers.map((offer) => ({
+            ...offer,
+            publishedAt: offer.publishedAt?.toISOString() ?? null,
+          })),
           publishedLabel,
           expiresLabel,
         }}

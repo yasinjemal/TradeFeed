@@ -3,7 +3,25 @@ import { Prisma, type HuntMatchPreference, type HuntStatus } from "@prisma/clien
 import { db } from "@/lib/db";
 import { generateHuntSlug } from "@/lib/hunt/slug";
 
-const publicHuntSelect = {
+/**
+ * The only offer shape allowed on public surfaces. In particular this omits
+ * shopId, seller identity, proof media, sellerWhatsappSnapshot and
+ * privateDataPurgeAfter.
+ */
+export const publicHuntOfferSelect = {
+  id: true,
+  matchType: true,
+  publicProductName: true,
+  publicDescription: true,
+  publicVariant: true,
+  publicDeliveryEstimate: true,
+  priceCents: true,
+  quantityAvailable: true,
+  publicSellerVerifiedSnapshot: true,
+  publishedAt: true,
+} satisfies Prisma.HuntOfferSelect;
+
+export const publicHuntSelect = {
   id: true,
   slug: true,
   status: true,
@@ -21,6 +39,9 @@ const publicHuntSelect = {
   publishedAt: true,
   expiresAt: true,
   resolvedAt: true,
+  fulfillmentStatus: true,
+  handoffAt: true,
+  fulfilledAt: true,
   seoApprovedAt: true,
   _count: { select: { participants: true } },
 } satisfies Prisma.HuntSelect;
@@ -48,61 +69,105 @@ export interface CreateHuntRecordInput {
   purgeAfter: Date;
 }
 
+export class HuntDailyLimitError extends Error {
+  constructor() {
+    super("This WhatsApp number already started three Hunts today.");
+    this.name = "HuntDailyLimitError";
+  }
+}
+
 export async function createHuntRecord(input: CreateHuntRecordInput) {
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      return await db.hunt.create({
-        data: {
-          slug: generateHuntSlug(input.publicTitle),
-          status: "LIVE",
-          moderationStatus: "APPROVED",
-          publicTitle: input.publicTitle,
-          publicDescription: input.publicDescription,
-          publicImageUrl: input.publicImageUrl,
-          publicImageKey: input.publicImageKey,
-          category: input.category,
-          desiredVariant: input.desiredVariant,
-          desiredColor: input.desiredColor,
-          style: input.style,
-          matchPreference: input.matchPreference,
-          maxBudgetCents: input.maxBudgetCents,
-          city: input.city,
-          province: input.province,
-          aiConfidence: input.aiConfidence,
-          expiresAt: input.expiresAt,
-          privateData: {
-            create: {
-              ownerFeatureId: input.ownerFeatureId,
+      return await db.$transaction(
+        async (tx) => {
+          const recentHunts = await tx.huntPrivateData.count({
+            where: {
               whatsappNumber: input.whatsappNumber,
-              buyerName: input.buyerName,
-              rawRequestText: input.rawRequestText,
-              huntUpdatesConsentAt: input.consentAt,
-              publicImageConsentAt: input.consentAt,
-              termsAcceptedAt: input.consentAt,
-              purgeAfter: input.purgeAfter,
+              createdAt: {
+                gte: new Date(
+                  input.consentAt.getTime() - 24 * 60 * 60 * 1_000,
+                ),
+              },
             },
-          },
-          participants: {
-            create: { visitorId: input.ownerFeatureId },
-          },
+          });
+          if (recentHunts >= 3) throw new HuntDailyLimitError();
+
+          return tx.hunt.create({
+            data: {
+              slug: generateHuntSlug(input.publicTitle),
+              status: "LIVE",
+              moderationStatus: "APPROVED",
+              publicTitle: input.publicTitle,
+              publicDescription: input.publicDescription,
+              publicImageUrl: input.publicImageUrl,
+              publicImageKey: input.publicImageKey,
+              category: input.category,
+              desiredVariant: input.desiredVariant,
+              desiredColor: input.desiredColor,
+              style: input.style,
+              matchPreference: input.matchPreference,
+              maxBudgetCents: input.maxBudgetCents,
+              city: input.city,
+              province: input.province,
+              aiConfidence: input.aiConfidence,
+              expiresAt: input.expiresAt,
+              privateData: {
+                create: {
+                  ownerFeatureId: input.ownerFeatureId,
+                  whatsappNumber: input.whatsappNumber,
+                  buyerName: input.buyerName,
+                  rawRequestText: input.rawRequestText,
+                  huntUpdatesConsentAt: input.consentAt,
+                  publicImageConsentAt: input.consentAt,
+                  termsAcceptedAt: input.consentAt,
+                  purgeAfter: input.purgeAfter,
+                },
+              },
+              participants: {
+                create: { visitorId: input.ownerFeatureId },
+              },
+              events: {
+                create: {
+                  type: "CREATED",
+                  actor: "BUYER",
+                  visitorId: input.ownerFeatureId,
+                  purgeAfter: input.purgeAfter,
+                },
+              },
+            },
+            select: { id: true, slug: true },
+          });
         },
-        select: { id: true, slug: true },
-      });
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        },
+      );
     } catch (error) {
-      const slugCollision =
+      if (error instanceof HuntDailyLimitError) throw error;
+      const retryable =
         error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === "P2002";
-      if (!slugCollision || attempt === 1) throw error;
+        (error.code === "P2002" || error.code === "P2034");
+      if (!retryable || attempt === 2) throw error;
     }
   }
 
   throw new Error("Unable to create Hunt");
 }
 
-export type PublicHunt = Prisma.HuntGetPayload<{
+export type PublicHuntOffer = Prisma.HuntOfferGetPayload<{
+  select: typeof publicHuntOfferSelect;
+}>;
+
+type PublicHuntBase = Prisma.HuntGetPayload<{
   select: typeof publicHuntSelect;
-}> & {
+}>;
+
+export type PublicHunt = PublicHuntBase & {
+  offers: PublicHuntOffer[];
+  selectedOffer: PublicHuntOffer | null;
   viewerJoined: boolean;
+  viewerIsOwner: boolean;
 };
 
 export function derivePublicHuntStatus(
@@ -126,6 +191,21 @@ export async function getPublicHuntBySlug(
     },
     select: {
       ...publicHuntSelect,
+      offers: {
+        where: { status: "PUBLISHED" },
+        select: publicHuntOfferSelect,
+        orderBy: [{ priceCents: "asc" }, { publishedAt: "asc" }],
+      },
+      selectedOffer: {
+        select: {
+          status: true,
+          ...publicHuntOfferSelect,
+        },
+      },
+      // Used only for the equality check below and removed from the result.
+      privateData: {
+        select: { ownerFeatureId: true },
+      },
       participants: viewerFeatureId
         ? {
             where: { visitorId: viewerFeatureId },
@@ -141,11 +221,23 @@ export async function getPublicHuntBySlug(
   });
 
   if (!hunt) return null;
-  const { participants, ...publicData } = hunt;
+  const { participants, privateData, selectedOffer, ...publicData } = hunt;
+  const publicSelectedOffer =
+    selectedOffer?.status === "PUBLISHED"
+      ? (() => {
+          const { status: _status, ...offer } = selectedOffer;
+          return offer;
+        })()
+      : null;
+
   return {
     ...publicData,
     status: derivePublicHuntStatus(hunt.status, hunt.expiresAt),
+    selectedOffer: publicSelectedOffer,
     viewerJoined: participants.length > 0,
+    viewerIsOwner:
+      Boolean(viewerFeatureId) &&
+      privateData?.ownerFeatureId === viewerFeatureId,
   };
 }
 
@@ -197,6 +289,20 @@ export async function joinPublicHunt(slug: string, visitorId: string) {
       create: {
         huntId: hunt.id,
         visitorId,
+      },
+      update: {},
+    });
+
+    await tx.huntEvent.upsert({
+      where: {
+        dedupeKey: `hunt-join:${hunt.id}:${visitorId}`,
+      },
+      create: {
+        huntId: hunt.id,
+        type: "JOINED",
+        actor: "BUYER",
+        visitorId,
+        dedupeKey: `hunt-join:${hunt.id}:${visitorId}`,
       },
       update: {},
     });

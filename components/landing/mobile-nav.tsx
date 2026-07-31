@@ -37,6 +37,17 @@ const NAV_SECTIONS = [
         ),
       },
       {
+        label: "TradeFeed HUNT — Beta",
+        href: "/hunt#start-hunt",
+        description: "Screenshot it. South Africa finds it.",
+        icon: (
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 15.75 5.25 5.25m-2.25-10.5a8.25 8.25 0 1 1-16.5 0 8.25 8.25 0 0 1 16.5 0Z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h6m-6 3h3.75" />
+          </svg>
+        ),
+      },
+      {
         label: "Import Catalogue",
         href: "/import-whatsapp-catalogue",
         description: "WhatsApp \u2192 Online shop",

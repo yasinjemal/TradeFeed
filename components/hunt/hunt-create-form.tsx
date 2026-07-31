@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import {
   Camera,
@@ -125,6 +125,10 @@ function FieldError({
 
 export function HuntCreateForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialRequest = (searchParams.get("request") ?? "")
+    .trim()
+    .slice(0, 500);
   const galleryInput = React.useRef<HTMLInputElement>(null);
   const cameraInput = React.useRef<HTMLInputElement>(null);
   const [preparedImage, setPreparedImage] = React.useState<File | null>(null);
@@ -350,6 +354,7 @@ export function HuntCreateForm() {
           <textarea
             id="hunt-request"
             name="requestText"
+            defaultValue={initialRequest}
             required
             maxLength={500}
             rows={3}

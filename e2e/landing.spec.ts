@@ -29,6 +29,38 @@ test.describe("Landing Page", () => {
     // Marketplace link should exist
     const marketplaceLink = page.getByRole("link", { name: /marketplace/i }).first();
     await expect(marketplaceLink).toBeVisible();
+
+    // HUNT must be discoverable from the homepage, not only by direct URL.
+    const huntLink = page.getByRole("link", { name: /HUNT/i }).first();
+    await expect(huntLink).toBeVisible();
+    await expect(huntLink).toHaveAttribute("href", "/hunt#start-hunt");
+  });
+
+  test("HUNT is discoverable on mobile", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+
+    const directHuntLink = page.getByRole("link", {
+      name: "Start a TradeFeed HUNT",
+    });
+
+    if (await directHuntLink.isVisible()) {
+      await expect(directHuntLink).toHaveAttribute(
+        "href",
+        "/hunt#start-hunt",
+      );
+      return;
+    }
+
+    await page.getByRole("button", { name: "Open menu" }).click();
+    const drawerHuntLink = page.getByRole("link", {
+      name: /TradeFeed HUNT/i,
+    }).last();
+    await expect(drawerHuntLink).toBeVisible();
+    await expect(drawerHuntLink).toHaveAttribute(
+      "href",
+      "/hunt#start-hunt",
+    );
   });
 
   test("footer renders with legal links", async ({ page }) => {

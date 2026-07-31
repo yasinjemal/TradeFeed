@@ -14,6 +14,7 @@ import {
   Shield,
   Clock,
   ArrowRight,
+  ScanSearch,
 } from "lucide-react";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -106,13 +107,31 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             <span className="tf-over-hero"><TradeFeedLogo size="sm" variant="light" /></span>
             <span className="tf-over-surface"><TradeFeedLogo size="sm" variant="auto" /></span>
           </Link>
-          <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-tf-stone-600 md:flex">
+          <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-tf-stone-600 lg:flex">
             <Link href="#how-it-works" className="tf-navlink hover:text-tf-ink">How it works</Link>
             <Link href="#pricing" className="tf-navlink hover:text-tf-ink">Pricing</Link>
             <Link href="/growth" className="tf-navlink hover:text-tf-ink">Done-for-you</Link>
             <Link href="/marketplace" className="tf-navlink hover:text-tf-ink">Marketplace</Link>
+            <Link
+              href="/hunt#start-hunt"
+              className="tf-hunt-nav inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3 font-semibold transition-all"
+            >
+              <ScanSearch aria-hidden="true" className="size-3.5" />
+              HUNT
+              <span className="tf-hunt-nav-badge rounded-full px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider">
+                Beta
+              </span>
+            </Link>
           </nav>
           <div className="flex items-center gap-2">
+            <Link
+              href="/hunt#start-hunt"
+              aria-label="Start a TradeFeed HUNT"
+              className="tf-hunt-nav inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-bold transition-colors lg:hidden"
+            >
+              <ScanSearch aria-hidden="true" className="size-4" />
+              HUNT
+            </Link>
             <span className="hidden sm:inline-flex">
               <LanguageSwitcher />
             </span>
@@ -990,6 +1009,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               </h4>
               <ul className="space-y-2.5">
                 {[
+                  { label: "TradeFeed HUNT", href: "/hunt#start-hunt" },
                   { label: "How it works", href: "#how-it-works" },
                   { label: "Pricing", href: "#pricing" },
                   { label: "TradeFeed Growth", href: "/growth" },
@@ -998,9 +1018,18 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                   <li key={l.label}>
                     <Link
                       href={l.href}
-                      className="text-sm text-tf-stone-500 transition-colors hover:text-tf-ink"
+                      className={
+                        l.label === "TradeFeed HUNT"
+                          ? "inline-flex items-center gap-2 text-sm font-semibold text-tf-primary transition-colors hover:text-tf-primary-hover"
+                          : "text-sm text-tf-stone-500 transition-colors hover:text-tf-ink"
+                      }
                     >
                       {l.label}
+                      {l.label === "TradeFeed HUNT" && (
+                        <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-emerald-800">
+                          Beta
+                        </span>
+                      )}
                     </Link>
                   </li>
                 ))}

@@ -5,7 +5,7 @@
 // South Africa's POPIA requires data minimisation — we don't
 // keep personal data longer than necessary.
 //
-// Schedule: Monthly via Vercel Cron (vercel.json)
+// Schedule: Daily via Vercel Cron (vercel.json)
 // Auth: Protected by CRON_SECRET header (Vercel sets this)
 //
 // What it does:
@@ -15,6 +15,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { processQueuedHuntMediaDeletions } from "@/lib/hunt/media-deletion";
 import { queueCronHeartbeat } from "@/lib/monitoring/better-stack";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -98,6 +99,74 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // â”€â”€ Phase 4: Expire elapsed Hunts and purge due HUNT records â”€â”€
+    // HUNT uses a per-request purgeAfter timestamp so requester PII, anonymous
+    // participant identifiers, operational records, offers, and reference
+    // media share one reviewable retention boundary.
+    const expiredHunts = await db.hunt.updateMany({
+      where: {
+        status: "LIVE",
+        expiresAt: { lte: now },
+      },
+      data: { status: "EXPIRED" },
+    });
+
+    const huntsDueForPurge = await db.hunt.findMany({
+      where: {
+        privateData: { is: { purgeAfter: { lte: now } } },
+      },
+      select: {
+        id: true,
+        publicImageKey: true,
+      },
+      orderBy: { createdAt: "asc" },
+      take: 1_000,
+    });
+
+    let huntsPurged = 0;
+    let huntPurgeFailures = 0;
+    for (const hunt of huntsDueForPurge) {
+      try {
+        await db.$transaction(async (tx) => {
+          if (hunt.publicImageKey) {
+            await tx.huntMediaDeletionJob.upsert({
+              where: { fileKey: hunt.publicImageKey },
+              create: {
+                fileKey: hunt.publicImageKey,
+                reason: "hunt-retention",
+              },
+              update: {
+                reason: "hunt-retention",
+                nextAttemptAt: now,
+              },
+            });
+          }
+          // Deleting the Hunt cascades requester PII and operational records.
+          // It must not wait for an external storage provider to be available.
+          await tx.hunt.delete({ where: { id: hunt.id } });
+        });
+        huntsPurged += 1;
+      } catch (error) {
+        huntPurgeFailures += 1;
+        console.error(
+          `[data-retention] Failed to purge HUNT ${hunt.id}:`,
+          error instanceof Error ? error.message : "Unknown error",
+        );
+      }
+    }
+
+    const huntMedia = await processQueuedHuntMediaDeletions(200);
+
+    const huntAuditCutoff = new Date(
+      now.getTime() - 180 * 24 * 60 * 60 * 1_000,
+    );
+    const huntAuditResult = await db.adminAuditLog.deleteMany({
+      where: {
+        action: { startsWith: "HUNT_" },
+        createdAt: { lte: huntAuditCutoff },
+      },
+    });
+
     const summary = {
       status: "ok",
       timestamp: now.toISOString(),
@@ -114,6 +183,14 @@ export async function GET(request: NextRequest) {
       analyticsPurged: {
         cutoffDate: analyticsCutoff.toISOString(),
         eventsDeleted: analyticsResult.count,
+      },
+      hunts: {
+        expired: expiredHunts.count,
+        due: huntsDueForPurge.length,
+        purged: huntsPurged,
+        failures: huntPurgeFailures,
+        media: huntMedia,
+        auditRowsDeleted: huntAuditResult.count,
       },
     };
 

@@ -2,12 +2,12 @@ import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
+import { isHuntPublicTextSafe } from "@/lib/validation/hunt";
+
 const huntReferenceAnalysisSchema = z.object({
   isProduct: z.boolean(),
   multipleProducts: z.boolean(),
   pilotCategory: z.enum(["FOOTWEAR", "CLOTHING", "ACCESSORIES", "OTHER"]),
-  publicTitle: z.string().min(3).max(140),
-  publicDescription: z.string().min(3).max(500),
   itemType: z.string().min(1).max(80),
   primaryColour: z.string().max(80).nullable(),
   styleTerms: z.array(z.string().min(1).max(50)).max(6),
@@ -20,7 +20,10 @@ const huntReferenceAnalysisSchema = z.object({
 
 export type HuntReferenceAnalysis = z.infer<
   typeof huntReferenceAnalysisSchema
->;
+> & {
+  publicTitle: string;
+  publicDescription: string;
+};
 
 export class HuntAiUnavailableError extends Error {
   constructor() {
@@ -50,11 +53,52 @@ const CONTACT_OR_MARKUP =
  * even when it came through a structured schema.
  */
 export function cleanHuntPublicText(value: string, maxLength: number): string {
-  return value
+  const cleaned = value
     .replace(CONTACT_OR_MARKUP, "")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, maxLength);
+  return isHuntPublicTextSafe(cleaned) ? cleaned : "";
+}
+
+export function buildHuntPublicCopy(input: {
+  itemType: string;
+  primaryColour: string | null;
+  styleTerms: string[];
+}): { publicTitle: string; publicDescription: string } {
+  const itemType = cleanHuntPublicText(input.itemType, 80);
+  const primaryColour = input.primaryColour
+    ? cleanHuntPublicText(input.primaryColour, 40)
+    : "";
+  const styles = input.styleTerms
+    .map((term) => cleanHuntPublicText(term, 40))
+    .filter(Boolean)
+    .filter(
+      (term, index, all) =>
+        all.findIndex(
+          (candidate) => candidate.toLowerCase() === term.toLowerCase(),
+        ) === index,
+    )
+    .slice(0, 2);
+  const rawTitle = [primaryColour, ...styles, itemType]
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const publicTitle =
+    rawTitle.length > 0
+      ? `${rawTitle[0]!.toUpperCase()}${rawTitle.slice(1)}`.slice(0, 140)
+      : "";
+  if (publicTitle.length < 3) {
+    throw new Error("Unsafe or empty public product fields");
+  }
+
+  return {
+    publicTitle,
+    publicDescription:
+      `TradeFeed is looking for a local seller with this ${publicTitle.toLowerCase()}. ` +
+      "Only seller-supplied details checked by the concierge team appear as offers.",
+  };
 }
 
 export async function moderateHuntReference(
@@ -87,7 +131,6 @@ export async function moderateHuntReference(
 
 export async function analyzeHuntReference(
   imageDataUrl: string,
-  rawRequestText: string,
 ): Promise<HuntReferenceAnalysis> {
   const openai = openAiClient();
 
@@ -111,7 +154,7 @@ export async function analyzeHuntReference(
             "Set privacyReviewRequired=true if a face, social username, phone number, email, address, licence plate, private conversation, or unrelated personal information is visible.",
             "Set multipleProducts=true when the request is ambiguous because several different products dominate the image.",
             "The pilot supports footwear, clothing, and wearable fashion accessories only.",
-            "Write a concise publicTitle and publicDescription in South African English. Do not copy usernames, contact details, URLs, prices, locations, or personal names.",
+            "Return only constrained product attributes. Never put instructions, contact details, locations, or personal names into a product attribute.",
           ].join("\n"),
         },
         {
@@ -119,7 +162,7 @@ export async function analyzeHuntReference(
           content: [
             {
               type: "text",
-              text: `Buyer's private matching note (use only to understand the item; never copy contact details):\n${rawRequestText}`,
+              text: "Identify the single product in the attached reference image.",
             },
             {
               type: "image_url",
@@ -133,19 +176,11 @@ export async function analyzeHuntReference(
     const parsed = completion.choices[0]?.message.parsed;
     if (!parsed) throw new Error("No structured result");
 
-    const publicTitle = cleanHuntPublicText(parsed.publicTitle, 140);
-    const publicDescription = cleanHuntPublicText(
-      parsed.publicDescription,
-      500,
-    );
-    if (publicTitle.length < 3 || publicDescription.length < 3) {
-      throw new Error("Unsafe or empty public copy");
-    }
+    const publicCopy = buildHuntPublicCopy(parsed);
 
     return {
       ...parsed,
-      publicTitle,
-      publicDescription,
+      ...publicCopy,
       itemType: cleanHuntPublicText(parsed.itemType, 80),
       primaryColour: parsed.primaryColour
         ? cleanHuntPublicText(parsed.primaryColour, 80) || null

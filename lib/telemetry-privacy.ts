@@ -9,6 +9,7 @@ const SAFE_TELEMETRY_META_KEYS = new Set([
   "draftId",
   "expected",
   "expectedAmount",
+  "huntMediaKey",
   "itemCount",
   "jobId",
   "newStatus",

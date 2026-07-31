@@ -40,7 +40,8 @@ export type LimiterName =
   | "message"
   | "tracking"
   | "huntCreate"
-  | "huntJoin";
+  | "huntJoin"
+  | "huntReport";
 
 // ── Config per limiter ──────────────────────────────────────
 
@@ -55,6 +56,7 @@ const LIMITER_CONFIG: Record<LimiterName, { limit: number; windowSeconds: number
   tracking:  { limit: 20,  windowSeconds: 60 },
   huntCreate:{ limit: 6,   windowSeconds: 3600 },
   huntJoin:  { limit: 30,  windowSeconds: 60 },
+  huntReport:{ limit: 3,   windowSeconds: 3600 },
 };
 
 // ── Upstash instances (lazy singleton per limiter) ──────────
@@ -132,6 +134,21 @@ export async function checkRateLimit(
 
   try {
     const upstash = getUpstashLimiter(name);
+    if (
+      !upstash &&
+      process.env.NODE_ENV === "production" &&
+      name === "huntCreate"
+    ) {
+      console.error(
+        '[rate-limit] Distributed limiter unavailable for "huntCreate"; failing closed',
+      );
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt: Date.now() + cfg.windowSeconds * 1_000,
+        retryAfterSeconds: cfg.windowSeconds,
+      };
+    }
 
     // ── Upstash path (production) ─────────────────────────────
     if (upstash) {
@@ -159,8 +176,17 @@ export async function checkRateLimit(
       return { allowed: success, remaining, resetAt, retryAfterSeconds: Math.max(retryAfter, 0) };
     }
   } catch (err) {
-    // If Redis is down or misconfigured, fail open — don't block legitimate users
+    // Most low-cost interactions fail open. Paid public HUNT creation fails
+    // closed so a Redis outage cannot become an unbounded AI/storage bill.
     console.warn(`[rate-limit] Redis error for "${name}", failing open:`, err instanceof Error ? err.message : err);
+    if (process.env.NODE_ENV === "production" && name === "huntCreate") {
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt: Date.now() + cfg.windowSeconds * 1_000,
+        retryAfterSeconds: cfg.windowSeconds,
+      };
+    }
     return { allowed: true, remaining: cfg.limit, resetAt: Date.now() + cfg.windowSeconds * 1000, retryAfterSeconds: 0 };
   }
 

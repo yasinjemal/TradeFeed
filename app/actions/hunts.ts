@@ -13,9 +13,20 @@ import { getOrCreateBuyerFeatureId } from "@/lib/buyer/feature-identity";
 import {
   countRecentHuntsForPhone,
   createHuntRecord,
+  HuntDailyLimitError,
   joinPublicHunt,
 } from "@/lib/db/hunts";
+import {
+  closeHuntForOwner,
+  recordPublicHuntShare,
+  selectHuntOfferForOwner,
+  submitHuntReport,
+} from "@/lib/db/hunt-operations";
+import { sanitizeHuntPublicImage } from "@/lib/hunt/image-sanitization";
+import { buildHuntWhatsAppUrl } from "@/lib/hunt/whatsapp";
+import { deleteHuntMediaOrQueue } from "@/lib/hunt/media-deletion";
 import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
+import { reportError } from "@/lib/telemetry";
 import { utapi } from "@/lib/ut-api";
 import {
   HUNT_LIFETIME_HOURS,
@@ -25,7 +36,8 @@ import {
   detectHuntImageMime,
   formCheckbox,
   huntCreateFieldsSchema,
-  imageExtensionForMime,
+  huntOwnerSelectOfferSchema,
+  huntReportSchema,
 } from "@/lib/validation/hunt";
 import { normalizeToE164, whatsappLoginSchema } from "@/lib/validation/auth";
 
@@ -152,14 +164,40 @@ export async function createHuntAction(
     };
   }
 
-  const imageDataUrl = `data:${detectedMime};base64,${Buffer.from(bytes).toString("base64")}`;
+  let sanitizedImage: Awaited<ReturnType<typeof sanitizeHuntPublicImage>>;
+  try {
+    sanitizedImage = await sanitizeHuntPublicImage(bytes);
+  } catch {
+    return {
+      success: false,
+      error:
+        "The image could not be safely processed. Export or screenshot it again, then retry.",
+      fieldErrors: {
+        referenceImage: ["The image could not be rebuilt without metadata"],
+      },
+    };
+  }
+
+  if (
+    sanitizedImage.bytes.byteLength > HUNT_MAX_IMAGE_BYTES ||
+    detectHuntImageMime(sanitizedImage.bytes) !== sanitizedImage.mime
+  ) {
+    return {
+      success: false,
+      error: "The safely processed image is invalid. Please try another image.",
+      fieldErrors: {
+        referenceImage: ["Safe image validation failed"],
+      },
+    };
+  }
+
+  const imageDataUrl =
+    `data:${sanitizedImage.mime};base64,` +
+    Buffer.from(sanitizedImage.bytes).toString("base64");
 
   try {
     await moderateHuntReference(imageDataUrl, parsed.data.requestText);
-    const analysis = await analyzeHuntReference(
-      imageDataUrl,
-      parsed.data.requestText,
-    );
+    const analysis = await analyzeHuntReference(imageDataUrl);
 
     if (!analysis.isProduct || analysis.multipleProducts) {
       return {
@@ -189,11 +227,12 @@ export async function createHuntAction(
       };
     }
 
-    const extension = imageExtensionForMime(detectedMime);
+    const safeImageBuffer = new ArrayBuffer(sanitizedImage.bytes.byteLength);
+    new Uint8Array(safeImageBuffer).set(sanitizedImage.bytes);
     const safeFile = new File(
-      [bytes],
-      `hunt-${randomUUID()}.${extension}`,
-      { type: detectedMime },
+      [safeImageBuffer],
+      `hunt-${randomUUID()}.${sanitizedImage.extension}`,
+      { type: sanitizedImage.mime },
     );
     const uploaded = await utapi.uploadFiles(safeFile);
     if (uploaded.error || !uploaded.data) {
@@ -205,8 +244,7 @@ export async function createHuntAction(
 
     const imageUrl = uploaded.data.ufsUrl ?? uploaded.data.url;
     const now = new Date();
-    const desiredVariant =
-      parsed.data.desiredVariant ?? analysis.inferredVariant;
+    const desiredVariant = parsed.data.desiredVariant;
 
     try {
       const hunt = await createHuntRecord({
@@ -239,7 +277,28 @@ export async function createHuntAction(
 
       return { success: true, slug: hunt.slug };
     } catch (error) {
-      await utapi.deleteFiles(uploaded.data.key).catch(() => undefined);
+      try {
+        await deleteHuntMediaOrQueue(
+          uploaded.data.key,
+          "hunt-create-rollback",
+        );
+      } catch (cleanupError) {
+        await reportError(
+          "createHuntAction.rollbackMediaDelete",
+          cleanupError,
+          {
+            huntMediaKey: uploaded.data.key,
+            status: "orphaned-upload",
+          },
+        );
+      }
+      if (error instanceof HuntDailyLimitError) {
+        return {
+          success: false,
+          error:
+            "This WhatsApp number already started three Hunts today. Try again tomorrow.",
+        };
+      }
       console.error(
         "[hunt] persistence failed:",
         error instanceof Error ? error.message : "unknown error",
@@ -304,4 +363,154 @@ export async function joinHuntAction(
 
   revalidatePath(`/hunt/${slug}`);
   return { success: true, participantCount: result.participantCount };
+}
+
+type HuntSimpleActionResult =
+  | { success: true }
+  | { success: false; error: string };
+
+export async function selectHuntOfferAction(
+  huntSlug: string,
+  offerId: string,
+): Promise<
+  | { success: true; whatsappUrl: string }
+  | { success: false; error: string }
+> {
+  const parsed = huntOwnerSelectOfferSchema.safeParse({ huntSlug, offerId });
+  if (!parsed.success) {
+    return { success: false, error: "This offer link is invalid." };
+  }
+
+  const featureId = await getOrCreateBuyerFeatureId();
+  const limit = await checkRateLimit("huntJoin", `select:${featureId}`);
+  if (!limit.allowed) {
+    return {
+      success: false,
+      error: "Too many offer attempts. Try again in a little while.",
+    };
+  }
+
+  try {
+    const { hunt, offer } = await selectHuntOfferForOwner({
+      ...parsed.data,
+      ownerFeatureId: featureId,
+    });
+    const whatsappUrl = buildHuntWhatsAppUrl(
+      offer.sellerWhatsappSnapshot!,
+      {
+        huntSlug: hunt.slug,
+        huntTitle: hunt.publicTitle,
+        requestedVariant: hunt.desiredVariant,
+        sellerName: offer.shop.name,
+        offerTitle: offer.publicProductName,
+        offerPriceCents: offer.priceCents,
+        offerVariant: offer.publicVariant,
+        deliveryEstimate: offer.publicDeliveryEstimate,
+      },
+    );
+
+    revalidatePath(`/hunt/${hunt.slug}`);
+    return { success: true, whatsappUrl };
+  } catch (error) {
+    const message =
+      error instanceof Error &&
+      [
+        "Only the Hunt creator can choose an offer.",
+        "This Hunt is unavailable, expired, or you are not its creator.",
+        "A different offer has already been selected.",
+        "This offer is no longer available.",
+      ].includes(error.message)
+        ? error.message
+        : "The offer could not be selected. Please try again.";
+    return { success: false, error: message };
+  }
+}
+
+export async function closeHuntAction(
+  huntSlug: string,
+): Promise<HuntSimpleActionResult> {
+  const parsed = huntOwnerSelectOfferSchema.shape.huntSlug.safeParse(huntSlug);
+  if (!parsed.success) {
+    return { success: false, error: "This Hunt link is invalid." };
+  }
+
+  const featureId = await getOrCreateBuyerFeatureId();
+  try {
+    await closeHuntForOwner(parsed.data, featureId);
+    revalidatePath(`/hunt/${parsed.data}`);
+    return { success: true };
+  } catch {
+    return {
+      success: false,
+      error: "Only the creator can close an active Hunt.",
+    };
+  }
+}
+
+export async function reportHuntAction(
+  input: unknown,
+): Promise<HuntSimpleActionResult> {
+  const parsed = huntReportSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Check the report details.",
+    };
+  }
+
+  const [featureId, ip] = await Promise.all([
+    getOrCreateBuyerFeatureId(),
+    getActionClientIp(),
+  ]);
+  const [ipLimit, deviceLimit] = await Promise.all([
+    checkRateLimit("huntReport", `ip:${ip}`),
+    checkRateLimit("huntReport", `device:${featureId}`),
+  ]);
+  if (!ipLimit.allowed || !deviceLimit.allowed) {
+    return {
+      success: false,
+      error: "Too many reports were sent. Try again later.",
+    };
+  }
+
+  try {
+    await submitHuntReport({
+      ...parsed.data,
+      reporterFeatureId: featureId,
+    });
+    return { success: true };
+  } catch {
+    return {
+      success: false,
+      error: "This Hunt is not available for reporting.",
+    };
+  }
+}
+
+export async function trackHuntShareAction(
+  huntSlug: string,
+  source: string,
+): Promise<void> {
+  const parsedSlug =
+    huntOwnerSelectOfferSchema.shape.huntSlug.safeParse(huntSlug);
+  const safeSource = ["native", "copy", "whatsapp"].includes(source)
+    ? source
+    : null;
+  if (!parsedSlug.success || !safeSource) return;
+
+  try {
+    const [featureId, ip] = await Promise.all([
+      getOrCreateBuyerFeatureId(),
+      getActionClientIp(),
+    ]);
+    const limit = await checkRateLimit("tracking", `hunt-share:${ip}`);
+    if (!limit.allowed) return;
+    await recordPublicHuntShare({
+      slug: parsedSlug.data,
+      visitorId: featureId,
+      source: safeSource,
+    });
+  } catch {
+    // Telemetry must never interfere with sharing.
+  }
 }

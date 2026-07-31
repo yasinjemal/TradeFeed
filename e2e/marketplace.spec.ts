@@ -56,4 +56,18 @@ test.describe("Marketplace", () => {
       /Application error|Internal Server Error/i,
     );
   });
+
+  test("a failed search can become a pre-filled HUNT", async ({ page }) => {
+    const query = "codex-hunt-no-result-92841";
+    await page.goto(`/marketplace?search=${query}`);
+
+    const huntLink = page.getByRole("link", {
+      name: new RegExp(`HUNT.*${query}`, "i"),
+    }).first();
+    await expect(huntLink).toBeVisible();
+    await expect(huntLink).toHaveAttribute(
+      "href",
+      `/hunt?request=${query}#start-hunt`,
+    );
+  });
 });
