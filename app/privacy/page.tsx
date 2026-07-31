@@ -87,6 +87,12 @@ export default function PrivacyPage() {
                 messages.
               </li>
               <li>
+                <strong>Email product-news preferences:</strong> We record whether you explicitly
+                opted in or out, when and where that choice was made, and suppression records
+                needed to honour unsubscribe, complaint, bounce, and national opt-out requests.
+                Creating a TradeFeed account does not opt you in.
+              </li>
+              <li>
                 <strong>TradeFeed HUNT requests:</strong> If you start a HUNT, we collect the
                 product reference image you choose, your request, requested variant, budget,
                 general city, WhatsApp number, optional first name, and your HUNT-specific
@@ -106,7 +112,11 @@ export default function PrivacyPage() {
               <li>To facilitate WhatsApp communication between buyers and sellers.</li>
               <li>To provide analytics about your catalog performance.</li>
               <li>To process subscription payments via PayFast.</li>
-              <li>To send service-related communications (no marketing without consent).</li>
+              <li>To send service-related communications needed to operate your account.</li>
+              <li>
+                To send optional product news and feature announcements only after your explicit
+                opt-in, with an unsubscribe option in every marketing email.
+              </li>
               <li>
                 To respond to voluntary setup-help or catalogue-import requests and understand why
                 sellers stop using TradeFeed.
@@ -130,7 +140,8 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-5 text-stone-600 space-y-1">
               <li>
                 <strong>Consent:</strong> We ask separately before enabling non-essential
-                analytics. Creating an account does not grant analytics consent.
+                analytics or sending email product news. Creating an account does not grant either
+                consent.
               </li>
               <li>
                 <strong>Contract:</strong> Processing is necessary to provide our catalog
@@ -155,6 +166,11 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong>PayFast:</strong> Payment processor for subscription billing.
+              </li>
+              <li>
+                <strong>Resend:</strong> Email delivery provider for account notifications and,
+                only where you opt in, TradeFeed product-news email. Resend receives the delivery
+                address and email content needed to send the message and process delivery events.
               </li>
               <li>
                 <strong>Uploadthing:</strong> Image hosting service for product photos.
@@ -246,6 +262,12 @@ export default function PrivacyPage() {
               Pseudonymous HUNT abuse-prevention counters expire after their short enforcement
               window and are removed during a subsequent retention cycle.
             </p>
+            <p className="text-stone-600 leading-relaxed">
+              Email campaign delivery records are retained only as needed for delivery auditing,
+              complaint handling, and legal compliance. Keyed suppression hashes may be retained
+              after account deletion so that TradeFeed does not accidentally contact an address
+              that unsubscribed; the suppression record does not store the raw email address.
+            </p>
           </section>
 
           {/* 7 */}
@@ -264,6 +286,11 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong>Objection:</strong> Object to the processing of your information.
+              </li>
+              <li>
+                <strong>Direct marketing:</strong> Withdraw email product-news consent at any time
+                from notification settings or the unsubscribe link in the message. This does not
+                disable essential account and order communications.
               </li>
               <li>
                 <strong>Portability:</strong> Request your data in a machine-readable format.

@@ -49,9 +49,11 @@ const isPublicRoute = createRouteMatcher([
   "/s/(.*)",                        // Vanity short link → redirects to catalog
   "/marketplace(.*)",               // Public marketplace (discovery)
   "/hunt(.*)",                      // HUNT pilot (buyer requests + public rooms)
+  "/email/unsubscribe(.*)",         // Scanner-safe email preference confirmation
   "/track(.*)",                     // Public order tracking (buyer-facing)
   "/orders",                        // Buyer order history (optional auth — shows sign-in CTA for guests)
   "/api/webhooks/(.*)",             // Clerk webhooks (server-to-server)
+  "/api/email/unsubscribe(.*)",      // Signed one-click marketing opt-out
   "/api/uploadthing(.*)",           // Uploadthing CDN upload endpoint
   "/api/og(.*)",                    // Dynamic OG image generation
   "/api/health",                    // Health check (uptime monitoring)

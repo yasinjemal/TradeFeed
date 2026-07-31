@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import { getNotificationPrefs, getLowStockVariants } from "@/lib/db/notifications";
 import { NotificationSettings } from "@/components/notifications/notification-settings";
 import { WhatsAppSequenceToggle } from "@/components/notifications/whatsapp-sequence-toggle";
+import { EmailMarketingToggle } from "@/components/notifications/email-marketing-toggle";
 import { db } from "@/lib/db";
 
 interface NotificationsPageProps {
@@ -22,10 +23,24 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
   const access = await requireShopAccess(slug);
   if (!access) notFound();
 
-  const [prefs, lowStockVariants, sequenceState] = await Promise.all([
+  const [
+    prefs,
+    lowStockVariants,
+    sequenceState,
+    emailMarketingPreference,
+  ] = await Promise.all([
     getNotificationPrefs(access.shopId),
     getLowStockVariants(access.shopId),
     db.sellerSequenceState.findUnique({ where: { shopId: access.shopId }, select: { optedOut: true } }),
+    db.emailMarketingPreference.findUnique({
+      where: { userId: access.userId },
+      select: { status: true },
+    }).catch(() => {
+      // Keep transactional notification settings available during a
+      // code-before-migration rollout. Marketing remains off until the
+      // additive preference table is present and an explicit opt-in exists.
+      return null;
+    }),
   ]);
 
   const formattedVariants = lowStockVariants.map((v) => ({
@@ -45,7 +60,7 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
       <div>
         <h1 className="text-2xl font-bold text-stone-900">Notifications</h1>
         <p className="text-sm text-stone-500 mt-1">
-          Configure email alerts for orders, reviews, and stock levels
+          Manage transactional alerts and optional TradeFeed updates.
         </p>
       </div>
 
@@ -53,6 +68,11 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
         prefs={prefs}
         lowStockVariants={formattedVariants}
         shopSlug={slug}
+      />
+
+      <EmailMarketingToggle
+        shopSlug={slug}
+        optedIn={emailMarketingPreference?.status === "OPTED_IN"}
       />
 
       <WhatsAppSequenceToggle

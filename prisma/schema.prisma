@@ -151,8 +151,181 @@ model User {
   // Relations
   shops              ShopUser[]                    // Shops this user belongs to
   onboardingEvents   OnboardingEvent[]             // Onboarding funnel tracking
+  emailMarketingPreference         EmailMarketingPreference?
+  emailMarketingCampaignsCreated   EmailMarketingCampaign[]          @relation("EmailMarketingCampaignCreator")
+  emailMarketingCampaignsApproved  EmailMarketingCampaign[]          @relation("EmailMarketingCampaignApprover")
+  emailMarketingCampaignRecipients EmailMarketingCampaignRecipient[]
 
   @@index([clerkId])
+}
+
+// ============================================================
+// EMAIL MARKETING SAFETY
+// Consent, suppression, campaign and delivery records are kept
+// separate from transactional notification preferences.
+// Recipient addresses remain on User; these models store only
+// relations or keyed hashes and never duplicate raw email values.
+// ============================================================
+model EmailMarketingPreference {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status EmailMarketingConsentStatus @default(UNKNOWN)
+
+  // Purpose-specific consent evidence. Existing users without a record,
+  // or records with UNKNOWN status, are not eligible for marketing.
+  consentSource      String?
+  consentVersion     String?
+  consentRequestedAt DateTime?
+  consentedAt        DateTime?
+  optedOutAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+enum EmailMarketingConsentStatus {
+  UNKNOWN
+  OPTED_IN
+  OPTED_OUT
+}
+
+// Global address-level suppression survives account changes/deletion.
+// normalizedEmailHash must be an HMAC-SHA-256 of the normalized address; raw
+// email addresses must never be copied into this table.
+model EmailSuppression {
+  id                  String                 @id @default(cuid())
+  normalizedEmailHash String                 @db.Char(64)
+  reason              EmailSuppressionReason
+  source              String?
+  providerEventId     String?                @unique
+  suppressedAt        DateTime               @default(now())
+  releasedAt          DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  @@unique([normalizedEmailHash, reason])
+  @@index([normalizedEmailHash, releasedAt])
+}
+
+enum EmailSuppressionReason {
+  UNSUBSCRIBED
+  HARD_BOUNCE
+  COMPLAINT
+  PROVIDER_SUPPRESSED
+  NCC_OPT_OUT
+  INVALID_ADDRESS
+  ADMIN
+}
+
+model EmailMarketingCampaign {
+  id          String                       @id @default(cuid())
+  campaignKey String                       @unique
+  kind        EmailMarketingCampaignKind
+  status      EmailMarketingCampaignStatus @default(DRAFT)
+
+  name               String
+  subject            String
+  templateHash       String @db.Char(64)
+  audienceDefinition Json
+
+  createdById  String
+  createdBy    User    @relation("EmailMarketingCampaignCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  approvedById String?
+  approvedBy   User?   @relation("EmailMarketingCampaignApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  approvedAt  DateTime?
+  startedAt   DateTime?
+  pausedAt    DateTime?
+  completedAt DateTime?
+  failedAt    DateTime?
+  cancelledAt DateTime?
+
+  eligibleCount   Int @default(0)
+  recipientCount  Int @default(0)
+  suppressedCount Int @default(0)
+  sentCount       Int @default(0)
+  deliveredCount  Int @default(0)
+  failedCount     Int @default(0)
+
+  recipients EmailMarketingCampaignRecipient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([kind, createdAt])
+  @@index([createdById])
+  @@index([approvedById])
+}
+
+enum EmailMarketingCampaignKind {
+  SELLER_REENGAGEMENT
+  FEATURE_ANNOUNCEMENT
+  CONSENT_REQUEST
+  OTHER
+}
+
+enum EmailMarketingCampaignStatus {
+  DRAFT
+  APPROVED
+  RUNNING
+  PAUSED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model EmailMarketingCampaignRecipient {
+  id         String                 @id @default(cuid())
+  campaignId String
+  campaign   EmailMarketingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Optional tenant context for personalization. The address itself is
+  // resolved from User at send time and is not duplicated here.
+  shopId String?
+
+  // Keyed normalized-email digest prevents duplicate sends when the same
+  // address appears with different casing or on more than one account.
+  normalizedEmailHash String @db.Char(64)
+  idempotencyKey      String @unique
+
+  status            EmailMarketingRecipientStatus @default(PENDING)
+  attempts          Int                           @default(0)
+  providerMessageId String?                       @unique
+  lastAttemptAt     DateTime?
+  nextRetryAt       DateTime?
+  lastError         String?                       @db.Text
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  failedAt          DateTime?
+  suppressedAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, userId])
+  @@unique([campaignId, normalizedEmailHash])
+  @@index([campaignId, status, nextRetryAt])
+  @@index([userId, createdAt])
+  @@index([shopId])
+}
+
+enum EmailMarketingRecipientStatus {
+  PENDING
+  PROCESSING
+  SENT
+  DELIVERED
+  SUPPRESSED
+  BOUNCED
+  COMPLAINED
+  FAILED
+  CANCELLED
 }
 
 // ============================================================
