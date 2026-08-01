@@ -1,11 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
 
 import {
-  getReengagementCampaignPreviewAction,
-  sendReengagementTestAction,
-  type ReengagementCampaignPreview,
+  getAccountReminderCampaignPreviewAction,
+  sendAccountReminderOnceAction,
+  sendAccountReminderTestAction,
+  type AccountReminderCampaignPreview,
 } from "@/app/actions/admin-email-campaigns";
 
 function StatusPill({
@@ -30,23 +36,56 @@ function StatusPill({
   );
 }
 
+function CampaignStatusPill({
+  status,
+}: {
+  status: AccountReminderCampaignPreview["campaignStatus"];
+}) {
+  const complete = status === "COMPLETED";
+  const untouched =
+    status === "NOT_STARTED" || status === "DRAFT";
+  const label =
+    status === "NOT_STARTED"
+      ? "Not sent"
+      : status
+          .toLowerCase()
+          .replace(/^\w/, (letter) => letter.toUpperCase());
+
+  return (
+    <span
+      className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+        complete
+          ? "border-emerald-500/25 bg-emerald-950/50 text-emerald-300"
+          : untouched
+            ? "border-stone-700 bg-stone-950/45 text-stone-300"
+            : "border-amber-500/25 bg-amber-950/40 text-amber-300"
+      }`}
+    >
+      Campaign: {label}
+    </span>
+  );
+}
+
 export function BulkEmailPanel() {
   const [preview, setPreview] =
-    useState<ReengagementCampaignPreview | null>(null);
+    useState<AccountReminderCampaignPreview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [showText, setShowText] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const loadPreview = useCallback(() => {
     setError(null);
     startTransition(async () => {
-      const result = await getReengagementCampaignPreviewAction();
+      const result =
+        await getAccountReminderCampaignPreviewAction();
       if (!result.success) {
         setError(result.error);
         return;
       }
       setPreview(result.preview);
+      setConfirmed(false);
     });
   }, []);
 
@@ -58,7 +97,7 @@ export function BulkEmailPanel() {
     setError(null);
     setNotice(null);
     startTransition(async () => {
-      const result = await sendReengagementTestAction();
+      const result = await sendAccountReminderTestAction();
       if (!result.success) {
         setError(result.error);
         return;
@@ -67,7 +106,42 @@ export function BulkEmailPanel() {
     });
   }
 
-  const canSend = preview?.canSend === true;
+  function sendOnce() {
+    if (!preview || !confirmed) return;
+
+    setError(null);
+    setNotice(null);
+    startTransition(async () => {
+      const result = await sendAccountReminderOnceAction({
+        confirmation: "SEND_ACCOUNT_REMINDER_ONCE",
+        expectedCount: preview.readyToSend,
+      });
+      if (!result.success) {
+        setError(result.error);
+      } else {
+        setNotice(result.message);
+      }
+
+      const refreshed =
+        await getAccountReminderCampaignPreviewAction();
+      if (refreshed.success) {
+        setPreview(refreshed.preview);
+      }
+      setConfirmed(false);
+    });
+  }
+
+  const excludedCount = preview
+    ? preview.optedOut +
+      preview.suppressed +
+      preview.invalidOrBanned +
+      preview.sharedEmailAccounts
+    : 0;
+  const canSend =
+    preview?.canSend === true && confirmed && !isPending;
+  const isCompleted =
+    preview?.campaignStatus === "COMPLETED";
+  const isFailed = preview?.campaignStatus === "FAILED";
 
   return (
     <section className="overflow-hidden rounded-2xl border border-stone-800 bg-stone-900">
@@ -75,15 +149,15 @@ export function BulkEmailPanel() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-2xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-400">
-              Seller comeback campaign
+              One-time account reminder
             </p>
             <h2 className="mt-2 text-xl font-bold text-white">
-              Your shop is still here. The hard work got smaller.
+              Remind sellers that their TradeFeed shop is still here.
             </h2>
             <p className="mt-2 text-sm leading-6 text-stone-400">
-              A personalised product-news email built around one useful action:
-              upload one photo, let AI draft the listing, and return to selling
-              through WhatsApp.
+              One short, factual email with one action: continue the shop
+              already connected to their account. It contains no promotion,
+              discount, urgency, or claim that the seller opted in.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -93,15 +167,15 @@ export function BulkEmailPanel() {
               blockedLabel="Provider not configured"
             />
             <StatusPill
-              ready={preview?.registryReady === true}
-              readyLabel="NCC check recorded"
-              blockedLabel="NCC check required"
+              ready={preview?.hmacReady === true}
+              readyLabel="Once-only guard ready"
+              blockedLabel="Security secret missing"
             />
-            <StatusPill
-              ready={preview?.sendingEnabled === true}
-              readyLabel="Sending enabled"
-              blockedLabel="Sending locked"
-            />
+            {preview && (
+              <CampaignStatusPill
+                status={preview.campaignStatus}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -114,24 +188,24 @@ export function BulkEmailPanel() {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 {
-                  label: "Potential owners",
+                  label: "Active shop owners",
                   value: preview.potentialOwners,
-                  hint: "Active-shop owners with an email",
+                  hint: "One row per unique account owner",
                 },
                 {
-                  label: "Explicit opt-ins",
-                  value: preview.explicitOptIns,
-                  hint: "Marketing consent is recorded",
-                },
-                {
-                  label: "Consent unknown",
-                  value: preview.unknownConsent,
-                  hint: "Excluded from this campaign",
-                },
-                {
-                  label: "Ready to send",
+                  label: "Ready for this one send",
                   value: preview.readyToSend,
-                  hint: "Deduplicated and unsuppressed",
+                  hint: "Unique, valid, and not suppressed",
+                },
+                {
+                  label: "Already reserved or sent",
+                  value: preview.alreadyReservedOrSent,
+                  hint: "Permanently blocked from a second run",
+                },
+                {
+                  label: "Excluded",
+                  value: excludedCount,
+                  hint: "Opt-outs, suppressions, invalid or shared emails",
                 },
               ].map((card) => (
                 <div
@@ -151,24 +225,66 @@ export function BulkEmailPanel() {
               ))}
             </div>
 
+            {isCompleted && (
+              <div className="rounded-xl border border-emerald-500/25 bg-emerald-950/35 p-5">
+                <h3 className="text-sm font-bold text-emerald-200">
+                  The once-only send is complete.
+                </h3>
+                <p className="mt-2 text-xs leading-5 text-emerald-100/75">
+                  The provider accepted{" "}
+                  {preview.providerAcceptedCount.toLocaleString()} message
+                  {preview.providerAcceptedCount === 1 ? "" : "s"}.
+                  {preview.finalSkippedCount > 0
+                    ? ` ${preview.finalSkippedCount.toLocaleString()} account${preview.finalSkippedCount === 1 ? " was" : "s were"} skipped by the final safety check.`
+                    : ""}{" "}
+                  This campaign cannot be sent again.
+                </p>
+              </div>
+            )}
+
+            {isFailed && (
+              <div className="rounded-xl border border-red-500/25 bg-red-950/35 p-5">
+                <h3 className="text-sm font-bold text-red-200">
+                  The batch failed closed.
+                </h3>
+                <p className="mt-2 text-xs leading-5 text-red-100/75">
+                  TradeFeed will not retry this one-time campaign
+                  automatically. Do not start another send until the provider
+                  and campaign records have been reconciled.
+                </p>
+              </div>
+            )}
+
             <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
               <div className="space-y-4">
                 <div className="rounded-xl border border-stone-800 bg-stone-950/45 p-5">
                   <h3 className="text-sm font-bold text-stone-200">
-                    Audience safety
+                    Audience safeguards
                   </h3>
                   <dl className="mt-4 space-y-3 text-xs">
                     {[
-                      ["Opted out", preview.optedOut],
-                      ["Suppressed", preview.suppressed],
-                      ["Banned or invalid", preview.invalidOrBanned],
-                      ["Duplicate owner/shop rows removed", preview.deduplicated],
+                      ["Explicitly opted out", preview.optedOut],
+                      ["Suppressed addresses", preview.suppressed],
+                      [
+                        "Banned or invalid accounts",
+                        preview.invalidOrBanned,
+                      ],
+                      [
+                        "Shared email accounts excluded",
+                        preview.sharedEmailAccounts,
+                      ],
+                      [
+                        "Duplicate shop memberships removed",
+                        preview.duplicateShopMemberships,
+                      ],
                     ].map(([label, value]) => (
                       <div
                         key={String(label)}
                         className="flex items-center justify-between gap-4"
                       >
-                        <dt className="text-stone-500">{label}</dt>
+                        <dt className="text-stone-500">
+                          {label}
+                        </dt>
                         <dd className="font-semibold tabular-nums text-stone-300">
                           {Number(value).toLocaleString()}
                         </dd>
@@ -177,16 +293,16 @@ export function BulkEmailPanel() {
                   </dl>
                 </div>
 
-                <div className="rounded-xl border border-amber-500/20 bg-amber-950/25 p-5">
-                  <h3 className="text-sm font-bold text-amber-200">
-                    Why customer sending is locked
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/25 p-5">
+                  <h3 className="text-sm font-bold text-emerald-200">
+                    What the button does
                   </h3>
-                  <p className="mt-2 text-xs leading-5 text-amber-100/70">
-                    Product-news emails are marketing. TradeFeed sends them only
-                    to explicit opt-ins, excludes suppression records, includes
-                    one-click unsubscribe, and requires a recent NCC
-                    Opt-Out Registry cleanse. Existing accounts are never
-                    silently treated as consent.
+                  <p className="mt-2 text-xs leading-5 text-emerald-100/70">
+                    TradeFeed freezes the reviewed audience, creates one
+                    personalised message per account, submits them in one
+                    provider batch, and records every provider message ID.
+                    Addresses are never exposed through BCC. A fixed campaign
+                    key prevents a second run.
                   </p>
                 </div>
 
@@ -209,7 +325,7 @@ export function BulkEmailPanel() {
               <div className="overflow-hidden rounded-xl border border-stone-800 bg-white">
                 <div className="flex items-center justify-between border-b border-stone-200 bg-stone-100 px-4 py-3">
                   <p className="text-xs font-bold text-stone-600">
-                    Email preview
+                    Exact email preview
                   </p>
                   <div className="flex rounded-lg bg-stone-200 p-0.5 text-[11px] font-semibold">
                     <button
@@ -237,19 +353,45 @@ export function BulkEmailPanel() {
                   </div>
                 </div>
                 {showText ? (
-                  <pre className="max-h-[720px] min-h-[520px] overflow-auto whitespace-pre-wrap p-6 font-mono text-xs leading-6 text-stone-700">
+                  <pre className="max-h-[650px] min-h-[520px] overflow-auto whitespace-pre-wrap p-6 font-mono text-xs leading-6 text-stone-700">
                     {preview.sampleText}
                   </pre>
                 ) : (
                   <iframe
-                    title="Seller comeback email preview"
+                    title="One-time account reminder email preview"
                     sandbox=""
                     srcDoc={preview.sampleHtml}
-                    className="h-[720px] w-full bg-stone-50"
+                    className="h-[650px] w-full bg-stone-50"
                   />
                 )}
               </div>
             </div>
+
+            {!isCompleted && !isFailed && (
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-950/25 p-4">
+                <input
+                  type="checkbox"
+                  checked={confirmed}
+                  onChange={(event) =>
+                    setConfirmed(event.target.checked)
+                  }
+                  disabled={
+                    isPending ||
+                    !preview.canSend ||
+                    preview.readyToSend === 0
+                  }
+                  className="mt-0.5 size-4 accent-emerald-500"
+                />
+                <span className="text-xs leading-5 text-amber-100/80">
+                  I reviewed the exact email and audience. Send it once to{" "}
+                  <strong className="text-amber-100">
+                    {preview.readyToSend.toLocaleString()} eligible account
+                    {preview.readyToSend === 1 ? "" : "s"}
+                  </strong>
+                  . This cannot be undone or sent a second time.
+                </span>
+              </label>
+            )}
 
             <div className="flex flex-col gap-3 border-t border-stone-800 pt-5 sm:flex-row">
               <button
@@ -258,16 +400,26 @@ export function BulkEmailPanel() {
                 disabled={isPending || !preview.providerReady}
                 className="rounded-xl border border-stone-700 bg-stone-800 px-5 py-3 text-sm font-semibold text-stone-200 transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {isPending ? "Working…" : "Send a test to my admin email"}
+                {isPending
+                  ? "Working…"
+                  : "Send a test to my admin email"}
               </button>
               <button
                 type="button"
+                onClick={sendOnce}
                 disabled={!canSend}
                 className="flex-1 rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-stone-800 disabled:text-stone-600"
               >
-                {canSend
-                  ? `Prepare campaign for ${preview.readyToSend} sellers`
-                  : "Customer sending locked — approval workflow not enabled"}
+                {isCompleted
+                  ? "One-time reminder already sent"
+                  : isFailed
+                    ? "Campaign locked after failure"
+                    : preview.readyToSend >
+                        preview.maxRecipients
+                      ? `Audience exceeds the ${preview.maxRecipients} message limit`
+                      : preview.canSend
+                        ? `Send one-time reminder to ${preview.readyToSend.toLocaleString()} accounts`
+                        : "One-time reminder is not ready"}
               </button>
               <button
                 type="button"
