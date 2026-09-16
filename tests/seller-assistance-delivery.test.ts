@@ -179,3 +179,16 @@ test("a signed bounce is recorded and replayed without duplicate sends", async (
   assert.equal(state.recipient.status, "BOUNCED");
   assert.equal(state.suppression, true);
 });
+
+test("assistant history distinguishes provider acceptance from confirmed delivery", async (t) => {
+  harness(t);
+  await approveFirst();
+  await deliverApprovedSellerAssistance(async () => ({ success: true, id: "provider-1" }));
+  const accepted = (await getSellerAssistanceReview()).history[0]!;
+  assert.equal(accepted.status, "SENT");
+  assert.equal(accepted.deliveredAt, null);
+  await applyAssistanceDeliveryEvent({ type: "email.delivered", created_at: new Date().toISOString(), data: { email_id: "provider-1", to: ["seller@example.com"], tags: { recipient_id: "recipient" }, created_at: new Date().toISOString(), from: "notifications@tradefeed.co.za", subject: "Test" } });
+  const delivered = (await getSellerAssistanceReview()).history[0]!;
+  assert.equal(delivered.status, "DELIVERED");
+  assert.ok(delivered.deliveredAt);
+});
