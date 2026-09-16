@@ -11,6 +11,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { recordShopProductCreated } from "@/lib/analytics/seller-lifecycle";
 import { generateUniqueProductSlug } from "@/lib/utils/product-slug";
 import type { ProductCreateInput, ProductUpdateInput } from "@/lib/validation/product";
 
@@ -29,7 +30,7 @@ export async function createProduct(
 ) {
   const slug = await generateUniqueProductSlug(input.name, shopId);
 
-  return db.product.create({
+  const product = await db.product.create({
     data: {
       name: input.name,
       slug,
@@ -51,6 +52,8 @@ export async function createProduct(
       globalCategory: true,
     },
   });
+  await recordShopProductCreated(shopId, product.id);
+  return product;
 }
 
 /**

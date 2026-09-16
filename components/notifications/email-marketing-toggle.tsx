@@ -6,19 +6,22 @@ import { updateEmailMarketingPreferenceAction } from "@/app/actions/email-market
 interface EmailMarketingToggleProps {
   shopSlug: string;
   optedIn: boolean;
+  assistanceEnabled?: boolean;
 }
 
 export function EmailMarketingToggle({
   shopSlug,
   optedIn: initialOptedIn,
+  assistanceEnabled: initialAssistanceEnabled = false,
 }: EmailMarketingToggleProps) {
   const [optedIn, setOptedIn] = useState(initialOptedIn);
+  const [assistanceEnabled, setAssistanceEnabled] = useState(initialAssistanceEnabled);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function updatePreference(nextOptedIn: boolean) {
-    if (isPending || nextOptedIn === optedIn) return;
+    if (isPending || (nextOptedIn === optedIn && assistanceEnabled)) return;
 
     setMessage(null);
     setError(null);
@@ -35,10 +38,11 @@ export function EmailMarketingToggle({
       }
 
       setOptedIn(result.optedIn);
+      setAssistanceEnabled(result.optedIn);
       setMessage(
         result.optedIn
-          ? "You’re subscribed to optional TradeFeed product news."
-          : "You won’t receive optional TradeFeed product news.",
+          ? "You’re subscribed to optional seller help and TradeFeed product news."
+          : "You won’t receive optional seller help or TradeFeed product news.",
       );
     });
   }
@@ -57,11 +61,13 @@ export function EmailMarketingToggle({
             id="product-news-heading"
             className="mt-1 text-lg font-semibold text-stone-900"
           >
-            TradeFeed product news
+            Seller help and product news
           </h2>
           <p className="mt-1 text-sm leading-6 text-stone-600">
-            Get occasional emails about meaningful new TradeFeed features,
-            seller tools, and practical ideas for growing your catalogue.
+            Get helpful emails based on your shop’s progress: adding a first
+            product, completing listing details, or sharing your catalogue.
+            Tailored help is limited to one email per seven days. Also receive
+            occasional TradeFeed product news and seller tips.
             This is separate from essential order, stock, review, security,
             and account emails.
           </p>
@@ -74,7 +80,7 @@ export function EmailMarketingToggle({
         <button
           type="button"
           role="switch"
-          aria-label="Receive optional TradeFeed product news by email"
+          aria-label="Receive optional seller help and product news by email"
           aria-checked={optedIn}
           disabled={isPending}
           onClick={() => updatePreference(!optedIn)}
@@ -90,6 +96,11 @@ export function EmailMarketingToggle({
           />
         </button>
       </div>
+
+      {optedIn && !assistanceEnabled && <div className="mt-3 text-sm text-stone-700">
+        <p>Your existing product-news subscription is on. Tailored seller help stays off until you choose it.</p>
+        <button type="button" disabled={isPending} className="mt-2 font-semibold text-emerald-700 underline" onClick={() => updatePreference(true)}>Also email me tailored seller help</button>
+      </div>}
 
       <div className="mt-4 min-h-5" aria-live="polite">
         {isPending && (

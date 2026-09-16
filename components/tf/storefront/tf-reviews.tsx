@@ -69,8 +69,8 @@ export function TfReviewsBlock({
           </span>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-tf-stone-600">
-          No reviews yet — {shopName} is just getting started. Every review here comes
-          from a confirmed TradeFeed order, so the first one will mean something.
+          No reviews yet for {shopName}. Reviews with a verified purchase badge
+          have been matched to a TradeFeed order.
         </p>
         {action && <div className="mt-4">{action}</div>}
       </section>
@@ -91,7 +91,7 @@ export function TfReviewsBlock({
             <div>
               <Stars rating={avgRating} />
               <p className="text-xs tabular-nums text-tf-stone-500">
-                {reviewCount} review{reviewCount === 1 ? "" : "s"} · from confirmed orders
+                {reviewCount} review{reviewCount === 1 ? "" : "s"} · verified purchases are labelled
               </p>
             </div>
           </div>
@@ -160,8 +160,8 @@ export function TfReviewsBlock({
       </ul>
 
       <p className="mt-4 text-xs text-tf-stone-500">
-        Bought from {shopName}? You&apos;ll get a review link on WhatsApp once your order
-        is delivered — it takes 30 seconds and helps the next buyer.
+        Bought from {shopName}? Share your experience to help the next buyer.
+        A verified purchase badge identifies reviews matched to a TradeFeed order.
       </p>
     </section>
   );

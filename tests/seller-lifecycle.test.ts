@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { db } from "@/lib/db";
 
 import {
   buildSellerMilestoneDedupeKey,
@@ -8,7 +9,36 @@ import {
   sellerMilestoneTargetsShop,
   SELLER_MILESTONE_SOURCES,
   SELLER_MILESTONE_STEPS,
+  recordShopProductCreated,
 } from "@/lib/analytics/seller-lifecycle";
+
+test("product saves record an owner milestone once and tracking failure does not fail the save", async (t) => {
+  const originalShop = db.shop.findUnique;
+  const originalFind = db.onboardingEvent.findFirst;
+  const originalCreate = db.onboardingEvent.create;
+  t.after(() => {
+    db.shop.findUnique = originalShop;
+    db.onboardingEvent.findFirst = originalFind;
+    db.onboardingEvent.create = originalCreate;
+  });
+  let recorded = false;
+  let writes = 0;
+  db.shop.findUnique = (async () => ({ slug: "test-shop", users: [{ userId: "owner" }] })) as unknown as typeof db.shop.findUnique;
+  db.onboardingEvent.findFirst = (async () => recorded ? { id: "event" } : null) as unknown as typeof db.onboardingEvent.findFirst;
+  db.onboardingEvent.create = (async (args: { data: { dedupeKey: string } }) => {
+    assert.equal(args.data.dedupeKey, "owner:product_created:shop");
+    writes++;
+    recorded = true;
+    return { id: "event" };
+  }) as unknown as typeof db.onboardingEvent.create;
+  await recordShopProductCreated("shop", "product-1");
+  await recordShopProductCreated("shop", "product-2");
+  assert.equal(writes, 1);
+  const errors = t.mock.method(console, "error", () => {});
+  db.shop.findUnique = (async () => { throw new Error("database unavailable"); }) as unknown as typeof db.shop.findUnique;
+  await assert.doesNotReject(() => recordShopProductCreated("shop", "product-3"));
+  assert.equal(errors.mock.callCount(), 1);
+});
 
 test("milestone dedupe keys are stable and prefer immutable shop IDs", () => {
   assert.equal(
@@ -42,6 +72,7 @@ test("seller lifecycle exposes a small canonical milestone taxonomy", () => {
     "payfast",
     "manual-upgrade",
     "admin",
+    "product-save",
   ]);
 });
 

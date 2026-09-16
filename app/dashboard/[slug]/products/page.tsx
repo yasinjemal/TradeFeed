@@ -17,6 +17,7 @@ import { computeQualityProps } from "@/lib/utils/listing-quality";
 import { ProductUsageMeter } from "@/components/billing/product-usage-meter";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { TrackedCatalogShareLink } from "@/components/analytics/tracked-catalog-share-link";
+import { listingDiscoveryIssues } from "@/lib/marketplace/listing-readiness";
 
 interface ProductsPageProps {
   params: Promise<{ slug: string }>;
@@ -33,6 +34,10 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
   const products = await getProducts(shop.id);
   const mappingStats = await countUnmappedProducts(shop.id);
   const limit = await checkProductLimit(shop.id);
+  const readyProducts = products.filter((product) =>
+    listingDiscoveryIssues(product).length === 0 &&
+    product.globalCategoryId && (product.description?.trim().length ?? 0) >= 40,
+  ).length;
 
   // Show upgrade nudge at 80%+ of free limit
   const showUpgradeNudge = !limit.unlimited && limit.current >= Math.floor(limit.limit * 0.8);
@@ -40,6 +45,17 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
 
   return (
     <div className="space-y-6">
+      <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5" aria-label="Get your first buyer enquiry">
+        <h2 className="font-semibold text-emerald-950">Get your first buyer enquiry</h2>
+        <p className="mt-2 text-sm text-emerald-900">
+          {Math.min(readyProducts, 3)} of your first 3 listings ready. Give each product a photo, price, available stock,
+          marketplace category and a useful description of at least 40 characters.
+          Then use Share catalog below to send your link to existing customers.
+        </p>
+        <p className="mt-2 text-sm text-emerald-800">When someone enquires, confirm availability and delivery with them. Update order status when an order is confirmed or delivered.</p>
+        <Link className="mt-3 mr-4 inline-block text-sm font-semibold underline" href={`/dashboard/${slug}/notifications`}>Choose optional listing help by email</Link>
+        {canManageCatalog && readyProducts < 3 && <Link className="mt-3 inline-block text-sm font-semibold underline" href={`/dashboard/${slug}/products/new?ai=true`}>Add a product from a photo →</Link>}
+      </section>
       {/* ── Discoverability Nudge (M8.4) ─────────────── */}
       {mappingStats.unmapped > 0 && mappingStats.total > 0 && (
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-4">
@@ -47,7 +63,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-amber-800">
               {mappingStats.unmapped} of {mappingStats.total} product{mappingStats.total !== 1 ? "s" : ""}{" "}
-              {mappingStats.unmapped === 1 ? "isn't" : "aren't"} discoverable on the marketplace
+              {mappingStats.unmapped === 1 ? "needs" : "need"} a marketplace category
             </p>
             <p className="text-xs text-amber-700 mt-0.5">
               Assign marketplace categories to help buyers find your products
@@ -236,6 +252,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
               0,
             );
             const qualityProps = computeQualityProps(product);
+            const discoveryIssues = listingDiscoveryIssues(product);
 
             return (
               <Link
@@ -266,6 +283,12 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
 
                   {/* Info */}
                   <div className="p-4 space-y-2">
+                    {discoveryIssues.length > 0 && (
+                      <div className="rounded-lg bg-amber-50 p-2 text-xs text-amber-900">
+                        <p className="font-semibold">Not ready for marketplace discovery</p>
+                        <ul className="mt-1 list-inside list-disc">{discoveryIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul>
+                      </div>
+                    )}
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <h3 className="font-semibold text-stone-900 truncate">

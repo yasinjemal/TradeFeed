@@ -196,7 +196,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                   className="tf-presence inline-block size-2 rounded-full bg-emerald-400"
                   aria-hidden="true"
                 />
-                {n(stats.shopCount)} active seller shops &middot; {stats.cityCount} SA {stats.cityCount === 1 ? "city" : "cities"}
+                {n(stats.shopCount)} registered shops &middot; {stats.cityCount} SA {stats.cityCount === 1 ? "city" : "cities"}
               </div>
 
               {/* Concise seller-first promise: readable, searchable, and above the fold. */}
@@ -343,7 +343,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             className="grid grid-cols-2 gap-8 text-center sm:grid-cols-4"
           >
             {[
-              { value: stats.shopCount, label: "active sellers" },
+              { value: stats.shopCount, label: "registered shops" },
               { value: stats.productCount, label: "products listed" },
               { value: stats.orderCount, label: "orders created" },
               { value: stats.cityCount, label: "SA cities" },
@@ -632,9 +632,9 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               Buyers see who they&apos;re buying from
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-white/70">
-              Every storefront, product page, and checkout carries your Verified
-              Seller card — your verification, orders fulfilled, reply time, and
-              location. Small shop, real-store trust.
+              Seller cards show verification status, location and available order
+              history. The verified badge appears only after a seller has been
+              verified by TradeFeed.
             </p>
             <ul className="mt-6 space-y-3">
               {[
@@ -685,7 +685,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                 aria-hidden="true"
               />
               <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-tf-stone-400">
-                Active seller shops
+                Shops with listed products
               </p>
             </div>
             <h2
@@ -697,7 +697,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             </h2>
             <p className="mt-2 text-sm text-tf-stone-500">
               No stock photos — these are {sellers.length} of the{" "}
-              {n(stats.shopCount)} active seller shops on TradeFeed.
+              {n(stats.shopCount)} registered shops on TradeFeed.
             </p>
           </TfReveal>
 
@@ -972,8 +972,8 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             <br className="hidden sm:block" /> in under 3&nbsp;minutes
           </h2>
           <p className="mx-auto mt-4 max-w-md text-sm text-white/70">
-            Join {n(stats.shopCount)} South African sellers already taking
-            orders on WhatsApp.
+            Join {n(stats.shopCount)} registered shops on TradeFeed.
+            Create your catalogue and share it with your WhatsApp customers.
           </p>
           <Link
             href={ctaHref}

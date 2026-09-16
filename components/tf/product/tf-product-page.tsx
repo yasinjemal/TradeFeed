@@ -1,6 +1,6 @@
 import * as React from "react";
 import Link from "next/link";
-import { BadgeCheck, ChevronLeft, Factory, FileText, LockKeyhole, RotateCcw, ShieldCheck } from "lucide-react";
+import { BadgeCheck, ChevronLeft, Factory, FileText, MessageCircle, RotateCcw, ShieldCheck } from "lucide-react";
 
 import { RestockAlert } from "@/components/catalog/restock-alert";
 import { ShareProduct } from "@/components/catalog/share-product";
@@ -265,9 +265,9 @@ export function TfProductPage({
             bulkDiscountTiers={tiers}
             />
             <div className="mt-5 grid grid-cols-3 gap-2 border-t border-tf-stone-200/70 pt-4">
-              <Assurance icon={<LockKeyhole className="size-4" />} label="Secure payment" />
-              <Assurance icon={<ShieldCheck className="size-4" />} label="Verified seller" />
-              <Assurance icon={<RotateCcw className="size-4" />} label="Clear policies" />
+              <Assurance icon={<MessageCircle className="size-4" />} label="Contact seller" />
+              <Assurance icon={<ShieldCheck className="size-4" />} label={shop.isVerified ? "Verified seller" : "Not yet verified"} />
+              <Assurance icon={<RotateCcw className="size-4" />} label={shop.returnPolicy?.trim() ? "Returns policy below" : "Ask about returns"} />
             </div>
           </div>
           </TfReveal>
@@ -322,7 +322,7 @@ export function TfProductPage({
           </TfReveal>
 
           <TfReveal>
-            <TfTrustBar ordersFulfilled={trustStats?.ordersFulfilled} compact />
+            <TfTrustBar ordersFulfilled={trustStats?.ordersFulfilled} paymentLabel="Arrange payment with the seller" compact />
           </TfReveal>
 
           <TfReveal>

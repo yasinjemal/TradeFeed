@@ -12,13 +12,14 @@ interface TfTrustBarProps extends React.ComponentProps<"div"> {
   ordersFulfilled?: number;
   /** Compact single-line version for tight layouts */
   compact?: boolean;
+  paymentLabel?: string;
 }
 
-function TfTrustBar({ ordersFulfilled, compact = false, className, ...props }: TfTrustBarProps) {
+function TfTrustBar({ ordersFulfilled, compact = false, paymentLabel = "PayFast secure payments", className, ...props }: TfTrustBarProps) {
   const items: { icon: React.ReactNode; label: string }[] = [
     {
       icon: <LockKeyhole aria-hidden="true" className="size-4 text-tf-primary" />,
-      label: "PayFast secure payments",
+      label: paymentLabel,
     },
     {
       icon: <ShieldCheck aria-hidden="true" className="size-4 text-tf-primary" />,

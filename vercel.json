@@ -3,6 +3,10 @@
   "ignoreCommand": "bash scripts/ignore-build.sh",
   "crons": [
     {
+      "path": "/api/cron/seller-assistance",
+      "schedule": "0 8 * * *"
+    },
+    {
       "path": "/api/cron/data-retention",
       "schedule": "0 3 * * *"
     },

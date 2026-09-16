@@ -668,6 +668,9 @@ export async function publishDraftsAction(
       });
       published++;
 
+      const { recordShopProductCreated } = await import("@/lib/analytics/seller-lifecycle");
+      await recordShopProductCreated(access.shopId, product.id);
+
       // Listing translations (Phase 3 synergy, fire-and-forget)
       if (FEATURE_FLAGS.LISTING_TRANSLATIONS) {
         import("@/lib/ai/translate-listing")

@@ -12,6 +12,7 @@ import { NotificationSettings } from "@/components/notifications/notification-se
 import { WhatsAppSequenceToggle } from "@/components/notifications/whatsapp-sequence-toggle";
 import { EmailMarketingToggle } from "@/components/notifications/email-marketing-toggle";
 import { db } from "@/lib/db";
+import { ASSISTANCE_CONSENT_VERSION } from "@/lib/email/assistance-consent";
 
 interface NotificationsPageProps {
   params: Promise<{ slug: string }>;
@@ -34,7 +35,7 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
     db.sellerSequenceState.findUnique({ where: { shopId: access.shopId }, select: { optedOut: true } }),
     db.emailMarketingPreference.findUnique({
       where: { userId: access.userId },
-      select: { status: true },
+      select: { status: true, consentVersion: true },
     }).catch(() => {
       // Keep transactional notification settings available during a
       // code-before-migration rollout. Marketing remains off until the
@@ -73,6 +74,7 @@ export default async function NotificationsPage({ params }: NotificationsPagePro
       <EmailMarketingToggle
         shopSlug={slug}
         optedIn={emailMarketingPreference?.status === "OPTED_IN"}
+        assistanceEnabled={emailMarketingPreference?.status === "OPTED_IN" && emailMarketingPreference.consentVersion === ASSISTANCE_CONSENT_VERSION}
       />
 
       <WhatsAppSequenceToggle

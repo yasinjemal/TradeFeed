@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { requireShopAccess } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { createMarketingEmailHash } from "@/lib/email/marketing-preferences";
+import { ASSISTANCE_CONSENT_VERSION } from "@/lib/email/assistance-consent";
 
 const PRODUCT_NEWS_CONSENT_SOURCE =
   "seller_dashboard_notifications_toggle";
-const PRODUCT_NEWS_CONSENT_VERSION = "product_news_v1";
+const PRODUCT_NEWS_CONSENT_VERSION = ASSISTANCE_CONSENT_VERSION;
 
 type EmailMarketingPreferenceActionResult =
   | { success: true; optedIn: boolean }

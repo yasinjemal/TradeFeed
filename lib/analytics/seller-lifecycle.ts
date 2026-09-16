@@ -31,6 +31,7 @@ export const SELLER_MILESTONE_SOURCES = [
   "payfast",
   "manual-upgrade",
   "admin",
+  "product-save",
 ] as const;
 
 export type SellerMilestoneSource =
@@ -187,4 +188,38 @@ export async function recordShopSubscriptionStarted(
     shopId,
     shopSlug: shop.slug,
   });
+}
+
+/** Record a saved product for its shop owner across dashboard and import paths.
+ * This is product creation, not proof of publication, sharing, or onboarding completion.
+ */
+export async function recordShopProductCreated(shopId: string, productId: string): Promise<void> {
+  try {
+    const shop = await db.shop.findUnique({
+      where: { id: shopId },
+      select: {
+        slug: true,
+        users: {
+          where: { role: "OWNER" },
+          orderBy: { userId: "asc" },
+          take: 1,
+          select: { userId: true },
+        },
+      },
+    });
+    const ownerId = shop?.users[0]?.userId;
+    if (!shop || !ownerId) return;
+    await recordSellerMilestone({
+      userId: ownerId,
+      shopId,
+      shopSlug: shop.slug,
+      productId,
+      step: "product_created",
+      source: "product-save",
+    });
+  } catch (error) {
+    // Await the attempt so serverless shutdown cannot silently drop it.
+    // A tracking failure must never cause a seller to retry a successful save.
+    console.error("[seller-lifecycle] Product milestone recording failed", error);
+  }
 }

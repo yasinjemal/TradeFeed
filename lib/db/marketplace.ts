@@ -16,6 +16,7 @@
 // ============================================================
 
 import { db } from "@/lib/db";
+import { MARKETPLACE_ELIGIBILITY } from "@/lib/marketplace/eligibility";
 import type { AnalyticsRequestContext } from "@/lib/analytics/visitor";
 import { trackEvent } from "@/lib/db/analytics";
 import type { Prisma } from "@prisma/client";
@@ -316,6 +317,7 @@ export async function getMarketplaceProducts(
 
   // ── Build WHERE clause ──────────────────────────────────
   const where: Prisma.ProductWhereInput = {
+    AND: [MARKETPLACE_ELIGIBILITY],
     isActive: true,
     ...(!includeWholesaleOnly && { wholesaleOnly: false }),
     shop: {
@@ -347,8 +349,12 @@ export async function getMarketplaceProducts(
     where.variants = {
       some: {
         isActive: true,
-        ...(minPrice !== undefined && { priceInCents: { gte: minPrice } }),
-        ...(maxPrice !== undefined && { priceInCents: { lte: maxPrice } }),
+        stock: { gt: 0 },
+        priceInCents: {
+          gt: 0,
+          ...(minPrice !== undefined && { gte: minPrice }),
+          ...(maxPrice !== undefined && { lte: maxPrice }),
+        },
       },
     };
   }
@@ -461,7 +467,7 @@ export async function getMarketplaceProducts(
           take: 1,
         },
         variants: {
-          where: { isActive: true },
+          where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
           select: { priceInCents: true },
         },
       },
@@ -561,6 +567,7 @@ export async function getPromotedProducts(
       expiresAt: { gt: now },
       startsAt: { lte: now },
       product: {
+        AND: [MARKETPLACE_ELIGIBILITY],
         isActive: true,
         wholesaleOnly: false,
         shop: { isActive: true },
@@ -609,7 +616,7 @@ export async function getPromotedProducts(
             take: 1,
           },
           variants: {
-            where: { isActive: true },
+            where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
             select: { priceInCents: true },
           },
         },
@@ -678,6 +685,8 @@ export async function getGlobalCategories(): Promise<CategoryWithCount[]> {
         select: {
           products: {
             where: {
+              AND: [MARKETPLACE_ELIGIBILITY],
+              wholesaleOnly: false,
               isActive: true,
               shop: { isActive: true },
               variants: { some: { isActive: true } },
@@ -764,6 +773,7 @@ export async function getTrendingProducts(
   const products = await db.product.findMany({
     where: {
       id: { in: productIds },
+      AND: [MARKETPLACE_ELIGIBILITY],
       isActive: true,
       wholesaleOnly: false,
       shop: { isActive: true },
@@ -807,7 +817,7 @@ export async function getTrendingProducts(
         take: 1,
       },
       variants: {
-        where: { isActive: true },
+        where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
         select: { priceInCents: true },
       },
     },
@@ -867,6 +877,7 @@ export async function getNewArrivals(
       wholesaleOnly: false,
       createdAt: { gte: sevenDaysAgo },
       shop: { isActive: true },
+      AND: [MARKETPLACE_ELIGIBILITY],
       variants: { some: { isActive: true } },
     },
     select: {
@@ -907,7 +918,7 @@ export async function getNewArrivals(
         take: 1,
       },
       variants: {
-        where: { isActive: true },
+        where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
         select: { priceInCents: true },
       },
     },
@@ -987,6 +998,8 @@ export async function getFeaturedShops(
         select: {
           products: {
             where: {
+              AND: [MARKETPLACE_ELIGIBILITY],
+              wholesaleOnly: false,
               isActive: true,
               variants: { some: { isActive: true } },
             },
