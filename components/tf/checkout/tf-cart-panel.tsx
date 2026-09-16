@@ -1,5 +1,6 @@
 "use client";
 
+import {createPortal} from "react-dom";
 import * as React from "react";
 import Image from "next/image";
 import { useTransition } from "react";
@@ -22,6 +23,7 @@ import {
   buildWhatsAppMessage,
   type DeliveryAddress,
 } from "@/lib/cart/whatsapp-message";
+import { getCheckoutKey } from "@/lib/cart/checkout-key";
 import { checkoutAction } from "@/app/actions/orders";
 import { trackWhatsAppCheckoutAction } from "@/app/actions/analytics";
 import { formatShippingCost, type ShippingRate } from "@/lib/shipping/rates";
@@ -63,7 +65,7 @@ interface Confirmation {
   whatsappUrl: string;
   totalCents: number;
   itemCount: number;
-  paymentMethod: "PAYFAST" | "COD";
+  paymentMethod: "PAYFAST" | "COD" | "MANUAL";
 }
 
 export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
@@ -80,6 +82,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
     shopSlug,
     shopProvince,
     shopCity,
+    onlinePaymentsEnabled,
     codEnabled,
     deliveryEnabled,
     collectionEnabled,
@@ -108,7 +111,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
   const [shippingRates, setShippingRates] = React.useState<ShippingRate[]>([]);
   const [selectedShipping, setSelectedShipping] = React.useState<string | null>(null);
   const [loadingRates, setLoadingRates] = React.useState(false);
-  const [paymentMethod, setPaymentMethod] = React.useState<"PAYFAST" | "COD">("PAYFAST");
+  const [paymentMethod, setPaymentMethod] = React.useState<"PAYFAST" | "COD" | "MANUAL">("MANUAL");
   const panelRef = React.useRef<HTMLDivElement>(null);
 
   const selectedShippingRate =
@@ -131,42 +134,6 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
           paymentMethod,
         )
       : undefined;
-
-  // Shipping rates lookup (same API as the live panel)
-  React.useEffect(() => {
-    if (!deliveryEnabled || !showDelivery || !delivery.province || !shopProvince) {
-      setShippingRates([]);
-      setSelectedShipping(null);
-      return;
-    }
-    let cancelled = false;
-    setLoadingRates(true);
-    const params = new URLSearchParams({
-      originProvince: shopProvince,
-      destinationProvince: delivery.province,
-      ...(shopCity ? { originCity: shopCity } : {}),
-      ...(delivery.city ? { destinationCity: delivery.city } : {}),
-    });
-    fetch(`/api/shipping/rates?${params}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (cancelled) return;
-        setShippingRates(data.rates ?? []);
-        if (data.rates?.length > 0) {
-          const cheapest = data.rates[0];
-          setSelectedShipping(`${cheapest.carrier}|${cheapest.service}`);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setShippingRates([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingRates(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [deliveryEnabled, showDelivery, delivery.province, delivery.city, shopProvince, shopCity]);
 
   React.useEffect(() => {
     if (!deliveryEnabled) {
@@ -261,6 +228,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
             ? `${selectedShippingRate.carrier}|${selectedShippingRate.service}`
             : undefined,
           paymentMethod,
+          await getCheckoutKey(shopId, [orderItems, whatsappMessage, buyerName, buyerPhone, buyerNote, deliveryData, marketingConsent, selectedShipping, paymentMethod]),
         );
 
         if (!result.success) {
@@ -291,6 +259,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
           itemCount: totalItems,
           paymentMethod,
         });
+        try { sessionStorage.removeItem("tradefeed_checkout_"+shopId); } catch {}
         clearCart();
       } catch {
         setError(
@@ -305,7 +274,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
   const sectionCls = "rounded-xl border border-tf-stone-200 bg-tf-raised p-4";
   const labelCls = "mb-1.5 block text-sm font-medium text-tf-ink";
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50">
       <button
         aria-label="Close cart"
@@ -598,6 +567,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                     </div>
                   )}
 
+                  <fieldset className="space-y-2"><legend className={labelCls}>How will you receive it?</legend>{deliveryEnabled && <label className="flex min-h-11 items-center gap-2 text-sm"><input type="radio" name="fulfilment" checked={selectedShipping !== "collection"} onChange={()=>setSelectedShipping(null)} />Arrange delivery with seller (cost confirmed separately)</label>}{collectionEnabled && <label className="flex min-h-11 items-center gap-2 text-sm"><input type="radio" name="fulfilment" checked={selectedShipping === "collection"} onChange={()=>{setSelectedShipping("collection");setShowDelivery(false);}} />Collect from seller</label>}</fieldset>
                   {(dispatchWindow || deliveryNote) && (
                     <p className="rounded-lg bg-tf-stone-50 px-3 py-2 text-xs leading-relaxed text-tf-stone-600">
                       {dispatchWindow && <span className="font-medium text-tf-ink">Typical dispatch: {dispatchWindow}.</span>}
@@ -710,15 +680,18 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                     </div>
                   )}
 
+                  <p className="text-sm text-tf-stone-600">Payment is arranged with the seller unless you select another available option. Delivery costs must be confirmed with the seller before payment. Unconfirmed orders reserve stock for 24 hours.</p>
+
                   {/* Payment method */}
-                  {codEnabled && (
+                  {(codEnabled || onlinePaymentsEnabled) && (
                     <fieldset>
                       <legend className={labelCls}>Payment</legend>
                       <div className="grid grid-cols-2 gap-2">
                         {(
                           [
-                            ["PAYFAST", "PayFast (secure)"],
-                            ["COD", "Cash on delivery"],
+                            ["MANUAL", "Arrange with seller"],
+                            ...(onlinePaymentsEnabled ? [["PAYFAST", "PayFast"] as const] : []),
+                            ...(codEnabled ? [["COD", "Cash on delivery"] as const] : []),
                           ] as const
                         ).map(([value, label]) => (
                           <label
@@ -788,7 +761,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                   </div>
                 )}
                 <div className="flex justify-between font-semibold text-tf-ink">
-                  <dt>Total</dt>
+                  <dt>{selectedShipping === "collection" ? "Total" : "Items total (delivery extra)"}</dt>
                   <dd>{formatZAR(totalPriceInCents + shippingCents)}</dd>
                 </div>
               </dl>
@@ -811,6 +784,6 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
           </>
         )}
       </div>
-    </div>
+    </div>, document.body
   );
 }

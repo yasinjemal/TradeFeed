@@ -1,3 +1,4 @@
+import { buyerOnlinePaymentsEnabled } from "@/lib/commerce/capabilities";
 // ============================================================
 // Layout — Public Catalog (/catalog/[slug])
 // ============================================================
@@ -150,7 +151,7 @@ export default async function CatalogLayout({
   };
 
   return (
-    <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined} shopProvince={shop.province ?? undefined} shopCity={shop.city ?? undefined} codEnabled={shop.codEnabled} deliveryEnabled={shop.deliveryEnabled} collectionEnabled={shop.collectionEnabled} dispatchWindow={shop.dispatchWindow} deliveryNote={shop.deliveryNote ?? undefined} shopName={shop.name} shopLogoUrl={shop.logoUrl ?? undefined} shopVerified={shop.isVerified} buyerDefaults={buyerDefaults}>
+    <CartProvider shopSlug={slug} shopId={shop.id} whatsappNumber={shop.whatsappNumber} retailWhatsappNumber={shop.retailWhatsappNumber ?? undefined} shopProvince={shop.province ?? undefined} shopCity={shop.city ?? undefined} onlinePaymentsEnabled={buyerOnlinePaymentsEnabled(shop.id)} codEnabled={shop.codEnabled} deliveryEnabled={shop.deliveryEnabled} collectionEnabled={shop.collectionEnabled} dispatchWindow={shop.dispatchWindow} deliveryNote={shop.deliveryNote ?? undefined} shopName={shop.name} shopLogoUrl={shop.logoUrl ?? undefined} shopVerified={shop.isVerified} buyerDefaults={buyerDefaults}>
     <WhatsAppCTAProvider>
     <WishlistProvider shopSlug={slug} shopId={shop.id}>
       {/* Google Fonts for custom theme fonts */}

@@ -42,7 +42,9 @@ function isPlatformHost(host: string): boolean {
 
 // Routes that DON'T require authentication
 const isPublicRoute = createRouteMatcher([
-  "/",                              // Landing page
+  "/",                              // Marketplace home
+  "/sell",
+  "/support/(.*)",                   // Case pages enforce scoped access themselves
   "/sign-in(.*)",                   // Clerk sign-in
   "/sign-up(.*)",                   // Clerk sign-up
   "/catalog/(.*)",                  // Public storefront (buyer-facing)

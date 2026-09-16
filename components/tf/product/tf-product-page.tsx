@@ -217,7 +217,7 @@ export function TfProductPage({
               {product.categoryName && product.categorySlug ? (
                 <Link
                   href={`/marketplace?category=${encodeURIComponent(product.categorySlug)}`}
-                  className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-tf-primary outline-none hover:text-tf-primary-hover focus-visible:ring-2 focus-visible:ring-tf-primary"
+                  className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-tf-primary outline-none hover:text-tf-primary-hover focus-visible:ring-2 focus-visible:ring-tf-primary"
                 >
                   <span className="h-px w-7 bg-tf-primary/55" aria-hidden="true" />
                   {product.categoryName}
@@ -230,7 +230,7 @@ export function TfProductPage({
                 priceInCents={minPriceCents}
               />
             </div>
-            <h1 className="max-w-[15ch] font-tf-editorial text-[2.65rem] font-medium leading-[0.94] tracking-[-0.035em] text-tf-ink sm:text-[3.5rem] lg:text-[4rem]">
+            <h1 className="max-w-xl font-tf-display text-3xl font-semibold leading-tight tracking-tight text-tf-ink sm:text-4xl">
               {product.name}
             </h1>
             <p className="mt-4 max-w-xl font-tf-display text-sm leading-6 text-tf-stone-500">
@@ -251,6 +251,7 @@ export function TfProductPage({
           <TfReveal delay={140}>
           <div className="rounded-[1.75rem] border border-tf-stone-200/80 bg-tf-raised p-5 shadow-[0_24px_70px_rgba(20,20,16,0.08)] sm:p-6">
             <TfOrderPanel
+              wholesaleOnly={product.wholesaleOnly}
             productId={product.id}
             productName={product.name}
             productUrl={productUrl}

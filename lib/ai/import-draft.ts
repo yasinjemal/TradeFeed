@@ -86,19 +86,7 @@ export async function generateImportDraft(
   globalContext?: string | null
 ): Promise<ImportDraft | null> {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    console.log("[import-draft] No OpenAI key — returning mock draft");
-    return {
-      title: "Imported product",
-      category: "Other",
-      description: "Imported via catalogue import. Edit to add details.",
-      priceMinCents: null,
-      priceMaxCents: null,
-      attributes: { sizes: [], colours: [], material: "" },
-      confidence: 0.3,
-      flags: ["no_price_detected"],
-    };
-  }
+  if (!apiKey) return null; // Caller keeps the draft for manual review.
 
   try {
     const OpenAI = (await import("openai")).default;

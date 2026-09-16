@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ShareProductProps {
   productName: string;
@@ -22,6 +22,8 @@ export function ShareProduct({
   shopName,
 }: ShareProductProps) {
   const [copied, setCopied] = useState(false);
+  const [canShare,setCanShare] = useState(false);
+  useEffect(()=>{setCanShare(typeof navigator.share === "function");},[]);
 
   const shareText = `Check out *${productName}* from ${price} at ${shopName}! 🛍️\n\n${productUrl}\n\nvia TradeFeed — Create your free shop at tradefeed.co.za`;
   const waShareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
@@ -117,7 +119,7 @@ export function ShareProduct({
       </button>
 
       {/* Native Share (mobile) */}
-      {typeof navigator !== "undefined" && "share" in navigator && (
+      {canShare && (
         <button
           type="button"
           onClick={handleNativeShare}

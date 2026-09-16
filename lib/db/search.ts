@@ -43,7 +43,7 @@ function sanitizeSearchQuery(raw: string): string {
  */
 export async function searchProductIds(
   query: string,
-  limit: number = 100
+  limit: number | null = 100
 ): Promise<SearchHit[]> {
   const sanitized = sanitizeSearchQuery(query);
   if (sanitized.length === 0) return [];
@@ -56,7 +56,7 @@ export async function searchProductIds(
       FROM "Product"
       WHERE "search_vector" @@ to_tsquery('english', $1)
         AND "isActive" = true
-      ORDER BY rank DESC
+      ORDER BY rank DESC, id ASC
       LIMIT $2
       `,
       sanitized,
@@ -64,7 +64,7 @@ export async function searchProductIds(
     );
 
     if (ftsResults.length > 0) {
-      console.log(`[search] query="${query}" method=fts results=${ftsResults.length}`);
+      console.log(`[search] method=fts results=${ftsResults.length}`);
       return ftsResults;
     }
 
@@ -76,7 +76,7 @@ export async function searchProductIds(
       FROM "Product"
       WHERE similarity("name", $1) > 0.15
         AND "isActive" = true
-      ORDER BY rank DESC
+      ORDER BY rank DESC, id ASC
       LIMIT $2
       `,
       trimmed,
@@ -84,9 +84,9 @@ export async function searchProductIds(
     );
 
     if (fuzzyResults.length > 0) {
-      console.log(`[search] query="${query}" method=fuzzy results=${fuzzyResults.length}`);
+      console.log(`[search] method=fuzzy results=${fuzzyResults.length}`);
     } else {
-      console.log(`[search] query="${query}" method=none results=0`);
+      console.log(`[search] method=none results=0`);
     }
 
     return fuzzyResults;

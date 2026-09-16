@@ -24,6 +24,8 @@ env:
   NEXT_PUBLIC_APP_URL: "https://tradefeed.co.za"
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CI_CLERK_PUBLISHABLE_KEY || 'pk_test_Y2xlcmsuZXhhbXBsZS5jb20k' }}
   CLERK_SECRET_KEY: ${{ secrets.CI_CLERK_SECRET_KEY || 'sk_test_dummy' }}
+  NEXT_PUBLIC_FF_UI_REDESIGN: "true"
+  NEXT_PUBLIC_FF_UI_REDESIGN_DASHBOARD: "true"
   CRON_SECRET: "ci-cron-secret"
   UPLOADTHING_TOKEN: "dummy"
 
@@ -64,12 +66,8 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Enable PostgreSQL extensions
-        run: npx prisma db execute --file prisma/ci-extensions.sql --schema prisma/schema.prisma
-
-      # Legacy db-push/migration history cannot be replayed until it is baselined.
-      - name: Synchronize test database schema
-        run: npx prisma db push --skip-generate
+      - name: Replay baseline and release migrations on the empty test database
+        run: npx tsx scripts/bootstrap-quality-db.ts
 
       - name: Lint
         run: npm run lint
@@ -79,6 +77,9 @@ jobs:
 
       - name: Unit tests
         run: npm test
+
+      - name: Database commerce tests
+        run: RUN_DATABASE_TESTS=true npx tsx --test tests/integration/commerce.test.ts
 
       - name: AI Eval (Promptfoo)
         if: env.OPENAI_API_KEY != ''
@@ -128,12 +129,11 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Enable PostgreSQL extensions
-        run: npx prisma db execute --file prisma/ci-extensions.sql --schema prisma/schema.prisma
+      - name: Replay baseline and release migrations on the empty test database
+        run: npx tsx scripts/bootstrap-quality-db.ts
 
-      # Legacy db-push/migration history cannot be replayed until it is baselined.
-      - name: Synchronize test database schema
-        run: npx prisma db push --skip-generate
+      - name: Seed deterministic buyer fixture
+        run: npx tsx scripts/seed-quality-fixture.ts
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

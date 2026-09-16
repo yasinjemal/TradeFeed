@@ -1,5 +1,6 @@
 "use client";
 
+import { CommerceHeader } from "@/components/commerce/header";
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -271,42 +272,13 @@ export function TfMarketplaceShell({
     <div className="min-h-screen bg-tf-surface pb-20 text-tf-ink">
       <TfFonts />
 
-      {/* ── Row 1: Announcement strip — static, scrolls away ── */}
-      <div className="bg-tf-deepest">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2 sm:px-6">
-          <div className="flex items-center gap-5 overflow-hidden">
-            <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-emerald-200">
-              <SouthAfricanFlag className="h-[13px] w-[19.5px] shrink-0" />
-              South Africa
-            </span>
-            <span className="hidden items-center gap-1.5 text-[11px] text-emerald-200/80 sm:flex">
-              <BadgeCheck aria-hidden="true" className="size-3 shrink-0 text-emerald-400/80" />
-              Verified sellers
-            </span>
-            <span className="hidden text-[11px] text-emerald-100/65 md:block">No platform fees</span>
-            <span className="hidden text-[11px] text-emerald-100/65 lg:block">Orders direct via WhatsApp</span>
-          </div>
-          <div className="flex shrink-0 items-center gap-3 text-[11px]">
-            {isSignedIn ? <Link href="/me" className="hidden text-emerald-300 transition-colors hover:text-white sm:block">My TradeFeed</Link> : <Link href="/sign-in" className="hidden text-emerald-400/70 transition-colors hover:text-emerald-300 sm:block">Sign in</Link>}
-            <Link href="/sign-up" className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-3 py-1 font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/30">
-              Sell free
-              <ArrowRight aria-hidden="true" className="size-3" />
-            </Link>
-          </div>
-        </div>
-      </div>
-
       {/* ── Rows 2+3: Search nav + categories — STICKY ─────── */}
+      <CommerceHeader compact />
       <header className="sticky top-0 z-30">
 
         {/* Row 2: Search-dominant nav */}
         <div className="border-b border-tf-stone-200 bg-tf-raised shadow-[0_1px_0_0_rgba(0,0,0,0.06)]">
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6">
-
-            {/* Logo — icon + wordmark, proper dark variant */}
-            <Link href="/" aria-label="TradeFeed home" className="hidden shrink-0 sm:block">
-              <TradeFeedLogo size="sm" variant="auto" />
-            </Link>
 
             {/* Search bar — the dominant element */}
             <div
@@ -477,6 +449,7 @@ export function TfMarketplaceShell({
           MAIN
       ══════════════════════════════════════════════════ */}
       <main className="mx-auto max-w-6xl px-4 pt-5 sm:px-6">
+        <h1 className="mb-5 text-2xl font-semibold tracking-tight">{currentFilters.search ? `Results for “${currentFilters.search}”` : "Explore the marketplace"}</h1>
 
         {/* ── Featured sellers rail — clean browse only ── */}
         {featuredShops.length > 0 && activeFilterCount === 0 && !currentFilters.search && currentPage === 1 && (
@@ -505,6 +478,7 @@ export function TfMarketplaceShell({
 
         {/* ── Toolbar ─────────────────────────────────── */}
         <div className="mb-4 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <label className="flex shrink-0 items-center gap-2 text-sm">Sort<select aria-label="Sort products" value={currentFilters.sortBy} onChange={(e)=>navigate({sortBy:e.target.value as MarketplaceSortBy})} className="min-h-11 rounded-lg border border-tf-stone-300 bg-tf-raised px-3">{[["quality","Recommended"],["newest","Newest"],["price_asc","Price: low to high"],["price_desc","Price: high to low"],["top_rated","Top rated"],["popular","Popular"]].map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
           {/* Count — fixed left */}
           <p className="shrink-0 text-sm text-tf-stone-500" aria-live="polite">
             <span className="font-semibold text-tf-ink">{totalProducts.toLocaleString("en-ZA")}</span>

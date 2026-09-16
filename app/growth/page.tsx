@@ -714,7 +714,7 @@ export default function GrowthPage() {
 
           <div className="mt-6 text-center">
             <Link
-              href="/#pricing"
+              href="/pricing"
               className="inline-flex items-center gap-2 text-sm font-semibold text-tf-primary hover:underline"
             >
               View self-service TradeFeed pricing
@@ -852,7 +852,7 @@ export default function GrowthPage() {
             <Link href="/marketplace" className="hover:text-white">
               Marketplace
             </Link>
-            <Link href="/#pricing" className="hover:text-white">
+            <Link href="/pricing" className="hover:text-white">
               Software pricing
             </Link>
             <Link href="/privacy" className="hover:text-white">

@@ -135,7 +135,7 @@ export function TfGallery({ images, video, productName, soldOut = false }: TfGal
             {slide.type === "image" ? (
               <Image
                 src={slide.image.url}
-                alt={slide.image.altText ?? `${productName} — photo ${i + 1}`}
+                alt={`${productName} — photo ${i + 1}`}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority={i === 0}

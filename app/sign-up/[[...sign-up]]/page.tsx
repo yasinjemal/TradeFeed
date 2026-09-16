@@ -30,16 +30,17 @@ export default function SignUpPage() {
           src="/img/signup_panel.png"
           alt=""
           fill
-          className="object-cover opacity-20"
+          className="object-cover opacity-10"
           priority
           sizes="50vw"
         />
+        <div className="pointer-events-none absolute inset-0 bg-[#071a0f]/55" />
         {/* Background decorative circles */}
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
 
         {/* Logo */}
-        <div>
+        <div className="relative z-10">
           <TradeFeedLogo size="lg" variant="light" />
         </div>
 

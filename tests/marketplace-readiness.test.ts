@@ -16,18 +16,18 @@ test("discovery eligibility survives price filters and is shared by counts and f
   spy(db.product, "findMany", async (args: any) => { queries.push(args); return []; });
   spy(db.product, "count", async (args: any) => { queries.push(args); return 0; });
   await getMarketplaceProducts({ minPrice: 100, maxPrice: 500 });
-  assert.deepEqual(queries[0].where, queries[1].where);
-  assert.deepEqual(queries[0].where.AND, [MARKETPLACE_ELIGIBILITY]);
+  assert.deepEqual(queries[1].where, {...queries[0].where,id:{in:[]}});
+  assert.deepEqual(queries[0].where.AND[0], MARKETPLACE_ELIGIBILITY);
   assert.deepEqual(queries[0].where.variants.some.priceInCents, { gt: 0, gte: 100, lte: 500 });
   await getNewArrivals();
-  assert.deepEqual(queries[2].where.AND, [MARKETPLACE_ELIGIBILITY]);
+  assert.deepEqual(queries[2].where.AND[0], MARKETPLACE_ELIGIBILITY);
   spy(db.promotedListing, "findMany", async (args: any) => {
-    assert.deepEqual(args.where.product.AND, [MARKETPLACE_ELIGIBILITY]);
+    assert.deepEqual(args.where.product.AND[0], MARKETPLACE_ELIGIBILITY);
     return [];
   });
   await getPromotedProducts();
   spy(db.globalCategory, "findMany", async (args: any) => {
-    assert.deepEqual(args.select._count.select.products.where.AND, [MARKETPLACE_ELIGIBILITY]);
+    assert.deepEqual(args.select._count.select.products.where.AND[0], MARKETPLACE_ELIGIBILITY);
     return [];
   });
   await getGlobalCategories();

@@ -1,3 +1,4 @@
+import { buyerOnlinePaymentsEnabled } from "@/lib/commerce/capabilities";
 // ============================================================
 // Data Access — Orders
 // ============================================================
@@ -11,11 +12,11 @@
 // ORDER NUMBER FORMAT: TF-YYYYMMDD-<20 HEX> (80 random bits)
 // ============================================================
 
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { Prisma, type OrderStatus, type Order, type OrderItem, type ShippingMethod } from "@prisma/client";
 import { db } from "@/lib/db";
+import { RESERVATION_DURATION_MS, transitionOrder, recordOrderPayment } from "@/lib/orders/lifecycle";
 import { syncProductRestockAlerts } from "@/lib/notifications/buyer-alerts";
-import { getSpecificRate } from "@/lib/shipping/rates";
 import {
   aggregateCheckoutItems,
   aggregateStockQuantities,
@@ -39,6 +40,7 @@ export function generateOrderNumber(date = new Date()): string {
 export interface CreateOrderInput {
   shopId: string;
   shopSlug: string;
+  checkoutKey?: string;
   items: {
     productId: string;
     variantId: string;
@@ -64,13 +66,13 @@ export interface CreateOrderInput {
   shippingMethod?: ShippingMethod;
   shippingRateKey?: string;
   buyerClerkId?: string;
-  paymentMethod?: "PAYFAST" | "COD";
+  paymentMethod?: "PAYFAST" | "COD" | "MANUAL";
 }
 
 // ── Create Order ────────────────────────────────────────────
 
 export type CreateOrderResult =
-  | { success: true; order: Order & { items: OrderItem[] } }
+  | { success: true; order: Order & { items: OrderItem[] }; replayed?: boolean }
   | { success: false; error: string };
 
 const MAX_DATABASE_INT = 2_147_483_647;
@@ -93,17 +95,7 @@ function wholesaleBuyerPhoneCandidates(phone: string | undefined): string[] {
   return [...candidates];
 }
 
-function parseShippingRateKey(
-  key: string | undefined,
-): { carrier: string; service: string } | null {
-  if (!key) return null;
-  const separator = key.indexOf("|");
-  if (separator < 1 || separator === key.length - 1) return null;
-  return {
-    carrier: key.slice(0, separator),
-    service: key.slice(separator + 1),
-  };
-}
+
 
 function isRetryableOrderTransactionError(error: unknown): boolean {
   if (!error || typeof error !== "object" || !("code" in error)) return false;
@@ -140,12 +132,20 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
     throw error;
   }
 
+  const checkoutFingerprint = createHash("sha256").update(JSON.stringify({ ...input, checkoutKey: undefined })).digest("hex");
   let lastError: unknown;
   for (let attempt = 0; attempt < ORDER_TRANSACTION_ATTEMPTS; attempt++) {
     const orderNumber = generateOrderNumber();
     try {
       const transactionResult = await db.$transaction(
         async (tx) => {
+          if (input.checkoutKey) {
+            const existing = await tx.order.findUnique({ where: { checkoutKey: input.checkoutKey }, include: { items: true } });
+            if (existing) {
+              if (existing.checkoutFingerprint !== checkoutFingerprint) throw new CheckoutPolicyError("This checkout attempt has changed. Start a new order.");
+              return { order: existing, productIds: [] as string[], replayed: true };
+            }
+          }
           const shop = await tx.shop.findFirst({
             where: {
               id: input.shopId,
@@ -290,8 +290,8 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
             throw new CheckoutPolicyError("This shop has no available fulfilment method.");
           }
 
-          let shippingCostCents = 0;
-          let courierName: string | null = null;
+          const shippingCostCents = 0;
+          const courierName: string | null = null;
           if (shippingMethod === "COLLECTION") {
             if (!shop.collectionEnabled) {
               throw new CheckoutPolicyError("Collection is not available from this shop.");
@@ -301,43 +301,17 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
               throw new CheckoutPolicyError("Delivery is not available from this shop.");
             }
           } else if (shippingMethod === "PLATFORM_COURIER") {
-            if (
-              !shop.deliveryEnabled ||
-              !shop.province ||
-              !input.deliveryProvince ||
-              !input.deliveryAddress
-            ) {
-              throw new CheckoutPolicyError(
-                "A valid delivery address is required for courier shipping.",
-              );
-            }
-            const rateChoice = parseShippingRateKey(input.shippingRateKey);
-            if (!rateChoice) {
-              throw new CheckoutPolicyError("Select a valid courier option.");
-            }
-            const rate = getSpecificRate(
-              {
-                originProvince: shop.province,
-                originCity: shop.city ?? undefined,
-                destinationProvince: input.deliveryProvince,
-                destinationCity: input.deliveryCity,
-                itemCount,
-              },
-              rateChoice.carrier,
-              rateChoice.service,
-            );
-            if (!rate) {
-              throw new CheckoutPolicyError("The selected courier option is not available.");
-            }
-            shippingCostCents = rate.priceCents;
-            courierName = `${rate.carrier} — ${rate.service}`;
+            throw new CheckoutPolicyError("Courier booking is not available. Choose collection or arrange delivery with the seller.");
           } else {
             throw new CheckoutPolicyError("Invalid fulfilment method.");
           }
 
-          const requestedPaymentMethod: string = input.paymentMethod ?? "PAYFAST";
-          if (requestedPaymentMethod !== "PAYFAST" && requestedPaymentMethod !== "COD") {
+          const requestedPaymentMethod: string = input.paymentMethod ?? "MANUAL";
+          if (requestedPaymentMethod !== "PAYFAST" && requestedPaymentMethod !== "COD" && requestedPaymentMethod !== "MANUAL") {
             throw new CheckoutPolicyError("Invalid payment method.");
+          }
+          if (requestedPaymentMethod === "PAYFAST" && !buyerOnlinePaymentsEnabled(shop.id)) {
+            throw new CheckoutPolicyError("Online payment is not available for this shop. Arrange payment with the seller.");
           }
           if (requestedPaymentMethod === "COD" && !shop.codEnabled) {
             throw new CheckoutPolicyError("Cash on delivery is not available from this shop.");
@@ -393,6 +367,10 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
           const order = await tx.order.create({
             data: {
               orderNumber,
+              checkoutKey: input.checkoutKey,
+              checkoutFingerprint,
+              stockReservedAt: new Date(),
+              reservationExpiresAt: new Date(Date.now() + RESERVATION_DURATION_MS),
               shopId: shop.id,
               buyerClerkId: input.buyerClerkId,
               buyerName: input.buyerName,
@@ -429,6 +407,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
 
           return {
             order,
+            replayed: false,
             productIds: [...new Set(verifiedItems.map((item) => item.productId))],
           };
         },
@@ -448,7 +427,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
         }
       }
 
-      return { success: true, order: transactionResult.order };
+      return { success: true, order: transactionResult.order, replayed: transactionResult.replayed };
     } catch (error) {
       if (error instanceof CheckoutPolicyError) {
         return { success: false, error: error.message };
@@ -520,19 +499,13 @@ export async function updateOrderStatus(
   shopId: string,
   status: OrderStatus,
 ) {
-  return db.order.update({
-    where: { id: orderId, shopId },
-    data: { status },
-  });
+  return transitionOrder({ orderId, shopId, status });
 }
 
 // ── Mark Order Paid (webhook — no shopId scoping) ───────────
 
 export async function markOrderPaid(orderId: string) {
-  return db.order.update({
-    where: { id: orderId },
-    data: { paidAt: new Date(), status: "CONFIRMED" },
-  });
+  return recordOrderPayment(orderId);
 }
 
 /**
@@ -594,7 +567,7 @@ export async function getOrderStats(shopId: string) {
       db.order.count({ where: { shopId, deletedAt: null, status: "CANCELLED" } }),
       db.order.count({ where: { shopId, deletedAt: null, paymentRequestedAt: { not: null }, paidAt: null, status: { not: "CANCELLED" } } }),
       db.order.aggregate({
-        where: { shopId, deletedAt: null, status: { not: "CANCELLED" } },
+        where: { shopId, deletedAt: null, paidAt: {not:null}, status: { not: "CANCELLED" } },
         _sum: { totalCents: true },
       }),
     ]);
@@ -614,13 +587,13 @@ export async function getOrderStats(shopId: string) {
 // ── Product Sold Count ──────────────────────────────────────
 
 /**
- * Get total units sold for a single product (non-cancelled orders).
+ * Get total units fulfilled for a single product (delivered orders).
  */
 export async function getProductSoldCount(productId: string): Promise<number> {
   const result = await db.orderItem.aggregate({
     where: {
       productId,
-      order: { status: { not: "CANCELLED" } },
+      order: { status: "DELIVERED", deletedAt: null },
     },
     _sum: { quantity: true },
   });
@@ -661,12 +634,11 @@ export async function getBuyerOrders(buyerClerkId: string) {
  * Sets codConfirmedAt + auto-advances status to DELIVERED.
  */
 export async function confirmCodPayment(orderId: string, shopId: string) {
-  return db.order.update({
-    where: { id: orderId, shopId, paymentMethod: "COD" },
-    data: {
-      codConfirmedAt: new Date(),
-      paidAt: new Date(),
-      status: "DELIVERED",
-    },
+  return db.$transaction(async tx => {
+    await tx.$queryRaw`SELECT id FROM "Order" WHERE id = ${orderId} FOR UPDATE`;
+    const order = await tx.order.findFirst({where:{id:orderId,shopId,deletedAt:null,paymentMethod:"COD"}});
+    if (!order || !["SHIPPED","DELIVERED"].includes(order.status) || order.paymentReviewRequired || order.stockReleasedAt) throw new CheckoutPolicyError("Confirm delivery before recording cash received.");
+    if (order.codConfirmedAt) return order;
+    return tx.order.update({where:{id:orderId},data:{codConfirmedAt:new Date(),paidAt:new Date(),status:"DELIVERED",deliveredAt:order.deliveredAt??new Date()}});
   });
 }

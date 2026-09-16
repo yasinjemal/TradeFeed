@@ -15,7 +15,7 @@ interface TfTrustBarProps extends React.ComponentProps<"div"> {
   paymentLabel?: string;
 }
 
-function TfTrustBar({ ordersFulfilled, compact = false, paymentLabel = "PayFast secure payments", className, ...props }: TfTrustBarProps) {
+function TfTrustBar({ ordersFulfilled, compact = false, paymentLabel = "Arrange payment with the seller", className, ...props }: TfTrustBarProps) {
   const items: { icon: React.ReactNode; label: string }[] = [
     {
       icon: <LockKeyhole aria-hidden="true" className="size-4 text-tf-primary" />,
@@ -23,13 +23,13 @@ function TfTrustBar({ ordersFulfilled, compact = false, paymentLabel = "PayFast 
     },
     {
       icon: <ShieldCheck aria-hidden="true" className="size-4 text-tf-primary" />,
-      label: "POPIA compliant",
+      label: "Your contact preferences respected",
     },
   ];
   if (ordersFulfilled != null && ordersFulfilled > 0) {
     items.push({
       icon: <PackageCheck aria-hidden="true" className="size-4 text-tf-primary" />,
-      label: `${ordersFulfilled.toLocaleString("en-ZA")} orders fulfilled`,
+      label: `${ordersFulfilled.toLocaleString("en-ZA")} order${ordersFulfilled === 1 ? "" : "s"} fulfilled`,
     });
   }
 

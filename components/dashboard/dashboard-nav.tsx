@@ -8,6 +8,8 @@ import { hasPermission, type Permission } from "@/lib/auth/permissions";
 
 // ── Primary nav items (always visible with icon + label) ──
 const primaryItems = [
+  {label:"Shop readiness",href:(slug:string)=>`/dashboard/${slug}/readiness`,exact:false,icon:<span aria-hidden="true">✓</span>},
+  {label:"Support",href:(slug:string)=>`/dashboard/${slug}/support`,exact:false,icon:<span aria-hidden="true">◌</span>},
   {
     label: "Overview",
     href: (slug: string) => `/dashboard/${slug}`,

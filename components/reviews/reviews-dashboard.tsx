@@ -84,15 +84,12 @@ export function ReviewsDashboard({
 
 function ReviewCard({ review, shopSlug }: { review: Review; shopSlug: string }) {
   const [isPending, startTransition] = useTransition();
-  const [dismissed, setDismissed] = useState(false);
-
-  if (dismissed) return null;
+  const [message, setMessage] = useState("");
 
   const handleDelete = () => {
-    if (!confirm("Delete this review? This cannot be undone.")) return;
     startTransition(async () => {
-      await deleteReviewAction(shopSlug, review.id);
-      setDismissed(true);
+      const result = await deleteReviewAction(shopSlug, review.id);
+      setMessage(result.success ? "Reported for platform review. The review remains visible until moderation." : result.error ?? "Could not report review.");
     });
   };
 
@@ -141,9 +138,10 @@ function ReviewCard({ review, shopSlug }: { review: Review; shopSlug: string }) 
           disabled={isPending}
           className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition disabled:opacity-50 flex-shrink-0"
         >
-          Delete
+          Report review
         </button>
       </div>
+      {message && <p role="status" className="mt-3 text-sm text-stone-600">{message}</p>}
     </div>
   );
 }

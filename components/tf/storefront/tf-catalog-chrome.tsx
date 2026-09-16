@@ -1,3 +1,5 @@
+import { CatalogCart } from "@/components/commerce/catalog-cart";
+import { CommerceHeader } from "@/components/commerce/header";
 import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, MapPin, Store } from "lucide-react";
@@ -28,7 +30,7 @@ export interface TfCatalogChromeShop {
 
 export function TfCatalogHeader({ shop }: { shop: TfCatalogChromeShop }) {
   return (
-    <div className="px-3 py-2.5 sm:px-4 sm:py-3">
+    <div><CommerceHeader compact /><div className="px-3 py-2.5 sm:px-4 sm:py-3">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-2">
         <Link
           href={`/catalog/${shop.slug}`}
@@ -57,9 +59,9 @@ export function TfCatalogHeader({ shop }: { shop: TfCatalogChromeShop }) {
 
           <span className="min-w-0">
             <span className="flex items-center gap-1.5">
-              <h1 className="truncate text-[15px] font-semibold leading-tight text-tf-ink transition-colors group-hover:text-tf-primary">
+              <span className="block break-words text-[15px] font-semibold leading-tight text-tf-ink transition-colors group-hover:text-tf-primary">
                 {shop.name}
-              </h1>
+              </span>
               {shop.isVerified && (
                 <BadgeCheck
                   aria-label="Verified seller"
@@ -85,8 +87,8 @@ export function TfCatalogHeader({ shop }: { shop: TfCatalogChromeShop }) {
         </Link>
 
         <div className="flex flex-shrink-0 items-center gap-1">
-          <LanguageSwitcher />
-          <TfThemeToggle className="size-9 sm:size-11" />
+          <CatalogCart />
+          <span className="hidden sm:block"><LanguageSwitcher /></span>
           <ShareCatalog
             shopName={shop.name}
             shopSlug={shop.slug}
@@ -95,7 +97,7 @@ export function TfCatalogHeader({ shop }: { shop: TfCatalogChromeShop }) {
           />
         </div>
       </div>
-    </div>
+    </div></div>
   );
 }
 

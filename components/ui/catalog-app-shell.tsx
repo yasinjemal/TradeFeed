@@ -1,3 +1,5 @@
+"use client";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 
@@ -17,6 +19,7 @@ export function CatalogAppShell({
   children,
   bottomNav,
 }: CatalogAppShellProps) {
+  const productPage = usePathname().includes("/products/");
   return (
     <div
       className={
@@ -25,7 +28,7 @@ export function CatalogAppShell({
           : "h-[100dvh] bg-stone-50 text-stone-900 flex flex-col"
       }
     >
-      <header
+      <div
         className={
           TF
             ? "sticky top-0 z-40 border-b border-tf-stone-200 bg-tf-raised/85 backdrop-blur-2xl"
@@ -33,11 +36,11 @@ export function CatalogAppShell({
         }
       >
         {header}
-      </header>
+      </div>
 
       <main className="flex-1 overflow-y-auto pb-28">{children}</main>
 
-      {bottomNav}
+      {!productPage && bottomNav}
     </div>
   );
 }

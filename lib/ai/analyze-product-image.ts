@@ -29,15 +29,7 @@ export async function analyzeProductImage(
   sellerContext?: string,
 ): Promise<AiProductAnalysis | null> {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    console.log("[ai-analyze] No OpenAI key — returning mock data");
-    return {
-      name: "Product from Image",
-      description: "Product imported via image upload. Edit to add a detailed description.",
-      category: "Other",
-      tags: ["image-import"],
-    };
-  }
+  if (!apiKey) return null; // Caller keeps the draft for manual review.
 
   try {
     const OpenAI = (await import("openai")).default;
@@ -62,9 +54,9 @@ export async function analyzeProductImage(
             `  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]\n` +
             `}\n\n` +
             `Rules:\n` +
-            `- Be specific about the product type, material, and style\n` +
+            `- Describe only visible or seller-confirmed facts; do not infer material, authenticity, performance or brand\n` +
             `- Use South African English\n` +
-            `- If the image is unclear, still try your best\n` +
+            `- If the image is unclear, say which details the seller must confirm; never invent them\n` +
             (sellerContext ? `\nSeller context:\n${sellerContext}` : ""),
         },
         {

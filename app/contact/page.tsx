@@ -27,9 +27,9 @@ export default async function ContactPage() {
   const t = await getTranslations("contact");
 
   const HELP_TOPICS = [
+    {icon:"",q:"How do I pay for a product?",a:"Check the payment options on your order. Most orders use payment arranged directly with the seller. Online payment appears only for enabled shops. Confirm delivery costs before paying."},
     { icon: "🛍️", q: t("faq.createShop"), a: t("faq.createShopAnswer") },
     { icon: "📸", q: t("faq.aiListing"), a: t("faq.aiListingAnswer") },
-    { icon: "💳", q: t("faq.payments"), a: t("faq.paymentsAnswer") },
     { icon: "📦", q: t("faq.orders"), a: t("faq.ordersAnswer") },
     { icon: "🔒", q: t("faq.whatsappSafe"), a: t("faq.whatsappSafeAnswer") },
     { icon: "❌", q: t("faq.cancelPro"), a: t("faq.cancelProAnswer") },
@@ -37,6 +37,7 @@ export default async function ContactPage() {
 
   return (
     <main className="min-h-screen bg-white">
+      <div className="mx-auto max-w-3xl px-4 py-5"><Link href="/support/order" className="inline-flex min-h-11 items-center rounded-lg bg-emerald-700 px-5 text-white font-semibold">Delivery, returns or payment problem? Get order help →</Link></div>
       {/* ── Header ───────────────────────────────────────── */}
       <div className="bg-stone-50 border-b border-stone-200">
         <div className="max-w-3xl mx-auto px-4 py-6">

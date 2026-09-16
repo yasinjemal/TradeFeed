@@ -1,3 +1,4 @@
+import { CommerceHeader } from "@/components/commerce/header";
 import Link from "next/link";
 import { BadgeCheck, CreditCard, MapPin, PackageCheck, TriangleAlert } from "lucide-react";
 
@@ -25,38 +26,34 @@ export function TfPaymentPage({ order, paymentUrl, status, isExpired }: TfPaymen
   const isCancelled = order.status === "CANCELLED";
   const isCod = order.paymentMethod === "COD";
   const location = [order.shop.city, order.shop.province].filter(Boolean).join(", ") || undefined;
-  const state = alreadyPaid
+  const state = order.paymentReviewRequired
+    ? { title: "Payment needs review", body: "We recorded your payment, but this order needs support review before fulfilment. Contact support with your order number.", tone: "warning" }
+    : alreadyPaid
     ? { title: "Payment received", body: "Your payment is confirmed. The seller will process your order shortly.", tone: "success" }
     : isCancelled
       ? { title: "This order was cancelled", body: "It can no longer be paid online.", tone: "warning" }
       : isCod
         ? { title: "Cash on delivery", body: `Pay ${formatZARCents(order.totalCents)} when you receive your order.`, tone: "warning" }
         : isExpired
-          ? { title: "This payment link has expired", body: "Ask the seller to send a new payment link on WhatsApp.", tone: "warning" }
-          : null;
+          ? { title: "This payment link has expired", body: "Contact the seller to check availability before placing a new order.", tone: "warning" }
+          : !paymentUrl
+            ? { title: "Arrange payment with the seller", body: "Confirm payment and delivery directly with the shop before paying. Online payment is unavailable for this order.", tone: "warning" }
+            : null;
 
   return (
     <main className="min-h-screen bg-tf-surface text-tf-ink">
       <TfFonts />
-      <header className="border-b border-tf-stone-200 bg-tf-raised/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-5">
-          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="auto" /></Link>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-tf-stone-500">{order.orderNumber}</span>
-            <TfThemeToggle className="size-9" />
-          </div>
-        </div>
-      </header>
+      <CommerceHeader compact />
       <section className="mx-auto max-w-xl space-y-4 px-5 py-8 sm:py-12">
         <div>
-          <p className="text-sm font-medium text-tf-primary">Secure checkout</p>
+          <p className="text-sm font-medium text-tf-primary">Order details</p>
           <h1 className="mt-1 font-tf-hero text-3xl font-semibold tracking-tight">Review your order</h1>
           <p className="mt-2 text-sm text-tf-stone-600">You&apos;re ordering from {order.shop.name}.</p>
         </div>
 
         {status === "success" && !alreadyPaid && (
           <div className="rounded-xl border border-tf-verified/25 bg-tf-verified-soft p-4 text-sm text-tf-verified">
-            Payment is being confirmed. This page will update once PayFast completes the payment.
+            Payment is being confirmed. Refresh this page after PayFast confirms the payment.
           </div>
         )}
         {status === "cancelled" && !alreadyPaid && (
@@ -97,6 +94,7 @@ export function TfPaymentPage({ order, paymentUrl, status, isExpired }: TfPaymen
           </div>
         )}
         <TfButton asChild fullWidth variant={paymentUrl ? "ghost" : "primary"}><Link href={trackHref}><PackageCheck aria-hidden="true" />Track this order</Link></TfButton>
+        <TfButton asChild fullWidth variant="ghost"><Link href={`/support/order?order=${encodeURIComponent(order.orderNumber)}`}>Help with this order</Link></TfButton>
         <TfTrustBar compact />
         {location && <p className="flex items-center justify-center gap-1.5 text-xs text-tf-stone-500"><MapPin aria-hidden="true" className="size-3.5" />{location}</p>}
       </section>

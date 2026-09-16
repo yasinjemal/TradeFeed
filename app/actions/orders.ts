@@ -11,7 +11,12 @@
 
 "use server";
 
+import { transitionOrder } from "@/lib/orders/lifecycle";
+import { buyerOnlinePaymentsEnabled } from "@/lib/commerce/capabilities";
+
 import { revalidatePath } from "next/cache";
+import { randomUUID } from "node:crypto";
+import { CheckoutPolicyError } from "@/lib/orders/checkout-policy";
 import {
   createOrder,
   updateOrderStatus,
@@ -67,8 +72,10 @@ export async function checkoutAction(
   marketingConsent?: boolean,
   shippingMethod?: "SELLER_ARRANGED" | "COLLECTION" | "PLATFORM_COURIER",
   shippingRateKey?: string,
-  paymentMethod?: "PAYFAST" | "COD",
+  paymentMethod?: "PAYFAST" | "COD" | "MANUAL",
+  checkoutKey?: string,
 ): Promise<ActionResult> {
+  checkoutKey ??= randomUUID();
   // Retry wrapper for transient DB connection failures (Neon cold starts)
   const MAX_RETRIES = 2;
 
@@ -79,7 +86,7 @@ export async function checkoutAction(
       deliveryAddress, deliveryCity, deliveryProvince, deliveryPostalCode,
       marketingConsent,
       shippingMethod, shippingRateKey,
-      paymentMethod,
+      paymentMethod, checkoutKey,
     );
 
     // If it succeeded or was a business-logic error (not a DB connection error), return
@@ -122,7 +129,8 @@ async function _attemptCheckout(
   marketingConsent?: boolean,
   shippingMethod?: "SELLER_ARRANGED" | "COLLECTION" | "PLATFORM_COURIER",
   shippingRateKey?: string,
-  paymentMethod?: "PAYFAST" | "COD",
+  paymentMethod?: "PAYFAST" | "COD" | "MANUAL",
+  checkoutKey?: string,
 ): Promise<InternalResult> {
   try {
     // Rate limit: 10 checkouts/min per IP
@@ -155,7 +163,7 @@ async function _attemptCheckout(
       marketingConsent,
       shippingMethod,
       shippingRateKey,
-      paymentMethod,
+      paymentMethod, checkoutKey,
     });
 
     if (!parsed.success) {
@@ -173,6 +181,7 @@ async function _attemptCheckout(
 
     const orderResult = await createOrder({
       shopId: input.shopId,
+      checkoutKey: input.checkoutKey,
       shopSlug: input.shopSlug,
       items: input.items,
       buyerClerkId: buyerClerkId ?? undefined,
@@ -195,6 +204,7 @@ async function _attemptCheckout(
     }
 
     const order = orderResult.order;
+    if (orderResult.replayed) return { success: true, orderNumber: order.orderNumber, trackingUrl: `/track/${encodeURIComponent(order.orderNumber)}` };
 
     // 3. Fire-and-forget notifications (don't block checkout)
     notifyNewOrder({
@@ -225,7 +235,7 @@ async function _attemptCheckout(
     ).catch(() => {});
 
     // 3b. Send WhatsApp order confirmation + payment link (fire-and-forget)
-    if (input.buyerPhone) {
+    if (input.buyerPhone && input.paymentMethod === "PAYFAST") {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://tradefeed.co.za";
       const { db: prismaDb } = await import("@/lib/db");
       prismaDb.shop.findUnique({ where: { id: input.shopId }, select: { name: true } })
@@ -333,17 +343,6 @@ export async function updateOrderStatusAction(
       });
     } catch { /* non-fatal */ }
 
-    // 4b. Set timestamps for shipping states
-    if (newStatus === "SHIPPED" || newStatus === "DELIVERED") {
-      const { db: prismaDb } = await import("@/lib/db");
-      await prismaDb.order.update({
-        where: { id: orderId, shopId: access.shopId },
-        data: newStatus === "SHIPPED"
-          ? { shippedAt: new Date() }
-          : { deliveredAt: new Date() },
-      });
-    }
-
     // 4c. Automated review request on delivery (fire-and-forget)
     if (newStatus === "DELIVERED") {
       const { FEATURE_FLAGS } = await import("@/lib/config/feature-flags");
@@ -411,9 +410,12 @@ export async function updateOrderStatusAction(
 
     // 6. Revalidate
     revalidatePath(`/dashboard/${shopSlug}/orders`);
+    revalidatePath(`/catalog/${shopSlug}`, "layout");
+    revalidatePath("/marketplace");
 
     return { success: true };
   } catch (error) {
+    if (error instanceof CheckoutPolicyError) return { success: false, error: error.message };
     await reportError("updateOrderStatusAction", error, { shopSlug, orderId, newStatus });
     return {
       success: false,
@@ -441,6 +443,10 @@ export async function createOrderPaymentLinkAction(
     const order = await getOrder(orderId, access.shopId);
     if (!order) {
       return { success: false, error: "Order not found." };
+    }
+
+    if (order.paymentMethod !== "PAYFAST" || !buyerOnlinePaymentsEnabled(access.shopId) || order.stockReleasedAt || order.paymentReviewRequired || (order.reservationExpiresAt && order.reservationExpiresAt < new Date())) {
+      return { success: false, error: "Online payment is unavailable for this order. Contact the seller or support." };
     }
 
     if (order.status === "CANCELLED") {
@@ -489,6 +495,8 @@ export async function createOrderPaymentLinkAction(
     }
 
     revalidatePath(`/dashboard/${shopSlug}/orders`);
+    revalidatePath(`/catalog/${shopSlug}`, "layout");
+    revalidatePath("/marketplace");
 
     return { success: true, paymentUrl: buyerPayUrl };
   } catch (error) {
@@ -552,20 +560,11 @@ export async function shipOrderAction(
       }
     }
 
-    const { db: prismaDb } = await import("@/lib/db");
-    await prismaDb.order.update({
-      where: { id: orderId, shopId: access.shopId },
-      data: {
-        status: "SHIPPED",
-        courierName: sanitizedCourier,
-        trackingNumber: sanitizedTracking,
-        trackingUrl,
-        shippedAt: new Date(),
-      },
-    });
+    await transitionOrder({ orderId, shopId: access.shopId, status: "SHIPPED", shipping: {courierName:sanitizedCourier,trackingNumber:sanitizedTracking,trackingUrl} });
 
     // Send WhatsApp notification with tracking info (fire-and-forget)
     if (order.buyerPhone) {
+      const { db: prismaDb } = await import("@/lib/db");
       prismaDb.shop.findUnique({ where: { id: access.shopId }, select: { name: true } })
         .then((shop) => {
           if (!shop) return;
@@ -582,6 +581,8 @@ export async function shipOrderAction(
     }
 
     revalidatePath(`/dashboard/${shopSlug}/orders`);
+    revalidatePath(`/catalog/${shopSlug}`, "layout");
+    revalidatePath("/marketplace");
     return { success: true };
   } catch (error) {
     await reportError("shipOrderAction", error, { shopSlug, orderId });
@@ -642,6 +643,8 @@ export async function confirmCodPaymentAction(
     }
 
     revalidatePath(`/dashboard/${shopSlug}/orders`);
+    revalidatePath(`/catalog/${shopSlug}`, "layout");
+    revalidatePath("/marketplace");
     return { success: true };
   } catch (error) {
     await reportError("confirmCodPaymentAction", error, { shopSlug, orderId });

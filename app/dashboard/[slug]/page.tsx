@@ -64,6 +64,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
   // Build priority attention items (red = urgent, yellow = action needed)
   const priorities: { level: "red" | "yellow"; label: string; href: string }[] = [];
+  priorities.push({level:"yellow",label:"Prepare three complete products and review your buyer experience",href:"/dashboard/"+slug+"/readiness"});
+  if (!shop.returnPolicy?.trim()) priorities.push({level:"yellow",label:"Add your returns policy so buyers know what to expect",href:"/dashboard/"+slug+"/settings"});
+  if (!shop.deliveryEnabled && !shop.collectionEnabled) priorities.push({level:"red",label:"Enable delivery or collection before taking orders",href:"/dashboard/"+slug+"/settings"});
   if (unreadMessages > 0) {
     priorities.push({
       level: "red",

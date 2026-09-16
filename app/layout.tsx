@@ -101,7 +101,7 @@ export default async function RootLayout({
           <meta name="google-site-verification" content="t7VN3FQbd8ShLmh9D_6FGqAgNepY9Dm5CwUZLagBhXs" />
           {/* Site-wide JSON-LD: Organization + WebSite (sitelinks search box) */}
           {generateSiteJsonLd().map((schema, i) => (
-            <script
+            <script suppressHydrationWarning
               key={`site-ld-${i}`}
               nonce={nonce}
               type="application/ld+json"
@@ -115,7 +115,7 @@ export default async function RootLayout({
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="apple-mobile-web-app-title" content="TradeFeed" />
           {/* Deny analytics by default before any measurement vendor can load. */}
-          <script
+          <script suppressHydrationWarning
             nonce={nonce}
             dangerouslySetInnerHTML={{
               __html: `window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};window[${JSON.stringify(`ga-disable-${GOOGLE_ANALYTICS_COOKIE_ID}`)}]=true;window.gtag("consent","default",{analytics_storage:"denied",ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",wait_for_update:500});`,
@@ -140,7 +140,7 @@ export default async function RootLayout({
             forcedTheme={FEATURE_FLAGS.UI_REDESIGN ? undefined : "light"}
           >
             <NextIntlClientProvider messages={messages}>
-              <main id="main-content">{children}</main>
+              <div id="main-content">{children}</div>
               <GlobalBottomNav />
               <FloatingWhatsApp />
               <AppToaster />
@@ -149,7 +149,9 @@ export default async function RootLayout({
           </ThemeProvider>
           {/* Register Service Worker for PWA */}
           <Script id="sw-register" strategy="afterInteractive" nonce={nonce}>
-            {`if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`}
+            {process.env.NODE_ENV === "production"
+              ? `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`
+              : `if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.filter(r=>r.active?.scriptURL===location.origin+'/sw.js').forEach(r=>r.unregister()))}`}
           </Script>
           <ConsentManagedAnalytics
             googleAnalyticsId={GOOGLE_ANALYTICS_ID}

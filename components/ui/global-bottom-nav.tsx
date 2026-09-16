@@ -102,9 +102,9 @@ export function GlobalBottomNav() {
           ),
         }
       : {
-          key: "pricing",
-          href: "/#pricing",
-          label: "Pricing",
+          key: "help",
+          href: "/support/order",
+          label: "Help",
           isActive: false,
           icon: (
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.9} stroke="currentColor">

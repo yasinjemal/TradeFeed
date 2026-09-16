@@ -116,6 +116,6 @@ export async function deleteReviewAction(
     return { success: true };
   } catch (error) {
     await reportError("deleteReviewAction", error, { shopSlug, reviewId });
-    return { success: false, error: "Failed to delete review." };
+    return { success: false, error: "Failed to report review." };
   }
 }
