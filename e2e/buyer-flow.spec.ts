@@ -4,6 +4,7 @@ test("buyer can discover a product, select retail and inspect the real cart", as
   page,
 }) => {
   await page.goto("/marketplace");
+  await page.getByRole("button", { name: "Reject non-essential", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   const product = page
     .locator('a[href="/catalog/quality-fixture/products/everyday-sneakers"]')
@@ -18,12 +19,13 @@ test("buyer can discover a product, select retail and inspect the real cart", as
     .filter({ visible: true })
     .click();
   await page.getByRole("button", { name: /Open cart, 1 items/ }).click();
-  await expect(page.getByRole("dialog")).toBeVisible();
+  const cart = page.getByRole("dialog", { name: "Your order", exact: true });
+  await expect(cart).toBeVisible();
   await expect(
-    page.getByRole("dialog").getByText("Everyday Sneakers", { exact: true }),
+    cart.getByText("Everyday Sneakers", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("dialog").getByText(/arranged with the seller/i),
+    cart.getByText(/arranged with the seller/i),
   ).toBeVisible();
 });
 test("support is reachable without an account and explains order verification", async ({

@@ -133,6 +133,13 @@ export default async function Home() {
             </div>
           </section>
         )}
+        <section className="rounded-2xl border border-tf-stone-200 p-7">
+          <h2 className="text-2xl font-semibold">Looking for something specific?</h2>
+          <p className="mt-2 text-sm text-tf-stone-600">Tell us what you need and let local sellers respond.</p>
+          <Link href="/hunt#start-hunt" className="mt-4 inline-flex min-h-11 items-center font-semibold text-tf-primary">
+            Start a TradeFeed HUNT
+          </Link>
+        </section>
         <section className="flex flex-wrap items-center justify-between gap-5 rounded-2xl bg-tf-deep p-7 text-white">
           <div>
             <h2 className="text-2xl font-semibold">
