@@ -28,7 +28,9 @@ import {
 
 export const ACCOUNT_REMINDER_CONFIRMATION =
   "SEND_ACCOUNT_REMINDER_ONCE" as const;
-export const ACCOUNT_REMINDER_MAX_RECIPIENTS = 100;
+// Bound the synchronous campaign, independently of the provider request limit.
+export const ACCOUNT_REMINDER_MAX_RECIPIENTS = 1_000;
+const ACCOUNT_REMINDER_BATCH_SIZE = 100;
 
 const ACCOUNT_REMINDER_TEMPLATE_ID =
   "legacy-seller-account-reminder-template-v1";
@@ -592,7 +594,7 @@ function buildRecipientMessage(
   };
 }
 
-async function markBatchFailed(batch: ClaimedBatch): Promise<void> {
+async function markBatchFailed(batch: ClaimedBatch, acceptedCount: number): Promise<void> {
   const failedAt = new Date();
 
   await db.$transaction(async (transaction) => {
@@ -610,7 +612,7 @@ async function markBatchFailed(batch: ClaimedBatch): Promise<void> {
           status: "FAILED",
           failedAt,
           lastError:
-            "provider_batch_outcome_unknown_no_retry",
+            "provider_batch_failed_or_not_attempted_no_retry",
           nextRetryAt: null,
         },
       });
@@ -621,7 +623,8 @@ async function markBatchFailed(batch: ClaimedBatch): Promise<void> {
       data: {
         status: "FAILED",
         failedAt,
-        failedCount: batch.recipients.length,
+        failedCount: batch.recipients.length - acceptedCount,
+        sentCount: acceptedCount,
         suppressedCount: batch.skippedCount,
       },
     });
@@ -652,7 +655,7 @@ async function completeEmptyBatch(
 }
 
 /**
- * Perform the single, non-retryable provider batch for the frozen campaign.
+ * Send the frozen campaign in bounded, non-retryable provider batches.
  *
  * A provider/DB ambiguity fails closed: the fixed campaign never returns to
  * DRAFT, so the same audience cannot be sent again by this workflow.
@@ -661,7 +664,7 @@ export async function deliverLegacySellerAccountReminder(input: {
   adminId: string;
   expectedCount: number;
   hmacSecret: string;
-}): Promise<AccountReminderDeliveryResult> {
+}, send: typeof sendEmailBatch = sendEmailBatch): Promise<AccountReminderDeliveryResult> {
   const validated = assertDeliveryInput(input);
   const batch = await claimAccountReminderBatch({
     ...validated,
@@ -672,77 +675,70 @@ export async function deliverLegacySellerAccountReminder(input: {
     return completeEmptyBatch(batch);
   }
 
-  const messages = batch.recipients.map((recipient) =>
-    buildRecipientMessage(
-      recipient,
-      validated.hmacSecret,
-      batch.claimedAt,
-    ),
-  );
-  const result = await sendEmailBatch(messages, {
-    idempotencyKey:
-      `tf-account-reminder-v1:${batch.campaignId}`,
-  });
-
-  if (
-    !result.success ||
-    result.fallback ||
-    result.ids.length !== batch.recipients.length
-  ) {
-    await markBatchFailed(batch);
-    throw new Error(
-      "The email provider did not confirm the complete one-time batch. No automatic retry will occur.",
+  let acceptedCount = 0;
+  for (let offset = 0; offset < batch.recipients.length; offset += ACCOUNT_REMINDER_BATCH_SIZE) {
+    // Keep provider requests paced; never retry an ambiguous submission.
+    if (offset > 0) await new Promise((resolve) => setTimeout(resolve, 600));
+    const recipients = batch.recipients.slice(offset, offset + ACCOUNT_REMINDER_BATCH_SIZE);
+    const messages = recipients.map((recipient) =>
+      buildRecipientMessage(recipient, validated.hmacSecret, batch.claimedAt),
     );
-  }
+    let result: Awaited<ReturnType<typeof sendEmailBatch>>;
+    try {
+      result = await send(messages, {
+        idempotencyKey: `tf-account-reminder-v1:${batch.campaignId}:batch-${offset / ACCOUNT_REMINDER_BATCH_SIZE}`,
+      });
+    } catch {
+      await markBatchFailed(batch, acceptedCount);
+      throw new Error("The provider batch outcome is unknown. Remaining batches were stopped. No automatic retry will occur.");
+    }
+    if (!result.success || result.fallback || result.ids.length !== recipients.length ||
+        result.ids.some((id) => !id)) {
+      await markBatchFailed(batch, acceptedCount);
+      throw new Error("The email provider did not confirm the complete one-time batch. Remaining batches were stopped. No automatic retry will occur.");
+    }
 
-  const completedAt = new Date();
-  try {
-    const recipientUpdates = batch.recipients.map(
-      (recipient, index) => {
-        const providerMessageId = result.ids[index];
-        if (!providerMessageId) {
-          throw new Error("A provider message ID is missing.");
-        }
-
-        return db.emailMarketingCampaignRecipient.update({
-          where: { id: recipient.recipientId },
+    const completedAt = new Date();
+    const nextAcceptedCount = acceptedCount + recipients.length;
+    const isLastBatch = offset + recipients.length === batch.recipients.length;
+    try {
+      await db.$transaction([
+        ...recipients.map((recipient, index) =>
+          db.emailMarketingCampaignRecipient.update({
+            where: { id: recipient.recipientId },
+            data: {
+              status: "SENT",
+              providerMessageId: result.ids[index],
+              sentAt: completedAt,
+              lastError: null,
+            },
+          }),
+        ),
+        db.emailMarketingCampaign.update({
+          where: { id: batch.campaignId },
           data: {
-            status: "SENT",
-            providerMessageId,
-            sentAt: completedAt,
-            lastError: null,
+            status: isLastBatch ? "COMPLETED" : "RUNNING",
+            ...(isLastBatch ? { completedAt } : {}),
+            sentCount: nextAcceptedCount,
+            suppressedCount: batch.skippedCount,
+            failedCount: 0,
           },
-        });
-      },
-    );
-    await db.$transaction([
-      ...recipientUpdates,
-      db.emailMarketingCampaign.update({
-        where: { id: batch.campaignId },
-        data: {
-          status: "COMPLETED",
-          completedAt,
-          sentCount: batch.recipients.length,
-          suppressedCount: batch.skippedCount,
-          failedCount: 0,
-        },
-      }),
-    ]);
-  } catch (error) {
-    // The provider already accepted the batch. Never resend on a persistence
-    // failure; leave RUNNING/PROCESSING rows for manual reconciliation.
-    console.error(
-      "[account-reminder] Provider accepted the batch but persistence reconciliation failed.",
-    );
-    throw new Error(
-      "The provider accepted the batch, but TradeFeed could not finish recording every message. Do not send again.",
-      { cause: error },
-    );
+        }),
+      ]);
+    } catch (error) {
+      // Accepted messages must not be resent, even if recording them failed.
+      // Stop before submitting any later batch and leave the campaign locked.
+      console.error("[account-reminder] Provider accepted a batch but persistence reconciliation failed.");
+      throw new Error(
+        "The provider accepted a batch, but TradeFeed could not finish recording every message. Remaining batches were stopped. Do not send again.",
+        { cause: error },
+      );
+    }
+    acceptedCount = nextAcceptedCount;
   }
-
   return {
     campaignId: batch.campaignId,
-    acceptedCount: batch.recipients.length,
+    acceptedCount,
     skippedCount: batch.skippedCount,
     status: "COMPLETED",
   };

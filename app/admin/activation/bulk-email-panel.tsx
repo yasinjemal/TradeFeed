@@ -299,8 +299,8 @@ export function BulkEmailPanel() {
                   </h3>
                   <p className="mt-2 text-xs leading-5 text-emerald-100/70">
                     TradeFeed freezes the reviewed audience, creates one
-                    personalised message per account, submits them in one
-                    provider batch, and records every provider message ID.
+                    personalised message per account, submits them in
+                    batches of up to 100, and records every provider message ID.
                     Addresses are never exposed through BCC. A fixed campaign
                     key prevents a second run.
                   </p>
