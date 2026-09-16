@@ -1,15 +1,23 @@
 import { requireAdmin } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { moderateReviewAction } from "@/app/actions/review-moderation";
-export default async function ReviewModerationPage() {
+import Link from "next/link";
+export default async function ReviewModerationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
   await requireAdmin();
+  const unverified = (await searchParams).filter === "unverified";
   const reviews = await db.review.findMany({
-    where: {
-      OR: [
-        { isApproved: false, moderatedAt: null },
-        { reportedAt: { not: null } },
-      ],
-    },
+    where: unverified
+      ? { isVerified: false }
+      : {
+          OR: [
+            { isApproved: false, moderatedAt: null },
+            { reportedAt: { not: null } },
+          ],
+        },
     orderBy: { createdAt: "asc" },
     take: 100,
     include: { shop: { select: { name: true } } },
@@ -17,9 +25,17 @@ export default async function ReviewModerationPage() {
   return (
     <section className="space-y-5 text-stone-100">
       <h1 className="text-2xl font-semibold">Review moderation</h1>
+      <nav className="flex gap-5 underline">
+        <Link href="/admin/reviews">Pending / reported</Link>
+        <Link href="/admin/reviews?filter=unverified">
+          Unverified purchase history
+        </Link>
+      </nav>
       <p className="text-stone-300">
         Apply the same content rules to positive and negative feedback. Seller
-        reports do not automatically remove reviews.
+        reports do not automatically remove reviews. Unverified means no matched
+        purchase evidence; it does not mean the review is false. Publishing a
+        review does not verify its purchase.
       </p>
       {reviews.length === 0 && <p>No reviews need attention.</p>}
       {reviews.map((r) => (
