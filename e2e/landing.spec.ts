@@ -73,3 +73,12 @@ test.describe("Landing Page", () => {
     await expect(terms).toBeVisible();
   });
 });
+
+test("homepage search takes a shopper to matching marketplace results", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("searchbox", { name: "Search products", exact: true }).fill("Everyday Sneakers");
+  await page.getByRole("button", { name: "Search products", exact: true }).click();
+  await expect(page).toHaveURL(/\/marketplace\?search=Everyday(?:\+|%20)Sneakers/);
+  await expect(page.getByRole("heading", { name: /Results for.*Everyday Sneakers/ })).toBeVisible();
+  await expect(page.locator('a[href="/catalog/quality-fixture/products/everyday-sneakers"]').first()).toBeVisible();
+});
