@@ -38,8 +38,10 @@ export default async function Operations({
   return (
     <section className="space-y-8 text-stone-100">
       <header>
-        <h1 className="text-3xl font-semibold">Seller support assistant</h1>
-        <p className="mt-2 text-stone-300">
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          Seller support assistant
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-400">
           Review helpful emails, approve the ones you want sent, and check
           seller progress. No support forms needed to approve an email.
         </p>
