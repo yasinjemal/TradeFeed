@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireShopAccess } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { listingDiscoveryIssues } from "@/lib/marketplace/listing-readiness";
+import { listingQualityIssues } from "@/lib/marketplace/listing-readiness";
+import { TfShareCatalogue } from "@/components/tf/dashboard/tf-share-catalogue";
+import { SITE_URL } from "@/lib/config/site";
 export default async function Readiness({
   params,
 }: {
@@ -15,7 +17,6 @@ export default async function Readiness({
     where: { id: access.shopId },
     include: {
       products: {
-        take: 200,
         orderBy: { updatedAt: "desc" },
         include: {
           images: { select: { url: true } },
@@ -50,13 +51,7 @@ export default async function Readiness({
   ];
   const products = shop.products.map((p) => ({
     ...p,
-    issues: [
-      ...listingDiscoveryIssues(p),
-      ...(!p.description?.trim()
-        ? ["Describe the product and its condition"]
-        : []),
-      ...(!p.globalCategoryId ? ["Choose a marketplace category"] : []),
-    ],
+    issues: listingQualityIssues(p),
   }));
   const ready = products.filter((p) => p.issues.length === 0).length;
   return (
@@ -98,7 +93,14 @@ export default async function Readiness({
       {products.map((p) => (
         <article key={p.id} className="rounded-xl border p-5">
           <h3 className="font-semibold">{p.name}</h3>
-              {p.discoveryGraceUntil && p.issues.length > 0 && <p className="mt-2 text-sm">Complete these details by {p.discoveryGraceUntil.toLocaleDateString("en-ZA")} to keep this product in marketplace discovery. Your shop and draft remain accessible.</p>}
+          {p.discoveryGraceUntil && p.issues.length > 0 && (
+            <p className="mt-2 text-sm">
+              Complete these details by{" "}
+              {p.discoveryGraceUntil.toLocaleDateString("en-ZA")} to keep this
+              product in marketplace discovery. Your shop and draft remain
+              accessible.
+            </p>
+          )}
           {p.issues.length > 0 ? (
             <ul className="my-3 list-disc pl-5 text-sm">
               {p.issues.map((i) => (
@@ -106,7 +108,12 @@ export default async function Readiness({
               ))}
             </ul>
           ) : (
-            <p className="my-3 text-emerald-700">Ready for buyers</p>
+            <p className="my-3 text-emerald-700">
+              Listing complete
+              {checks.some((c) => !c.done)
+                ? " — finish your shop details above"
+                : " — ready for buyers"}
+            </p>
           )}
           <Link
             className="font-semibold underline"
@@ -122,6 +129,15 @@ export default async function Readiness({
       >
         Preview your shop as a buyer →
       </Link>
+      <TfShareCatalogue
+        catalogUrl={`${SITE_URL}/catalog/${slug}`}
+        shopName={shop.name}
+        shopSlug={slug}
+      />
+      <p className="text-sm">
+        After sharing, follow up on real buyer questions. A view or WhatsApp
+        click alone does not confirm an enquiry or a sale.
+      </p>
     </section>
   );
 }
