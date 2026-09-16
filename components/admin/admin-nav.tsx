@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/admin", label: "Overview", icon: "📊" },
   { href: "/admin/activation", label: "Activation", icon: "🚀" },
-  { href: "/admin/operations", label: "Seller follow-up", icon: "☑" },
+  { href: "/admin/operations", label: "Seller assistant", icon: "☑" },
   { href: "/admin/hunts", label: "HUNT", icon: "🎯" },
   { href: "/admin/categories", label: "Categories", icon: "📂" },
   { href: "/admin/promotions", label: "Promotions", icon: "📢" },

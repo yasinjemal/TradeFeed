@@ -89,7 +89,7 @@ export async function getSellerAssistanceReview() {
   const historyRows = await Promise.all(history.map(async (row) => {
     const snapshot = row.campaign.audienceDefinition as unknown as AssistanceSnapshot;
     const state = row.shopId && row.sentAt ? await ownerState(row.userId, row.shopId) : null;
-    return { id: row.id, campaignId: row.campaignId, shopName: snapshot.shopName, kind: snapshot.decision.kind, status: row.status, sentAt: row.sentAt?.toISOString() ?? null, resolved: Boolean(state && assistanceOutcome(snapshot, state.member.shop, state.shared)) };
+    return { id: row.id, campaignId: row.campaignId, shopName: snapshot.shopName, kind: snapshot.decision.kind, status: row.status, sentAt: row.sentAt?.toISOString() ?? null, deliveredAt: row.deliveredAt?.toISOString() ?? null, resolved: Boolean(state && assistanceOutcome(snapshot, state.member.shop, state.shared)) };
   }));
   const suggestions = [];
   let examined = 0;
