@@ -15,7 +15,7 @@ export function AssistanceRefresh() {
       type="button"
       disabled={pending}
       onClick={() => startTransition(() => router.refresh())}
-      className="min-h-11 rounded-lg border border-stone-600 px-4 py-2 text-sm text-stone-100 disabled:opacity-50"
+      className="min-h-11 rounded-xl border border-stone-700 bg-stone-900 px-4 py-2 text-sm font-medium text-stone-200 transition-colors hover:border-stone-500 hover:bg-stone-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-400 disabled:opacity-50"
     >
       {pending ? "Checking..." : "Refresh progress"}
     </button>
@@ -36,7 +36,7 @@ export function AssistanceControl(
       <button
         type="button"
         disabled={pending || saved}
-        className="min-h-11 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        className="min-h-11 w-full rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-400 disabled:opacity-50 sm:w-auto"
         onClick={() =>
           startTransition(async () => {
             try {
