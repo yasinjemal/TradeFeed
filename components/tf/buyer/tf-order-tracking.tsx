@@ -1,3 +1,5 @@
+import { buyerOnlinePaymentsEnabled } from "@/lib/commerce/capabilities";
+import { CommerceHeader } from "@/components/commerce/header";
 import Link from "next/link";
 import { BadgeCheck, CircleHelp, CreditCard, MapPin, MessageCircle, PackageCheck, Truck } from "lucide-react";
 
@@ -36,20 +38,12 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
   const waNumber = order.shop.whatsappNumber.replace(/\D/g, "");
   const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi, I have a question about order ${order.orderNumber}.`)}`;
   const isCancelled = order.status === "CANCELLED";
-  const canPay = !order.paidAt && !isCancelled && order.paymentMethod !== "COD";
+  const canPay = !order.paidAt && !isCancelled && !order.paymentReviewRequired && order.paymentMethod === "PAYFAST" && buyerOnlinePaymentsEnabled(order.shop.id) && !(order.status === "PENDING" && order.reservationExpiresAt && order.reservationExpiresAt < new Date());
 
   return (
     <main className="min-h-screen bg-tf-surface text-tf-ink">
       <TfFonts />
-      <header className="border-b border-tf-stone-200 bg-tf-raised/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-5">
-          <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="auto" /></Link>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-tf-stone-500">{order.orderNumber}</span>
-            <TfThemeToggle className="size-9" />
-          </div>
-        </div>
-      </header>
+      <CommerceHeader compact />
       <section className="mx-auto max-w-xl space-y-4 px-5 py-8 sm:py-12">
         <div className="rounded-2xl bg-tf-deep p-6 text-tf-surface">
           <p className="text-sm text-emerald-200">Order status</p>
@@ -68,7 +62,7 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
 
         {payment === "success" && (
           <div className="rounded-xl border border-tf-verified/25 bg-tf-verified-soft p-4 text-sm text-tf-verified">
-            {order.paidAt ? "Payment received. The seller will process your order shortly." : "Your payment is being confirmed by PayFast."}
+            {order.paidAt && !order.paymentReviewRequired ? "Payment received. The seller will process your order shortly." : "Your payment is being confirmed by PayFast."}
           </div>
         )}
         {payment === "cancelled" && !order.paidAt && <div className="rounded-xl border border-tf-accent/30 bg-tf-accent-soft p-4 text-sm">Payment was cancelled. You can try again below.</div>}
@@ -89,6 +83,7 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
           </ol>
         </section>
 
+        {order.paymentReviewRequired && <p role="status" className="rounded-xl border border-tf-stone-200 p-4">Payment was recorded but needs support review. Please open an order support case before arranging fulfilment.</p>}
         {canPay && (
           <div className="flex items-center justify-between gap-3 rounded-xl border border-tf-stone-200 bg-tf-raised p-4">
             <div><p className="text-sm font-medium">Payment pending</p><p className="text-xs text-tf-stone-500">Pay securely through PayFast.</p></div>
@@ -138,6 +133,7 @@ export function TfOrderTracking({ order, payment }: TfOrderTrackingProps) {
 
         <TfVerifiedSellerCard name={order.shop.name} verified={order.shop.isVerified} avatarUrl={order.shop.logoUrl} location={location} href={`/catalog/${order.shop.slug}`} />
         <TfButton asChild variant="whatsapp" fullWidth><a href={waLink} target="_blank" rel="noopener noreferrer"><MessageCircle aria-hidden="true" />Contact seller on WhatsApp</a></TfButton>
+        <TfButton asChild fullWidth variant="ghost"><Link href={`/support/order?order=${encodeURIComponent(order.orderNumber)}`}>Help with this order</Link></TfButton>
         <TfTrustBar compact />
         {location && <p className="flex items-center justify-center gap-1.5 text-xs text-tf-stone-500"><MapPin aria-hidden="true" className="size-3.5" />{location}</p>}
         <section className="rounded-xl border border-tf-stone-200 bg-tf-stone-50 p-4"><p className="mb-3 text-sm font-medium">Track another order</p><TfTrackingSearch /></section>

@@ -47,6 +47,7 @@ interface TfOrderPanelProps {
   option2Label: string;
   /** First product image — shown as the cart line thumbnail */
   imageUrl?: string | null;
+  wholesaleOnly?: boolean;
   minWholesaleQty?: number;
   bulkDiscountTiers?: BulkDiscountTier[];
 }
@@ -92,6 +93,7 @@ export function TfOrderPanel({
   option1Label,
   option2Label,
   imageUrl,
+  wholesaleOnly = false,
   minWholesaleQty = 1,
   bulkDiscountTiers = [],
 }: TfOrderPanelProps) {
@@ -102,13 +104,14 @@ export function TfOrderPanel({
   );
   const hasColors = variants.some((v) => v.color);
   // Retail availability is driven by product data, not shop config
-  const hasRetail = variants.some((v) => v.retailPriceCents != null && v.retailPriceCents > 0);
+  const hasRetail = !wholesaleOnly;
+  const showOrderTypeChoice = hasRetail && (minWholesaleQty > 1 || bulkDiscountTiers.length > 0 || variants.some(v => v.retailPriceCents != null && v.retailPriceCents !== v.priceInCents));
 
   const [size, setSize] = React.useState<string | null>(sizes.length === 1 ? sizes[0]! : null);
   const [color, setColor] = React.useState<string | null>(null);
-  const [orderType, setOrderType] = React.useState<OrderType>("wholesale");
+  const [orderType, setOrderType] = React.useState<OrderType>(wholesaleOnly ? "wholesale" : "retail");
   const minQty = orderType === "retail" ? 1 : Math.max(1, minWholesaleQty);
-  const [qty, setQty] = React.useState(Math.max(1, minWholesaleQty));
+  const [qty, setQty] = React.useState(wholesaleOnly ? Math.max(1, minWholesaleQty) : 1);
 
   const switchOrderType = (type: OrderType) => {
     setOrderType(type);
@@ -296,7 +299,7 @@ export function TfOrderPanel({
     <>
       <div id={`tf-order-options-${productId}`} className="space-y-4">
         {/* Wholesale / retail toggle — only when the product carries both prices */}
-        {hasRetail && (
+        {showOrderTypeChoice && (
           <fieldset>
             <legend className="sr-only">Order type</legend>
             <div className="grid grid-cols-2 gap-2">
@@ -332,8 +335,8 @@ export function TfOrderPanel({
         {/* Price */}
         <p className="flex items-baseline gap-3 tabular-nums">
           <span
-            className="font-tf-hero text-tf-ink"
-            style={{ fontSize: "clamp(2rem, 5vw, 3rem)", lineHeight: 1, letterSpacing: "-0.04em", fontWeight: 700 }}
+            className="font-tf-display text-tf-ink"
+            style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", lineHeight: 1, letterSpacing: "-0.04em", fontWeight: 600 }}
           >
             {formatZAR(unitCents / 100)}
           </span>
@@ -463,7 +466,7 @@ export function TfOrderPanel({
       </div>
 
       {/* Sticky mobile bar — selected options plus two explicit purchase paths */}
-      <div className="tf-slide-up fixed inset-x-0 bottom-[3.75rem] z-30 border-t border-tf-stone-200 bg-tf-raised/95 px-3 py-2.5 shadow-[0_-8px_24px_rgba(20,20,16,0.08)] backdrop-blur-sm lg:hidden">
+      <div className="tf-slide-up fixed inset-x-0 bottom-0 z-30 border-t border-tf-stone-200 bg-tf-raised/95 px-3 py-2.5 shadow-[0_-8px_24px_rgba(20,20,16,0.08)] backdrop-blur-sm lg:hidden">
         <div className="mx-auto max-w-xl">
           <div className="mb-2 flex items-center justify-between gap-3">
             <p className="min-w-0 truncate text-xs font-medium text-tf-stone-600">

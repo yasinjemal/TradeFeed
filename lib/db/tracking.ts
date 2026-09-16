@@ -21,6 +21,8 @@ export async function getOrderByNumber(orderNumber: string) {
       status: true,
       paymentRequestedAt: true,
       paymentLinkExpiresAt: true,
+      reservationExpiresAt: true,
+      paymentReviewRequired: true,
       paidAt: true,
       totalCents: true,
       itemCount: true,
@@ -51,6 +53,7 @@ export async function getOrderByNumber(orderNumber: string) {
       },
       shop: {
         select: {
+          id: true,
           name: true,
           slug: true,
           logoUrl: true,
@@ -72,6 +75,8 @@ export async function getOrderByNumber(orderNumber: string) {
     paymentRequestedAt: order.paymentRequestedAt,
     paymentLinkExpiresAt: order.paymentLinkExpiresAt,
     paidAt: order.paidAt,
+    reservationExpiresAt: order.reservationExpiresAt,
+    paymentReviewRequired: order.paymentReviewRequired,
     totalCents: order.totalCents,
     itemCount: order.itemCount,
     createdAt: order.createdAt,

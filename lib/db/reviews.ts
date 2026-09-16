@@ -50,7 +50,7 @@ export async function createReview(input: CreateReviewInput) {
       comment: input.comment || null,
       buyerName: input.buyerName,
       buyerEmail: input.buyerEmail || null,
-      isApproved: true, // Auto-approved — seller can delete unwanted reviews
+      isApproved: input.isVerified === true,
       isVerified: input.isVerified ?? false,
     },
   });
@@ -111,8 +111,9 @@ export async function approveReview(reviewId: string, shopId: string) {
 }
 
 export async function deleteReview(reviewId: string, shopId: string) {
-  return db.review.deleteMany({
+  return db.review.updateMany({
     where: { id: reviewId, shopId },
+    data: { reportedAt: new Date() },
   });
 }
 

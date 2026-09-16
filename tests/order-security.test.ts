@@ -166,9 +166,9 @@ test("checkout schema defaults legacy rows safely and rejects unsupported modes"
 
   const parsed = checkoutSchema.parse(baseInput);
   assert.equal(parsed.items[0]?.orderType, "wholesale");
-  assert.equal(parsed.paymentMethod, "PAYFAST");
+  assert.equal(parsed.paymentMethod, "MANUAL");
   assert.equal(
-    checkoutSchema.safeParse({ ...baseInput, paymentMethod: "MANUAL" }).success,
+    checkoutSchema.safeParse({ ...baseInput, paymentMethod: "UNSUPPORTED" }).success,
     false,
   );
   assert.equal(

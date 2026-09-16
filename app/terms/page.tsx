@@ -55,9 +55,9 @@ export default function TermsPage() {
             <p className="text-stone-600 leading-relaxed">
               TradeFeed provides a digital catalog platform that enables South African
               wholesalers (&ldquo;Sellers&rdquo;) to create online product catalogs and connect with
-              retailers and buyers (&ldquo;Buyers&rdquo;) via WhatsApp. TradeFeed is a catalog and
-              communication tool — we do not process orders, handle payments between buyers and
-              sellers, or guarantee transactions.
+              retailers and buyers (&ldquo;Buyers&rdquo;) via WhatsApp. TradeFeed records orders and provides catalogue, communication and support tools.
+              Payment and fulfilment options are shown for each order. Sellers remain responsible
+              for their products, delivery and returns. Platform courier booking is not currently offered.
             </p>
           </section>
 
@@ -82,7 +82,7 @@ export default function TermsPage() {
             <p className="text-stone-600 leading-relaxed">As a Buyer browsing TradeFeed catalogs:</p>
             <ul className="list-disc pl-5 text-stone-600 space-y-1">
               <li>
-                All transactions occur directly between you and the Seller via WhatsApp.
+                Product sales are between you and the Seller. TradeFeed records the order and provides support tools; payment arrangements are shown at checkout.
                 TradeFeed is not a party to any transaction.
               </li>
               <li>

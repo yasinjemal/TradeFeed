@@ -188,7 +188,7 @@ function ReviewForm({
     return (
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-center">
         <p className="text-emerald-800 font-semibold">✅ Thank you for your review!</p>
-        <p className="text-sm text-emerald-600 mt-1">It will appear after seller approval.</p>
+        <p className="text-sm text-emerald-600 mt-1">It will appear after platform moderation.</p>
       </div>
     );
   }

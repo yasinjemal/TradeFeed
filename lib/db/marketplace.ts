@@ -16,7 +16,8 @@
 // ============================================================
 
 import { db } from "@/lib/db";
-import { MARKETPLACE_ELIGIBILITY } from "@/lib/marketplace/eligibility";
+import { rankMarketplaceCandidates } from "@/lib/marketplace/ranking";
+import { MARKETPLACE_ELIGIBILITY, marketplaceContentStandard } from "@/lib/marketplace/eligibility";
 import type { AnalyticsRequestContext } from "@/lib/analytics/visitor";
 import { trackEvent } from "@/lib/db/analytics";
 import type { Prisma } from "@prisma/client";
@@ -215,7 +216,7 @@ async function enrichWithSellerTiers(
     }),
     db.order.groupBy({
       by: ["shopId"],
-      where: { shopId: { in: shopIds } },
+      where: { shopId: { in: shopIds }, status: "DELIVERED", deletedAt: null },
       _count: true,
     }),
     db.review.groupBy({
@@ -276,7 +277,7 @@ async function enrichWithSoldCounts(
     by: ["productId"],
     where: {
       productId: { in: productIds },
-      order: { status: { not: "CANCELLED" } },
+      order: { status: "DELIVERED", deletedAt: null },
     },
     _sum: { quantity: true },
   });
@@ -317,7 +318,7 @@ export async function getMarketplaceProducts(
 
   // ── Build WHERE clause ──────────────────────────────────
   const where: Prisma.ProductWhereInput = {
-    AND: [MARKETPLACE_ELIGIBILITY],
+    AND: [MARKETPLACE_ELIGIBILITY, marketplaceContentStandard()],
     isActive: true,
     ...(!includeWholesaleOnly && { wholesaleOnly: false }),
     shop: {
@@ -362,7 +363,7 @@ export async function getMarketplaceProducts(
   // Full-text search — PostgreSQL tsvector with pg_trgm fuzzy fallback
   let searchProductOrder: string[] | null = null;
   if (search && search.trim().length > 0) {
-    const hits = await searchProductIds(search, pageSize * 3);
+    const hits = await searchProductIds(search, null);
     if (hits.length > 0) {
       searchProductOrder = hits.map((h) => h.id);
       where.id = { in: searchProductOrder };
@@ -376,59 +377,39 @@ export async function getMarketplaceProducts(
     }
   }
 
-  // ── Build ORDER BY ──────────────────────────────────────
-  let orderBy: Prisma.ProductOrderByWithRelationInput;
-  let trendingOrder: string[] | null = null;
-  switch (sortBy) {
-    case "quality":
-      orderBy = { qualityScore: "desc" };
-      break;
-    case "newest":
-      orderBy = { createdAt: "desc" };
-      break;
-    case "price_asc":
-      orderBy = { minPriceCents: "asc" };
-      break;
-    case "price_desc":
-      orderBy = { maxPriceCents: "desc" };
-      break;
-    case "trending":
-    case "popular": {
-      // Pre-fetch product IDs ranked by analytics event count (last 7 days)
-      const daysAgo = new Date();
-      daysAgo.setDate(daysAgo.getDate() - 7);
-      const ranked = await db.analyticsEvent.groupBy({
-        by: ["productId"],
-        where: {
-          productId: { not: null },
-          type: { in: ["PRODUCT_VIEW", "WHATSAPP_CLICK", "MARKETPLACE_CLICK"] },
-          createdAt: { gte: daysAgo },
-        },
-        _count: { id: true },
-        orderBy: { _count: { id: "desc" } },
-        take: pageSize * 3,
-      });
-      trendingOrder = ranked
-        .map((e) => e.productId)
-        .filter((id): id is string => id !== null);
-      // Still fetch by newest, then re-sort post-query
-      orderBy = { createdAt: "desc" };
-      break;
-    }
-    case "top_rated":
-      // top_rated is sorted post-query after enriching with reviews
-      orderBy = { createdAt: "desc" };
-      break;
-    default:
-      orderBy = { createdAt: "desc" };
-  }
-
-  // ── Execute query ───────────────────────────────────────
-  const skip = (page - 1) * pageSize;
-
-  const [rawProducts, total] = await Promise.all([
-    db.product.findMany({
-      where,
+  // Project only ranking fields for all eligible matches. Pagination must happen
+  // after ranking; fetching a page first silently breaks relevance and top-rated.
+  const candidates = await db.product.findMany({
+    where,
+    select: {
+      id: true, name: true, createdAt: true, qualityScore: true,
+      variants: { where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } }, select: { priceInCents: true } },
+    },
+  });
+  const ids = candidates.map((p) => p.id);
+  const [ratings, activity] = await Promise.all([
+    sortBy === "top_rated" && ids.length ? db.review.groupBy({
+      by: ["productId"], where: { productId: { in: ids }, isApproved: true },
+      _avg: { rating: true }, _count: { rating: true },
+    }) : Promise.resolve([]),
+    (sortBy === "popular" || sortBy === "trending") && ids.length ? db.analyticsEvent.groupBy({
+      by: ["productId"],
+      where: { productId: { in: ids }, type: { in: ["PRODUCT_VIEW", "WHATSAPP_CLICK", "MARKETPLACE_CLICK"] }, createdAt: { gte: new Date(Date.now() - 7 * 86400000) } },
+      _count: { id: true },
+    }) : Promise.resolve([]),
+  ]);
+  const ratingMap = new Map(ratings.map((r) => [r.productId, { rating: r._avg.rating ?? 0, reviews: r._count.rating }]));
+  const activityMap = new Map(activity.map((r) => [r.productId, r._count.id]));
+  const relevanceMap = new Map((searchProductOrder ?? []).map((id, i) => [id, (searchProductOrder?.length ?? 0) - i]));
+  const ranked = rankMarketplaceCandidates(candidates.map((p) => ({
+    ...p, price: Math.min(...p.variants.map((v) => v.priceInCents)),
+    rating: ratingMap.get(p.id)?.rating ?? 0, reviews: ratingMap.get(p.id)?.reviews ?? 0,
+    activity: activityMap.get(p.id) ?? 0, relevance: relevanceMap.get(p.id) ?? 0,
+  })), sortBy, search);
+  const total = ranked.length;
+  const pageIds = ranked.slice((page - 1) * pageSize, page * pageSize).map((p) => p.id);
+  const rawProducts = await db.product.findMany({
+      where: { ...where, id: { in: pageIds } },
       select: {
         id: true,
         slug: true,
@@ -457,7 +438,7 @@ export async function getMarketplaceProducts(
           },
         },
         images: {
-          where: { position: 0 },
+          orderBy: [{ position: "asc" }, { id: "asc" }],
           select: { url: true },
           take: 1,
         },
@@ -471,12 +452,9 @@ export async function getMarketplaceProducts(
           select: { priceInCents: true },
         },
       },
-      orderBy,
-      skip,
-      take: pageSize,
-    }),
-    db.product.count({ where }),
-  ]);
+    });
+  const pageOrder = new Map(pageIds.map((id, i) => [id, i]));
+  rawProducts.sort((a, b) => (pageOrder.get(a.id) ?? 0) - (pageOrder.get(b.id) ?? 0));
 
   // ── Transform results ───────────────────────────────────
   let products: MarketplaceProduct[] = rawProducts.map((p) => {
@@ -506,22 +484,6 @@ export async function getMarketplaceProducts(
     };
   });
 
-  // When searching with full-text, re-sort by relevance ranking
-  if (searchProductOrder && searchProductOrder.length > 0) {
-    const orderMap = new Map(searchProductOrder.map((id, i) => [id, i]));
-    products.sort(
-      (a, b) => (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
-    );
-  }
-
-  // Re-sort by trending/popular analytics ranking
-  if (trendingOrder && trendingOrder.length > 0) {
-    const orderMap = new Map(trendingOrder.map((id, i) => [id, i]));
-    products.sort(
-      (a, b) => (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
-    );
-  }
-
   // Batch-enrich with review stats
   products = await enrichWithReviewStats(products);
 
@@ -530,16 +492,6 @@ export async function getMarketplaceProducts(
 
   // Batch-enrich with sold counts
   products = await enrichWithSoldCounts(products);
-
-  // Post-enrichment sort for top_rated
-  if (sortBy === "top_rated") {
-    products.sort((a, b) => {
-      const rA = a.avgRating ?? 0;
-      const rB = b.avgRating ?? 0;
-      if (rB !== rA) return rB - rA;
-      return b.reviewCount - a.reviewCount;
-    });
-  }
 
   return {
     products,
@@ -567,7 +519,7 @@ export async function getPromotedProducts(
       expiresAt: { gt: now },
       startsAt: { lte: now },
       product: {
-        AND: [MARKETPLACE_ELIGIBILITY],
+        AND: [MARKETPLACE_ELIGIBILITY, marketplaceContentStandard()],
         isActive: true,
         wholesaleOnly: false,
         shop: { isActive: true },
@@ -606,7 +558,7 @@ export async function getPromotedProducts(
             },
           },
           images: {
-            where: { position: 0 },
+            orderBy: [{ position: "asc" }, { id: "asc" }],
             select: { url: true },
             take: 1,
           },
@@ -685,7 +637,7 @@ export async function getGlobalCategories(): Promise<CategoryWithCount[]> {
         select: {
           products: {
             where: {
-              AND: [MARKETPLACE_ELIGIBILITY],
+              AND: [MARKETPLACE_ELIGIBILITY, marketplaceContentStandard()],
               wholesaleOnly: false,
               isActive: true,
               shop: { isActive: true },
@@ -773,7 +725,7 @@ export async function getTrendingProducts(
   const products = await db.product.findMany({
     where: {
       id: { in: productIds },
-      AND: [MARKETPLACE_ELIGIBILITY],
+      AND: [MARKETPLACE_ELIGIBILITY, marketplaceContentStandard()],
       isActive: true,
       wholesaleOnly: false,
       shop: { isActive: true },
@@ -807,7 +759,7 @@ export async function getTrendingProducts(
         },
       },
       images: {
-        where: { position: 0 },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
         select: { url: true },
         take: 1,
       },
@@ -877,7 +829,7 @@ export async function getNewArrivals(
       wholesaleOnly: false,
       createdAt: { gte: sevenDaysAgo },
       shop: { isActive: true },
-      AND: [MARKETPLACE_ELIGIBILITY],
+      AND: [MARKETPLACE_ELIGIBILITY, marketplaceContentStandard()],
       variants: { some: { isActive: true } },
     },
     select: {
@@ -908,7 +860,7 @@ export async function getNewArrivals(
         },
       },
       images: {
-        where: { position: 0 },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
         select: { url: true },
         take: 1,
       },
@@ -998,7 +950,7 @@ export async function getFeaturedShops(
         select: {
           products: {
             where: {
-              AND: [MARKETPLACE_ELIGIBILITY],
+              AND: [MARKETPLACE_ELIGIBILITY, marketplaceContentStandard()],
               wholesaleOnly: false,
               isActive: true,
               variants: { some: { isActive: true } },

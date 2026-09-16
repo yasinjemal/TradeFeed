@@ -13,6 +13,8 @@ const NAV_ITEMS = [
   { href: "/admin/hunts", label: "HUNT", icon: "🎯" },
   { href: "/admin/categories", label: "Categories", icon: "📂" },
   { href: "/admin/promotions", label: "Promotions", icon: "📢" },
+  { href: "/admin/reviews", label: "Reviews", icon: "☆" },
+  { href: "/admin/support", label: "Support", icon: "◌" },
   { href: "/admin/orders", label: "Orders", icon: "📦" },
   { href: "/admin/users", label: "Users", icon: "👥" },
   { href: "/admin/moderation", label: "Moderation", icon: "🛡️" },

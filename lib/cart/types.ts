@@ -83,6 +83,7 @@ export interface CartContextValue {
   /** Verified seller flag (TF redesign cart panel) */
   shopVerified?: boolean;
   /** Whether this shop accepts cash on delivery */
+  onlinePaymentsEnabled?: boolean;
   codEnabled?: boolean;
   /** Whether this shop offers courier delivery at checkout */
   deliveryEnabled?: boolean;

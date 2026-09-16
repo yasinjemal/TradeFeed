@@ -164,9 +164,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
 
   const [reviews, reviewAgg, soldCount, similarProducts, moreFromSeller] = await Promise.all([
-    getProductReviews(productId),
-    getReviewAggregation(productId),
-    getProductSoldCount(productId),
+    getProductReviews(product.id),
+    getReviewAggregation(product.id),
+    getProductSoldCount(product.id),
     product.category ? getSimilarProducts(product.category.id, shop.id, product.id) : Promise.resolve([]),
     getMoreFromSeller(shop.id, product.id),
   ]);

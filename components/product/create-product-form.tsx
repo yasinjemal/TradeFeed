@@ -88,6 +88,8 @@ export function CreateProductForm({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [stock, setStock] = useState("");
+  const [price, setPrice] = useState("");
+  const [draftReady, setDraftReady] = useState(false);
   const [option1Label, setOption1Label] = useState("Size");
   const [option2Label, setOption2Label] = useState("Color");
   const [selectedGlobalCategorySlug, setSelectedGlobalCategorySlug] = useState<string | null>(null);
@@ -109,6 +111,25 @@ export function CreateProductForm({
   useEffect(() => {
     if (autoOpenAi) photoRef.current?.scrollIntoView({ block: "center" });
   }, [autoOpenAi]);
+
+  // Recover only seller-entered listing text, scoped to this shop and browser tab.
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem("tf_product_draft_"+shopSlug) ?? "null");
+      if (saved && typeof saved.name === "string") {
+        setName(saved.name); setDescription(saved.description ?? ""); setStock(saved.stock ?? ""); setPrice(saved.price ?? "");
+        setSelectedGlobalCategorySlug(saved.category ?? null);
+      }
+    } catch { /* Storage may be disabled. The form still works. */ }
+    setDraftReady(true);
+  }, [shopSlug]);
+  useEffect(() => {
+    if (!draftReady) return;
+    try {
+      if (state?.success) sessionStorage.removeItem("tf_product_draft_"+shopSlug);
+      else sessionStorage.setItem("tf_product_draft_"+shopSlug,JSON.stringify({name,description,stock,price,category:selectedGlobalCategorySlug}));
+    } catch { /* A failed autosave must not lose the current form. */ }
+  }, [draftReady,shopSlug,name,description,stock,price,selectedGlobalCategorySlug,state?.success]);
 
   // Variant labels follow the marketplace category
   useEffect(() => {
@@ -529,6 +550,8 @@ export function CreateProductForm({
                 <Input
                   id="priceInRands"
                   name="priceInRands"
+                  value={price}
+                  onChange={(e)=>setPrice(e.target.value)}
                   type="number"
                   inputMode="decimal"
                   step="0.01"

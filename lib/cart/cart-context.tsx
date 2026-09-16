@@ -90,6 +90,7 @@ interface CartProviderProps {
   retailWhatsappNumber?: string;
   shopProvince?: string;
   shopCity?: string;
+  onlinePaymentsEnabled?: boolean;
   codEnabled?: boolean;
   deliveryEnabled?: boolean;
   collectionEnabled?: boolean;
@@ -109,6 +110,7 @@ export function CartProvider({
   retailWhatsappNumber,
   shopProvince,
   shopCity,
+  onlinePaymentsEnabled,
   codEnabled,
   deliveryEnabled = true,
   collectionEnabled = true,
@@ -241,7 +243,8 @@ export function CartProvider({
       shopId,
       shopProvince,
       shopCity,
-      codEnabled,
+      onlinePaymentsEnabled,
+  codEnabled,
       deliveryEnabled,
       collectionEnabled,
       dispatchWindow,
@@ -265,7 +268,8 @@ export function CartProvider({
       shopId,
       shopProvince,
       shopCity,
-      codEnabled,
+      onlinePaymentsEnabled,
+  codEnabled,
       deliveryEnabled,
       collectionEnabled,
       dispatchWindow,

@@ -259,7 +259,7 @@ async function handleOrderPayment(
 
   // 2. Validate paid amount against stored order total
   const receivedCents = Math.round(parseFloat(body["amount_gross"] ?? "0") * 100);
-  if (Math.abs(receivedCents - order.totalCents) > 100) {
+  if (!Number.isSafeInteger(receivedCents) || receivedCents !== order.totalCents) {
     await reportError("payfast-itn-order-amount-mismatch", new Error("Order amount mismatch"), {
       orderId, expected: order.totalCents, received: receivedCents,
     });
@@ -268,7 +268,12 @@ async function handleOrderPayment(
 
   try {
     // 3. Mark order as paid
-    await markOrderPaid(orderId);
+    const payment = await markOrderPaid(orderId);
+    if (payment.duplicate) return NextResponse.json({ received: true, duplicate: true });
+    if (payment.reviewRequired) {
+      await reportError("payfast-order-needs-review", new Error("Payment received for an order that cannot be fulfilled automatically"), { orderId });
+      return NextResponse.json({ received: true, reviewRequired: true });
+    }
     console.log(`[PayFast ITN] Order marked paid: ${orderId}`);
 
     // 4. Capture transaction fee

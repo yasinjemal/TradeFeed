@@ -467,6 +467,7 @@ model Product {
   // ── Ranking ──────────────────────────────────────────
   // Marketplace quality score (0–100). Computed daily by ranking cron.
   // f(views, orders, rating, freshness, seller_tier) with decay for stale products.
+  discoveryGraceUntil DateTime?                // Existing listings have a 30-day content repair window
   qualityScore  Float   @default(50.0)         // Default 50 — neutral baseline
 
   // ── Full-Text Search ─────────────────────────────────
@@ -493,6 +494,7 @@ model Product {
   @@index([isActive, qualityScore])
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "Product_name_trgm_idx")
   @@unique([shopId, slug])
+  @@index([search_vector], type: Gin, map: "Product_search_vector_idx")
 }
 
 // ============================================================
@@ -818,6 +820,14 @@ model Order {
   paidAt          DateTime?                         // When buyer completed payment (set by PayFast ITN)
   codConfirmedAt  DateTime?                         // When seller confirmed cash received (COD only)
 
+  // Nullable accounting fields deliberately leave legacy stock untouched.
+  stockReservedAt DateTime?
+  reservationExpiresAt DateTime?
+  stockReleasedAt DateTime?
+  paymentReviewRequired Boolean @default(false)
+  checkoutKey String? @unique
+  checkoutFingerprint String?
+
   // WhatsApp tracking
   whatsappSent    Boolean      @default(true)       // Whether WA message was opened
   whatsappMessage String?                           // Snapshot of the order message sent
@@ -840,6 +850,7 @@ model Order {
   transactionFee  TransactionFee?
   reviewRequest   ReviewRequest?
   messages        OrderMessage[]
+  supportCases    SupportCase[]
 
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -851,6 +862,7 @@ model Order {
   @@index([buyerClerkId])                            // For buyer order history lookups
   @@index([buyerPhone])                              // For "track my order" lookups
   @@index([deletedAt])                               // Filter out soft-deleted orders
+  @@index([status, reservationExpiresAt])
 }
 
 // ============================================================
@@ -1052,7 +1064,10 @@ model Review {
   buyerEmail  String?                               // Optional email for follow-up
 
   // Moderation
-  isApproved  Boolean  @default(true)               // Auto-approved; seller can delete unwanted reviews
+  isApproved  Boolean  @default(false)              // Unverified submissions require platform moderation
+  reportedAt DateTime?
+  moderatedAt DateTime?
+  moderationReason String?
   isVerified  Boolean  @default(false)              // Whether buyer actually purchased
 
   createdAt   DateTime @default(now())
@@ -2268,4 +2283,30 @@ model HuntRateLimitBucket {
 enum HuntRateLimitScope {
   DEVICE
   NETWORK
+}
+
+// Order-linked support. Guest capability hashes never appear in public projections.
+model SupportCase {
+  id String @id @default(cuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  category String
+  status String @default("OPEN")
+  buyerClerkId String?
+  guestTokenHash String?
+  messages SupportCaseMessage[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([status, updatedAt])
+  @@index([orderId])
+}
+model SupportCaseMessage {
+  id String @id @default(cuid())
+  caseId String
+  supportCase SupportCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actor String
+  actorId String?
+  body String
+  createdAt DateTime @default(now())
+  @@index([caseId, createdAt])
 }
