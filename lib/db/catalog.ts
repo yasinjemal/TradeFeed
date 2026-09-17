@@ -11,6 +11,7 @@
 // - Optimised for SSR — fast queries for mobile users on SA data
 // ============================================================
 
+import { buyerOptions } from "@/lib/products/buyer-options";
 import { db } from "@/lib/db";
 
 /**
@@ -354,9 +355,7 @@ export async function getSimilarProducts(
       },
       variants: {
         where: { isActive: true },
-        select: { retailPriceCents: true, priceInCents: true },
-        orderBy: { priceInCents: "asc" },
-        take: 1,
+        select: { retailPriceCents: true, priceInCents: true, size: true },
       },
       shop: {
         select: { name: true, slug: true, isVerified: true },
@@ -371,7 +370,8 @@ export async function getSimilarProducts(
     slug: p.slug,
     name: p.name,
     imageUrl: p.images[0]?.url ?? null,
-    minPriceCents: p.variants[0]?.retailPriceCents ?? p.variants[0]?.priceInCents ?? 0,
+    minPriceCents: p.variants.length ? Math.min(...buyerOptions(p.variants).map(v => v.retailPriceCents ?? v.priceInCents)) : 0,
+    maxPriceCents: Math.max(0, ...buyerOptions(p.variants).map(v => v.retailPriceCents ?? v.priceInCents)),
     shopName: p.shop.name,
     shopSlug: p.shop.slug,
     isVerified: p.shop.isVerified,
@@ -409,9 +409,7 @@ export async function getMoreFromSeller(
       },
       variants: {
         where: { isActive: true },
-        select: { retailPriceCents: true, priceInCents: true },
-        orderBy: { priceInCents: "asc" },
-        take: 1,
+        select: { retailPriceCents: true, priceInCents: true, size: true },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -423,7 +421,8 @@ export async function getMoreFromSeller(
     slug: p.slug,
     name: p.name,
     imageUrl: p.images[0]?.url ?? null,
-    minPriceCents: p.variants[0]?.retailPriceCents ?? p.variants[0]?.priceInCents ?? 0,
+    minPriceCents: p.variants.length ? Math.min(...buyerOptions(p.variants).map(v => v.retailPriceCents ?? v.priceInCents)) : 0,
+    maxPriceCents: Math.max(0, ...buyerOptions(p.variants).map(v => v.retailPriceCents ?? v.priceInCents)),
   }));
 }
 

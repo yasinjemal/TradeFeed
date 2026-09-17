@@ -1,3 +1,4 @@
+import { allowDiscoveryPromotions } from "@/lib/marketplace/promoted-context";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -7,7 +8,6 @@ import {
   getGlobalCategories,
   getTrendingProducts,
   getNewArrivals,
-  getFeaturedShops,
   interleavePromotedProducts,
   type CategoryWithCount,
 } from "@/lib/db/marketplace";
@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = `${category.name} Suppliers South Africa — Wholesale & Retail | TradeFeed`;
   const description = category.description
-    ? `${category.description} Browse ${category.name.toLowerCase()} from verified SA sellers. Wholesale & retail prices. Order via WhatsApp.`
+    ? `${category.description} Browse ${category.name.toLowerCase()} from South African sellers. Wholesale & retail prices. Order via WhatsApp.`
     : `Shop ${category.name.toLowerCase()} from South Africa's top sellers on TradeFeed. Wholesale & retail prices. Compare products from Johannesburg, Durban, Cape Town & more. Order via WhatsApp.`;
 
   return {
@@ -132,14 +132,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   await expirePromotedListings();
 
-  const [productsResult, promoted, categories, trending, newArrivals, featuredShops] =
+  const [productsResult, promoted, categories, trending, newArrivals] =
     await Promise.all([
       getMarketplaceProducts(filters),
-      getPromotedProducts(12),
+      allowDiscoveryPromotions(filters) ? getPromotedProducts(12) : Promise.resolve([]),
       Promise.resolve(allCategories),
       getTrendingProducts(12),
       getNewArrivals(8),
-      getFeaturedShops(8),
     ]);
 
   const interleavedProducts = interleavePromotedProducts(
@@ -182,10 +181,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         />
       ))}
 
+      <MarketplaceShellSwitch
+        introduction={<>
       {/* Category hero */}
-      <div className="bg-gradient-to-b from-stone-900 via-stone-950 to-stone-950 border-b border-stone-800/40">
-        <div className="max-w-6xl mx-auto px-4 pt-20 pb-10 sm:pt-24 sm:pb-12">
-          <nav className="flex items-center gap-1.5 text-xs text-stone-500 mb-6">
+      <div className="bg-tf-surface border-b border-tf-stone-200">
+        <div className="max-w-6xl mx-auto px-4 py-4 sm:px-6">
+          <nav className="flex items-center gap-1.5 text-xs text-stone-500 mb-2">
             <Link href="/marketplace" className="hover:text-emerald-400 transition-colors">
               Marketplace
             </Link>
@@ -201,7 +202,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                 <span>/</span>
               </>
             )}
-            <span className="text-stone-300">{category.name}</span>
+            <span className="text-tf-stone-600">{category.name}</span>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -209,31 +210,28 @@ export default async function CategoryPage({ params, searchParams }: Props) {
               <span className="text-4xl">{category.icon}</span>
             )}
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-stone-100">
-                {category.name}{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
-                  Suppliers
-                </span>
+              <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-tf-ink">
+                {category.name}
               </h1>
               <p className="mt-2 text-stone-500 text-sm">
-                {category.productCount} product{category.productCount !== 1 ? "s" : ""} from verified SA sellers
+                {category.productCount} product{category.productCount !== 1 ? "s" : ""} from South African sellers
               </p>
             </div>
           </div>
 
-          <p className="mt-4 text-stone-400 text-lg max-w-2xl leading-relaxed">
+          <p className="hidden sm:block mt-2 text-tf-stone-600 text-sm max-w-2xl leading-relaxed">
             {category.description ||
               `Browse ${category.name.toLowerCase()} from South Africa's top sellers. Wholesale & retail prices. Order via WhatsApp.`}
           </p>
 
           {/* Sub-category pills for parent categories */}
           {isParent && category.children && (
-            <div className="mt-6 flex flex-wrap gap-2">
-              {category.children.map((child) => (
+            <details className="mt-3"><summary className="cursor-pointer py-2 text-sm font-medium text-tf-primary">Browse subcategories</summary><div className="mt-2 flex flex-wrap gap-2">
+              {category.children.filter(child => child.productCount > 0).map((child) => (
                 <Link
                   key={child.slug}
                   href={`/marketplace/category/${child.slug}`}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium bg-stone-800/80 border border-stone-700/50 text-stone-300 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400 transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium bg-tf-raised border border-tf-stone-200 text-tf-stone-600 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400 transition-all"
                 >
                   {child.icon && <span>{child.icon}</span>}
                   {child.name}
@@ -242,12 +240,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                   </span>
                 </Link>
               ))}
-            </div>
+            </div></details>
           )}
         </div>
       </div>
 
-      <MarketplaceShellSwitch
+        </>}
         products={interleavedProducts}
         totalProducts={productsResult.total}
         totalPages={productsResult.totalPages}
@@ -255,7 +253,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         categories={categories}
         trendingProducts={trending}
         newArrivals={newArrivals}
-        featuredShops={featuredShops}
+        featuredShops={[]}
         promotedProducts={promoted}
         currentFilters={filters}
       />

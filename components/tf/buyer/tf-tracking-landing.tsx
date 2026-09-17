@@ -30,6 +30,7 @@ export function TfTrackingLanding() {
             Enter the order number from your TradeFeed WhatsApp message to see its latest status.
           </p>
           <div className="mt-7"><TfTrackingSearch /></div>
+          <p className="mt-4 text-sm text-tf-stone-600">Direct WhatsApp enquiries do not receive a tracking number. <Link href="/contact" className="font-medium text-tf-primary underline">Get help finding your order</Link>.</p>
           <div className="mt-7 flex gap-3 rounded-xl bg-tf-stone-50 p-4 text-sm text-tf-stone-600">
             <ShieldCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-tf-primary" />
             <p>Your order details are private. Only someone with the order number can view this page.</p>
@@ -60,6 +61,7 @@ export function TfTrackingNotFound({ orderNumber }: { orderNumber: string }) {
           <p className="mt-3 text-sm leading-relaxed text-tf-stone-600">Double-check the order number from your WhatsApp message and try again.</p>
           <p className="mt-4 inline-flex rounded-lg bg-tf-stone-50 px-3 py-2 font-mono text-sm text-tf-stone-600">{orderNumber}</p>
           <div className="mt-7"><TfTrackingSearch /></div>
+          <p className="mt-4 text-sm text-tf-stone-600">Direct WhatsApp enquiries do not receive a tracking number. <Link href="/contact" className="font-medium text-tf-primary underline">Get help finding your order</Link>.</p>
         </div>
       </section>
     </main>

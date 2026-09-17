@@ -9,6 +9,9 @@
 
 "use server";
 
+import { allowDiscoveryPromotions } from "@/lib/marketplace/promoted-context";
+
+
 import { z } from "zod";
 import {
   trackPromotedClick,
@@ -64,6 +67,8 @@ export interface LoadMoreResult {
  */
 export async function loadMoreProducts(filters: {
   category?: string;
+  parentCategory?: string;
+  city?: string;
   search?: string;
   sortBy?: MarketplaceSortBy;
   province?: string;
@@ -82,7 +87,7 @@ export async function loadMoreProducts(filters: {
     });
 
     // Interleave promoted products into page 2+ as well
-    const promoted = await getPromotedProducts(4);
+    const promoted = allowDiscoveryPromotions(filters) ? await getPromotedProducts(4) : [];
     const products = interleavePromotedProducts(result.products, promoted);
 
     return {

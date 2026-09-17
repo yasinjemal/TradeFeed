@@ -24,6 +24,7 @@ export interface TfGridProduct {
   videoUrl?: string | null;
   videoKind?: "upload" | "direct" | "youtube" | null;
   minPriceCents: number;
+  maxPriceCents?: number;
   categoryId: string | null;
   categoryName: string | null;
   /** Original server order (newest first) — used for the default sort */
@@ -170,6 +171,7 @@ export function TfStorefrontGrid({
                 href={`/catalog/${shopSlug}/products/${p.slug ?? p.id}`}
                 title={p.name}
                 price={p.minPriceCents / 100}
+                priceFrom={p.maxPriceCents != null && p.minPriceCents !== p.maxPriceCents}
                 imageUrl={p.imageUrl}
                 imageAlt={p.imageAlt ?? p.name}
                 videoPreviewUrl={p.videoUrl}

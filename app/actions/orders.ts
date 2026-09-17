@@ -15,6 +15,7 @@ import { transitionOrder } from "@/lib/orders/lifecycle";
 import { buyerOnlinePaymentsEnabled } from "@/lib/commerce/capabilities";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { randomUUID } from "node:crypto";
 import { CheckoutPolicyError } from "@/lib/orders/checkout-policy";
 import {
@@ -204,6 +205,15 @@ async function _attemptCheckout(
     }
 
     const order = orderResult.order;
+    if (order.checkoutKey && order.checkoutKey.length >= 32) {
+      (await cookies()).set(`tf_checkout_${order.orderNumber}`, order.checkoutKey, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
     if (orderResult.replayed) return { success: true, orderNumber: order.orderNumber, trackingUrl: `/track/${encodeURIComponent(order.orderNumber)}` };
 
     // 3. Fire-and-forget notifications (don't block checkout)

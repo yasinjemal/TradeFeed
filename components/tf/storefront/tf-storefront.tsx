@@ -224,6 +224,7 @@ export function TfStorefront({
 
       {/* ── Reviews ────────────────────────────────────── */}
       <TfReveal>
+      <div id="shop-reviews" />
       <TfReviewsBlock
         reviews={reviews}
         avgRating={avgRating}

@@ -1,3 +1,4 @@
+import { allowDiscoveryPromotions } from "@/lib/marketplace/promoted-context";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -39,6 +40,8 @@ interface MarketplacePageProps {
   searchParams: Promise<{
     category?: string;
     search?: string;
+    parentCategory?: string;
+    city?: string;
     sort?: string;
     province?: string;
     minPrice?: string;
@@ -111,6 +114,8 @@ export default async function MarketplacePage({
   // Build filters from URL params
   const filters = {
     category: params.category,
+    parentCategory: params.parentCategory,
+    city: params.city,
     search: params.search,
     sortBy: (params.sort as "quality" | "newest" | "trending" | "price_asc" | "price_desc" | "popular" | "top_rated") || "quality",
     province: params.province,
@@ -131,7 +136,7 @@ export default async function MarketplacePage({
   const [productsResult, promoted, categories, trending, newArrivals, featuredShops] =
     await Promise.all([
       getMarketplaceProducts(filters),
-      getPromotedProducts(12),
+      allowDiscoveryPromotions(filters) ? getPromotedProducts(12) : Promise.resolve([]),
       getGlobalCategories(),
       useTf ? Promise.resolve([]) : getTrendingProducts(12),
       useTf ? Promise.resolve([]) : getNewArrivals(8),

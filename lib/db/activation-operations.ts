@@ -44,7 +44,7 @@ export async function getActivationOperations(now = new Date()) {
             discoveryGraceUntil: true,
             images: { select: { url: true } },
             variants: {
-              select: { isActive: true, stock: true, priceInCents: true },
+              select: { size: true, isActive: true, stock: true, priceInCents: true },
             },
           },
         },

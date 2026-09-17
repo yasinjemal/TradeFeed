@@ -12,6 +12,7 @@ import { TfMarketplaceShell } from "@/components/tf/marketplace/tf-marketplace-s
 // ============================================================
 
 export interface MarketplaceShellSwitchProps {
+  introduction?: React.ReactNode;
   products: MarketplaceProduct[];
   totalProducts: number;
   totalPages: number;
@@ -22,6 +23,8 @@ export interface MarketplaceShellSwitchProps {
   featuredShops: FeaturedShop[];
   promotedProducts: MarketplaceProduct[];
   currentFilters: {
+    parentCategory?: string;
+    city?: string;
     category?: string;
     search?: string;
     sortBy: MarketplaceSortBy;
@@ -38,6 +41,7 @@ export function MarketplaceShellSwitch(props: MarketplaceShellSwitchProps) {
   if (FEATURE_FLAGS.UI_REDESIGN) {
     return (
       <TfMarketplaceShell
+        introduction={props.introduction}
         products={props.products}
         totalProducts={props.totalProducts}
         totalPages={props.totalPages}
@@ -49,5 +53,5 @@ export function MarketplaceShellSwitch(props: MarketplaceShellSwitchProps) {
       />
     );
   }
-  return <MarketplaceShell {...props} />;
+  return <>{props.introduction}<MarketplaceShell {...props} /></>;
 }

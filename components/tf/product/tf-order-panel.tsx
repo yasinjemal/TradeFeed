@@ -4,6 +4,7 @@ import * as React from "react";
 import { MessageCircle, Minus, Plus, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 
+import { buyerOptions, isPlaceholderOption, needsSizeConfirmation } from "@/lib/products/buyer-options";
 import { cn } from "@/lib/utils";
 import { TfButton } from "@/components/tf/button";
 import { formatZAR } from "@/components/tf/format";
@@ -89,7 +90,7 @@ export function TfOrderPanel({
   shopId,
   shopName,
   whatsappNumber,
-  variants,
+  variants: suppliedVariants,
   option1Label,
   option2Label,
   imageUrl,
@@ -98,6 +99,8 @@ export function TfOrderPanel({
   bulkDiscountTiers = [],
 }: TfOrderPanelProps) {
   const { addItem } = useCart();
+  const variants = React.useMemo(() => buyerOptions(suppliedVariants), [suppliedVariants]);
+  const needsConfirmation = needsSizeConfirmation(productName, variants);
   const sizes = React.useMemo(
     () => Array.from(new Set(variants.map((v) => v.size))),
     [variants],
@@ -133,15 +136,14 @@ export function TfOrderPanel({
     );
   }, [variants, size, color, hasColors]);
 
-  const exactSelection = size != null && (!hasColors || colorsForSize.length === 0 || color != null);
-  const baseWholesaleCents = selected?.priceInCents ?? Math.min(...variants.map((v) => v.priceInCents));
-  const unitCents = effectiveUnitPriceCents({
-    orderType,
-    wholesalePriceCents: baseWholesaleCents,
-    retailPriceCents: selected?.retailPriceCents ?? null,
-    quantity: qty,
-    bulkDiscountTiers,
-  });
+  const exactSelection = !needsConfirmation && size != null && (!hasColors || colorsForSize.length === 0 || color != null);
+  const matchingVariants = variants.filter(v => (!size || v.size === size) && (!color || v.color === color));
+  const optionPrices = matchingVariants.map(v => effectiveUnitPriceCents({
+    orderType, wholesalePriceCents: v.priceInCents, retailPriceCents: v.retailPriceCents,
+    quantity: qty, bulkDiscountTiers,
+  }));
+  const unitCents = optionPrices.length ? Math.min(...optionPrices) : 0;
+  const priceFrom = !exactSelection && new Set(optionPrices).size > 1;
   const activeTier = orderType === "wholesale" ? applicableTier(qty, bulkDiscountTiers) : null;
   const tierNudge = orderType === "wholesale" ? nextTierNudge(qty, bulkDiscountTiers) : null;
   const maxQty = exactSelection && selected ? Math.max(1, selected.stock) : 99;
@@ -158,22 +160,23 @@ export function TfOrderPanel({
     );
 
   const waMessage = [
-    `Hi ${shopName}! I'd like to order:`,
+    `Hi ${shopName}! I'm interested in:`,
     "",
     `*${productName}*`,
-    size ? `${option1Label}: ${size}` : null,
+    size && !isPlaceholderOption(size) ? `${option1Label}: ${size}` : null,
     color ? `${option2Label}: ${color}` : null,
     hasRetail ? `Order type: ${orderType === "retail" ? "Retail" : "Wholesale"}` : null,
     `Quantity: ${qty}`,
-    `Price: ${formatZAR(unitCents / 100)} each — ${formatZAR(totalCents / 100)} total${activeTier ? ` (${activeTier.discountPercent}% bulk discount)` : ""}`,
+    `Listed price: ${priceFrom ? "from " : ""}${formatZAR(unitCents / 100)} each${exactSelection ? ` — ${formatZAR(totalCents / 100)} total` : " (confirm your options with the seller)"}${activeTier ? ` (${activeTier.discountPercent}% bulk discount)` : ""}`,
     "",
+    needsConfirmation ? "Please confirm available sizes and colours." : "Please confirm availability, delivery costs and returns before I order.",
     productUrl,
   ]
     .filter((l) => l !== null)
     .join("\n");
   const waHref = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(waMessage)}`;
 
-  const canAddToCart = !soldOut && exactSelection && selected != null && selected.stock > 0;
+  const canAddToCart = !soldOut && exactSelection && selected != null && selected.stock >= qty && qty >= minQty;
   const missingOptionLabel =
     size == null
       ? option1Label
@@ -182,13 +185,13 @@ export function TfOrderPanel({
         : null;
   const selectionSummary = exactSelection
     ? [
-        size ? `${option1Label}: ${size}` : null,
+        size && !isPlaceholderOption(size) ? `${option1Label}: ${size}` : null,
         color ? `${option2Label}: ${color}` : null,
         `Qty ${qty}`,
       ]
         .filter(Boolean)
         .join(" · ")
-    : `Choose ${missingOptionLabel?.toLowerCase() ?? "options"}`;
+    : needsConfirmation ? "Confirm sizes with seller" : `Choose ${missingOptionLabel?.toLowerCase() ?? "options"}`;
 
   const scrollToOptions = () => {
     document
@@ -273,7 +276,7 @@ export function TfOrderPanel({
         }}
       >
         <MessageCircle aria-hidden="true" />
-        {exactSelection ? "Order on WhatsApp" : "Ask on WhatsApp"}
+        {needsConfirmation ? "Ask about sizes" : "Ask on WhatsApp"}
       </a>
     </TfButton>
   );
@@ -287,11 +290,11 @@ export function TfOrderPanel({
       size="lg"
       fullWidth
       onClick={scrollToOptions}
-      disabled={soldOut}
+      disabled={soldOut || needsConfirmation}
       className="px-3 text-sm"
     >
       <ShoppingBag aria-hidden="true" className="size-5" />
-      {soldOut ? "Sold out" : "Choose options"}
+      {soldOut ? "Sold out" : needsConfirmation ? "Sizes unconfirmed" : "Choose options"}
     </TfButton>
   );
 
@@ -338,7 +341,7 @@ export function TfOrderPanel({
             className="font-tf-display text-tf-ink"
             style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", lineHeight: 1, letterSpacing: "-0.04em", fontWeight: 600 }}
           >
-            {formatZAR(unitCents / 100)}
+            {priceFrom && "From "}{formatZAR(unitCents / 100)}
           </span>
           {activeTier && (
             <span className="rounded-full bg-tf-verified-soft px-2 py-0.5 text-xs font-medium text-tf-verified">
@@ -384,6 +387,7 @@ export function TfOrderPanel({
                   onClick={() => {
                     setSize(size === s ? null : s);
                     setColor(null);
+                    setQty(minQty);
                   }}
                 >
                   {s}
@@ -403,7 +407,7 @@ export function TfOrderPanel({
                   key={c}
                   active={color === c}
                   disabled={!colorInStock(c)}
-                  onClick={() => setColor(color === c ? null : c)}
+                  onClick={() => { setColor(color === c ? null : c); setQty(minQty); }}
                 >
                   {c}
                 </Pill>
@@ -411,6 +415,8 @@ export function TfOrderPanel({
             </div>
           </fieldset>
         )}
+
+        {needsConfirmation && <p role="status" className="rounded-lg bg-tf-stone-100 p-3 text-sm text-tf-stone-600">This listing mentions sizes that the seller has not added as options. Ask the seller to confirm the size and colour before ordering.</p>}
 
         {/* Quantity */}
         {!soldOut && (
@@ -461,7 +467,7 @@ export function TfOrderPanel({
           {addToCartButton(true)}
         </div>
         <p className="text-xs text-tf-stone-400">
-          Opens WhatsApp pre-filled &mdash; {shopName} confirms availability &amp; delivery.
+          Ask {shopName} about availability, delivery and returns. A direct WhatsApp enquiry does not create a tracked order. Use the cart to place a TradeFeed order.
         </p>
       </div>
 
@@ -473,7 +479,7 @@ export function TfOrderPanel({
               {selectionSummary}
             </p>
             <p className="shrink-0 text-sm font-semibold tabular-nums text-tf-ink">
-              {formatZAR(totalCents / 100)}
+              {priceFrom && "From "}{formatZAR(totalCents / 100)}
             </p>
           </div>
           <div className="grid grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] gap-2">

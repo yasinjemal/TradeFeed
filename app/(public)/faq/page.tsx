@@ -126,7 +126,7 @@ const FAQ_CATEGORIES = [
       },
       {
         q: "Can buyers track their orders?",
-        a: "Yes. Every order gets a unique tracking number (e.g. TF-20260224-0042). You update the order status from your dashboard — Pending → Confirmed → Shipped → Delivered — and buyers can check their order status anytime using their tracking number.",
+        a: "Orders placed through the cart get a unique tracking number (e.g. TF-20260224-0042). Direct WhatsApp enquiries do not create tracked orders. You update the order status from your dashboard — Pending → Confirmed → Shipped → Delivered — and buyers can check their order status anytime using their tracking number.",
       },
     ],
   },
