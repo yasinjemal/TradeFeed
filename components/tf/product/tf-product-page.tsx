@@ -19,6 +19,7 @@ import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfGallery, type TfGalleryVideo } from "./tf-gallery";
 import { TfOrderPanel, type TfVariant } from "./tf-order-panel";
 import { TfProductFavourite } from "./tf-product-favourite";
+import { TfProductRail } from "./tf-product-rail";
 import { TfFulfillmentPromise } from "@/components/tf/fulfillment-promise";
 
 // ============================================================
@@ -86,14 +87,10 @@ export interface TfProductPageProps {
   similarProducts: TfStripProduct[];
 }
 
-function ProductStrip({ title, products }: { title: string; products: TfStripProduct[] }) {
+function ProductStrip({ title, products, autoPlay = false }: { title: string; products: TfStripProduct[]; autoPlay?: boolean }) {
   if (products.length === 0) return null;
   return (
-    <section aria-label={title}>
-      <TfReveal>
-        <h2 className="font-tf-editorial text-2xl font-medium tracking-[-0.02em] text-tf-ink sm:text-3xl">{title}</h2>
-      </TfReveal>
-      <TfReveal as="ul" stagger className="tf-rail mt-3 flex snap-x gap-3 overflow-x-auto pb-1 pr-6 scrollbar-hide">
+    <TfProductRail title={title} autoPlay={autoPlay}>
         {products.map((p) => (
           <li key={p.id} className="w-40 shrink-0 snap-start sm:w-48">
             <TfProductCard
@@ -108,8 +105,7 @@ function ProductStrip({ title, products }: { title: string; products: TfStripPro
             />
           </li>
         ))}
-      </TfReveal>
-    </section>
+    </TfProductRail>
   );
 }
 
@@ -366,7 +362,7 @@ export function TfProductPage({
       />
       </TfReveal>
 
-      <ProductStrip title={`More from ${shop.name}`} products={moreFromSeller} />
+      <ProductStrip title={`More from ${shop.name}`} products={moreFromSeller} autoPlay />
       <ProductStrip title="Related items" products={similarProducts} />
     </div>
   );
