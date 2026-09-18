@@ -1,20 +1,23 @@
+import { needsSizeConfirmation } from "@/lib/products/buyer-options";
 export interface ListingSnapshot {
   isActive: boolean;
   isFlagged: boolean;
   minPriceCents: number;
   images: { url: string }[];
-  variants: { isActive: boolean; stock: number; priceInCents: number }[];
+  variants: { size?: string; isActive: boolean; stock: number; priceInCents: number }[];
 }
 
 /** Editorial completeness target, distinct from the temporary discovery grace. */
 export function listingQualityIssues(
   product: ListingSnapshot & {
+    name?: string;
     description: string | null;
     globalCategoryId: string | null;
   },
 ): string[] {
   return [
     ...listingDiscoveryIssues(product),
+    ...(product.name && needsSizeConfirmation(product.name, product.variants.filter(v => v.isActive).map(v => ({size: v.size ?? "Default"}))) ? ["Add the real sizes advertised in your product title and confirm stock for each option"] : []),
     ...((product.description?.trim().length ?? 0) < 40
       ? ["Describe the product and its condition in at least 40 characters"]
       : []),

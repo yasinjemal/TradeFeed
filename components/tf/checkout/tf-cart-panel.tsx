@@ -512,7 +512,7 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
               <section aria-label="Your details" className={sectionCls}>
                 <h3 className="mb-3 font-tf-display text-sm font-semibold text-tf-ink">
                   <span className="tabular-nums text-tf-primary">2.</span> Your details{" "}
-                  <span className="font-normal text-tf-stone-400">(optional, speeds things up)</span>
+                  <span className="font-normal text-tf-stone-400">(optional)</span>
                 </h3>
                 <div className="space-y-3">
                   <div>
@@ -534,7 +534,8 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                       value={buyerPhone}
                       onChange={(e) => setBuyerPhone(e.target.value)}
                       autoComplete="tel"
-                      placeholder="For delivery updates"
+                      placeholder="For delivery updates and order help"
+                      aria-describedby="tf-phone-help"
                     />
                   </div>
                   <div>
@@ -546,6 +547,8 @@ export function TfCartPanel({ isOpen, onClose }: TfCartPanelProps) {
                       placeholder="Anything they should know"
                     />
                   </div>
+
+                  <p id="tf-phone-help" className="text-sm text-tf-stone-600">Add your phone to verify this order when requesting help on another device. Without it, contact TradeFeed support for assistance.</p>
 
                   {/* Delivery toggle */}
                   {deliveryEnabled && <button

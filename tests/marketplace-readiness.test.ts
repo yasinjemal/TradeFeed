@@ -18,7 +18,8 @@ test("discovery eligibility survives price filters and is shared by counts and f
   await getMarketplaceProducts({ minPrice: 100, maxPrice: 500 });
   assert.deepEqual(queries[1].where, {...queries[0].where,id:{in:[]}});
   assert.deepEqual(queries[0].where.AND[0], MARKETPLACE_ELIGIBILITY);
-  assert.deepEqual(queries[0].where.variants.some.priceInCents, { gt: 0, gte: 100, lte: 500 });
+  // Price bounds apply to the effective retail price after candidate selection.
+  assert.equal(queries[0].select.variants.select.retailPriceCents, true);
   await getNewArrivals();
   assert.deepEqual(queries[2].where.AND[0], MARKETPLACE_ELIGIBILITY);
   spy(db.promotedListing, "findMany", async (args: any) => {

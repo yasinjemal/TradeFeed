@@ -43,6 +43,28 @@ async function main() {
       variants: { create: { size: "M", priceInCents: 45000, stock: 30 } },
     },
   });
+  const clothing = await db.globalCategory.upsert({
+    where: {slug: "quality-clothing"}, update: {},
+    create: {name: "Clothing", slug: "quality-clothing"},
+  });
+  for (const [id, name, prices] of [
+    ["unconfirmed-polo", "Striped Polo S-XXL", [19900]],
+    ["variable-polo", "Cotton Polo", [65000, 70000]],
+  ] as const) {
+    await db.product.upsert({
+      where: {id: `quality-${id}`}, update: {},
+      create: {
+        id: `quality-${id}`, shopId: shop.id, globalCategoryId: clothing.id,
+        slug: id, name, description: "Cotton clothing for everyday wear. Pairs well with sneakers. Ask about delivery.",
+        minPriceCents: prices[0], maxPriceCents: prices[prices.length - 1],
+        images: {create: {url: "/landing/demo-sneakers.webp"}},
+        variants: {create: prices.map((price, index) => ({
+          size: prices.length === 1 ? "Default" : index === 0 ? "M" : "L",
+          priceInCents: 60000, retailPriceCents: price, stock: 20,
+        }))},
+      },
+    });
+  }
   console.log(
     "Local fixture ready: /catalog/quality-fixture/products/everyday-sneakers",
   );

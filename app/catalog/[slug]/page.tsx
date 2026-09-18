@@ -1,3 +1,4 @@
+import { buyerOptions } from "@/lib/products/buyer-options";
 // ============================================================
 // Page — Public Catalog Product Grid (/catalog/[slug])
 // ============================================================
@@ -183,7 +184,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
     imageUrl: p.images[0]?.url ?? null,
     priceInCents:
       p.variants.length > 0
-        ? Math.min(...p.variants.map((v) => v.priceInCents))
+        ? Math.min(...buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents))
         : 0,
   }));
 
@@ -201,7 +202,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
   };
 
   const cachedProducts = products.map((p) => {
-    const prices = p.variants.map((v) => v.priceInCents);
+    const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
     return {
       id: p.id,
       shopId: shop.id,
@@ -252,7 +253,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
           returnPolicy: shop.returnPolicy,
         }}
         products={products.map((p, index) => {
-          const prices = p.variants.map((v) => v.priceInCents);
+          const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
           return {
             id: p.id,
             slug: p.slug,
@@ -265,6 +266,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
                 ? (p.videos[0].source.toLowerCase() as "upload" | "direct" | "youtube")
                 : null,
             minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
+            maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
             categoryId: p.category?.id ?? null,
             categoryName: p.category?.name ?? null,
             position: index,

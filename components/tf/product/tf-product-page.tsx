@@ -35,6 +35,7 @@ export interface TfStripProduct {
   name: string;
   imageUrl: string | null;
   minPriceCents: number;
+  maxPriceCents?: number;
   shopName: string;
   shopSlug: string;
   shopVerified: boolean;
@@ -99,6 +100,7 @@ function ProductStrip({ title, products }: { title: string; products: TfStripPro
               href={`/catalog/${p.shopSlug}/products/${p.slug ?? p.id}`}
               title={p.name}
               price={p.minPriceCents / 100}
+              priceFrom={p.maxPriceCents != null && p.maxPriceCents !== p.minPriceCents}
               imageUrl={p.imageUrl}
               sellerName={p.shopName}
               sellerVerified={p.shopVerified}
@@ -358,6 +360,8 @@ export function TfProductPage({
         reviewCount={reviewCount}
         shopName={shop.name}
         distribution={reviewDistribution}
+        productScope
+        shopHref={`/catalog/${shop.slug}#shop-reviews`}
         action={<TfReviewForm shopId={shop.id} shopSlug={shop.slug} productId={product.id} />}
       />
       </TfReveal>

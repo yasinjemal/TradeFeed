@@ -31,6 +31,7 @@ import type { CategoryWithCount, FeaturedShop, MarketplaceProduct, MarketplaceSo
 import { TfFilterSheet, type TfFilterState } from "./tf-filter-sheet";
 
 interface TfMarketplaceShellProps {
+  introduction?: React.ReactNode;
   products: MarketplaceProduct[];
   totalProducts: number;
   totalPages: number;
@@ -39,6 +40,8 @@ interface TfMarketplaceShellProps {
   featuredShops: FeaturedShop[];
   promotedProducts: MarketplaceProduct[];
   currentFilters: {
+    parentCategory?: string;
+    city?: string;
     category?: string;
     search?: string;
     sortBy: MarketplaceSortBy;
@@ -73,6 +76,7 @@ function toCard(p: MarketplaceProduct) {
     href: `/catalog/${p.shop.slug}/products/${p.slug ?? p.id}`,
     title: p.name,
     price: p.minPriceCents / 100,
+    priceFrom: p.minPriceCents !== p.maxPriceCents,
     imageUrl: p.imageUrl,
     sellerName: p.shop.name,
     sellerVerified: p.shop.isVerified,
@@ -101,6 +105,7 @@ interface Suggestions {
 const NO_SUGGESTIONS: Suggestions = { products: [], categories: [] };
 
 export function TfMarketplaceShell({
+  introduction,
   products,
   totalProducts,
   totalPages,
@@ -110,6 +115,7 @@ export function TfMarketplaceShell({
   promotedProducts,
   currentFilters,
 }: TfMarketplaceShellProps) {
+  const [interactive, setInteractive] = React.useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isSignedIn } = useUser();
@@ -127,6 +133,7 @@ export function TfMarketplaceShell({
   const sentinelRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    setInteractive(true);
     setAllProducts(products);
     setNextPage(currentPage + 1);
     setHasMore(currentPage < totalPages);
@@ -148,10 +155,16 @@ export function TfMarketplaceShell({
 
   const navigate = React.useCallback(
     (updates: Record<string, string | undefined>) => {
-      const qs = buildMarketplaceSearchParams(searchParams.toString(), updates);
+      const base = buildMarketplaceSearchParams(searchParams.toString(), {
+        ...(currentFilters.parentCategory ? { parentCategory: currentFilters.parentCategory } : {}),
+        ...(currentFilters.category ? { category: currentFilters.category } : {}),
+        ...(currentFilters.city ? { city: currentFilters.city } : {}),
+        ...(currentFilters.province ? { province: currentFilters.province } : {}),
+      });
+      const qs = buildMarketplaceSearchParams(base, { ...(Object.hasOwn(updates, "category") ? { parentCategory: undefined } : {}), ...updates });
       router.push(qs ? `/marketplace?${qs}` : "/marketplace", { scroll: false });
     },
-    [router, searchParams],
+    [router, searchParams, currentFilters],
   );
 
   const onSearchChange = (value: string) => {
@@ -204,6 +217,8 @@ export function TfMarketplaceShell({
         setLoadingMore(true);
         loadMoreProducts({
           category: currentFilters.category,
+          parentCategory: currentFilters.parentCategory,
+          city: currentFilters.city,
           search: currentFilters.search,
           sortBy: currentFilters.sortBy,
           province: currentFilters.province,
@@ -250,16 +265,16 @@ export function TfMarketplaceShell({
       category: state.category,
       sort: state.sort,
       province: state.province,
-      minPrice: state.minPrice,
-      maxPrice: state.maxPrice,
+      minPrice: state.minPrice ? String(Math.round(Number(state.minPrice) * 100)) : undefined,
+      maxPrice: state.maxPrice ? String(Math.round(Number(state.maxPrice) * 100)) : undefined,
       verified: state.verified,
     });
   };
 
   const activePricePreset = PRICE_PRESETS.find(
     (p) =>
-      (p.min ?? undefined) === currentFilters.minPrice &&
-      (p.max ?? undefined) === currentFilters.maxPrice,
+      (p.min != null ? p.min * 100 : undefined) === currentFilters.minPrice &&
+      (p.max != null ? p.max * 100 : undefined) === currentFilters.maxPrice,
   );
 
   const pillBase =
@@ -274,6 +289,7 @@ export function TfMarketplaceShell({
 
       {/* ── Rows 2+3: Search nav + categories — STICKY ─────── */}
       <CommerceHeader compact />
+      {introduction}
       <header className="sticky top-0 z-30">
 
         {/* Row 2: Search-dominant nav */}
@@ -380,7 +396,7 @@ export function TfMarketplaceShell({
               onClick={() => setSheetOpen(true)}
               className="relative flex min-h-[48px] shrink-0 items-center gap-2 rounded-2xl border border-tf-stone-200 bg-tf-stone-50 px-4 text-sm font-medium text-tf-stone-700 outline-none transition-all hover:border-tf-stone-300 hover:bg-tf-raised hover:shadow-sm focus-visible:ring-2 focus-visible:ring-tf-primary"
             >
-              <SlidersHorizontal aria-hidden="true" className="size-4" />
+              <span className="sr-only">Filters</span><SlidersHorizontal aria-hidden="true" className="size-4" />
               <span className="hidden sm:inline">Filters</span>
               {activeFilterCount > 0 && (
                 <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-tf-primary px-1 text-[10px] font-bold tabular-nums text-white">
@@ -478,7 +494,7 @@ export function TfMarketplaceShell({
 
         {/* ── Toolbar ─────────────────────────────────── */}
         <div className="mb-4 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <label className="flex shrink-0 items-center gap-2 text-sm">Sort<select aria-label="Sort products" value={currentFilters.sortBy} onChange={(e)=>navigate({sortBy:e.target.value as MarketplaceSortBy})} className="min-h-11 rounded-lg border border-tf-stone-300 bg-tf-raised px-3">{[["quality","Recommended"],["newest","Newest"],["price_asc","Price: low to high"],["price_desc","Price: high to low"],["top_rated","Top rated"],["popular","Popular"]].map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+          <label className="flex shrink-0 items-center gap-2 text-sm">Sort<select disabled={!interactive} aria-label="Sort products" value={currentFilters.sortBy} onChange={(e)=>navigate({sort:e.target.value as MarketplaceSortBy})} className="min-h-11 rounded-lg border border-tf-stone-300 bg-tf-raised px-3">{[["quality","Recommended"],["newest","Newest"],["price_asc","Price: low to high"],["price_desc","Price: high to low"],["top_rated","Top rated"],["popular","Popular"]].map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
           {/* Count — fixed left */}
           <p className="shrink-0 text-sm text-tf-stone-500" aria-live="polite">
             <span className="font-semibold text-tf-ink">{totalProducts.toLocaleString("en-ZA")}</span>
@@ -497,8 +513,8 @@ export function TfMarketplaceShell({
                 type="button"
                 onClick={() =>
                   navigate({
-                    minPrice: isActive ? undefined : preset.min?.toString(),
-                    maxPrice: isActive ? undefined : preset.max?.toString(),
+                    minPrice: isActive ? undefined : preset.min != null ? String(preset.min * 100) : undefined,
+                    maxPrice: isActive ? undefined : preset.max != null ? String(preset.max * 100) : undefined,
                   })
                 }
                 aria-pressed={isActive}
@@ -621,8 +637,8 @@ export function TfMarketplaceShell({
           category: currentFilters.category,
           sort: currentFilters.sortBy === "quality" ? undefined : currentFilters.sortBy,
           province: currentFilters.province,
-          minPrice: currentFilters.minPrice?.toString(),
-          maxPrice: currentFilters.maxPrice?.toString(),
+          minPrice: currentFilters.minPrice != null ? String(currentFilters.minPrice / 100) : undefined,
+          maxPrice: currentFilters.maxPrice != null ? String(currentFilters.maxPrice / 100) : undefined,
           verified: currentFilters.verifiedOnly ? "true" : undefined,
         }}
         onApply={applySheet}

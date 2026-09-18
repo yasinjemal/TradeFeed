@@ -21,7 +21,7 @@ export default async function Readiness({
         include: {
           images: { select: { url: true } },
           variants: {
-            select: { isActive: true, stock: true, priceInCents: true },
+            select: { size: true, isActive: true, stock: true, priceInCents: true },
           },
         },
       },

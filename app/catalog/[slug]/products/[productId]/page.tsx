@@ -185,7 +185,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       ? toGalleryVideo(product.videos?.[0] ?? null)
       : null;
     const mapSellerStrip = (
-      items: { id: string; slug: string | null; name: string; imageUrl: string | null; minPriceCents: number }[],
+      items: { id: string; slug: string | null; name: string; imageUrl: string | null; minPriceCents: number; maxPriceCents: number }[],
       shopMeta: { name: string; slug: string; isVerified: boolean },
     ) =>
       items.map((p) => ({
@@ -194,6 +194,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         name: p.name,
         imageUrl: p.imageUrl,
         minPriceCents: p.minPriceCents,
+        maxPriceCents: p.maxPriceCents,
         shopName: shopMeta.name,
         shopSlug: shopMeta.slug,
         shopVerified: shopMeta.isVerified,

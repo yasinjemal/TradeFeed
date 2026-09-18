@@ -8,6 +8,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { checkRateLimit, getActionClientIp } from "@/lib/rate-limit-upstash";
 import { supportCaseAccess, supportTokenHash } from "@/lib/support/access";
+import { matchesCheckoutProof } from "@/lib/support/checkout-proof";
 const bodySchema = z.string().trim().min(10).max(4000);
 const normalizePhone = (value: string) =>
   value.replace(/\D/g, "").replace(/^0/, "27");
@@ -44,12 +45,14 @@ export async function createSupportCaseAction(
   const { userId } = await auth();
   const order = await db.order.findUnique({
     where: { orderNumber: parsed.data.orderNumber.toUpperCase() },
-    select: { id: true, buyerClerkId: true, buyerPhone: true, deletedAt: true },
+    select: { id: true, orderNumber: true, checkoutKey: true, buyerClerkId: true, buyerPhone: true, deletedAt: true },
   });
+  const checkoutProof = order && matchesCheckoutProof(order.checkoutKey,
+    (await cookies()).get(`tf_checkout_${order.orderNumber}`)?.value);
   if (
     !order ||
     order.deletedAt ||
-    (!(userId && order.buyerClerkId === userId) &&
+    (!checkoutProof && !(userId && order.buyerClerkId === userId) &&
       !(
         order.buyerPhone &&
         normalizePhone(order.buyerPhone) ===

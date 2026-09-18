@@ -17,6 +17,8 @@
 
 import { db } from "@/lib/db";
 import { rankMarketplaceCandidates } from "@/lib/marketplace/ranking";
+import { buyerOptions } from "@/lib/products/buyer-options";
+import { primarySearchMatches } from "@/lib/marketplace/search-intent";
 import { MARKETPLACE_ELIGIBILITY, marketplaceContentStandard } from "@/lib/marketplace/eligibility";
 import type { AnalyticsRequestContext } from "@/lib/analytics/visitor";
 import { trackEvent } from "@/lib/db/analytics";
@@ -345,21 +347,6 @@ export async function getMarketplaceProducts(
     };
   }
 
-  // Price range filter — check if ANY variant is within range
-  if (minPrice !== undefined || maxPrice !== undefined) {
-    where.variants = {
-      some: {
-        isActive: true,
-        stock: { gt: 0 },
-        priceInCents: {
-          gt: 0,
-          ...(minPrice !== undefined && { gte: minPrice }),
-          ...(maxPrice !== undefined && { lte: maxPrice }),
-        },
-      },
-    };
-  }
-
   // Full-text search — PostgreSQL tsvector with pg_trgm fuzzy fallback
   let searchProductOrder: string[] | null = null;
   if (search && search.trim().length > 0) {
@@ -383,7 +370,7 @@ export async function getMarketplaceProducts(
     where,
     select: {
       id: true, name: true, createdAt: true, qualityScore: true,
-      variants: { where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } }, select: { priceInCents: true } },
+      variants: { where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } }, select: { priceInCents: true, retailPriceCents: true, size: true } },
     },
   });
   const ids = candidates.map((p) => p.id);
@@ -401,8 +388,11 @@ export async function getMarketplaceProducts(
   const ratingMap = new Map(ratings.map((r) => [r.productId, { rating: r._avg.rating ?? 0, reviews: r._count.rating }]));
   const activityMap = new Map(activity.map((r) => [r.productId, r._count.id]));
   const relevanceMap = new Map((searchProductOrder ?? []).map((id, i) => [id, (searchProductOrder?.length ?? 0) - i]));
-  const ranked = rankMarketplaceCandidates(candidates.map((p) => ({
-    ...p, price: Math.min(...p.variants.map((v) => v.priceInCents)),
+  const ranked = rankMarketplaceCandidates(primarySearchMatches(candidates, search).filter(p => buyerOptions(p.variants).some(v => {
+    const price = v.retailPriceCents ?? v.priceInCents;
+    return (minPrice == null || price >= minPrice) && (maxPrice == null || price <= maxPrice);
+  })).map((p) => ({
+    ...p, price: Math.min(...buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents)),
     rating: ratingMap.get(p.id)?.rating ?? 0, reviews: ratingMap.get(p.id)?.reviews ?? 0,
     activity: activityMap.get(p.id) ?? 0, relevance: relevanceMap.get(p.id) ?? 0,
   })), sortBy, search);
@@ -449,7 +439,7 @@ export async function getMarketplaceProducts(
         },
         variants: {
           where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
-          select: { priceInCents: true },
+          select: { priceInCents: true, retailPriceCents: true, size: true },
         },
       },
     });
@@ -458,7 +448,7 @@ export async function getMarketplaceProducts(
 
   // ── Transform results ───────────────────────────────────
   let products: MarketplaceProduct[] = rawProducts.map((p) => {
-    const prices = p.variants.map((v) => v.priceInCents);
+    const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
     const minP = prices.length > 0 ? Math.min(...prices) : 0;
     const maxP = prices.length > 0 ? Math.max(...prices) : 0;
 
@@ -569,7 +559,7 @@ export async function getPromotedProducts(
           },
           variants: {
             where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
-            select: { priceInCents: true },
+            select: { priceInCents: true, retailPriceCents: true, size: true },
           },
         },
       },
@@ -584,7 +574,7 @@ export async function getPromotedProducts(
 
   const products: MarketplaceProduct[] = promoted.map((pl) => {
     const p = pl.product;
-    const prices = p.variants.map((v) => v.priceInCents);
+    const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
 
     return {
       id: p.id,
@@ -770,7 +760,7 @@ export async function getTrendingProducts(
       },
       variants: {
         where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
-        select: { priceInCents: true },
+        select: { priceInCents: true, retailPriceCents: true, size: true },
       },
     },
   });
@@ -783,7 +773,7 @@ export async function getTrendingProducts(
     .slice(0, limit)
     .map((e) => {
       const p = productMap.get(e.productId!)!;
-      const prices = p.variants.map((v) => v.priceInCents);
+      const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
 
       return {
         id: p.id,
@@ -871,7 +861,7 @@ export async function getNewArrivals(
       },
       variants: {
         where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
-        select: { priceInCents: true },
+        select: { priceInCents: true, retailPriceCents: true, size: true },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -879,7 +869,7 @@ export async function getNewArrivals(
   });
 
   const mapped: MarketplaceProduct[] = products.map((p) => {
-    const prices = p.variants.map((v) => v.priceInCents);
+    const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
     return {
       id: p.id,
       slug: p.slug,

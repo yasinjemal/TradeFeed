@@ -1,3 +1,4 @@
+import { allowDiscoveryPromotions } from "@/lib/marketplace/promoted-context";
 import type { Metadata } from "next";
 import { provinceIndexable, robotsFor } from "@/lib/seo/should-index";
 import { notFound } from "next/navigation";
@@ -59,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const topCities = province.cities.slice(0, 3).map((c) => c.name).join(", ");
 
   const title = `Suppliers in ${province.name} — Wholesale & Retail Products | TradeFeed`;
-  const description = `${province.description} Browse wholesale and retail products from verified sellers in ${topCities} and across ${province.name}. Order via WhatsApp on TradeFeed.`;
+  const description = `${province.description} Browse wholesale and retail products from independent sellers in ${topCities} and across ${province.name}. Order via WhatsApp on TradeFeed.`;
 
   return {
     title,
@@ -111,7 +112,7 @@ export default async function ProvincePage({ params, searchParams }: Props) {
   const [productsResult, promoted, categories, trending, newArrivals, featuredShops] =
     await Promise.all([
       getMarketplaceProducts(filters),
-      getPromotedProducts(12),
+      allowDiscoveryPromotions(filters) ? getPromotedProducts(12) : Promise.resolve([]),
       getGlobalCategories(),
       getTrendingProducts(12),
       getNewArrivals(8),

@@ -1,3 +1,4 @@
+import { allowDiscoveryPromotions } from "@/lib/marketplace/promoted-context";
 import type { Metadata } from "next";
 import { cityIndexable, robotsFor } from "@/lib/seo/should-index";
 import { notFound } from "next/navigation";
@@ -112,7 +113,7 @@ export default async function CityPage({ params, searchParams }: Props) {
   const [productsResult, promoted, categories, trending, newArrivals, featuredShops] =
     await Promise.all([
       getMarketplaceProducts(filters),
-      getPromotedProducts(12),
+      allowDiscoveryPromotions(filters) ? getPromotedProducts(12) : Promise.resolve([]),
       getGlobalCategories(),
       getTrendingProducts(12),
       getNewArrivals(8),
@@ -181,7 +182,7 @@ export default async function CityPage({ params, searchParams }: Props) {
             </span>
           </h1>
           <p className="mt-4 text-stone-400 text-lg max-w-2xl leading-relaxed">
-            Browse wholesale and retail products from verified sellers in{" "}
+            Browse wholesale and retail products from independent sellers in{" "}
             {city.name}, {province.name}. Compare prices and order directly via
             WhatsApp on TradeFeed.
           </p>

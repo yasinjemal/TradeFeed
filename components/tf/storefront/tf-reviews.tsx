@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 import { BadgeCheck, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -23,6 +24,8 @@ interface TfReviewsBlockProps {
   avgRating: number | null;
   reviewCount: number;
   shopName: string;
+  productScope?: boolean;
+  shopHref?: string;
   /** Rating distribution bars (product page) — omit to hide */
   distribution?: { rating: number; count: number }[];
   /** Slot for a review form / write-review affordance */
@@ -51,6 +54,8 @@ export function TfReviewsBlock({
   avgRating,
   reviewCount,
   shopName,
+  productScope = false,
+  shopHref,
   distribution,
   action,
   className,
@@ -69,9 +74,10 @@ export function TfReviewsBlock({
           </span>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-tf-stone-600">
-          No reviews yet for {shopName}. Reviews with a verified purchase badge
+          {productScope ? "No reviews for this product yet." : `No reviews yet for ${shopName}.`} Reviews with a verified purchase badge
           have been matched to a TradeFeed order.
         </p>
+        {productScope && shopHref && <Link href={shopHref} className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-tf-primary underline">See this shop’s reviews</Link>}
         {action && <div className="mt-4">{action}</div>}
       </section>
     );

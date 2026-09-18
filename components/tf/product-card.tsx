@@ -26,6 +26,7 @@ export interface TfProductCardProps extends React.ComponentProps<"article"> {
   title: string;
   /** Price in Rand */
   price: number;
+  priceFrom?: boolean;
   /** Original price when on sale */
   compareAtPrice?: number;
   imageUrl?: string | null;
@@ -53,6 +54,7 @@ function TfProductCard({
   href,
   title,
   price,
+  priceFrom = false,
   compareAtPrice,
   imageUrl,
   imageAlt,
@@ -76,7 +78,7 @@ function TfProductCard({
     : 0;
 
   const waHref = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi! I'm interested in "${title}" — ${formatZAR(price)}`)}`
+    ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi! I'm interested in "${title}" — ${priceFrom ? "from " : ""}${formatZAR(price)}. Please confirm options, availability and delivery.`)}`
     : null;
 
   // ── Smart autoplay preview (upload/direct only) ──────────
@@ -219,7 +221,7 @@ function TfProductCard({
             href={waHref}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`Order "${title}" on WhatsApp`}
+            aria-label={`Ask about "${title}" on WhatsApp`}
             onClick={(e) => e.stopPropagation()}
             className={cn(
               "absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 py-2.5",
@@ -229,7 +231,7 @@ function TfProductCard({
             )}
           >
             <WhatsAppIcon className="size-4 shrink-0" />
-            Order on WhatsApp
+            Ask on WhatsApp
           </a>
         )}
       </div>
@@ -247,7 +249,7 @@ function TfProductCard({
 
         <div className="flex items-baseline gap-1.5 tabular-nums">
           <span className="font-tf-display text-[15px] font-bold text-tf-ink">
-            {formatZAR(price)}
+            {priceFrom && "From "}{formatZAR(price)}
           </span>
           {onSale && (
             <s className="text-[11px] text-tf-stone-400">{formatZAR(compareAtPrice)}</s>
