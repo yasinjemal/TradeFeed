@@ -1,3 +1,5 @@
+import { ShopGallery } from "./shop-gallery";
+import type { DiscoverableShop } from "@/lib/db/discover-shops";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -25,7 +27,6 @@ import {
 import type {
   MarketplaceProduct,
   CategoryWithCount,
-  FeaturedShop,
 } from "@/lib/db/marketplace";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TfThemeToggle } from "@/components/tf/theme-toggle";
@@ -74,7 +75,7 @@ export function Storefront({
 }: {
   products: MarketplaceProduct[];
   categories: CategoryWithCount[];
-  shops: FeaturedShop[];
+  shops: DiscoverableShop[];
 }) {
   const hero = productSelection(products);
   const availableCategories = categories
@@ -397,71 +398,7 @@ export function Storefront({
             </a>
           </div>
         </section>
-        <section
-          id="meet-the-shops"
-          className={styles.section}
-          aria-labelledby="shops-title"
-        >
-          <div className={styles.sectionHeading}>
-            <div>
-              <p className={styles.sectionKicker}>
-                SMALL BUSINESSES. BIG POSSIBILITIES.
-              </p>
-              <h2 id="shops-title">Meet the shops.</h2>
-            </div>
-            <Link href="/marketplace">
-              Keep discovering <ArrowRight size={17} aria-hidden="true" />
-            </Link>
-          </div>
-          <div className={styles.shops}>
-            {shops.map((s, i) => (
-              <Link
-                key={s.id}
-                href={`/catalog/${s.slug}`}
-                className={styles.shopCard}
-                data-tone={i % 4}
-              >
-                <div className={styles.shopAvatar}>
-                  {s.logoUrl ? (
-                    <Image
-                      src={s.logoUrl}
-                      alt=""
-                      fill
-                      sizes="64px"
-                      className={styles.containImage}
-                    />
-                  ) : (
-                    <span>{s.name.slice(0, 1).toUpperCase()}</span>
-                  )}
-                </div>
-                <div>
-                  <h3>
-                    {s.name}{" "}
-                    {s.isVerified && (
-                      <BadgeCheck size={15} aria-label="Verified seller" />
-                    )}
-                  </h3>
-                  <p>{s.city ?? s.province ?? "Independent shop"}</p>
-                  <span>
-                    {s.productCount}{" "}
-                    {s.productCount === 1 ? "product" : "products"}
-                  </span>
-                </div>
-                <ArrowUpRight
-                  size={19}
-                  className={styles.shopArrow}
-                  aria-hidden="true"
-                />
-              </Link>
-            ))}
-          </div>
-          {shops.length === 0 && (
-            <p className={styles.empty}>
-              Explore current seller collections in the{" "}
-              <Link href="/marketplace">marketplace</Link>.
-            </p>
-          )}
-        </section>
+        <ShopGallery shops={shops} />
         <section className={styles.sellerBanner}>
           <div>
             <p className={styles.eyebrow}>
