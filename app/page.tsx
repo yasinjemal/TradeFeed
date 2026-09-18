@@ -3,8 +3,8 @@ import { Storefront } from "@/components/storefront/storefront";
 import {
   getMarketplaceProducts,
   getGlobalCategories,
-  getFeaturedShops,
 } from "@/lib/db/marketplace";
+import { getDiscoverableShops } from "@/lib/db/discover-shops";
 export const revalidate = 300;
 export const metadata: Metadata = {
   title: { absolute: "TradeFeed | Discover South African shops" },
@@ -16,7 +16,7 @@ export default async function Home() {
   const [result, categories, shops] = await Promise.all([
     getMarketplaceProducts({ pageSize: 24 }),
     getGlobalCategories(),
-    getFeaturedShops(4),
+    getDiscoverableShops(),
   ]);
   return (
     <Storefront
