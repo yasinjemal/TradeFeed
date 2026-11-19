@@ -1,4 +1,8 @@
 import { needsSizeConfirmation } from "@/lib/products/buyer-options";
+
+/** Shortest description that counts as "useful" for marketplace readiness. */
+export const MIN_LISTING_DESCRIPTION_LENGTH = 40;
+
 export interface ListingSnapshot {
   isActive: boolean;
   isFlagged: boolean;
@@ -18,8 +22,8 @@ export function listingQualityIssues(
   return [
     ...listingDiscoveryIssues(product),
     ...(product.name && needsSizeConfirmation(product.name, product.variants.filter(v => v.isActive).map(v => ({size: v.size ?? "Default"}))) ? ["Add the real sizes advertised in your product title and confirm stock for each option"] : []),
-    ...((product.description?.trim().length ?? 0) < 40
-      ? ["Describe the product and its condition in at least 40 characters"]
+    ...((product.description?.trim().length ?? 0) < MIN_LISTING_DESCRIPTION_LENGTH
+      ? [`Describe the product and its condition in at least ${MIN_LISTING_DESCRIPTION_LENGTH} characters`]
       : []),
     ...(!product.globalCategoryId ? ["Choose a marketplace category"] : []),
   ];

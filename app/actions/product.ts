@@ -22,9 +22,23 @@ import {
   variantCreateSchema,
   variantUpdateSchema,
 } from "@/lib/validation/product";
-import { createProduct, updateProduct, deleteProduct } from "@/lib/db/products";
+import {
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  addProductImage,
+  countActiveProducts,
+} from "@/lib/db/products";
 import { createVariant, deleteVariant, batchCreateVariants, updateVariant } from "@/lib/db/variants";
 import { requireShopAccess } from "@/lib/auth";
+import {
+  parseListingPricing,
+  parseListingPhoto,
+  resolveListingStatus,
+  type DraftReason,
+  type ListingStatus,
+  type PhotoOutcome,
+} from "@/lib/products/create-listing";
 
 // ============================================================
 // Shared Types
@@ -39,6 +53,28 @@ type ActionResult = {
   isFirstProduct?: boolean;
   /** Non-blocking warning (e.g. "saved as draft because price missing") */
   warning?: string;
+  // ── Set by createProductAction on success: what actually happened ──
+  /** "live" only when the product is active AND has a priced option. */
+  status?: ListingStatus;
+  /** Why it was saved as a draft instead of going live. */
+  draftReason?: DraftReason;
+  /** Whether the photo the seller picked is on the product. */
+  photo?: PhotoOutcome;
+  /** The saved photo's id (for follow-up edits such as background removal). */
+  imageId?: string;
+  /** How many buyable options (sizes) were saved. */
+  variantCount?: number;
+};
+
+export type ProductActionResult = ActionResult;
+
+/** Everything the post-create side effects need to know. */
+type ProductCreatedEvent = {
+  shopId: string;
+  userId: string;
+  productId: string;
+  name: string;
+  status: ListingStatus;
 };
 
 export type ProductActionDeps = {
@@ -54,7 +90,64 @@ export type ProductActionDeps = {
   checkProductLimit: (
     shopId: string
   ) => Promise<{ allowed: boolean; current: number; limit: number }>;
+  /** Live products before this create (first-product share prompt). */
+  countActiveProducts: typeof countActiveProducts;
+  /** Attach the photo the seller picked on the create screen. */
+  addProductImage: typeof addProductImage;
+  /** Referral reward, translations and the activity log. Never blocks the result. */
+  afterProductCreated: (event: ProductCreatedEvent) => Promise<void>;
 };
+
+/**
+ * Non-critical work after a product is created. Each step is
+ * fire-and-forget: a failure here must never change what the
+ * seller is told about their listing.
+ */
+async function runPostCreateEffects(event: ProductCreatedEvent): Promise<void> {
+  // Referral reward qualification (3+ active products triggers reward for referrer)
+  try {
+    const { applyReferralReward } = await import("@/lib/db/referrals");
+    applyReferralReward(event.shopId).catch(() => {});
+  } catch {
+    // Non-fatal — product creation succeeded
+  }
+
+  // AI listing translations on publish (fire-and-forget, Phase 3)
+  try {
+    const { FEATURE_FLAGS } = await import("@/lib/config/feature-flags");
+    if (FEATURE_FLAGS.LISTING_TRANSLATIONS && event.status === "live") {
+      import("@/lib/ai/translate-listing")
+        .then(({ upsertTranslationsForProduct }) =>
+          upsertTranslationsForProduct(event.productId, event.shopId)
+        )
+        .catch(() => {});
+    }
+  } catch {
+    // Non-fatal
+  }
+
+  // Activity log (fire-and-forget)
+  try {
+    const { logShopActivity } = await import("@/lib/db/activity-logs");
+    const { ACTIVITY_ACTIONS, ACTIVITY_ENTITY_TYPES } = await import("@/lib/config/activity-actions");
+    const { db: prismaUser } = await import("@/lib/db");
+    const actor = await prismaUser.user.findUnique({
+      where: { id: event.userId },
+      select: { firstName: true, lastName: true, email: true },
+    });
+    const actorName = [actor?.firstName, actor?.lastName].filter(Boolean).join(" ") || actor?.email || "Unknown";
+    logShopActivity({
+      shopId: event.shopId,
+      userId: event.userId,
+      userName: actorName,
+      action: ACTIVITY_ACTIONS.PRODUCT_CREATED,
+      entityType: ACTIVITY_ENTITY_TYPES.PRODUCT,
+      entityId: event.productId,
+      entityName: event.name,
+      metadata: { name: event.name, isActive: event.status === "live" },
+    });
+  } catch { /* non-fatal */ }
+}
 
 const defaultDeps: ProductActionDeps = {
   requireShopAccess,
@@ -70,6 +163,9 @@ const defaultDeps: ProductActionDeps = {
     const { checkProductLimit } = await import("@/lib/db/subscriptions");
     return checkProductLimit(shopId);
   },
+  countActiveProducts,
+  addProductImage,
+  afterProductCreated: runPostCreateEffects,
 };
 
 /**
@@ -143,10 +239,22 @@ async function resolveShopAccess(
 // ============================================================
 
 /**
- * Create a new product in a shop.
+ * Create a new product in a shop — the one create path.
  *
- * WHAT: Validates input → verifies shop access → creates product → redirects.
+ * WHAT: Validates everything → creates the product hidden → saves its
+ * priced options and the chosen photo → publishes it only if it is
+ * actually orderable → reports what happened.
  * WHY: Core catalog building action. Products are what buyers see.
+ *
+ * TRUTHFUL RESULT: `status` is "live" only when the product is active
+ * and has a priced option. Anything else is a "draft" with a
+ * `draftReason`. `photo` says whether the picked photo is attached.
+ *
+ * FormData (beyond the product fields):
+ *   priceInRands  one price for every option; blank saves a draft
+ *   stock         stock when there are no sizes (blank → 1)
+ *   sizes         JSON [{ size, stock }] — one option per size
+ *   imageUrl / imageKey / imageName  the already-uploaded CDN photo
  */
 export async function createProductAction(
   shopSlug: string,
@@ -193,102 +301,163 @@ export async function createProductAction(
       };
     }
 
-    // 2b. Product count before create (for first-product share prompt)
-    const { db } = await import("@/lib/db");
-    const countBefore = await db.product.count({
-      where: { shopId: access.shopId, isActive: true },
+    // 2b. Price, sizes and photo are validated BEFORE anything is saved.
+    // A typo in the price is something to fix on the form, not a reason
+    // to leave a half-made product behind.
+    const text = (key: string): string => {
+      const value = formData.get(key);
+      return typeof value === "string" ? value : "";
+    };
+
+    const pricingResult = parseListingPricing({
+      priceInRands: text("priceInRands"),
+      stock: text("stock"),
+      sizes: text("sizes"),
     });
-
-    // 3. Create product via data access layer
-    const product = await deps.createProduct(parsed.data, access.shopId);
-
-    // 3b. Auto-create default variant if inline price was provided
-    const inlinePrice = formData.get("priceInRands") as string;
-    const inlineStock = formData.get("stock") as string;
-
-    // P3 FIX: Reject active products without a price — prevents "No pricing" listings
-    if (parsed.data.isActive && (!inlinePrice || inlinePrice.trim() === "")) {
-      // Product was created — flip to draft so it doesn't show "No pricing" to buyers
-      await deps.updateProduct(product.id, access.shopId, { isActive: false });
-      deps.revalidatePath(`/dashboard/${shopSlug}/products`);
+    if (!pricingResult.ok) {
       return {
-        success: true,
-        productId: product.id,
-        isFirstProduct: countBefore === 0,
-        warning: "Price is required to publish. Your product was saved as a draft — add a price to go live.",
+        success: false,
+        error: "Please fix the errors below.",
+        fieldErrors: pricingResult.fieldErrors,
+      };
+    }
+    const pricing = pricingResult.pricing;
+
+    const photoResult = parseListingPhoto({
+      url: text("imageUrl"),
+      key: text("imageKey"),
+      name: text("imageName"),
+    });
+    if (!photoResult.ok) {
+      return {
+        success: false,
+        error: photoResult.error,
+        fieldErrors: { photo: [photoResult.error] },
       };
     }
 
-    if (inlinePrice && inlinePrice.trim() !== "") {
+    // 2c. Decide the outcome up front: no price → draft, hidden → draft.
+    const intended = resolveListingStatus({
+      wantsLive: parsed.data.isActive,
+      hasPrice: pricing !== null,
+    });
+    let status: ListingStatus = intended.status;
+    let draftReason: DraftReason | undefined = intended.draftReason;
+
+    // 2d. Live products before this one (for the first-product share prompt)
+    const countBefore = await deps.countActiveProducts(access.shopId);
+
+    // 3. Create the product hidden. It only goes live in step 6, after
+    // its price is saved, so buyers never see a "No pricing" listing and
+    // a half-finished create can only ever leave a hidden draft behind.
+    const product = await deps.createProduct(
+      { ...parsed.data, isActive: false },
+      access.shopId
+    );
+
+    // 4. Save the buyable options: one per size, or a single default option.
+    let variantCount = 0;
+    if (pricing) {
       try {
-        const { variantCreateSchema } = await import("@/lib/validation/product");
-        // P1 FIX: Default stock to "1" instead of "0" — prevents instant "sold out"
-        const variantInput = variantCreateSchema.safeParse({
-          size: "Default",
-          priceInRands: inlinePrice.trim(),
-          stock: (inlineStock && inlineStock.trim() !== "") ? inlineStock.trim() : "1",
-        });
-        if (variantInput.success) {
-          await deps.createVariant(product.id, access.shopId, variantInput.data, parsed.data.name);
+        if (pricing.hasRealSizes) {
+          const created = await deps.batchCreateVariants(
+            product.id,
+            access.shopId,
+            pricing.variants.map((variant) => ({
+              size: variant.size,
+              color: null,
+              priceInCents: pricing.priceInCents,
+              stock: variant.stock,
+            })),
+            parsed.data.name
+          );
+          variantCount = created?.count ?? 0;
+        } else {
+          const only = pricing.variants[0]!;
+          const created = await deps.createVariant(
+            product.id,
+            access.shopId,
+            {
+              size: only.size,
+              priceInRands: pricing.priceInCents, // already cents
+              retailPriceInRands: undefined,
+              stock: only.stock,
+            },
+            parsed.data.name
+          );
+          variantCount = created ? 1 : 0;
         }
       } catch (variantError) {
-        // Variant creation failed but product was created — don't block the seller
-        console.error("[createProductAction] Variant creation failed (product still created):", variantError);
+        console.error("[createProductAction] Saving the price failed (product kept as a draft):", variantError);
       }
-      // If variant validation fails, we still created the product — seller can add variants manually
+
+      if (variantCount === 0) {
+        status = "draft";
+        draftReason = "publish_failed";
+      }
     }
 
-    // 4. Revalidate and return success (show success screen in form)
+    // 5. Attach the photo the seller picked — whichever path they used.
+    let photo: PhotoOutcome = "none";
+    let imageId: string | undefined;
+    if (photoResult.photo) {
+      try {
+        const saved = await deps.addProductImage(product.id, access.shopId, photoResult.photo);
+        if (saved) {
+          photo = "attached";
+          imageId = saved.id;
+        } else {
+          photo = "failed";
+        }
+      } catch (photoError) {
+        photo = "failed";
+        console.error("[createProductAction] Attaching the photo failed (product still created):", photoError);
+      }
+    }
+
+    // 6. Publish — only now that the listing is orderable.
+    if (status === "live") {
+      try {
+        const published = await deps.updateProduct(product.id, access.shopId, { isActive: true });
+        if (!published) throw new Error("Product not found when publishing");
+      } catch (publishError) {
+        status = "draft";
+        draftReason = "publish_failed";
+        console.error("[createProductAction] Publishing failed (product kept as a draft):", publishError);
+      }
+    }
+
+    // 7. Revalidate what changed
     deps.revalidatePath(`/dashboard/${shopSlug}/products`);
-
-    // 5. Check referral reward qualification (3+ active products triggers reward for referrer)
-    try {
-      const { applyReferralReward } = await import("@/lib/db/referrals");
-      applyReferralReward(access.shopId).catch(() => {});
-    } catch {
-      // Non-fatal — product creation succeeded
+    if (status === "live") {
+      deps.revalidatePath(`/catalog/${shopSlug}`);
     }
 
-    // 5b. AI listing translations on publish (fire-and-forget, Phase 3)
+    // 8. Referral reward, translations, activity log — never block the result
     try {
-      const { FEATURE_FLAGS } = await import("@/lib/config/feature-flags");
-      if (FEATURE_FLAGS.LISTING_TRANSLATIONS && parsed.data.isActive) {
-        import("@/lib/ai/translate-listing")
-          .then(({ upsertTranslationsForProduct }) =>
-            upsertTranslationsForProduct(product.id, access.shopId)
-          )
-          .catch(() => {});
-      }
-    } catch {
-      // Non-fatal
-    }
-
-    // 6. Log activity (fire-and-forget)
-    try {
-      const { logShopActivity } = await import("@/lib/db/activity-logs");
-      const { ACTIVITY_ACTIONS, ACTIVITY_ENTITY_TYPES } = await import("@/lib/config/activity-actions");
-      const { db: prismaUser } = await import("@/lib/db");
-      const actor = await prismaUser.user.findUnique({
-        where: { id: access.userId },
-        select: { firstName: true, lastName: true, email: true },
-      });
-      const actorName = [actor?.firstName, actor?.lastName].filter(Boolean).join(" ") || actor?.email || "Unknown";
-      logShopActivity({
+      await deps.afterProductCreated({
         shopId: access.shopId,
         userId: access.userId,
-        userName: actorName,
-        action: ACTIVITY_ACTIONS.PRODUCT_CREATED,
-        entityType: ACTIVITY_ENTITY_TYPES.PRODUCT,
-        entityId: product.id,
-        entityName: parsed.data.name,
-        metadata: { name: parsed.data.name, isActive: parsed.data.isActive },
+        productId: product.id,
+        name: parsed.data.name,
+        status,
       });
-    } catch { /* non-fatal */ }
+    } catch {
+      // Non-fatal — the product was created
+    }
 
     return {
       success: true,
       productId: product.id,
-      isFirstProduct: countBefore === 0,
+      isFirstProduct: status === "live" && countBefore === 0,
+      status,
+      ...(draftReason && { draftReason }),
+      photo,
+      ...(imageId && { imageId }),
+      variantCount,
+      ...(draftReason === "missing_price" && {
+        warning: "Price is required to publish. Your product was saved as a draft — add a price to go live.",
+      }),
     };
   } catch (error: unknown) {
     // Re-throw redirect
