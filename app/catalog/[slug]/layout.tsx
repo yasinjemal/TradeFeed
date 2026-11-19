@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import { buyerOnlinePaymentsEnabled } from "@/lib/commerce/capabilities";
 // ============================================================
 // Layout — Public Catalog (/catalog/[slug])
@@ -167,7 +168,7 @@ export default async function CatalogLayout({
         <script
           key={`shop-ld-${i}`}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }}
         />
       ))}
 

@@ -5,7 +5,7 @@
 // key marketing elements and navigation links.
 // ============================================================
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Landing Page", () => {
   test("renders hero section with branding", async ({ page }) => {
