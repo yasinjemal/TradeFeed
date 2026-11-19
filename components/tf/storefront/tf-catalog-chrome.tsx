@@ -28,6 +28,14 @@ export interface TfCatalogChromeShop {
   tierLabel?: string;
 }
 
+// A shop with nothing listed must never announce "0 products".
+// The count is a fact worth printing only once it is a positive one;
+// below that the chrome says where the seller is and stops there.
+function productCountLabel(count: number): string | null {
+  if (count <= 0) return null;
+  return `${count} ${count === 1 ? "product" : "products"}`;
+}
+
 export function TfCatalogHeader({ shop }: { shop: TfCatalogChromeShop }) {
   return (
     <div><CommerceHeader compact /><div className="px-3 py-2.5 sm:px-4 sm:py-3">
@@ -80,8 +88,9 @@ export function TfCatalogHeader({ shop }: { shop: TfCatalogChromeShop }) {
               )}
             </span>
             <span className="mt-0.5 block truncate text-[11px] leading-tight text-tf-stone-500">
-              {shop.city && <span>{shop.city} · </span>}
-              {shop.productCount} {shop.productCount === 1 ? "product" : "products"}
+              {shop.city}
+              {shop.city && productCountLabel(shop.productCount) && " · "}
+              {productCountLabel(shop.productCount)}
             </span>
           </span>
         </Link>
@@ -112,9 +121,9 @@ export function TfCatalogFooter({ shop }: { shop: TfCatalogChromeShop }) {
               Verified
             </span>
           )}
-          <span>
-            {shop.productCount} {shop.productCount === 1 ? "product" : "products"}
-          </span>
+          {productCountLabel(shop.productCount) && (
+            <span>{productCountLabel(shop.productCount)}</span>
+          )}
           {shop.city && (
             <span className="inline-flex items-center gap-1">
               <MapPin aria-hidden="true" className="size-3" />

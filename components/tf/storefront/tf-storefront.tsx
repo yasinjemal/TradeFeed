@@ -204,6 +204,7 @@ export function TfStorefront({
           shopSlug={shop.slug}
           sellerName={shop.name}
           sellerVerified={shop.isVerified}
+          whatsappNumber={shop.whatsappNumber}
         />
       )}
 
@@ -275,8 +276,12 @@ export function TfStorefront({
         </div>
       )}
 
-      {/* ── Sticky WhatsApp CTA (mobile, above bottom nav) ── */}
-      {products.length > 0 && (
+      {/* ── Sticky WhatsApp CTA (mobile, above bottom nav) ──
+             Always rendered. This used to be gated on
+             products.length > 0, which left every shop that had
+             not listed yet with no persistent way to order — the
+             buyers most likely to need to ask a question. */}
+      {(
         <div className="fixed inset-x-0 bottom-[3.5rem] z-30 px-4 pb-2 lg:hidden">
           <TfButton asChild variant="whatsapp" fullWidth size="lg" className="shadow-tf-md">
             <TrackedWhatsAppLink

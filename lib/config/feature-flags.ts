@@ -49,6 +49,15 @@ export const FEATURE_FLAGS = {
    */
   UI_REDESIGN_DASHBOARD: process.env.NEXT_PUBLIC_FF_UI_REDESIGN_DASHBOARD === "true",
 
+  /**
+   * Seller profile ("The Counter") on /catalog/[slug] — nameplate
+   * hero, promise dock, ask dock, proof rail, density ladder.
+   * MEANINGLESS unless UI_REDESIGN is also on: the profile renders
+   * inside the TF branch, and app/layout.tsx forces light mode
+   * while UI_REDESIGN is off.
+   */
+  SELLER_PROFILE: process.env.NEXT_PUBLIC_FF_SELLER_PROFILE === "true",
+
   // ── Product Videos (2026) ────────────────────────────────────
   /** Product videos: YouTube/direct links free for all plans, hosted uploads Starter+ */
   PRODUCT_VIDEO: process.env.NEXT_PUBLIC_FF_PRODUCT_VIDEO === "true",

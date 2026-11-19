@@ -934,11 +934,23 @@ h4, h5, h6 {
     0%, 100% { transform: translate(0, 0) scale(1); }
     50% { transform: translate(36px, -24px) scale(1.06); }
   }
-  .tf-ambient::before {
-    animation: tf-drift-a 18s ease-in-out infinite;
+
+  /* The drift is a desktop pleasure. On a phone these are two
+     ~960px blurred textures at DPR 2 that the compositor never
+     gets to retire, so the gradients stay — the movement does not. */
+  @media (min-width: 640px) {
+    .tf-ambient::before {
+      animation: tf-drift-a 18s ease-in-out infinite;
+    }
+    .tf-ambient::after {
+      animation: tf-drift-b 22s ease-in-out infinite;
+    }
   }
-  .tf-ambient::after {
-    animation: tf-drift-b 22s ease-in-out infinite;
+
+  /* Save-Data: the probe strips ambience entirely. */
+  [data-light-media="true"] .tf-ambient::before,
+  [data-light-media="true"] .tf-ambient::after {
+    display: none;
   }
 
   /* Gentle float for the hero phone mock — starts after the
@@ -1016,4 +1028,83 @@ h4, h5, h6 {
     black calc(100% - 32px),
     transparent
   );
+}
+
+/* ═══ TF Counter — the seller profile's depth system ═════════
+   The inspiration was a turning arc of frosted vitrines. That
+   needs backdrop-filter re-sampled every frame on cards that
+   move relative to their backdrop — a sustained cost on the
+   phones this product actually runs on.
+
+   So depth here is LAYOUT, not animation: objects on a counter,
+   each one fractionally smaller and lower than the one before,
+   with a single soft shadow bar under the row. Composited once.
+   No scroll listener, no rAF, no observer, no @supports gamble.
+   Identical on every Android in the target population — and it
+   survives prefers-reduced-motion untouched, because it never
+   moved in the first place. No new keyframes anywhere below. */
+
+.tf-counter-rail {
+  position: relative;
+}
+.tf-counter-rail::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 10px;
+  background: var(--color-tf-stone-300);
+  opacity: 0.35;
+  filter: blur(8px);
+  pointer-events: none;
+}
+.tf-counter-card {
+  transform: scale(calc(1 - var(--tf-i, 0) * 0.012))
+    translateY(calc(var(--tf-i, 0) * 2px));
+  transform-origin: 50% 100%;
+}
+
+/* The contact ellipse. remove-background posts bg_color=ffffff&format=jpg,
+   so product imagery is opaque — a mask-driven shadow is impossible here.
+   A static pseudo-element under the frame reads as contact just as well. */
+.tf-plinth {
+  position: relative;
+}
+.tf-plinth::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  width: 72%;
+  height: 14px;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: var(--color-tf-ink);
+  opacity: 0.12;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* "The Settle" — the frame arrives, then its shadow lands one beat
+   later. That single offset is what reads as an object coming to
+   rest on a surface, and it costs two class names already in use. */
+.tf-settle {
+  --tf-d: 120ms;
+}
+
+/* Hairline rule used to separate promise rows without a box per row */
+.tf-rule-row + .tf-rule-row {
+  border-top: 1px solid var(--color-tf-stone-200);
+}
+
+/* Ghost monogram — sits behind the nameplate, never competes with it */
+.tf-monogram {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 0;
+  width: 100%;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
 }

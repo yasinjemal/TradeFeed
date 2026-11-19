@@ -38,6 +38,7 @@ import { ShopAboutSection } from "@/components/catalog/shop-about-section";
 import { ShopReviewHighlights } from "@/components/catalog/shop-review-highlights";
 import { IllustrationRocket } from "@/components/ui/illustrations";
 import { TfStorefront } from "@/components/tf/storefront/tf-storefront";
+import { TfSellerProfile } from "@/components/tf/profile";
 import { shopIndexable, robotsFor } from "@/lib/seo/should-index";
 
 // ISR: revalidate catalog pages every 60 seconds for near-real-time updates
@@ -63,12 +64,21 @@ export async function generateMetadata({ params }: CatalogPageProps): Promise<Me
   const location = [shop.city, shop.province].filter(Boolean).join(", ");
   const locationTag = location ? ` in ${location}` : " South Africa";
   const productCount = shop._count?.products ?? 0;
-  const productLabel = productCount === 1 ? "1 product" : `${productCount}+ products`;
+  // A shop that has not listed yet must not advertise "0+ products" —
+  // not in the tab, not in a search result, not in a WhatsApp preview.
+  const productLabel =
+    productCount === 0
+      ? null
+      : productCount === 1
+        ? "1 product"
+        : `${productCount}+ products`;
+  const countSuffix = productLabel ? ` — ${productLabel}` : "";
+  const browseClause = productLabel ? `Browse ${productLabel} and order` : "Order";
 
-  const title = `${shop.name}${locationTag} — ${productLabel} | TradeFeed Marketplace`;
+  const title = `${shop.name}${locationTag}${countSuffix} | TradeFeed Marketplace`;
   const description = shop.description
-    ? `${shop.description.slice(0, 130)}. Browse ${productLabel} and order via WhatsApp on TradeFeed.`
-    : `Shop ${shop.name}${locationTag}. Browse ${productLabel}, order directly on WhatsApp. Free online marketplace South Africa.`;
+    ? `${shop.description.slice(0, 130)}. ${browseClause} via WhatsApp on TradeFeed.`
+    : `Shop ${shop.name}${locationTag}. ${browseClause} directly on WhatsApp. Free online marketplace South Africa.`;
 
   const images = shop.bannerUrl
     ? [{ url: shop.bannerUrl, width: 1200, height: 630, alt: shop.name }]
@@ -89,7 +99,7 @@ export async function generateMetadata({ params }: CatalogPageProps): Promise<Me
     },
     twitter: {
       card: "summary_large_image",
-      title: `${shop.name} — ${productLabel} | TradeFeed`,
+      title: `${shop.name}${countSuffix} | TradeFeed`,
       description,
       ...(images.length > 0 && { images: [images[0]!.url] }),
     },
@@ -230,77 +240,119 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
       _count: { id: true },
     });
 
+    const tfShop = {
+      id: shop.id,
+      slug: shop.slug,
+      name: shop.name,
+      isVerified: shop.isVerified,
+      logoUrl: shop.logoUrl,
+      bannerUrl: shop.bannerUrl,
+      city: shop.city,
+      province: shop.province,
+      aboutText: shop.aboutText,
+      description: shop.description,
+      whatsappNumber: shop.whatsappNumber,
+      createdAt: shop.createdAt,
+      deliveryEnabled: shop.deliveryEnabled,
+      collectionEnabled: shop.collectionEnabled,
+      dispatchWindow: shop.dispatchWindow,
+      deliveryNote: shop.deliveryNote,
+      returnPolicy: shop.returnPolicy,
+    };
+
+    const tfProducts = products.map((p, index) => {
+      const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
+      return {
+        id: p.id,
+        slug: p.slug,
+        name: p.name,
+        imageUrl: p.images[0]?.url ?? null,
+        imageAlt: p.images[0]?.altText ?? null,
+        videoUrl: FEATURE_FLAGS.PRODUCT_VIDEO ? (p.videos[0]?.url ?? null) : null,
+        videoKind:
+          FEATURE_FLAGS.PRODUCT_VIDEO && p.videos[0]
+            ? (p.videos[0].source.toLowerCase() as "upload" | "direct" | "youtube")
+            : null,
+        minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
+        maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
+        categoryId: p.category?.id ?? null,
+        categoryName: p.category?.name ?? null,
+        position: index,
+      };
+    });
+
+    const tfCombos = combos.map((c) => ({
+      id: c.id,
+      name: c.name,
+      description: c.description,
+      priceCents: c.priceCents,
+      retailPriceCents: c.retailPriceCents,
+      stock: c.stock,
+      items: c.items,
+      images: c.images,
+    }));
+
+    const tfDrop = recentDrops[0]
+      ? {
+          id: recentDrops[0].id,
+          title: recentDrops[0].title,
+          itemCount: recentDrops[0]._count.items,
+        }
+      : null;
+
+    const shareUrl = `${APP_URL}/catalog/${slug}`;
+
     return (
       <>
-      <TfStorefront
-        shop={{
-          id: shop.id,
-          slug: shop.slug,
-          name: shop.name,
-          isVerified: shop.isVerified,
-          logoUrl: shop.logoUrl,
-          bannerUrl: shop.bannerUrl,
-          city: shop.city,
-          province: shop.province,
-          aboutText: shop.aboutText,
-          description: shop.description,
-          whatsappNumber: shop.whatsappNumber,
-          createdAt: shop.createdAt,
-          deliveryEnabled: shop.deliveryEnabled,
-          collectionEnabled: shop.collectionEnabled,
-          dispatchWindow: shop.dispatchWindow,
-          deliveryNote: shop.deliveryNote,
-          returnPolicy: shop.returnPolicy,
-        }}
-        products={products.map((p, index) => {
-          const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
-          return {
-            id: p.id,
-            slug: p.slug,
-            name: p.name,
-            imageUrl: p.images[0]?.url ?? null,
-            imageAlt: p.images[0]?.altText ?? null,
-            videoUrl: FEATURE_FLAGS.PRODUCT_VIDEO ? (p.videos[0]?.url ?? null) : null,
-            videoKind:
-              FEATURE_FLAGS.PRODUCT_VIDEO && p.videos[0]
-                ? (p.videos[0].source.toLowerCase() as "upload" | "direct" | "youtube")
-                : null,
-            minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
-            maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
-            categoryId: p.category?.id ?? null,
-            categoryName: p.category?.name ?? null,
-            position: index,
-          };
-        })}
-        combos={combos.map((c) => ({
-          id: c.id,
-          name: c.name,
-          description: c.description,
-          priceCents: c.priceCents,
-          retailPriceCents: c.retailPriceCents,
-          stock: c.stock,
-          items: c.items,
-          images: c.images,
-        }))}
-        drop={
-          recentDrops[0]
-            ? {
-                id: recentDrops[0].id,
-                title: recentDrops[0].title,
-                itemCount: recentDrops[0]._count.items,
-              }
-            : null
-        }
-        fallbackProducts={fallbackProducts}
-        shareUrl={`${APP_URL}/catalog/${slug}`}
-        trustStats={trustStats}
-        reviews={reviewHighlights}
-        avgRating={ratingAgg._avg.rating}
-        reviewCount={ratingAgg._count.id}
-        isOwner={isOwner}
-        ownerDashboardSlug={ownerDashboardSlug}
-        showRecruitment={showRecruitmentCTAs}
-      />
+        {FEATURE_FLAGS.SELLER_PROFILE ? (
+          <TfSellerProfile
+            shop={{
+              ...tfShop,
+              // Already fetched by getCatalogShop and, until now,
+              // dropped on the floor before render.
+              address: shop.address,
+              instagram: shop.instagram,
+              facebook: shop.facebook,
+              tiktok: shop.tiktok,
+              website: shop.website,
+              whatsappGroupLink: shop.whatsappGroupLink,
+              gallery: shop.gallery.map((g) => ({
+                id: g.id,
+                url: g.url,
+                type: String(g.type),
+                caption: g.caption,
+              })),
+            }}
+            products={tfProducts}
+            combos={tfCombos}
+            drop={tfDrop}
+            fallbackProducts={fallbackProducts}
+            shareUrl={shareUrl}
+            trustStats={trustStats}
+            reviews={reviewHighlights}
+            avgRating={ratingAgg._avg.rating}
+            reviewCount={ratingAgg._count.id}
+            isOwner={isOwner}
+            ownerDashboardSlug={ownerDashboardSlug}
+            showRecruitment={showRecruitmentCTAs}
+          />
+        ) : (
+          <TfStorefront
+            shop={tfShop}
+            products={tfProducts}
+            combos={tfCombos}
+            drop={tfDrop}
+            fallbackProducts={fallbackProducts}
+            shareUrl={shareUrl}
+            trustStats={trustStats}
+            reviews={reviewHighlights}
+            avgRating={ratingAgg._avg.rating}
+            reviewCount={ratingAgg._count.id}
+            isOwner={isOwner}
+            ownerDashboardSlug={ownerDashboardSlug}
+            showRecruitment={showRecruitmentCTAs}
+          />
+        )}
       {/* Offline cache manager (silent — renders nothing) */}
       <CatalogCacheManager shop={cachedShop} products={cachedProducts} />
       </>

@@ -37,7 +37,18 @@ interface TfStorefrontGridProps {
   /** Seller identity shown on each card */
   sellerName: string;
   sellerVerified: boolean;
+  /** Enables the per-card WhatsApp CTA the card already implements */
+  whatsappNumber?: string;
+  /** 20+ products: tighten the grid one column earlier */
+  dense?: boolean;
 }
+
+/**
+ * Search, sort and category pills mount only from here up. Below
+ * it, a filter UI over a handful of items advertises the items
+ * that are not there — 90 of 116 live shops hold two or fewer.
+ */
+const BROWSE_CHROME_MIN_PRODUCTS = 8;
 
 type SortKey = "newest" | "price_asc" | "price_desc";
 
@@ -46,7 +57,10 @@ export function TfStorefrontGrid({
   shopSlug,
   sellerName,
   sellerVerified,
+  whatsappNumber,
+  dense = false,
 }: TfStorefrontGridProps) {
+  const showChrome = products.length >= BROWSE_CHROME_MIN_PRODUCTS;
   const [query, setQuery] = React.useState("");
   const [category, setCategory] = React.useState<string | null>(null);
   const [sort, setSort] = React.useState<SortKey>("newest");
@@ -75,7 +89,8 @@ export function TfStorefrontGrid({
 
   return (
     <section aria-label="Products">
-      {/* Search + sort */}
+      {/* Search + sort — only once there is enough to search */}
+      {showChrome && (
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search
@@ -102,9 +117,10 @@ export function TfStorefrontGrid({
           <option value="price_desc">Price ↓</option>
         </select>
       </div>
+      )}
 
       {/* Category pills */}
-      {categories.length > 1 && (
+      {showChrome && categories.length > 1 && (
         <div className="mt-3 overflow-x-auto">
           <div className="flex w-max gap-2">
             <button
@@ -164,8 +180,15 @@ export function TfStorefrontGrid({
           className="mt-4"
         />
       ) : (
-        <TfReveal as="ul" stagger className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-          {visible.map((p) => (
+        <TfReveal
+          as="ul"
+          stagger
+          className={cn(
+            "mt-4 grid grid-cols-2 gap-3 sm:gap-4",
+            dense ? "sm:grid-cols-3 lg:grid-cols-4" : "sm:grid-cols-3",
+          )}
+        >
+          {visible.map((p, index) => (
             <li key={p.id}>
               <TfProductCard
                 href={`/catalog/${shopSlug}/products/${p.slug ?? p.id}`}
@@ -178,6 +201,8 @@ export function TfStorefrontGrid({
                 videoKind={p.videoKind}
                 sellerName={sellerName}
                 sellerVerified={sellerVerified}
+                whatsappNumber={whatsappNumber}
+                priority={index < 4}
                 className="h-full"
               />
             </li>
