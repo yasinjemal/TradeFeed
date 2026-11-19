@@ -45,6 +45,9 @@ export function TfDiptych({
                 product.maxPriceCents != null &&
                 product.minPriceCents !== product.maxPriceCents
               }
+              compareAtPrice={
+                product.compareAtPriceCents != null ? product.compareAtPriceCents / 100 : null
+              }
               imageUrl={product.imageUrl}
               imageAlt={product.imageAlt ?? product.name}
               videoPreviewUrl={product.videoUrl}

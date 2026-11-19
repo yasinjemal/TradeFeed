@@ -12,6 +12,7 @@
 import { useState, useTransition, useCallback } from "react";
 import { bulkUpdateVariantsAction, deleteVariantAction } from "@/app/actions/product";
 import { formatZAR } from "@/types";
+import { randsToCents, wasPriceProblem, WAS_PRICE_FORMAT_MESSAGE } from "@/lib/products/compare-at";
 import { toast } from "sonner";
 
 interface Variant {
@@ -19,6 +20,8 @@ interface Variant {
   size: string;
   color: string | null;
   priceInCents: number;
+  /** Optional "was" price buyers see crossed out. */
+  compareAtPriceCents?: number | null;
   stock: number;
   sku: string | null;
 }
@@ -49,6 +52,18 @@ interface EditState {
   priceInRands: string;
   stock: string;
   sku: string;
+  /** "" means no was-price. */
+  compareAtPriceInRands: string;
+}
+
+/** Why this row's was-price cannot be saved, or null when it is fine. */
+function rowWasPriceProblem(state: EditState): string | null {
+  const raw = state.compareAtPriceInRands.trim();
+  if (raw === "") return null;
+  const was = randsToCents(raw);
+  if (was === null) return WAS_PRICE_FORMAT_MESSAGE;
+  const price = randsToCents(state.priceInRands);
+  return price === null ? null : wasPriceProblem(price, was);
 }
 
 export function VariantBulkEditor({
@@ -70,6 +85,8 @@ export function VariantBulkEditor({
             priceInRands: (v.priceInCents / 100).toFixed(2),
             stock: v.stock.toString(),
             sku: v.sku ?? "",
+            compareAtPriceInRands:
+              v.compareAtPriceCents != null ? (v.compareAtPriceCents / 100).toFixed(2) : "",
           },
         ])
       ) as Record<string, EditState>,
@@ -108,10 +125,22 @@ export function VariantBulkEditor({
           priceInRands: s.priceInRands,
           stock: s.stock,
           sku: s.sku,
+          compareAtPriceInRands: s.compareAtPriceInRands.trim(),
         };
       });
 
     if (updates.length === 0) return;
+
+    // Catch a bad was-price here, with the option's name, before the round trip.
+    const blocked = variants.find((v) => {
+      const state = dirtyIds.has(v.id) ? editState[v.id] : undefined;
+      return state ? rowWasPriceProblem(state) !== null : false;
+    });
+    if (blocked) {
+      const label = [blocked.size, blocked.color].filter(Boolean).join(" / ");
+      toast.error(`${label}: ${rowWasPriceProblem(editState[blocked.id]!)}`);
+      return;
+    }
 
     startTransition(async () => {
       const result = await bulkUpdateVariantsAction(shopSlug, productId, updates);
@@ -306,6 +335,39 @@ export function VariantBulkEditor({
                   />
                 </div>
               </div>
+
+              {/* Row 3: optional was-price */}
+              <div className="mt-2">
+                <label
+                  htmlFor={`was-m-${v.id}`}
+                  className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1 block"
+                >
+                  Was price (optional)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-medium text-sm pointer-events-none">
+                    R
+                  </span>
+                  <input
+                    id={`was-m-${v.id}`}
+                    type="text"
+                    inputMode="decimal"
+                    value={state.compareAtPriceInRands}
+                    onChange={(e) => handleChange(v.id, "compareAtPriceInRands", e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    disabled={isPending}
+                    placeholder="None"
+                    aria-invalid={rowWasPriceProblem(state) ? true : undefined}
+                    className={`w-full pl-8 pr-3 py-2.5 text-base rounded-xl border transition-colors
+                      focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400
+                      disabled:opacity-50 placeholder:text-stone-300
+                      ${rowWasPriceProblem(state) ? "border-red-300 bg-red-50" : dirty ? "border-amber-300 bg-amber-50" : "border-stone-200 bg-stone-50"}`}
+                  />
+                </div>
+                <p className={`mt-1 text-xs ${rowWasPriceProblem(state) ? "text-red-600" : "text-stone-500"}`}>
+                  {rowWasPriceProblem(state) ?? "Buyers see it crossed out next to the price."}
+                </p>
+              </div>
             </div>
           );
         })}
@@ -338,6 +400,9 @@ export function VariantBulkEditor({
               </th>
               <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider w-36">
                 Price (R)
+              </th>
+              <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider w-36">
+                Was (R)
               </th>
               <th className="text-left px-3 py-2.5 font-semibold text-stone-600 text-xs uppercase tracking-wider w-28">
                 Stock
@@ -403,6 +468,27 @@ export function VariantBulkEditor({
                     </div>
                   </td>
                   <td className="px-3 py-1.5">
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm font-medium pointer-events-none">R</span>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        aria-label={`Was price for ${[v.size, v.color].filter(Boolean).join(" / ")}`}
+                        title={rowWasPriceProblem(state) ?? "Buyers see it crossed out next to the price"}
+                        value={state.compareAtPriceInRands}
+                        onChange={(e) => handleChange(v.id, "compareAtPriceInRands", e.target.value)}
+                        onFocus={(e) => e.target.select()}
+                        disabled={isPending}
+                        placeholder="None"
+                        aria-invalid={rowWasPriceProblem(state) ? true : undefined}
+                        className={`w-full pl-7 pr-2 py-1.5 text-sm rounded-lg border transition-colors
+                          focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400
+                          disabled:opacity-50 placeholder:text-stone-300
+                          ${rowWasPriceProblem(state) ? "border-red-300 bg-red-50" : dirty ? "border-amber-300 bg-amber-50" : "border-stone-200 bg-white"}`}
+                      />
+                    </div>
+                  </td>
+                  <td className="px-3 py-1.5">
                     <input
                       type="number"
                       inputMode="numeric"
@@ -464,6 +550,7 @@ export function VariantBulkEditor({
                   return min === max ? formatZAR(min) : `${formatZAR(min)} – ${formatZAR(max)}`;
                 })()}
               </td>
+              <td />
               <td className="px-3 py-2 text-xs font-medium text-stone-500">
                 {variants.reduce((sum, v) => sum + v.stock, 0).toLocaleString()} total
               </td>

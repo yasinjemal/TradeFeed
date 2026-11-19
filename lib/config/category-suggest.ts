@@ -7,7 +7,7 @@
 // WHY THIS FILE EXISTS:
 // This was originally in lib/db/global-categories.ts, but that file
 // imports Prisma (server-only). Since this logic runs in client
-// components (create-product-form), it must live in a file with
+// components (the Add product screen), it must live in a file with
 // NO server-side imports.
 // ============================================================
 

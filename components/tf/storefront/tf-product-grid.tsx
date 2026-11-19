@@ -25,6 +25,8 @@ export interface TfGridProduct {
   videoKind?: "upload" | "direct" | "youtube" | null;
   minPriceCents: number;
   maxPriceCents?: number;
+  /** A was-price that applies to the price shown (see buyerPriceSummary). */
+  compareAtPriceCents?: number | null;
   categoryId: string | null;
   categoryName: string | null;
   /** Original server order (newest first) — used for the default sort */
@@ -195,6 +197,7 @@ export function TfStorefrontGrid({
                 title={p.name}
                 price={p.minPriceCents / 100}
                 priceFrom={p.maxPriceCents != null && p.minPriceCents !== p.maxPriceCents}
+                compareAtPrice={p.compareAtPriceCents != null ? p.compareAtPriceCents / 100 : null}
                 imageUrl={p.imageUrl}
                 imageAlt={p.imageAlt ?? p.name}
                 videoPreviewUrl={p.videoUrl}

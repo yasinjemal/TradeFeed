@@ -11,7 +11,7 @@
 // - Optimised for SSR — fast queries for mobile users on SA data
 // ============================================================
 
-import { buyerOptions } from "@/lib/products/buyer-options";
+import { buyerPriceSummary } from "@/lib/products/buyer-price";
 import { db } from "@/lib/db";
 
 /**
@@ -204,6 +204,7 @@ export async function getCatalogProducts(shopId: string) {
           color: true,
           priceInCents: true,
           retailPriceCents: true,
+          compareAtPriceCents: true,
           stock: true,
         },
         orderBy: [{ size: "asc" }, { color: "asc" }],
@@ -272,6 +273,7 @@ export async function getCatalogProduct(slugOrId: string, shopId: string) {
         color: true,
         priceInCents: true,
         retailPriceCents: true,
+        compareAtPriceCents: true,
         stock: true,
         sku: true,
       },
@@ -355,7 +357,7 @@ export async function getSimilarProducts(
       },
       variants: {
         where: { isActive: true },
-        select: { retailPriceCents: true, priceInCents: true, size: true },
+        select: { retailPriceCents: true, priceInCents: true, compareAtPriceCents: true, size: true },
       },
       shop: {
         select: { name: true, slug: true, isVerified: true },
@@ -370,8 +372,7 @@ export async function getSimilarProducts(
     slug: p.slug,
     name: p.name,
     imageUrl: p.images[0]?.url ?? null,
-    minPriceCents: p.variants.length ? Math.min(...buyerOptions(p.variants).map(v => v.retailPriceCents ?? v.priceInCents)) : 0,
-    maxPriceCents: Math.max(0, ...buyerOptions(p.variants).map(v => v.retailPriceCents ?? v.priceInCents)),
+    ...buyerPriceSummary(p.variants),
     shopName: p.shop.name,
     shopSlug: p.shop.slug,
     isVerified: p.shop.isVerified,
@@ -409,7 +410,7 @@ export async function getMoreFromSeller(
       },
       variants: {
         where: { isActive: true },
-        select: { retailPriceCents: true, priceInCents: true, size: true },
+        select: { retailPriceCents: true, priceInCents: true, compareAtPriceCents: true, size: true },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -421,8 +422,7 @@ export async function getMoreFromSeller(
     slug: p.slug,
     name: p.name,
     imageUrl: p.images[0]?.url ?? null,
-    minPriceCents: p.variants.length ? Math.min(...buyerOptions(p.variants).map(v => v.retailPriceCents ?? v.priceInCents)) : 0,
-    maxPriceCents: Math.max(0, ...buyerOptions(p.variants).map(v => v.retailPriceCents ?? v.priceInCents)),
+    ...buyerPriceSummary(p.variants),
   }));
 }
 

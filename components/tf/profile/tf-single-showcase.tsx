@@ -7,6 +7,7 @@ import { TfButton } from "@/components/tf/button";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TrackedWhatsAppLink } from "@/components/analytics/tracked-whatsapp-link";
 import { formatZAR } from "@/components/tf/format";
+import { resolveSale } from "@/lib/products/compare-at";
 import type { TfGridProduct } from "@/components/tf/storefront/tf-product-grid";
 
 // ============================================================
@@ -39,6 +40,8 @@ export function TfSingleShowcase({
   const price = formatZAR(product.minPriceCents / 100);
   const fromPrice =
     product.maxPriceCents != null && product.maxPriceCents !== product.minPriceCents;
+  // Same rule as every product card: a was-price shows only when it is a real saving.
+  const sale = resolveSale(product.minPriceCents, product.compareAtPriceCents);
 
   const waHref = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
     `Hi ${shopName}, I would like to order the ${product.name}.`,
@@ -72,8 +75,21 @@ export function TfSingleShowcase({
               <h3 className="font-tf-display text-2xl font-semibold leading-tight text-tf-ink">
                 {product.name}
               </h3>
-              <p className="mt-2 text-3xl font-semibold tabular-nums text-tf-ink">
-                {fromPrice ? `From ${price}` : price}
+              <p className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 tabular-nums">
+                <span className="text-3xl font-semibold text-tf-ink">
+                  {fromPrice ? `From ${price}` : price}
+                </span>
+                {sale && (
+                  <>
+                    <s className="text-base text-tf-stone-500">
+                      <span className="sr-only">was </span>
+                      {formatZAR(sale.compareAt / 100)}
+                    </s>
+                    <span className="rounded-full bg-tf-accent-soft px-2 py-0.5 text-xs font-medium text-tf-accent-ink">
+                      -{sale.percentOff}%
+                    </span>
+                  </>
+                )}
               </p>
             </div>
           </Link>

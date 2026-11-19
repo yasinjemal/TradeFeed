@@ -5,6 +5,8 @@ import { MessageCircle, Minus, Plus, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 
 import { buyerOptions, isPlaceholderOption, needsSizeConfirmation } from "@/lib/products/buyer-options";
+import { buyerPriceCents } from "@/lib/products/buyer-price";
+import { resolveSale, type SaleDisplay } from "@/lib/products/compare-at";
 import { cn } from "@/lib/utils";
 import { TfButton } from "@/components/tf/button";
 import { formatZAR } from "@/components/tf/format";
@@ -33,6 +35,8 @@ export interface TfVariant {
   color: string | null;
   priceInCents: number;
   retailPriceCents: number | null;
+  /** The seller's "was" price for this option, if any. */
+  compareAtPriceCents?: number | null;
   stock: number;
 }
 
@@ -143,6 +147,24 @@ export function TfOrderPanel({
     quantity: qty, bulkDiscountTiers,
   }));
   const unitCents = optionPrices.length ? Math.min(...optionPrices) : 0;
+
+  // A was-price shows only while the price on screen is an option's plain
+  // buyer price. A wholesale or bulk-discounted price is a different price,
+  // so the seller's was-price says nothing true about it. When several
+  // options share the price shown, all of them must carry a was-price and
+  // the lowest is used, exactly as on the catalogue card.
+  let sale: SaleDisplay | null = null;
+  for (let index = 0; index < matchingVariants.length; index += 1) {
+    if (optionPrices[index] !== unitCents) continue;
+    const variant = matchingVariants[index]!;
+    const candidate =
+      buyerPriceCents(variant) === unitCents ? resolveSale(unitCents, variant.compareAtPriceCents) : null;
+    if (!candidate) {
+      sale = null;
+      break;
+    }
+    if (!sale || candidate.compareAt < sale.compareAt) sale = candidate;
+  }
   const priceFrom = !exactSelection && new Set(optionPrices).size > 1;
   const activeTier = orderType === "wholesale" ? applicableTier(qty, bulkDiscountTiers) : null;
   const tierNudge = orderType === "wholesale" ? nextTierNudge(qty, bulkDiscountTiers) : null;
@@ -336,13 +358,24 @@ export function TfOrderPanel({
         )}
 
         {/* Price */}
-        <p className="flex items-baseline gap-3 tabular-nums">
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 tabular-nums">
           <span
             className="font-tf-display text-tf-ink"
             style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", lineHeight: 1, letterSpacing: "-0.04em", fontWeight: 600 }}
           >
             {priceFrom && "From "}{formatZAR(unitCents / 100)}
           </span>
+          {sale && (
+            <>
+              <s className="text-base text-tf-stone-500">
+                <span className="sr-only">was </span>
+                {formatZAR(sale.compareAt / 100)}
+              </s>
+              <span className="rounded-full bg-tf-accent-soft px-2 py-0.5 text-xs font-medium text-tf-accent-ink">
+                -{sale.percentOff}%
+              </span>
+            </>
+          )}
           {activeTier && (
             <span className="rounded-full bg-tf-verified-soft px-2 py-0.5 text-xs font-medium text-tf-verified">
               {activeTier.discountPercent}% bulk discount

@@ -757,6 +757,97 @@ h4, h5, h6 {
   --tf-cta-text: #06281c;
 }
 
+/* ═══ Light pin ═════════════════════════════════════════════
+   The seller dashboard shell (app/dashboard/[slug]/layout.tsx) is
+   still light-only legacy chrome with hard-coded light surfaces.
+   Nothing inside it may follow the device's dark preference:
+   - TF components would paint dark cards and light headings onto
+     a light page;
+   - legacy components that inherit their text colour (plain
+     inputs, table cells) would get the dark theme's near-white
+     text on light fields, so a seller could not read the price
+     they just typed.
+   `.tf-light` re-declares, for one subtree, every token that the
+   two `.dark` blocks override, and restarts text-colour
+   inheritance from the light foreground.
+   KEEP IN STEP with the base :root tokens and the TF @theme block.
+   Delete this once the dashboard shell itself follows the theme. */
+.tf-light {
+  color-scheme: light;
+
+  /* Base (shadcn) tokens — same values as :root */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  /* <body> already resolved its colour from the dark foreground;
+     everything in here inherits from the light one instead. */
+  color: var(--foreground);
+
+  --color-tf-surface: #faf8f4;
+  --color-tf-raised: #ffffff;
+  --color-tf-ink: #1a1a17;
+
+  --color-tf-primary: #047857;
+  --color-tf-primary-hover: #065f46;
+  --color-tf-accent: #f59e0b;
+  --color-tf-accent-ink: #92600a;
+  --color-tf-accent-soft: #fef3c7;
+
+  --color-tf-verified: #047857;
+  --color-tf-verified-soft: #ecfdf5;
+  --color-tf-success: #047857;
+  --color-tf-warning: #b45309;
+  --color-tf-error: #b91c1c;
+  --color-tf-error-soft: #fef2f2;
+
+  --color-tf-stone-50: #fafaf7;
+  --color-tf-stone-100: #f5f3ee;
+  --color-tf-stone-200: #e7e2d9;
+  --color-tf-stone-300: #d6d0c4;
+  --color-tf-stone-400: #a8a29e;
+  --color-tf-stone-500: #78716c;
+  --color-tf-stone-600: #57534e;
+  --color-tf-stone-700: #44403c;
+  --color-tf-stone-800: #292524;
+  --color-tf-stone-900: #1c1917;
+
+  --shadow-tf-sm: 0 1px 2px 0 rgb(26 26 23 / 0.05), 0 1px 3px 0 rgb(26 26 23 / 0.06);
+  --shadow-tf-md: 0 4px 12px -2px rgb(26 26 23 / 0.08), 0 2px 4px -2px rgb(26 26 23 / 0.05);
+
+  /* Re-resolved here: on <html> these already hold the dark greens. */
+  --tf-cta: var(--color-tf-primary);
+  --tf-cta-hover: var(--color-tf-primary-hover);
+  --tf-cta-text: #ffffff;
+}
+
 /* Pro shop themes (--shop-primary injected by the catalog layout)
    tint interactive accents ONLY — never surfaces or body text.
    Under .dark the brand color is lifted toward white so it keeps

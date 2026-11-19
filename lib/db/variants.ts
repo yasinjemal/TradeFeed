@@ -101,6 +101,7 @@ export async function createVariant(
       color: input.color || null,
       priceInCents: input.priceInRands, // Already converted to cents by Zod transform
       retailPriceCents: input.retailPriceInRands ?? null, // Optional retail price in cents
+      compareAtPriceCents: input.compareAtPriceInRands ?? null, // Optional "was" price in cents
       stock: input.stock,
       sku,
     },
@@ -146,6 +147,9 @@ export async function updateVariant(
       }),
       ...(input.retailPriceInRands !== undefined && {
         retailPriceCents: input.retailPriceInRands, // null clears it, number sets it
+      }),
+      ...(input.compareAtPriceInRands !== undefined && {
+        compareAtPriceCents: input.compareAtPriceInRands, // null clears it, number sets it
       }),
       ...(input.stock !== undefined && { stock: input.stock }),
       ...(input.sku !== undefined && { sku: input.sku || null }),
@@ -201,7 +205,7 @@ export async function deleteVariant(variantId: string, shopId: string) {
 export async function batchCreateVariants(
   productId: string,
   shopId: string,
-  variants: { size: string; color: string | null; priceInCents: number; stock: number; retailPriceCents?: number | null }[],
+  variants: { size: string; color: string | null; priceInCents: number; stock: number; retailPriceCents?: number | null; compareAtPriceCents?: number | null }[],
   productName?: string
 ) {
   const isOwner = await verifyProductOwnership(productId, shopId);
@@ -214,6 +218,7 @@ export async function batchCreateVariants(
       color: v.color,
       priceInCents: v.priceInCents,
       retailPriceCents: v.retailPriceCents ?? null,
+      compareAtPriceCents: v.compareAtPriceCents ?? null,
       stock: v.stock,
       // Auto-generate SKU from product name + variant options
       ...(productName ? { sku: generateSku(productName, v.size, v.color) } : {}),

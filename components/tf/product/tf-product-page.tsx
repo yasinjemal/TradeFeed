@@ -36,6 +36,7 @@ export interface TfStripProduct {
   imageUrl: string | null;
   minPriceCents: number;
   maxPriceCents?: number;
+  compareAtPriceCents?: number | null;
   shopName: string;
   shopSlug: string;
   shopVerified: boolean;
@@ -97,6 +98,7 @@ function ProductStrip({ title, products, autoPlay = false }: { title: string; pr
               title={p.name}
               price={p.minPriceCents / 100}
               priceFrom={p.maxPriceCents != null && p.maxPriceCents !== p.minPriceCents}
+              compareAtPrice={p.compareAtPriceCents != null ? p.compareAtPriceCents / 100 : null}
               imageUrl={p.imageUrl}
               sellerName={p.shopName}
               sellerVerified={p.shopVerified}

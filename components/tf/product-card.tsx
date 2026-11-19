@@ -8,6 +8,7 @@ import { BadgeCheck, ImageOff, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInView } from "@/lib/hooks/use-in-view";
 import { shouldAutoplay } from "@/lib/video/autoplay";
+import { resolveSale } from "@/lib/products/compare-at";
 import { formatZAR } from "./format";
 import { TfRatingChip } from "./rating-chip";
 
@@ -27,8 +28,8 @@ export interface TfProductCardProps extends React.ComponentProps<"article"> {
   /** Price in Rand */
   price: number;
   priceFrom?: boolean;
-  /** Original price when on sale */
-  compareAtPrice?: number;
+  /** The seller's "was" price in Rand. Shown only when it is above `price`. */
+  compareAtPrice?: number | null;
   imageUrl?: string | null;
   imageAlt?: string;
   sellerName?: string;
@@ -72,10 +73,8 @@ function TfProductCard({
   className,
   ...props
 }: TfProductCardProps) {
-  const onSale = compareAtPrice != null && compareAtPrice > price;
-  const discountPct = onSale
-    ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
-    : 0;
+  const sale = resolveSale(price, compareAtPrice);
+  const onSale = sale !== null;
 
   const waHref = whatsappNumber
     ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(`Hi! I'm interested in "${title}" — ${priceFrom ? "from " : ""}${formatZAR(price)}. Please confirm options, availability and delivery.`)}`
@@ -194,7 +193,7 @@ function TfProductCard({
             )}
             {onSale && (
               <span className="rounded-full bg-tf-accent px-2 py-0.5 text-[11px] font-bold leading-none text-tf-ink shadow-sm">
-                -{discountPct}%
+                -{sale.percentOff}%
               </span>
             )}
             {promoted && (
@@ -252,7 +251,10 @@ function TfProductCard({
             {priceFrom && "From "}{formatZAR(price)}
           </span>
           {onSale && (
-            <s className="text-[11px] text-tf-stone-400">{formatZAR(compareAtPrice)}</s>
+            <s className="text-[11px] text-tf-stone-500">
+              <span className="sr-only">was </span>
+              {formatZAR(sale.compareAt)}
+            </s>
           )}
         </div>
 

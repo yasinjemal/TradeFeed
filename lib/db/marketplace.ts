@@ -18,6 +18,7 @@
 import { db } from "@/lib/db";
 import { rankMarketplaceCandidates } from "@/lib/marketplace/ranking";
 import { buyerOptions } from "@/lib/products/buyer-options";
+import { buyerPriceSummary } from "@/lib/products/buyer-price";
 import { primarySearchMatches } from "@/lib/marketplace/search-intent";
 import { MARKETPLACE_ELIGIBILITY, marketplaceContentStandard } from "@/lib/marketplace/eligibility";
 import type { AnalyticsRequestContext } from "@/lib/analytics/visitor";
@@ -75,6 +76,8 @@ export interface MarketplaceProduct {
   videoSource: "UPLOAD" | "YOUTUBE" | "DIRECT" | null;
   minPriceCents: number;
   maxPriceCents: number;
+  /** A was-price that applies to `minPriceCents` (see buyerPriceSummary), else null. */
+  compareAtPriceCents?: number | null;
   variantCount: number;
   shop: {
     id: string;
@@ -370,7 +373,7 @@ export async function getMarketplaceProducts(
     where,
     select: {
       id: true, name: true, createdAt: true, qualityScore: true,
-      variants: { where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } }, select: { priceInCents: true, retailPriceCents: true, size: true } },
+      variants: { where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } }, select: { priceInCents: true, retailPriceCents: true, compareAtPriceCents: true, size: true } },
     },
   });
   const ids = candidates.map((p) => p.id);
@@ -439,7 +442,7 @@ export async function getMarketplaceProducts(
         },
         variants: {
           where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
-          select: { priceInCents: true, retailPriceCents: true, size: true },
+          select: { priceInCents: true, retailPriceCents: true, compareAtPriceCents: true, size: true },
         },
       },
     });
@@ -448,9 +451,7 @@ export async function getMarketplaceProducts(
 
   // ── Transform results ───────────────────────────────────
   let products: MarketplaceProduct[] = rawProducts.map((p) => {
-    const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
-    const minP = prices.length > 0 ? Math.min(...prices) : 0;
-    const maxP = prices.length > 0 ? Math.max(...prices) : 0;
+    const priced = buyerPriceSummary(p.variants);
 
     return {
       id: p.id,
@@ -460,8 +461,9 @@ export async function getMarketplaceProducts(
       imageUrl: p.images[0]?.url ?? null,
       videoUrl: p.videos[0]?.url ?? null,
       videoSource: p.videos[0]?.source ?? null,
-      minPriceCents: minP,
-      maxPriceCents: maxP,
+      minPriceCents: priced.minPriceCents,
+      maxPriceCents: priced.maxPriceCents,
+      compareAtPriceCents: priced.compareAtPriceCents,
       variantCount: p.variants.length,
       shop: p.shop,
       globalCategory: p.globalCategory,
@@ -559,7 +561,7 @@ export async function getPromotedProducts(
           },
           variants: {
             where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
-            select: { priceInCents: true, retailPriceCents: true, size: true },
+            select: { priceInCents: true, retailPriceCents: true, compareAtPriceCents: true, size: true },
           },
         },
       },
@@ -574,7 +576,7 @@ export async function getPromotedProducts(
 
   const products: MarketplaceProduct[] = promoted.map((pl) => {
     const p = pl.product;
-    const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
+    const priced = buyerPriceSummary(p.variants);
 
     return {
       id: p.id,
@@ -584,8 +586,9 @@ export async function getPromotedProducts(
       imageUrl: p.images[0]?.url ?? null,
       videoUrl: p.videos[0]?.url ?? null,
       videoSource: p.videos[0]?.source ?? null,
-      minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
-      maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
+      minPriceCents: priced.minPriceCents,
+      maxPriceCents: priced.maxPriceCents,
+      compareAtPriceCents: priced.compareAtPriceCents,
       variantCount: p.variants.length,
       shop: p.shop,
       globalCategory: p.globalCategory,
@@ -760,7 +763,7 @@ export async function getTrendingProducts(
       },
       variants: {
         where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
-        select: { priceInCents: true, retailPriceCents: true, size: true },
+        select: { priceInCents: true, retailPriceCents: true, compareAtPriceCents: true, size: true },
       },
     },
   });
@@ -773,7 +776,7 @@ export async function getTrendingProducts(
     .slice(0, limit)
     .map((e) => {
       const p = productMap.get(e.productId!)!;
-      const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
+      const priced = buyerPriceSummary(p.variants);
 
       return {
         id: p.id,
@@ -783,8 +786,9 @@ export async function getTrendingProducts(
         imageUrl: p.images[0]?.url ?? null,
         videoUrl: p.videos[0]?.url ?? null,
         videoSource: p.videos[0]?.source ?? null,
-        minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
-        maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
+        minPriceCents: priced.minPriceCents,
+        maxPriceCents: priced.maxPriceCents,
+        compareAtPriceCents: priced.compareAtPriceCents,
         variantCount: p.variants.length,
         shop: p.shop,
         globalCategory: p.globalCategory,
@@ -861,7 +865,7 @@ export async function getNewArrivals(
       },
       variants: {
         where: { isActive: true, stock: { gt: 0 }, priceInCents: { gt: 0 } },
-        select: { priceInCents: true, retailPriceCents: true, size: true },
+        select: { priceInCents: true, retailPriceCents: true, compareAtPriceCents: true, size: true },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -869,7 +873,7 @@ export async function getNewArrivals(
   });
 
   const mapped: MarketplaceProduct[] = products.map((p) => {
-    const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
+    const priced = buyerPriceSummary(p.variants);
     return {
       id: p.id,
       slug: p.slug,
@@ -878,8 +882,9 @@ export async function getNewArrivals(
       imageUrl: p.images[0]?.url ?? null,
       videoUrl: p.videos[0]?.url ?? null,
       videoSource: p.videos[0]?.source ?? null,
-      minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
-      maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
+      minPriceCents: priced.minPriceCents,
+      maxPriceCents: priced.maxPriceCents,
+      compareAtPriceCents: priced.compareAtPriceCents,
       variantCount: p.variants.length,
       shop: p.shop,
       globalCategory: p.globalCategory,
