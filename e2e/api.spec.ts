@@ -5,7 +5,7 @@
 // and the application is healthy.
 // ============================================================
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Health & API", () => {
   test("GET /api/health returns 200 with ok status", async ({ request }) => {

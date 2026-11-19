@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { FaqItem } from "@/components/landing/animated-stats";
@@ -202,7 +203,7 @@ export default async function FaqPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: serializeJsonLd(
             generateFaqJsonLd(
               ALL_FAQ_ITEMS.map((f) => ({ question: f.q, answer: f.a }))
             )
@@ -213,7 +214,7 @@ export default async function FaqPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonLd({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [

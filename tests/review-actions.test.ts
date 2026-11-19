@@ -10,20 +10,9 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import { z } from "zod";
-
-// ── Recreate the review schema locally (same as reviews.ts) ─
-// We recreate it here to test in isolation without importing the
-// server action file (which has "use server" directive + DB deps).
-// If the schema changes in reviews.ts, these tests catch drift.
-
-const submitReviewSchema = z.object({
-  rating: z.number().int().min(1, "Rating must be 1-5").max(5, "Rating must be 1-5"),
-  title: z.string().trim().max(200, "Title too long").optional().or(z.literal("")),
-  comment: z.string().trim().max(2000, "Review too long").optional().or(z.literal("")),
-  buyerName: z.string().trim().min(1, "Name is required").max(100, "Name too long"),
-  buyerEmail: z.string().email("Invalid email").optional().or(z.literal("")),
-});
+// The schema lives in lib/validation so these tests exercise the same
+// object the server action uses, with no "use server" or DB imports.
+import { submitReviewSchema } from "../lib/validation/review";
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -213,4 +202,53 @@ test("submitReviewSchema trims title whitespace", () => {
   if (result.success) {
     assert.equal(result.data.title, "Great!");
   }
+});
+
+// ============================================================
+// HTML Stripping
+// ============================================================
+
+test("submitReviewSchema strips HTML tags from title, comment and buyerName", () => {
+  const result = submitReviewSchema.safeParse({
+    ...validReviewInput(),
+    title: "<b>Great</b> product",
+    comment: "Loved it</script><script>alert(1)</script>",
+    buyerName: "<i>Thabo</i>",
+  });
+  assert.equal(result.success, true);
+  if (result.success) {
+    assert.equal(result.data.title, "Great product");
+    assert.equal(result.data.comment, "Loved italert(1)");
+    assert.equal(result.data.buyerName, "Thabo");
+  }
+});
+
+test("submitReviewSchema rejects a buyerName that is only markup", () => {
+  const result = submitReviewSchema.safeParse({
+    ...validReviewInput(),
+    buyerName: "<script></script>",
+  });
+  assert.equal(result.success, false);
+  if (!result.success) {
+    assert.equal(result.error.issues[0]?.message, "Name is required");
+  }
+});
+
+test("submitReviewSchema keeps ordinary text that has no tags", () => {
+  const result = submitReviewSchema.safeParse({
+    ...validReviewInput(),
+    comment: "Size 5 & up, R199 - 100% worth it",
+  });
+  assert.equal(result.success, true);
+  if (result.success) {
+    assert.equal(result.data.comment, "Size 5 & up, R199 - 100% worth it");
+  }
+});
+
+test("submitReviewSchema applies the length limit after stripping", () => {
+  const result = submitReviewSchema.safeParse({
+    ...validReviewInput(),
+    title: `<b>${"A".repeat(200)}</b>`,
+  });
+  assert.equal(result.success, true);
 });

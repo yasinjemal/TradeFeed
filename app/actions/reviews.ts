@@ -8,8 +8,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { requireShopAccess } from "@/lib/auth";
+import { submitReviewSchema } from "@/lib/validation/review";
 import { createReview, deleteReview } from "@/lib/db/reviews";
 import { notifyNewReview } from "@/lib/notifications";
 import { reportError } from "@/lib/telemetry";
@@ -21,16 +21,6 @@ type ActionResult = {
   error?: string;
   fieldErrors?: Record<string, string[]>;
 };
-
-// ── Validation ──────────────────────────────────────────────
-
-const submitReviewSchema = z.object({
-  rating: z.number().int().min(1, "Rating must be 1-5").max(5, "Rating must be 1-5"),
-  title: z.string().trim().max(200, "Title too long").optional().or(z.literal("")),
-  comment: z.string().trim().max(2000, "Review too long").optional().or(z.literal("")),
-  buyerName: z.string().trim().min(1, "Name is required").max(100, "Name too long"),
-  buyerEmail: z.string().email("Invalid email").optional().or(z.literal("")),
-});
 
 // ── Submit Review (Buyer — no auth) ─────────────────────────
 
