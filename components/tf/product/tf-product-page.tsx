@@ -5,7 +5,6 @@ import { BadgeCheck, ChevronLeft, Factory, FileText, MessageCircle, RotateCcw, S
 import { RestockAlert } from "@/components/catalog/restock-alert";
 import { ShareProduct } from "@/components/catalog/share-product";
 import { TfButton } from "@/components/tf/button";
-import { TfFonts } from "@/components/tf/tf-fonts";
 import { formatZAR } from "@/components/tf/format";
 import { TfProductCard } from "@/components/tf/product-card";
 import { TfRatingChip } from "@/components/tf/rating-chip";
@@ -170,7 +169,6 @@ export function TfProductPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-10 pb-28 lg:pb-8">
-      <TfFonts />
 
       {/* Back to shop */}
       <Link

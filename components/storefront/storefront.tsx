@@ -30,7 +30,7 @@ import type {
 } from "@/lib/db/marketplace";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TfThemeToggle } from "@/components/tf/theme-toggle";
-import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { formatZAR } from "@/components/tf/format";
 import styles from "./storefront.module.css";
 
@@ -83,7 +83,7 @@ export function Storefront({
     .slice(0, 8);
   return (
     <div className={styles.page}>
-      <TfFonts />
+      <TfHeroFont face="display" />
       <div className={styles.announcement}>
         <span>
           <MapPin size={13} aria-hidden="true" /> Independent shops. All across

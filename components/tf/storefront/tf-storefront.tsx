@@ -7,7 +7,6 @@ import { FollowShopButton } from "@/components/catalog/follow-shop-button";
 import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
 import { TfButton } from "@/components/tf/button";
 import { TfEmptyState } from "@/components/tf/empty-state";
-import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfTrustBar } from "@/components/tf/trust-bar";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
@@ -95,7 +94,6 @@ export function TfStorefront({
 
   return (
     <div className="space-y-5 pb-20">
-      <TfFonts />
 
       {/* ── Shop banner, when the seller uploaded one ──── */}
       {shop.bannerUrl && (

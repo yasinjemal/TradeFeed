@@ -15,7 +15,6 @@ import { TfEmptyState } from "@/components/tf/empty-state";
 import { TfProductCard } from "@/components/tf/product-card";
 import { TfProductCardSkeleton } from "@/components/tf/skeleton";
 import { TfThemeToggle } from "@/components/tf/theme-toggle";
-import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
@@ -285,7 +284,6 @@ export function TfMarketplaceShell({
 
   return (
     <div className="min-h-screen bg-tf-surface pb-20 text-tf-ink">
-      <TfFonts />
 
       {/* ── Rows 2+3: Search nav + categories — STICKY ─────── */}
       <CommerceHeader compact />

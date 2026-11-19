@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { SeoPageShell, SeoCta } from "@/components/seo/seo-page";
 import { SeoFaq } from "@/components/seo/faq";
 import { TfButton } from "@/components/tf/button";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { PLANS } from "@/lib/billing/plans";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
@@ -34,6 +35,7 @@ const FAQ = [
 export default function PricingPage() {
   return (
     <SeoPageShell breadcrumb={{ name: "Pricing", path: "/pricing" }}>
+      <TfHeroFont />
       <h1
         className="font-tf-hero font-semibold text-tf-ink"
         style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", lineHeight: "1.05", letterSpacing: "-0.035em" }}

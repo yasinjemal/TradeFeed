@@ -4,7 +4,7 @@ import { BadgeCheck, CreditCard, MapPin, PackageCheck, TriangleAlert } from "luc
 
 import { formatZARCents } from "@/lib/currency";
 import { TfButton } from "@/components/tf/button";
-import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import { TfTrustBar } from "@/components/tf/trust-bar";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
@@ -42,7 +42,7 @@ export function TfPaymentPage({ order, paymentUrl, status, isExpired }: TfPaymen
 
   return (
     <main className="min-h-screen bg-tf-surface text-tf-ink">
-      <TfFonts />
+      <TfHeroFont />
       <CommerceHeader compact />
       <section className="mx-auto max-w-xl space-y-4 px-5 py-8 sm:py-12">
         <div>

@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TfButton } from "@/components/tf/button";
-import { TfFonts } from "@/components/tf/tf-fonts";
 import { SA_PROVINCES } from "@/lib/marketplace/locations";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 
@@ -50,7 +49,6 @@ export function SeoPageShell({ breadcrumb, children }: SeoPageShellProps) {
 
   return (
     <div className="min-h-screen bg-tf-surface text-tf-ink">
-      <TfFonts />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}

@@ -1,12 +1,10 @@
 import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import Link from "next/link";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
-import { TfFonts } from "@/components/tf/tf-fonts";
 
 export function CommerceHeader({ compact = false }: { compact?: boolean }) {
   return (
     <header className="border-b border-tf-stone-200 bg-tf-raised text-tf-ink">
-      <TfFonts />
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4">
         <Link href="/" aria-label="TradeFeed home">
           <TradeFeedLogo size="sm" variant="auto" />

@@ -26,7 +26,6 @@ import { getVerificationForShop } from "@/lib/db/verification";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { db } from "@/lib/db";
 import Link from "next/link";
-import { TfFonts } from "@/components/tf/tf-fonts";
 
 interface SettingsPageProps {
   params: Promise<{ slug: string }>;
@@ -78,7 +77,6 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <TfFonts />
       {/* ── Hero Header ──────────────────────────────────── */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-950 via-stone-900 to-emerald-950 p-8 sm:p-10">
         {/* Animated decorative orbs */}

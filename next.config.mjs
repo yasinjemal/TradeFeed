@@ -8,6 +8,21 @@ const nextConfig = {
   // Skip type-checking during Vercel builds (already done in CI/locally)
   // Cuts ~30-60s off each build
   typescript: { ignoreBuildErrors: false },
+  // Self-hosted display faces. public/ is served with
+  // `max-age=0, must-revalidate` by default, which would re-check three
+  // font files on every cold navigation. The filenames are versioned by
+  // directory (public/fonts/v1) and never overwritten in place, so they
+  // are safe to freeze — bump the directory to roll a face.
+  async headers() {
+    return [
+      {
+        source: "/fonts/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

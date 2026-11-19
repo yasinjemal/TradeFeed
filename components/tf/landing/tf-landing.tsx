@@ -21,7 +21,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TfButton } from "@/components/tf/button";
 import { TfThemeToggle } from "@/components/tf/theme-toggle";
-import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfCountUp } from "@/components/tf/motion/tf-count-up";
@@ -98,7 +98,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
 
   return (
     <div className="overflow-x-hidden bg-tf-surface text-tf-ink">
-      <TfFonts />
+      <TfHeroFont />
 
       {/* ── Sticky header ──────────────────────────────── */}
       <TfLandingHeader>

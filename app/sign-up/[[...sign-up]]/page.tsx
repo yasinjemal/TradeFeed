@@ -17,12 +17,10 @@ import {
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
-import { TfFonts } from "@/components/tf/tf-fonts";
 
 export default function SignUpPage() {
   return (
     <main className="flex min-h-screen flex-col bg-tf-surface lg:flex-row">
-      <TfFonts />
       {/* ── Left panel — Value proposition ── */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-[#071a0f] px-8 py-10 text-white lg:flex lg:w-1/2 lg:px-16 lg:py-16">
         {/* Background photo */}

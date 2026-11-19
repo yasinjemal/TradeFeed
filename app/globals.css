@@ -2,6 +2,99 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* ═══ Self-hosted TF display faces ══════════════════════════════
+   Same-origin, so they need no CSP exception, no DNS or TLS to a
+   third party, and they sit behind the service worker's cache-first
+   font handler (public/sw.js) — a repeat visit costs zero bytes,
+   which the Fontshare CDN never gave us.
+
+   Fetched into public/fonts/v1/ by scripts/fetch-fonts.mjs, not
+   committed: the ITF Free Font License permits self-hosting and
+   forbids redistribution, and this repo is public. See
+   public/fonts/README.md.
+
+   Declared here but fetched lazily — a @font-face rule nobody
+   matches costs zero font bytes, so a page with the TF flags off
+   pays only for the CSS below. The only thing that can break that
+   is a <link rel=preload>, which is why TfHeroFont stays gated.
+
+   One variable file per family covers every weight the app uses
+   and is smaller than the statics it replaces. It is also the only
+   way the 550 and 650 half-steps on the homepage render as
+   authored; statics would snap them to 600 and 700. */
+
+@font-face {
+  font-family: "Clash Display";
+  src: url("/fonts/v1/ClashDisplay-Variable.woff2") format("woff2-variations");
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "General Sans";
+  src: url("/fonts/v1/GeneralSans-Variable.woff2") format("woff2-variations");
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Boska";
+  src: url("/fonts/v1/Boska-Variable.woff2") format("woff2-variations");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Metric-matched stand-ins. Each reshapes a face the device already
+   has so it occupies the same width and line box as the webfont it
+   covers for — the swap becomes a change of letterform with no
+   reflow. Measured at the weight each face actually renders at
+   (600 for the two sans, 400 for Boska), since advance widths grow
+   with weight on a variable face, and against the system face each
+   src actually resolves to. The hero face is tuned on a sample of
+   the text it really paints — seller nameplates, which sellers type
+   in capitals as often as not, plus headlines and rand prices —
+   because Clash Display's capitals and figures are much narrower
+   against Arial than its lowercase is. Tuned on lowercase instead,
+   the stand-in ran 13.5% wide on an all-caps shop name and wrapped
+   the nameplate onto a second line until the real font arrived.
+   Regenerate with `python scripts/font-fallback-metrics.py` rather
+   than by hand.
+
+   These sit ahead of Inter in the token chains below. Inter is the
+   nicer-looking stand-in but it is a webfont under a hashed family
+   name, so no @font-face can point at it and no override can be
+   tuned to it. A reflow is worse than a letterform. */
+
+@font-face {
+  font-family: "Clash Display Fallback";
+  src: local("Arial"), local("Roboto"), local("Helvetica Neue"), local("Liberation Sans");
+  size-adjust: 104.88%;
+  ascent-override: 84.86%;
+  descent-override: 23.84%;
+  line-gap-override: 8.58%;
+}
+
+@font-face {
+  font-family: "General Sans Fallback";
+  src: local("Arial"), local("Roboto"), local("Helvetica Neue"), local("Liberation Sans");
+  size-adjust: 107.75%;
+  ascent-override: 93.73%;
+  descent-override: 22.27%;
+  line-gap-override: 9.28%;
+}
+
+@font-face {
+  font-family: "Boska Fallback";
+  src: local("Times New Roman"), local("Tinos"), local("Liberation Serif"), local("Georgia");
+  size-adjust: 99.96%;
+  ascent-override: 96.04%;
+  descent-override: 25.01%;
+  line-gap-override: 9.00%;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 body {
@@ -579,10 +672,10 @@ h4, h5, h6 {
 
   /* Type — loaded by <TfFonts/> only when UI_REDESIGN is on             */
   /* Hero headlines — Clash Display (ultra-high-contrast geometric)       */
-  --font-tf-hero: "Clash Display", "General Sans", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-tf-hero: "Clash Display", "Clash Display Fallback", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   /* UI headings  — General Sans (warm humanist)                          */
-  --font-tf-display: "General Sans", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-tf-editorial: "Boska", Georgia, "Times New Roman", serif;
+  --font-tf-display: "General Sans", "General Sans Fallback", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-tf-editorial: "Boska", "Boska Fallback", Georgia, "Times New Roman", serif;
 
   /* Restrained, warm-tinted elevation */
   --shadow-tf-sm: 0 1px 2px 0 rgb(26 26 23 / 0.05), 0 1px 3px 0 rgb(26 26 23 / 0.06);

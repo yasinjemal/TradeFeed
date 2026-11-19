@@ -27,7 +27,7 @@ import { GrowthApplicationForm } from "@/components/growth/growth-application-fo
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { TfBadge } from "@/components/tf/badge";
 import { TfButton } from "@/components/tf/button";
-import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { TfLandingHeader } from "@/components/tf/landing/tf-header";
 import { TfLandingStickyCta } from "@/components/tf/landing/sticky-cta";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
@@ -165,7 +165,7 @@ export const metadata: Metadata = {
 export default function GrowthPage() {
   return (
     <main className="bg-tf-deepest text-tf-ink">
-      <TfFonts />
+      <TfHeroFont />
 
       <TfLandingHeader>
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">

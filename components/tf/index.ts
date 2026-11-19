@@ -3,7 +3,7 @@
 // Gate every usage behind FEATURE_FLAGS.UI_REDESIGN.
 // ============================================================
 
-export { TfFonts } from "./tf-fonts";
+export { TfHeroFont } from "./tf-fonts";
 export { TfButton, tfButtonVariants } from "./button";
 export { TfInput } from "./input";
 export { TfBadge, tfBadgeVariants } from "./badge";

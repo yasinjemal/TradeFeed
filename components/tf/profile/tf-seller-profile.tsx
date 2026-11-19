@@ -6,7 +6,7 @@ import { ArrowRight, Flame, MessageCircle, Share2, Store } from "lucide-react";
 import { RecentlyViewedStrip } from "@/components/catalog/recently-viewed-strip";
 import { TrackedWhatsAppLink } from "@/components/analytics/tracked-whatsapp-link";
 import { TfButton } from "@/components/tf/button";
-import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfComboRail, type TfCombo } from "@/components/tf/storefront/tf-combo-rail";
 import { TfReviewsBlock, type TfReview } from "@/components/tf/storefront/tf-reviews";
@@ -197,7 +197,7 @@ export function TfSellerProfile({
 
   return (
     <div className="space-y-8 pb-28">
-      <TfFonts />
+      <TfHeroFont />
       <TfLightMediaProbe />
 
       {/* 1 ── The seller, set in type. No hero image, by design. */}

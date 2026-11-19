@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PackageSearch, ShieldCheck } from "lucide-react";
 
-import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { TfTrackingSearch } from "./tf-tracking-search";
@@ -9,7 +9,7 @@ import { TfTrackingSearch } from "./tf-tracking-search";
 export function TfTrackingLanding() {
   return (
     <main className="min-h-screen bg-tf-surface text-tf-ink">
-      <TfFonts />
+      <TfHeroFont />
       <header className="border-b border-tf-stone-200 bg-tf-raised/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
           <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="auto" /></Link>
@@ -44,7 +44,7 @@ export function TfTrackingLanding() {
 export function TfTrackingNotFound({ orderNumber }: { orderNumber: string }) {
   return (
     <main className="min-h-screen bg-tf-surface text-tf-ink">
-      <TfFonts />
+      <TfHeroFont />
       <header className="border-b border-tf-stone-200 bg-tf-raised/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
           <Link href="/" aria-label="TradeFeed home"><TradeFeedLogo size="sm" variant="auto" /></Link>

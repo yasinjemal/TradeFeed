@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
 import { formatZAR } from "@/types";
 import { TfButton } from "@/components/tf/button";
 import { TfEmptyState } from "@/components/tf/empty-state";
-import { TfFonts } from "@/components/tf/tf-fonts";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
 import { TfCountUp } from "@/components/tf/motion/tf-count-up";
 import { TfShareCatalogue } from "./tf-share-catalogue";
@@ -79,7 +78,6 @@ export function TfDashboardHome({
 
   return (
     <div className="space-y-5 text-tf-ink">
-      <TfFonts />
 
       {/* ── Identity ───────────────────────────────────── */}
       <div className="flex items-center gap-3">

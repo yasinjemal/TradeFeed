@@ -15,7 +15,7 @@ import { unstable_cache } from "next/cache";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { CreateShopForm } from "@/components/shop/create-shop-form";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
-import { TfFonts } from "@/components/tf/tf-fonts";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { TfCreateShop } from "@/components/tf/onboarding/tf-create-shop";
 
 const AVATAR_GRADIENTS = [
@@ -96,7 +96,7 @@ export default async function CreateShopPage() {
   if (FEATURE_FLAGS.UI_REDESIGN_DASHBOARD) {
     return (
       <>
-        <TfFonts />
+        <TfHeroFont />
         <TfCreateShop sellerLabel={sellerLabel} />
       </>
     );
