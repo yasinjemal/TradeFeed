@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { HowItWorksSection } from "@/components/landing/how-it-works-section";
@@ -120,7 +121,7 @@ export default async function HowItWorksPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonLd({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [

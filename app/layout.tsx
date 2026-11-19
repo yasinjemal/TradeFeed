@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
@@ -105,7 +106,7 @@ export default async function RootLayout({
               key={`site-ld-${i}`}
               nonce={nonce}
               type="application/ld+json"
-              dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+              dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }}
             />
           ))}
           {/* PWA */}

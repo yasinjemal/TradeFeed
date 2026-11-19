@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import * as React from "react";
 import Link from "next/link";
 
@@ -51,7 +52,7 @@ export function SeoPageShell({ breadcrumb, children }: SeoPageShellProps) {
     <div className="min-h-screen bg-tf-surface text-tf-ink">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }}
       />
 
       <header className="sticky top-0 z-30 border-b border-tf-stone-200 bg-tf-surface/95 backdrop-blur-sm">

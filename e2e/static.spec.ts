@@ -4,7 +4,7 @@
 // Verifies static pages render correctly.
 // ============================================================
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Static Pages", () => {
   test("privacy policy page loads", async ({ page }) => {

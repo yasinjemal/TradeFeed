@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -45,7 +46,7 @@ const FAQ = [
 export default function SellOnWhatsappPage() {
   return (
     <SeoPageShell breadcrumb={{ name: "Sell on WhatsApp", path: "/sell-on-whatsapp" }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(HOWTO_LD) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(HOWTO_LD) }} />
 
       <h1 className="font-tf-display text-4xl font-semibold leading-tight tracking-tight">
         How to sell on WhatsApp — without the chaos

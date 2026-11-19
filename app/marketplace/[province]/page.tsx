@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import { allowDiscoveryPromotions } from "@/lib/marketplace/promoted-context";
 import type { Metadata } from "next";
 import { provinceIndexable, robotsFor } from "@/lib/seo/should-index";
@@ -147,7 +148,7 @@ export default async function ProvincePage({ params, searchParams }: Props) {
         <script
           key={i}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(ld) }}
         />
       ))}
 
