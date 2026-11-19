@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import * as React from "react";
 
 // ============================================================
@@ -23,7 +24,7 @@ export function SeoFaq({ items, title = "Frequently asked questions" }: { items:
 
   return (
     <section className="mt-12" aria-label={title}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(ld) }} />
       <h2 className="font-tf-display text-2xl font-semibold tracking-tight">{title}</h2>
       <dl className="mt-4 divide-y divide-tf-stone-200 rounded-xl border border-tf-stone-200 bg-tf-raised">
         {items.map((i) => (

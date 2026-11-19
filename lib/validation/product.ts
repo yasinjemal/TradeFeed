@@ -14,11 +14,7 @@
 // ============================================================
 
 import { z } from "zod";
-
-/** Strip HTML/script tags to prevent XSS in user-provided text */
-function stripHtml(str: string): string {
-  return str.replace(/<[^>]*>/g, "");
-}
+import { stripHtml } from "./strip-html";
 
 /**
  * Schema for creating a new product.
