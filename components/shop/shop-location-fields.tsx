@@ -1,8 +1,8 @@
 // ============================================================
 // Component — Shop Location Fields (City + Province)
 // ============================================================
-// Required location inputs shared by the /get-started and
-// /create-shop signup forms. City is free text with suggestions;
+// Required location inputs for the /get-started signup form.
+// City is free text with suggestions;
 // typing a known city auto-selects the province.
 //
 // WHY REQUIRED: the marketplace province/city SEO pages can only

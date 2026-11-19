@@ -1,7 +1,12 @@
+import { sellerCta } from "@/lib/config/seller-cta";
+import { TfSiteFooter } from "@/components/tf/site/site-footer";
+import { TfSiteHeader } from "@/components/tf/site/site-header";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { unstable_cache } from "next/cache";
+import { getLandingPlatformStats } from "@/lib/db/landing-proof";
+import { proofCounterValue, statsBlockCounters } from "@/lib/growth/landing-proof";
+import { SITE_ORIGIN } from "@/lib/seo/site-url";
 import { auth } from "@clerk/nextjs/server";
 import { WhatsAppImportFlow } from "@/components/import/whatsapp-import-flow";
 
@@ -15,13 +20,14 @@ import { WhatsAppImportFlow } from "@/components/import/whatsapp-import-flow";
 
 export const revalidate = 3600; // 1 hour
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+// Never localhost in production — see lib/seo/site-url.ts.
+const APP_URL = SITE_ORIGIN;
 
 export const metadata: Metadata = {
-  title:
-    "Import Your WhatsApp Catalogue to TradeFeed — Free Online Shop in 30 Seconds",
+  // The root layout appends the brand — don't repeat it here.
+  title: "Import Your WhatsApp Catalogue — Free Online Shop in 30 Seconds",
   description:
-    "Turn your WhatsApp Business catalogue into a professional online shop instantly. Upload your product photos or paste your catalogue link — AI creates the listings. Free to start. Join 100+ South African sellers on TradeFeed.",
+    "Turn your WhatsApp Business catalogue into a professional online shop instantly. Upload your product photos or paste your catalogue link — AI creates the listings. Free to start.",
   keywords: [
     "import WhatsApp catalogue",
     "WhatsApp catalogue to online shop",
@@ -54,20 +60,15 @@ export const metadata: Metadata = {
   },
 };
 
-const getPlatformStats = unstable_cache(
-  async () => {
-    const [shopCount, productCount] = await Promise.all([
-      db.shop.count({ where: { isActive: true } }),
-      db.product.count({ where: { isActive: true } }),
-    ]);
-    return { shopCount, productCount };
-  },
-  ["import-page-stats"],
-  { revalidate: 600 },
-);
-
 export default async function ImportWhatsAppCataloguePage() {
-  const { shopCount, productCount } = await getPlatformStats();
+  // Counters are shown only above their thresholds, and never as a
+  // made-up floor ("at least 50 sellers"). A failed query is "unknown":
+  // the proof is hidden and the page still renders.
+  const stats = await getLandingPlatformStats().catch(() => null);
+  const shopCount = proofCounterValue(stats, "shops");
+  const statCounters = statsBlockCounters(stats).filter(
+    (counter) => counter.key === "shops" || counter.key === "products",
+  );
 
   // ── Auth check: show import flow for users with a shop ────
   const { userId: clerkId } = await auth();
@@ -89,7 +90,17 @@ export default async function ImportWhatsAppCataloguePage() {
     shopName = user?.shops[0]?.shop.name ?? null;
   }
 
+  // Shown only to visitors without a shop: the single sign-up path.
+  const signUpCta = sellerCta({ isSignedIn: !!clerkId });
+
   return (
+    <>
+    {/* Same header and footer as /sell (overlay: this hero is dark too). */}
+    <TfSiteHeader
+      variant="overlay"
+      cta={sellerCta({ isSignedIn: !!clerkId, dashboardSlug: shopSlug })}
+      isSignedIn={!!clerkId}
+    />
     <main className="min-h-screen bg-stone-950 text-stone-100">
       {/* ── Hero ─────────────────────────────────────────── */}
       <section className="relative pt-24 pb-20 px-5 overflow-hidden">
@@ -106,7 +117,9 @@ export default async function ImportWhatsAppCataloguePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            {Math.max(shopCount, 50)}+ sellers already on TradeFeed
+            {shopCount !== null
+              ? `${shopCount.toLocaleString("en-ZA")} registered shops on TradeFeed`
+              : "Works with your WhatsApp Business catalogue"}
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.08]">
@@ -129,13 +142,13 @@ export default async function ImportWhatsAppCataloguePage() {
             <>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
-                  href={clerkId ? "/create-shop" : "/sign-up"}
+                  href={signUpCta.href}
                   className="group inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl bg-gradient-to-r from-[#25D366] to-emerald-500 text-white hover:from-[#20BD5A] hover:to-emerald-400 transition-all shadow-2xl shadow-emerald-600/25 hover:shadow-emerald-500/35 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto"
                 >
                   <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current mr-2" aria-hidden="true">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                   </svg>
-                  {clerkId ? "Create Your Shop First" : "Import My Catalogue — Free"}
+                  {signUpCta.label}
                   <svg
                     className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"
                     fill="none"
@@ -202,10 +215,10 @@ export default async function ImportWhatsAppCataloguePage() {
                 seconds.
               </p>
               <Link
-                href="/create-shop"
+                href={signUpCta.href}
                 className="mt-4 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-500 transition-colors"
               >
-                Create My Shop — Free
+                {signUpCta.label}
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -347,34 +360,28 @@ export default async function ImportWhatsAppCataloguePage() {
         </div>
       </section>
 
-      {/* ── Social Proof Stats ───────────────────────────── */}
-      <section className="py-16 px-5 border-t border-stone-800/30">
-        <div className="max-w-3xl mx-auto">
-          <div className="rounded-2xl bg-gradient-to-br from-emerald-950/50 to-stone-900/80 border border-emerald-500/10 p-10 text-center">
-            <p className="text-[11px] font-medium text-emerald-400 uppercase tracking-widest mb-4">
-              Growing Platform
-            </p>
-            <div className="grid grid-cols-3 gap-6">
-              <div>
-                <p className="text-3xl font-extrabold text-emerald-400">
-                  {Math.max(shopCount, 10)}+
-                </p>
-                <p className="text-xs text-stone-500 mt-1">Active Sellers</p>
-              </div>
-              <div>
-                <p className="text-3xl font-extrabold text-stone-100">
-                  {Math.max(productCount, 50)}+
-                </p>
-                <p className="text-xs text-stone-500 mt-1">Products Listed</p>
-              </div>
-              <div>
-                <p className="text-3xl font-extrabold text-stone-100">9</p>
-                <p className="text-xs text-stone-500 mt-1">SA Provinces</p>
+      {/* ── Platform numbers — only when both clear their thresholds ── */}
+      {statCounters.length === 2 && (
+        <section className="py-16 px-5 border-t border-stone-800/30">
+          <div className="max-w-3xl mx-auto">
+            <div className="rounded-2xl bg-gradient-to-br from-emerald-950/50 to-stone-900/80 border border-emerald-500/10 p-10 text-center">
+              <p className="text-[11px] font-medium text-emerald-400 uppercase tracking-widest mb-4">
+                On TradeFeed today
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                {statCounters.map((counter) => (
+                  <div key={counter.key}>
+                    <p className="text-3xl font-extrabold text-emerald-400 tabular-nums">
+                      {counter.value.toLocaleString("en-ZA")}
+                    </p>
+                    <p className="text-xs text-stone-400 mt-1">{counter.label}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── FAQ Section ──────────────────────────────────── */}
       <section className="py-20 px-5 bg-stone-900/20 border-t border-stone-800/30">
@@ -449,8 +456,10 @@ export default async function ImportWhatsAppCataloguePage() {
             Online?
           </h2>
           <p className="mt-4 text-stone-400 text-lg">
-            Join {Math.max(shopCount, 50)}+ South African sellers who already
-            upgraded from WhatsApp-only selling.
+            {shopCount !== null && (
+              <>Join {shopCount.toLocaleString("en-ZA")} registered shops on TradeFeed. </>
+            )}
+            Keep taking orders on WhatsApp — your catalogue link does the showing.
           </p>
           {shopSlug ? (
             <button
@@ -461,10 +470,10 @@ export default async function ImportWhatsAppCataloguePage() {
             </button>
           ) : (
             <Link
-              href={clerkId ? "/create-shop" : "/sign-up"}
+              href={signUpCta.href}
               className="mt-8 inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-[#25D366] to-emerald-500 text-base font-bold text-white shadow-2xl shadow-emerald-600/25 hover:shadow-emerald-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all"
             >
-              {clerkId ? "Create Your Shop First" : "Import My Catalogue — Free"}
+              {signUpCta.label}
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -496,5 +505,7 @@ export default async function ImportWhatsAppCataloguePage() {
         </Link>
       </div>
     </main>
+    <TfSiteFooter />
+    </>
   );
 }

@@ -20,7 +20,7 @@ import { db } from "@/lib/db";
 /**
  * Get the list of admin Clerk user IDs from env.
  */
-function getAdminUserIds(): string[] {
+export function getAdminUserIds(): string[] {
   const raw = process.env.ADMIN_USER_IDS || "";
   return raw
     .split(",")

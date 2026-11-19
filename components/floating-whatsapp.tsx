@@ -25,15 +25,18 @@ export function FloatingWhatsApp() {
   }, []);
 
   // Keep conversion and transactional surfaces free of a competing floating CTA.
+  // /sell is an exact match: its sticky sign-up bar is the one floating
+  // action on that page (support is linked from the footer).
   if (
     pathname === "/" ||
+    pathname === "/sell" ||
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/catalog") ||
     pathname.startsWith("/marketplace") ||
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
-    pathname.startsWith("/create-shop") ||
+    pathname.startsWith("/get-started") ||
     pathname.startsWith("/growth") ||
     pathname.startsWith("/hunt")
   ) {

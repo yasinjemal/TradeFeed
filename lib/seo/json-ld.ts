@@ -15,7 +15,11 @@
 // REF: https://developers.google.com/search/docs/appearance/structured-data/product
 // ============================================================
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+import { COMPANY, type CompanyProfile } from "@/lib/config/company";
+import { SITE_ORIGIN } from "@/lib/seo/site-url";
+
+// Never localhost in production — see lib/seo/site-url.ts.
+const APP_URL = SITE_ORIGIN;
 
 /**
  * Convert an UploadThing CDN URL to our image proxy URL.
@@ -32,21 +36,43 @@ function toProxiedImageUrl(rawUrl: string): string {
 /**
  * JSON-LD for the root layout — renders once across the site.
  * Schema: Organization + WebSite with SearchAction (sitelinks search box)
+ *
+ * Identity fields come from lib/config/company.ts. Anything the owner
+ * has not supplied there is omitted — structured data must not state
+ * a legal name, address or social profile that is not real.
  */
-export function generateSiteJsonLd() {
+export function generateSiteJsonLd(company: CompanyProfile = COMPANY) {
   const organization: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "TradeFeed",
+    name: company.brandName,
+    ...(company.legalName && { legalName: company.legalName }),
     url: APP_URL,
     logo: `${APP_URL}/icon.svg`,
     description:
       "TradeFeed is South Africa's WhatsApp-first commerce platform and marketplace. Sellers create a free online shop, AI writes their listings from a photo, and buyers order via WhatsApp.",
-    sameAs: [],
+    email: company.supportEmail,
+    ...(company.vatNumber && { vatID: company.vatNumber }),
+    ...(company.address && {
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: company.address.street,
+        addressLocality: company.address.locality,
+        addressRegion: company.address.region,
+        postalCode: company.address.postalCode,
+        addressCountry: "ZA",
+      },
+    }),
+    ...(company.socialLinks.length > 0 && { sameAs: [...company.socialLinks] }),
     contactPoint: {
       "@type": "ContactPoint",
-      contactType: "customer service",
-      availableLanguage: ["English", "Afrikaans", "Zulu", "Xhosa", "Sotho"],
+      contactType: "customer support",
+      email: company.supportEmail,
+      telephone: `+${company.supportWhatsApp}`,
+      url: `${APP_URL}/contact`,
+      areaServed: "ZA",
+      // TODO(owner): add the other languages support is actually offered in.
+      availableLanguage: ["English"],
     },
     areaServed: {
       "@type": "Country",

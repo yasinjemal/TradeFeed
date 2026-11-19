@@ -81,8 +81,10 @@ const isPublicRoute = createRouteMatcher([
   "/city/(.*)",                     // Legacy city pages (308 → /marketplace/[province]/[city])
   "/faq",
   "/how-it-works",
+  "/about",
   // ── Anonymous-reachable app routes (each page enforces its own auth:
-  // /get-started redirects to sign-in, /invite + /review validate tokens,
+  // /get-started redirects guests to sign-up, /create-shop redirects to
+  // /get-started, /invite + /review validate tokens,
   // /pay + /whatsapp-login are buyer-facing with zero auth by design) ──
   "/create-shop",
   "/get-started",

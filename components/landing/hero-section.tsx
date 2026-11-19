@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { FadeIn } from "./fade-in";
 
 interface HeroSectionProps {
-  badge: string;
+  /** Omitted when there is no seller count worth showing. */
+  badge?: string;
   title: string;
   titleHighlight: string;
   subtitle: string;
@@ -16,7 +17,8 @@ interface HeroSectionProps {
   ctaSecondaryHref: string;
   benefits: string[];
   proofSellers: string;
-  proofCities: string;
+  /** Real cities with the most shops. The whole line is hidden without them. */
+  proofCities?: string;
 }
 
 export function HeroSection({
@@ -55,15 +57,17 @@ export function HeroSection({
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           {/* Badge */}
-          <FadeIn>
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-200/60 px-4 py-1.5 text-xs font-medium text-blue-700 mb-8">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" />
-              </span>
-              {badge}
-            </div>
-          </FadeIn>
+          {badge && (
+            <FadeIn>
+              <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-200/60 px-4 py-1.5 text-xs font-medium text-blue-700 mb-8">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" />
+                </span>
+                {badge}
+              </div>
+            </FadeIn>
+          )}
 
           {/* Headline */}
           <FadeIn delay={0.1}>
@@ -90,29 +94,16 @@ export function HeroSection({
             </div>
           </FadeIn>
 
-          {/* Inline social proof */}
-          <FadeIn delay={0.3}>
-            <div className="mt-6 flex items-center justify-center gap-3">
-              <div className="flex -space-x-2">
-                {[
-                  "from-amber-400 to-orange-500",
-                  "from-blue-400 to-indigo-500",
-                  "from-pink-400 to-rose-500",
-                ].map((gradient, i) => (
-                  <div
-                    key={i}
-                    className={`w-8 h-8 rounded-full bg-gradient-to-br ${gradient} border-2 border-white flex items-center justify-center text-[9px] font-bold text-white shadow-sm`}
-                  >
-                    {["JHB", "CPT", "DBN"][i]}
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-slate-500">
+          {/* Inline social proof — real cities only. The line is dropped when
+              there are none, rather than naming cities we cannot back up. */}
+          {proofCities && (
+            <FadeIn delay={0.3}>
+              <p className="mt-6 text-sm text-slate-500">
                 {proofSellers}{" "}
                 <span className="text-slate-600 font-medium">{proofCities}</span>
               </p>
-            </div>
-          </FadeIn>
+            </FadeIn>
+          )}
 
           {/* CTAs */}
           <FadeIn delay={0.35}>

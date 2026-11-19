@@ -1,3 +1,4 @@
+import { sellerCta } from "@/lib/config/seller-cta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
@@ -11,7 +12,8 @@ import { PLANS } from "@/lib/billing/plans";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
 export const metadata: Metadata = {
-  title: "TradeFeed Pricing — Free to Start, Plans from R99/month",
+  // The root layout appends the brand — don't repeat it here.
+  title: "Pricing — Free to Start, Plans from R99/month",
   description:
     "Honest pricing in rand: Free (20 products, 10 AI listings/month), Starter R99, Pro R299, Pro AI R499. No hidden fees, no card to start, cancel anytime.",
   alternates: { canonical: `${APP_URL}/pricing` },
@@ -77,7 +79,7 @@ export default function PricingPage() {
               ))}
             </ul>
             <TfButton asChild fullWidth variant={plan.popular ? "primary" : "secondary"} className="mt-5">
-              <Link href="/sign-up">{plan.priceMonthly === 0 ? "Start free" : `Choose ${plan.name}`}</Link>
+              <Link href={sellerCta().href}>{plan.priceMonthly === 0 ? "Start free" : `Choose ${plan.name}`}</Link>
             </TfButton>
           </div>
         ))}

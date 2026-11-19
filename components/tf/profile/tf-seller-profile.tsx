@@ -1,3 +1,4 @@
+import { SELLER_SIGN_UP_PATH } from "@/lib/config/seller-cta";
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -360,7 +361,7 @@ export function TfSellerProfile({
             One photo, one link, orders on WhatsApp. 20 products free.
           </p>
           <TfButton asChild className="mt-4">
-            <Link href="/create-shop">Create your free shop</Link>
+            <Link href={SELLER_SIGN_UP_PATH}>Create your free shop</Link>
           </TfButton>
         </div>
       )}

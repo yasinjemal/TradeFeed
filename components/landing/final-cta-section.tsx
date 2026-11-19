@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { FadeIn } from "./fade-in";
 
 interface FinalCTASectionProps {
-  badge: string;
+  /** Omitted when there is no seller count worth showing. */
+  badge?: string;
   title: string;
   titleHighlight: string;
   subtitle: string;
@@ -47,11 +48,13 @@ export function FinalCTASection({
       </div>
 
       <div className="relative mx-auto max-w-3xl px-6 lg:px-8 text-center">
-        <FadeIn>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs font-medium text-blue-300 mb-8 backdrop-blur-sm">
-            🚀 {badge}
-          </div>
-        </FadeIn>
+        {badge && (
+          <FadeIn>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-4 py-1.5 text-xs font-medium text-blue-300 mb-8 backdrop-blur-sm">
+              🚀 {badge}
+            </div>
+          </FadeIn>
+        )}
 
         <FadeIn delay={0.1}>
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">

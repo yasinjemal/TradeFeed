@@ -1,5 +1,6 @@
 "use client";
 
+import { SELLER_CTA_LABEL, SELLER_SIGN_UP_PATH } from "@/lib/config/seller-cta";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -153,8 +154,8 @@ export default function WhatsAppLoginPage() {
 
         <p className="mt-6 text-center text-xs text-slate-400">
           Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="text-blue-600 hover:text-blue-500 font-medium">
-            Start selling free →
+          <Link href={SELLER_SIGN_UP_PATH} className="text-blue-600 hover:text-blue-500 font-medium">
+            {SELLER_CTA_LABEL} →
           </Link>
         </p>
       </div>

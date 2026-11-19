@@ -3,14 +3,12 @@ import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth/admin";
-import { unstable_cache } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { FaqItem } from "@/components/landing/animated-stats";
 import { HeroSection } from "@/components/landing/hero-section";
 import { SocialProofSection } from "@/components/landing/social-proof-section";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { HowItWorksSection } from "@/components/landing/how-it-works-section";
-import { ProductPreviewSection } from "@/components/landing/product-preview-section";
 import { FinalCTASection } from "@/components/landing/final-cta-section";
 import { CustomDomainSection } from "@/components/landing/custom-domain-section";
 import { FadeIn } from "@/components/landing/fade-in";
@@ -20,8 +18,15 @@ import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
 import { generateFaqJsonLd } from "@/lib/seo/json-ld";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { PLAN_COMPARISON } from "@/lib/billing/plans";
-import { getMarketplaceProducts } from "@/lib/db/marketplace";
+import {
+  getLandingFeaturedProducts,
+  getLandingFeaturedShops,
+  getLandingPlatformStats,
+} from "@/lib/db/landing-proof";
+import { proofCounterValue } from "@/lib/growth/landing-proof";
+import { sellerCta } from "@/lib/config/seller-cta";
 import { TfLanding } from "@/components/tf/landing/tf-landing";
+import { JsonLdScript } from "@/components/tf/site/json-ld-script";
 import { SA_PROVINCES } from "@/lib/marketplace/locations";
 import { GrowthSpotlight } from "@/components/growth/growth-spotlight";
 import type { Metadata } from "next";
@@ -78,7 +83,6 @@ import { FAQ_ITEMS } from "@/lib/seo/faq-items";
 //   1. Sticky Navbar (auth-aware)
 //   2. Hero (animated gradient mesh, live stats, dual CTA)
 //   3. Trusted-By Logo Bar
-//   4. Mock Catalog Preview (desktop + phone)
 //   5. WhatsApp Before/After
 //   6. How It Works (3 steps + connecting line)
 //   7. Feature Showcase (12 cards)
@@ -90,94 +94,8 @@ import { FAQ_ITEMS } from "@/lib/seo/faq-items";
 //  13. Footer (extended)
 // ============================================================
 
-// Cache platform stats for 5 minutes — avoids DB queries on every landing page hit
-const getPlatformStats = unstable_cache(
-  async () => {
-    const [shopCount, productCount, orderCount, cityRows] = await Promise.all([
-      db.shop.count({ where: { isActive: true } }),
-      db.product.count({ where: { isActive: true } }),
-      db.order.count(),
-      db.shop.findMany({
-        where: { isActive: true, city: { not: null } },
-        select: { city: true },
-        distinct: ["city"],
-      }),
-    ]);
-
-    const cityCount = cityRows.length;
-
-    // Top cities by seller density — for the hero social proof line
-    const cityCounts = await db.shop.groupBy({
-      by: ["city"],
-      where: { isActive: true, city: { not: null } },
-      _count: { id: true },
-      orderBy: { _count: { id: "desc" } },
-      take: 3,
-    });
-    const topCities = cityCounts
-      .map((r) => r.city!)
-      .filter(Boolean)
-      .join(", ");
-
-    return { shopCount, productCount, orderCount, cityCount, topCities };
-  },
-  ["platform-stats"],
-  { revalidate: 300 } // 5 minutes
-);
-
-// Cache featured sellers for 10 minutes — real social proof on the homepage
-const getHomepageSellers = unstable_cache(
-  async () => {
-    const shops = await db.shop.findMany({
-      where: {
-        isActive: true,
-        products: { some: { isActive: true } },
-      },
-      select: {
-        name: true,
-        slug: true,
-        logoUrl: true,
-        city: true,
-        isVerified: true,
-        _count: { select: { products: { where: { isActive: true } } } },
-      },
-      orderBy: [{ isFeaturedShop: "desc" }, { isVerified: "desc" }, { createdAt: "asc" }],
-      take: 12, // fetch more, then filter by quality gate below
-    });
-    // Quality gate: only show sellers with at least 3 active products
-    return shops.filter((s) => s._count.products >= 3).slice(0, 6);
-  },
-  ["homepage-sellers"],
-  { revalidate: 600 } // 10 minutes
-);
-
-// Cache the homepage marketplace preview for 5 minutes — real products,
-// already mapped to TfProductCard props so the cache stores plain JSON.
-const getHomepageProducts = unstable_cache(
-  async () => {
-    const { products } = await getMarketplaceProducts({
-      sortBy: "quality",
-      page: 1,
-      pageSize: 8,
-    });
-    return products.map((p) => ({
-      href: `/catalog/${p.shop.slug}/products/${p.slug ?? p.id}`,
-      title: p.name,
-      price: p.minPriceCents / 100,
-      imageUrl: p.imageUrl,
-      sellerName: p.shop.name,
-      sellerVerified: p.shop.isVerified,
-      rating: p.avgRating ?? undefined,
-      ratingCount: p.reviewCount > 0 ? p.reviewCount : undefined,
-      location: p.shop.city ?? p.shop.province ?? undefined,
-      whatsappNumber: p.shop.whatsappNumber,
-      isNew:
-        Date.now() - new Date(p.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000,
-    }));
-  },
-  ["homepage-products"],
-  { revalidate: 300 } // 5 minutes
-);
+// Counters, featured shops and showcase products are loaded and
+// quality-gated in lib/db/landing-proof.ts + lib/growth/landing-proof.ts.
 
 export default async function HomePage() {
   // ── i18n ──────────────────────────────────────────────
@@ -209,51 +127,43 @@ export default async function HomePage() {
     }
   }
 
-  const ctaHref = clerkId
-    ? dashboardSlug
-      ? `/dashboard/${dashboardSlug}`
-      : "/create-shop"
-    : "/sign-up";
-  const ctaLabel = clerkId
-    ? dashboardSlug
-      ? "Go to Dashboard"
-      : "Create Your Shop"
-    : "Create My Free Shop";
+  // One label, one sign-up path — see lib/config/seller-cta.ts
+  const cta = sellerCta({ isSignedIn: !!clerkId, dashboardSlug });
+  const { href: ctaHref, label: ctaLabel } = cta;
 
-  // ── AI CTA — deep-links to product creation with AI pre-opened ──
-  const aiCtaHref = clerkId
-    ? dashboardSlug
-      ? `/dashboard/${dashboardSlug}/products/new?ai=true`
-      : "/create-shop?ai=true"
-    : "/sign-up?redirect_url=/dashboard&ai=true";
+  // ── AI CTA — a seller with a shop deep-links to product creation with
+  // AI pre-opened; everyone else takes the same sign-up path as every
+  // other button (onboarding starts with a product photo anyway).
+  const aiCtaHref = dashboardSlug
+    ? `/dashboard/${dashboardSlug}/products/new?ai=true`
+    : ctaHref;
+  const billingHref = dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : ctaHref;
 
-  // ── Live platform stats (cached) + admin check + sellers (parallel) ──
+  // ── Live platform proof (cached) + admin check (parallel) ──
   // Every source is individually failure-safe: a DB blip must degrade
-  // the landing page (zero stats, empty rails), never error-boundary it.
-  const [{ shopCount, productCount, orderCount, cityCount, topCities }, adminClerkId, featuredSellers, homeProducts] = await Promise.all([
-    getPlatformStats().catch(() => ({
-      shopCount: 0,
-      productCount: 0,
-      orderCount: 0,
-      cityCount: 0,
-      topCities: "",
-    })),
+  // the landing page, never error-boundary it. A failed stats query is
+  // `null` — "unknown" — so the page hides the counters instead of
+  // printing "0 registered shops".
+  const [stats, adminClerkId, featuredSellers, homeProducts] = await Promise.all([
+    getLandingPlatformStats().catch(() => null),
     isAdmin().catch(() => null),
-    getHomepageSellers().catch(() => []),
-    getHomepageProducts().catch(() => []),
+    getLandingFeaturedShops().catch(() => []),
+    getLandingFeaturedProducts().catch(() => []),
   ]);
   const userIsAdmin = !!adminClerkId;
+
+  // Each counter is a number only when it clears its threshold.
+  const shopCount = proofCounterValue(stats, "shops");
+  const productCount = proofCounterValue(stats, "products");
+  const orderCount = proofCounterValue(stats, "orders");
+  const cityCount = proofCounterValue(stats, "cities");
+  const topCities = stats?.topCities ?? "";
 
   // FAQ rich-results schema — rendered for BOTH skins (the flag
   // branch must never silently drop structured data)
   const faqJsonLd = (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(
-          generateFaqJsonLd(FAQ_ITEMS.map((f) => ({ question: f.q, answer: f.a }))),
-        ),
-      }}
+    <JsonLdScript
+      data={generateFaqJsonLd(FAQ_ITEMS.map((f) => ({ question: f.q, answer: f.a })))}
     />
   );
 
@@ -263,18 +173,10 @@ export default async function HomePage() {
       <>
         {faqJsonLd}
         <TfLanding
-          ctaHref={ctaHref}
-          ctaLabel={ctaLabel}
+          cta={cta}
           isSignedIn={!!clerkId}
-          stats={{ shopCount, productCount, orderCount, cityCount, topCities }}
-          sellers={featuredSellers.map((s) => ({
-            name: s.name,
-            slug: s.slug,
-            logoUrl: s.logoUrl,
-            city: s.city,
-            isVerified: s.isVerified,
-            productCount: s._count.products,
-          }))}
+          stats={stats}
+          sellers={featuredSellers}
           products={homeProducts}
           faqItems={FAQ_ITEMS.map((f) => ({ question: f.q, answer: f.a }))}
         />
@@ -335,7 +237,7 @@ export default async function HomePage() {
             <div className="hidden md:block">
               <LanguageSwitcher />
             </div>
-            <MobileNav ctaHref={ctaHref} ctaLabel={ctaLabel} isSignedIn={!!clerkId} isAdmin={userIsAdmin} stats={{ shops: shopCount, products: productCount, orders: orderCount }} />
+            <MobileNav ctaHref={ctaHref} ctaLabel={ctaLabel} isSignedIn={!!clerkId} isAdmin={userIsAdmin} stats={shopCount !== null && productCount !== null && orderCount !== null ? { shops: shopCount, products: productCount, orders: orderCount } : undefined} />
             {clerkId ? (
               <Link
                 href={ctaHref}
@@ -356,11 +258,11 @@ export default async function HomePage() {
                   {tCommon("signIn")}
                 </Link>
                 <Link
-                  href="/sign-up"
-                  aria-label="Start Selling Free"
+                  href={ctaHref}
+                  aria-label={ctaLabel}
                   className="px-5 py-2.5 text-sm font-semibold rounded-xl bg-blue-600 text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
                 >
-                  <span className="hidden sm:inline">Start Selling Free →</span>
+                  <span className="hidden sm:inline">{ctaLabel} →</span>
                   <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                   </svg>
@@ -375,7 +277,7 @@ export default async function HomePage() {
           SECTION 2 — HERO
       ───────────────────────────────────────────────────── */}
       <HeroSection
-        badge={tLanding("hero.badge", { shopCount })}
+        badge={shopCount !== null ? tLanding("hero.badge", { shopCount }) : undefined}
         title={tLanding("hero.title")}
         titleHighlight={tLanding("hero.titleHighlight")}
         subtitle={tLanding("hero.subtitle")}
@@ -390,7 +292,7 @@ export default async function HomePage() {
           tLanding("hero.benefitWhatsApp"),
         ]}
         proofSellers={tLanding("hero.proofSellers")}
-        proofCities={topCities || tLanding("hero.proofCities")}
+        proofCities={topCities || undefined}
       />
 
       {/* ─────────────────────────────────────────────────────
@@ -410,11 +312,6 @@ export default async function HomePage() {
           ordersViaChat: tLanding("trustedBy.ordersViaChat"),
         }}
       />
-
-      {/* ─────────────────────────────────────────────────────
-          SECTION 4 — CATALOG PREVIEW
-      ───────────────────────────────────────────────────── */}
-      <ProductPreviewSection />
 
       {/* ─────────────────────────────────────────────────────
           SECTION 4b — FEATURED SELLERS
@@ -456,7 +353,7 @@ export default async function HomePage() {
                           )}
                         </div>
                         <p className="text-[11px] text-slate-500">
-                          {seller.city && <>{"\uD83D\uDCCD"} {seller.city} &middot; </>}{seller._count.products} {seller._count.products === 1 ? "product" : "products"}
+                          {seller.city && <>{"\uD83D\uDCCD"} {seller.city} &middot; </>}{seller.productCount} {seller.productCount === 1 ? "product" : "products"}
                         </p>
                       </div>
                     </div>
@@ -471,7 +368,7 @@ export default async function HomePage() {
                   href={ctaHref}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-500 hover:shadow-xl hover:shadow-blue-500/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
                 >
-                  Join These Sellers — It&apos;s Free →
+                  {ctaLabel} →
                 </Link>
               </div>
             </div>
@@ -561,7 +458,7 @@ export default async function HomePage() {
                     );
                   })}
                 </ul>
-                <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-50 hover:border-slate-400 transition-all">
+                <Link href={ctaHref} className="block w-full text-center px-6 py-3.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-50 hover:border-slate-400 transition-all">
                   {tLanding("pricing.freePlan.cta")}
                 </Link>
               </div>
@@ -601,7 +498,7 @@ export default async function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-500 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+                <Link href={billingHref} className="block w-full text-center px-6 py-3.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-500 hover:-translate-y-0.5 active:translate-y-0 transition-all">
                   Get Starter →
                 </Link>
               </div>
@@ -638,7 +535,7 @@ export default async function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-500 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+                <Link href={billingHref} className="block w-full text-center px-6 py-3.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-500 hover:-translate-y-0.5 active:translate-y-0 transition-all">
                   {tLanding("pricing.proPlan.cta")}
                 </Link>
               </div>
@@ -679,7 +576,7 @@ export default async function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}/billing` : "/create-shop") : "/sign-up"} className="block w-full text-center px-6 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white font-semibold text-sm shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+                <Link href={billingHref} className="block w-full text-center px-6 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white font-semibold text-sm shadow-lg shadow-violet-600/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all">
                   Upgrade to Pro AI →
                 </Link>
               </div>
@@ -736,52 +633,22 @@ export default async function HomePage() {
       </section>
 
       {/* ─────────────────────────────────────────────────────
-          SECTION 8 — TESTIMONIALS & TRUST
+          SECTION 8 — WHAT CHANGES FOR A SELLER
       ───────────────────────────────────────────────────── */}
       <section className="py-24 px-6 lg:px-8 bg-slate-50 border-t border-slate-200">
         <div className="max-w-7xl mx-auto">
           <FadeIn>
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">Why Sellers Love TradeFeed</h2>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">What Changes When You Use TradeFeed</h2>
               <p className="mt-3 text-slate-500 text-lg max-w-xl mx-auto">Built for the way South African sellers actually do business.</p>
             </div>
           </FadeIn>
-
-          {/* Testimonial quotes */}
-          <div className="grid sm:grid-cols-3 gap-6 mb-14">
-            {[
-              { quote: "I used to send 50 photos a day on WhatsApp. Now I share one link and my customers browse and order. Game changer.", name: "Thandi M.", role: "Reseller, Johannesburg", img: "/img/testimonial_thandi.png" },
-              { quote: "Set up my catalog in 10 minutes. First order came the same day. No app, no complicated setup — just my phone.", name: "Sipho K.", role: "Beauty & wellness, Durban", img: null },
-              { quote: "The AI listing saved me hours. Upload a photo, it writes the description. I just adjust the price and publish.", name: "Lerato P.", role: "Wholesaler, Cape Town", img: null },
-            ].map((t, i) => (
-              <FadeIn key={t.name} delay={i * 0.1}>
-                <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm h-full flex flex-col">
-                  <p className="text-slate-600 text-sm leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-3">
-                    {t.img ? (
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                        <Image src={t.img} alt={t.name} fill className="object-cover" sizes="40px" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-blue-600">{t.name.split(" ").map(n => n[0]).join("")}</span>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-xs font-bold text-slate-900">{t.name}</p>
-                      <p className="text-[11px] text-slate-500">{t.role}</p>
-                    </div>
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
 
           <div className="grid sm:grid-cols-3 gap-6">
             {[
               {
                 icon: (<svg className="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>),
-                stat: "3+ hours saved daily",
+                stat: "Fewer repeat questions",
                 heading: "No More Size DMs",
                 description: "Customers browse your catalog, pick sizes and colors themselves, and order with one tap. You stop answering the same questions all day.",
               },
@@ -838,7 +705,7 @@ export default async function HomePage() {
           SECTION 10 — FINAL CTA
       ───────────────────────────────────────────────────── */}
       <FinalCTASection
-        badge={tLanding("cta.badge", { shopCount: Math.max(shopCount, 50) })}
+        badge={shopCount !== null ? tLanding("cta.badge", { shopCount }) : undefined}
         title={tLanding("cta.title")}
         titleHighlight={tLanding("cta.titleHighlight")}
         subtitle={tLanding("cta.subtitle")}
@@ -913,11 +780,10 @@ export default async function HomePage() {
                 Starter for just R99/month for unlimited products, or Pro for R299/month for unlimited AI,
                 promoted listings, revenue analytics, and instant order notifications. Payments are handled securely through PayFast, South Africa&apos;s
                 most trusted payment gateway.{" "}
-                <Link href={clerkId ? (dashboardSlug ? `/dashboard/${dashboardSlug}` : "/create-shop") : "/sign-up"} className="text-blue-600 hover:text-blue-500 underline underline-offset-2">
+                <Link href={ctaHref} className="text-blue-600 hover:text-blue-500 underline underline-offset-2">
                   Create your online shop
                 </Link>
-                {" "}today and join hundreds of South African sellers who chose TradeFeed as their home
-                for selling online.
+                {" "}today and start taking orders on WhatsApp.
               </p>
 
               {/* Internal link cluster for SEO */}
@@ -930,7 +796,7 @@ export default async function HomePage() {
                   <Link href="/import-whatsapp-catalogue" className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
                     Import WhatsApp Catalogue →
                   </Link>
-                  <Link href={clerkId ? "/create-shop" : "/sign-up"} className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
+                  <Link href={ctaHref} className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
                     Create Online Shop →
                   </Link>
                   <Link href="#pricing" className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
@@ -975,7 +841,7 @@ export default async function HomePage() {
             <div>
               <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-4">{tFooter("product")}</h4>
               <ul className="space-y-2.5">
-                {[{ label: "TradeFeed HUNT — Beta", href: "/hunt#start-hunt" }, { label: tNav("features"), href: "#features" }, { label: tNav("pricing"), href: "#pricing" }, { label: "TradeFeed Growth", href: "/growth" }, { label: tNav("marketplace"), href: "/marketplace" }, { label: tNav("faq"), href: "#faq" }].map((l) => (
+                {[{ label: "TradeFeed HUNT — Beta", href: "/hunt#start-hunt" }, { label: tNav("features"), href: "#features" }, { label: tNav("pricing"), href: "#pricing" }, { label: "TradeFeed Growth", href: "/growth" }, { label: tNav("marketplace"), href: "/marketplace" }, { label: tNav("faq"), href: "/faq" }, { label: "How It Works", href: "/how-it-works" }].map((l) => (
                   <li key={l.label}><Link href={l.href} className="text-sm text-slate-400 hover:text-white transition-colors">{l.label}</Link></li>
                 ))}
               </ul>
@@ -991,7 +857,7 @@ export default async function HomePage() {
             <div>
               <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-4">{tFooter("legal")}</h4>
               <ul className="space-y-2.5">
-                {[{ label: tFooter("privacy"), href: "/privacy" }, { label: tFooter("terms"), href: "/terms" }, { label: "Contact", href: "/contact" }].map((l) => (
+                {[{ label: tFooter("privacy"), href: "/privacy" }, { label: tFooter("terms"), href: "/terms" }, { label: "About", href: "/about" }, { label: "Contact", href: "/contact" }].map((l) => (
                   <li key={l.label}><Link href={l.href} className="text-sm text-slate-400 hover:text-white transition-colors">{l.label}</Link></li>
                 ))}
               </ul>

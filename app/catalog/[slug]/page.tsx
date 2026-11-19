@@ -1,3 +1,4 @@
+import { SELLER_SIGN_UP_PATH } from "@/lib/config/seller-cta";
 import { buyerOptions } from "@/lib/products/buyer-options";
 // ============================================================
 // Page — Public Catalog Product Grid (/catalog/[slug])
@@ -533,7 +534,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
                 </div>
 
                 <Link
-                  href="/create-shop"
+                  href={SELLER_SIGN_UP_PATH}
                   className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-bold text-emerald-700 shadow-xl shadow-emerald-900/20 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-900/30 hover:scale-[1.03] active:scale-[0.98]"
                 >
                   Create your free shop

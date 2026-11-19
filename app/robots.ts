@@ -9,14 +9,17 @@
 //   robots, so equity consolidates instead of being orphaned.
 // ============================================================
 
+import { SITE_ORIGIN } from "@/lib/seo/site-url";
 import type { MetadataRoute } from "next";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+// Never localhost in production — see lib/seo/site-url.ts.
+const APP_URL = SITE_ORIGIN;
 
 const DISALLOW = [
   "/dashboard/",
   "/admin/",
   "/create-shop",
+  "/get-started",
   "/sign-in",
   "/sign-up",
   "/orders",

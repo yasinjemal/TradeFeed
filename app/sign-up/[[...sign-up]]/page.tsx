@@ -7,6 +7,7 @@
 // mutation remains in a supported response context.
 // ============================================================
 
+import { SELLER_ONBOARDING_PATH } from "@/lib/config/seller-cta";
 import { ClerkLoaded, ClerkLoading, SignUp } from "@clerk/nextjs";
 import Image from "next/image";
 import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
@@ -126,7 +127,7 @@ export default function SignUpPage() {
 
           <ClerkLoaded>
             <SignUp
-              fallbackRedirectUrl="/create-shop"
+              fallbackRedirectUrl={SELLER_ONBOARDING_PATH}
               appearance={{
                 elements: {
                   rootBox: "mx-auto w-full",

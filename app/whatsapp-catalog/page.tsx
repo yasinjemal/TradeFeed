@@ -78,7 +78,7 @@ export default function WhatsappCatalogPage() {
         </p>
       </SeoSection>
 
-      <SeoCta label="Create your catalogue — free" />
+      <SeoCta />
       <SeoFaq items={FAQ} />
     </SeoPageShell>
   );

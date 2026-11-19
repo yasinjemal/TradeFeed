@@ -13,9 +13,11 @@
 //   - /marketplace/[province]/[city]/[category] (popular city+category combos)
 //   - /catalog/[slug] (each active shop)
 //   - /catalog/[slug]/products/[id] (each active product)
+//   - /sell + money pages, /how-it-works, /faq, /about
 //   - /privacy, /terms, /contact (legal/info pages)
 // ============================================================
 
+import { SITE_ORIGIN } from "@/lib/seo/site-url";
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import {
@@ -33,7 +35,8 @@ import { getGlobalCategories } from "@/lib/db/marketplace";
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // regenerate at most once per hour
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+// Never localhost in production — see lib/seo/site-url.ts.
+const APP_URL = SITE_ORIGIN;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Always return static pages even if DB queries fail
@@ -64,6 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     // ── Money pages (SEO blueprint §7) ──────────────────────
     ...[
+      "sell",
       "sell-online-south-africa",
       "sell-on-whatsapp",
       "whatsapp-catalog",
@@ -77,6 +81,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.9,
+    })),
+    // ── Info pages linked from every public footer ──────────
+    ...["how-it-works", "faq", "about"].map((path) => ({
+      url: `${APP_URL}/${path}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
     {
       url: `${APP_URL}/privacy`,

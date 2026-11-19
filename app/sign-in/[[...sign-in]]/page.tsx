@@ -114,7 +114,7 @@ export default function SignInPage() {
 
           <ClerkLoaded>
             <SignIn
-              fallbackRedirectUrl="/create-shop"
+              fallbackRedirectUrl="/dashboard"
               appearance={{
                 elements: {
                   rootBox: "mx-auto w-full",

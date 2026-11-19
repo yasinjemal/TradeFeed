@@ -25,6 +25,7 @@ import { parseProductMessage } from "./product-import-parser";
 import { sendTextMessage } from "./business-api";
 import { getSellerPreferences, buildSellerAIContext } from "@/lib/db/seller-preferences";
 import { aiProductResponseSchema, applyAISafety } from "@/lib/validation/ai-product";
+import { SELLER_ONBOARDING_PATH } from "@/lib/config/seller-cta";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 const MAX_IMPORTS_PER_HOUR = 10;
@@ -394,7 +395,7 @@ export async function processWhatsAppProductImport(
     if (!shop) {
       await sendTextMessage(from,
         "👋 Hi! To import products via WhatsApp, you need a TradeFeed store first.\n\n" +
-        `Sign up free at ${APP_URL}/create-shop`
+        `Sign up free at ${APP_URL}${SELLER_ONBOARDING_PATH}`
       );
       return { success: false, error: "NO_SHOP" };
     }
