@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { SeoPageShell, SeoSection, SeoCta } from "@/components/seo/seo-page";
 import { SeoFaq } from "@/components/seo/faq";
+import { planPricePerMonth } from "@/lib/billing/plans";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 
 const FAQ = [
   { q: "What do I need to start selling online in South Africa?", a: "A smartphone, product photos, and somewhere buyers can browse and order. On TradeFeed that's a free online shop with one shareable link — no website, no coding, no app for your buyers to download." },
-  { q: "How much does it cost to sell online?", a: "TradeFeed is free for your first 20 products, forever, including 10 AI-written listings a month. Paid plans start at R99/month when you outgrow that. No card needed to start." },
+  { q: "How much does it cost to sell online?", a: `TradeFeed is free for your first 20 products, forever, including 10 AI-written listings a month. Paid plans start at ${planPricePerMonth("starter")} when you outgrow that. No card needed to start.` },
   { q: "Do I need to register a company to sell online in SA?", a: "No — you can start selling as an individual. Registering with CIPC becomes worth it as you grow (it helps with business banking and wholesale accounts), but it is not a requirement to open your shop." },
   { q: "How do I get paid safely?", a: "Most sellers confirm payment in the WhatsApp chat: EFT, PayFast, or cash on delivery for local orders. TradeFeed never holds your money — buyers pay you directly." },
   { q: "Can buyers trust a small online shop?", a: "That's exactly what TradeFeed is built for. Your shop shows a Verified Seller card — verification status, orders fulfilled, reply time, and location — so a small reseller looks as trustworthy as an established store." },
@@ -90,7 +91,7 @@ export default function SellOnlineSouthAfricaPage() {
       <SeoSection title="What it costs">
         <p>
           R0 to start: 20 products free, forever, with 10 AI listings a month. Upgrade to
-          Starter (R99/month) for unlimited products when the orders justify it. Full details on
+          Starter ({planPricePerMonth("starter")}) for unlimited products when the orders justify it. Full details on
           the{" "}
           <Link href="/pricing" className="text-tf-primary underline underline-offset-2">
             pricing page

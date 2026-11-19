@@ -21,6 +21,10 @@ import { getShopSubscription, isTrialActive } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
 import { TrialBanner } from "@/components/billing/trial-banner";
+import { PickedPlanReminder } from "@/components/billing/picked-plan-reminder";
+import { hasPaidEntitlement } from "@/lib/billing/subscription-status";
+import { PICKED_PLAN_COOKIE, parseHighlightPlan } from "@/lib/billing/upgrade-copy";
+import { cookies } from "next/headers";
 import { WhatsAppCommunityBanner } from "@/components/community/whatsapp-community-banner";
 import { LocationNudgeBanner } from "@/components/dashboard/location-nudge-banner";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
@@ -45,6 +49,12 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   ]);
   const health = computeSellerHealth(healthMetrics);
   const trial = isTrialActive(subscription);
+
+  // Plan chosen on the pricing page before this seller had a shop
+  // (app/choose-plan). Worth showing only until they are on a paid plan.
+  const pickedPlan = hasPaidEntitlement(subscription)
+    ? null
+    : parseHighlightPlan((await cookies()).get(PICKED_PLAN_COOKIE)?.value);
 
   // Profile completeness
   const profileChecks = [
@@ -117,6 +127,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
     return (
       <div className="space-y-5">
+        {pickedPlan && <PickedPlanReminder shopSlug={slug} plan={pickedPlan} />}
         {trial.active && <TrialBanner daysLeft={trial.daysLeft} shopSlug={slug} />}
         {!shop.city && <LocationNudgeBanner shopSlug={slug} />}
         <TfDashboardHome
@@ -154,6 +165,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
   return (
     <div className="space-y-8">
+      {/* Plan picked on /pricing before the shop existed */}
+      {pickedPlan && <PickedPlanReminder shopSlug={slug} plan={pickedPlan} />}
+
       {/* Trial Banner */}
       {trial.active && <TrialBanner daysLeft={trial.daysLeft} shopSlug={slug} />}
 

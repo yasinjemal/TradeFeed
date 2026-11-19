@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { billingHref } from "@/lib/billing/upgrade-copy";
 
 interface CustomDomainBannerProps {
   shopSlug: string;
@@ -53,7 +54,7 @@ export function CustomDomainBanner({ shopSlug, planSlug, hasCustomDomain }: Cust
 
         {/* CTA */}
         <Link
-          href={`/dashboard/${shopSlug}/billing`}
+          href={billingHref(shopSlug, "pro")}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-500 hover:-transtone-y-0.5 active:transtone-y-0 transition-all flex-shrink-0"
         >
           Upgrade to Pro

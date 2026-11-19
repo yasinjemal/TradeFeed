@@ -143,7 +143,7 @@
       "proPlan": {
         "name": "Pro",
         "subtitle": "For growing businesses",
-        "price": "R199",
+        "price": "R299",
         "period": "/month",
         "cta": "Upgrade to Pro →",
         "features": [
@@ -165,7 +165,7 @@
     "cta": {
       "title": "Ready to",
       "titleHighlight": "sell online in South Africa?",
-      "subtitle": "Upload a photo, AI creates the listing, share on WhatsApp. Your first 5 AI listings are free — start selling in under 3 minutes.",
+      "subtitle": "Upload a photo, AI creates the listing, share on WhatsApp. Your first 10 AI listings are free — start selling in under 3 minutes.",
       "badge": "Join {shopCount}+ South African sellers",
       "button": "✨ Try AI Free",
       "buttonSecondary": "or browse the marketplace →",
@@ -424,7 +424,7 @@
       "createShop": "How do I create a shop?",
       "createShopAnswer": "Click \"Start Selling\" on the homepage, sign up with your email or Google account, and follow the setup wizard. You'll have your catalog link in under 2 minutes.",
       "aiListing": "How does AI listing work?",
-      "aiListingAnswer": "Upload a product photo and our AI automatically generates the title, description, category, and suggested price. You can edit anything before publishing. Free plan includes 5 AI listings per month.",
+      "aiListingAnswer": "Upload a product photo and our AI automatically generates the title, description, category, and suggested price. You can edit anything before publishing. Free plan includes 10 AI listings per month.",
       "payments": "How do payments work?",
       "paymentsAnswer": "Subscription payments are processed securely through PayFast — South Africa's most trusted payment gateway. Buyers pay sellers directly via WhatsApp/EFT — TradeFeed does not handle buyer payments.",
       "orders": "How do orders work?",

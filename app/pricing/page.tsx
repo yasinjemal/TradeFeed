@@ -6,18 +6,23 @@ import { SeoPageShell, SeoCta } from "@/components/seo/seo-page";
 import { SeoFaq } from "@/components/seo/faq";
 import { TfButton } from "@/components/tf/button";
 import { TfHeroFont } from "@/components/tf/tf-fonts";
-import { PLANS } from "@/lib/billing/plans";
+import { PLANS, planPrice, planPricePerMonth } from "@/lib/billing/plans";
+import { choosePlanHref } from "@/lib/billing/upgrade-copy";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
+// Prices in the metadata come from the same table as the cards below.
+const FROM_PRICE = planPricePerMonth("starter");
+const PAGE_TITLE = `TradeFeed Pricing — Free to Start, Plans from ${FROM_PRICE}`;
+
 export const metadata: Metadata = {
-  title: "TradeFeed Pricing — Free to Start, Plans from R99/month",
+  title: PAGE_TITLE,
   description:
-    "Honest pricing in rand: Free (20 products, 10 AI listings/month), Starter R99, Pro R299, Pro AI R499. No hidden fees, no card to start, cancel anytime.",
+    `Honest pricing in rand: Free (20 products, 10 AI listings/month), Starter ${planPrice("starter")}, Pro ${planPrice("pro")}, Pro AI ${planPrice("pro-ai")}. No hidden fees, no card to start, cancel anytime.`,
   alternates: { canonical: `${APP_URL}/pricing` },
   openGraph: {
-    title: "TradeFeed Pricing — Free to Start, Plans from R99/month",
-    description: "Free for 20 products. Paid plans from R99/month. Prices in rand, cancel anytime.",
+    title: PAGE_TITLE,
+    description: `Free for 20 products. Paid plans from ${FROM_PRICE}. Prices in rand, cancel anytime.`,
     url: `${APP_URL}/pricing`,
     siteName: "TradeFeed",
     type: "website",
@@ -77,7 +82,10 @@ export default function PricingPage() {
               ))}
             </ul>
             <TfButton asChild fullWidth variant={plan.popular ? "primary" : "secondary"} className="mt-5">
-              <Link href="/sign-up">{plan.priceMonthly === 0 ? "Start free" : `Choose ${plan.name}`}</Link>
+              {/* The chosen plan survives sign-up: see choosePlanHref / app/choose-plan. */}
+              <Link href={choosePlanHref(plan.slug)}>
+                {plan.priceMonthly === 0 ? "Start free" : `Choose ${plan.name}`}
+              </Link>
             </TfButton>
           </div>
         ))}

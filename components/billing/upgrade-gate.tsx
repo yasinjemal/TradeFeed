@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { planLessThanPerDay } from "@/lib/billing/plans";
+import { billingHref } from "@/lib/billing/upgrade-copy";
 
 interface UpgradeGateProps {
   current: number;
@@ -31,11 +33,11 @@ export function UpgradeGate({ current, limit, shopSlug, mode }: UpgradeGateProps
           You&apos;ve used all <span className="font-bold">{limit}</span> product slots on the Free plan.
         </p>
         <p className="text-xs text-red-600/70 mb-6">
-          Upgrade to Pro for unlimited products, AI listings, and analytics — that&apos;s less than R7/day.
+          Upgrade to Pro for unlimited products, AI listings, and analytics — that&apos;s {planLessThanPerDay("pro")}.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
-            href={`/dashboard/${shopSlug}/billing`}
+            href={billingHref(shopSlug, "pro")}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
           >
             ⚡ Upgrade to Pro
@@ -71,7 +73,7 @@ export function UpgradeGate({ current, limit, shopSlug, mode }: UpgradeGateProps
           Upgrade to Pro for unlimited products and grow your business without limits.
         </p>
         <Link
-          href={`/dashboard/${shopSlug}/billing`}
+          href={billingHref(shopSlug, "pro")}
           className="inline-flex items-center gap-1.5 mt-3 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all"
         >
           ⚡ Go Pro — Unlimited Products

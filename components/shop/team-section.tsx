@@ -13,6 +13,7 @@ import {
   updateStaffRoleAction,
 } from "@/app/actions/staff";
 import { TEAM_LIMIT_WARNING_THRESHOLD } from "@/lib/config/plan-limits";
+import { billingHref } from "@/lib/billing/upgrade-copy";
 
 interface Member {
   role: string;
@@ -327,7 +328,7 @@ export function TeamSection({
             Upgrade to Pro to invite team members and manage staff.
           </p>
           <Link
-            href={`/dashboard/${shopSlug}/billing`}
+            href={billingHref(shopSlug, "pro")}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors"
           >
             Upgrade Plan

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { SeoPageShell, SeoSection, SeoCta } from "@/components/seo/seo-page";
 import { SeoFaq } from "@/components/seo/faq";
+import { planPricePerMonth } from "@/lib/billing/plans";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
@@ -25,7 +26,7 @@ const FAQ = [
   { q: "Can I keep using WhatsApp Business alongside TradeFeed?", a: "Yes — that's the point. Orders still arrive in your WhatsApp. TradeFeed replaces the catalogue part, not the conversation part." },
   { q: "Can I move my existing WhatsApp catalogue over?", a: "Yes, in one import: photos, names, and prices come across, and AI tidies up the listings. See the import page for the walkthrough." },
   { q: "Does a catalogue link work for wholesale?", a: "Yes. You can run wholesale and retail pricing on the same products, set minimum order quantities, and take structured bulk enquiries on WhatsApp." },
-  { q: "What does it cost?", a: "Free for 20 products. Paid plans from R99/month for unlimited products." },
+  { q: "What does it cost?", a: `Free for 20 products. Paid plans from ${planPricePerMonth("starter")} for unlimited products.` },
 ];
 
 export default function WhatsappCatalogPage() {

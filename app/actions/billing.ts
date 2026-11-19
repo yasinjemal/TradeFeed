@@ -7,10 +7,17 @@
 
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { requireShopAccess } from "@/lib/auth";
 import { buildPayFastCheckoutUrl, buildShopBoostCheckoutUrl } from "@/lib/payfast";
-import { getPlans, getShopSubscription, cancelSubscription } from "@/lib/db/subscriptions";
+import { cancelPayFastSubscription } from "@/lib/payfast-api";
+import { getPlans, getShopSubscription, markSubscriptionCancelled } from "@/lib/db/subscriptions";
+import { cancelShopSubscription } from "@/lib/billing/cancel-subscription";
+import { canStartCheckout } from "@/lib/billing/subscription-itn";
+import { PICKED_PLAN_COOKIE } from "@/lib/billing/upgrade-copy";
 import { buildShopBoostPaymentId, calculateShopBoostPrice, SHOP_BOOST_DURATIONS } from "@/lib/config/promotions";
+import { reportError } from "@/lib/telemetry";
 import { db } from "@/lib/db";
 
 interface BillingActionResult {
@@ -38,6 +45,20 @@ export async function createCheckoutAction(
       return { success: false, error: "Cannot checkout for free plan." };
     }
 
+    // Every checkout creates a NEW PayFast subscription. While one is
+    // already billing, only an upgrade is allowed — the webhook cancels
+    // the cheaper one it replaces. Anything else would leave the seller
+    // paying for two plans.
+    const current = await getShopSubscription(access.shopId);
+    if (!canStartCheckout(current, plan.priceInCents)) {
+      return {
+        success: false,
+        error:
+          `You're already paying for ${current?.plan.name ?? "a plan"}. ` +
+          "To move to this plan, cancel your current subscription first — you can choose a new plan once it ends.",
+      };
+    }
+
     // Get user details for PayFast
     const user = await db.user.findUnique({
       where: { id: access.userId },
@@ -57,6 +78,10 @@ export async function createCheckoutAction(
       buyerLastName: user.lastName ?? undefined,
     });
 
+    // They are acting on the plan they picked earlier (app/choose-plan),
+    // so stop reminding them about it.
+    (await cookies()).delete(PICKED_PLAN_COOKIE);
+
     return { success: true, checkoutUrl };
   } catch (error) {
     console.error("[createCheckout]", error);
@@ -64,23 +89,47 @@ export async function createCheckoutAction(
   }
 }
 
+export interface CancelSubscriptionActionResult {
+  success: boolean;
+  error?: string;
+  /** Name of the plan that was cancelled, e.g. "Starter" */
+  planName?: string;
+  /** ISO date the paid plan stays usable until */
+  endsAt?: string | null;
+  /** True when PayFast confirmed the recurring debit is stopped */
+  stoppedAtPayFast?: boolean;
+}
+
 /**
  * Cancel the current subscription.
+ *
+ * Stops the recurring debit at PayFast first, and only then marks the
+ * subscription cancelled here. If PayFast does not confirm, nothing
+ * changes and the seller is told it did not work.
  */
 export async function cancelSubscriptionAction(
   shopSlug: string,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<CancelSubscriptionActionResult> {
   try {
     const access = await requireShopAccess(shopSlug, "billing:manage");
     if (!access) return { success: false, error: "Access denied." };
 
-    const subscription = await getShopSubscription(access.shopId);
-    if (!subscription || subscription.plan.slug === "free") {
-      return { success: false, error: "No active paid subscription." };
-    }
+    const result = await cancelShopSubscription(access.shopId, {
+      getSubscription: getShopSubscription,
+      cancelAtPayFast: cancelPayFastSubscription,
+      markCancelled: markSubscriptionCancelled,
+      reportError,
+    });
 
-    await cancelSubscription(access.shopId);
-    return { success: true };
+    if (!result.ok) return { success: false, error: result.error };
+
+    revalidatePath(`/dashboard/${shopSlug}/billing`);
+    return {
+      success: true,
+      planName: result.planName,
+      endsAt: result.endsAt ? result.endsAt.toISOString() : null,
+      stoppedAtPayFast: result.stoppedAtPayFast,
+    };
   } catch (error) {
     console.error("[cancelSubscription]", error);
     return { success: false, error: "Failed to cancel subscription." };

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { cheapestUnlimitedProductsPlan, planPricePerMonth } from "@/lib/billing/plans";
+import { billingHref } from "@/lib/billing/upgrade-copy";
 
 interface ProductUsageMeterProps {
   current: number;
@@ -44,6 +46,9 @@ export function ProductUsageMeter({
     );
   }
 
+  // "Upgrade" with no plan named: land on the cheapest plan that lifts the cap.
+  const unlimitedHref = billingHref(shopSlug, cheapestUnlimitedProductsPlan().slug);
+
   const percent = Math.min((current / limit) * 100, 100);
   const atLimit = current >= limit;
   const nearLimit = current >= Math.floor(limit * 0.8);
@@ -85,7 +90,7 @@ export function ProductUsageMeter({
           </div>
           {(atLimit || nearLimit) && (
             <Link
-              href={`/dashboard/${shopSlug}/billing`}
+              href={unlimitedHref}
               className="text-xs font-bold text-emerald-600 hover:text-emerald-700 whitespace-nowrap"
             >
               Upgrade →
@@ -131,10 +136,10 @@ export function ProductUsageMeter({
             Upgrade to Pro for unlimited products + advanced analytics.
           </p>
           <Link
-            href={`/dashboard/${shopSlug}/billing`}
+            href={billingHref(shopSlug, "pro")}
             className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-600/20 whitespace-nowrap"
           >
-            ⚡ Go Pro — R199/mo
+            ⚡ Go Pro — {planPricePerMonth("pro", "short")}
           </Link>
         </div>
       )}
@@ -144,7 +149,7 @@ export function ProductUsageMeter({
             Only {limit - current} product{limit - current === 1 ? "" : "s"} left. Upgrade for unlimited.
           </p>
           <Link
-            href={`/dashboard/${shopSlug}/billing`}
+            href={unlimitedHref}
             className="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold hover:bg-amber-200 transition-colors whitespace-nowrap"
           >
             ⚡ Upgrade

@@ -19,7 +19,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireShopAccess } from "@/lib/auth";
-import { checkAiAccess, trackAiGeneration, FREE_AI_CREDITS, AI_DAILY_LIMIT } from "@/lib/db/ai";
+import { checkAiAccess, trackAiGeneration, AI_DAILY_LIMIT } from "@/lib/db/ai";
+import { aiCreditsExhausted, billingHref } from "@/lib/billing/upgrade-copy";
 import { checkRateLimit } from "@/lib/rate-limit-upstash";
 import { getSellerPreferences, buildSellerAIContext } from "@/lib/db/seller-preferences";
 import { aiGenerateRequestSchema, aiProductResponseSchema, applyAISafety } from "@/lib/validation/ai-product";
@@ -48,16 +49,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Check plan + credits — free users get 5 AI tries
-    const { canGenerate, hasUnlimitedAi, creditsRemaining, planSlug } = await checkAiAccess(access.shopId);
+    // 3. Check plan + credits. The allowance depends on the plan
+    //    (Free and Starter are limited, Pro and Pro AI are not).
+    const { canGenerate, hasUnlimitedAi, creditsRemaining, creditsUsed, creditLimit, planSlug } =
+      await checkAiAccess(access.shopId);
     if (!canGenerate) {
+      // Name the seller's real plan and limit, and point at the cheapest
+      // plan that removes it (Pro — not Pro AI).
+      const exhausted = aiCreditsExhausted(planSlug);
       return NextResponse.json(
         {
           error: "CREDITS_EXHAUSTED",
-          message: `You've used all ${FREE_AI_CREDITS} free AI generations. Upgrade to Pro AI for unlimited.`,
+          message: exhausted.message,
           currentPlan: planSlug,
-          creditsUsed: FREE_AI_CREDITS,
+          creditsUsed,
           creditsRemaining: 0,
+          creditLimit: exhausted.creditLimit,
+          recommendedPlan: exhausted.recommendedPlan,
+          upgradeUrl: billingHref(shopSlug, exhausted.recommendedPlan),
         },
         { status: 403 }
       );
@@ -208,7 +217,8 @@ Return ONLY valid JSON:
       credits: {
         remaining: newCreditsRemaining === Infinity ? null : newCreditsRemaining,
         unlimited: hasUnlimitedAi,
-        total: hasUnlimitedAi ? null : FREE_AI_CREDITS,
+        // The seller's own plan allowance — 25 on Starter, not Free's 10.
+        total: creditLimit,
       },
     });
   } catch (error) {

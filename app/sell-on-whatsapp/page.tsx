@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { SeoPageShell, SeoSection, SeoCta } from "@/components/seo/seo-page";
 import { SeoFaq } from "@/components/seo/faq";
+import { planPricePerMonth } from "@/lib/billing/plans";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
@@ -39,7 +40,7 @@ const FAQ = [
   { q: "Why not just use the built-in WhatsApp Business catalogue?", a: "It works until it doesn't: no search, no categories, no link Google can find, and buyers must already have your number. A TradeFeed catalogue is a real web page — searchable, shareable, and trust-badged. You can import your existing WhatsApp catalogue in one go." },
   { q: "How do I stop the endless 'how much?' messages?", a: "Put the price on the listing. When buyers browse your catalogue link, they see prices, sizes, and stock before they message you — so the first message you get is an order, not a question." },
   { q: "Do my buyers need to download anything?", a: "No. Your catalogue link opens in any phone browser, and orders arrive in WhatsApp, which they already have." },
-  { q: "What does it cost?", a: "Free for your first 20 products, with 10 AI-written listings a month. Paid plans from R99/month when you grow." },
+  { q: "What does it cost?", a: `Free for your first 20 products, with 10 AI-written listings a month. Paid plans from ${planPricePerMonth("starter")} when you grow.` },
 ];
 
 export default function SellOnWhatsappPage() {
