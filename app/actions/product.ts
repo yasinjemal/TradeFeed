@@ -31,6 +31,7 @@ import {
 } from "@/lib/db/products";
 import { createVariant, deleteVariant, batchCreateVariants, updateVariant } from "@/lib/db/variants";
 import { requireShopAccess } from "@/lib/auth";
+import { wasPriceProblem } from "@/lib/products/compare-at";
 import {
   parseListingPricing,
   parseListingPhoto,
@@ -252,6 +253,7 @@ async function resolveShopAccess(
  *
  * FormData (beyond the product fields):
  *   priceInRands  one price for every option; blank saves a draft
+ *   compareAtPriceInRands  optional "was" price; must be above the price
  *   stock         stock when there are no sizes (blank → 1)
  *   sizes         JSON [{ size, stock }] — one option per size
  *   imageUrl / imageKey / imageName  the already-uploaded CDN photo
@@ -313,6 +315,7 @@ export async function createProductAction(
       priceInRands: text("priceInRands"),
       stock: text("stock"),
       sizes: text("sizes"),
+      compareAtPriceInRands: text("compareAtPriceInRands"),
     });
     if (!pricingResult.ok) {
       return {
@@ -367,6 +370,7 @@ export async function createProductAction(
               size: variant.size,
               color: null,
               priceInCents: pricing.priceInCents,
+              compareAtPriceCents: pricing.compareAtPriceCents,
               stock: variant.stock,
             })),
             parsed.data.name
@@ -381,6 +385,7 @@ export async function createProductAction(
               size: only.size,
               priceInRands: pricing.priceInCents, // already cents
               retailPriceInRands: undefined,
+              compareAtPriceInRands: pricing.compareAtPriceCents ?? undefined, // already cents
               stock: only.stock,
             },
             parsed.data.name
@@ -800,6 +805,8 @@ export async function updateVariantAction(
     priceInRands?: string;
     stock?: string;
     sku?: string;
+    /** "was" price in rands; "" or null removes it. */
+    compareAtPriceInRands?: string | null;
   },
   deps: ProductActionDeps = defaultDeps
 ): Promise<ActionResult> {
@@ -815,6 +822,19 @@ export async function updateVariantAction(
         success: false,
         error: "Please fix the errors below.",
         fieldErrors: extractFieldErrors(parsed.error.issues),
+      };
+    }
+
+    // A was-price is shown to buyers crossed out, so it has to be a real saving.
+    const wasProblem =
+      parsed.data.compareAtPriceInRands != null && parsed.data.priceInRands !== undefined
+        ? wasPriceProblem(parsed.data.priceInRands, parsed.data.compareAtPriceInRands)
+        : null;
+    if (wasProblem) {
+      return {
+        success: false,
+        error: "Please fix the errors below.",
+        fieldErrors: { compareAtPriceInRands: [wasProblem] },
       };
     }
 
@@ -846,6 +866,8 @@ export async function bulkUpdateVariantsAction(
     priceInRands: string;
     stock: string;
     sku?: string;
+    /** "was" price in rands; "" removes it, omitted leaves it as it is. */
+    compareAtPriceInRands?: string;
   }[]
 ): Promise<ActionResult & { updatedCount?: number; errors?: string[] }> {
   try {
@@ -870,10 +892,26 @@ export async function bulkUpdateVariantsAction(
         priceInRands: upd.priceInRands,
         stock: upd.stock,
         ...(upd.sku !== undefined && { sku: upd.sku }),
+        ...(upd.compareAtPriceInRands !== undefined && {
+          compareAtPriceInRands: upd.compareAtPriceInRands,
+        }),
       });
 
       if (!parsed.success) {
-        errors.push(`Variant ${upd.variantId}: Invalid data`);
+        const wasPriceIssue = parsed.error.issues.find(
+          (issue) => issue.path[0] === "compareAtPriceInRands"
+        );
+        errors.push(wasPriceIssue ? wasPriceIssue.message : `Variant ${upd.variantId}: Invalid data`);
+        continue;
+      }
+
+      // A was-price is shown to buyers crossed out, so it has to be a real saving.
+      const wasProblem =
+        parsed.data.compareAtPriceInRands != null && parsed.data.priceInRands !== undefined
+          ? wasPriceProblem(parsed.data.priceInRands, parsed.data.compareAtPriceInRands)
+          : null;
+      if (wasProblem) {
+        errors.push(wasProblem);
         continue;
       }
 
@@ -891,7 +929,13 @@ export async function bulkUpdateVariantsAction(
     return {
       success: errors.length === 0,
       updatedCount,
-      ...(errors.length > 0 && { errors, error: `${errors.length} variant(s) failed to update.` }),
+      ...(errors.length > 0 && {
+        errors,
+        error:
+          errors.length === 1
+            ? errors[0]
+            : `${errors.length} options could not be updated. ${errors[0]}`,
+      }),
     };
   } catch (error: unknown) {
     const message = extractActionError(error);

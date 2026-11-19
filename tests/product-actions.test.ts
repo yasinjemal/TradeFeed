@@ -186,6 +186,7 @@ test("createProductAction publishes a priced listing and reports it live", async
     size: "Default",
     priceInRands: 14999,
     retailPriceInRands: undefined,
+    compareAtPriceInRands: undefined,
     stock: 7,
   });
 
@@ -342,9 +343,9 @@ test("createProductAction creates one option per size, each with its own stock",
   const [batch] = callsTo("batchCreateVariants");
   assert.deepEqual(batch!.args.slice(0, 2), ["prod_1", "shop_1"]);
   assert.deepEqual(batch!.args[2], [
-    { size: "S", color: null, priceInCents: 29900, stock: 3 },
-    { size: "M", color: null, priceInCents: 29900, stock: 1 },
-    { size: "XL", color: null, priceInCents: 29900, stock: 0 },
+    { size: "S", color: null, priceInCents: 29900, compareAtPriceCents: null, stock: 3 },
+    { size: "M", color: null, priceInCents: 29900, compareAtPriceCents: null, stock: 1 },
+    { size: "XL", color: null, priceInCents: 29900, compareAtPriceCents: null, stock: 0 },
   ]);
 });
 
@@ -362,6 +363,76 @@ test("createProductAction rejects unreadable sizes without creating anything", a
   assert.ok(result.fieldErrors?.sizes?.[0]);
   assert.equal(callsTo("createProduct").length, 0);
 });
+
+// ── The was-price reaches the saved options ─────────────────────────
+
+test("createProductAction saves the was-price on the single default option", async () => {
+  const { deps, callsTo } = buildRecordingDeps();
+
+  const result = await createProductAction(
+    "shop-slug",
+    null,
+    listingForm({ priceInRands: "349.99", compareAtPriceInRands: "449.99" }),
+    deps,
+  );
+
+  assert.equal(result.status, "live");
+  assert.deepEqual(callsTo("createVariant")[0]!.args[2], {
+    size: "Default",
+    priceInRands: 34999,
+    retailPriceInRands: undefined,
+    compareAtPriceInRands: 44999,
+    stock: 1,
+  });
+});
+
+test("createProductAction saves the same was-price on every size", async () => {
+  const { deps, callsTo } = buildRecordingDeps();
+
+  const result = await createProductAction(
+    "shop-slug",
+    null,
+    listingForm({
+      priceInRands: "100",
+      compareAtPriceInRands: "150",
+      sizes: JSON.stringify([
+        { size: "S", stock: "2" },
+        { size: "M", stock: "4" },
+      ]),
+    }),
+    deps,
+  );
+
+  assert.equal(result.status, "live");
+  assert.equal(result.variantCount, 2);
+  assert.deepEqual(callsTo("batchCreateVariants")[0]!.args[2], [
+    { size: "S", color: null, priceInCents: 10000, compareAtPriceCents: 15000, stock: 2 },
+    { size: "M", color: null, priceInCents: 10000, compareAtPriceCents: 15000, stock: 4 },
+  ]);
+});
+
+for (const [wasPrice, why] of [
+  ["100", "equal to the price"],
+  ["60", "below the price"],
+  ["100.50", "a saving buyers would not see"],
+  ["cheap", "not an amount"],
+] as const) {
+  test(`createProductAction rejects a was-price that is ${why} without creating anything`, async () => {
+    const { deps, callsTo } = buildRecordingDeps();
+
+    const result = await createProductAction(
+      "shop-slug",
+      null,
+      listingForm({ priceInRands: "100", compareAtPriceInRands: wasPrice, ...PHOTO }),
+      deps,
+    );
+
+    assert.equal(result.success, false);
+    assert.ok(result.fieldErrors?.compareAtPriceInRands?.[0], "the was-price field carries the error");
+    assert.equal(callsTo("createProduct").length, 0);
+    assert.equal(callsTo("addProductImage").length, 0);
+  });
+}
 
 // ── Draft for honest reasons other than a missing price ─────────────
 

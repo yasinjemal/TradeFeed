@@ -330,6 +330,7 @@ export default async function ProductDetailPage({
             size: v.size,
             color: v.color,
             priceInCents: v.priceInCents,
+            compareAtPriceCents: v.compareAtPriceCents,
             stock: v.stock,
             sku: v.sku,
           }))}

@@ -1,4 +1,5 @@
 import { buyerOptions } from "@/lib/products/buyer-options";
+import { buyerPriceSummary } from "@/lib/products/buyer-price";
 // ============================================================
 // Page — Public Catalog Product Grid (/catalog/[slug])
 // ============================================================
@@ -261,7 +262,7 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
     };
 
     const tfProducts = products.map((p, index) => {
-      const prices = buyerOptions(p.variants).map((v) => v.retailPriceCents ?? v.priceInCents);
+      const priced = buyerPriceSummary(p.variants);
       return {
         id: p.id,
         slug: p.slug,
@@ -273,8 +274,9 @@ export default async function CatalogPage({ params }: CatalogPageProps) {
           FEATURE_FLAGS.PRODUCT_VIDEO && p.videos[0]
             ? (p.videos[0].source.toLowerCase() as "upload" | "direct" | "youtube")
             : null,
-        minPriceCents: prices.length > 0 ? Math.min(...prices) : 0,
-        maxPriceCents: prices.length > 0 ? Math.max(...prices) : 0,
+        minPriceCents: priced.minPriceCents,
+        maxPriceCents: priced.maxPriceCents,
+        compareAtPriceCents: priced.compareAtPriceCents,
         categoryId: p.category?.id ?? null,
         categoryName: p.category?.name ?? null,
         position: index,

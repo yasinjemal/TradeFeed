@@ -14,6 +14,7 @@
 // ============================================================
 
 import { z } from "zod";
+import { randsToCents, WAS_PRICE_FORMAT_MESSAGE as WAS_PRICE_MESSAGE } from "@/lib/products/compare-at";
 import { stripHtml } from "./strip-html";
 
 /**
@@ -208,6 +209,23 @@ export const variantCreateSchema = z.object({
       return Math.round(num * 100);
     }),
 
+  // Optional "was" price, shown crossed out when above the price buyers pay.
+  // Blank means none. Anything else must be a plain rand amount.
+  compareAtPriceInRands: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal(""))
+    .transform((val, ctx) => {
+      if (!val) return undefined;
+      const cents = randsToCents(val);
+      if (cents === null) {
+        ctx.addIssue({ code: "custom", message: WAS_PRICE_MESSAGE });
+        return z.NEVER;
+      }
+      return cents;
+    }),
+
   stock: z
     .string()
     .trim()
@@ -271,6 +289,23 @@ export const variantUpdateSchema = z.object({
       const num = parseFloat(val);
       if (isNaN(num) || num <= 0) return undefined;
       return Math.round(num * 100);
+    }),
+
+  // "was" price: omitted = leave as is, null or "" = remove it, else a rand amount.
+  compareAtPriceInRands: z
+    .string()
+    .trim()
+    .optional()
+    .nullable()
+    .transform((val, ctx) => {
+      if (val === undefined) return undefined;
+      if (val === null || val === "") return null;
+      const cents = randsToCents(val);
+      if (cents === null) {
+        ctx.addIssue({ code: "custom", message: WAS_PRICE_MESSAGE });
+        return z.NEVER;
+      }
+      return cents;
     }),
 
   stock: z

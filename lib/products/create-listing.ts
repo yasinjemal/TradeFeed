@@ -18,6 +18,7 @@
 import { variantCreateSchema } from "@/lib/validation/product";
 import { isPlaceholderOption } from "@/lib/products/buyer-options";
 import { isUploadThingUrl } from "@/lib/video/parse";
+import { randsToCents, wasPriceProblem, WAS_PRICE_FORMAT_MESSAGE } from "@/lib/products/compare-at";
 import { MIN_LISTING_DESCRIPTION_LENGTH } from "@/lib/marketplace/listing-readiness";
 
 /** The single option a product gets when the seller adds no sizes. */
@@ -38,6 +39,8 @@ export interface ListingVariantDraft {
 
 export interface ListingPricing {
   priceInCents: number;
+  /** Optional "was" price for every option; always above the price. */
+  compareAtPriceCents: number | null;
   /** One entry per real size, or a single placeholder option. */
   variants: ListingVariantDraft[];
   /** False when the only option is the placeholder. */
@@ -73,6 +76,8 @@ export function parseListingPricing(raw: {
   priceInRands: string;
   stock: string;
   sizes: string;
+  /** Optional "was" price. Blank means none. */
+  compareAtPriceInRands?: string;
 }): ListingPricingResult {
   const price = raw.priceInRands.trim();
   if (price === "") return { ok: true, pricing: null };
@@ -92,6 +97,22 @@ export function parseListingPricing(raw: {
     };
   }
   const priceInCents = priced.data.priceInRands;
+
+  // -- Was-price (optional) --
+  // It is shown to buyers crossed out, so one that is not above the
+  // price is an error to fix here, never something to drop quietly.
+  let compareAtPriceCents: number | null = null;
+  const wasPrice = (raw.compareAtPriceInRands ?? "").trim();
+  if (wasPrice !== "") {
+    compareAtPriceCents = randsToCents(wasPrice);
+    if (compareAtPriceCents === null) {
+      return { ok: false, fieldErrors: { compareAtPriceInRands: [WAS_PRICE_FORMAT_MESSAGE] } };
+    }
+    const problem = wasPriceProblem(priceInCents, compareAtPriceCents);
+    if (problem) {
+      return { ok: false, fieldErrors: { compareAtPriceInRands: [problem] } };
+    }
+  }
 
   // ── Sizes (optional) ──────────────────────────────────────
   let rawSizes: unknown = [];
@@ -143,7 +164,7 @@ export function parseListingPricing(raw: {
   }
 
   if (variants.length > 0) {
-    return { ok: true, pricing: { priceInCents, variants, hasRealSizes: true } };
+    return { ok: true, pricing: { priceInCents, compareAtPriceCents, variants, hasRealSizes: true } };
   }
 
   const singleStock = parseStock(raw.stock);
@@ -154,6 +175,7 @@ export function parseListingPricing(raw: {
     ok: true,
     pricing: {
       priceInCents,
+      compareAtPriceCents,
       variants: [{ size: PLACEHOLDER_OPTION, stock: singleStock }],
       hasRealSizes: false,
     },

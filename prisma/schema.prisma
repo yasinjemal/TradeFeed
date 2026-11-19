@@ -559,6 +559,7 @@ model ProductVariant {
   color        String?                        // e.g. "Red", "Blue" — optional for some products
   priceInCents Int                            // Wholesale price in ZAR cents (e.g. 29999 = R299.99)
   retailPriceCents Int?                        // Optional retail price in ZAR cents (shown to retail buyers)
+  compareAtPriceCents Int?                     // Optional "was" price in ZAR cents; shown crossed out only when above the price buyers pay
   stock        Int    @default(0)             // Current stock count for this variant
   sku          String?                        // Optional SKU for seller's own tracking
   isActive     Boolean @default(true)         // Can hide individual variants

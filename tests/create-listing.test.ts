@@ -22,6 +22,7 @@ test("a price becomes cents on a single default option", () => {
     ok: true,
     pricing: {
       priceInCents: 14999,
+      compareAtPriceCents: null,
       variants: [{ size: "Default", stock: 12 }],
       hasRealSizes: false,
     },
@@ -65,6 +66,7 @@ test("sizes replace the default option and keep their own stock", () => {
     ok: true,
     pricing: {
       priceInCents: 5000,
+      compareAtPriceCents: null,
       variants: [
         { size: "S", stock: 2 },
         { size: "M", stock: 5 },
@@ -102,6 +104,51 @@ test("bad size stock, long names and too many sizes are rejected", () => {
     const result = parseListingPricing({ priceInRands: "50", stock: "", sizes });
     assert.ok(!result.ok && result.fieldErrors.sizes?.[0], `should reject ${sizes.slice(0, 40)}`);
   }
+});
+
+// ── Was-price on create ─────────────────────────────────────
+
+test("a was-price above the price is kept, in cents, for every option", () => {
+  const single = parseListingPricing({ priceInRands: "349.99", compareAtPriceInRands: "449,99", ...noSizes });
+  assert.equal(single.ok && single.pricing?.compareAtPriceCents, 44999);
+
+  const sized = parseListingPricing({
+    priceInRands: "100",
+    compareAtPriceInRands: "150",
+    stock: "",
+    sizes: JSON.stringify([{ size: "S", stock: "1" }, { size: "M", stock: "1" }]),
+  });
+  assert.equal(sized.ok && sized.pricing?.compareAtPriceCents, 15000);
+  assert.equal(sized.ok && sized.pricing?.hasRealSizes, true);
+});
+
+test("a blank was-price means none", () => {
+  for (const compareAtPriceInRands of [undefined, "", "   "]) {
+    const result = parseListingPricing({ priceInRands: "100", compareAtPriceInRands, ...noSizes });
+    assert.equal(result.ok && result.pricing?.compareAtPriceCents, null);
+  }
+});
+
+test("a was-price that buyers would not see is an error, never dropped quietly", () => {
+  const cases: [string, RegExp][] = [
+    ["100", /must be higher than the price/],
+    ["80", /must be higher than the price/],
+    ["100.20", /under 1%/],
+    ["abc", /in rands/],
+    ["0", /in rands/],
+  ];
+  for (const [compareAtPriceInRands, message] of cases) {
+    const result = parseListingPricing({ priceInRands: "100", compareAtPriceInRands, ...noSizes });
+    assert.equal(result.ok, false, `was "${compareAtPriceInRands}" should be rejected`);
+    assert.match((!result.ok && result.fieldErrors.compareAtPriceInRands?.[0]) || "", message);
+  }
+});
+
+test("a was-price without a price still saves a draft with no pricing", () => {
+  assert.deepEqual(
+    parseListingPricing({ priceInRands: "", compareAtPriceInRands: "150", ...noSizes }),
+    { ok: true, pricing: null },
+  );
 });
 
 // ── Photo ───────────────────────────────────────────────────

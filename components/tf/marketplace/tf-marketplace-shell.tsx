@@ -76,6 +76,7 @@ function toCard(p: MarketplaceProduct) {
     title: p.name,
     price: p.minPriceCents / 100,
     priceFrom: p.minPriceCents !== p.maxPriceCents,
+    compareAtPrice: p.compareAtPriceCents != null ? p.compareAtPriceCents / 100 : null,
     imageUrl: p.imageUrl,
     sellerName: p.shop.name,
     sellerVerified: p.shop.isVerified,

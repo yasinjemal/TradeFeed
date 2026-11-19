@@ -186,7 +186,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       ? toGalleryVideo(product.videos?.[0] ?? null)
       : null;
     const mapSellerStrip = (
-      items: { id: string; slug: string | null; name: string; imageUrl: string | null; minPriceCents: number; maxPriceCents: number }[],
+      items: { id: string; slug: string | null; name: string; imageUrl: string | null; minPriceCents: number; maxPriceCents: number; compareAtPriceCents: number | null }[],
       shopMeta: { name: string; slug: string; isVerified: boolean },
     ) =>
       items.map((p) => ({
@@ -196,6 +196,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         imageUrl: p.imageUrl,
         minPriceCents: p.minPriceCents,
         maxPriceCents: p.maxPriceCents,
+        compareAtPriceCents: p.compareAtPriceCents,
         shopName: shopMeta.name,
         shopSlug: shopMeta.slug,
         shopVerified: shopMeta.isVerified,
@@ -245,6 +246,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               color: v.color,
               priceInCents: v.priceInCents,
               retailPriceCents: v.retailPriceCents,
+              compareAtPriceCents: v.compareAtPriceCents,
               stock: v.stock,
             })),
             option1Label,

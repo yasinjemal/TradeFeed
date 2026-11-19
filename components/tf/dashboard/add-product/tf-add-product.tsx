@@ -33,6 +33,8 @@ import {
   Camera,
   ChevronDown,
   Loader2,
+  Minus,
+  Plus,
   RefreshCw,
   Sparkles,
   Tag,
@@ -42,12 +44,19 @@ import {
 import { createProductAction } from "@/app/actions/product";
 import { PriceSuggestionHint } from "@/components/product/price-suggestion-hint";
 import { TfButton } from "@/components/tf/button";
+import { formatZAR } from "@/components/tf/format";
 import { TfSkeleton } from "@/components/tf/skeleton";
 import { cn } from "@/lib/utils";
 import { suggestGlobalCategory } from "@/lib/config/category-suggest";
 import { getVariantPreset } from "@/lib/config/category-variants";
 import type { GlobalCategoryOption } from "@/lib/db/global-categories";
 import { compressImage } from "@/lib/images/compress-image";
+import {
+  randsToCents,
+  resolveSale,
+  wasPriceProblem,
+  WAS_PRICE_FORMAT_MESSAGE,
+} from "@/lib/products/compare-at";
 import { MIN_LISTING_DESCRIPTION_LENGTH } from "@/lib/marketplace/listing-readiness";
 import {
   MAX_CREATE_SIZES,
@@ -81,6 +90,8 @@ const FIELD =
 const LABEL = "block text-sm font-medium text-tf-ink";
 const HINT = "text-sm text-tf-stone-600";
 const CARD = "rounded-2xl border border-tf-stone-200 bg-tf-raised p-4 shadow-tf-sm";
+const STEPPER =
+  "flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-tf-stone-300 bg-tf-raised text-tf-ink outline-none hover:border-tf-stone-400 hover:bg-tf-stone-50 focus-visible:ring-2 focus-visible:ring-tf-primary disabled:cursor-not-allowed disabled:opacity-40";
 
 type PhotoState =
   | { phase: "empty" }
@@ -112,6 +123,7 @@ interface SavedDraft {
   name?: string;
   description?: string;
   price?: string;
+  wasPrice?: string;
   stock?: string;
   sizes?: SizeEntry[];
   category?: CategoryChoice | null;
@@ -124,6 +136,7 @@ const ERROR_FIELDS: { name: string; id: string; insideMore: boolean }[] = [
   { name: "photo", id: "add-product-photo", insideMore: false },
   { name: "name", id: "name", insideMore: false },
   { name: "priceInRands", id: "priceInRands", insideMore: false },
+  { name: "compareAtPriceInRands", id: "compareAtPriceInRands", insideMore: false },
   { name: "stock", id: "stock", insideMore: false },
   { name: "sizes", id: "add-product-sizes", insideMore: false },
   { name: "description", id: "description", insideMore: true },
@@ -133,6 +146,13 @@ const ERROR_FIELDS: { name: string; id: string; insideMore: boolean }[] = [
   { name: "option2Label", id: "option2Label", insideMore: true },
   { name: "minWholesaleQty", id: "minWholesaleQty", insideMore: true },
 ];
+
+function fieldErrorFor(
+  state: { fieldErrors?: Record<string, string[]> } | null,
+  field: string,
+): string | null {
+  return state?.fieldErrors?.[field]?.[0] ?? null;
+}
 
 function cleanPrice(value: string): string {
   let cleaned = value.replace(/[^\d.,]/g, "");
@@ -228,6 +248,8 @@ function AddProductForm({
     descriptionByAi: false,
   });
   const [price, setPrice] = React.useState("");
+  const [wasPrice, setWasPrice] = React.useState("");
+  const [submittedWasPrice, setSubmittedWasPrice] = React.useState<string | null>(null);
   const [stock, setStock] = React.useState("1");
   const [sizes, setSizes] = React.useState<SizeEntry[]>([]);
   const [category, setCategory] = React.useState<CategoryChoice | null>(null);
@@ -297,6 +319,30 @@ function AddProductForm({
   // ── Derived ─────────────────────────────────────────────
   const priceValue = Number.parseFloat(price.replace(",", "."));
   const hasPrice = Number.isFinite(priceValue) && priceValue > 0;
+
+  // The optional was-price. The same check the server and the catalogue use
+  // decides whether buyers would see it; anything that would not show is an
+  // error to fix here, never something saved and quietly ignored.
+  const hasWasPrice = wasPrice.trim() !== "";
+  const priceCents = randsToCents(price);
+  const wasCents = hasWasPrice ? randsToCents(wasPrice) : null;
+  const wasProblem = !hasWasPrice
+    ? null
+    : wasCents === null
+      ? WAS_PRICE_FORMAT_MESSAGE
+      : priceCents === null
+        ? null
+        : wasPriceProblem(priceCents, wasCents);
+  const sale =
+    priceCents !== null && wasCents !== null && !wasProblem
+      ? resolveSale(priceCents / 100, wasCents / 100)
+      : null;
+  // A server message describes what was submitted, so it goes once that changes.
+  const wasPriceError =
+    wasProblem ??
+    (hasWasPrice && wasPrice === submittedWasPrice
+      ? fieldErrorFor(state, "compareAtPriceInRands")
+      : null);
   const realSizes = sizes.map((entry) => ({
     size: entry.size,
     stock: entry.stock.trim() === "" ? 1 : Number.parseInt(entry.stock, 10) || 0,
@@ -329,7 +375,9 @@ function AddProductForm({
           : "Add a name to publish"
         : isActive && !hasPrice
           ? "Add a price to publish"
-          : null;
+          : wasProblem
+            ? "Fix the was-price to publish"
+            : null;
   const canSubmit = !isPending && blocker === null;
   const submitLabel = isActive
     ? nameOk
@@ -357,6 +405,7 @@ function AddProductForm({
           });
         }
         if (typeof saved.price === "string") setPrice(cleanPrice(saved.price));
+        if (typeof saved.wasPrice === "string") setWasPrice(cleanPrice(saved.wasPrice));
         if (typeof saved.stock === "string") setStock(saved.stock.replace(/\D/g, "").slice(0, 6));
         if (Array.isArray(saved.sizes)) {
           setSizes(
@@ -389,6 +438,7 @@ function AddProductForm({
         name: text.name,
         description: text.description,
         price,
+        wasPrice,
         stock,
         sizes,
         category,
@@ -399,7 +449,7 @@ function AddProductForm({
     } catch {
       // A failed autosave must not interrupt the seller.
     }
-  }, [restored, succeeded, storageKey, text.name, text.description, price, stock, sizes, category, uploadedPhoto, aiGenerated]);
+  }, [restored, succeeded, storageKey, text.name, text.description, price, wasPrice, stock, sizes, category, uploadedPhoto, aiGenerated]);
 
   // Release the local preview when the form goes away.
   React.useEffect(
@@ -618,6 +668,7 @@ function AddProductForm({
         productId={state.productId}
         name={text.name}
         priceInRands={price}
+        compareAtInRands={wasPrice}
         status={state.status ?? "draft"}
         draftReason={state.draftReason}
         photo={state.photo ?? "none"}
@@ -644,7 +695,10 @@ function AddProductForm({
   return (
     <form
       action={formAction}
-      onSubmit={() => aiAbortRef.current?.abort()}
+      onSubmit={() => {
+        aiAbortRef.current?.abort();
+        setSubmittedWasPrice(wasPrice);
+      }}
       className="mx-auto w-full max-w-xl space-y-4 pb-32 text-tf-ink md:pb-0"
       noValidate
     >
@@ -929,7 +983,7 @@ function AddProductForm({
           )}
         </div>
 
-        <div className={cn("grid gap-3", sizes.length === 0 && "grid-cols-2")}>
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <label htmlFor="priceInRands" className={LABEL}>
               Price
@@ -958,11 +1012,65 @@ function AddProductForm({
             </div>
           </div>
 
-          {sizes.length === 0 && (
-            <div className="space-y-1.5">
-              <label htmlFor="stock" className={LABEL}>
-                In stock
-              </label>
+          <div className="space-y-1.5">
+            <label htmlFor="compareAtPriceInRands" className={LABEL}>
+              Was <span className="font-normal text-tf-stone-600">(optional)</span>
+            </label>
+            <div className="relative">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base font-medium text-tf-stone-500"
+              >
+                R
+              </span>
+              <input
+                id="compareAtPriceInRands"
+                name="compareAtPriceInRands"
+                value={wasPrice}
+                onChange={(event) => setWasPrice(cleanPrice(event.target.value))}
+                inputMode="decimal"
+                placeholder="0.00"
+                disabled={isPending}
+                aria-invalid={wasPriceError ? true : undefined}
+                aria-describedby="was-price-note"
+                enterKeyHint="done"
+                autoComplete="off"
+                className={cn(FIELD, "pl-9 tabular-nums")}
+              />
+            </div>
+          </div>
+        </div>
+        {fieldError("priceInRands") && (
+          <p id="price-error" role="alert" className="text-sm text-tf-error">
+            {fieldError("priceInRands")}
+          </p>
+        )}
+        <p
+          id="was-price-note"
+          role={wasPriceError ? "alert" : undefined}
+          className={cn("text-sm", wasPriceError ? "text-tf-error" : "text-tf-stone-600")}
+        >
+          {wasPriceError ??
+            (sale
+              ? `Buyers see ${formatZAR(sale.compareAt)} crossed out and ${sale.percentOff}% off. Only use a price you really charged before.`
+              : "Had a higher price before? Add it and buyers see the saving.")}
+        </p>
+
+        {sizes.length === 0 && (
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor="stock" className={LABEL}>
+              In stock
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setStock((value) => String(Math.max(0, (Number.parseInt(value, 10) || 0) - 1)))}
+                disabled={isPending || (Number.parseInt(stock, 10) || 0) <= 0}
+                aria-label="One less in stock"
+                className={STEPPER}
+              >
+                <Minus aria-hidden="true" className="size-4" />
+              </button>
               <input
                 id="stock"
                 name="stock"
@@ -973,15 +1081,19 @@ function AddProductForm({
                 disabled={isPending}
                 aria-invalid={fieldError("stock") ? true : undefined}
                 autoComplete="off"
-                className={cn(FIELD, "tabular-nums")}
+                className={cn(FIELD, "w-20 px-2 text-center tabular-nums")}
               />
+              <button
+                type="button"
+                onClick={() => setStock((value) => String(Math.min(999999, (Number.parseInt(value, 10) || 0) + 1)))}
+                disabled={isPending}
+                aria-label="One more in stock"
+                className={STEPPER}
+              >
+                <Plus aria-hidden="true" className="size-4" />
+              </button>
             </div>
-          )}
-        </div>
-        {fieldError("priceInRands") && (
-          <p id="price-error" role="alert" className="text-sm text-tf-error">
-            {fieldError("priceInRands")}
-          </p>
+          </div>
         )}
         {fieldError("stock") && (
           <p role="alert" className="text-sm text-tf-error">
@@ -1019,6 +1131,7 @@ function AddProductForm({
       <TfBuyersSee
         name={text.name}
         priceInRands={price}
+        compareAtInRands={wasPrice}
         imageUrl={previewUrl}
         shopName={shopName}
         optionLabel={option1Label}

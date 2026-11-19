@@ -10,6 +10,7 @@ import { BgRemoveButton } from "@/components/product/bg-remove-button";
 import { TfButton } from "@/components/tf/button";
 import { TfShareCatalogue } from "@/components/tf/dashboard/tf-share-catalogue";
 import { formatZAR } from "@/components/tf/format";
+import { resolveSale } from "@/lib/products/compare-at";
 import type { DraftReason, ListingPhoto, ListingStatus, PhotoOutcome } from "@/lib/products/create-listing";
 
 // ============================================================
@@ -27,6 +28,8 @@ export interface TfAddProductResultProps {
   name: string;
   /** Raw price field value in rands, as submitted. */
   priceInRands: string;
+  /** Raw "was" field value in rands, as submitted. Empty when there is none. */
+  compareAtInRands?: string;
   status: ListingStatus;
   draftReason?: DraftReason;
   photo: PhotoOutcome;
@@ -60,6 +63,7 @@ export function TfAddProductResult({
   productId,
   name,
   priceInRands,
+  compareAtInRands = "",
   status,
   draftReason,
   photo: initialPhoto,
@@ -81,8 +85,15 @@ export function TfAddProductResult({
   const price = Number.parseFloat(priceInRands.replace(",", "."));
   const draft = DRAFT_COPY[draftReason ?? "missing_price"];
 
+  const priceSaved = Number.isFinite(price) && price > 0 && variantCount > 0;
+  const sale =
+    priceSaved && compareAtInRands.trim() !== ""
+      ? resolveSale(price, Number.parseFloat(compareAtInRands.replace(",", ".")))
+      : null;
+
   const facts = [
-    Number.isFinite(price) && price > 0 && variantCount > 0 ? formatZAR(price) : null,
+    priceSaved ? formatZAR(price) : null,
+    sale ? `was ${formatZAR(sale.compareAt)}` : null,
     variantCount > 1 ? `${variantCount} options` : null,
   ].filter(Boolean);
 

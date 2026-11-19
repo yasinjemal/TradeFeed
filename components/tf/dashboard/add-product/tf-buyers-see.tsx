@@ -3,6 +3,7 @@ import { ImageOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { formatZAR } from "@/components/tf/format";
+import { resolveSale } from "@/lib/products/compare-at";
 
 // ============================================================
 // TfBuyersSee — a live preview of the listing as buyers get it.
@@ -11,14 +12,17 @@ import { formatZAR } from "@/components/tf/format";
 // typing is what lands on their catalogue. The right side lists
 // what a buyer can pick on the product page.
 //
-// Only real data appears here. There is no "was" price, because
-// the catalogue has no compare-at price to show buyers.
+// Only real data appears here. The was-price and the "-N%" badge
+// use resolveSale, the same rule the catalogue card and product
+// page use, so this preview cannot show a saving buyers will not see.
 // ============================================================
 
 export interface TfBuyersSeeProps {
   name: string;
   /** Raw price field value, in rands. */
   priceInRands: string;
+  /** Raw "was" field value, in rands. Empty when there is none. */
+  compareAtInRands: string;
   /** Local preview or CDN URL of the chosen photo. */
   imageUrl: string | null;
   shopName: string;
@@ -35,6 +39,7 @@ export interface TfBuyersSeeProps {
 export function TfBuyersSee({
   name,
   priceInRands,
+  compareAtInRands,
   imageUrl,
   shopName,
   optionLabel,
@@ -45,6 +50,10 @@ export function TfBuyersSee({
 }: TfBuyersSeeProps) {
   const price = Number.parseFloat(priceInRands.replace(",", "."));
   const hasPrice = Number.isFinite(price) && price > 0;
+  const sale =
+    hasPrice && compareAtInRands.trim() !== ""
+      ? resolveSale(price, Number.parseFloat(compareAtInRands.replace(",", ".")))
+      : null;
   const title = name.trim();
   const soldOut = totalStock <= 0;
 
@@ -85,6 +94,11 @@ export function TfBuyersSee({
                 <ImageOff className="size-8" />
               </div>
             )}
+            {sale && (
+              <span className="absolute left-2.5 top-2.5 rounded-full bg-tf-accent px-2 py-0.5 text-[11px] font-bold leading-none text-tf-ink shadow-sm">
+                -{sale.percentOff}%
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-1 p-3">
             <p
@@ -95,13 +109,16 @@ export function TfBuyersSee({
             >
               {title || "Product name"}
             </p>
-            <p
-              className={cn(
-                "font-tf-display text-[15px] font-bold tabular-nums",
-                hasPrice ? "text-tf-ink" : "text-tf-stone-400",
-              )}
-            >
-              {hasPrice ? formatZAR(price) : "R —"}
+            <p className="flex flex-wrap items-baseline gap-x-1.5 tabular-nums">
+              <span
+                className={cn(
+                  "font-tf-display text-[15px] font-bold",
+                  hasPrice ? "text-tf-ink" : "text-tf-stone-400",
+                )}
+              >
+                {hasPrice ? formatZAR(price) : "R —"}
+              </span>
+              {sale && <s className="text-[11px] text-tf-stone-500">{formatZAR(sale.compareAt)}</s>}
             </p>
             <p className="truncate text-[11px] text-tf-stone-400">{shopName}</p>
           </div>
@@ -114,6 +131,17 @@ export function TfBuyersSee({
             <dd className="font-tf-display text-xl font-bold tabular-nums text-tf-ink">
               {hasPrice ? formatZAR(price) : <span className="text-tf-stone-400">Not set</span>}
             </dd>
+            {sale && (
+              <dd className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums">
+                <s className="text-tf-stone-600">
+                  <span className="sr-only">was </span>
+                  {formatZAR(sale.compareAt)}
+                </s>
+                <span className="rounded-full bg-tf-accent-soft px-2 py-0.5 text-xs font-medium text-tf-accent-ink">
+                  {sale.percentOff}% off
+                </span>
+              </dd>
+            )}
           </div>
 
           <div>
