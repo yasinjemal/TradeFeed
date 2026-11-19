@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { SeoPageShell, SeoSection, SeoCta } from "@/components/seo/seo-page";
 import { SeoFaq } from "@/components/seo/faq";
+import { planPrice, planPricePerMonth } from "@/lib/billing/plans";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
@@ -47,7 +48,7 @@ export default function ShopifyAlternativePage() {
           of apps, and payment gateway fees are part of the honest total. TradeFeed is priced in
           rand: <strong>free for 20 products</strong>, then{" "}
           <Link href="/pricing" className="text-tf-primary underline underline-offset-2">
-            R99–R499/month
+            {planPrice("starter")}–{planPricePerMonth("pro-ai")}
           </Link>{" "}
           with no transaction fees. We don&apos;t quote Shopify&apos;s current numbers here
           because they change — check their pricing page and do the rand maths for the full

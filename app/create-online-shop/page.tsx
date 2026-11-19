@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { SeoPageShell, SeoSection, SeoCta } from "@/components/seo/seo-page";
 import { SeoFaq } from "@/components/seo/faq";
+import { planPricePerMonth } from "@/lib/billing/plans";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tradefeed.co.za";
 
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 const FAQ = [
-  { q: "Is it really free to create an online shop?", a: "Yes — 20 products free, forever, including 10 AI-written listings a month, your own shop link, and WhatsApp ordering. No credit card to start. Paid plans (from R99/month) add unlimited products and more AI." },
+  { q: "Is it really free to create an online shop?", a: `Yes — 20 products free, forever, including 10 AI-written listings a month, your own shop link, and WhatsApp ordering. No credit card to start. Paid plans (from ${planPricePerMonth("starter")}) add unlimited products and more AI.` },
   { q: "Do I need to know how to build a website?", a: "No. If you can post a photo on WhatsApp, you can build your shop. Upload a photo, AI writes the listing, you hit publish." },
   { q: "Can I use my own domain name?", a: "Yes — on higher plans you can connect your own .co.za domain so your shop runs on your brand, with SSL handled for you." },
   { q: "How do customers pay?", a: "You confirm payment in the WhatsApp chat: EFT, PayFast for cards, or cash on delivery. TradeFeed never holds your money." },

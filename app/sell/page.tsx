@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { isPopularPlan } from "@/lib/billing/plans";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth/admin";
@@ -569,10 +570,8 @@ export default async function HomePage() {
 
             {/* Starter Plan */}
             <FadeIn delay={0.1}>
-              <div className="relative p-8 rounded-2xl bg-white border-2 border-blue-500/40 shadow-lg shadow-blue-500/5 hover:shadow-xl transition-all h-full flex flex-col">
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <div className="px-4 py-1 rounded-full bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-600/30">MOST POPULAR</div>
-                </div>
+              <div className={`relative p-8 rounded-2xl bg-white ${pricingCardEmphasis("starter")} transition-all h-full flex flex-col`}>
+                <MostPopularBadge slug="starter" />
                 <div className="mb-6">
                   <h3 className="text-lg font-bold text-slate-900">Starter</h3>
                   <p className="text-sm text-blue-600 mt-1">For serious sellers</p>
@@ -609,7 +608,8 @@ export default async function HomePage() {
 
             {/* Pro Plan */}
             <FadeIn delay={0.2}>
-              <div className="relative p-8 rounded-2xl bg-white border border-blue-200 shadow-sm hover:shadow-lg transition-all h-full flex flex-col">
+              <div className={`relative p-8 rounded-2xl bg-white ${pricingCardEmphasis("pro")} transition-all h-full flex flex-col`}>
+                <MostPopularBadge slug="pro" />
                 <div className="mb-6">
                   <h3 className="text-lg font-bold text-slate-900">{tLanding("pricing.proPlan.name")}</h3>
                   <p className="text-sm text-blue-600 mt-1">For growing businesses</p>
@@ -1026,5 +1026,25 @@ export default async function HomePage() {
         </div>
       </footer>
     </main>
+  );
+}
+
+// ── "Most popular" ───────────────────────────────────────────
+// Which plan is the popular one is decided in lib/billing/plans.ts and
+// nowhere else. This page used to badge Starter while the pricing page
+// and the billing dashboard disagreed with it and with each other.
+
+function pricingCardEmphasis(slug: string): string {
+  return isPopularPlan(slug)
+    ? "border-2 border-blue-500/40 shadow-lg shadow-blue-500/5 hover:shadow-xl"
+    : "border border-blue-200 shadow-sm hover:shadow-lg";
+}
+
+function MostPopularBadge({ slug }: { slug: string }) {
+  if (!isPopularPlan(slug)) return null;
+  return (
+    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+      <div className="px-4 py-1 rounded-full bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-600/30">MOST POPULAR</div>
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import { FaqItem } from "@/components/landing/animated-stats";
 import { FadeIn } from "@/components/landing/fade-in";
 import { generateFaqJsonLd } from "@/lib/seo/json-ld";
 import type { Metadata } from "next";
+import { planPricePerMonth } from "@/lib/billing/plans";
 
 export const metadata: Metadata = {
   title:
@@ -85,7 +86,7 @@ const FAQ_CATEGORIES = [
     items: [
       {
         q: "How many products can I list?",
-        a: "The Free plan supports up to 20 products. Starter (R99/month) and above give you unlimited products. Most small sellers start free and upgrade once they outgrow 20 listings.",
+        a: `The Free plan supports up to 20 products. Starter (${planPricePerMonth("starter")}) and above give you unlimited products. Most small sellers start free and upgrade once they outgrow 20 listings.`,
       },
       {
         q: "Can I add sizes, colours, and other options?",
@@ -135,7 +136,7 @@ const FAQ_CATEGORIES = [
     items: [
       {
         q: "How much does TradeFeed cost?",
-        a: "Free to start with up to 20 products — forever. Starter is R99/month (unlimited products, 25 AI generations, buyer reviews). Pro is R299/month (unlimited AI, team accounts, advanced analytics). Pro AI is R499/month (full AI automation). No hidden fees. Cancel anytime.",
+        a: `Free to start with up to 20 products — forever. Starter is ${planPricePerMonth("starter")} (unlimited products, 25 AI generations, buyer reviews). Pro is ${planPricePerMonth("pro")} (unlimited AI, team accounts, advanced analytics). Pro AI is ${planPricePerMonth("pro-ai")} (full AI automation). No hidden fees. Cancel anytime.`,
       },
       {
         q: "How do I accept payments from my customers?",

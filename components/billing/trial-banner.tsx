@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { planPricePerMonth } from "@/lib/billing/plans";
+import { billingHref } from "@/lib/billing/upgrade-copy";
 
 interface TrialBannerProps {
   daysLeft: number;
@@ -64,14 +66,16 @@ export function TrialBanner({ daysLeft, shopSlug }: TrialBannerProps) {
               : "You have full access to unlimited products, analytics, revenue insights, and customer CRM."}
           </p>
           <Link
-            href={`/dashboard/${shopSlug}/billing`}
+            href={billingHref(shopSlug, "pro")}
             className={`inline-flex items-center gap-1.5 mt-3 rounded-lg px-4 py-2 text-xs font-bold text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all ${
               urgent
                 ? "bg-gradient-to-r from-red-500 to-rose-600"
                 : "bg-gradient-to-r from-emerald-500 to-emerald-600"
             }`}
           >
-            {urgent ? "⚡ Upgrade Now — Keep Pro" : "⚡ Upgrade to Pro — R199/mo"}
+            {urgent
+              ? "⚡ Upgrade Now — Keep Pro"
+              : `⚡ Upgrade to Pro — ${planPricePerMonth("pro", "short")}`}
           </Link>
         </div>
       </div>

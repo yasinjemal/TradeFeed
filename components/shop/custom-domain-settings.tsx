@@ -22,6 +22,7 @@ import {
 } from "@/app/actions/domains";
 import type { DomainHealthResult } from "@/lib/vercel/domains";
 import Link from "next/link";
+import { billingHref } from "@/lib/billing/upgrade-copy";
 
 // ── SA Registrar guides ───────────────────────────────────
 const REGISTRAR_GUIDES = [
@@ -153,7 +154,7 @@ export function CustomDomainSettings({
             ))}
           </ul>
           <Link
-            href={`/dashboard/${shopSlug}/billing`}
+            href={billingHref(shopSlug, "pro")}
             className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-amber-700 hover:text-amber-900 transition-colors"
           >
             Upgrade to Pro →

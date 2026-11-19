@@ -4,6 +4,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { planLessThanPerDay } from "@/lib/billing/plans";
+import { billingHref } from "@/lib/billing/upgrade-copy";
 import { getShopBySlug } from "@/lib/db/shops";
 import { requireShopAccess, hasPermission } from "@/lib/auth";
 import { getProducts } from "@/lib/db/products";
@@ -89,11 +91,11 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
                 : `Only ${slotsLeft} product slot${slotsLeft !== 1 ? "s" : ""} left.`}
             </p>
             <p className="text-xs text-emerald-700 mt-0.5">
-              Upgrade to Pro for unlimited products — that&apos;s less than R7/day
+              Upgrade to Pro for unlimited products — that&apos;s {planLessThanPerDay("pro")}
             </p>
           </div>
           <Link
-            href={`/dashboard/${slug}/billing`}
+            href={billingHref(slug, "pro")}
             className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition-all shadow-md shadow-emerald-200 hover:shadow-lg hover:-transtone-y-0.5 active:transtone-y-0"
           >
             ⚡ Go Pro

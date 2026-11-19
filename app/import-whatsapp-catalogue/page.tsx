@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { WhatsAppImportFlow } from "@/components/import/whatsapp-import-flow";
+import { planPricePerMonth } from "@/lib/billing/plans";
 
 // ============================================================
 // /import-whatsapp-catalogue — SEO Landing Page + Functional Import
@@ -395,7 +396,7 @@ export default async function ImportWhatsAppCataloguePage() {
               },
               {
                 q: "Is it really free?",
-                a: "Yes. Our Free plan lets you list up to 20 products with 10 AI generations per month — forever. No credit card required. Upgrade to Starter (R99/month) for unlimited products, or Pro (R299/month) for unlimited AI.",
+                a: `Yes. Our Free plan lets you list up to 20 products with 10 AI generations per month — forever. No credit card required. Upgrade to Starter (${planPricePerMonth("starter")}) for unlimited products, or Pro (${planPricePerMonth("pro")}) for unlimited AI.`,
               },
               {
                 q: "Will my customers still order on WhatsApp?",

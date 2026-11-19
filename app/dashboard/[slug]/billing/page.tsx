@@ -10,10 +10,17 @@ import { redirect } from "next/navigation";
 import { getPlans, getShopSubscription, checkProductLimit } from "@/lib/db/subscriptions";
 import { BillingDashboard } from "@/components/billing/billing-dashboard";
 import { recordSellerMilestone } from "@/lib/analytics/seller-lifecycle";
+import { hasPaidEntitlement } from "@/lib/billing/subscription-status";
+import { cookies } from "next/headers";
+import {
+  PICKED_PLAN_COOKIE,
+  parseHighlightPlan,
+  paymentReturnCopy,
+} from "@/lib/billing/upgrade-copy";
 
 interface BillingPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; plan?: string | string[] }>;
 }
 
 export default async function BillingPage({
@@ -50,6 +57,19 @@ export default async function BillingPage({
     }).catch(() => false);
   }
 
+  // ?plan= is set by whatever sent the seller here: an upgrade nudge,
+  // the pricing page, or our own PayFast return URL. A seller who chose
+  // a plan before they had a shop has it waiting in a cookie instead.
+  const cookieStore = await cookies();
+  const pickedPlan =
+    parseHighlightPlan(query.plan) ??
+    parseHighlightPlan(cookieStore.get(PICKED_PLAN_COOKIE)?.value);
+  const paymentReturn = paymentReturnCopy({
+    paidForPlan: pickedPlan,
+    activePlanSlug: hasPaidEntitlement(subscription) ? subscription!.plan.slug : null,
+    activePlanName: subscription?.plan.name ?? null,
+  });
+
   return (
     <div className="space-y-6">
       {/* ── Page Header ───────────────────────────────────── */}
@@ -62,15 +82,15 @@ export default async function BillingPage({
 
       {/* ── Status Banner (from PayFast return) ───────────── */}
       {query.status === "success" && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
+        <div role="status" className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
             <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
           <div>
-            <p className="text-sm font-semibold text-emerald-800">Payment Successful!</p>
-            <p className="text-xs text-emerald-600">Your subscription has been activated. Welcome to Pro! 🎉</p>
+            <p className="text-sm font-semibold text-emerald-800">{paymentReturn.title}</p>
+            <p className="text-xs text-emerald-600">{paymentReturn.body}</p>
           </div>
         </div>
       )}
@@ -94,6 +114,8 @@ export default async function BillingPage({
         subscription={subscription}
         productLimit={productLimit}
         shopSlug={slug}
+        // After a payment the plan is theirs — nothing left to point at.
+        highlightPlan={query.status === "success" ? null : pickedPlan}
       />
     </div>
   );

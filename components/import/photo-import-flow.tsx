@@ -23,6 +23,8 @@ import {
   type ReviewDraft,
 } from "@/app/actions/catalogue-import";
 import { ImportReviewGrid } from "@/components/import/import-review-grid";
+import { billingHref } from "@/lib/billing/upgrade-copy";
+import { cheapestUnlimitedAiPlan } from "@/lib/billing/plans";
 
 const MAX_PHOTOS = 50;
 
@@ -317,7 +319,7 @@ export function PhotoImportFlow({ shopSlug, resumeJob }: PhotoImportFlowProps) {
             </p>
             <p className="text-xs text-amber-600 mt-0.5">
               Fill those in manually below, or{" "}
-              <Link href={`/dashboard/${shopSlug}/billing`} className="underline font-semibold">
+              <Link href={billingHref(shopSlug, cheapestUnlimitedAiPlan().slug)} className="underline font-semibold">
                 upgrade for unlimited AI
               </Link>.
             </p>

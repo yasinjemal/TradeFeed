@@ -143,7 +143,7 @@
       "proPlan": {
         "name": "Pro",
         "subtitle": "Bakeng sa dikgwebo tse holang",
-        "price": "R199",
+        "price": "R299",
         "period": "/ka khoeli",
         "cta": "Ntlafatsa ho Pro →",
         "features": [
@@ -165,7 +165,7 @@
     "cta": {
       "title": "O Lokile",
       "titleHighlight": "ho rekisa inthaneteng Afrika Borwa?",
-      "subtitle": "Laisha setshwantsho, AI e theha lethathamo, arolelana ho WhatsApp. Di-listing tsa hao tse 5 tsa pele tsa AI ke tsa mahala — qala ho rekisa ka metsotso e ka tlase ho meraro.",
+      "subtitle": "Laisha setshwantsho, AI e theha lethathamo, arolelana ho WhatsApp. Di-listing tsa hao tse 10 tsa pele tsa AI ke tsa mahala — qala ho rekisa ka metsotso e ka tlase ho meraro.",
       "badge": "Kopana le barekisi ba {shopCount}+ ba Afrika Borwa",
       "button": "✨ Leka AI Mahala",
       "buttonSecondary": "kapa sheba mmaraka →",
