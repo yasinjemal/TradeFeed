@@ -28,7 +28,7 @@ export const FEATURE_FLAGS = {
   // ── AI Deepening (Phase 3) ───────────────────────────────
   /** Translate listings into zu/xh/af/st on publish */
   LISTING_TRANSLATIONS: process.env.NEXT_PUBLIC_FF_LISTING_TRANSLATIONS === "true",
-  /** Price suggestion from similar listings in the product wizard */
+  /** Price suggestion from similar listings on the Add product screen */
   PRICE_SUGGESTIONS: process.env.NEXT_PUBLIC_FF_PRICE_SUGGESTIONS === "true",
   /** Background removal on product image upload */
   BG_REMOVAL: process.env.NEXT_PUBLIC_FF_BG_REMOVAL === "true",

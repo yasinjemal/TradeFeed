@@ -198,6 +198,48 @@ export async function deleteProduct(productId: string, shopId: string) {
 }
 
 /**
+ * Attach one already-uploaded CDN image to a product — scoped by shopId.
+ *
+ * WHAT: Saves the photo the seller picked on the create screen.
+ * WHY: The create action attaches the photo in the same request that
+ * creates the product, so a listing never goes live without the photo
+ * the seller chose.
+ *
+ * MULTI-TENANT: Verifies shopId ownership before writing.
+ */
+export async function addProductImage(
+  productId: string,
+  shopId: string,
+  image: { url: string; key: string; name: string }
+) {
+  const product = await db.product.findFirst({
+    where: { id: productId, shopId },
+    select: { id: true, _count: { select: { images: true } } },
+  });
+  if (!product) return null;
+
+  return db.productImage.create({
+    data: {
+      productId,
+      url: image.url,
+      key: image.key,
+      altText: image.name.replace(/\.[^/.]+$/, ""),
+      position: product._count.images,
+    },
+    select: { id: true, url: true },
+  });
+}
+
+/**
+ * Count live products in a shop (first-product share prompt).
+ */
+export async function countActiveProducts(shopId: string) {
+  return db.product.count({
+    where: { shopId, isActive: true },
+  });
+}
+
+/**
  * Count products in a shop (for dashboard stats).
  */
 export async function countProducts(shopId: string) {

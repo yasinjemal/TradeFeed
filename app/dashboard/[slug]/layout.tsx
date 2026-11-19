@@ -16,6 +16,7 @@ import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { ShopSwitcher } from "@/components/dashboard/shop-switcher";
 import { DashboardMobileNav } from "@/components/dashboard/mobile-nav";
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
+import { AddProductFab } from "@/components/dashboard/add-product-fab";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -59,7 +60,8 @@ export default async function DashboardLayout({
   const canManageCatalog = hasPermission(access.role, "catalog:manage");
 
   return (
-    <div className="min-h-screen bg-[#faf8f4]">
+    // tf-light: this shell is light-only, so TF components inside it stay light too.
+    <div className="tf-light min-h-screen bg-[#faf8f4]">
       {/* ── Top Nav ─────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-[#faf8f4]/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -165,23 +167,7 @@ export default async function DashboardLayout({
       </a>
 
       {/* ── Floating Add Product Button (mobile) ────────── */}
-      {canManageCatalog && (
-      <a
-        href={`/dashboard/${slug}/products/new`}
-        className="fixed bottom-[4.5rem] right-4 z-50 md:hidden
-          w-14 h-14 rounded-full
-          bg-emerald-700 hover:bg-emerald-800
-          text-white shadow-lg shadow-emerald-700/25
-          flex items-center justify-center
-          hover:shadow-xl motion-safe:hover:scale-105
-          motion-safe:active:scale-95 transition-all duration-200"
-        aria-label="Add product"
-      >
-        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-      </a>
-      )}
+      {canManageCatalog && <AddProductFab slug={slug} />}
 
       {/* ── Mobile Bottom Tab Bar ───────────────────────── */}
       <MobileBottomNav slug={slug} />

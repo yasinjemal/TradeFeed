@@ -9,6 +9,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { removeImageBackgroundAction } from "@/app/actions/image-bg";
@@ -28,7 +29,7 @@ export function BgRemoveButton({ shopSlug, imageId, onDone }: BgRemoveButtonProp
     startTransition(async () => {
       const res = await removeImageBackgroundAction(shopSlug, imageId);
       if (res.success) {
-        toast.success("Background removed — looking sharp! ✨");
+        toast.success("Background removed");
         onDone?.(res.url);
       } else {
         toast.error(res.error);
@@ -41,15 +42,18 @@ export function BgRemoveButton({ shopSlug, imageId, onDone }: BgRemoveButtonProp
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-emerald-300 hover:text-emerald-700 transition-colors disabled:opacity-60"
+      className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[10px] border border-tf-stone-300 bg-tf-raised px-4 text-sm font-medium text-tf-ink outline-none transition-colors hover:border-tf-stone-400 hover:bg-tf-stone-50 focus-visible:ring-2 focus-visible:ring-tf-primary disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
     >
       {isPending ? (
         <>
-          <span className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <Loader2 aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />
           Cleaning up…
         </>
       ) : (
-        <>🪄 Remove background</>
+        <>
+          <Wand2 aria-hidden="true" className="size-4" />
+          Remove background
+        </>
       )}
     </button>
   );

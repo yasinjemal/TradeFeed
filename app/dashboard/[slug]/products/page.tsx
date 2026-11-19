@@ -11,13 +11,15 @@ import { countUnmappedProducts } from "@/lib/db/global-categories";
 import { checkProductLimit } from "@/lib/db/subscriptions";
 import { notFound } from "next/navigation";
 import { formatZAR } from "@/types";
-import { IllustrationEmptyBox } from "@/components/ui/illustrations";
+import { Camera, PackagePlus, Upload } from "lucide-react";
+import { TfButton } from "@/components/tf/button";
+import { TfEmptyState } from "@/components/tf/empty-state";
 import { ListingQualityScore } from "@/components/product/listing-quality-score";
 import { computeQualityProps } from "@/lib/utils/listing-quality";
 import { ProductUsageMeter } from "@/components/billing/product-usage-meter";
 import { FEATURE_FLAGS } from "@/lib/config/feature-flags";
 import { TrackedCatalogShareLink } from "@/components/analytics/tracked-catalog-share-link";
-import { listingDiscoveryIssues } from "@/lib/marketplace/listing-readiness";
+import { listingDiscoveryIssues, MIN_LISTING_DESCRIPTION_LENGTH } from "@/lib/marketplace/listing-readiness";
 
 interface ProductsPageProps {
   params: Promise<{ slug: string }>;
@@ -36,8 +38,15 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
   const limit = await checkProductLimit(shop.id);
   const readyProducts = products.filter((product) =>
     listingDiscoveryIssues(product).length === 0 &&
-    product.globalCategoryId && (product.description?.trim().length ?? 0) >= 40,
+    product.globalCategoryId &&
+    (product.description?.trim().length ?? 0) >= MIN_LISTING_DESCRIPTION_LENGTH,
   ).length;
+
+  // One way in: "Add product". "Import many" is the bulk alternative.
+  const addProductHref = `/dashboard/${slug}/products/new`;
+  const importManyHref = FEATURE_FLAGS.CATALOGUE_IMPORT
+    ? `/dashboard/${slug}/import`
+    : `/dashboard/${slug}/products/import`;
 
   // Show upgrade nudge at 80%+ of free limit
   const showUpgradeNudge = !limit.unlimited && limit.current >= Math.floor(limit.limit * 0.8);
@@ -49,12 +58,12 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
         <h2 className="font-semibold text-emerald-950">Get your first buyer enquiry</h2>
         <p className="mt-2 text-sm text-emerald-900">
           {Math.min(readyProducts, 3)} of your first 3 listings ready. Give each product a photo, price, available stock,
-          marketplace category and a useful description of at least 40 characters.
+          marketplace category and a useful description of at least {MIN_LISTING_DESCRIPTION_LENGTH} characters.
           Then use Share catalog below to send your link to existing customers.
         </p>
         <p className="mt-2 text-sm text-emerald-800">When someone enquires, confirm availability and delivery with them. Update order status when an order is confirmed or delivered.</p>
         <Link className="mt-3 mr-4 inline-block text-sm font-semibold underline" href={`/dashboard/${slug}/notifications`}>Choose optional listing help by email</Link>
-        {canManageCatalog && readyProducts < 3 && <Link className="mt-3 inline-block text-sm font-semibold underline" href={`/dashboard/${slug}/products/new?ai=true`}>Add a product from a photo →</Link>}
+        {canManageCatalog && readyProducts < 3 && <Link className="mt-3 inline-block text-sm font-semibold underline" href={addProductHref}>Add product →</Link>}
       </section>
       {/* ── Discoverability Nudge (M8.4) ─────────────── */}
       {mappingStats.unmapped > 0 && mappingStats.total > 0 && (
@@ -102,7 +111,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
       )}
 
       {/* ── Header ──────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Products</h1>
           <p className="text-sm text-stone-500">
@@ -122,20 +131,20 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
           </p>
         </div>
         {canManageCatalog && (
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/dashboard/${slug}/products/import`}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50 transition"
-          >
-            📦 Bulk Import
-          </Link>
-          <Link
-            href={`/dashboard/${slug}/products/new`}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-300 hover:-transtone-y-0.5 active:transtone-y-0 transition-all duration-200"
-          >
-            + Add Product
-          </Link>
-        </div>
+          <div className="flex items-center gap-2">
+            <TfButton asChild variant="secondary">
+              <Link href={importManyHref}>
+                <Upload aria-hidden="true" />
+                Import many
+              </Link>
+            </TfButton>
+            <TfButton asChild>
+              <Link href={addProductHref}>
+                <PackagePlus aria-hidden="true" />
+                Add product
+              </Link>
+            </TfButton>
+          </div>
         )}
       </div>
 
@@ -153,91 +162,33 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
 
       {/* ── Empty State ─────────────────────────────────── */}
       {products.length === 0 && (
-        <div className="rounded-2xl border-2 border-dashed border-emerald-200 bg-gradient-to-br from-emerald-50/30 to-teal-50/30 p-6 sm:p-10">
-          <div className="max-w-md mx-auto text-center">
-            <IllustrationEmptyBox className="w-32 h-32 mx-auto mb-4 opacity-80" />
-            <h2 className="text-xl font-bold text-stone-900 mb-2">
-              Create your first product in 60 seconds
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              Upload a photo and let AI do the rest — or type it in manually. Buyers will see your products immediately.
-            </p>
-
-            {/* Catalogue import — primary onboarding path (Phase 4) */}
-            {FEATURE_FLAGS.CATALOGUE_IMPORT && (
-              <Link
-                href={`/dashboard/${slug}/import`}
-                className="block rounded-xl border-2 border-emerald-300 bg-white p-4 mb-5 max-w-xs mx-auto text-left hover:border-emerald-400 hover:shadow-md transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl flex-shrink-0">📦</span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-emerald-800">
-                      Already selling on WhatsApp?
-                    </p>
-                    <p className="text-xs text-stone-500 mt-0.5">
-                      Import your whole catalogue at once — AI writes every listing.
-                    </p>
-                  </div>
-                  <span className="text-emerald-500 flex-shrink-0">→</span>
-                </div>
-              </Link>
-            )}
-
-            {/* What a great listing looks like */}
-            <div className="rounded-xl border border-stone-200 bg-white p-3 mb-5 max-w-xs mx-auto text-left">
-              <div className="flex gap-3 items-center">
-                <div className="w-14 h-14 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl">👕</span>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-stone-800 truncate">Premium Cotton T-Shirt</p>
-                  <p className="text-[10px] text-emerald-600 font-bold">R149.99</p>
-                  <p className="text-[10px] text-stone-400">50 in stock · 📸 3 photos</p>
-                </div>
+        <TfEmptyState
+          icon={<Camera />}
+          title="Add your first product"
+          description={
+            canManageCatalog
+              ? "One photo and one price is enough to start. You can add sizes and details on the same screen."
+              : "This shop has no products yet. Someone who manages the catalogue can add the first one."
+          }
+          action={
+            canManageCatalog ? (
+              <div className="flex flex-wrap justify-center gap-2">
+                <TfButton asChild size="lg">
+                  <Link href={addProductHref}>
+                    <PackagePlus aria-hidden="true" />
+                    Add product
+                  </Link>
+                </TfButton>
+                <TfButton asChild size="lg" variant="secondary">
+                  <Link href={importManyHref}>
+                    <Upload aria-hidden="true" />
+                    Import many
+                  </Link>
+                </TfButton>
               </div>
-              <p className="text-[9px] text-stone-400 mt-2 text-center">↑ This is what a great listing looks like</p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href={`/dashboard/${slug}/products/new?wizard=true`}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-200 hover:shadow-xl hover:-transtone-y-0.5 active:transtone-y-0 transition-all"
-              >
-                🚀 Guided Setup
-              </Link>
-              <Link
-                href={`/dashboard/${slug}/products/new?ai=true`}
-                className="inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-5 py-3 text-sm font-medium text-emerald-700 hover:bg-emerald-100 transition"
-              >
-                ✨ Create with AI
-              </Link>
-              <Link
-                href={`/dashboard/${slug}/products/new?quick=true`}
-                className="inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white px-5 py-3 text-sm font-medium text-stone-700 hover:bg-stone-50 transition"
-              >
-                ⚡ Quick Sell
-              </Link>
-            </div>
-            <div className="flex items-center justify-center gap-3 mt-3">
-              <Link
-                href={`/dashboard/${slug}/products/new`}
-                className="inline-flex items-center gap-2 text-xs text-stone-500 hover:text-stone-700 transition"
-              >
-                📝 Manual Entry
-              </Link>
-              <Link
-                href={`/dashboard/${slug}/products/import`}
-                className="inline-flex items-center gap-2 text-xs text-stone-500 hover:text-stone-700 transition"
-              >
-                📦 Bulk Import
-              </Link>
-            </div>
-            <p className="text-xs text-stone-400 mt-4">
-              💡 Most sellers list their first product in under 60 seconds with AI
-            </p>
-          </div>
-        </div>
+            ) : undefined
+          }
+        />
       )}
 
       {/* ── Product Grid ────────────────────────────────── */}

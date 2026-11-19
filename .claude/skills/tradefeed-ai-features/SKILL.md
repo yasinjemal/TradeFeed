@@ -1,6 +1,6 @@
 ---
 name: tradefeed-ai-features
-description: TradeFeed's AI feature architecture — photo-to-listing generation, credits and plan gating, rate limits, translations, background removal, price suggestions, and prompt evals. Use this whenever building, changing, or debugging ANYTHING involving OpenAI calls, AI credits, the product wizard's AI path, listing generation, AI chat/sales features, or prompt changes — and before adding any new AI capability.
+description: TradeFeed's AI feature architecture — photo-to-listing generation, credits and plan gating, rate limits, translations, background removal, price suggestions, and prompt evals. Use this whenever building, changing, or debugging ANYTHING involving OpenAI calls, AI credits, the Add product screen's AI path, listing generation, AI chat/sales features, or prompt changes — and before adding any new AI capability.
 ---
 
 # TradeFeed AI Features
@@ -11,7 +11,7 @@ All AI runs on **OpenAI** (`openai` SDK; vision features use gpt-4o-mini). AI lo
 
 ## The flagship: photo → listing
 
-`app/api/ai/generate-product/route.ts`: seller uploads a product photo, vision model returns SEO name, 150–300 word description, category, tags, WhatsApp caption, SEO title/meta. Consumed by the product wizard (`components/product/product-wizard.tsx`), create form (`?ai=true`), and quick-sell flow. Output passes through `applyAISafety` (`lib/validation/ai-product.ts`) before touching the DB — never write raw model output to Prisma.
+`app/api/ai/generate-product/route.ts`: seller uploads a product photo, vision model returns SEO name, 150–300 word description, category, tags, WhatsApp caption, SEO title/meta. Consumed by the one Add product screen (`components/tf/dashboard/add-product/tf-add-product.tsx`), which starts it automatically when a photo is picked, and by onboarding and the catalogue import flows. Output passes through `applyAISafety` (`lib/validation/ai-product.ts`) before touching the DB — never write raw model output to Prisma.
 
 Supporting modules in `lib/ai/`: `analyze-product-image.ts`, `import-draft.ts` + `parse-text-listings.ts` (WhatsApp catalogue paste → structured listings), `price-suggestion.ts` (comparable-listing pricing, surfaced via `components/product/price-suggestion-hint.tsx`), `translate-listing.ts` (en/zu/xh/af/st, `LISTING_TRANSLATIONS` flag), `remove-background.ts` (`BG_REMOVAL` flag). WhatsApp AI sales assistant: `lib/whatsapp/ai-sales.ts` + `/dashboard/[slug]/conversations`.
 
@@ -31,7 +31,7 @@ Supporting modules in `lib/ai/`: `analyze-product-image.ts`, `import-draft.ts` +
 
 ## UX rules for AI surfaces
 
-- AI is an accelerator, never a gate: every AI path has a manual escape hatch (the wizard falls back to manual entry).
+- AI is an accelerator, never a gate: every AI path has a manual escape hatch (the Add product screen lets the seller type the name at any point).
 - Show generation progress honestly (multi-second vision calls need skeleton/streaming states, disabled submit, and cancellation).
 - Generated content is **editable before saving** — sellers must be able to correct the model.
 - Label AI output as AI-generated in seller-facing UI; credit counters stay visible near the trigger button.

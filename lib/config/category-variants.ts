@@ -2,7 +2,7 @@
 // Category → Variant Label Presets
 // ============================================================
 // Maps GlobalCategory slugs to default variant option labels.
-// Used by create-product-form to auto-fill option1Label / option2Label
+// Used by the Add product screen to auto-fill option1Label / option2Label
 // when a seller selects a marketplace category.
 //
 // WHY: Different product types have different axes:
