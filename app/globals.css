@@ -1233,51 +1233,66 @@ h4, h5, h6 {
   position: relative;
 }
 
-/* The plank. Bleeds 8px past the card on both sides so that the
-   segments under adjacent cards meet and read as one continuous
-   shelf — 8px covers the grid's gap-3 (12px) and gap-4 (16px)
-   alike. Fades at the ends so a row's outer edges do not stop
-   dead against the page gutter. */
+/* The board. This was a 1px hairline and it was invisible on a phone —
+   a near-white card on a #faf8f4 page, with nothing under it reading as
+   furniture. It is now an actual edge-on board: lit along its top, in
+   shadow along its front, with the row's weight falling beneath it.
+   Bleeds 8px each side so the boards under adjacent cards butt together
+   into one continuous run — 8px is exactly half of the grid's gap-4 and
+   covers gap-3 with a little overlap. */
 .tf-shelf::before {
   content: "";
   position: absolute;
   inset-inline: -8px;
-  bottom: -11px;
-  height: 1px;
+  bottom: -10px;
+  height: 10px;
+  border-radius: 0 0 2px 2px;
   background: linear-gradient(
-    90deg,
-    transparent,
-    var(--color-tf-stone-300) 6%,
-    var(--color-tf-stone-300) 94%,
-    transparent
+    180deg,
+    var(--color-tf-stone-200) 0%,
+    var(--color-tf-stone-300) 45%,
+    var(--color-tf-stone-400) 100%
   );
-  opacity: 0.9;
+  box-shadow: 0 4px 9px -3px color-mix(in oklab, var(--color-tf-ink) 30%, transparent);
   pointer-events: none;
 }
 
-/* Where the object meets the plank. Same reasoning as .tf-plinth:
-   remove-background returns opaque JPEGs, so a mask-driven shadow
-   is impossible — a static ellipse reads as contact just as well. */
+/* Where the object meets the board — a tight dark seam right at the
+   join, sitting ON the board's top surface rather than floating under
+   the card. Same reasoning as .tf-plinth: remove-background returns
+   opaque JPEGs, so a mask-driven shadow is impossible; a drawn seam
+   reads as contact just as well. */
 .tf-shelf::after,
 .tf-shelf-contact::after {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -6px;
-  width: 78%;
-  height: 12px;
+  bottom: -4px;
+  width: 88%;
+  height: 8px;
   transform: translateX(-50%);
   border-radius: 9999px;
   background: var(--color-tf-ink);
-  opacity: 0.18;
-  filter: blur(9px);
+  opacity: 0.26;
+  filter: blur(5px);
   pointer-events: none;
 }
 
-/* Dark mode: a light plank on a dark surface, and a deeper
-   contact shadow — ink at 11% disappears against tf-surface. */
+/* Dark mode: the board darkens rather than glares, and the seam deepens
+   — ink at 26% vanishes against a #131311 page. */
 .dark .tf-shelf::before {
-  opacity: 0.35;
+  background: linear-gradient(
+    180deg,
+    var(--color-tf-stone-300) 0%,
+    var(--color-tf-stone-200) 55%,
+    #0f0e0d 100%
+  );
+  box-shadow: 0 4px 10px -3px #000;
+}
+.dark .tf-shelf::after,
+.dark .tf-shelf-contact::after {
+  opacity: 0.55;
+  filter: blur(6px);
 }
 .dark .tf-shelf::after,
 .dark .tf-shelf-contact::after {

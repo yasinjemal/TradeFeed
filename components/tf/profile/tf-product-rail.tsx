@@ -32,22 +32,21 @@ export function TfProductRail({
       <h2 className="font-tf-display text-xl font-semibold text-tf-ink">
         What {shopName} is selling
       </h2>
-      {/* tf-counter-rail lays one continuous bar under the whole row —
-          the same surface the proof rail stands on. Each card then adds
-          only its own contact shadow, so the shelf reads as one plank
-          with objects on it rather than a strip of separate tiles.
-          pb-7 keeps that bar inside the scroll container; at pb-2 the
-          overflow clipped it. */}
+      {/* Each card carries its own board, bleeding 8px so the boards butt
+          together into one continuous run under the row — gap-4 is 16px,
+          so 8px a side meets exactly. pb-8 keeps the board and its drop
+          shadow inside the scroll container; at pb-2 the overflow clipped
+          them. */}
       <TfReveal
         as="ul"
         stagger
-        className="tf-rail tf-counter-rail tf-nudge -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-7 overscroll-x-contain"
+        className="tf-rail tf-nudge -mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-8 overscroll-x-contain"
       >
         {products.map((product, index) => (
           <li
             key={product.id}
             className={cn(
-              "tf-shelf-contact shrink-0 snap-start",
+              "tf-shelf shrink-0 snap-start",
               index === 0 ? "w-[76vw] max-w-[300px]" : "w-[66vw] max-w-[260px]",
             )}
           >
