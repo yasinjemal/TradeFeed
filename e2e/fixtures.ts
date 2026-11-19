@@ -11,6 +11,10 @@
 //
 // Each test (and each retry) therefore presents its own client address,
 // the way separate buyers would. The limiter itself is untouched.
+//
+// The header is added only to requests for the app's own origin. Setting
+// it with `extraHTTPHeaders` sends it to every host the page talks to,
+// and that broke Clerk: its sign-up form never loaded.
 // ============================================================
 
 import { createHash } from "node:crypto";
@@ -24,11 +28,19 @@ function clientAddressFor(testId: string, retry: number): string {
 export const test = base.extend({
   // The second argument is Playwright's "use" callback. It is named `provide`
   // so react-hooks/rules-of-hooks does not mistake it for React's `use`.
-  extraHTTPHeaders: async ({ extraHTTPHeaders }, provide, testInfo) => {
-    await provide({
-      ...extraHTTPHeaders,
-      "x-forwarded-for": clientAddressFor(testInfo.testId, testInfo.retry),
-    });
+  context: async ({ context, baseURL }, provide, testInfo) => {
+    if (baseURL) {
+      const appOrigin = new URL(baseURL).origin;
+      const address = clientAddressFor(testInfo.testId, testInfo.retry);
+      await context.route(
+        (url) => url.origin === appOrigin,
+        (route) =>
+          route.continue({
+            headers: { ...route.request().headers(), "x-forwarded-for": address },
+          }),
+      );
+    }
+    await provide(context);
   },
 });
 
