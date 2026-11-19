@@ -1,6 +1,9 @@
 import * as React from "react";
 
-import { TfStorefrontGrid, type TfGridProduct } from "@/components/tf/storefront/tf-product-grid";
+import {
+  TfStorefrontGrid,
+  type TfGridProduct,
+} from "@/components/tf/storefront/tf-product-grid";
 import type { TfStageMode } from "@/lib/seller/stage-mode";
 import { TfDiptych } from "./tf-diptych";
 import { TfProductRail } from "./tf-product-rail";
@@ -84,6 +87,9 @@ export function TfInventoryBlock({
           sellerVerified={shopVerified}
           whatsappNumber={whatsappNumber}
           dense={mode === "grid-dense"}
+          // The shelf is the profile's own; the same grid renders on the
+          // live TF storefront, which must stay exactly as it is.
+          shelf
         />
       );
   }

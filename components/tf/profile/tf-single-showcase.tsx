@@ -50,7 +50,7 @@ export function TfSingleShowcase({
         What {shopName} is selling
       </h2>
 
-      <div className="tf-plinth relative mt-4">
+      <div className="tf-plinth tf-shelf-settle relative mt-4">
         <TfReveal>
           <Link
             href={href}

@@ -41,6 +41,12 @@ interface TfStorefrontGridProps {
   whatsappNumber?: string;
   /** 20+ products: tighten the grid one column earlier */
   dense?: boolean;
+  /**
+   * Stand each product on a shelf (plank, contact shadow, and the
+   * scroll-driven settle where supported). Opt-in: the legacy TF
+   * storefront ships this grid to live buyers and must not change.
+   */
+  shelf?: boolean;
 }
 
 /**
@@ -59,6 +65,7 @@ export function TfStorefrontGrid({
   sellerVerified,
   whatsappNumber,
   dense = false,
+  shelf = false,
 }: TfStorefrontGridProps) {
   const showChrome = products.length >= BROWSE_CHROME_MIN_PRODUCTS;
   const [query, setQuery] = React.useState("");
@@ -91,32 +98,32 @@ export function TfStorefrontGrid({
     <section aria-label="Products">
       {/* Search + sort — only once there is enough to search */}
       {showChrome && (
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-tf-stone-400"
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={`Search ${sellerName}'s products…`}
-            aria-label="Search this shop"
-            className="min-h-11 w-full rounded-full border border-tf-stone-300 bg-tf-raised pl-10 pr-4 text-[15px] text-tf-ink placeholder:text-tf-stone-400 outline-none focus-visible:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary/25"
-          />
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-tf-stone-400"
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={`Search ${sellerName}'s products…`}
+              aria-label="Search this shop"
+              className="min-h-11 w-full rounded-full border border-tf-stone-300 bg-tf-raised pl-10 pr-4 text-[15px] text-tf-ink placeholder:text-tf-stone-400 outline-none focus-visible:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary/25"
+            />
+          </div>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            aria-label="Sort products"
+            className="min-h-11 shrink-0 rounded-full border border-tf-stone-300 bg-tf-raised px-3 text-sm text-tf-ink outline-none focus-visible:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary/25"
+          >
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price ↑</option>
+            <option value="price_desc">Price ↓</option>
+          </select>
         </div>
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as SortKey)}
-          aria-label="Sort products"
-          className="min-h-11 shrink-0 rounded-full border border-tf-stone-300 bg-tf-raised px-3 text-sm text-tf-ink outline-none focus-visible:border-tf-primary focus-visible:ring-2 focus-visible:ring-tf-primary/25"
-        >
-          <option value="newest">Newest</option>
-          <option value="price_asc">Price ↑</option>
-          <option value="price_desc">Price ↓</option>
-        </select>
-      </div>
       )}
 
       {/* Category pills */}
@@ -186,25 +193,42 @@ export function TfStorefrontGrid({
           className={cn(
             "mt-4 grid grid-cols-2 gap-3 sm:gap-4",
             dense ? "sm:grid-cols-3 lg:grid-cols-4" : "sm:grid-cols-3",
+            // The plank sits 11px below the card. Without extra row
+            // gap it would read as underlining the row beneath it
+            // rather than supporting its own.
+            shelf && "gap-y-8 sm:gap-y-9",
           )}
         >
           {visible.map((p, index) => (
-            <li key={p.id}>
-              <TfProductCard
-                href={`/catalog/${shopSlug}/products/${p.slug ?? p.id}`}
-                title={p.name}
-                price={p.minPriceCents / 100}
-                priceFrom={p.maxPriceCents != null && p.minPriceCents !== p.maxPriceCents}
-                imageUrl={p.imageUrl}
-                imageAlt={p.imageAlt ?? p.name}
-                videoPreviewUrl={p.videoUrl}
-                videoKind={p.videoKind}
-                sellerName={sellerName}
-                sellerVerified={sellerVerified}
-                whatsappNumber={whatsappNumber}
-                priority={index < 4}
-                className="h-full"
-              />
+            <li key={p.id} className={cn(shelf && "tf-shelf")}>
+              {/* The settle gets its own element on purpose. .tf-stagger > *
+                  owns both `transform` and `animation` on the <li> — the
+                  latter carries tf-autoshow, the failsafe that reveals the
+                  card if the observer never fires. An `animation:` shorthand
+                  here would silently drop that failsafe and leave products
+                  at opacity 0 forever. Shelf on the slot, settle on the
+                  object standing on it. */}
+              <div className={cn("h-full", shelf && "tf-shelf-settle")}>
+                <TfProductCard
+                  href={`/catalog/${shopSlug}/products/${p.slug ?? p.id}`}
+                  title={p.name}
+                  price={p.minPriceCents / 100}
+                  priceFrom={
+                    p.maxPriceCents != null &&
+                    p.minPriceCents !== p.maxPriceCents
+                  }
+                  imageUrl={p.imageUrl}
+                  imageAlt={p.imageAlt ?? p.name}
+                  videoPreviewUrl={p.videoUrl}
+                  videoKind={p.videoKind}
+                  sellerName={sellerName}
+                  sellerVerified={sellerVerified}
+                  whatsappNumber={whatsappNumber}
+                  priority={index < 4}
+                  shelf={shelf ? "grid" : undefined}
+                  className="h-full"
+                />
+              </div>
             </li>
           ))}
         </TfReveal>

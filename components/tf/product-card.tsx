@@ -14,10 +14,43 @@ import { TfRatingChip } from "./rating-chip";
 // WhatsApp green SVG icon — inline so no extra icon dep needed
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      className={className}
+    >
       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
       <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.522 5.844L.057 23.882a.5.5 0 0 0 .61.61l6.04-1.465A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.003-1.37l-.359-.213-3.724.904.92-3.625-.234-.373A9.818 9.818 0 0 1 2.182 12c0-5.424 4.394-9.818 9.818-9.818 5.424 0 9.818 4.394 9.818 9.818 0 5.424-4.394 9.818-9.818 9.818z" />
     </svg>
+  );
+}
+
+/**
+ * Wraps the still in a parallax layer, or in nothing at all.
+ *
+ * Returning the child untouched when no shelf is asked for matters:
+ * an always-present wrapper would add a positioned element between
+ * the aspect frame and a `fill` Image on every card the marketplace
+ * renders, for the benefit of one flag-gated surface.
+ */
+function ShelfFrame({
+  shelf,
+  children,
+}: {
+  shelf?: "grid" | "rail";
+  children: React.ReactNode;
+}) {
+  if (!shelf) return <>{children}</>;
+  return (
+    <div
+      className={cn(
+        "absolute inset-0",
+        shelf === "rail" ? "tf-shelf-parallax-x" : "tf-shelf-parallax",
+      )}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -48,6 +81,15 @@ export interface TfProductCardProps extends React.ComponentProps<"article"> {
   videoPreviewUrl?: string | null;
   /** youtube shows a play badge only (no iframe in grids) */
   videoKind?: "upload" | "direct" | "youtube" | null;
+  /**
+   * Stands the card on a shelf: a plank, a contact shadow, and —
+   * where the browser supports scroll-driven CSS and the viewer has
+   * not asked for less motion — a settle and a parallax inside the
+   * frame. "grid" parallaxes on the block axis (page scroll), "rail"
+   * on the inline axis (swipe). Off by default, because the legacy
+   * TF storefront is live and must not change under buyers.
+   */
+  shelf?: "grid" | "rail";
 }
 
 function TfProductCard({
@@ -69,6 +111,7 @@ function TfProductCard({
   isNew = false,
   videoPreviewUrl,
   videoKind,
+  shelf,
   className,
   ...props
 }: TfProductCardProps) {
@@ -88,7 +131,9 @@ function TfProductCard({
   // and reduced-motion opt out entirely — the still image stays.
   const playsInline = videoKind === "upload" || videoKind === "direct";
   const hasVideo = Boolean(videoPreviewUrl) && videoKind != null;
-  const { ref: mediaRef, inView } = useInView<HTMLDivElement>({ threshold: 0.5 });
+  const { ref: mediaRef, inView } = useInView<HTMLDivElement>({
+    threshold: 0.5,
+  });
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [videoSrc, setVideoSrc] = React.useState<string | null>(null);
   const [videoReady, setVideoReady] = React.useState(false);
@@ -133,17 +178,27 @@ function TfProductCard({
       {...props}
     >
       {/* ── Image (+ video preview) ────────────────────── */}
-      <div ref={mediaRef} className="relative aspect-[4/5] overflow-hidden bg-tf-stone-100">
+      <div
+        ref={mediaRef}
+        className="relative aspect-[4/5] overflow-hidden bg-tf-stone-100"
+      >
         {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={imageAlt ?? title}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-            loading={priority ? "eager" : "lazy"}
-            priority={priority}
-            className="object-cover transition-transform duration-500 will-change-transform group-hover:scale-[1.06]"
-          />
+          // The parallax lives on a wrapper, not on the Image itself: the
+          // Image already owns a transform for the hover zoom, and two
+          // animations on one transform property is a fight the scroll
+          // timeline wins silently. The wrapper is only rendered when a
+          // shelf is asked for, so the live storefront's DOM is unchanged.
+          <ShelfFrame shelf={shelf}>
+            <Image
+              src={imageUrl}
+              alt={imageAlt ?? title}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+              loading={priority ? "eager" : "lazy"}
+              priority={priority}
+              className="object-cover transition-transform duration-500 will-change-transform group-hover:scale-[1.06]"
+            />
+          </ShelfFrame>
         ) : (
           <div className="flex h-full items-center justify-center text-tf-stone-300">
             <ImageOff aria-hidden="true" className="size-8" />
@@ -211,7 +266,10 @@ function TfProductCard({
             aria-label="Verified seller"
             className="absolute right-2.5 top-2.5 flex size-[22px] items-center justify-center rounded-full bg-white shadow-sm"
           >
-            <BadgeCheck aria-hidden="true" className="size-3.5 text-tf-verified" />
+            <BadgeCheck
+              aria-hidden="true"
+              className="size-3.5 text-tf-verified"
+            />
           </span>
         )}
 
@@ -249,16 +307,21 @@ function TfProductCard({
 
         <div className="flex items-baseline gap-1.5 tabular-nums">
           <span className="font-tf-display text-[15px] font-bold text-tf-ink">
-            {priceFrom && "From "}{formatZAR(price)}
+            {priceFrom && "From "}
+            {formatZAR(price)}
           </span>
           {onSale && (
-            <s className="text-[11px] text-tf-stone-400">{formatZAR(compareAtPrice)}</s>
+            <s className="text-[11px] text-tf-stone-400">
+              {formatZAR(compareAtPrice)}
+            </s>
           )}
         </div>
 
         <div className="mt-auto flex items-center justify-between gap-1.5 pt-0.5">
           {sellerName && (
-            <p className="min-w-0 truncate text-[11px] text-tf-stone-400">{sellerName}</p>
+            <p className="min-w-0 truncate text-[11px] text-tf-stone-400">
+              {sellerName}
+            </p>
           )}
           <div className="flex shrink-0 items-center gap-1">
             {rating != null ? (

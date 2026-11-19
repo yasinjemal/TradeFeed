@@ -33,28 +33,34 @@ export function TfDiptych({
       <TfReveal
         as="ul"
         stagger
-        className="mt-4 grid grid-cols-2 gap-3 sm:max-w-xl sm:gap-4"
+        className="mt-4 grid grid-cols-2 gap-3 pb-1 sm:max-w-xl sm:gap-4"
       >
         {products.map((product) => (
-          <li key={product.id}>
-            <TfProductCard
-              href={`/catalog/${shopSlug}/products/${product.slug ?? product.id}`}
-              title={product.name}
-              price={product.minPriceCents / 100}
-              priceFrom={
-                product.maxPriceCents != null &&
-                product.minPriceCents !== product.maxPriceCents
-              }
-              imageUrl={product.imageUrl}
-              imageAlt={product.imageAlt ?? product.name}
-              videoPreviewUrl={product.videoUrl}
-              videoKind={product.videoKind}
-              sellerName={shopName}
-              sellerVerified={shopVerified}
-              whatsappNumber={whatsappNumber}
-              priority
-              className="h-full"
-            />
+          <li key={product.id} className="tf-shelf">
+            {/* Settle on its own element: .tf-stagger > * already owns
+                transform and animation on the <li>, including the
+                tf-autoshow failsafe. See tf-product-grid.tsx. */}
+            <div className="tf-shelf-settle h-full">
+              <TfProductCard
+                href={`/catalog/${shopSlug}/products/${product.slug ?? product.id}`}
+                title={product.name}
+                price={product.minPriceCents / 100}
+                priceFrom={
+                  product.maxPriceCents != null &&
+                  product.minPriceCents !== product.maxPriceCents
+                }
+                imageUrl={product.imageUrl}
+                imageAlt={product.imageAlt ?? product.name}
+                videoPreviewUrl={product.videoUrl}
+                videoKind={product.videoKind}
+                sellerName={shopName}
+                sellerVerified={shopVerified}
+                whatsappNumber={whatsappNumber}
+                priority
+                shelf="grid"
+                className="h-full"
+              />
+            </div>
           </li>
         ))}
       </TfReveal>

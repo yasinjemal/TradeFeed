@@ -1201,3 +1201,146 @@ h4, h5, h6 {
   pointer-events: none;
   user-select: none;
 }
+
+/* ═══ The Shelf — products standing on a surface ═════════════
+   Extends the Counter above from the proof rail (facts) to the
+   products themselves, at every density rung. Until now only a
+   one-product shop got a surface (.tf-plinth); everything from
+   two upward floated.
+
+   Read the Counter comment above first: it argues depth should
+   be LAYOUT, not animation, because this product runs on cheap
+   Android. That argument is kept, as the BASE layer — the plank
+   and the contact shadow are static geometry, composited once,
+   and they are what makes a product read as "on a shelf". They
+   need no keyframes, no observer, and no support check, so they
+   land identically on every device and survive reduced-motion.
+
+   Motion is a strictly additive SECOND layer. It is scroll-driven
+   CSS, not JS: no listener, no rAF, no observer, and it runs on
+   the compositor off the main thread, so it costs 0 KB of bundle
+   and cannot jank the thread that handles taps. The @supports
+   check is not a gamble here, because its negative branch is the
+   complete static shelf rather than a broken state. A device that
+   cannot do it loses the settle, never the surface. */
+
+/* ── Base layer: the plank and the contact shadow ──────────── */
+/* .tf-shelf draws both. .tf-shelf-contact draws only the ellipse,
+   for rows that already carry one continuous bar of their own
+   (.tf-counter-rail) and would otherwise get a second plank. */
+.tf-shelf,
+.tf-shelf-contact {
+  position: relative;
+}
+
+/* The plank. Bleeds 8px past the card on both sides so that the
+   segments under adjacent cards meet and read as one continuous
+   shelf — 8px covers the grid's gap-3 (12px) and gap-4 (16px)
+   alike. Fades at the ends so a row's outer edges do not stop
+   dead against the page gutter. */
+.tf-shelf::before {
+  content: "";
+  position: absolute;
+  inset-inline: -8px;
+  bottom: -11px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-tf-stone-300) 6%,
+    var(--color-tf-stone-300) 94%,
+    transparent
+  );
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Where the object meets the plank. Same reasoning as .tf-plinth:
+   remove-background returns opaque JPEGs, so a mask-driven shadow
+   is impossible — a static ellipse reads as contact just as well. */
+.tf-shelf::after,
+.tf-shelf-contact::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 78%;
+  height: 12px;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: var(--color-tf-ink);
+  opacity: 0.18;
+  filter: blur(9px);
+  pointer-events: none;
+}
+
+/* Dark mode: a light plank on a dark surface, and a deeper
+   contact shadow — ink at 11% disappears against tf-surface. */
+.dark .tf-shelf::before {
+  opacity: 0.35;
+}
+.dark .tf-shelf::after,
+.dark .tf-shelf-contact::after {
+  opacity: 0.4;
+}
+
+/* ── Enhancement layer: the settle and the parallax ────────── */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* The object stands up as it arrives. Pivots on 50% 100% —
+       its own footprint on the plank — so the bottom edge never
+       leaves the surface it is supposed to be resting on. */
+    .tf-shelf-settle {
+      animation: tf-shelf-settle linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+      transform-origin: 50% 100%;
+    }
+
+    /* Vertical parallax inside the frame, for grids. */
+    .tf-shelf-parallax {
+      animation: tf-shelf-parallax linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    /* Horizontal variant, for the snap rails. Same idea driven by
+       the inline axis, so a product shifts in its frame as it is
+       swiped past rather than as the page scrolls. */
+    .tf-shelf-parallax-x {
+      animation: tf-shelf-parallax-x linear both;
+      animation-timeline: view(inline);
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+/* Kept out of the media query so the declarations are parsed once;
+   nothing references them unless the rules above matched. */
+@keyframes tf-shelf-settle {
+  from {
+    transform: perspective(900px) rotateX(4.5deg) translateY(8px) scale(0.975);
+  }
+  to {
+    transform: perspective(900px) rotateX(0deg) translateY(0) scale(1);
+  }
+}
+
+/* The 1.08 scale is the headroom the translation moves within —
+   without it the frame would show its own edge at the extremes. */
+@keyframes tf-shelf-parallax {
+  from {
+    transform: scale(1.08) translateY(-3%);
+  }
+  to {
+    transform: scale(1.08) translateY(3%);
+  }
+}
+@keyframes tf-shelf-parallax-x {
+  from {
+    transform: scale(1.08) translateX(-3%);
+  }
+  to {
+    transform: scale(1.08) translateX(3%);
+  }
+}
