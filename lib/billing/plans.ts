@@ -8,7 +8,7 @@
 //   - scripts/seed-plans.ts   (Plan DB rows)
 //
 // Enforcement lives elsewhere but MUST agree with these numbers:
-//   - lib/db/ai.ts            (FREE_AI_CREDITS=10, STARTER_AI_CREDITS=25)
+//   - lib/db/ai.ts            (reads aiGenerationsPerMonth from here)
 //   - lib/db/subscriptions.ts (product limits)
 //   - app/actions/domains.ts  (custom domain = above Starter)
 // If you change a number here, change the enforcement too.
@@ -146,6 +146,81 @@ export const PLANS: readonly PlanDef[] = [
 export function getPlan(slug: PlanSlug): PlanDef {
   // PLANS covers every PlanSlug, so this never actually returns undefined
   return PLANS.find((p) => p.slug === slug)!;
+}
+
+/**
+ * Look up a plan by a slug we do not control (URL parameter, DB row,
+ * API response). Returns undefined for anything that is not a plan.
+ */
+export function findPlan(slug: string | null | undefined): PlanDef | undefined {
+  return PLANS.find((p) => p.slug === slug);
+}
+
+/** Narrow an untrusted value to a real plan slug, or null. */
+export function parsePlanSlug(value: unknown): PlanSlug | null {
+  return typeof value === "string" ? (findPlan(value)?.slug ?? null) : null;
+}
+
+/** The plan every surface badges as "Most popular". */
+export function isPopularPlan(slug: string | null | undefined): boolean {
+  return findPlan(slug)?.popular ?? false;
+}
+
+// ── Price copy ───────────────────────────────────────────────
+// Every price a seller reads must come from PLANS. Use these
+// helpers instead of typing a number into a string —
+// tests/billing-truth.test.ts fails the build on a typed-in price
+// that no longer matches.
+
+/** "R299" */
+export function planPrice(slug: PlanSlug): string {
+  return `R${getPlan(slug).priceMonthly}`;
+}
+
+/** "R299/month" (long) or "R299/mo" (short) */
+export function planPricePerMonth(slug: PlanSlug, style: "long" | "short" = "long"): string {
+  return `${planPrice(slug)}/${style === "long" ? "month" : "mo"}`;
+}
+
+/**
+ * The smallest whole-rand amount the plan costs LESS than per day,
+ * averaged over a year — Pro at R299 is R9.83 a day, so 10, as in
+ * "less than R10/day". Always strictly greater than the real daily
+ * cost, so the claim stays true.
+ */
+export function planDailyCostCeiling(slug: PlanSlug): number {
+  return Math.floor((getPlan(slug).priceMonthly * 12) / 365) + 1;
+}
+
+/** "less than R10/day" */
+export function planLessThanPerDay(slug: PlanSlug): string {
+  return `less than R${planDailyCostCeiling(slug)}/day`;
+}
+
+// ── Limits ───────────────────────────────────────────────────
+
+/**
+ * AI listing allowance for a plan slug (null = unlimited).
+ * Unknown slugs get the Free allowance — the safe default.
+ */
+export function aiListingLimit(slug: string | null | undefined): number | null {
+  return (findPlan(slug) ?? getPlan("free")).aiGenerationsPerMonth;
+}
+
+/** Cheapest plan with no AI listing limit — the honest upgrade when credits run out. */
+export function cheapestUnlimitedAiPlan(): PlanDef {
+  return cheapestPlanWhere((p) => p.aiGenerationsPerMonth === null);
+}
+
+/** Cheapest plan with no product limit — the honest upgrade at the 20-product cap. */
+export function cheapestUnlimitedProductsPlan(): PlanDef {
+  return cheapestPlanWhere((p) => p.productLimit === 0);
+}
+
+function cheapestPlanWhere(predicate: (plan: PlanDef) => boolean): PlanDef {
+  const match = [...PLANS].filter(predicate).sort((a, b) => a.priceMonthly - b.priceMonthly)[0];
+  // The top plan removes every limit, so there is always a match.
+  return match ?? PLANS[PLANS.length - 1]!;
 }
 
 /** Rand saved per year with annual billing (0 when no annual option) */

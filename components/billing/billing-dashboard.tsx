@@ -6,9 +6,15 @@
 
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { createCheckoutAction, cancelSubscriptionAction } from "@/app/actions/billing";
+import { useRouter } from "next/navigation";
+import {
+  createCheckoutAction,
+  cancelSubscriptionAction,
+  type CancelSubscriptionActionResult,
+} from "@/app/actions/billing";
+import { isPopularPlan, planLessThanPerDay, type PlanSlug } from "@/lib/billing/plans";
 
 interface Plan {
   id: string;
@@ -44,6 +50,8 @@ interface BillingDashboardProps {
   subscription: Subscription | null;
   productLimit: ProductLimit;
   shopSlug: string;
+  /** Plan the seller picked before landing here (?plan=), if any */
+  highlightPlan?: PlanSlug | null;
 }
 
 export function BillingDashboard({
@@ -51,6 +59,7 @@ export function BillingDashboard({
   subscription,
   productLimit,
   shopSlug,
+  highlightPlan = null,
 }: BillingDashboardProps) {
   const currentPlan = subscription?.plan;
   const isFreePlan = !currentPlan || currentPlan.slug === "free";
@@ -186,7 +195,7 @@ export function BillingDashboard({
               <p className="text-sm font-bold text-slate-800">Pro sellers earn 3× more on average</p>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                 Unlimited products, promoted listings, and the trusted ⭐ PRO badge help you sell more.
-                For less than R7/day — one sale covers it.
+                For {planLessThanPerDay("pro")} — one sale covers it.
               </p>
             </div>
           </div>
@@ -205,13 +214,19 @@ export function BillingDashboard({
             isCurrent={currentPlan?.id === plan.id}
             currentPlanPrice={currentPlan?.priceInCents ?? 0}
             shopSlug={shopSlug}
+            isPicked={highlightPlan === plan.slug}
           />
         ))}
       </div>
 
       {/* ── Cancel Section ───────────────────────────────── */}
-      {!isFreePlan && (
-        <CancelSection shopSlug={shopSlug} />
+      {!isFreePlan && currentPlan && (
+        <CancelSection
+          shopSlug={shopSlug}
+          planName={currentPlan.name}
+          isCancelled={subscription?.status === "CANCELLED"}
+          endsAt={subscription?.currentPeriodEnd ?? null}
+        />
       )}
     </div>
   );
@@ -226,14 +241,18 @@ function PlanCard({
   isCurrent,
   currentPlanPrice,
   shopSlug,
+  isPicked,
 }: {
   plan: Plan;
   isCurrent: boolean;
   currentPlanPrice: number;
   shopSlug: string;
+  /** The seller chose this plan on the page that sent them here */
+  isPicked: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const features: string[] = plan.features
     ? JSON.parse(plan.features) as string[]
@@ -246,7 +265,18 @@ function PlanCard({
 
   const canUpgrade = !isCurrent && plan.priceInCents > currentPlanPrice;
   const isAiPlan = plan.slug === "pro-ai";
-  const isPopular = plan.slug === "starter";
+  // "Popular" is whatever lib/billing/plans.ts says — one answer everywhere.
+  const isPopular = isPopularPlan(plan.slug);
+  // Only point at a plan the seller can actually buy from here.
+  const isHighlighted = isPicked && canUpgrade;
+
+  // The plan cards sit below the usage card and stack on a phone, so
+  // bring the one they picked into view instead of making them hunt.
+  useEffect(() => {
+    if (!isHighlighted) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    cardRef.current?.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+  }, [isHighlighted]);
 
   const handleUpgrade = () => {
     setError(null);
@@ -262,14 +292,18 @@ function PlanCard({
 
   return (
     <div
+      ref={cardRef}
+      data-picked={isHighlighted ? "true" : undefined}
       className={`bg-white rounded-2xl border-2 p-6 transition-all flex flex-col ${
-        isCurrent
-          ? "border-emerald-400 shadow-lg shadow-emerald-100/50"
-          : isAiPlan
-            ? "border-violet-200 hover:border-violet-300"
-            : isPopular
-              ? "border-emerald-200 hover:border-emerald-300"
-              : "border-slate-200/60 hover:border-slate-300"
+        isHighlighted
+          ? "border-emerald-500 ring-4 ring-emerald-500/20 shadow-lg shadow-emerald-100/50"
+          : isCurrent
+            ? "border-emerald-400 shadow-lg shadow-emerald-100/50"
+            : isAiPlan
+              ? "border-violet-200 hover:border-violet-300"
+              : isPopular
+                ? "border-emerald-200 hover:border-emerald-300"
+                : "border-slate-200/60 hover:border-slate-300"
       }`}
     >
       <div className="flex items-center justify-between mb-3">
@@ -279,12 +313,17 @@ function PlanCard({
             Current
           </span>
         )}
-        {!isCurrent && isPopular && (
-          <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-            Popular
+        {isHighlighted && (
+          <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded-full">
+            Your pick
           </span>
         )}
-        {!isCurrent && isAiPlan && (
+        {!isCurrent && !isHighlighted && isPopular && (
+          <span className="text-[10px] font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
+            Most popular
+          </span>
+        )}
+        {!isCurrent && !isHighlighted && isAiPlan && (
           <span className="text-[10px] font-semibold uppercase tracking-wider bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">
             ✨ AI
           </span>
@@ -367,29 +406,65 @@ function PlanCard({
   );
 }
 
-function CancelSection({ shopSlug }: { shopSlug: string }) {
+function CancelSection({
+  shopSlug,
+  planName,
+  isCancelled,
+  endsAt,
+}: {
+  shopSlug: string;
+  planName: string;
+  isCancelled: boolean;
+  endsAt: Date | null;
+}) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cancelled, setCancelled] = useState<CancelSubscriptionActionResult | null>(null);
 
   const handleCancel = () => {
     setError(null);
     startTransition(async () => {
       const result = await cancelSubscriptionAction(shopSlug);
       if (result.success) {
-        window.location.reload();
+        setCancelled(result);
+        router.refresh();
       } else {
         setError(result.error ?? "Failed to cancel.");
       }
     });
   };
 
+  const endsOn = cancelled?.endsAt ?? endsAt;
+  const endsLabel = endsOn
+    ? new Date(endsOn).toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" })
+    : null;
+  const keepsUntil = endsLabel ? `until ${endsLabel}` : "until the end of your billing period";
+
+  // Already cancelled (just now, or on an earlier visit): say what
+  // happens next instead of offering to cancel again.
+  if (cancelled || isCancelled) {
+    return (
+      <div role="status" className="bg-white rounded-2xl border border-slate-200/60 p-6">
+        <h3 className="text-sm font-semibold text-slate-800 mb-2">Subscription cancelled</h3>
+        <p className="text-xs text-slate-500">
+          {/* Only promised when PayFast confirmed it during this visit. */}
+          {cancelled?.stoppedAtPayFast && (
+            <>PayFast has stopped your monthly payment — you won&apos;t be charged again. </>
+          )}
+          You keep {planName} {keepsUntil}. After that, your shop moves to the Free plan.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/60 p-6">
       <h3 className="text-sm font-semibold text-slate-800 mb-2">Cancel Subscription</h3>
       <p className="text-xs text-slate-500 mb-4">
-        You&apos;ll keep Pro features until the end of your billing period.
-        After that, you&apos;ll be downgraded to the Free plan.
+        We&apos;ll stop your monthly PayFast payment. You keep {planName} {keepsUntil},
+        then your shop moves to the Free plan.
       </p>
 
       {!showConfirm ? (
@@ -401,23 +476,30 @@ function CancelSection({ shopSlug }: { shopSlug: string }) {
           Cancel subscription...
         </button>
       ) : (
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isPending}
-            className="text-xs bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
-          >
-            {isPending ? "Cancelling..." : "Yes, cancel"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowConfirm(false)}
-            className="text-xs text-slate-500 hover:text-slate-700 px-4 py-2"
-          >
-            Keep plan
-          </button>
-          {error && <p className="text-xs text-red-600">{error}</p>}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={isPending}
+              className="text-xs bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
+            >
+              {isPending ? "Cancelling..." : "Yes, cancel"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowConfirm(false)}
+              disabled={isPending}
+              className="text-xs text-slate-500 hover:text-slate-700 px-4 py-2"
+            >
+              Keep plan
+            </button>
+          </div>
+          {error && (
+            <p role="alert" className="text-xs text-red-600">
+              {error}
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -11,7 +11,11 @@
 //    - "promo_..." → promotion payment → create PromotedListing
 //    - "order_..." → buyer order payment → mark order as paid
 //    - anything else → subscription payment → activate subscription
-// 4. If cancelled → cancel subscription (promotions are one-time, no cancel)
+// 4. If cancelled → record the cancellation (promotions are one-time, no cancel)
+//
+// Subscription notifications are matched on the PayFast token, because
+// one shop can have two live subscriptions after an upgrade — see
+// lib/billing/subscription-itn.ts.
 //
 // SECURITY:
 // - Signature validation prevents spoofing
@@ -21,7 +25,14 @@
 
 import { NextResponse } from "next/server";
 import { validatePayFastITN } from "@/lib/payfast";
-import { upgradeSubscription, cancelSubscription } from "@/lib/db/subscriptions";
+import {
+  upgradeSubscription,
+  markSubscriptionCancelled,
+  extendCancelledSubscription,
+} from "@/lib/db/subscriptions";
+import { cancelPayFastSubscription } from "@/lib/payfast-api";
+import { decideSubscriptionItn } from "@/lib/billing/subscription-itn";
+import { describePayFastFailure } from "@/lib/billing/cancel-subscription";
 import { db } from "@/lib/db";
 import { parsePromotionPaymentId, calculatePromotionPrice, parseShopBoostPaymentId, calculateShopBoostPrice } from "@/lib/config/promotions";
 import { createPromotedListing } from "@/lib/db/promotions";
@@ -350,25 +361,67 @@ async function handleSubscriptionPayment(
   const planSlug = colonIdx !== -1 ? paymentId.slice(colonIdx + 1) : null;
 
   const token = body["token"]; // PayFast subscription token
+  const incomingPlanSlug = planSlug ?? "pro";
 
-  switch (paymentStatus) {
-    case "COMPLETE": {
-      // Validate paid amount against the plan price
-      if (planSlug) {
-        const plan = await db.plan.findUnique({ where: { slug: planSlug }, select: { priceInCents: true } });
-        if (plan && plan.priceInCents > 0) {
-          const receivedCents = Math.round(parseFloat(body["amount_gross"] ?? "0") * 100);
-          if (Math.abs(receivedCents - plan.priceInCents) > 100) {
-            await reportError("payfast-itn-subscription-amount-mismatch", new Error("Subscription amount mismatch"), {
-              shopId, planSlug, expected: plan.priceInCents, received: receivedCents,
-            });
-            return NextResponse.json({ error: "Amount mismatch" }, { status: 400 });
-          }
+  const [incomingPlan, current] = await Promise.all([
+    db.plan.findUnique({ where: { slug: incomingPlanSlug }, select: { priceInCents: true } }),
+    db.subscription.findUnique({
+      where: { shopId },
+      select: {
+        status: true,
+        payfastToken: true,
+        plan: { select: { slug: true, priceInCents: true } },
+      },
+    }),
+  ]);
+
+  // Validate paid amount against the plan price
+  if (paymentStatus === "COMPLETE" && planSlug && incomingPlan && incomingPlan.priceInCents > 0) {
+    const receivedCents = Math.round(parseFloat(body["amount_gross"] ?? "0") * 100);
+    if (Math.abs(receivedCents - incomingPlan.priceInCents) > 100) {
+      await reportError("payfast-itn-subscription-amount-mismatch", new Error("Subscription amount mismatch"), {
+        shopId, planSlug, expected: incomingPlan.priceInCents, received: receivedCents,
+      });
+      return NextResponse.json({ error: "Amount mismatch" }, { status: 400 });
+    }
+  }
+
+  // A shop can have more than one PayFast subscription (an upgrade is a
+  // second checkout), so the token decides what this notification means.
+  // See lib/billing/subscription-itn.ts for the rules.
+  const action = decideSubscriptionItn({
+    paymentStatus,
+    incomingPlanSlug,
+    incomingPlanPriceCents: incomingPlan?.priceInCents ?? 0,
+    incomingToken: token,
+    current,
+  });
+
+  switch (action.type) {
+    case "ACTIVATE": {
+      await upgradeSubscription(shopId, action.planSlug, action.tokenToStore);
+      console.log(`[PayFast ITN] Subscription activated: shop=${shopId} plan=${action.planSlug}`);
+
+      // The seller upgraded through a new checkout, which left the
+      // previous subscription billing. Stop it so they pay for one plan.
+      // Runs after the upgrade so the CANCELLED ITN this triggers is
+      // recognised as "superseded" and ignored.
+      if (action.supersededToken) {
+        const cancelled = await cancelPayFastSubscription(action.supersededToken);
+        if (cancelled.ok) {
+          console.log(`[PayFast ITN] Superseded subscription cancelled at PayFast for shop ${shopId}`);
+        } else {
+          // Non-fatal for the webhook, urgent for a human: the seller is
+          // still being billed for the old plan as well as the new one.
+          await reportError(
+            "payfast-superseded-cancel-failed",
+            new Error(
+              `Old subscription is still billing after an upgrade — cancel it in the PayFast dashboard: ${describePayFastFailure(cancelled)}`,
+            ),
+            { shopId, planSlug: action.planSlug },
+          );
         }
       }
-
-      await upgradeSubscription(shopId, planSlug ?? "pro", token);
-      console.log(`[PayFast ITN] Subscription activated: shop=${shopId} plan=${planSlug ?? "pro"}`);
 
       // Apply referral reward: if this shop was referred, extend referrer's sub
       try {
@@ -384,14 +437,42 @@ async function handleSubscriptionPayment(
       break;
     }
 
-    case "CANCELLED": {
-      await cancelSubscription(shopId);
+    case "CHARGED_AFTER_CANCEL": {
+      // They paid for another month, so they get it — but the
+      // subscription stays cancelled and we stop PayFast again.
+      await extendCancelledSubscription(shopId);
+      const cancelled = await cancelPayFastSubscription(action.token);
+      await reportError(
+        "payfast-charged-after-cancel",
+        new Error(
+          `PayFast debited a subscription the seller had cancelled — a refund may be owed. Cancel at PayFast now: ${describePayFastFailure(cancelled)}`,
+        ),
+        { shopId, planSlug: incomingPlanSlug, paymentId: body["pf_payment_id"] },
+      );
+      break;
+    }
+
+    case "SUPERSEDED_SUBSCRIPTION_CHARGED": {
+      // Plan is left exactly as it is; only the stale subscription is stopped.
+      const cancelled = await cancelPayFastSubscription(action.staleToken);
+      await reportError(
+        "payfast-superseded-subscription-charged",
+        new Error(
+          `A replaced subscription was debited again — the seller paid for two plans and a refund may be owed. Cancel at PayFast now: ${describePayFastFailure(cancelled)}`,
+        ),
+        { shopId, planSlug: incomingPlanSlug, paymentId: body["pf_payment_id"] },
+      );
+      break;
+    }
+
+    case "MARK_CANCELLED": {
+      await markSubscriptionCancelled(shopId);
       console.log(`[PayFast ITN] Subscription cancelled for shop ${shopId}`);
       break;
     }
 
-    default:
-      console.log(`[PayFast ITN] Unhandled status: ${paymentStatus}`);
+    case "IGNORE":
+      console.log(`[PayFast ITN] No action for shop ${shopId}: ${action.reason}`);
   }
 
   return NextResponse.json({ received: true });

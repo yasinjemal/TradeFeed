@@ -4,11 +4,8 @@
 // Manages subscription state, plan lookups, and product limit
 // enforcement for the freemium business model.
 //
-// PLANS:
-// - Free: 20 products, basic features, 10 AI generations
-// - Starter: R99/mo, unlimited products, 25 AI generations
-// - Pro: R299/mo, unlimited products, unlimited AI
-// - Pro AI: R499/mo, everything + advanced AI
+// PLANS: Free, Starter, Pro, Pro AI — prices and limits are defined
+// once, in lib/billing/plans.ts. Do not restate them here.
 //
 // RULES:
 // - Every shop gets a Free subscription on creation
@@ -110,7 +107,7 @@ export async function createFreeSubscription(shopId: string) {
 export async function upgradeSubscription(
   shopId: string,
   planSlug: string,
-  payfastToken?: string,
+  payfastToken?: string | null,
 ) {
   const plan = await db.plan.findUnique({
     where: { slug: planSlug },
@@ -149,12 +146,38 @@ export async function upgradeSubscription(
 }
 
 /**
- * Cancel a subscription (revert to free plan at period end).
+ * Record a cancellation in OUR database: the paid plan stays usable
+ * until currentPeriodEnd, then the expiry cron moves the shop to Free.
+ *
+ * LOCAL STATE ONLY. This does not stop PayFast debiting the seller.
+ * Seller-initiated cancellation must go through cancelShopSubscription
+ * (lib/billing/cancel-subscription.ts), which cancels at PayFast first.
+ * Call this directly only when PayFast has already confirmed the
+ * subscription is cancelled (its CANCELLED ITN, or a successful API call).
+ *
+ * The PayFast token is deliberately kept: it is how the webhook
+ * recognises a debit that arrives after cancellation.
  */
-export async function cancelSubscription(shopId: string) {
-  return db.subscription.update({
-    where: { shopId },
+export async function markSubscriptionCancelled(shopId: string) {
+  return db.subscription.updateMany({
+    where: { shopId, plan: { slug: { not: "free" } } },
     data: { status: "CANCELLED" },
+  });
+}
+
+/**
+ * PayFast debited a subscription the seller had already cancelled.
+ * They paid for another month, so give them that month — but leave
+ * the subscription CANCELLED so it still ends instead of renewing.
+ */
+export async function extendCancelledSubscription(shopId: string) {
+  const now = new Date();
+  const periodEnd = new Date(now);
+  periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+  return db.subscription.updateMany({
+    where: { shopId, status: "CANCELLED" },
+    data: { currentPeriodStart: now, currentPeriodEnd: periodEnd },
   });
 }
 

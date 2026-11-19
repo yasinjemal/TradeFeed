@@ -23,11 +23,20 @@
 const PAYFAST_SANDBOX_URL = "https://sandbox.payfast.co.za/eng/process";
 const PAYFAST_LIVE_URL = "https://www.payfast.co.za/eng/process";
 
-interface PayFastConfig {
+export interface PayFastConfig {
   merchantId: string;
   merchantKey: string;
   passphrase: string;
   sandbox: boolean;
+}
+
+/**
+ * Shared by the checkout/ITN code below and the REST API client in
+ * lib/payfast-api.ts, so both always target the same PayFast
+ * environment (sandbox vs live) with the same credentials.
+ */
+export function getPayFastConfig(): PayFastConfig {
+  return getConfig();
 }
 
 function getConfig(): PayFastConfig {
@@ -79,8 +88,10 @@ export function buildPayFastCheckoutUrl(params: CheckoutParams): string {
   const data: Record<string, string> = {
     merchant_id: config.merchantId,
     merchant_key: config.merchantKey,
-    return_url: `${appUrl}/dashboard/${params.shopSlug}/billing?status=success`,
-    cancel_url: `${appUrl}/dashboard/${params.shopSlug}/billing?status=cancelled`,
+    // The plan rides along so the billing page can name the plan that
+    // was bought (success) or keep it highlighted (cancelled).
+    return_url: `${appUrl}/dashboard/${params.shopSlug}/billing?status=success&plan=${encodeURIComponent(params.planSlug)}`,
+    cancel_url: `${appUrl}/dashboard/${params.shopSlug}/billing?status=cancelled&plan=${encodeURIComponent(params.planSlug)}`,
     notify_url: `${appUrl}/api/webhooks/payfast`,
     name_first: params.buyerFirstName ?? "",
     name_last: params.buyerLastName ?? "",
