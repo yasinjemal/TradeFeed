@@ -3,7 +3,7 @@
 // ============================================================
 // After sign-in, users land here. We check if they have a shop:
 //   - Yes → redirect to their first shop's dashboard
-//   - No  → redirect to /create-shop
+//   - No  → redirect to /get-started (product-first onboarding)
 //
 // This prevents the old bug where existing users were forced
 // to the create-shop page unnecessarily.

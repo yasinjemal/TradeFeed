@@ -1,3 +1,4 @@
+import { SELLER_SIGN_UP_PATH } from "@/lib/config/seller-cta";
 import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import { cache } from "react";
 import { getCatalogProduct, getCatalogShop, getSimilarProducts, getMoreFromSeller } from "@/lib/db/catalog";
@@ -584,7 +585,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <div className="flex items-center gap-2.5"><span className="font-bold text-emerald-500">2.</span> {t("stepShare")}</div>
             <div className="flex items-center gap-2.5"><span className="font-bold text-emerald-500">3.</span> {t("stepReceive")}</div>
           </div>
-          <Link href="/create-shop" className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-200 transition-all hover:bg-emerald-700 active:scale-[0.98]">
+          <Link href={SELLER_SIGN_UP_PATH} className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-200 transition-all hover:bg-emerald-700 active:scale-[0.98]">
             {t("createShopCta")}
           </Link>
         </div>
@@ -597,7 +598,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <div className="flex items-center gap-2">🏷️ {t("aiCategory")}</div>
             <div className="flex items-center gap-2">🚀 {t("aiFaster")}</div>
           </div>
-          <Link href="/create-shop" className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-violet-200 transition-all hover:bg-violet-700 active:scale-[0.98]">
+          <Link href={SELLER_SIGN_UP_PATH} className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-violet-200 transition-all hover:bg-violet-700 active:scale-[0.98]">
             {t("tryFree")}
           </Link>
         </div>

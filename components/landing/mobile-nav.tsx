@@ -311,11 +311,11 @@ export function MobileNav({
               ) : (
                 <>
                   <Link
-                    href="/sign-up"
+                    href={ctaHref}
                     onClick={close}
                     className="flex items-center justify-center gap-2 w-full px-4 py-3.5 text-sm font-bold rounded-xl bg-blue-600 text-white hover:bg-blue-500 active:scale-[0.98] transition-all shadow-lg shadow-blue-600/20"
                   >
-                    Start Selling \u2014 It&apos;s Free
+                    {ctaLabel}
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                     </svg>

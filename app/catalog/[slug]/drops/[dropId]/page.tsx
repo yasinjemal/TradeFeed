@@ -6,6 +6,7 @@
 // and "Powered by TradeFeed" viral badge.
 // ============================================================
 
+import { SELLER_SIGN_UP_PATH } from "@/lib/config/seller-cta";
 import { getPublicDrop } from "@/lib/db/drops";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -201,7 +202,7 @@ export default async function PublicDropPage({ params }: DropPageProps) {
       {/* ── Powered by TradeFeed (Viral Badge) ── */}
       <div className="max-w-2xl mx-auto px-4 mt-10 mb-8">
         <Link
-          href="/create-shop"
+          href={SELLER_SIGN_UP_PATH}
           className="block rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-5 text-center text-white hover:shadow-xl hover:-translate-y-0.5 transition-all"
         >
           <div className="flex items-center justify-center gap-2 mb-1">

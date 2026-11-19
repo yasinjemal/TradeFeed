@@ -14,13 +14,8 @@ import {
   Shield,
   Clock,
   ArrowRight,
-  ScanSearch,
 } from "lucide-react";
 
-import { LanguageSwitcher } from "@/components/language-switcher";
-import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
-import { TfButton } from "@/components/tf/button";
-import { TfThemeToggle } from "@/components/tf/theme-toggle";
 import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { TfVerifiedSellerCard } from "@/components/tf/verified-seller-card";
 import { TfReveal } from "@/components/tf/motion/tf-reveal";
@@ -29,25 +24,31 @@ import { TfTilt } from "@/components/tf/motion/tf-tilt";
 import { TfLiveTicker } from "@/components/tf/motion/tf-live-ticker";
 import { TfMarquee } from "@/components/tf/motion/tf-marquee";
 import { TfPhoneMock } from "./phone-mock";
-import { TfLandingHeader } from "./tf-header";
 import { TfLandingStickyCta } from "./sticky-cta";
-import { SA_PROVINCES } from "@/lib/marketplace/locations";
 import { PLANS } from "@/lib/billing/plans";
 import { TfProductCard } from "@/components/tf/product-card";
 import { GrowthSpotlight } from "@/components/growth/growth-spotlight";
+import { TfSiteHeader } from "@/components/tf/site/site-header";
+import { TfSiteFooter } from "@/components/tf/site/site-footer";
+import type { SellerCta } from "@/lib/config/seller-cta";
+import {
+  proofCounterValue,
+  statsBlockCounters,
+  type PlatformStats,
+} from "@/lib/growth/landing-proof";
 
 export interface TfLandingProps {
-  ctaHref: string;
-  ctaLabel: string;
+  /** The one sign-up call to action — resolve it with sellerCta(). */
+  cta: SellerCta;
   /** Whether the viewer has a Clerk session — hides "Sign in" and the like */
   isSignedIn?: boolean;
-  stats: {
-    shopCount: number;
-    productCount: number;
-    orderCount: number;
-    cityCount: number;
-    topCities: string;
-  };
+  /**
+   * Platform counters, or `null` when they could not be loaded.
+   * Each number is shown only if it clears its threshold in
+   * lib/growth/landing-proof.ts — never print these directly.
+   */
+  stats: PlatformStats | null;
+  /** Shops that passed the featured-shop gate (lib/db/landing-proof.ts). */
   sellers: {
     name: string;
     slug: string;
@@ -89,73 +90,31 @@ function initials(name: string) {
 
 const WHATSAPP_GREEN = "#25D366";
 
-export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, sellers, products = [], faqItems = [] }: TfLandingProps) {
+const STATS_GRID_COLS: Record<number, string> = {
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-3",
+  4: "sm:grid-cols-4",
+};
+
+export function TfLanding({ cta, isSignedIn = false, stats, sellers, products = [], faqItems = [] }: TfLandingProps) {
+  const { href: ctaHref, label: ctaLabel } = cta;
   const reassurance = `20 products free · 10 AI listings a month · no credit card · set up in under 3 minutes`;
-  const liveShopHref = sellers[0]
-    ? `/catalog/${sellers[0].slug}`
-    : "/marketplace";
+  const liveShop = sellers[0]
+    ? { href: `/catalog/${sellers[0].slug}`, label: "See a live shop" }
+    : { href: "/marketplace", label: "Browse the marketplace" };
   const proofSeller = sellers.find((seller) => seller.isVerified) ?? sellers[0] ?? null;
+
+  // Counters: null means "do not show this number" (too small, or unknown).
+  const shopCount = proofCounterValue(stats, "shops");
+  const cityCount = proofCounterValue(stats, "cities");
+  const statCounters = statsBlockCounters(stats);
 
   return (
     <div className="overflow-x-hidden bg-tf-surface text-tf-ink">
       <TfHeroFont />
 
-      {/* ── Sticky header ──────────────────────────────── */}
-      <TfLandingHeader>
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-          <Link href="/" aria-label="TradeFeed home" className="shrink-0">
-            <span className="tf-over-hero"><TradeFeedLogo size="sm" variant="light" /></span>
-            <span className="tf-over-surface"><TradeFeedLogo size="sm" variant="auto" /></span>
-          </Link>
-          <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-tf-stone-600 lg:flex">
-            <Link href="#how-it-works" className="tf-navlink hover:text-tf-ink">How it works</Link>
-            <Link href="#pricing" className="tf-navlink hover:text-tf-ink">Pricing</Link>
-            <Link href="/growth" className="tf-navlink hover:text-tf-ink">Done-for-you</Link>
-            <Link href="/marketplace" className="tf-navlink hover:text-tf-ink">Marketplace</Link>
-            <Link
-              href="/hunt#start-hunt"
-              className="tf-hunt-nav inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3 font-semibold transition-all"
-            >
-              <ScanSearch aria-hidden="true" className="size-3.5" />
-              HUNT
-              <span className="tf-hunt-nav-badge rounded-full px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider">
-                Beta
-              </span>
-            </Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/hunt#start-hunt"
-              aria-label="Start a TradeFeed HUNT"
-              className="tf-hunt-nav inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-bold transition-colors lg:hidden"
-            >
-              <ScanSearch aria-hidden="true" className="size-4" />
-              HUNT
-            </Link>
-            <span className="hidden sm:inline-flex">
-              <LanguageSwitcher />
-            </span>
-            <span className="hidden sm:inline-flex">
-              <TfThemeToggle />
-            </span>
-            {/* Auth-aware: signed-in users already have the dashboard CTA */}
-            {!isSignedIn && (
-              <Link
-                href="/sign-in"
-                className="hidden px-3 py-2 text-sm text-tf-stone-600 hover:text-tf-ink sm:block transition-colors"
-              >
-                Sign in
-              </Link>
-            )}
-            <TfButton asChild size="sm">
-              <Link href={ctaHref}>
-                <span className="hidden sm:inline">{ctaLabel}</span>
-                <span className="sm:hidden">{isSignedIn ? "Open" : "Start free"}</span>
-              </Link>
-            </TfButton>
-          </div>
-        </div>
-      </TfLandingHeader>
+      {/* ── Site header (shared with /pricing and the SEO pages) ── */}
+      <TfSiteHeader variant="overlay" cta={cta} isSignedIn={isSignedIn} />
 
       {/* ══════════════════════════════════════════════════
           HERO — Cinematic dark opener
@@ -190,13 +149,20 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
 
             {/* ── Left: Headline + CTAs ─── */}
             <div className="min-w-0">
-              {/* Real seller footprint */}
+              {/* Real seller footprint — only when the number is worth showing */}
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400">
-                <span
-                  className="tf-presence inline-block size-2 rounded-full bg-emerald-400"
-                  aria-hidden="true"
-                />
-                {n(stats.shopCount)} registered shops &middot; {stats.cityCount} SA {stats.cityCount === 1 ? "city" : "cities"}
+                {shopCount !== null ? (
+                  <>
+                    <span
+                      className="tf-presence inline-block size-2 rounded-full bg-emerald-400"
+                      aria-hidden="true"
+                    />
+                    {n(shopCount)} registered shops
+                    {cityCount !== null && <> &middot; {n(cityCount)} SA cities</>}
+                  </>
+                ) : (
+                  "Built for South African WhatsApp sellers"
+                )}
               </div>
 
               {/* Concise seller-first promise: readable, searchable, and above the fold. */}
@@ -252,10 +218,10 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
                 <Link
-                  href={liveShopHref}
+                  href={liveShop.href}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 px-6 py-3.5 text-sm font-medium text-white/75 transition-all duration-200 hover:border-white/35 hover:text-white"
                 >
-                  See a live shop
+                  {liveShop.label}
                 </Link>
               </div>
 
@@ -328,44 +294,43 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
       )}
 
       {/* ══════════════════════════════════════════════════
-          STATS — real, earned numbers
+          STATS — real, earned numbers. Rendered only when at
+          least two counters clear their thresholds; a small
+          number is hidden, never rounded up.
       ══════════════════════════════════════════════════ */}
-      <section aria-label="Platform statistics" className="bg-tf-surface">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <TfReveal>
-            <p className="mb-10 text-center text-[11px] font-medium uppercase tracking-[0.28em] text-tf-stone-400">
-              Real numbers · updated every 5 minutes
-            </p>
-          </TfReveal>
-          <TfReveal
-            as="div"
-            stagger
-            className="grid grid-cols-2 gap-8 text-center sm:grid-cols-4"
-          >
-            {[
-              { value: stats.shopCount, label: "registered shops" },
-              { value: stats.productCount, label: "products listed" },
-              { value: stats.orderCount, label: "orders created" },
-              { value: stats.cityCount, label: "SA cities" },
-            ].map(({ value, label }) => (
-              <div key={label}>
-                <p
-                  className="font-tf-hero tabular-nums text-tf-ink"
-                  style={{
-                    fontSize: "clamp(3.5rem, 10vw, 6.5rem)",
-                    fontWeight: 700,
-                    lineHeight: "0.88",
-                    letterSpacing: "-0.045em",
-                  }}
-                >
-                  <TfCountUp value={value} />
-                </p>
-                <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.22em] text-tf-stone-400">{label}</p>
-              </div>
-            ))}
-          </TfReveal>
-        </div>
-      </section>
+      {statCounters.length > 0 && (
+        <section aria-label="Platform statistics" className="bg-tf-surface">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+            <TfReveal>
+              <p className="mb-10 text-center text-[11px] font-medium uppercase tracking-[0.28em] text-tf-stone-500">
+                Live numbers · updated every 5 minutes
+              </p>
+            </TfReveal>
+            <TfReveal
+              as="div"
+              stagger
+              className={`grid grid-cols-2 gap-8 text-center ${STATS_GRID_COLS[statCounters.length] ?? "sm:grid-cols-4"}`}
+            >
+              {statCounters.map(({ key, value, label }) => (
+                <div key={key}>
+                  <p
+                    className="font-tf-hero tabular-nums text-tf-ink"
+                    style={{
+                      fontSize: "clamp(3.5rem, 10vw, 6.5rem)",
+                      fontWeight: 700,
+                      lineHeight: "0.88",
+                      letterSpacing: "-0.045em",
+                    }}
+                  >
+                    <TfCountUp value={value} />
+                  </p>
+                  <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.22em] text-tf-stone-500">{label}</p>
+                </div>
+              ))}
+            </TfReveal>
+          </div>
+        </section>
+      )}
 
       {/* ══════════════════════════════════════════════════
           HOW IT WORKS — three honest steps (dark)
@@ -594,7 +559,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
                 href={ctaHref}
                 className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-400 transition-colors hover:text-emerald-300"
               >
-                Start now — it&apos;s free
+                {ctaLabel}
                 <ArrowRight className="size-3.5" aria-hidden="true" />
               </Link>
             </div>
@@ -696,8 +661,9 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               <span className="font-light text-tf-stone-400">selling online</span>
             </h2>
             <p className="mt-2 text-sm text-tf-stone-500">
-              No stock photos — these are {sellers.length} of the{" "}
-              {n(stats.shopCount)} registered shops on TradeFeed.
+              {shopCount !== null
+                ? `No stock photos — these are ${sellers.length} of the ${n(shopCount)} registered shops on TradeFeed.`
+                : "No stock photos — these shops are selling on TradeFeed right now."}
             </p>
           </TfReveal>
 
@@ -748,7 +714,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
               href={ctaHref}
               className="inline-flex items-center gap-2 rounded-xl border border-tf-stone-200 bg-tf-raised px-6 py-3 text-sm font-semibold text-tf-ink shadow-tf-sm transition-all hover:border-tf-primary/30 hover:shadow-tf-md"
             >
-              Join these sellers — it&apos;s free
+              {ctaLabel}
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
@@ -972,7 +938,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
             <br className="hidden sm:block" /> in under 3&nbsp;minutes
           </h2>
           <p className="mx-auto mt-4 max-w-md text-sm text-white/70">
-            Join {n(stats.shopCount)} registered shops on TradeFeed.
+            {shopCount !== null && <>Join {n(shopCount)} registered shops on TradeFeed. </>}
             Create your catalogue and share it with your WhatsApp customers.
           </p>
           <Link
@@ -990,128 +956,7 @@ export function TfLanding({ ctaHref, ctaLabel, isSignedIn = false, stats, seller
         </TfReveal>
       </section>
 
-      {/* ══════════════════════════════════════════════════
-          FOOTER
-      ══════════════════════════════════════════════════ */}
-      <footer className="border-t border-tf-stone-200 bg-tf-surface">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          <div className="mb-10 grid gap-8 sm:grid-cols-4">
-            <div className="sm:col-span-1">
-              <TradeFeedLogo size="sm" />
-              <p className="mt-3 text-xs leading-relaxed text-tf-stone-500">
-                South Africa&apos;s WhatsApp-first marketplace. Create your
-                online shop, list products, and sell via WhatsApp. 🇿🇦
-              </p>
-            </div>
-            <div>
-              <h4 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.15em] text-tf-stone-400">
-                Product
-              </h4>
-              <ul className="space-y-2.5">
-                {[
-                  { label: "TradeFeed HUNT", href: "/hunt#start-hunt" },
-                  { label: "How it works", href: "#how-it-works" },
-                  { label: "Pricing", href: "#pricing" },
-                  { label: "TradeFeed Growth", href: "/growth" },
-                  { label: "Marketplace", href: "/marketplace" },
-                ].map((l) => (
-                  <li key={l.label}>
-                    <Link
-                      href={l.href}
-                      className={
-                        l.label === "TradeFeed HUNT"
-                          ? "inline-flex items-center gap-2 text-sm font-semibold text-tf-primary transition-colors hover:text-tf-primary-hover"
-                          : "text-sm text-tf-stone-500 transition-colors hover:text-tf-ink"
-                      }
-                    >
-                      {l.label}
-                      {l.label === "TradeFeed HUNT" && (
-                        <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-emerald-800">
-                          Beta
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.15em] text-tf-stone-400">
-                For Sellers
-              </h4>
-              <ul className="space-y-2.5">
-                {[
-                  { label: "Sell online in SA", href: "/sell-online-south-africa" },
-                  { label: "Sell on WhatsApp", href: "/sell-on-whatsapp" },
-                  { label: "WhatsApp catalogue", href: "/whatsapp-catalog" },
-                  { label: "Create a shop", href: "/create-online-shop" },
-                  { label: "Import catalogue", href: "/import-whatsapp-catalogue" },
-                  { label: "Pricing", href: "/pricing" },
-                ].map((l) => (
-                  <li key={l.label}>
-                    <Link
-                      href={l.href}
-                      className="text-sm text-tf-stone-500 transition-colors hover:text-tf-ink"
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.15em] text-tf-stone-400">
-                Legal
-              </h4>
-              <ul className="space-y-2.5">
-                {[
-                  { label: "Privacy (POPIA)", href: "/privacy" },
-                  { label: "Terms", href: "/terms" },
-                  { label: "Contact", href: "/contact" },
-                ].map((l) => (
-                  <li key={l.label}>
-                    <Link
-                      href={l.href}
-                      className="text-sm text-tf-stone-500 transition-colors hover:text-tf-ink"
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Province SEO links */}
-          <div className="mb-6 border-t border-tf-stone-200 pt-6">
-            <h4 className="mb-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-tf-stone-400">
-              Browse by Province
-            </h4>
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-              {SA_PROVINCES.map((p) => (
-                <Link
-                  key={p.slug}
-                  href={`/marketplace/${p.slug}`}
-                  className="text-xs text-tf-stone-400 transition-colors hover:text-tf-primary"
-                >
-                  {p.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center justify-between gap-4 border-t border-tf-stone-200 pt-6 sm:flex-row">
-            <p className="text-xs text-tf-stone-400">
-              © {new Date().getFullYear()} TradeFeed — South Africa&apos;s
-              WhatsApp-first marketplace.
-            </p>
-            <div className="flex items-center gap-5 text-xs text-tf-stone-400">
-              <span>POPIA Compliant</span>
-              <span>SSL Encrypted</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <TfSiteFooter />
 
       <TfLandingStickyCta
         href={ctaHref}

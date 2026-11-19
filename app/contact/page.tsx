@@ -9,10 +9,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { TradeFeedLogo } from "@/components/ui/tradefeed-logo";
+import { SeoPageShell } from "@/components/seo/seo-page";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
+import { COMPANY } from "@/lib/config/company";
 
 export const metadata: Metadata = {
-  title: "Contact & Help — TradeFeed",
+  // The root layout appends the brand — don't repeat it here.
+  title: "Contact & Help",
   description:
     "Get help with TradeFeed. Contact our support team via email or WhatsApp. Find answers to common questions about selling, orders, and your account.",
   alternates: {
@@ -20,8 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
-const SUPPORT_EMAIL = "support@tradefeed.co.za";
-const SUPPORT_WHATSAPP = "27835034502";
+const SUPPORT_EMAIL = COMPANY.supportEmail;
+const SUPPORT_WHATSAPP = COMPANY.supportWhatsApp;
 
 export default async function ContactPage() {
   const t = await getTranslations("contact");
@@ -36,44 +39,33 @@ export default async function ContactPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-white">
-      <div className="mx-auto max-w-3xl px-4 py-5"><Link href="/support/order" className="inline-flex min-h-11 items-center rounded-lg bg-emerald-700 px-5 text-white font-semibold">Delivery, returns or payment problem? Get order help →</Link></div>
-      {/* ── Header ───────────────────────────────────────── */}
-      <div className="bg-stone-50 border-b border-stone-200">
-        <div className="max-w-3xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <Link href="/" className="flex items-center gap-2">
-              <TradeFeedLogo size="sm" />
-            </Link>
-            <Link
-              href="/marketplace"
-              className="text-sm text-stone-500 hover:text-emerald-600 transition-colors"
-            >
-            {t("browseMarketplace")}
-          </Link>
-          </div>
-          <h1 className="text-3xl font-bold text-stone-900">
-            {t("title")}
-          </h1>
-          <p className="text-stone-500 text-sm mt-2">
-            {t("subtitle")}
-          </p>
-          <p className="text-xs text-stone-500 mt-1 flex items-center gap-1.5">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
-            {t("responseTime")}
-          </p>
-        </div>
-      </div>
+    // Same header, footer and company details as every other public page.
+    <SeoPageShell breadcrumb={{ name: "Contact", path: "/contact" }}>
+      <TfHeroFont />
+      <h1 className="font-tf-hero font-semibold text-tf-ink" style={{ fontSize: "clamp(2.25rem, 5vw, 3.25rem)", lineHeight: "1.08", letterSpacing: "-0.03em" }}>
+        {t("title")}
+      </h1>
+      <p className="mt-3 max-w-2xl text-lg leading-relaxed text-tf-stone-600">{t("subtitle")}</p>
+      <p className="mt-2 flex items-center gap-1.5 text-sm text-tf-stone-600">
+        <span aria-hidden="true" className="inline-block size-2 rounded-full bg-tf-primary" />
+        {t("responseTime")}
+      </p>
+      <Link
+        href="/support/order"
+        className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-tf-primary px-5 font-semibold text-white transition-colors hover:bg-tf-primary-hover"
+      >
+        Delivery, returns or payment problem? Get order help →
+      </Link>
 
       {/* ── Contact Cards ────────────────────────────────── */}
-      <div className="max-w-3xl mx-auto px-4 py-10">
+      <div className="mt-10">
         <div className="grid sm:grid-cols-2 gap-4 mb-12">
           {/* Email */}
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="group flex items-start gap-4 rounded-2xl border border-stone-200 bg-white p-5 transition-all hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/40"
+            className="group flex items-start gap-4 rounded-2xl border border-tf-stone-200 bg-tf-raised p-5 transition-all hover:border-tf-primary/40 hover:shadow-tf-md"
           >
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-tf-verified-soft text-tf-verified group-hover:bg-tf-primary group-hover:text-white transition-colors">
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -89,13 +81,13 @@ export default async function ContactPage() {
               </svg>
             </div>
             <div>
-              <h2 className="text-base font-bold text-stone-900">
+              <h2 className="text-base font-bold text-tf-ink">
                 {t("emailSupport")}
               </h2>
-              <p className="text-sm text-emerald-600 font-medium mt-0.5">
+              <p className="text-sm text-tf-primary font-medium mt-0.5">
                 {SUPPORT_EMAIL}
               </p>
-              <p className="text-xs text-stone-500 mt-1">
+              <p className="text-xs text-tf-stone-600 mt-1">
                 {t("emailDesc")}
               </p>
             </div>
@@ -106,9 +98,9 @@ export default async function ContactPage() {
             href={`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent("Hi TradeFeed, I need help with...")}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-start gap-4 rounded-2xl border border-stone-200 bg-white p-5 transition-all hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/40"
+            className="group flex items-start gap-4 rounded-2xl border border-tf-stone-200 bg-tf-raised p-5 transition-all hover:border-tf-primary/40 hover:shadow-tf-md"
           >
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-tf-verified-soft text-tf-verified group-hover:bg-tf-primary group-hover:text-white transition-colors">
               <svg
                 viewBox="0 0 24 24"
                 className="h-6 w-6 fill-current"
@@ -118,13 +110,13 @@ export default async function ContactPage() {
               </svg>
             </div>
             <div>
-              <h2 className="text-base font-bold text-stone-900">
+              <h2 className="text-base font-bold text-tf-ink">
                 {t("whatsappSupport")}
               </h2>
-              <p className="text-sm text-emerald-600 font-medium mt-0.5">
+              <p className="text-sm text-tf-primary font-medium mt-0.5">
                 {t("whatsappChat")}
               </p>
-              <p className="text-xs text-stone-500 mt-1">
+              <p className="text-xs text-tf-stone-600 mt-1">
                 {t("whatsappDesc")}
               </p>
             </div>
@@ -133,10 +125,10 @@ export default async function ContactPage() {
 
         {/* ── Help Topics / FAQ ──────────────────────────── */}
         <div>
-          <h2 className="text-xl font-bold text-stone-900 mb-1">
+          <h2 className="text-xl font-bold text-tf-ink mb-1">
             {t("commonQuestions")}
           </h2>
-          <p className="text-sm text-stone-500 mb-6">
+          <p className="text-sm text-tf-stone-600 mb-6">
             {t("commonQuestionsDesc")}
           </p>
 
@@ -144,13 +136,13 @@ export default async function ContactPage() {
             {HELP_TOPICS.map((topic) => (
               <details
                 key={topic.q}
-                className="group rounded-xl border border-stone-200 bg-white overflow-hidden transition-all hover:border-stone-300 open:border-emerald-200 open:shadow-sm"
+                className="group rounded-xl border border-tf-stone-200 bg-tf-raised overflow-hidden transition-all hover:border-tf-stone-300 open:border-tf-primary/40 open:shadow-tf-sm"
               >
-                <summary className="flex cursor-pointer items-center gap-3 px-5 py-4 text-sm font-semibold text-stone-800 list-none [&::-webkit-details-marker]:hidden">
+                <summary className="flex cursor-pointer items-center gap-3 px-5 py-4 text-sm font-semibold text-tf-ink list-none [&::-webkit-details-marker]:hidden">
                   <span className="text-lg flex-shrink-0">{topic.icon}</span>
                   <span className="flex-1">{topic.q}</span>
                   <svg
-                    className="w-4 h-4 text-stone-400 transition-transform group-open:rotate-180"
+                    className="w-4 h-4 text-tf-stone-500 transition-transform group-open:rotate-180"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth={2}
@@ -163,7 +155,7 @@ export default async function ContactPage() {
                     />
                   </svg>
                 </summary>
-                <div className="px-5 pb-4 text-sm text-stone-600 leading-relaxed border-t border-stone-100 pt-3">
+                <div className="px-5 pb-4 text-sm text-tf-stone-600 leading-relaxed border-t border-tf-stone-100 pt-3">
                   {topic.a}
                 </div>
               </details>
@@ -172,17 +164,17 @@ export default async function ContactPage() {
         </div>
 
         {/* ── Still need help? ───────────────────────────── */}
-        <div className="mt-12 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-6 text-center">
-          <h3 className="text-base font-bold text-stone-900">
+        <div className="mt-12 rounded-2xl border border-tf-stone-200 bg-tf-raised p-6 text-center">
+          <h3 className="text-base font-bold text-tf-ink">
             {t("stillNeedHelp")}
           </h3>
-          <p className="text-sm text-stone-600 mt-1 mb-4">
+          <p className="text-sm text-tf-stone-600 mt-1 mb-4">
             {t("stillNeedHelpDesc")}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href={`mailto:${SUPPORT_EMAIL}`}
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 transition-all"
+              className="inline-flex items-center gap-2 rounded-xl bg-tf-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-tf-primary-hover transition-all"
             >
               <svg
                 className="w-4 h-4"
@@ -203,46 +195,13 @@ export default async function ContactPage() {
               href={`https://wa.me/${SUPPORT_WHATSAPP}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-stone-700 ring-1 ring-stone-200 hover:bg-stone-50 transition-all"
+              className="inline-flex items-center gap-2 rounded-xl bg-tf-raised px-5 py-2.5 text-sm font-semibold text-tf-stone-700 ring-1 ring-tf-stone-200 hover:bg-tf-stone-50 transition-all"
             >
               💬 {t("whatsappUs")}
             </a>
           </div>
         </div>
-
-        {/* ── Footer nav ─────────────────────────────────── */}
-        <div className="mt-12 pt-8 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
-          <div className="flex items-center gap-2">
-            <TradeFeedLogo size="sm" />
-          </div>
-          <div className="flex items-center gap-6">
-            <Link
-              href="/"
-              className="hover:text-stone-700 transition-colors"
-            >
-              Home
-            </Link>
-            <Link
-              href="/marketplace"
-              className="hover:text-stone-700 transition-colors"
-            >
-              Marketplace
-            </Link>
-            <Link
-              href="/privacy"
-              className="hover:text-stone-700 transition-colors"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/terms"
-              className="hover:text-stone-700 transition-colors"
-            >
-              Terms
-            </Link>
-          </div>
-        </div>
       </div>
-    </main>
+    </SeoPageShell>
   );
 }

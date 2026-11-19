@@ -6,9 +6,11 @@
 //   Step 2: Upload product photo + name + price
 //   Step 3: 🎉 Celebration — your shop is live!
 //
-// Replaces the old flow: /create-shop → empty dashboard → /products/new
+// The only onboarding flow. /create-shop (shop first, empty dashboard,
+// then /products/new) redirects here.
 // ============================================================
 
+import { SELLER_ONBOARDING_PATH, SELLER_SIGN_UP_PATH } from "@/lib/config/seller-cta";
 import { redirect } from "next/navigation";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
@@ -16,7 +18,8 @@ import { GetStartedFlow } from "@/components/shop/get-started-flow";
 import { recordSellerMilestone } from "@/lib/analytics/seller-lifecycle";
 
 export const metadata = {
-  title: "Get Started — List Your First Product | TradeFeed",
+  // The root layout appends the brand — don't repeat it here.
+  title: "Get Started — List Your First Product",
   description:
     "Upload your first product and get your online shop link in under 60 seconds. Sell via WhatsApp on TradeFeed.",
 };
@@ -24,8 +27,11 @@ export const metadata = {
 export default async function GetStartedPage() {
   const { userId: clerkId } = await auth();
 
+  // Guests are almost always new sellers (this is where every "create
+  // your shop" link ends up), so send them to sign-up — which links to
+  // sign-in — and bring them back here afterwards.
   if (!clerkId) {
-    redirect("/sign-in");
+    redirect(`${SELLER_SIGN_UP_PATH}?redirect_url=${SELLER_ONBOARDING_PATH}`);
   }
 
   // If user already has a shop, go to dashboard

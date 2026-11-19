@@ -1,3 +1,4 @@
+import { SELLER_SIGN_UP_PATH } from "@/lib/config/seller-cta";
 import { CatalogCart } from "@/components/commerce/catalog-cart";
 import { CommerceHeader } from "@/components/commerce/header";
 import Image from "next/image";
@@ -134,7 +135,7 @@ export function TfCatalogFooter({ shop }: { shop: TfCatalogChromeShop }) {
 
         {/* Viral loop — turns buyers into sellers */}
         <Link
-          href="/create-shop"
+          href={SELLER_SIGN_UP_PATH}
           className="group mx-auto flex w-fit items-center justify-center gap-2.5 rounded-xl bg-tf-surface px-5 py-3 ring-1 ring-tf-stone-200 transition-all duration-300 hover:shadow-tf-md hover:ring-tf-primary/40 focus-visible:ring-2 focus-visible:ring-tf-primary"
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-tf-primary">

@@ -1,13 +1,13 @@
-import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { HowItWorksSection } from "@/components/landing/how-it-works-section";
-import { FadeIn } from "@/components/landing/fade-in";
 import type { Metadata } from "next";
 
+import { SeoCta, SeoPageShell } from "@/components/seo/seo-page";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
+
 export const metadata: Metadata = {
-  title:
-    "How It Works — Sell on WhatsApp in 3 Easy Steps | TradeFeed",
+  // The root layout appends the brand — don't repeat it here.
+  title: "How It Works — Sell on WhatsApp in 3 Easy Steps",
   description:
     "Create your free online shop in under 5 minutes. Snap a product photo, AI writes the listing, share your catalog link, and receive structured orders on WhatsApp. No app needed. Start selling in South Africa today.",
   keywords: [
@@ -115,136 +115,97 @@ const BENEFITS = [
 export default async function HowItWorksPage() {
   const tLanding = await getTranslations("landing");
 
+  const steps = [
+    { title: tLanding("howItWorks.step1Title"), description: tLanding("howItWorks.step1Desc") },
+    { title: tLanding("howItWorks.step2Title"), description: tLanding("howItWorks.step2Desc") },
+    { title: tLanding("howItWorks.step3Title"), description: tLanding("howItWorks.step3Desc") },
+  ];
+
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      {/* Breadcrumb JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: serializeJsonLd({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            itemListElement: [
-              {
-                "@type": "ListItem",
-                position: 1,
-                name: "TradeFeed",
-                item: "https://tradefeed.co.za",
-              },
-              {
-                "@type": "ListItem",
-                position: 2,
-                name: "How It Works",
-                item: "https://tradefeed.co.za/how-it-works",
-              },
-            ],
-          }),
-        }}
-      />
+    // Same header, footer and breadcrumb schema as /pricing and the money pages.
+    <SeoPageShell breadcrumb={{ name: "How it works", path: "/how-it-works" }}>
+      <TfHeroFont />
 
-      {/* Hero header — light section with enough top padding for the fixed navbar */}
-      <div className="pt-32 pb-16 px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <FadeIn>
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full mb-6">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-              </svg>
-              {tLanding("howItWorks.badge")}
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-              {tLanding("howItWorks.title")}
-            </h1>
-            <p className="mt-4 text-slate-500 text-lg leading-relaxed max-w-xl mx-auto">
-              {tLanding("howItWorks.subtitle")}
-            </p>
-          </FadeIn>
-        </div>
-      </div>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tf-primary">
+        {tLanding("howItWorks.badge")}
+      </p>
+      <h1
+        className="mt-2 font-tf-hero font-semibold text-tf-ink"
+        style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", lineHeight: "1.05", letterSpacing: "-0.035em" }}
+      >
+        {tLanding("howItWorks.title")}
+      </h1>
+      <p className="mt-4 max-w-2xl text-lg leading-relaxed text-tf-stone-600">
+        {tLanding("howItWorks.subtitle")}
+      </p>
 
-      {/* 3-step section — reuses the landing page component (dark bg, connecting line, icons) */}
-      <HowItWorksSection
-        badge={tLanding("howItWorks.badge")}
-        title={tLanding("howItWorks.title")}
-        subtitle={tLanding("howItWorks.subtitle")}
-        steps={[
-          {
-            title: tLanding("howItWorks.step1Title"),
-            description: tLanding("howItWorks.step1Desc"),
-          },
-          {
-            title: tLanding("howItWorks.step2Title"),
-            description: tLanding("howItWorks.step2Desc"),
-          },
-          {
-            title: tLanding("howItWorks.step3Title"),
-            description: tLanding("howItWorks.step3Desc"),
-          },
-        ]}
-      />
+      <ol className="mt-10 grid gap-4 sm:grid-cols-3">
+        {steps.map((step, index) => (
+          <li
+            key={step.title}
+            className="rounded-xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm"
+          >
+            <span
+              aria-hidden="true"
+              className="flex size-9 items-center justify-center rounded-full bg-tf-primary text-sm font-semibold text-white"
+            >
+              {index + 1}
+            </span>
+            <h2 className="mt-4 font-tf-display text-lg font-semibold text-tf-ink">
+              {step.title}
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-tf-stone-600">{step.description}</p>
+          </li>
+        ))}
+      </ol>
 
-      {/* Why TradeFeed — benefit cards */}
-      <section className="py-24 px-6 lg:px-8 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto">
-          <FadeIn>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-                Why Sellers Choose TradeFeed
-              </h2>
-              <p className="mt-3 text-slate-500 text-lg max-w-xl mx-auto">
-                Built for the way South African sellers actually do business.
+      <section className="mt-14" aria-labelledby="why-tradefeed">
+        <h2
+          id="why-tradefeed"
+          className="font-tf-display text-3xl font-semibold tracking-tight sm:text-4xl"
+        >
+          Why sellers choose TradeFeed
+        </h2>
+        <p className="mt-3 text-[15px] leading-relaxed text-tf-stone-600">
+          Built for the way South African sellers actually do business.
+        </p>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+          {BENEFITS.map((benefit) => (
+            <li
+              key={benefit.title}
+              className="rounded-xl border border-tf-stone-200 bg-tf-raised p-5 shadow-tf-sm"
+            >
+              <span className="flex size-10 items-center justify-center rounded-xl bg-tf-verified-soft text-tf-verified">
+                {benefit.icon}
+              </span>
+              <h3 className="mt-4 font-tf-display text-base font-semibold text-tf-ink">
+                {benefit.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-tf-stone-600">
+                {benefit.description}
               </p>
-            </div>
-          </FadeIn>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {BENEFITS.map((benefit, i) => (
-              <FadeIn key={benefit.title} delay={i * 0.08}>
-                <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all h-full flex flex-col">
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mb-4 flex-shrink-0">
-                    {benefit.icon}
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900 mb-2">{benefit.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed flex-1">{benefit.description}</p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {/* CTA */}
-      <section className="pb-24 px-6 lg:px-8">
-        <FadeIn>
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="p-8 sm:p-12 rounded-2xl bg-slate-50 border border-slate-200">
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mb-3">
-                Ready to start selling?
-              </h2>
-              <p className="text-slate-500 text-sm max-w-md mx-auto mb-8">
-                Create your free catalog in under 5 minutes. No credit card, no commitment — your first 10 AI listings are on us.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/sign-up"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-500 shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  Start Selling Free →
-                </Link>
-                <Link
-                  href="/marketplace"
-                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 hover:border-slate-400 transition-all"
-                >
-                  Browse the Marketplace
-                </Link>
-              </div>
-              <p className="mt-5 text-xs text-slate-400">
-                10 free AI listings · No credit card · Set up in under 5 minutes · Cancel anytime
-              </p>
-            </div>
-          </div>
-        </FadeIn>
-      </section>
-    </div>
+      <p className="mt-12 text-[15px] leading-relaxed text-tf-stone-600">
+        More detail is in the{" "}
+        <Link href="/faq" className="text-tf-primary underline underline-offset-2">
+          FAQ
+        </Link>
+        , and plans are on the{" "}
+        <Link href="/pricing" className="text-tf-primary underline underline-offset-2">
+          pricing page
+        </Link>
+        . Or look around the{" "}
+        <Link href="/marketplace" className="text-tf-primary underline underline-offset-2">
+          marketplace
+        </Link>{" "}
+        first.
+      </p>
+
+      <SeoCta />
+    </SeoPageShell>
   );
 }

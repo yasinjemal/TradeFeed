@@ -22,7 +22,7 @@ const HIDDEN_PREFIXES = [
   "/admin",
   "/sign-in",
   "/sign-up",
-  "/create-shop",
+  "/get-started",
   "/growth",
   "/hunt",
 ];
@@ -54,9 +54,16 @@ export function GlobalBottomNav() {
     ? "text-stone-500 hover:text-stone-300"
     : tabIdleCls;
 
-  // The homepage owns a dedicated conversion CTA; avoid covering it with
-  // app navigation. Other listed routes already provide their own nav.
-  if (pathname === "/" || HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))) {
+  // The homepage and the seller landing page each own a dedicated sticky
+  // conversion CTA; app navigation must not cover it (on /sell the tab bar
+  // sat on top of the sticky sign-up bar). Exact match for /sell — a prefix
+  // would also hide the nav on /sell-on-whatsapp and friends. Other listed
+  // routes already provide their own nav.
+  if (
+    pathname === "/" ||
+    pathname === "/sell" ||
+    HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))
+  ) {
     return null;
   }
 

@@ -3,11 +3,14 @@
 import { FadeIn, StaggerContainer, StaggerItem } from "./fade-in";
 import { AnimatedCounter } from "./animated-stats";
 
+// A counter is `null` when it is below its display threshold or the
+// numbers could not be loaded (lib/growth/landing-proof.ts). Null
+// counters are dropped; with fewer than two left the section is hidden.
 interface SocialProofSectionProps {
-  shopCount: number;
-  productCount: number;
-  orderCount: number;
-  cityCount: number;
+  shopCount: number | null;
+  productCount: number | null;
+  orderCount: number | null;
+  cityCount: number | null;
   labels: {
     activeSellers: string;
     productsListed: string;
@@ -25,7 +28,7 @@ export function SocialProofSection({
   cityCount,
   labels,
 }: SocialProofSectionProps) {
-  const stats = [
+  const allStats = [
     {
       value: shopCount,
       suffix: "+",
@@ -76,6 +79,11 @@ export function SocialProofSection({
       ),
     },
   ];
+
+  const stats = allStats.flatMap((stat) =>
+    stat.value === null ? [] : [{ ...stat, value: stat.value }],
+  );
+  if (stats.length < 2) return null;
 
   return (
     <section className="relative py-16 border-y border-slate-100">

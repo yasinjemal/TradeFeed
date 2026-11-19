@@ -7,10 +7,12 @@
 // ============================================================
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SeoPageShell } from "@/components/seo/seo-page";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — TradeFeed",
+  // The root layout appends the brand — don't repeat it here.
+  title: "Terms of Service",
   description: "TradeFeed terms of service. Rules and conditions for using our digital catalog platform.",
   alternates: {
     canonical: "https://tradefeed.co.za/terms",
@@ -19,30 +21,21 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-white">
-      {/* ── Header ───────────────────────────────────────── */}
-      <div className="bg-stone-50 border-b border-stone-200">
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <Link
-            href="/"
-            className="text-sm text-stone-500 hover:text-stone-700 transition-colors mb-4 inline-block"
-          >
-            ← Back to TradeFeed
-          </Link>
-          <h1 className="text-3xl font-bold text-stone-900">Terms of Service</h1>
-          <p className="text-stone-500 text-sm mt-2">
-            Last updated: July 2026
-          </p>
-        </div>
-      </div>
+    // Same header, footer and company details as every other public page.
+    <SeoPageShell breadcrumb={{ name: "Terms of Service", path: "/terms" }}>
+      <TfHeroFont />
+      <h1 className="font-tf-hero font-semibold text-tf-ink" style={{ fontSize: "clamp(2.25rem, 5vw, 3.25rem)", lineHeight: "1.08", letterSpacing: "-0.03em" }}>
+        Terms of Service
+      </h1>
+      <p className="mt-3 text-sm text-tf-stone-600">Last updated: July 2026</p>
 
       {/* ── Content ──────────────────────────────────────── */}
-      <div className="max-w-3xl mx-auto px-4 py-10">
+      <div className="mt-10">
         <div className="prose prose-stone prose-sm max-w-none space-y-8">
           {/* 1 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">1. Acceptance of Terms</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">1. Acceptance of Terms</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               By accessing or using TradeFeed (&ldquo;the Platform&rdquo;), you agree to be bound by these
               Terms of Service (&ldquo;Terms&rdquo;). If you do not agree to these Terms, please do not use
               the Platform. TradeFeed is operated in South Africa and governed by South African law.
@@ -51,8 +44,8 @@ export default function TermsPage() {
 
           {/* 2 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">2. Description of Service</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">2. Description of Service</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               TradeFeed provides a digital catalog platform that enables South African
               wholesalers (&ldquo;Sellers&rdquo;) to create online product catalogs and connect with
               retailers and buyers (&ldquo;Buyers&rdquo;) via WhatsApp. TradeFeed records orders and provides catalogue, communication and support tools.
@@ -63,9 +56,9 @@ export default function TermsPage() {
 
           {/* 3 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">3. Seller Responsibilities</h2>
-            <p className="text-stone-600 leading-relaxed">As a Seller on TradeFeed, you agree to:</p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <h2 className="text-xl font-semibold text-tf-ink">3. Seller Responsibilities</h2>
+            <p className="text-tf-stone-600 leading-relaxed">As a Seller on TradeFeed, you agree to:</p>
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>Provide accurate and truthful product information (names, descriptions, prices, stock).</li>
               <li>Only list products that you are legally entitled to sell.</li>
               <li>Respond to buyer enquiries made via WhatsApp in a timely manner.</li>
@@ -78,9 +71,9 @@ export default function TermsPage() {
 
           {/* 4 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">4. Buyer Guidelines</h2>
-            <p className="text-stone-600 leading-relaxed">As a Buyer browsing TradeFeed catalogs:</p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <h2 className="text-xl font-semibold text-tf-ink">4. Buyer Guidelines</h2>
+            <p className="text-tf-stone-600 leading-relaxed">As a Buyer browsing TradeFeed catalogs:</p>
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>
                 Product sales are between you and the Seller. TradeFeed records the order and provides support tools; payment arrangements are shown at checkout.
                 TradeFeed is not a party to any transaction.
@@ -97,15 +90,15 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">4A. TradeFeed HUNT Beta</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">4A. TradeFeed HUNT Beta</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               HUNT lets a buyer publish a product reference and request genuine offers from
               relevant sellers. By starting a HUNT, you confirm that you may use the reference
               image for product-search purposes and that you have removed faces, usernames,
               private messages, addresses, contact details, and other unrelated personal
               information.
             </p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>HUNT is a beta service and does not guarantee that an offer will arrive.</li>
               <li>
                 TradeFeed may use automated checks and human review, but a match label or
@@ -131,11 +124,11 @@ export default function TermsPage() {
 
           {/* 5 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">5. Subscription Plans & Billing</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">5. Subscription Plans & Billing</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               TradeFeed offers subscription plans for Sellers:
             </p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>
                 <strong>Free Plan:</strong> Limited to 20 products. No payment required.
               </li>
@@ -144,7 +137,7 @@ export default function TermsPage() {
                 price via PayFast.
               </li>
             </ul>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               Subscription payments are processed by PayFast (Pty) Ltd. By subscribing, you
               agree to PayFast&apos;s terms and conditions. Subscriptions renew automatically
               unless cancelled before the billing date. Refunds are handled on a case-by-case
@@ -154,18 +147,18 @@ export default function TermsPage() {
 
           {/* 6 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">6. Prohibited Content</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">6. Prohibited Content</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               You may not use TradeFeed to list or promote:
             </p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>Counterfeit or stolen goods.</li>
               <li>Products that infringe intellectual property rights.</li>
               <li>Illegal substances or prohibited items under SA law.</li>
               <li>Misleading or fraudulent product listings.</li>
               <li>Content that is hateful, discriminatory, or harmful.</li>
             </ul>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               TradeFeed reserves the right to remove any content and deactivate any shop that
               violates these terms, without prior notice.
             </p>
@@ -173,8 +166,8 @@ export default function TermsPage() {
 
           {/* 7 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">7. Seller Verification</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">7. Seller Verification</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               TradeFeed may offer a &ldquo;Verified Seller&rdquo; badge to shops that meet our verification
               criteria. Verification indicates that TradeFeed has confirmed basic information about
               the seller — it does not constitute an endorsement or guarantee of the seller&apos;s
@@ -184,8 +177,8 @@ export default function TermsPage() {
 
           {/* 8 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">8. Intellectual Property</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">8. Intellectual Property</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               Sellers retain ownership of their product listings, images, and content. By uploading
               content to TradeFeed, you grant us a non-exclusive, royalty-free licence to display
               your content on the platform for the purpose of providing our services. The TradeFeed
@@ -195,12 +188,12 @@ export default function TermsPage() {
 
           {/* 9 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">9. Limitation of Liability</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">9. Limitation of Liability</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               TradeFeed is provided &ldquo;as is&rdquo; without warranties of any kind. To the maximum
               extent permitted by South African law:
             </p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>
                 We are not liable for any disputes between Buyers and Sellers.
               </li>
@@ -217,11 +210,11 @@ export default function TermsPage() {
 
           {/* 10 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">10. Account Termination</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">10. Account Termination</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               We may suspend or terminate your account if you violate these Terms. You may delete
               your account at any time by contacting{" "}
-              <a href="mailto:support@tradefeed.co.za" className="text-emerald-600 hover:underline">
+              <a href="mailto:support@tradefeed.co.za" className="text-tf-primary hover:underline">
                 support@tradefeed.co.za
               </a>
               . Upon termination, your shop and all associated data will be permanently deleted
@@ -231,8 +224,8 @@ export default function TermsPage() {
 
           {/* 11 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">11. Governing Law</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">11. Governing Law</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               These Terms are governed by the laws of the Republic of South Africa. Any disputes
               shall be resolved in the courts of the Republic of South Africa, in the jurisdiction
               of the Gauteng Division.
@@ -241,26 +234,16 @@ export default function TermsPage() {
 
           {/* 12 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">12. Contact</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">12. Contact</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               For questions about these Terms, contact us at:{" "}
-              <a href="mailto:support@tradefeed.co.za" className="text-emerald-600 hover:underline">
+              <a href="mailto:support@tradefeed.co.za" className="text-tf-primary hover:underline">
                 support@tradefeed.co.za
               </a>
             </p>
           </section>
         </div>
-
-        {/* ── Footer links ───────────────────────────────── */}
-        <div className="mt-12 pt-8 border-t border-stone-200 flex flex-wrap gap-4 text-sm text-stone-500">
-          <Link href="/privacy" className="hover:text-emerald-600 transition-colors">
-            Privacy Policy →
-          </Link>
-          <Link href="/" className="hover:text-emerald-600 transition-colors">
-            Back to TradeFeed →
-          </Link>
-        </div>
       </div>
-    </main>
+    </SeoPageShell>
   );
 }

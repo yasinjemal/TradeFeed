@@ -82,7 +82,7 @@ export function BottomNav({ shopSlug }: BottomNavProps) {
         pathname.startsWith("/sign-in") ||
         pathname.startsWith("/sign-up") ||
         pathname.startsWith("/dashboard") ||
-        pathname.startsWith("/create-shop"),
+        pathname.startsWith("/get-started"),
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.9} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.964 0A9 9 0 1 0 6.018 18.725m11.964 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />

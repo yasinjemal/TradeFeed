@@ -1,3 +1,4 @@
+import { SELLER_ONBOARDING_PATH } from "@/lib/config/seller-cta";
 import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -94,7 +95,7 @@ export default async function RootLayout({
       signUpUrl="/sign-up"
       afterSignOutUrl="/"
       signInFallbackRedirectUrl="/dashboard"
-      signUpFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl={SELLER_ONBOARDING_PATH}
     >
       <html lang={locale} className={inter.variable} suppressHydrationWarning>
         <head>

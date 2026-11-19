@@ -88,7 +88,7 @@ export default function VsWhatsappGroupsPage() {
         </p>
       </SeoSection>
 
-      <SeoCta label="Get your catalogue link — free" />
+      <SeoCta />
       <SeoFaq items={FAQ} />
     </SeoPageShell>
   );

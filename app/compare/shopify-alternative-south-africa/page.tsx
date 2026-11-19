@@ -97,7 +97,7 @@ export default function ShopifyAlternativePage() {
         </p>
       </SeoSection>
 
-      <SeoCta label="Try the WhatsApp-first way — free" />
+      <SeoCta />
       <SeoFaq items={FAQ} />
       <p className="mt-6 text-xs text-tf-stone-400">
         Shopify is a trademark of Shopify Inc. This page makes factual comparisons only and is

@@ -1,3 +1,4 @@
+import { SELLER_SIGN_UP_PATH } from "@/lib/config/seller-cta";
 import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import { buyerOnlinePaymentsEnabled } from "@/lib/commerce/capabilities";
 // ============================================================
@@ -324,7 +325,7 @@ export default async function CatalogLayout({
 
               {/* ── Viral Growth Badge — turns buyers into sellers ── */}
               <Link
-                href="/create-shop"
+                href={SELLER_SIGN_UP_PATH}
                 className="mx-auto flex items-center justify-center gap-2.5 w-fit px-5 py-3 rounded-xl bg-white ring-1 ring-stone-200/60 shadow-sm hover:ring-emerald-200 hover:shadow-md hover:shadow-emerald-100/50 transition-all duration-300 group"
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shadow-sm shadow-emerald-200/50">

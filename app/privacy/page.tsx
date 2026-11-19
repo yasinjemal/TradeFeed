@@ -6,11 +6,13 @@
 // ============================================================
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SeoPageShell } from "@/components/seo/seo-page";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
 import { AnalyticsPreferencesButton } from "@/components/privacy/analytics-preferences-button";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — TradeFeed",
+  // The root layout appends the brand — don't repeat it here.
+  title: "Privacy Policy",
   description: "TradeFeed privacy policy. How we collect, use, and protect your personal information in compliance with POPIA.",
   alternates: {
     canonical: "https://tradefeed.co.za/privacy",
@@ -19,30 +21,21 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-white">
-      {/* ── Header ───────────────────────────────────────── */}
-      <div className="bg-stone-50 border-b border-stone-200">
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <Link
-            href="/"
-            className="text-sm text-stone-500 hover:text-stone-700 transition-colors mb-4 inline-block"
-          >
-            ← Back to TradeFeed
-          </Link>
-          <h1 className="text-3xl font-bold text-stone-900">Privacy Policy</h1>
-          <p className="text-stone-500 text-sm mt-2">
-            Last updated: July 2026
-          </p>
-        </div>
-      </div>
+    // Same header, footer and company details as every other public page.
+    <SeoPageShell breadcrumb={{ name: "Privacy Policy", path: "/privacy" }}>
+      <TfHeroFont />
+      <h1 className="font-tf-hero font-semibold text-tf-ink" style={{ fontSize: "clamp(2.25rem, 5vw, 3.25rem)", lineHeight: "1.08", letterSpacing: "-0.03em" }}>
+        Privacy Policy
+      </h1>
+      <p className="mt-3 text-sm text-tf-stone-600">Last updated: July 2026</p>
 
       {/* ── Content ──────────────────────────────────────── */}
-      <div className="max-w-3xl mx-auto px-4 py-10">
+      <div className="mt-10">
         <div className="prose prose-stone prose-sm max-w-none space-y-8">
           {/* 1 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">1. Introduction</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">1. Introduction</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               TradeFeed (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) operates the TradeFeed platform
               (tradefeed.co.za), a digital catalog service for South African wholesalers and
               retailers. We are committed to protecting your personal information in compliance with
@@ -53,9 +46,9 @@ export default function PrivacyPage() {
 
           {/* 2 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">2. Information We Collect</h2>
-            <p className="text-stone-600 leading-relaxed">We collect the following categories of personal information:</p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <h2 className="text-xl font-semibold text-tf-ink">2. Information We Collect</h2>
+            <p className="text-tf-stone-600 leading-relaxed">We collect the following categories of personal information:</p>
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>
                 <strong>Account Information:</strong> Name, email address, and profile image when
                 you sign up via our authentication provider (Clerk).
@@ -104,9 +97,9 @@ export default function PrivacyPage() {
 
           {/* 3 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">3. How We Use Your Information</h2>
-            <p className="text-stone-600 leading-relaxed">We process your personal information for the following purposes:</p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <h2 className="text-xl font-semibold text-tf-ink">3. How We Use Your Information</h2>
+            <p className="text-tf-stone-600 leading-relaxed">We process your personal information for the following purposes:</p>
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>To create and manage your seller account and shop profile.</li>
               <li>To display your public catalog to potential buyers.</li>
               <li>To facilitate WhatsApp communication between buyers and sellers.</li>
@@ -133,11 +126,11 @@ export default function PrivacyPage() {
 
           {/* 4 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">4. Legal Basis for Processing (POPIA)</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">4. Legal Basis for Processing (POPIA)</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               Under POPIA, we process your personal information based on:
             </p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>
                 <strong>Consent:</strong> We ask separately before enabling non-essential
                 analytics or sending email product news. Creating an account does not grant either
@@ -156,11 +149,11 @@ export default function PrivacyPage() {
 
           {/* 5 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">5. Data Sharing</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">5. Data Sharing</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               We do not sell your personal information. We share data only with:
             </p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>
                 <strong>Clerk:</strong> Authentication provider (stores account credentials securely).
               </li>
@@ -227,7 +220,7 @@ export default function PrivacyPage() {
                 one of those links.
               </li>
             </ul>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               All service providers are bound by data protection agreements. Your shop&apos;s public
               catalog information (shop name, products, WhatsApp number) is intentionally made public
               as this is the core service — connecting buyers with sellers. If a seller confirms
@@ -239,30 +232,30 @@ export default function PrivacyPage() {
 
           {/* 6 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">6. Data Retention</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">6. Data Retention</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               We retain your personal information for as long as your account is active. If you
               delete your account, we will remove your personal data within 30 days, except where
               retention is required by law (e.g., financial records for SARS compliance).
             </p>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               Raw voluntary research-form responses are deleted within 90 days. Contact details in
               those responses are deleted when the requested follow-up is complete or within 90
               days, whichever comes first. We may retain de-identified themes and aggregate counts
               for product planning.
             </p>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               HUNT requester details, the original request, participant identifiers, seller-routing
               records, offers, and the public reference image are scheduled for deletion 180 days
               after the HUNT begins. The scheduled cleanup may complete during the next retention
               cycle. We may retain de-identified funnel totals that cannot be used to contact or
               identify a requester.
             </p>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               Pseudonymous HUNT abuse-prevention counters expire after their short enforcement
               window and are removed during a subsequent retention cycle.
             </p>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               Email campaign delivery records are retained only as needed for delivery auditing,
               complaint handling, and legal compliance. Keyed suppression hashes may be retained
               after account deletion so that TradeFeed does not accidentally contact an address
@@ -272,9 +265,9 @@ export default function PrivacyPage() {
 
           {/* 7 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">7. Your Rights Under POPIA</h2>
-            <p className="text-stone-600 leading-relaxed">You have the right to:</p>
-            <ul className="list-disc pl-5 text-stone-600 space-y-1">
+            <h2 className="text-xl font-semibold text-tf-ink">7. Your Rights Under POPIA</h2>
+            <p className="text-tf-stone-600 leading-relaxed">You have the right to:</p>
+            <ul className="list-disc pl-5 text-tf-stone-600 space-y-1">
               <li>
                 <strong>Access:</strong> Request a copy of your personal information.
               </li>
@@ -296,9 +289,9 @@ export default function PrivacyPage() {
                 <strong>Portability:</strong> Request your data in a machine-readable format.
               </li>
             </ul>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               To exercise any of these rights, contact us at{" "}
-              <a href="mailto:privacy@tradefeed.co.za" className="text-emerald-600 hover:underline">
+              <a href="mailto:privacy@tradefeed.co.za" className="text-tf-primary hover:underline">
                 privacy@tradefeed.co.za
               </a>
               . We will respond within 30 days.
@@ -307,8 +300,8 @@ export default function PrivacyPage() {
 
           {/* 8 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">8. Cookies & Analytics</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">8. Cookies & Analytics</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               TradeFeed uses essential cookies for authentication and security. These remain
               available when you reject analytics. If you save a product or request a restock
               alert, start or join a HUNT while signed out, we also create a separate random
@@ -320,14 +313,14 @@ export default function PrivacyPage() {
               identifying request data, cookies, request bodies, query strings, and arbitrary
               form values are removed from those reports.
             </p>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               Non-essential measurement is denied by default. If you accept analytics, we enable
               our first-party catalogue analytics, Google Analytics 4 (GA4), Vercel Analytics,
               Vercel Speed Insights, and Sentry browser performance tracing. Sentry Session Replay
               remains disabled. Google advertising storage and personalisation remain disabled.
               Analytics URLs exclude query strings.
             </p>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               With consent, our httpOnly random visitor cookie can persist for up to 12 months so
               repeat anonymous visits can be counted consistently. It is not derived from your IP
               address and is not shared with advertisers. Rejecting or later withdrawing analytics
@@ -339,8 +332,8 @@ export default function PrivacyPage() {
 
           {/* 9 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">9. Security</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">9. Security</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               We implement appropriate technical and organisational measures to protect your
               personal information, including: encrypted database connections (TLS), secure
               authentication via Clerk, HTTPS-only access, and role-based access controls.
@@ -349,21 +342,21 @@ export default function PrivacyPage() {
 
           {/* 10 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">10. Information Officer</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">10. Information Officer</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               Our Information Officer can be contacted at:{" "}
-              <a href="mailto:privacy@tradefeed.co.za" className="text-emerald-600 hover:underline">
+              <a href="mailto:privacy@tradefeed.co.za" className="text-tf-primary hover:underline">
                 privacy@tradefeed.co.za
               </a>
             </p>
-            <p className="text-stone-600 leading-relaxed">
+            <p className="text-tf-stone-600 leading-relaxed">
               If you are not satisfied with our response, you have the right to lodge a complaint
               with the Information Regulator of South Africa at{" "}
               <a
                 href="https://inforegulator.org.za"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-emerald-600 hover:underline"
+                className="text-tf-primary hover:underline"
               >
                 inforegulator.org.za
               </a>
@@ -373,25 +366,15 @@ export default function PrivacyPage() {
 
           {/* 11 */}
           <section>
-            <h2 className="text-xl font-semibold text-stone-900">11. Changes to This Policy</h2>
-            <p className="text-stone-600 leading-relaxed">
+            <h2 className="text-xl font-semibold text-tf-ink">11. Changes to This Policy</h2>
+            <p className="text-tf-stone-600 leading-relaxed">
               We may update this privacy policy from time to time. We will notify registered users
               of material changes via email. The &ldquo;Last updated&rdquo; date at the top of
               this page indicates when the policy was last revised.
             </p>
           </section>
         </div>
-
-        {/* ── Footer links ───────────────────────────────── */}
-        <div className="mt-12 pt-8 border-t border-stone-200 flex flex-wrap gap-4 text-sm text-stone-500">
-          <Link href="/terms" className="hover:text-emerald-600 transition-colors">
-            Terms of Service →
-          </Link>
-          <Link href="/" className="hover:text-emerald-600 transition-colors">
-            Back to TradeFeed →
-          </Link>
-        </div>
       </div>
-    </main>
+    </SeoPageShell>
   );
 }

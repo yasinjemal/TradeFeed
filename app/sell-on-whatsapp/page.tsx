@@ -104,7 +104,7 @@ export default function SellOnWhatsappPage() {
         </p>
       </SeoSection>
 
-      <SeoCta label="Get your catalogue link" />
+      <SeoCta />
       <SeoFaq items={FAQ} />
     </SeoPageShell>
   );

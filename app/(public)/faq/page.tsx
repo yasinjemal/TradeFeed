@@ -1,14 +1,16 @@
-import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { FaqItem } from "@/components/landing/animated-stats";
-import { FadeIn } from "@/components/landing/fade-in";
-import { generateFaqJsonLd } from "@/lib/seo/json-ld";
 import type { Metadata } from "next";
 
+import { SeoCta, SeoPageShell } from "@/components/seo/seo-page";
+import { JsonLdScript } from "@/components/tf/site/json-ld-script";
+import { TfHeroFont } from "@/components/tf/tf-fonts";
+import { generateFaqJsonLd } from "@/lib/seo/json-ld";
+
 export const metadata: Metadata = {
-  title:
-    "FAQ — Frequently Asked Questions | TradeFeed",
+  // The root layout appends the brand — don't repeat it here.
+  title: "FAQ — Frequently Asked Questions",
   description:
     "Get answers to common questions about selling on TradeFeed. Learn how to create your WhatsApp catalog, accept orders, manage products, and grow your South African business online.",
   keywords: [
@@ -198,115 +200,63 @@ export default async function FaqPage() {
   const tLanding = await getTranslations("landing");
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      {/* FAQ JSON-LD for Google rich results */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: serializeJsonLd(
-            generateFaqJsonLd(
-              ALL_FAQ_ITEMS.map((f) => ({ question: f.q, answer: f.a }))
-            )
-          ),
-        }}
-      />
-      {/* Breadcrumb JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: serializeJsonLd({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            itemListElement: [
-              {
-                "@type": "ListItem",
-                position: 1,
-                name: "TradeFeed",
-                item: "https://tradefeed.co.za",
-              },
-              {
-                "@type": "ListItem",
-                position: 2,
-                name: "FAQ",
-                item: "https://tradefeed.co.za/faq",
-              },
-            ],
-          }),
-        }}
+    // Same header, footer and breadcrumb schema as /pricing and the money pages.
+    <SeoPageShell breadcrumb={{ name: "FAQ", path: "/faq" }}>
+      <TfHeroFont />
+      {/* FAQPage rich-results schema — mirrors the visible questions below */}
+      <JsonLdScript
+        data={generateFaqJsonLd(ALL_FAQ_ITEMS.map((f) => ({ question: f.q, answer: f.a })))}
       />
 
-      {/* Header */}
-      <div className="pt-32 pb-16 px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <FadeIn>
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full mb-6">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-              </svg>
-              Help Centre
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tf-primary">
+        Help centre
+      </p>
+      <h1
+        className="mt-2 font-tf-hero font-semibold text-tf-ink"
+        style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", lineHeight: "1.05", letterSpacing: "-0.035em" }}
+      >
+        {tLanding("faq.title")}
+      </h1>
+      <p className="mt-4 max-w-2xl text-lg leading-relaxed text-tf-stone-600">
+        {tLanding("faq.subtitle")}
+      </p>
+
+      <div className="mt-10 space-y-12">
+        {FAQ_CATEGORIES.map((category) => (
+          <section key={category.title} aria-label={category.title}>
+            <h2 className="font-tf-display text-2xl font-semibold tracking-tight text-tf-ink">
+              {category.title}
+            </h2>
+            <div className="mt-4 space-y-3">
+              {category.items.map((faq) => (
+                <details
+                  key={faq.q}
+                  className="group rounded-xl border border-tf-stone-200 bg-tf-raised open:shadow-tf-sm"
+                >
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-medium text-tf-ink outline-none focus-visible:ring-2 focus-visible:ring-tf-primary [&::-webkit-details-marker]:hidden">
+                    {faq.q}
+                    <ChevronDown
+                      aria-hidden="true"
+                      className="size-4 shrink-0 text-tf-stone-500 transition-transform duration-200 motion-reduce:transition-none group-open:rotate-180"
+                    />
+                  </summary>
+                  <p className="px-5 pb-4 text-sm leading-relaxed text-tf-stone-600">{faq.a}</p>
+                </details>
+              ))}
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-              {tLanding("faq.title")}
-            </h1>
-            <p className="mt-3 text-slate-500 text-sm max-w-xl mx-auto">
-              {tLanding("faq.subtitle")}
-            </p>
-          </FadeIn>
-        </div>
+          </section>
+        ))}
       </div>
 
-      {/* FAQ sections by category */}
-      <div className="pb-24 px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto space-y-16">
-          {FAQ_CATEGORIES.map((category, catIdx) => (
-            <section key={category.title}>
-              <FadeIn delay={catIdx * 0.05}>
-                <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <span className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                    {catIdx + 1}
-                  </span>
-                  {category.title}
-                </h2>
-              </FadeIn>
-              <div className="space-y-3">
-                {category.items.map((faq, i) => (
-                  <FadeIn key={faq.q} delay={catIdx * 0.05 + i * 0.03}>
-                    <FaqItem question={faq.q} answer={faq.a} />
-                  </FadeIn>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+      <p className="mt-12 text-[15px] leading-relaxed text-tf-stone-600">
+        Still have a question?{" "}
+        <Link href="/contact" className="text-tf-primary underline underline-offset-2">
+          Contact us
+        </Link>{" "}
+        by email or WhatsApp and a person will answer.
+      </p>
 
-        {/* CTA */}
-        <FadeIn>
-          <div className="max-w-3xl mx-auto mt-20 text-center">
-            <div className="p-8 rounded-2xl bg-slate-50 border border-slate-200">
-              <h2 className="text-xl font-bold text-slate-900 mb-2">
-                Still have questions?
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                We&apos;re here to help. Reach out and we&apos;ll get back to you as soon as possible.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-500 shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  Contact Us
-                </Link>
-                <Link
-                  href="/sign-up"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 hover:border-slate-400 transition-all"
-                >
-                  Start Selling Free →
-                </Link>
-              </div>
-            </div>
-          </div>
-        </FadeIn>
-      </div>
-    </div>
+      <SeoCta />
+    </SeoPageShell>
   );
 }
