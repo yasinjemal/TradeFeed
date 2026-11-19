@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 // This fixture is seeded in CI. Missing products are failures, never silent skips.
 test("buyer can discover a product, select retail and inspect the real cart", async ({
   page,

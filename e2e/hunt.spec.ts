@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test.describe("TradeFeed HUNT", () => {
   test("authorizes every inline script with the response CSP nonce", async ({

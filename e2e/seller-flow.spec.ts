@@ -5,7 +5,7 @@
 // These are smoke tests — no real auth (Clerk sign-in required).
 // ============================================================
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Seller Flow", () => {
   test("create-shop keeps the seller's intended destination", async ({
