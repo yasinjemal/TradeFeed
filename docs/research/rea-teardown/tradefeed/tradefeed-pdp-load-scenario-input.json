@@ -1,0 +1,39 @@
+{
+  "browser": {
+    "mode": "connect",
+    "cdp_endpoint": "http://127.0.0.1:9222",
+    "target_id": "F0CD8DF9B6F30DA119818C3F38C1B696"
+  },
+  "start_url": {
+    "url": "https://tradefeed.co.za/catalog/smiley-fashion-shop/products/stylish-polo-shirt-with-zigzag-design-cotton-blend-s-xxl"
+  },
+  "environment": {
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "device_scale_factor": 1
+    },
+    "service_workers": "allow"
+  },
+  "capture": {
+    "events": [
+      "network",
+      "console"
+    ],
+    "at_end": [
+      "url"
+    ],
+    "network": {
+      "request_body": false,
+      "response_body": false,
+      "header_values": false
+    }
+  },
+  "actions": [
+    {
+      "step_id": "settle",
+      "action": "wait_for_timeout",
+      "duration_ms": 8000
+    }
+  ]
+}

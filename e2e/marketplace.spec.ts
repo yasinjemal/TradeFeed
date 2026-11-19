@@ -5,7 +5,7 @@
 // and the search/filter UI is functional.
 // ============================================================
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Marketplace", () => {
   test("renders marketplace page with heading", async ({ page }) => {

@@ -1,4 +1,5 @@
 import { SELLER_SIGN_UP_PATH } from "@/lib/config/seller-cta";
+import { serializeJsonLd } from "@/lib/seo/serialize-json-ld";
 import { cache } from "react";
 import { getCatalogProduct, getCatalogShop, getSimilarProducts, getMoreFromSeller } from "@/lib/db/catalog";
 
@@ -211,7 +212,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           priceInCents={minPrice}
         />
         {generateProductJsonLd(shop, product, reviewAgg, reviews).map((schema, i) => (
-          <script key={`product-ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+          <script key={`product-ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }} />
         ))}
         <TfProductPage
           shop={{
@@ -306,7 +307,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       />
 
       {generateProductJsonLd(shop, product, reviewAgg, reviews).map((schema, i) => (
-        <script key={`product-ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+        <script key={`product-ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }} />
       ))}
 
       {/* ── Sticky Mobile Buy Bar ── */}

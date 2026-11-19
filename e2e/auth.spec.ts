@@ -5,7 +5,7 @@
 // These are smoke tests — they don't sign in (Clerk auth).
 // ============================================================
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Auth Pages", () => {
   test("sign-in page renders Clerk widget", async ({ page }) => {
